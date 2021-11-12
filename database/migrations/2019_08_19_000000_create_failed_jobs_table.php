@@ -1,10 +1,10 @@
 <?php
-/**
+/*
  * 2019_08_19_000000_create_failed_jobs_table.php
- * Copyright (c) 2020 james@firefly-iii.org
+ * Copyright (c) 2021 james@firefly-iii.org
  *
- * This file is part of the Firefly III CSV importer
- * (https://github.com/firefly-iii/csv-importer).
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as

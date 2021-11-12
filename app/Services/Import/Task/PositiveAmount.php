@@ -1,11 +1,10 @@
 <?php
-declare(strict_types=1);
-/**
+/*
  * PositiveAmount.php
- * Copyright (c) 2020 james@firefly-iii.org
+ * Copyright (c) 2021 james@firefly-iii.org
  *
- * This file is part of the Firefly III CSV importer
- * (https://github.com/firefly-iii/csv-importer).
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,6 +19,9 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
+
 
 namespace App\Services\Import\Task;
 
