@@ -45,13 +45,22 @@ declare(strict_types=1);
 namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\TokenSetResponse;
-use GuzzleHttp\Client;
 use App\Services\Shared\Response\Response;
+use GuzzleHttp\Client;
+
 /**
  * Class PostNewTokenRequest
  */
 class PostNewTokenRequest extends Request
 {
+    private string $identifier;
+    private string $key;
+
+    public function __construct(string $identifier, string $key)
+    {
+        $this->identifier = $identifier;
+        $this->key        = $key;
+    }
 
     /**
      * @inheritDoc
@@ -68,20 +77,20 @@ class PostNewTokenRequest extends Request
         $url    = sprintf('%s/%s', config('nordigen.url'), 'api/v2/token/new/');
         $client = new Client;
 
-        $res = $client->post($url,
-                      [
-                          'json'    => [
-                              'secret_id'  => config('nordigen.id'),
-                              'secret_key' => config('nordigen.key'),
-                          ],
-                          'headers' => [
-                              'accept'       => 'application/json',
-                              'content-type' => 'application/json',
-                              'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
-                          ],
-                      ]
+        $res  = $client->post($url,
+                              [
+                                  'json'    => [
+                                      'secret_id'  => $this->identifier,
+                                      'secret_key' => $this->key,
+                                  ],
+                                  'headers' => [
+                                      'accept'       => 'application/json',
+                                      'content-type' => 'application/json',
+                                      'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
+                                  ],
+                              ]
         );
-        $body = (string)$res->getBody();
+        $body = (string) $res->getBody();
         $json = json_decode($body, true, JSON_THROW_ON_ERROR);
         return new TokenSetResponse($json);
     }

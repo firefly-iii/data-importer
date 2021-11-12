@@ -24,9 +24,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Services\Enums\AuthenticationStatus;
+use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
+use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
+
 
 /**
  * Class AuthenticateController
@@ -38,24 +43,78 @@ class AuthenticateController extends Controller
      */
     public function index(Request $request)
     {
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        $mainTitle = 'Auth';
+        $pageTitle = 'Auth';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
         if ('csv' === $flow) {
             // redirect straight to upload
             return redirect(route('003-upload.index'));
         }
 
-        exit; // here we are deze functies moeten iets anders teruggeven.
-        // dus niet true/false of null/string maar evt een error ofzo?
-        // plus wat als de values leeg zijn geeft-ie dan false terug of wat anders?
-        $verifySpectre = $this->verifySpectre();
-        if ('spectre' === $flow && null === $verifySpectre) {
-            return redirect(route('003-upload.index'));
+        if ('spectre' === $flow) {
+            $subTitle  = 'Spectre';
+            $validator = new SpectreValidator;
+            $result    = $validator->validate();
+            if ($result->equals(AuthenticationStatus::nodata())) {
+
+                // show for to enter data. save as cookie.
+                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
+            }
+            if ($result->equals(AuthenticationStatus::authenticated())) {
+                return redirect(route('003-upload.index'));
+            }
         }
 
-        $verifyNordigen = $this->verifyNordigen();
-        if ('spectre' === $flow && null === $verifySpectre) {
-            return redirect(route('003-upload.index'));
+        if ('nordigen' === $flow) {
+            $subTitle  = 'Nordigen';
+            $validator = new NordigenValidator;
+            $result    = $validator->validate();
+            if ($result->equals(AuthenticationStatus::nodata())) {
+
+                // show for to enter data. save as cookie.
+                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
+            }
+            if ($result->equals(AuthenticationStatus::authenticated())) {
+                return redirect(route('003-upload.index'));
+            }
         }
+        throw new ImporterErrorException('Impossible flow exception.');
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function postIndex(Request $request)
+    {
+        // set cookies and redirect, validator will pick it up.
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        if ('spectre' === $flow) {
+            $appId  = $request->get('spectre_app_id');
+            $secret = $request->get('spectre_secret');
+            if ('' === $appId || '' === $secret) {
+                // todo show error
+                return redirect(route('002-authenticate.index'));
+            }
+            // store ID and key in session:
+            session()->put(Constants::SESSION_SPECTRE_APP_ID, $appId);
+            session()->put(Constants::SESSION_SPECTRE_SECRET, $secret);
+            return redirect(route('002-authenticate.index'));
+        }
+        if ('nordigen' === $flow) {
+            $key        = $request->get('nordigen_key');
+            $identifier = $request->get('nordigen_id');
+            if ('' === $key || '' === $identifier) {
+                // todo show error
+                return redirect(route('002-authenticate.index'));
+            }
+            // store ID and key in session:
+            session()->put(Constants::SESSION_NORDIGEN_ID, $identifier);
+            session()->put(Constants::SESSION_NORDIGEN_KEY, $key);
+
+            return redirect(route('002-authenticate.index'));
+        }
+
+        throw new ImporterErrorException('Impossible flow exception.');
     }
 
 }

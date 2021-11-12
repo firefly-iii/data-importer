@@ -1,0 +1,102 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>{{ mainTitle }}</h1>
+                <h2>{{ subTitle }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <p class="lead">Spectre config.</p>
+                <p>
+                    Spectre bla bla
+                    <a target="_blank" href="https://docs.firefly-iii.org/csv/usage/upload/">check out the
+                        documentation</a>.
+                </p>
+                <hr/>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form method="post" action="{{ route('002-authenticate.post') }}" accept-charset="UTF-8">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+
+                            {% if 'nordigen' == flow %}
+                            <!-- nordigen ID -->
+                            <div class="form-group row">
+                                <label for="date" class="col-sm-3 col-form-label">Nordigen ID</label>
+                                <div class="col-sm-9">
+                                    <input type="text" name="nordigen_id" class="form-control" id="nordigen_id"
+                                           placeholder="Nordigen ID" value="" aria-describedby="nordigenIdHelp">
+                                    <small id="nordigenIdHelp" class="form-text text-muted">
+                                        Nordigen ID help
+                                    </small>
+                                </div>
+                            </div>
+                            <!-- nordigen key -->
+                            <div class="form-group row">
+                                <label for="date" class="col-sm-3 col-form-label">Nordigen key</label>
+                                <div class="col-sm-9">
+                                    <input type="text" name="nordigen_key" class="form-control" id="nordigen_key"
+                                           placeholder="Nordigen key" value="" aria-describedby="nordigenKeyHelp">
+                                    <small id="nordigenKeyHelp" class="form-text text-muted">
+                                        Nordigen key help
+                                    </small>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if 'spectre' == flow %}
+                                <!-- spectre app id -->
+                                <div class="form-group row">
+                                    <label for="date" class="col-sm-3 col-form-label">Spectre App ID</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="spectre_app_id" class="form-control"
+                                               id="spectre_app_id" placeholder="Spectre App ID" value=""
+                                               aria-describedby="spectreAppIdHelp">
+                                        <small id="spectreAppIdHelp" class="form-text text-muted">
+                                            spectreAppIdHelp
+                                        </small>
+                                    </div>
+                                </div>
+                                <!-- spectre secret -->
+                                <div class="form-group row">
+                                    <label for="date" class="col-sm-3 col-form-label">Spectre secret</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="spectre_secret" class="form-control"
+                                               id="spectre_secret" placeholder="Spectre Secret" value=""
+                                               aria-describedby="spectreSecret">
+                                        <small id="spectreSecret" class="form-text text-muted">
+                                            spectreSecret
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <!-- go back to start -->
+                                    <a href="{{ route('back.start') }}" class="btn btn-secondary">&larr; Go back to
+                                        index</a>
+                                    <br/><br/>
+                                    <a href="{{ route('flush') }}" class="btn btn-danger btn-sm">Start over</a>
+                                </div>
+                                <div class="col-lg-6">
+                                    <!-- continue -->
+                                    <button type="submit" class="float-right btn btn-primary">Authenticate &rarr;
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

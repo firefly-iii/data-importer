@@ -41,13 +41,13 @@ Route::get('/reset','IndexController@reset')->name('reset');
 
 // step 2: Authenticate Nordigen / Spectre manually if necessary.
 Route::get('/authenticate', 'Import\AuthenticateController@index')->name('002-authenticate.index');
+Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
 
 // step 3: Upload CSV file + config file
 Route::get('/upload', 'Import\UploadController@index')->name('003-upload.index');
 
-//
-//// routes to go back to other steps (also takes care of session vars)
-//Route::get('/back/start', 'NavController@toStart')->name('back.start');
+// routes to go back to other steps (also takes care of session vars)
+Route::get('/back/start', 'NavController@toStart')->name('back.start');
 //Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
 //Route::get('/back/config', 'NavController@toConfig')->name('back.config');
 //Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');

@@ -137,10 +137,10 @@ class TokenManager
      * get new token set and store in session
      * @throws ImporterHttpException
      */
-    public static function getNewTokenSet(): void
+    public static function getNewTokenSet(string $identifier, string $key): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $client = new PostNewTokenRequest;
+        $client = new PostNewTokenRequest($identifier, $key);
         /** @var TokenSetResponse $result */
         $result = $client->post();
 

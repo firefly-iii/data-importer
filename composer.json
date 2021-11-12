@@ -83,7 +83,8 @@
         "laravel/framework": "^8.0",
         "laravel/tinker": "^2.0",
         "league/csv": "9.*",
-        "rcrowe/twigbridge": "^0.12.1"
+        "rcrowe/twigbridge": "^0.12.1",
+        "spatie/enum": "^3.10"
     },
     "require-dev": {
         "filp/whoops": "^2.0",

@@ -35,6 +35,12 @@ class Constants
     public const NORDIGEN_ACCESS_EXPIRY_TIME  = 'nordigen_access_expiry_time';
     public const NORDIGEN_REFRESH_EXPIRY_TIME = 'nordigen_refresh_expiry_time';
 
+    // session value constants:
+    public const SESSION_SPECTRE_APP_ID = 'spectre_app_id';
+    public const SESSION_SPECTRE_SECRET = 'spectre_secret';
+    public const SESSION_NORDIGEN_ID = 'nordigen_id';
+    public const SESSION_NORDIGEN_KEY = 'nordigen_key';
+
     // cookie name to remember the flow:
     public const FLOW_COOKIE = 'flow';
 //     stores the configuration array

@@ -67,37 +67,6 @@
                         <h4>Spectre</h4>
                         <p id="spectre_result"><span class="fas fa-cog fa-spin"></span></p>
                         <hr/>
-                        <!--
-                        <p>
-                            The following data can be imported:
-                        </p>
-                        <ul>
-                            <li>
-                                Import data from a CSV file<br/>
-                                <span class="text-success small">No further configuration is necessary, but you can
-                                <a class="text-danger" href="{{ route('reset') }}">
-                                    reauthenticate with Firefly III</a>
-                                    </span>
-                            </li>
-                            <li>
-                                Data from Nordigen<br/>
-                                <span class="small" id="nordigen_status"><span class="fas fa-cog fa-spin"></span></span>
-                            </li>
-                            <li>
-                                Data from Spectre<br/>
-                                <span class="small" id="spectre_status"><span class="fas fa-cog fa-spin"></span></span>
-                            </li>
-                        </ul>
-<p>
--->
-
-                        <!-- <a class="btn btn-danger btn-sm" href="{{ route('flush') }}">Start over</a> -->
-
-
-                        <!--
-                                                </p>
-<a class="float-right btn btn-primary disabled" id="start"
-                           href="X"><span class="fas fa-cog fa-spin"></span></a>                        </p>-->
                         <form action="{{ route('index.post') }}" method="post">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}" />
                             <div class="row">
@@ -133,6 +102,7 @@
             if ('OK' === data.result) {
                 $('#csv_button').removeClass('disabled').text('Import CSV file').removeAttr('disabled');
             } else {
+
                 $('#csv_button').hide();
                 $('#error_explain').show();
                 $('#firefly_expl').hide();
@@ -154,7 +124,7 @@
                 $('#spectre_result').text('The Spectre / Salt Edge API is configured correctly.');
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
-            if ('no-settings' === data.result) {
+            if ('NODATA' === data.result) {
                 $('#spectre_result').text('If you want to use the Spectre / Salt Edge API, it must be configured in the next step before it can be used.');
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
@@ -170,7 +140,7 @@
                 $('#nordigen_result').text('The Nordigen API is configured correctly.');
                 $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
             }
-            if ('no-settings' === data.result) {
+            if ('NODATA' === data.result) {
                 $('#nordigen_result').text('If you want to use the Nordigen API, it must be configured in the next step before it can be used.');
                 $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
             }

@@ -24,13 +24,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ImporterHttpException;
-use App\Services\Nordigen\TokenManager;
-use App\Services\Spectre\Request\ListCustomersRequest;
-use App\Services\Spectre\Response\ErrorResponse;
+use App\Services\Enums\AuthenticationStatus;
+use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
+use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Log;
 
 /**
  * Class ServiceController
@@ -43,11 +41,16 @@ class ServiceController extends Controller
      */
     public function validateSpectre(Request $request): JsonResponse
     {
-        $error = $this->verifySpectre();
+        $validator = new SpectreValidator;
+        $result    = $validator->validate();
 
-        if (null !== $error) {
+        if ($result->equals(AuthenticationStatus::error())) {
             // send user error:
-            return response()->json(['result' => 'NOK', 'message' => $error]);
+            return response()->json(['result' => 'NOK']);
+        }
+        if ($result->equals(AuthenticationStatus::nodata())) {
+            // send user error:
+            return response()->json(['result' => 'NODATA']);
         }
 
         return response()->json(['result' => 'OK']);
@@ -58,11 +61,18 @@ class ServiceController extends Controller
      */
     public function validateNordigen(): JsonResponse
     {
-        $error = $this->verifyNordigen();
-        if (null !== $error) {
+        $validator = new NordigenValidator;
+        $result    = $validator->validate();
+
+        if ($result->equals(AuthenticationStatus::error())) {
             // send user error:
-            return response()->json(['result' => 'NOK', 'message' => $error]);
+            return response()->json(['result' => 'NOK']);
         }
+        if ($result->equals(AuthenticationStatus::nodata())) {
+            // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
+
         return response()->json(['result' => 'OK']);
     }
 }
