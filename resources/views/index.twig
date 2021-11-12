@@ -1,0 +1,184 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Firefly III Data Import Tool</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">v{{ version }}</h6>
+                        <p class="card-text">
+                            Welcome! This tool will help you import data into Firefly III.
+                        </p>
+                        <p>
+                            This tool is sparsely documented, you can find all the details you need
+                            in the <a href="https://docs.firefly-iii.org/" target="_blank">
+                                documentation</a>. Any links you see to the docs will open in a new window or tab.
+                        </p>
+                        <p>
+                            To import data, you need to authenticate with Firefly III, and optionally with one of the
+                            data sources this importer supports.
+                        </p>
+                        <hr/>
+                        <h4>Firefly III</h4>
+
+                        {% if pat %}
+                            <p id="firefly_expl">
+                                You're using a Personal Access Token to <span
+                                    class="text-info">authenticate</span> to Firefly III.
+                            </p>
+                        {% endif %}
+                        {% if clientIdWithURL %}
+                            <p id="firefly_expl">
+                                You're using a fixed Client ID and a fixed Firefly III URL to <span
+                                    class="text-info">authenticate</span> to Firefly III.
+                            </p>
+                        {% endif %}
+                        {% if URLonly %}
+                            <p id="firefly_expl">
+                                You're using a Client ID and a fixed Firefly III URL to <span
+                                    class="text-info">authenticate</span> to Firefly III.
+                            </p>
+                        {% endif %}
+                        {% if flexible %}
+                            <p id="firefly_expl">
+                                You're using a self-submitted Client ID and Firefly III URL to <span
+                                    class="text-info">authenticate</span> to Firefly III.
+                            </p>
+                        {% endif %}
+                        <p id="error_explain" style="display: none;">The importer could not connect to Firefly III.
+                            Please remedy the error below first, and check out the <a
+                                href="https://docs.firefly-iii.org/" target="_blank">
+                                documentation</a> if necessary.</p>
+                        <p id="error_txt" style="display: none;" class="text-danger"></p>
+                        <p>
+                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}">Start over</a>
+                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}">Reauthenticate</a>
+                        </p>
+                        <hr/>
+                        <h4>Nordigen</h4>
+                        <p id="nordigen_result"><span class="fas fa-cog fa-spin"></span></p>
+                        <hr/>
+                        <h4>Spectre</h4>
+                        <p id="spectre_result"><span class="fas fa-cog fa-spin"></span></p>
+                        <hr/>
+                        <!--
+                        <p>
+                            The following data can be imported:
+                        </p>
+                        <ul>
+                            <li>
+                                Import data from a CSV file<br/>
+                                <span class="text-success small">No further configuration is necessary, but you can
+                                <a class="text-danger" href="{{ route('reset') }}">
+                                    reauthenticate with Firefly III</a>
+                                    </span>
+                            </li>
+                            <li>
+                                Data from Nordigen<br/>
+                                <span class="small" id="nordigen_status"><span class="fas fa-cog fa-spin"></span></span>
+                            </li>
+                            <li>
+                                Data from Spectre<br/>
+                                <span class="small" id="spectre_status"><span class="fas fa-cog fa-spin"></span></span>
+                            </li>
+                        </ul>
+<p>
+-->
+
+                        <!-- <a class="btn btn-danger btn-sm" href="{{ route('flush') }}">Start over</a> -->
+
+
+                        <!--
+                                                </p>
+<a class="float-right btn btn-primary disabled" id="start"
+                           href="X"><span class="fas fa-cog fa-spin"></span></a>                        </p>-->
+                        <form action="{{ route('index.post') }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <button class="btn btn-info disabled" value="csv" name="flow" disabled="disabled" id="csv_button"><span
+                                            class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <button class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled" id="spectre_button"><span
+                                            class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <button class="btn btn-info disabled"  value="nordigen" name="flow" disabled="disabled" id="nordigen_button"><span
+                                            class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <p>
+    </p>
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript">
+        // validate Firefly III information:
+        var url = '{{ route('token.validate') }}';
+        var tokenPageUrl = '{{ route('token.index') }}';
+        $.getJSON(url).done(function (data) {
+            if ('OK' === data.result) {
+                $('#csv_button').removeClass('disabled').text('Import CSV file').removeAttr('disabled');
+            } else {
+                $('#csv_button').hide();
+                $('#error_explain').show();
+                $('#firefly_expl').hide();
+                $('#error_txt').show().text(data.message);
+                // window.location = tokenPageUrl;
+            }
+        }).fail(function () {
+            $('#csv_button').hide();
+            $('#error_explain').show();
+            $('#firefly_expl').hide();
+            $('#error_txt').show().text(data.message);
+            // window.location = tokenPageUrl;
+        });
+
+        // validate Spectre information:
+        url = '{{ route('validate.spectre') }}';
+        $.getJSON(url).done(function (data) {
+            if ('OK' === data.result) {
+                $('#spectre_result').text('The Spectre / Salt Edge API is configured correctly.');
+                $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
+            }
+            if ('no-settings' === data.result) {
+                $('#spectre_result').text('If you want to use the Spectre / Salt Edge API, it must be configured in the next step before it can be used.');
+                $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
+            }
+        }).fail(function () {
+            $('#spectre_result').text('The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.');
+            $('#spectre_button').hide();
+        });
+
+        // validate Nordigen information
+        url = '{{ route('validate.nordigen') }}';
+        $.getJSON(url).done(function (data) {
+            if ('OK' === data.result) {
+                $('#nordigen_result').text('The Nordigen API is configured correctly.');
+                $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
+            }
+            if ('no-settings' === data.result) {
+                $('#nordigen_result').text('If you want to use the Nordigen API, it must be configured in the next step before it can be used.');
+                $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
+            }
+        }).fail(function () {
+            $('#nordigen_result').text('The Nordigen API is configured incorrectly and cannot be used to import data.');
+            $('#nordigen_button').hide();
+        });
+
+
+    </script>
+{% endblock %}

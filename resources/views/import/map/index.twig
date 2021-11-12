@@ -1,0 +1,104 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>{{ mainTitle }}</h1>
+                <h2>{{ subTitle }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <p class="lead">Map data in your file to your Firefly III instance.</p>
+                <p>
+                    Each entry in your CSV file may already exist in another form in your own Firefly III
+                    instance. Be sure to <a target="_blank" href="https://docs.firefly-iii.org/csv/usage/map/">check out the documentation</a>, because this is where
+                    the magic happens.
+                </p>
+                <p class="text-info">
+                    Account names with "lots&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;&nbsp;spaces" may seemingly lose those spaces. Fear not, those will be perfectly preserved.
+                </p>
+                {% if not errors.isEmpty %}
+                    <p class="text-danger">Some error(s) occurred:</p>
+                    <ul>
+                        {% for error in errors.all %}
+                            <li class="text-danger">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <hr/>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form method="post" action="{{ route('import.mapping.post') }}" accept-charset="UTF-8">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+                            {% for index, row in data %}
+                                <h3>{{ index }}: {{ trans('import.column_'~row.role) }}</h3>
+                                <table class="table">
+                                    <tr>
+                                        <th style="width:50%;">Field value</th>
+                                        <th style="width:50%;">Mapped to</th>
+                                    </tr>
+                                    {% set finalCount = 0 %}
+                                    {% for valueIndex, value in row.values %}
+                                        <tr>
+                                            <td>
+                                                <pre style="color:#e83e8c;">{{ value }}</pre>
+                                                <input type="hidden" name="values[{{ index }}][{{ loop.index0 }}]" value="{{ value }}" />
+                                            </td>
+                                            <td>
+                                                <select name="mapping[{{ index }}][{{ loop.index0 }}]" class="form-control">
+                                                    <option value="0" label="(do not map / automap)">(do not map / automap)</option>
+                                                    {% for key, maps in row.mapping_data %}
+                                                        <!-- if is array go one level deeper -->
+                                                        {% if maps is iterable %}
+                                                            <optgroup label="{{ key }}">
+                                                                {% for singleId, singleEntry in maps %}
+                                                                    <option {% if singleId == row.mapped[value] %}selected{% endif %} label="{{ singleEntry }}" value="{{ singleId }}">
+                                                                        {{ singleEntry }}
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </optgroup>
+                                                        {% else %}
+                                                            <option {% if key == row.mapped[value] %}selected{% endif %} label="{{ maps }}" value="{{ key }}">
+                                                                {{ maps }}
+                                                            </option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        {% set finalCount = loop.index0 + 1 %}
+                                        <!-- final count is {{ finalCount }} -->
+                                    {% endfor %}
+                                </table>
+                                <!-- final count is {{ finalCount }} -->
+                            {% endfor %}
+                            <p>
+                                &nbsp;
+                            </p>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <!-- go back to roles -->
+                                    <a href="{{ route('back.roles') }}" class="btn btn-secondary">&larr; Go back to role selection</a>
+                                    <br>
+                                    <small class="text-muted">Changes on this page will not be saved.</small>
+                                    <br /><br />
+                                    <a href="{{ route('flush') }}" class="btn btn-danger btn-sm">Start over</a>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button type="submit" class="btn btn-primary float-right">Submit &rarr;</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

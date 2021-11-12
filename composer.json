@@ -1,0 +1,137 @@
+{
+    "name": "firefly-iii/univeral-importer",
+    "description": "Firefly III Data Import Tool.",
+    "keywords": [
+        "firefly iii",
+        "firefly-iii",
+        "firefly",
+        "csv",
+        "import",
+        "comma separated file",
+        "importing",
+        "tool",
+        "finance",
+        "finances",
+        "manager",
+        "management",
+        "euro",
+        "dollar",
+        "laravel",
+        "money",
+        "currency",
+        "financials",
+        "financial",
+        "budgets",
+        "administration",
+        "tool",
+        "tooling",
+        "help",
+        "helper",
+        "assistant",
+        "planning",
+        "organizing",
+        "bills",
+        "personal finance",
+        "budgets",
+        "budgeting",
+        "budgeting tool",
+        "budgeting application",
+        "transactions",
+        "self hosted",
+        "self-hosted",
+        "transfers",
+        "management"
+    ],
+    "license": "AGPL-3.0-or-later",
+    "homepage": "https://github.com/firefly-iii/universal-importer",
+    "type": "project",
+    "readme": "readme.md",
+    "authors": [
+        {
+            "name": "James Cole",
+            "email": "james@firefly-iii.org",
+            "homepage": "https://github.com/firefly-iii",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "james@firefly-iii.org",
+        "issues": "https://github.com/firefly-iii/firefly-iii/issues",
+        "forum": "https://gitter.im/firefly-iii/firefly-iii",
+        "source": "https://github.com/firefly-iii/universal-importer",
+        "docs": "https://docs.firefly-iii.org/"
+    },
+    "funding": [
+        {
+            "type": "patreon",
+            "url": "https://www.patreon.com/JC5"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/JC5"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "ext-bcmath": "*",
+        "ext-json": "*",
+        "doctrine/dbal": "^3.0",
+        "fideloper/proxy": "^4.0",
+        "firefly-iii/api-support-classes": "@dev",
+        "fruitcake/laravel-cors": "^2.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "laravel/framework": "^8.0",
+        "laravel/tinker": "^2.0",
+        "league/csv": "9.*",
+        "rcrowe/twigbridge": "^0.12.1"
+    },
+    "require-dev": {
+        "filp/whoops": "^2.0",
+        "fakerphp/faker": "^1.4",
+        "barryvdh/laravel-debugbar": "^3.2",
+        "barryvdh/laravel-ide-helper": "^2.6",
+        "laravel/ui": "^3.0",
+        "mockery/mockery": "^1.0",
+        "nunomaduro/collision": "^5.0",
+        "phpunit/phpunit": "^9.2",
+        "roave/security-advisories": "dev-master"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ]
+    }
+}

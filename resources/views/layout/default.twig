@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <base href="{{ route('index') }}/">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}?version={{ version }}">
+    <link href="{{ asset('fa/css/all.min.css') }}" rel="stylesheet">
+
+    <title>Firefly III Data Importer // {{ pageTitle|default('No title') }}</title>
+</head>
+<body>
+{% if config('csv_importer.is_external') %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-danger" role="alert">
+            This installation of the Firefly III CSV importer is
+            <strong>not</strong> under your control. Be mindful of your
+            privacy.
+            <a title="Read more on this page." class="alert-link" target="_blank"
+               href="https://docs.firefly-iii.org/csv/help/public/">
+                Read more on this page.
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="{{ asset('js/jquery-3.4.1.min.js') }}?version={{ version }}"></script>
+<script src="{{ asset('js/popper.min.js') }}?version={{ version }}"></script>
+<script src="{{ asset('js/bootstrap.min.js') }}?version={{ version }}"></script>
+{% block scripts %}{% endblock %}
+
+
+{% if config('csv_importer.tracker_site_id') != '' and config('csv_importer.tracker_url') != '' %}
+    <!-- This tracker tag is only here because this instance of the Firefly III CSV importer was purposefully configured to include it -->
+    <!-- Your own installation will NOT include it, unless you explicitely configure it to have it. -->
+    <script type="text/javascript" nonce="{{ JS_NONCE }}">
+        var _paq = window._paq || [];
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+            var u="//{{ config('csv_importer.tracker_url') }}/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '{{ config('csv_importer.tracker_site_id') }}']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+        })();
+    </script>
+    <noscript><p><img src="//{{ config('csv_importer.tracker_url') }}/matomo.php?idsite={{ config('csv_importer.tracker_site_id') }}}&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+{% endif %}
+</body>
+</html>

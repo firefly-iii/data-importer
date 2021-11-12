@@ -1,0 +1,18 @@
+version: 2
+updates:
+
+  # composer updates
+  - package-ecosystem: "composer"
+    directory: "/"
+    target-branch: develop
+    labels: ["bug"]
+    schedule:
+      interval: "weekly"
+
+  # yarn / JS updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    target-branch: develop
+    labels: ["bug"]
+    schedule:
+      interval: "weekly"
