@@ -50,15 +50,30 @@ Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003
 // step 4: Configure import
 Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
 Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
+Route::get('/import/configure/download', ['uses' => 'Import\DownloadController@download', 'as' => '004-configure.download']);
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
+
+// step 5: Set column roles (CSV)
+Route::get('/import/roles', ['uses' => 'Import\CSV\RoleController@index', 'as' => '005-roles.index']);
+Route::post('/import/roles', ['uses' => 'Import\CSV\RoleController@postIndex', 'as' => '005-roles.post']);
+
+// step 6: mapping (CSV)
+Route::get('/import/mapping', ['uses' => 'Import\CSV\MapController@index', 'as' => '006-mapping.index']);
+Route::post('/import/mapping', ['uses' => 'Import\CSV\MapController@postIndex', 'as' => '006-mapping.post']);
+
+// step 7: convert CSV to JSON transactions (CSV)
+Route::get('/import/convert', ['uses' => 'Import\CSV\ConvertController@index', 'as' => '007-convert.index']);
+Route::post('/import/convert/start', ['uses' => 'Import\CSV\ConvertController@start', 'as' => '007-convert.start']);
+Route::get('/import/convert/status', ['uses' => 'Import\CSV\ConvertController@status', 'as' => '007-convert.status']);
 
 
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');
 Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
-//Route::get('/back/config', 'NavController@toConfig')->name('back.config');
-//Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
-//Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
+Route::get('/back/config', 'NavController@toConfig')->name('back.config');
+Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
+Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
+
 //
 //// import by POST
 //Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
@@ -73,20 +88,9 @@ Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
 //
 //// import config helper
 //
-//// roles
-//Route::get('/import/roles', ['uses' => 'Import\RoleController@index', 'as' => 'import.roles.index']);
-//Route::post('/import/roles', ['uses' => 'Import\RoleController@postIndex', 'as' => 'import.roles.post']);
+
 //
 //// download config:
-//Route::get('/configuration/download', ['uses' => 'Import\DownloadController@download', 'as' => 'import.job.configuration.download']);
 //
-//// mapping
-//Route::get('/import/mapping', ['uses' => 'Import\MapController@index', 'as' => 'import.mapping.index']);
-//Route::post('/import/mapping', ['uses' => 'Import\MapController@postIndex', 'as' => 'import.mapping.post']);
-//
-//// run import
-//Route::get('/import/run', ['uses' => 'Import\RunController@index', 'as' => 'import.run.index']);
-//
-//// start import routine.
-//Route::any('/import/job/start', ['uses' => 'Import\RunController@start', 'as' => 'import.job.start']);
-//Route::get('/import/job/status', ['uses' => 'Import\RunController@status', 'as' => 'import.job.status']);
+
+

@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import;
+namespace App\Http\Controllers\Import\CSV;
 
 
 use App\Http\Controllers\Controller;
@@ -199,7 +199,7 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
-        return redirect()->route('import.run.index');
+        return redirect()->route('007-convert.index');
     }
 
     /**

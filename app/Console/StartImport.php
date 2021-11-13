@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\File\FileReader;
 use App\Services\Import\ImportRoutineManager;
@@ -59,7 +59,7 @@ trait StartImport
 
         try {
             $manager->setConfiguration($configObject);
-        } catch (ImportException $e) {
+        } catch (ImporterErrorException $e) {
             $this->error($e->getMessage());
 
             return 1;

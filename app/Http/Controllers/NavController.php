@@ -50,7 +50,7 @@ class NavController extends Controller
     public function toRoles()
     {
         session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
-        return redirect(route('import.roles.index'));
+        return redirect(route('005-roles.index'));
     }
 
     /**

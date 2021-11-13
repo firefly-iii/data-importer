@@ -30,7 +30,6 @@ use App\Http\Middleware\ConfigComplete;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
-use App\Services\CSV\Specifics\SpecificService;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use App\Support\Token;
@@ -56,7 +55,7 @@ class ConfigurationController extends Controller
     public function __construct()
     {
         parent::__construct();
-        app('view')->share('pageTitle', 'Import configuration');
+        app('view')->share('pageTitle', 'Configuration');
         $this->middleware(ConfigComplete::class);
     }
 
@@ -66,9 +65,10 @@ class ConfigurationController extends Controller
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle = 'Import routine';
+        $mainTitle = 'Configuration';
         $subTitle  = 'Configure your CSV file import';
         $accounts  = [];
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         $configuration = null;
         if (session()->has(Constants::CONFIGURATION)) {
@@ -78,7 +78,7 @@ class ConfigurationController extends Controller
         $overruleSkip = 'true' === $request->get('overruleskip');
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
             // skipForm
-            return redirect()->route('import.roles.index');
+            return redirect()->route('005-roles.index');
         }
 
         // get list of asset accounts:
@@ -89,9 +89,6 @@ class ConfigurationController extends Controller
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
         $response = $request->get();
-
-        // get list of specifics:
-        $specifics = SpecificService::getSpecifics();
 
         /** @var Account $account */
         foreach ($response as $account) {
@@ -118,7 +115,7 @@ class ConfigurationController extends Controller
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'specifics', 'configuration')
+            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow')
         );
     }
 
@@ -164,7 +161,7 @@ class ConfigurationController extends Controller
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
 
         // redirect to import things?
-        return redirect()->route('import.roles.index');
+        return redirect()->route('005-roles.index');
     }
 
 }

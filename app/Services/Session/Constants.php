@@ -42,7 +42,6 @@ class Constants
     public const SESSION_NORDIGEN_KEY   = 'nordigen_key';
 
     // upload config values:
-    public const HAS_UPLOAD         = 'has_uploaded_file';
     public const UPLOAD_CSV_FILE    = 'csv_file_path';
     public const UPLOAD_CONFIG_FILE = 'config_file_path';
 
@@ -52,18 +51,21 @@ class Constants
     //     stores the configuration array
     public const CONFIGURATION = 'configuration';
 
-    // if the user is done configuring the import
-    public const CONFIG_COMPLETE_INDICATOR = 'config_complete';
+    // if the user is done with specific steps:
+    public const HAS_UPLOAD                 = 'has_uploaded_file';
+    public const CONFIG_COMPLETE_INDICATOR  = 'config_complete';
+    public const ROLES_COMPLETE_INDICATOR   = 'role_config_complete';
+    public const MAPPING_COMPLETE_INDICATOR = 'mapping_config_complete';
+
+    // constants for CSV conversion job:
+    public const CSV_CONVERSION_JOB_IDENTIFIER = 'csv_c_job_id';
 
 
     //    /** @var string */
-//    public const JOB_IDENTIFIER = 'import_job_id';
 //    /** @var string */
 //    public const JOB_STATUS = 'import_job_status';
 //    /** @var string */
-//    public const MAPPING_COMPLETE_INDICATOR = 'mapping_config_complete';
 //    /** @var string string */
-//    public const ROLES_COMPLETE_INDICATOR = 'role_config_complete';
 //    /** @var string */
 
 //    /** @var string */

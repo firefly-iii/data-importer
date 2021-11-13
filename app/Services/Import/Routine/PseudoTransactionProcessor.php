@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import\Routine;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\Import\Support\ProgressInformation;
 use App\Services\Import\Task\AbstractTask;
 use App\Support\Token;
@@ -60,7 +60,7 @@ class PseudoTransactionProcessor
      *
      * @param int|null $defaultAccountId
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public function __construct(?int $defaultAccountId)
     {
@@ -72,7 +72,7 @@ class PseudoTransactionProcessor
     /**
      * @param int|null $accountId
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function getDefaultAccount(?int $accountId): void
     {
@@ -89,14 +89,14 @@ class PseudoTransactionProcessor
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
                 Log::error($e->getMessage());
-                throw new ImportException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
+                throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
             $this->defaultAccount = $result->getAccount();
         }
     }
 
     /**
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function getDefaultCurrency(): void
     {
@@ -113,7 +113,7 @@ class PseudoTransactionProcessor
             $response = $prefRequest->get();
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
-            throw new ImportException('Could not load the users currency preference.');
+            throw new ImporterErrorException('Could not load the users currency preference.');
         }
         $code            = $response->getPreference()->data ?? 'EUR';
         $currencyRequest = new GetCurrencyRequest($url, $token);
@@ -126,7 +126,7 @@ class PseudoTransactionProcessor
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
-            throw new ImportException(sprintf('The default currency ("%s") could not be loaded.', $code));
+            throw new ImporterErrorException(sprintf('The default currency ("%s") could not be loaded.', $code));
         }
     }
 

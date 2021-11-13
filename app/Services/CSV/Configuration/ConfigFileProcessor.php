@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Configuration;
 
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
@@ -42,7 +42,7 @@ class ConfigFileProcessor
      * @param string $fileName
      *
      * @return Configuration
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public static function convertConfigFile(string $fileName): Configuration
     {
@@ -51,13 +51,13 @@ class ConfigFileProcessor
             $content = StorageService::getContent($fileName);
         } catch (FileNotFoundException $e) {
             Log::error($e->getMessage());
-            throw new ImportException(sprintf('Cpuld not find config file: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Cpuld not find config file: %s', $e->getMessage()));
         }
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
-            throw new ImportException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));
         }
 
         return Configuration::fromFile($json);

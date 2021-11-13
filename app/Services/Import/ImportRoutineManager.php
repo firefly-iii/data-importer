@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Import\ImportJobStatus\ImportJobStatusManager;
 use App\Services\Import\Routine\APISubmitter;
@@ -110,7 +110,7 @@ class ImportRoutineManager
     /**
      * @param Configuration $configuration
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public function setConfiguration(Configuration $configuration): void
     {

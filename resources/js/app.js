@@ -28,7 +28,7 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
-import ImportStatus from "./components/import/ImportStatus";
+import ConversionStatus from "./components/import/ConversionStatus";
 
 /**
  * The following block of code may be used to automatically register your
@@ -41,8 +41,8 @@ import ImportStatus from "./components/import/ImportStatus";
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('import-messages', require('./components/import/ImportMessages.vue').default);
-Vue.component('import-status', ImportStatus);
+Vue.component('conversion-messages', require('./components/import/ConversionMessages.vue').default);
+Vue.component('conversion-status', ConversionStatus);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -53,6 +53,6 @@ let props = {};
 new Vue({
             el: "#app",
             render: (createElement) => {
-                return createElement(ImportStatus, { props: props })
+                return createElement(ConversionStatus, { props: props })
             },
         });

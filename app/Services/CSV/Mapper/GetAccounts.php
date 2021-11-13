@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Mapper;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -42,7 +42,7 @@ trait GetAccounts
      * Returns a combined list of asset accounts and all liability accounts.
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     protected function getAllAccounts(): array
     {
@@ -62,7 +62,7 @@ trait GetAccounts
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
-            throw new ImportException(sprintf('Could not download accounts: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
 
         if ($response instanceof GetAccountsResponse) {
@@ -70,7 +70,7 @@ trait GetAccounts
         }
 
         if (!$response instanceof GetAccountsResponse) {
-            throw new ImportException('Could not get list of ALL accounts.');
+            throw new ImporterErrorException('Could not get list of ALL accounts.');
         }
 
         return array_merge($accounts);
@@ -95,7 +95,7 @@ trait GetAccounts
      * Returns a combined list of asset accounts and all liability accounts.
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     protected function getAssetAccounts(): array
     {
@@ -116,7 +116,7 @@ trait GetAccounts
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
-            throw new ImportException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
         }
 
         if ($response instanceof GetAccountsResponse) {
@@ -124,7 +124,7 @@ trait GetAccounts
         }
 
         if (!$response instanceof GetAccountsResponse) {
-            throw new ImportException('Could not get list of asset accounts.');
+            throw new ImporterErrorException('Could not get list of asset accounts.');
         }
 
         $request = new GetAccountsRequest($url, $token);
@@ -139,7 +139,7 @@ trait GetAccounts
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
-            throw new ImportException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
         }
 
         if ($response instanceof GetAccountsResponse) {
@@ -147,7 +147,7 @@ trait GetAccounts
         }
 
         if (!$response instanceof GetAccountsResponse) {
-            throw new ImportException('Could not get list of asset accounts.');
+            throw new ImporterErrorException('Could not get list of asset accounts.');
         }
 
         return array_merge($accounts, $liabilities);

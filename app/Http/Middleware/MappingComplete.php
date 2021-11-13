@@ -45,7 +45,7 @@ class MappingComplete
     public function handle(Request $request, Closure $next)
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-            return redirect()->route('import.run.index');
+            return redirect()->route('007-convert.index');
         }
 
         return $next($request);

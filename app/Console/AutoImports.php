@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Mail\ImportFinished;
 use Illuminate\Support\Facades\Mail;
 use JsonException;
@@ -102,7 +102,7 @@ trait AutoImports
     /**
      * @param array $files
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     protected function importFiles(array $files): void
     {
@@ -115,7 +115,7 @@ trait AutoImports
     /**
      * @param string $file
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function importFile(string $file): void
     {
@@ -134,7 +134,7 @@ trait AutoImports
             $configuration = json_decode(file_get_contents($jsonFile), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
-            throw new ImportException(sprintf('Bad JSON in configuration file: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Bad JSON in configuration file: %s', $e->getMessage()));
         }
         $this->line(sprintf('Going to import from file %s using configuration %s.', $csvFile, $jsonFile));
         // create importer
@@ -169,7 +169,7 @@ trait AutoImports
     /**
      * @param string $file
      *
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function importUpload(string $csvFile, string $jsonFile): void
     {
@@ -185,7 +185,7 @@ trait AutoImports
             $configuration = json_decode(file_get_contents($jsonFile), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
-            throw new ImportException(sprintf('Bad JSON in configuration file: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Bad JSON in configuration file: %s', $e->getMessage()));
         }
         $this->line(sprintf('Going to import from file %s using configuration %s.', $csvFile, $jsonFile));
         // create importer

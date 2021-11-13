@@ -22,10 +22,10 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import;
+namespace App\Http\Controllers\Import\CSV;
 
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ReadyForImport;
 use App\Mail\ImportFinished;
@@ -44,11 +44,10 @@ use Log;
 use Mail;
 use TypeError;
 
-
 /**
- * Class RunController
+ * Class ConvertController
  */
-class RunController extends Controller
+class ConvertController extends Controller
 {
 
     /**
@@ -82,29 +81,30 @@ class RunController extends Controller
 
 
         Log::debug('Will now verify configuration content.');
-        if ([] === $configuration->getDoMapping()) {
+        $jobBackUrl = route('back.mapping');
+        if (empty($configuration->getDoMapping())) {
             // no mapping, back to roles
             Log::debug('NO role info in config, will send you back to roles..');
             $jobBackUrl = route('back.roles');
         }
-        if ([] !== $configuration->getMapping()) {
+        if (empty($configuration->getMapping())) {
             // back to mapping
             Log::debug('NO mapping in file, will send you back to mapping..');
             $jobBackUrl = route('back.mapping');
         }
 
         // job ID may be in session:
-        $identifier = session()->get(Constants::JOB_IDENTIFIER);
+        $identifier = session()->get(Constants::CSV_CONVERSION_JOB_IDENTIFIER);
         $routine    = new ImportRoutineManager($identifier);
         $identifier = $routine->getIdentifier();
 
         Log::debug(sprintf('Import routine manager identifier is "%s"', $identifier));
 
         // store identifier in session so the status can get it.
-        session()->put(Constants::JOB_IDENTIFIER, $identifier);
-        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::JOB_IDENTIFIER));
+        session()->put(Constants::CSV_CONVERSION_JOB_IDENTIFIER, $identifier);
+        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CSV_CONVERSION_JOB_IDENTIFIER));
 
-        return view('import.run.index', compact('mainTitle', 'subTitle', 'identifier', 'jobBackUrl'));
+        return view('import.007-convert.index', compact('mainTitle', 'subTitle', 'identifier', 'jobBackUrl'));
     }
 
     /**
@@ -128,16 +128,19 @@ class RunController extends Controller
             $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
 
             // read configuration from disk (to append data)
-            $diskArray  = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
+            $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
+            if (null !== $configurationFile) {
+                $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
+                $diskConfig = Configuration::fromArray($diskArray);
+                $configuration->setMapping($diskConfig->getMapping());
+                $configuration->setDoMapping($diskConfig->getDoMapping());
+                $configuration->setRoles($diskConfig->getRoles());
+            }
 
             $routine->setConfiguration($configuration);
             $routine->setReader(FileReader::getReaderFromSession());
             $routine->start();
-        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ImportException | ErrorException | TypeError $e) {
+        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ImporterErrorException | ErrorException | TypeError $e) {
             // update job to error state.
             ImportJobStatusManager::setJobStatus(ImportJobStatus::JOB_ERRORED);
             $error = sprintf('Internal error: %s in file %s:%d', $e->getMessage(), $e->getFile(), $e->getLine());

@@ -59,7 +59,7 @@
 
 <script>
     export default {
-        name: "ImportMessages",
+        name: "ConversionMessages",
         props: {
             messages: {
                 type: [Array, Object],

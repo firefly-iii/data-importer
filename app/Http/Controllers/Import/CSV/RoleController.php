@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import;
+namespace App\Http\Controllers\Import\CSV;
 
 
 use App\Http\Controllers\Controller;
@@ -33,11 +33,10 @@ use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
-use League\Csv\Exception;
 use Log;
 
 /**
@@ -57,13 +56,15 @@ class RoleController extends Controller
 
     /**
      * @return Factory|View
-     * @throws FileNotFoundException
-     * @throws Exception
      */
-    public function index()
+    public function index(Request $request)
     {
         Log::debug('Now in role controller');
-        $mainTitle = 'Define roles';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        if('csv' !== $flow) {
+            die('redirect or something');
+        }
+        $mainTitle = 'Role definition';
         $subTitle  = 'Configure the role of each column in your file';
 
         // get configuration object.
@@ -72,11 +73,13 @@ class RoleController extends Controller
 
         // append configuration from original file
         // because the session omits 3 arrays: mapping, do_mapping and roles
-        $configFileName    = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        $fileConfiguration = ConfigFileProcessor::convertConfigFile($configFileName);
-        $configuration->setDoMapping($fileConfiguration->getDoMapping());
-        $configuration->setMapping($fileConfiguration->getMapping());
-        $configuration->setRoles($fileConfiguration->getRoles());
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        if (null !== $configFileName) {
+            $fileConfiguration = ConfigFileProcessor::convertConfigFile($configFileName);
+            $configuration->setDoMapping($fileConfiguration->getDoMapping());
+            $configuration->setMapping($fileConfiguration->getMapping());
+            $configuration->setRoles($fileConfiguration->getRoles());
+        }
 
         // get columns from file
         $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
@@ -87,7 +90,7 @@ class RoleController extends Controller
         $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR, 512));
 
         // roles
-        $roles = config('csv_importer.import_roles');
+        $roles = config('csv.import_roles');
         ksort($roles);
 
         // configuration (if it is set)
@@ -95,7 +98,7 @@ class RoleController extends Controller
         $configuredDoMapping = $configuration->getDoMapping();
 
         return view(
-            'import.roles.index',
+            'import.005-roles.index',
             compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
         );
     }
@@ -124,13 +127,16 @@ class RoleController extends Controller
 
         // the 'mapping' array is missing because it was saved to disk and not used otherwise
         // it must be restored, and THEN saved:
-        $diskArray  = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-        $diskConfig = Configuration::fromArray($diskArray);
-        // save the mapping from the diskConfig to our updated config:
-        $configuration->setMapping($diskConfig->getMapping());
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        if (null !== $configFileName) {
+            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
+            // save the mapping from the diskConfig to our updated config:
+            $configuration->setMapping($diskConfig->getMapping());
+        }
 
         // then this is the new, full array:
-        $fullArray      = $configuration->toArray();
+        $fullArray = $configuration->toArray();
 
         // and it can be saved on disk:
         $configFileName = StorageService::storeArray($fullArray);
@@ -146,13 +152,13 @@ class RoleController extends Controller
 
         // redirect to mapping thing.
         if (true === $needsMapping) {
-            return redirect()->route('import.mapping.index');
+            return redirect()->route('006-mapping.index');
         }
         // otherwise, store empty mapping, and continue:
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
-        return redirect()->route('import.run.index');
+        return redirect()->route('007-convert.index');
     }
 
     /**

@@ -26,7 +26,7 @@ namespace App\Http\Controllers\Import;
 
 
 use App\Exceptions\ImporterErrorException;
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadedFiles;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
@@ -140,7 +140,7 @@ class UploadController extends Controller
                 try {
                     $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
                     session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                } catch (ImportException $e) {
+                } catch (ImporterErrorException $e) {
                     $errors->add('config_file', $e->getMessage());
                 }
             }

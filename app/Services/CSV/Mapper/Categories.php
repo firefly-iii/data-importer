@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Mapper;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Category;
@@ -41,7 +41,7 @@ class Categories implements MapperInterface
      * Get map of objects.
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public function getMap(): array
     {
@@ -58,7 +58,7 @@ class Categories implements MapperInterface
         } catch (ApiHttpException $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
-            throw new ImportException(sprintf('Could not download categories: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not download categories: %s', $e->getMessage()));
         }
         /** @var Category $category */
         foreach ($response as $category) {

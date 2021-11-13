@@ -30,7 +30,7 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\StartImport;
 use App\Console\VerifyJSON;
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
 use Log;
 
@@ -48,7 +48,7 @@ class AutoUploadController extends Controller
     {
         $access = $this->haveAccess();
         if (false === $access) {
-            throw new ImportException('Could not connect to your local Firefly III instance.');
+            throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
         }
 
         $json = $request->file('json');
@@ -56,7 +56,7 @@ class AutoUploadController extends Controller
 
         try {
             $this->importUpload($csv->getPathname(), $json->getPathname());
-        } catch (ImportException $e) {
+        } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }

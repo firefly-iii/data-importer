@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 
 /**
  * Class Token
@@ -33,7 +33,7 @@ class Token
 {
     /**
      * @return string
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public static function getAccessToken(): string
     {
@@ -43,14 +43,14 @@ class Token
             $value = (string) config('csv_importer.access_token');
         }
         if ('' === (string) $value) {
-            throw new ImportException('No valid access token value.');
+            throw new ImporterErrorException('No valid access token value.');
         }
         return (string) $value;
     }
 
     /**
      * @return string
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public static function getVanityURL(): string
     {
@@ -59,14 +59,14 @@ class Token
             $value = self::getURL();
         }
         if ('' === (string) $value) {
-            throw new ImportException('No valid URL value.');
+            throw new ImporterErrorException('No valid URL value.');
         }
         return (string) $value;
     }
 
     /**
      * @return string
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public static function getURL(): string
     {
@@ -76,7 +76,7 @@ class Token
             $value = (string) config('csv_importer.url');
         }
         if ('' === (string) $value) {
-            throw new ImportException('No valid URL value.');
+            throw new ImporterErrorException('No valid URL value.');
         }
         return (string) $value;
     }

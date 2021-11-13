@@ -66,7 +66,7 @@ class RolesPostRequest extends Request
      */
     public function rules(): array
     {
-        $keys = implode(',', array_keys(config('csv_importer.import_roles')));
+        $keys = implode(',', array_keys(config('csv.import_roles')));
 
         return [
             'roles.*'      => sprintf('required|in:%s', $keys),

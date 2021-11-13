@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Specifics\SpecificService;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -48,7 +48,7 @@ class MapperService
      * @param array  $data
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
     {
@@ -62,7 +62,7 @@ class MapperService
         } catch (Exception $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
-            throw new ImportException(sprintf('Could not set delimiter: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 
         $offset = 0;
@@ -74,7 +74,7 @@ class MapperService
             $records = $stmt->process($reader);
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            throw new ImportException($e->getMessage());
+            throw new ImporterErrorException($e->getMessage());
         }
         // loop each row, apply specific:
         Log::debug('Going to loop all records to collect information');

@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Mapper;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 
 /**
  * Class OpposingAccountIbans
@@ -37,7 +37,7 @@ class OpposingAccountIbans implements MapperInterface
      * Get map of objects.
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     public function getMap(): array
     {

@@ -28,7 +28,7 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\StartImport;
 use App\Console\VerifyJSON;
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use Illuminate\Console\Command;
 use Log;
 
@@ -83,7 +83,7 @@ class AutoImport extends Command
         $this->line(sprintf('Found %d CSV + JSON file sets in %s', count($files), $this->directory));
         try {
             $this->importFiles($files);
-        } catch (ImportException $e) {
+        } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }

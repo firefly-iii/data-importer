@@ -23,7 +23,7 @@
 declare(strict_types=1);
 namespace App\Services\Import\Routine;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Specifics\SpecificService;
 use App\Services\Import\Support\ProgressInformation;
@@ -105,7 +105,7 @@ class CSVFileProcessor
 
         try {
             return $this->processCSVLines($records);
-        } catch (ImportException $e) {
+        } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             Log::error($e->getTraceAsString());
             $message = sprintf('Could not parse CSV: %s', $e->getMessage());
@@ -120,7 +120,7 @@ class CSVFileProcessor
      * @param ResultSet $records
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function processCSVLines(ResultSet $records): array
     {
@@ -170,7 +170,7 @@ class CSVFileProcessor
      * @param array $array
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function removeDuplicateLines(array $array): array
     {
@@ -182,7 +182,7 @@ class CSVFileProcessor
             } catch (JsonException $e) {
                 Log::error($e->getMessage());
                 Log::error($e->getTraceAsString());
-                throw new ImportException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
+                throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
             }
             if (in_array($hash, $hashes, true)) {
                 $message = sprintf('Going to skip line #%d because it\'s in the file twice. This may reset the count below.', $index);

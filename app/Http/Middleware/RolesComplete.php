@@ -45,7 +45,7 @@ class RolesComplete
     public function handle(Request $request, Closure $next)
     {
         if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
-            return redirect()->route('import.mapping.index');
+            return redirect()->route('006-mapping.index');
         }
 
         return $next($request);

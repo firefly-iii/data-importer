@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import\Task;
 
-use App\Exceptions\ImportException;
+use App\Exceptions\ImporterErrorException;
 use App\Services\Import\DeterminesTransactionType;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiException;
@@ -196,7 +196,7 @@ class Accounts extends AbstractTask
      * @param Account|null $defaultAccount
      *
      * @return array
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function findAccount(array $array, ?Account $defaultAccount): array
     {
@@ -286,7 +286,7 @@ class Accounts extends AbstractTask
      * @param string $value
      *
      * @return Account|null
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function findById(string $value): ?Account
     {
@@ -302,14 +302,14 @@ class Accounts extends AbstractTask
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
-            throw new ImportException($e->getMessage());
+            throw new ImporterErrorException($e->getMessage());
         }
         if (1 === count($response)) {
             /** @var Account $account */
             try {
                 $account = $response->current();
             } catch (ApiException $e) {
-                throw new ImportException($e->getMessage());
+                throw new ImporterErrorException($e->getMessage());
             }
 
             Log::debug(sprintf('[a] Found %s account #%d based on ID "%s"', $account->type, $account->id, $value));
@@ -327,7 +327,7 @@ class Accounts extends AbstractTask
      * @param string $transactionType
      *
      * @return Account|null
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function findByIban(string $iban, string $transactionType): ?Account
     {
@@ -343,7 +343,7 @@ class Accounts extends AbstractTask
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
-            throw new ImportException($e->getMessage());
+            throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
             Log::debug('Found NOTHING.');
@@ -356,7 +356,7 @@ class Accounts extends AbstractTask
             try {
                 $account = $response->current();
             } catch (ApiException $e) {
-                throw new ImportException($e->getMessage());
+                throw new ImporterErrorException($e->getMessage());
             }
             // catch impossible combination "expense" with "deposit"
             if ('expense' === $account->type && 'deposit' === $transactionType) {
@@ -396,7 +396,7 @@ class Accounts extends AbstractTask
      * @param string $name
      *
      * @return Account|null
-     * @throws ImportException
+     * @throws ImporterErrorException
      */
     private function findByName(string $name): ?Account
     {
@@ -412,7 +412,7 @@ class Accounts extends AbstractTask
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
-            throw new ImportException($e->getMessage());
+            throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
             Log::debug('Found NOTHING.');
