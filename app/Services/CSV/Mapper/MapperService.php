@@ -79,7 +79,7 @@ class MapperService
         // loop each row, apply specific:
         Log::debug('Going to loop all records to collect information');
         foreach ($records as $row) {
-            $row = SpecificService::runSpecifics($row, $specifics);
+            //$row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
             foreach ($row as $columnIndex => $column) {
                 if (!isset($data[$columnIndex])) {

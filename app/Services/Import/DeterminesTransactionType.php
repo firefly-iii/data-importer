@@ -27,6 +27,7 @@ namespace App\Services\Import;
 use Log;
 
 /**
+ * @deprecated
  * Trait DeterminesTransactionType
  */
 trait DeterminesTransactionType

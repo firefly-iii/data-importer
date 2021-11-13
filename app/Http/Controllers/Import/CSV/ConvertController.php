@@ -73,12 +73,14 @@ class ConvertController extends Controller
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
 
         // append info from the file on disk:
-        $diskArray  = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-        $diskConfig = Configuration::fromArray($diskArray);
+        $configFileName = Constants::UPLOAD_CONFIG_FILE;
+        if (null !== $configFileName) {
+            $diskArray  = json_decode(StorageService::getContent(session()->get($configFileName)), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
 
-        $configuration->setDoMapping($diskConfig->getDoMapping());
-        $configuration->setMapping($diskConfig->getMapping());
-
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+            $configuration->setMapping($diskConfig->getMapping());
+        }
 
         Log::debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');

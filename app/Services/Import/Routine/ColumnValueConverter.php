@@ -31,6 +31,7 @@ use Log;
 use UnexpectedValueException;
 
 /**
+ * @deprecated
  * Class ColumnValueConverter
  *
  * Converts rows of ColumnValue's to pseudo transactions.

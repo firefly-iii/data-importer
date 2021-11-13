@@ -31,6 +31,7 @@ use Log;
 use Storage;
 
 /**
+ * @deprecated
  * Class ImportJobStatusManager
  */
 class ImportJobStatusManager
@@ -144,7 +145,7 @@ class ImportJobStatusManager
      */
     public static function setJobStatus(string $status): ImportJobStatus
     {
-        $identifier = session()->get(Constants::JOB_IDENTIFIER);
+        $identifier = session()->get(Constants::CSV_CONVERSION_JOB_IDENTIFIER);
         Log::debug(sprintf('Now in setJobStatus(%s)', $status));
         Log::debug(sprintf('Found "%s" in the session', $identifier));
 

@@ -20,6 +20,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
+                            <a href="{{ jobBackUrl }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span> Go back to the previous step</a>
                             <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="If the importer seems stuck, you can reset it.">Start over</a>
                             <a class="btn btn-info text-white btn-sm" href="{{ route('004-configure.download') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="You can download a configuration file of your import, so you can make a quick start the next time you import.">
                                 Download configuration file

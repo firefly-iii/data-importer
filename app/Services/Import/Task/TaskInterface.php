@@ -28,6 +28,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 
 /**
+ * @deprecated
  * Interface TaskInterface
  */
 interface TaskInterface

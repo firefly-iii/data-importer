@@ -73,12 +73,15 @@ class MapController extends Controller
 
         // the config in the session will miss important values, we must get those from disk:
         // 'mapping', 'do_mapping', 'roles' are missing.
-        $diskArray  = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-        $diskConfig = Configuration::fromArray($diskArray);
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        if (null !== $configFileName) {
+            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
 
-        $configuration->setMapping($diskConfig->getMapping());
-        $configuration->setDoMapping($diskConfig->getDoMapping());
-        $configuration->setRoles($diskConfig->getRoles());
+            $configuration->setMapping($diskConfig->getMapping());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+            $configuration->setRoles($diskConfig->getRoles());
+        }
 
         // then we can use them:
         $roles           = $configuration->getRoles();
@@ -87,7 +90,7 @@ class MapController extends Controller
         $data            = [];
 
         foreach ($roles as $index => $role) {
-            $info     = config('csv_importer.import_roles')[$role] ?? null;
+            $info     = config('csv.import_roles')[$role] ?? null;
             $mappable = $info['mappable'] ?? false;
             if (null === $info) {
                 continue;
@@ -123,12 +126,20 @@ class MapController extends Controller
             $data[$index] = $info;
         }
 
+        // if nothing to map, just set mappable to true and go to the next step:
+        if(0===count($data)) {
+            // set map config as complete.
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            return redirect()->route('007-convert.index');
+        }
+
+
         // get columns from file
         $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
-        $delimiter = (string) config(sprintf('csv_importer.delimiters.%s', $configuration->getDelimiter()));
+        $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
         $data      = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
 
-        return view('import.map.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
     }
 
     /**

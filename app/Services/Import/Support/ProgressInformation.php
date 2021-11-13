@@ -28,6 +28,7 @@ namespace App\Services\Import\Support;
 use App\Services\Import\ImportJobStatus\ImportJobStatusManager;
 
 /**
+ * @deprecated
  * Trait ProgressInformation
  */
 trait ProgressInformation

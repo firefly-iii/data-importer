@@ -28,6 +28,7 @@ namespace App\Services\Import\Task;
 use Log;
 
 /**
+ * @deprecated
  * Class Amount
  */
 class Amount extends AbstractTask

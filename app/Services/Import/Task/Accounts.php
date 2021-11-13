@@ -37,6 +37,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use Log;
 
 /**
+ * @deprecated
  * Class Accounts
  */
 class Accounts extends AbstractTask

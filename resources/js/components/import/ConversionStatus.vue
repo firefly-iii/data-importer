@@ -26,7 +26,7 @@
                 <div class="card-header">Data conversion</div>
                 <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
                     <p>
-                        Your CSV file will be converted so it can be imported. Press "start job" to start.
+                        TODO Your CSV file will be converted so it can be imported. Press "start job" to start.
                     </p>
                     <p>
                         <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job

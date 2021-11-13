@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Import\Task;
 
 /**
+ * @deprecated
  * Class EmptyDescription
  */
 class EmptyDescription extends AbstractTask

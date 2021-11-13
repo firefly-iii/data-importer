@@ -28,6 +28,7 @@ namespace App\Services\Import\Task;
 use App\Services\CSV\Converter\Amount;
 
 /**
+ * @deprecated
  * Class PositiveAmount
  */
 class PositiveAmount extends AbstractTask

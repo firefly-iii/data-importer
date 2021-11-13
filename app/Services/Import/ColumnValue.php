@@ -28,6 +28,7 @@ use App\Services\CSV\Converter\ConverterService;
 use Log;
 
 /**
+ * @deprecated
  * Class ColumnValue
  */
 class ColumnValue

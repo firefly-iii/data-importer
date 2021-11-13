@@ -35,6 +35,7 @@ use League\Csv\Statement;
 use Log;
 
 /**
+ * @deprecated
  * Class CSVFileProcessor
  */
 class CSVFileProcessor
@@ -131,7 +132,7 @@ class CSVFileProcessor
         foreach ($records as $line) {
             $line = $this->sanitize($line);
             Log::debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
-            $line             = SpecificService::runSpecifics($line, $this->specifics);
+            //$line             = SpecificService::runSpecifics($line, $this->specifics);
             $updatedRecords[] = $line;
             $currentIndex++;
 

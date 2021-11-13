@@ -27,6 +27,7 @@ namespace App\Services\Import\Task;
 
 
 /**
+ * @deprecated
  * Class Tags
  */
 class Tags extends AbstractTask

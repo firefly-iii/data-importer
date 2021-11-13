@@ -157,7 +157,7 @@ class RoleService
         /** @var array $line */
         foreach ($records as $line) {
             $line = array_values($line);
-            $line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
+            //$line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
             foreach ($line as $index => $cell) {
                 if (strlen($cell) > self::EXAMPLE_LENGTH) {
                     $cell = sprintf('%s...', substr($cell, 0, self::EXAMPLE_LENGTH));

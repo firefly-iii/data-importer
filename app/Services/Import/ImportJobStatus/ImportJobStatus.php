@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Import\ImportJobStatus;
 
 /**
+ * @deprecated
  * Class ImportJobStatus
  */
 class ImportJobStatus

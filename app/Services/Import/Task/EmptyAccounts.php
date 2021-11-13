@@ -28,6 +28,7 @@ namespace App\Services\Import\Task;
 use Log;
 
 /**
+ * @deprecated
  * Class EmptyAccounts
  *
  * A very simple task that makes sure that if the source of a deposit

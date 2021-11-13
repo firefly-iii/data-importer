@@ -39,6 +39,7 @@ use Storage;
 use Str;
 
 /**
+ * @deprecated
  * Class ImportRoutineManager
  */
 class ImportRoutineManager

@@ -41,6 +41,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use Log;
 
 /**
+ * @deprecated
  * Class APISubmitter
  */
 class APISubmitter

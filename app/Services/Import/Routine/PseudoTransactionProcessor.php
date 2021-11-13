@@ -40,6 +40,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\PreferenceResponse;
 use Log;
 
 /**
+ * @deprecated
  * Class PseudoTransactionProcessor
  */
 class PseudoTransactionProcessor

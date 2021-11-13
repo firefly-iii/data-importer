@@ -32,6 +32,7 @@ use App\Services\Import\Support\ProgressInformation;
 use Log;
 
 /**
+ * @deprecated
  * Class LineProcessor
  *
  * Processes single lines from a CSV file. Converts them into
