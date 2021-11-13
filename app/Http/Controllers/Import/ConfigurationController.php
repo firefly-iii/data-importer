@@ -146,6 +146,7 @@ class ConfigurationController extends Controller
         // store config on drive.
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
+        $configuration->setFlow($request->cookie('flow'));
 
         $json = '[]';
         try {

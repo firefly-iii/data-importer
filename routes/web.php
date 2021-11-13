@@ -61,10 +61,10 @@ Route::post('/import/roles', ['uses' => 'Import\CSV\RoleController@postIndex', '
 Route::get('/import/mapping', ['uses' => 'Import\CSV\MapController@index', 'as' => '006-mapping.index']);
 Route::post('/import/mapping', ['uses' => 'Import\CSV\MapController@postIndex', 'as' => '006-mapping.post']);
 
-// step 7: convert CSV to JSON transactions (CSV)
-Route::get('/import/convert', ['uses' => 'Import\CSV\ConvertController@index', 'as' => '007-convert.index']);
-Route::post('/import/convert/start', ['uses' => 'Import\CSV\ConvertController@start', 'as' => '007-convert.start']);
-Route::get('/import/convert/status', ['uses' => 'Import\CSV\ConvertController@status', 'as' => '007-convert.status']);
+// step 7: convert any import to JSON transactions
+Route::get('/import/convert', ['uses' => 'Import\ConversionController@index', 'as' => '007-convert.index']);
+Route::any('/import/convert/start', ['uses' => 'Import\ConversionController@start', 'as' => '007-convert.start']);
+Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);
 
 
 // routes to go back to other steps (also takes care of session vars)

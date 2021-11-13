@@ -1,6 +1,6 @@
 <?php
 /*
- * ImportJobStatusManager.php
+ * RoutineStatusManager.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -22,20 +22,24 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Import\ImportJobStatus;
+namespace App\Services\Shared\Conversion;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Storage;
 
 /**
- * @deprecated
- * Class ImportJobStatusManager
+ * Class RoutineStatusManager
  */
-class ImportJobStatusManager
+class RoutineStatusManager
 {
+    private const DISK_NAME = 'conversion-routines';
+
     /**
      * @param string $identifier
      * @param int    $index
@@ -46,17 +50,18 @@ class ImportJobStatusManager
         $lineNo = $index + 1;
         Log::debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
 
-        $disk = Storage::disk('jobs');
+        $disk = Storage::disk(self::DISK_NAME);
         try {
             if ($disk->exists($identifier)) {
                 try {
-                    $status = ImportJobStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                    $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new ImportJobStatus;
+                    Log::error($e->getMessage());
+                    $status = new ConversionStatus;
                 }
                 $status->errors[$index]   = $status->errors[$index] ?? [];
                 $status->errors[$index][] = $error;
-                self::storeJobStatus($identifier, $status);
+                self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
             Log::error($e->getMessage());
@@ -64,13 +69,13 @@ class ImportJobStatusManager
     }
 
     /**
-     * @param string          $identifier
-     * @param ImportJobStatus $status
+     * @param string           $identifier
+     * @param ConversionStatus $status
      */
-    private static function storeJobStatus(string $identifier, ImportJobStatus $status): void
+    private static function storeConversionStatus(string $identifier, ConversionStatus $status): void
     {
-        Log::debug(sprintf('Now in storeJobStatus(%s): %s', $identifier, $status->status));
-        $disk = Storage::disk('jobs');
+        Log::debug(sprintf('Now in storeConversionStatus(%s): %s', $identifier, $status->status));
+        $disk = Storage::disk(self::DISK_NAME);
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
         } catch (JsonException $e) {
@@ -90,17 +95,18 @@ class ImportJobStatusManager
         $lineNo = $index + 1;
         Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
 
-        $disk = Storage::disk('jobs');
+        $disk = Storage::disk(self::DISK_NAME);
         try {
             if ($disk->exists($identifier)) {
                 try {
-                    $status = ImportJobStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                    $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new ImportJobStatus;
+                    Log::error($e->getMessage());
+                    $status = new ConversionStatus;
                 }
                 $status->warnings[$index]   = $status->warnings[$index] ?? [];
                 $status->warnings[$index][] = $warning;
-                self::storeJobStatus($identifier, $status);
+                self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
             Log::error($e->getMessage());
@@ -118,17 +124,18 @@ class ImportJobStatusManager
         $lineNo = $index + 1;
         Log::debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
 
-        $disk = Storage::disk('jobs');
+        $disk = Storage::disk(self::DISK_NAME);
         try {
             if ($disk->exists($identifier)) {
                 try {
-                    $status = ImportJobStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                    $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new ImportJobStatus;
+                    Log::error($e->getMessage());
+                    $status = new ConversionStatus;
                 }
                 $status->messages[$index]   = $status->messages[$index] ?? [];
                 $status->messages[$index][] = $message;
-                self::storeJobStatus($identifier, $status);
+                self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
             Log::error($e->getMessage());
@@ -139,20 +146,23 @@ class ImportJobStatusManager
     /**
      * @param string $status
      *
-     * @return ImportJobStatus
-     * @throws JsonException
-     * @throws JsonException
+     * @return ConversionStatus
+     * @throws ImporterErrorException
      */
-    public static function setJobStatus(string $status): ImportJobStatus
+    public static function setConversionStatus(string $status): ConversionStatus
     {
-        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        Log::debug(sprintf('Now in setJobStatus(%s)', $status));
+        try {
+            $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+            throw new ImporterErrorException('No identifier found');
+        }
+        Log::debug(sprintf('Now in setConversionStatus(%s)', $status));
         Log::debug(sprintf('Found "%s" in the session', $identifier));
 
-        $jobStatus         = self::startOrFindJob($identifier);
+        $jobStatus         = self::startOrFindConversion($identifier);
         $jobStatus->status = $status;
 
-        self::storeJobStatus($identifier, $jobStatus);
+        self::storeConversionStatus($identifier, $jobStatus);
 
         return $jobStatus;
     }
@@ -160,34 +170,33 @@ class ImportJobStatusManager
     /**
      * @param string $identifier
      *
-     * @return ImportJobStatus
+     * @return ConversionStatus
      */
-    public static function startOrFindJob(string $identifier): ImportJobStatus
+    public static function startOrFindConversion(string $identifier): ConversionStatus
     {
-        Log::debug(sprintf('Now in startOrFindJob(%s)', $identifier));
-        $disk = Storage::disk('jobs');
-        try {
-            Log::debug(sprintf('Try to see if file exists for job %s.', $identifier));
-            if ($disk->exists($identifier)) {
-                Log::debug(sprintf('Status file exists for job %s.', $identifier));
-                try {
-                    $array  = json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
-                    $status = ImportJobStatus::fromArray($array);
-                } catch (FileNotFoundException | JsonException $e) {
-                    Log::error($e->getMessage());
-                    $status = new ImportJobStatus;
-                }
-
-                return $status;
-
+        Log::debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
+        $disk = Storage::disk(self::DISK_NAME);
+        Log::debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
+        if ($disk->exists($identifier)) {
+            Log::debug(sprintf('Status file exists for conversion "%s".', $identifier));
+            try {
+                $array  = json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
+                $status = ConversionStatus::fromArray($array);
+            } catch (FileNotFoundException | JsonException $e) {
+                Log::error($e->getMessage());
+                $status = new ConversionStatus;
             }
-        } catch (FileNotFoundException $e) {
-            Log::error('Could not find file, write a new one.');
-            Log::error($e->getMessage());
+
+            return $status;
+
         }
         Log::debug('File does not exist or error, create a new one.');
-        $status = new ImportJobStatus;
-        $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $status = new ConversionStatus;
+        try {
+            $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
+        }
 
         Log::debug('Return status.', $status->toArray());
 

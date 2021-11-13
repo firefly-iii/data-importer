@@ -57,8 +57,8 @@ class Constants
     public const ROLES_COMPLETE_INDICATOR   = 'role_config_complete';
     public const MAPPING_COMPLETE_INDICATOR = 'mapping_config_complete';
 
-    // constants for CSV conversion job:
-    public const CSV_CONVERSION_JOB_IDENTIFIER = 'csv_c_job_id';
+    // constants for data conversion job:
+    public const CONVERSION_JOB_IDENTIFIER = 'conversion_job_id';
 
 
     //    /** @var string */

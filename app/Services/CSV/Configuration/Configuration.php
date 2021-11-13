@@ -34,7 +34,7 @@ use UnexpectedValueException;
 class Configuration
 {
     /** @var int */
-    public const VERSION = 2;
+    public const VERSION = 3;
     private string $date;
     private int    $defaultAccount;
     private string $delimiter;
@@ -46,6 +46,9 @@ class Configuration
     private int    $version;
     private array  $doMapping;
     private bool   $addImportTag;
+
+    // what type of import?
+    private string $flow;
 
     // how to do double transaction detection?
     private array $mapping; // 'classic' or 'cell'
@@ -75,6 +78,7 @@ class Configuration
         $this->roles          = [];
         $this->mapping        = [];
         $this->doMapping      = [];
+        $this->flow           = 'csv';
 
         // double transaction detection:
         $this->duplicateDetectionMethod = 'classic';
@@ -132,6 +136,9 @@ class Configuration
         $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
 
+        // flow
+        $object->flow = $array['flow'] ?? 'csv';
+
         // overrule a setting:
         if ('none' === $object->duplicateDetectionMethod) {
             $object->ignoreDuplicateTransactions = false;
@@ -166,6 +173,12 @@ class Configuration
 
             return self::fromVersionTwo($data);
         }
+        if (3 === $version) {
+            Log::debug('v3 config file!');
+
+            return self::fromVersionThree($data);
+        }
+
         throw new UnexpectedValueException(sprintf('Configuration file version "%s" cannot be parsed.', $version));
     }
 
@@ -184,6 +197,7 @@ class Configuration
         $object->delimiter      = $delimiters[$data['delimiter']] ?? 'comma';
         $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
         $object->rules          = $data['apply-rules'] ?? true;
+        $object->flow           = $data['flow'] ?? 'csv';
 
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
 
@@ -263,6 +277,18 @@ class Configuration
     }
 
     /**
+     * @param array $data
+     *
+     * @return static
+     */
+    private static function fromVersionThree(array $data): self
+    {
+        $object            = self::fromArray($data);
+        $object->specifics = [];
+        return $object;
+    }
+
+    /**
      * @param array $array
      *
      * @return static
@@ -279,11 +305,11 @@ class Configuration
         $object->rules          = $array['rules'];
         $object->skipForm       = $array['skip_form'];
         $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->specifics      = $array['specifics'];
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->version        = $version;
+        $object->flow           = $array['flow'] ?? 'csv';
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -307,24 +333,6 @@ class Configuration
         // config for "cell":
         $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
-
-        $firstValue = count(array_values($array['specifics'])) > 0 ? array_values($array['specifics'])[0] : null;
-        $firstKey   = count(array_values($array['specifics'])) > 0 ? array_keys($array['specifics'])[0] : null;
-
-        // due to a bug, the "specifics" array could still be broken at this point.
-        // do a quick check and verification.
-        if (is_bool($firstValue) && is_string($firstKey)) {
-            $actualSpecifics = [];
-            foreach ($array['specifics'] as $key => $value) {
-                if (true === $value) {
-                    $actualSpecifics[] = $key;
-                }
-            }
-            $object->specifics = $actualSpecifics;
-        }
-
-        //Log::debug(var_export($object->ignoreDuplicateLines, true));
-        //Log::debug(var_export($object->ignoreDuplicateTransactions, true));
 
         return $object;
     }
@@ -411,7 +419,6 @@ class Configuration
             'rules'                         => $this->rules,
             'skip_form'                     => $this->skipForm,
             'add_import_tag'                => $this->addImportTag,
-            'specifics'                     => $this->specifics,
             'roles'                         => $this->roles,
             'do_mapping'                    => $this->doMapping,
             'mapping'                       => $this->mapping,
@@ -421,6 +428,7 @@ class Configuration
             'unique_column_index'           => $this->uniqueColumnIndex,
             'unique_column_type'            => $this->uniqueColumnType,
             'version'                       => $this->version,
+            'flow'                          => $this->flow,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -503,7 +511,7 @@ class Configuration
     public function setMapping(array $mapping): void
     {
         $newMap = [];
-        foreach($mapping as $column => $map) {
+        foreach ($mapping as $column => $map) {
             ksort($map);
             $newMap[$column] = $map;
         }
@@ -540,6 +548,22 @@ class Configuration
     public function getUniqueColumnType(): string
     {
         return $this->uniqueColumnType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlow(): string
+    {
+        return $this->flow;
+    }
+
+    /**
+     * @param string $flow
+     */
+    public function setFlow(string $flow): void
+    {
+        $this->flow = $flow;
     }
 
 

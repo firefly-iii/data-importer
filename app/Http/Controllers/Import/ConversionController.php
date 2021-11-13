@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import\CSV;
+namespace App\Http\Controllers\Import;
 
 
 use App\Exceptions\ImporterErrorException;
@@ -30,24 +30,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ReadyForImport;
 use App\Mail\ImportFinished;
 use App\Services\CSV\Configuration\Configuration;
-use App\Services\CSV\File\FileReader;
+use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Import\ImportJobStatus\ImportJobStatus;
 use App\Services\Import\ImportJobStatus\ImportJobStatusManager;
-use App\Services\Import\ImportRoutineManager;
 use App\Services\Session\Constants;
+use App\Services\Shared\Conversion\ConversionStatus;
+use App\Services\Shared\Conversion\RoutineManagerInterface;
+use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Storage\StorageService;
-use ErrorException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
 use Log;
 use Mail;
-use TypeError;
 
 /**
- * Class ConvertController
+ * Class ConversionController
  */
-class ConvertController extends Controller
+class ConversionController extends Controller
 {
 
     /**
@@ -67,7 +67,6 @@ class ConvertController extends Controller
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
         $mainTitle = 'Import the data';
-        $subTitle  = 'Connect to Firefly III and store your data';
 
         // get configuration object.
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
@@ -77,7 +76,6 @@ class ConvertController extends Controller
         if (null !== $configFileName) {
             $diskArray  = json_decode(StorageService::getContent(session()->get($configFileName)), true, JSON_THROW_ON_ERROR);
             $diskConfig = Configuration::fromArray($diskArray);
-
             $configuration->setDoMapping($diskConfig->getDoMapping());
             $configuration->setMapping($diskConfig->getMapping());
         }
@@ -96,80 +94,113 @@ class ConvertController extends Controller
         }
 
         // job ID may be in session:
-        $identifier = session()->get(Constants::CSV_CONVERSION_JOB_IDENTIFIER);
-        $routine    = new ImportRoutineManager($identifier);
+        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $flow       = $configuration->getFlow();
+
+        // switch based on flow:
+        if (!in_array($flow, config('importer.flows'), true)) {
+            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+        }
+        /** @var RoutineManagerInterface $routine */
+        if ('csv' === $flow) {
+            $routine = new CSVRoutineManager(null);
+        }
+        if ('nordigen' === $flow) {
+            throw new ImporterErrorException('Cannot handle. :(');
+        }
+        if ('spectre' === $flow) {
+            throw new ImporterErrorException('Cannot handle. :(');
+        }
+
+        // may be a new identifier! Yay!
         $identifier = $routine->getIdentifier();
 
-        Log::debug(sprintf('Import routine manager identifier is "%s"', $identifier));
+        Log::debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
         // store identifier in session so the status can get it.
-        session()->put(Constants::CSV_CONVERSION_JOB_IDENTIFIER, $identifier);
-        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CSV_CONVERSION_JOB_IDENTIFIER));
+        session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
+        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
 
-        return view('import.007-convert.index', compact('mainTitle', 'subTitle', 'identifier', 'jobBackUrl'));
+        return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
     /**
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws JsonException
-     * @throws JsonException
      */
     public function start(Request $request): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier = $request->get('identifier');
-        $routine    = new ImportRoutineManager($identifier);
 
-        $importJobStatus = ImportJobStatusManager::startOrFindJob($identifier);
-        ImportJobStatusManager::setJobStatus(ImportJobStatus::JOB_RUNNING);
+        // start new conversion routine, depending on the type of import:
+        // read configuration from session
+        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
 
+        // read configuration from disk (to append data)
+        $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        if (null !== $configurationFile) {
+            $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
+            $configuration->setMapping($diskConfig->getMapping());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+            $configuration->setRoles($diskConfig->getRoles());
+        }
+
+        // now create the right class:
+        $flow = $configuration->getFlow();
+        if (!in_array($flow, config('importer.flows'), true)) {
+            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+        }
+        /** @var RoutineManagerInterface $routine */
+        if ('csv' === $flow) {
+            $routine = new CSVRoutineManager($identifier);
+        }
+        if ('nordigen' === $flow) {
+            throw new ImporterErrorException('Cannot handle. :(');
+        }
+        if ('spectre' === $flow) {
+            throw new ImporterErrorException('Cannot handle. :(');
+        }
+
+        $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
+
+        RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_RUNNING);
+
+        // then push stuff into the routine:
+        $routine->setConfiguration($configuration);
+        //$routine->setReader(FileReader::getReaderFromSession());
+        $result = false;
         try {
-            // read configuration from session
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-
-            // read configuration from disk (to append data)
-            $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
-            if (null !== $configurationFile) {
-                $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
-                $diskConfig = Configuration::fromArray($diskArray);
-                $configuration->setMapping($diskConfig->getMapping());
-                $configuration->setDoMapping($diskConfig->getDoMapping());
-                $configuration->setRoles($diskConfig->getRoles());
-            }
-
-            $routine->setConfiguration($configuration);
-            $routine->setReader(FileReader::getReaderFromSession());
             $routine->start();
-        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (ImporterErrorException | ErrorException | TypeError $e) {
-            // update job to error state.
-            ImportJobStatusManager::setJobStatus(ImportJobStatus::JOB_ERRORED);
-            $error = sprintf('Internal error: %s in file %s:%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
-            ImportJobStatusManager::addError($identifier, 0, $error);
+            $result = true;
+        } catch (ImporterErrorException $e) {
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+        }
+        die('here we are');
 
-            return response()->json($importJobStatus->toArray());
+        if (true === $result) {
+            // set done:
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
+
+            // if configured, send report!
+            // TODO make event handler.
+            $log
+                = [
+                'messages' => $routine->getAllMessages(),
+                'warnings' => $routine->getAllWarnings(),
+                'errors'   => $routine->getAllErrors(),
+            ];
+
+            $send = config('mail.enable_mail_report');
+            Log::debug('Log log', $log);
+            if (true === $send) {
+                Log::debug('SEND MAIL');
+                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
+            }
         }
 
-        // set done:
-        ImportJobStatusManager::setJobStatus(ImportJobStatus::JOB_DONE);
-
-        // if configured, send report!
-        $log
-            = [
-            'messages' => $routine->getAllMessages(),
-            'warnings' => $routine->getAllWarnings(),
-            'errors'   => $routine->getAllErrors(),
-        ];
-
-        $send = config('mail.enable_mail_report');
-        Log::debug('Log log', $log);
-        if (true === $send) {
-            Log::debug('SEND MAIL');
-            Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-        }
 
         return response()->json($importJobStatus->toArray());
     }

@@ -76,6 +76,7 @@ class ImportRoutineManager
      */
     public function __construct(string $identifier = null)
     {
+        die('i am deprecated');
         Log::debug('Constructed ImportRoutineManager');
 
         // get line converter

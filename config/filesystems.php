@@ -77,6 +77,10 @@ return [
             'driver' => 'local',
             'root'   => storage_path('jobs'),
         ],
+        'conversion-routines'           => [
+            'driver' => 'local',
+            'root'   => storage_path('conversion-routines'),
+        ],
         'configurations' => [
             'driver' => 'local',
             'root'   => envNonEmpty('JSON_CONFIGURATION_DIR', storage_path('configurations')),
