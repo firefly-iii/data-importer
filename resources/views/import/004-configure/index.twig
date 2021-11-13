@@ -1,0 +1,350 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>{{ mainTitle }}</h1>
+                <h2>{{ subTitle }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <p class="lead">Configure your import.</p>
+                {% if 'csv' == flow %}
+                    <p>
+                        CSV files come in many shapes and forms. Some of the most important settings are below. They
+                        apply
+                        to all lines in the file, and what to do with double lines or troubles during the import.
+                        If you would like some support, <a href="https://docs.firefly-iii.org/csv/usage/configure/"
+                                                           target="_blank">check out the documentation for this
+                            page.</a>
+                    </p>
+                {% endif %}
+                {% if not errors.isEmpty %}
+                    <p class="text-danger">Some error(s) occurred:</p>
+                    <ul>
+                        {% for error in errors.all %}
+                            <li class="text-danger">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <hr/>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8"
+                              id="store">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+
+                            {% if 'csv' == flow %}
+                                <h4>File options</h4>
+                                <div class="form-group row">
+                                    <div class="col-sm-3">Headers</div>
+                                    <div class="col-sm-9">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   {% if configuration.isHeaders %}checked{% endif %} type="checkbox"
+                                                   id="headers" name="headers" value="1" aria-describedby="headersHelp">
+                                            <label class="form-check-label" for="headers">
+                                                Yes
+                                            </label>
+                                            <small id="headersHelp" class="form-text text-muted">
+                                                Select this checkbox when your CSV file has headers on the first line of
+                                                the
+                                                file.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="delimiter" class="col-sm-3 col-form-label">CSV delimiter</label>
+                                    <div class="col-sm-9">
+                                        <select id="delimiter" name="delimiter" class="form-control"
+                                                aria-describedby="delimiterHelp">
+                                            <option value="comma"
+                                                    {% if configuration.getDelimiter == 'comma' %}selected{% endif %}
+                                                    label="A comma (,)">A comma (,)
+                                            </option>
+                                            <option value="semicolon"
+                                                    {% if configuration.getDelimiter == 'semicolon' %}selected{% endif %}
+                                                    label="A semicolon (;)">A semicolon (;)
+                                            </option>
+                                            <option value="tab"
+                                                    {% if configuration.getDelimiter == 'tab' %}selected{% endif %}
+                                                    label="A tab (invisible)">A tab (invisible)
+                                            </option>
+                                        </select>
+                                        <small id="delimiterHelp" class="form-text text-muted">
+                                            Select the field separator of our CSV file. This is almost always a comma.
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="date" class="col-sm-3 col-form-label">Date format</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="date" class="form-control" id="date"
+                                               placeholder="Date format"
+                                               value="{{ configuration.getDate|default('Y-m-d') }}"
+                                               aria-describedby="dateHelp">
+                                        <small id="dateHelp" class="form-text text-muted">
+                                            Use this box to set the date format as it can be found in your file. You can
+                                            use
+                                            the format as described
+                                            <a href="https://www.php.net/manual/en/function.date.php">on this page</a>.
+                                            Don't stop playing with this setting until <strong
+                                                id="date_example">1984-09-17</strong> matches what you see in your
+                                            CSV file.
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+
+                            <h4>Import options</h4>
+                            <div class="form-group row">
+                                <label for="default_account" class="col-sm-3 col-form-label">Default import
+                                    account</label>
+                                <div class="col-sm-9">
+                                    <select id="default_account" name="default_account" class="form-control"
+                                            aria-describedby="defaultAccountHelp">
+                                        {% for accountGroup, accountList in accounts %}
+                                            <optgroup label="{{ accountGroup }}">
+                                                {% for account in accountList %}
+                                                    <option
+                                                        {% if configuration.getDefaultAccount == account.id %}selected{% endif %}
+                                                        value="{{ account.id }}"
+                                                        label="{{ account.name }}">{{ account.name }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                    <small id="defaultAccountHelp" class="form-text text-muted">
+                                        Select the asset account you want to link transactions to, if your import
+                                        doesn't have enough meta data to determine this.
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-3">Rules</div>
+                                <div class="col-sm-9">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               {% if configuration.isRules or null == configuration %}checked{% endif %}
+                                               type="checkbox" id="rules" name="rules" value="1"
+                                               aria-describedby="rulesHelp">
+                                        <label class="form-check-label" for="rules">
+                                            Yes
+                                        </label>
+                                        <small id="rulesHelp" class="form-text text-muted">
+                                            Select if you want Firefly III to apply your rules to the import.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-3">Import tag</div>
+                                <div class="col-sm-9">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               {% if configuration.isAddImportTag or null == configuration %}checked{% endif %}
+                                               type="checkbox" id="rules" name="add_import_tag" value="1"
+                                               aria-describedby="add_import_tagHelp">
+                                        <label class="form-check-label" for="rules">
+                                            Yes
+                                        </label>
+                                        <small id="add_import_tagHelp" class="form-text text-muted">
+                                            When selected Firefly III will add a tag to each imported transaction
+                                            denoting the import; this groups your import under a tag.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4>Duplicate transaction detection</h4>
+                            <p class="text-muted">
+                                Firefly III can automatically detect duplicate transactions. This is pretty foolproof.
+                                In some special cases however,
+                                you want more control over this process. Read more about the options below in <a
+                                    href="https://docs.firefly-iii.org/csv/usage/configure/" target="_blank">the
+                                    documentation</a>.
+                            </p>
+
+                            <div class="form-group row">
+                                <label for="X" class="col-sm-3 col-form-label">General detection options</label>
+                                <div class="col-sm-9">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               {% if configuration.isIgnoreDuplicateLines or null == configuration %}checked{% endif %}
+                                               type="checkbox" value="1" id="ignore_duplicate_lines"
+                                               name="ignore_duplicate_lines" aria-describedby="duplicateHelp">
+                                        <label class="form-check-label" for="ignore_duplicate_lines">
+                                            Do not import duplicate lines in the import.
+                                        </label>
+                                    </div>
+
+                                    <small class="form-text text-muted" id="duplicateHelp">
+                                        Whatever method you choose ahead, it's smart to make the importer ignore any
+                                        duplicated lines in your CSV file.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="default_account" class="col-sm-3 col-form-label">Detection method</label>
+                                <div class="col-sm-9">
+                                    <select id="duplicate_detection_method" name="duplicate_detection_method"
+                                            class="form-control" aria-describedby="duplicate_detection_method_help">
+                                        <option label="No duplicate detection"
+                                                {% if configuration.getDuplicateDetectionMethod == 'none' %}selected{% endif %}
+                                                value="none">No duplicate detection
+                                        </option>
+                                        <option label="Content-based"
+                                                {% if configuration.getDuplicateDetectionMethod == 'classic' %}selected{% endif %}
+                                                value="classic">Content-based detection
+                                        </option>
+                                        <option label="Identifier-based"
+                                                {% if configuration.getDuplicateDetectionMethod == 'cell' %}selected{% endif %}
+                                                value="cell">Identifier-based detection
+                                        </option>
+                                    </select>
+                                    <small id="duplicate_detection_method_help" class="form-text text-muted">
+                                        For more details on these detection method see <a
+                                            href="https://docs.firefly-iii.org/csv/usage/configure/#duplicate-transaction-detection"
+                                            target="_blank">the documentation</a>. If you're not sure, select
+                                        "content-based" detection.
+                                    </small>
+                                </div>
+                            </div>
+                            {% if 'csv' == flow %}
+                                <div class="form-group row" id="unique_column_index_holder">
+                                    <label for="unique_column_index" class="col-sm-3 col-form-label">Unique column
+                                        index</label>
+                                    <div class="col-sm-9">
+                                        <input type="number" step="1" name="unique_column_index" class="form-control"
+                                               id="unique_column_index" placeholder="Column index"
+                                               value="{{ configuration.getUniqueColumnIndex }}"
+                                               aria-describedby="unique_column_index_help">
+                                        <small id="unique_column_index_help" class="form-text text-muted">
+                                            This field is only relevant for the "identifier-based" detection option.
+                                            Indicate which column contains the unique identifier. Start counting from
+                                            zero!
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row" id="unique_column_type_holder">
+                                    <label for="unique_column_type" class="col-sm-3 col-form-label">Unique column
+                                        type</label>
+                                    <div class="col-sm-9">
+                                        <select id="unique_column_type" name="unique_column_type" class="form-control"
+                                                aria-describedby="unique_column_type_help">
+                                            {% for columnType, columnName in config('csv_importer.unique_column_options') %}
+                                                <option label="{{ columnName }}"
+                                                        {% if configuration.getUniqueColumnType == columnType %}selected{% endif %}
+                                                        value="{{ columnType }}">{{ columnName }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <small id="unique_column_type_help" class="form-text text-muted">
+                                            This field is only relevant for the "identifier-based" detection option.
+                                            Select
+                                            the type of value you expect in
+                                            the unique identifier. What must Firefly III search for?
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <h4>Other options</h4>
+                            <div class="form-group row">
+                                <div class="col-sm-3">Skip form</div>
+                                <div class="col-sm-9">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               {% if configuration.isSkipForm %}checked{% endif %} type="checkbox"
+                                               id="skip_form" name="skip_form" value="1" aria-describedby="skipHelp">
+                                        <label class="form-check-label" for="skip_form">
+                                            Yes
+                                        </label>
+                                        <small id="skipHelp" class="form-text text-muted">
+                                            Skip the options the next time you import and go straight to processing.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <!-- go back to upload -->
+                                    <a href="{{ route('back.upload') }}" class="btn btn-secondary">&larr; Go back to
+                                        upload</a>
+                                    <br>
+                                    <small class="text-muted">Changes on this page will not be saved.</small>
+                                    <br/><br/>
+                                    <a href="{{ route('flush') }}" class="btn btn-danger btn-sm">Start over</a>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                                </div>
+                            </div>
+
+                        </form>
+                        <p>&nbsp;</p>
+                        <p>&nbsp;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript">
+
+        // some basic triggers for the duplicate options.
+
+        var phpFormatRoute = '{{ route('004-configure.php_date') }}';
+        $(document).ready(function () {
+            updateDateExample();
+            linkToTriggers();
+            triggerDetectionMethod();
+        });
+
+        function linkToTriggers() {
+            $('#duplicate_detection_method').on('change', triggerDetectionMethod);
+        }
+
+        function triggerDetectionMethod() {
+            var value = $('#duplicate_detection_method').val();
+            console.log('trigger change, value is')
+            console.log(value);
+            if ('none' === value) {
+                $('#unique_column_index_holder').hide();
+                $('#unique_column_type_holder').hide();
+            }
+            if ('classic' === value) {
+                $('#unique_column_index_holder').hide();
+                $('#unique_column_type_holder').hide();
+            }
+            if ('cell' === value) {
+                $('#unique_column_index_holder').show();
+                $('#unique_column_type_holder').show();
+            }
+        }
+
+        function updateDateExample() {
+            $('#date_example').text('...');
+            var format = $('#date').val();
+            $.getJSON(phpFormatRoute, {format: format}).done(function (data) {
+                $('#date_example').text(data.result);
+            }).fail(function () {
+                $('#date_example').text(':(');
+            });
+        }
+
+        $('#date').on('change', updateDateExample);
+    </script>
+{% endblock %}

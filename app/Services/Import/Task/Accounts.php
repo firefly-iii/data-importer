@@ -294,8 +294,8 @@ class Accounts extends AbstractTask
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('id');
         $request->setQuery($value);
         /** @var GetAccountsResponse $response */
@@ -335,8 +335,8 @@ class Accounts extends AbstractTask
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('iban');
         $request->setQuery($iban);
         /** @var GetAccountsResponse $response */
@@ -404,8 +404,8 @@ class Accounts extends AbstractTask
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('name');
         $request->setQuery($name);
         /** @var GetAccountsResponse $response */

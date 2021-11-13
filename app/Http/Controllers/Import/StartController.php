@@ -43,32 +43,6 @@ class StartController extends Controller
     public function __construct()
     {
         parent::__construct();
-        app('view')->share('pageTitle', 'Import');
         $this->middleware(UploadedFiles::class);
     }
-
-    /**
-     * @return Factory|View
-     */
-    public function index()
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle = 'Import routine';
-        $subTitle  = 'Start page and instructions';
-
-        // get existing configs.
-        $disk = Storage::disk('configurations');
-        Log::debug(
-            sprintf(
-                'Going to check directory for config files: %s',
-                config('filesystems.disks.configurations.root'),
-            )
-        );
-        $list = $disk->files();
-
-        Log::debug('List of files:', $list);
-
-        return view('import.index', compact('mainTitle', 'subTitle', 'list'));
-    }
-
 }

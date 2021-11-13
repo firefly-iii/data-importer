@@ -81,8 +81,8 @@ class PseudoTransactionProcessor
 
         if (null !== $accountId) {
             $accountRequest = new GetAccountRequest($url, $token);
-            $accountRequest->setVerify(config('csv_importer.connection.verify'));
-            $accountRequest->setTimeOut(config('csv_importer.connection.timeout'));
+            $accountRequest->setVerify(config('importer.connection.verify'));
+            $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
             /** @var GetAccountResponse $result */
             try {
@@ -104,8 +104,8 @@ class PseudoTransactionProcessor
         $token = Token::getAccessToken();
 
         $prefRequest = new GetPreferenceRequest($url, $token);
-        $prefRequest->setVerify(config('csv_importer.connection.verify'));
-        $prefRequest->setTimeOut(config('csv_importer.connection.timeout'));
+        $prefRequest->setVerify(config('importer.connection.verify'));
+        $prefRequest->setTimeOut(config('importer.connection.timeout'));
         $prefRequest->setName('currencyPreference');
 
         try {
@@ -117,8 +117,8 @@ class PseudoTransactionProcessor
         }
         $code            = $response->getPreference()->data ?? 'EUR';
         $currencyRequest = new GetCurrencyRequest($url, $token);
-        $currencyRequest->setVerify(config('csv_importer.connection.verify'));
-        $currencyRequest->setTimeOut(config('csv_importer.connection.timeout'));
+        $currencyRequest->setVerify(config('importer.connection.verify'));
+        $currencyRequest->setTimeOut(config('importer.connection.timeout'));
         $currencyRequest->setCode($code);
         try {
             /** @var GetCurrencyResponse $result */

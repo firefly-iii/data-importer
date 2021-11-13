@@ -86,8 +86,8 @@ class ConfigurationController extends Controller
         $token   = Token::getAccessToken();
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $response = $request->get();
 
         // get list of specifics:
@@ -102,8 +102,8 @@ class ConfigurationController extends Controller
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new GetAccountsRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::LIABILITIES);
         $response = $request->get();
         /** @var Account $account */
@@ -117,7 +117,7 @@ class ConfigurationController extends Controller
         }
 
         return view(
-            'import.configuration.index',
+            'import.004-configure.index',
             compact('mainTitle', 'subTitle', 'accounts', 'specifics', 'configuration')
         );
     }

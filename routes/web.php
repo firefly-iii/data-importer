@@ -45,10 +45,17 @@ Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('0
 
 // step 3: Upload CSV file + config file
 Route::get('/upload', 'Import\UploadController@index')->name('003-upload.index');
+Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003-upload.upload']);
+
+// step 4: Configure import
+Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
+Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
+Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
+
 
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');
-//Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
+Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
 //Route::get('/back/config', 'NavController@toConfig')->name('back.config');
 //Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
 //Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
@@ -61,13 +68,10 @@ Route::get('/back/start', 'NavController@toStart')->name('back.start');
 //
 //// start import thing.
 //Route::get('/import/start', ['uses' => 'Import\StartController@index', 'as' => 'import.start']);
-//Route::post('/import/upload', ['uses' => 'Import\UploadController@upload', 'as' => 'import.upload']);
 //
-//Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => 'import.configure.index']);
-//Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => 'import.configure.post']);
+//
 //
 //// import config helper
-//Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => 'import.configure.php_date']);
 //
 //// roles
 //Route::get('/import/roles', ['uses' => 'Import\RoleController@index', 'as' => 'import.roles.index']);

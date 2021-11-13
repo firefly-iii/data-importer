@@ -38,17 +38,25 @@ class Constants
     // session value constants:
     public const SESSION_SPECTRE_APP_ID = 'spectre_app_id';
     public const SESSION_SPECTRE_SECRET = 'spectre_secret';
-    public const SESSION_NORDIGEN_ID = 'nordigen_id';
-    public const SESSION_NORDIGEN_KEY = 'nordigen_key';
+    public const SESSION_NORDIGEN_ID    = 'nordigen_id';
+    public const SESSION_NORDIGEN_KEY   = 'nordigen_key';
+
+    // upload config values:
+    public const HAS_UPLOAD         = 'has_uploaded_file';
+    public const UPLOAD_CSV_FILE    = 'csv_file_path';
+    public const UPLOAD_CONFIG_FILE = 'config_file_path';
 
     // cookie name to remember the flow:
     public const FLOW_COOKIE = 'flow';
-//     stores the configuration array
-//    public const CONFIGURATION = 'configuration';
+
+    //     stores the configuration array
+    public const CONFIGURATION = 'configuration';
+
     // if the user is done configuring the import
-//    public const CONFIG_COMPLETE_INDICATOR = 'config_complete';
-//    /** @var string */
-//    public const HAS_UPLOAD     = 'has_uploaded_file';
+    public const CONFIG_COMPLETE_INDICATOR = 'config_complete';
+
+
+    //    /** @var string */
 //    public const JOB_IDENTIFIER = 'import_job_id';
 //    /** @var string */
 //    public const JOB_STATUS = 'import_job_status';
@@ -57,8 +65,7 @@ class Constants
 //    /** @var string string */
 //    public const ROLES_COMPLETE_INDICATOR = 'role_config_complete';
 //    /** @var string */
-//    public const UPLOAD_CONFIG_FILE = 'config_file_path';
+
 //    /** @var string */
-//    public const UPLOAD_CSV_FILE = 'csv_file_path';
 
 }

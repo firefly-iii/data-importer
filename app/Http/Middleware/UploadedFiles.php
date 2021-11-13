@@ -47,7 +47,7 @@ class UploadedFiles
     {
 
         if (session()->has(Constants::HAS_UPLOAD)) {
-            return redirect()->route('import.configure.index');
+            return redirect(route('004-configure.index'));
         }
 
         return $next($request);

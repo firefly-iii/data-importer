@@ -7,26 +7,28 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-8 offset-lg-2">
+            <div class="col-lg-10 offset-lg-1">
+                <h1>Firefly III Data Import Tool, v{{ version }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
                 <div class="card">
+                    <div class="card-header">
+                        Firefly III Data Import Tool, v{{ version }}
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Firefly III Data Import Tool</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">v{{ version }}</h6>
                         <p class="card-text">
                             Welcome! This tool will help you import data into Firefly III.
                         </p>
                         <p>
-                            This tool is sparsely documented, you can find all the details you need
-                            in the <a href="https://docs.firefly-iii.org/" target="_blank">
-                                documentation</a>. Any links you see to the docs will open in a new window or tab.
+                            All are instructions in the <a href="https://docs.firefly-iii.org/" target="_blank">
+                                TODO documentation</a>. Any links you see to the docs will open in a new window or tab.
                         </p>
                         <p>
                             To import data, you need to authenticate with Firefly III, and optionally with one of the
                             data sources this importer supports.
                         </p>
-                        <hr/>
-                        <h4>Firefly III</h4>
-
                         {% if pat %}
                             <p id="firefly_expl">
                                 You're using a Personal Access Token to <span
@@ -51,51 +53,96 @@
                                     class="text-info">authenticate</span> to Firefly III.
                             </p>
                         {% endif %}
-                        <p id="error_explain" style="display: none;">The importer could not connect to Firefly III.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:1em;display: none;" id="error_explain">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        Configuration / connection error :(
+                    </div>
+                    <div class="card-body">
+                        <p>The importer could not connect to Firefly III.
                             Please remedy the error below first, and check out the <a
                                 href="https://docs.firefly-iii.org/" target="_blank">
                                 documentation</a> if necessary.</p>
-                        <p id="error_txt" style="display: none;" class="text-danger"></p>
-                        <p>
-                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}">Start over</a>
-                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}">Reauthenticate</a>
-                        </p>
-                        <hr/>
-                        <h4>Nordigen</h4>
-                        <p id="nordigen_result"><span class="fas fa-cog fa-spin"></span></p>
-                        <hr/>
-                        <h4>Spectre</h4>
-                        <p id="spectre_result"><span class="fas fa-cog fa-spin"></span></p>
-                        <hr/>
-                        <form action="{{ route('index.post') }}" method="post">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}" />
-                            <div class="row">
-                                <div class="col-4 text-center">
-                                    <button class="btn btn-info disabled" value="csv" name="flow" disabled="disabled" id="csv_button"><span
-                                            class="fas fa-cog fa-spin"></span></button>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <button class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled" id="spectre_button"><span
-                                            class="fas fa-cog fa-spin"></span></button>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <button class="btn btn-info disabled"  value="nordigen" name="flow" disabled="disabled" id="nordigen_button"><span
-                                            class="fas fa-cog fa-spin"></span></button>
-                                </div>
-                            </div>
-                        </form>
+                        <p id="error_txt" class="text-danger"></p>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
-    <p>
-    </p>
+        <form action="{{ route('index.post') }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            <div class="row" style="margin-top:1em;" id="importers">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    Import from CSV file
+                                </div>
+                                <div class="card-body">
+                                    <button class="btn btn-info disabled" value="csv" name="flow" disabled="disabled"
+                                            id="csv_button"><span class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    Import from Nordigen (img)
+                                </div>
+                                <div class="card-body">
+                                    <p id="nordigen_result"><span class="fas fa-cog fa-spin"></span></p>
+                                    <button class="btn btn-info disabled" value="nordigen" name="flow" disabled="disabled" id="nordigen_button"><span class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    Import from Spectre
+                                </div>
+                                <div class="card-body">
+                                    <p id="spectre_result"><span class="fas fa-cog fa-spin"></span></p>
+                                    <button class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled" id="spectre_button"><span class="fas fa-cog fa-spin"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="row" style="margin-top:1em;" id="importers">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        Extra buttons!
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button resets your progress">Start over</a>
+                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button tries to connect to Firefly III again">Reauthenticate</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript">
         // validate Firefly III information:
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+
         var url = '{{ route('token.validate') }}';
         var tokenPageUrl = '{{ route('token.index') }}';
         $.getJSON(url).done(function (data) {
@@ -103,14 +150,14 @@
                 $('#csv_button').removeClass('disabled').text('Import CSV file').removeAttr('disabled');
             } else {
 
-                $('#csv_button').hide();
+                $('#importers').hide();
                 $('#error_explain').show();
                 $('#firefly_expl').hide();
-                $('#error_txt').show().text(data.message);
+                $('#error_txt').text(data.message);
                 // window.location = tokenPageUrl;
             }
         }).fail(function () {
-            $('#csv_button').hide();
+            $('#importers').hide();
             $('#error_explain').show();
             $('#firefly_expl').hide();
             $('#error_txt').show().text(data.message);
@@ -121,7 +168,7 @@
         url = '{{ route('validate.spectre') }}';
         $.getJSON(url).done(function (data) {
             if ('OK' === data.result) {
-                $('#spectre_result').text('The Spectre / Salt Edge API is configured correctly.');
+                $('#spectre_result').hide();
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
             if ('NODATA' === data.result) {
@@ -137,7 +184,7 @@
         url = '{{ route('validate.nordigen') }}';
         $.getJSON(url).done(function (data) {
             if ('OK' === data.result) {
-                $('#nordigen_result').text('The Nordigen API is configured correctly.');
+                $('#nordigen_result').hide();
                 $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
             }
             if ('NODATA' === data.result) {

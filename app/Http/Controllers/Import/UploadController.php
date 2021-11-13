@@ -25,16 +25,19 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 
+use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImportException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadedFiles;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\MessageBag;
+use Illuminate\View\View;
 use Log;
 use Storage;
 
@@ -49,7 +52,34 @@ class UploadController extends Controller
     public function __construct()
     {
         parent::__construct();
+        app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadedFiles::class);
+    }
+
+    /**
+     * @return Factory|View
+     */
+    public function index(Request $request)
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $mainTitle = 'Upload your file(s)';
+        $subTitle  = 'Start page and instructions';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+
+
+        // get existing configs.
+        $disk = Storage::disk('configurations');
+        Log::debug(
+            sprintf(
+                'Going to check directory for config files: %s',
+                config('filesystems.disks.configurations.root'),
+            )
+        );
+        $list = $disk->files();
+
+        Log::debug('List of files:', $list);
+
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list','flow'));
     }
 
     /**
@@ -129,7 +159,7 @@ class UploadController extends Controller
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            } catch (ImportException $e) {
+            } catch (ImporterErrorException $e) {
                 $errors->add('config_file', $e->getMessage());
             }
         }
@@ -138,7 +168,7 @@ class UploadController extends Controller
             return redirect(route('import.start'))->withErrors($errors);
         }
 
-        return redirect(route('import.configure.index'));
+        return redirect(route('004-configure.index'));
     }
 
     /**

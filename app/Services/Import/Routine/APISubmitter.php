@@ -103,8 +103,8 @@ class APISubmitter
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new PostTagRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $body = [
             'tag'  => $this->tag,
             'date' => $this->tagDate,
@@ -229,8 +229,8 @@ class APISubmitter
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new PostTransactionRequest($url, $token);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         Log::debug('Submitting to Firefly III:', $line);
         $request->setBody($line);
         try {
@@ -387,8 +387,8 @@ class APISubmitter
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
         $request = new PutTransactionRequest($url, $token, $groupId);
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBody($body);
         try {
             $request->put();

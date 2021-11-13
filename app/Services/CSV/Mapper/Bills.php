@@ -48,8 +48,8 @@ class Bills implements MapperInterface
         $token   = Token::getAccessToken();
         $request = new GetBillsRequest($url, $token);
 
-        $request->setVerify(config('csv_importer.connection.verify'));
-        $request->setTimeOut(config('csv_importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
             $response = $request->get();

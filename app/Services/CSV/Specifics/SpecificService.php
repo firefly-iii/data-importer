@@ -33,22 +33,12 @@ class SpecificService
 {
     /**
      * @return array
+     * @deprecated
      */
     public static function getSpecifics(): array
     {
-        $specifics = [];
-        foreach (config('csv_importer.specifics') as $class) {
-            if (class_exists($class)) {
-                $parts           = explode('\\', $class);
-                $key             = $parts[count($parts) - 1];
-                $specifics[$key] = [
-                    'name'        => trans($class::getName()),
-                    'description' => trans($class::getDescription()),
-                ];
-            }
-        }
+        return [];
 
-        return $specifics;
     }
 
     /**
