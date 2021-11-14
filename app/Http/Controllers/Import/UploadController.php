@@ -74,11 +74,20 @@ class UploadController extends Controller
                 config('filesystems.disks.configurations.root'),
             )
         );
-        $list = $disk->files();
+        $all = $disk->files();
+
+        // remove files from list
+        $list    = [];
+        $ignored = config('importer.ignored_files');
+        foreach ($all as $entry) {
+            if (!in_array($entry, $ignored, true)) {
+                $list[] = $entry;
+            }
+        }
 
         Log::debug('List of files:', $list);
 
-        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list','flow'));
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow'));
     }
 
     /**
@@ -91,34 +100,38 @@ class UploadController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $csvFile    = $request->file('csv_file');
         $configFile = $request->file('config_file');
+        $flow       = $request->cookie('flow');
         $errors     = new MessageBag;
 
-        if (null === $csvFile) {
+        if (null === $csvFile && 'csv' === $flow) {
             $errors->add('csv_file', 'No file was uploaded.');
 
-            return redirect(route('import.start'))->withErrors($errors);
+            return redirect(route('003-upload.index'))->withErrors($errors);
         }
-        $errorNumber = $csvFile->getError();
-        if (0 !== $errorNumber) {
-            $errors->add('csv_file', $this->getError($errorNumber));
-        }
-
-        // upload the file to a temp directory and use it from there.
-        if (0 === $errorNumber) {
-            $content = file_get_contents($csvFile->getPathname());
-
-            // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-            // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-            // This one is for you: 🤦‍♀️
-            $eol = $this->detectEOL($content);
-            if ("\r" === $eol) {
-                Log::error('You bank is dumb. Tell them to fix their CSV files.');
-                $content = str_replace("\r", "\n", $content);
+        if ('csv' === $flow) {
+            $errorNumber = $csvFile->getError();
+            if (0 !== $errorNumber) {
+                $errors->add('csv_file', $this->getError($errorNumber));
             }
 
-            $csvFileName = StorageService::storeContent($content);
-            session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
-            session()->put(Constants::HAS_UPLOAD, 'true');
+
+            // upload the file to a temp directory and use it from there.
+            if (0 === $errorNumber) {
+                $content = file_get_contents($csvFile->getPathname());
+
+                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                // This one is for you: 🤦‍♀️
+                $eol = $this->detectEOL($content);
+                if ("\r" === $eol) {
+                    Log::error('You bank is dumb. Tell them to fix their CSV files.');
+                    $content = str_replace("\r", "\n", $content);
+                }
+
+                $csvFileName = StorageService::storeContent($content);
+                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
+                session()->put(Constants::HAS_UPLOAD, 'true');
+            }
         }
 
         // if present, and no errors, upload the config file and store it in the session.
@@ -164,7 +177,7 @@ class UploadController extends Controller
         }
 
         if ($errors->count() > 0) {
-            return redirect(route('import.start'))->withErrors($errors);
+            return redirect(route('003-upload.index'))->withErrors($errors);
         }
 
         return redirect(route('004-configure.index'));

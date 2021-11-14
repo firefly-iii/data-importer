@@ -67,7 +67,7 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
-        $subTitle  = 'Configure your CSV file import';
+        $subTitle  = 'Configure your TODO file import';
         $accounts  = [];
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
@@ -112,6 +112,14 @@ class ConfigurationController extends Controller
         // created default configuration object for sensible defaults:
         if (null === $configuration) {
             $configuration = Configuration::make();
+        }
+
+        // also get the nordigen / spectre accounts
+        if('nordigen' === $flow) {
+            die('grab config for nordigen.');
+        }
+        if('spectre' === $flow) {
+            die('grab config for spectre.');
         }
 
         return view(

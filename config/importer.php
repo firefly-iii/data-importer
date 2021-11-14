@@ -33,6 +33,7 @@ return [
     'is_external'       => env('IS_EXTERNAL', false),
     'minimum_version'   => '5.6.0',
     'cache_api_calls'   => false,
+    'ignored_files' => ['.gitignore'],
     'tracker_site_id'   => env('TRACKER_SITE_ID', ''),
     'tracker_url'       => env('TRACKER_URL', ''),
     'vanity_url'        => envNonEmpty('VANITY_URL'),
