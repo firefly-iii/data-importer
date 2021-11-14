@@ -22,7 +22,63 @@
 
 namespace App\Services\Shared\Import\Routine;
 
+use App\Exceptions\ImporterErrorException;
+use App\Services\CSV\Configuration\Configuration;
+use Log;
+
+/**
+ * Class RoutineManager
+ */
 class RoutineManager
 {
+    private ApiSubmitter  $apiSubmitter;
+    private array         $transactions;
+    private string        $identifier;
+    private array         $allMessages;
+    private array         $allWarnings;
+    private array         $allErrors;
+
+    /**
+     * @param string $identifier
+     */
+    public function __construct(string $identifier)
+    {
+        $this->identifier   = $identifier;
+        $this->transactions = [];
+    }
+
+    /**
+     * @param array $transactions
+     */
+    public function setTransactions(array $transactions): void
+    {
+        $this->transactions = $transactions;
+        Log::debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
+    }
+
+    /**
+     * @param Configuration $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->apiSubmitter  = new APISubmitter;
+        $this->apiSubmitter->setIdentifier($this->identifier);
+        $this->apiSubmitter->setConfiguration($configuration);
+        Log::debug('Created APISubmitter in RoutineManager');
+    }
+
+    /**
+     *
+     * @throws ImporterErrorException
+     */
+    public function start(): void
+    {
+        Log::debug('Now starting submission by calling API Submitter');
+        // submit transactions to API:
+        $this->apiSubmitter->processTransactions($this->transactions);
+        $this->allMessages = $this->apiSubmitter->getMessages();
+        $this->allWarnings = $this->apiSubmitter->getWarnings();
+        $this->allErrors   = $this->apiSubmitter->getErrors();
+    }
 
 }

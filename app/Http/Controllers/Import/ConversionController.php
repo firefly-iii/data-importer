@@ -201,22 +201,6 @@ class ConversionController extends Controller
 
             // set config as complete.
             session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-
-//            // if configured, send report!
-//            // TODO make event handler.
-//            $log
-//                = [
-//                'messages' => $routine->getAllMessages(),
-//                'warnings' => $routine->getAllWarnings(),
-//                'errors'   => $routine->getAllErrors(),
-//            ];
-//
-//            $send = config('mail.enable_mail_report');
-//            Log::debug('Log log', $log);
-//            if (true === $send) {
-//                Log::debug('SEND MAIL');
-//                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//            }
         }
 
 

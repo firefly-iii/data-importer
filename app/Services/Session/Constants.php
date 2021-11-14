@@ -57,6 +57,7 @@ class Constants
     public const ROLES_COMPLETE_INDICATOR      = 'role_config_complete';
     public const MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
     public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
+    public const SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
 
     // constants for data conversion job:
     public const CONVERSION_JOB_IDENTIFIER = 'conversion_job_id';

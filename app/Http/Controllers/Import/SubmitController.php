@@ -27,16 +27,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ReadyForImport;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Session\Constants;
-use App\Services\Shared\Conversion\ConversionStatus;
-use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Storage\StorageService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
 use Log;
-
+use Storage;
 
 /**
  * Class SubmitController
@@ -115,6 +115,89 @@ class SubmitController extends Controller
             return response()->json($fakeStatus->toArray());
         }
         $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);
+
+        return response()->json($importJobStatus->toArray());
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws ImporterErrorException
+     */
+    public function start(Request $request): JsonResponse
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $identifier        = $request->get('identifier');
+        $configuration     = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
+        $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        $routine           = new RoutineManager($identifier);
+        $importJobStatus   = SubmissionStatusManager::startOrFindSubmission($identifier);
+        $disk              = Storage::disk(self::DISK_NAME);
+        $fileName          = sprintf('%s.json', $identifier);
+
+        if (null !== $configurationFile) {
+            $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
+            $configuration->setMapping($diskConfig->getMapping());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+            $configuration->setRoles($diskConfig->getRoles());
+        }
+
+        // get files from disk:
+        if (!$disk->has($fileName)) {
+            // TODO error in logs
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
+        }
+
+        try {
+            $json = $disk->get($fileName);
+            $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+            Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
+        } catch (FileNotFoundException|JsonException $e) {
+            // TODO error in logs
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
+        }
+
+        $routine->setTransactions($transactions);
+
+        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING);
+
+        // then push stuff into the routine:
+        $routine->setConfiguration($configuration);
+        try {
+            $routine->start();
+        } catch (ImporterErrorException $e) {
+            Log::error($e->getMessage());
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
+        }
+
+        // set done:
+        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE);
+
+        // set config as complete.
+        session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
+
+
+//            // if configured, send report!
+//            // TODO make event handler.
+//            $log
+//                = [
+//                'messages' => $routine->getAllMessages(),
+//                'warnings' => $routine->getAllWarnings(),
+//                'errors'   => $routine->getAllErrors(),
+//            ];
+//
+//            $send = config('mail.enable_mail_report');
+//            Log::debug('Log log', $log);
+//            if (true === $send) {
+//                Log::debug('SEND MAIL');
+//                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
+//            }
+
 
         return response()->json($importJobStatus->toArray());
     }

@@ -54,13 +54,13 @@
                 </div>
                 <div class="card-body" v-if="'submission_done' === this.status ">
                     <p>
-                        The TODO routine has finished 🎉. Done!
+                        The TODO routine has finished 🎉. Done!!
                     </p>
-                    <conversion-messages
+                    <submission-messages
                         :messages="this.messages"
                         :warnings="this.warnings"
                         :errors="this.errors"
-                    ></conversion-messages>
+                    ></submission-messages>
                 </div>
                 <div class="card-body" v-if="'submission_errored' === this.status">
                     <p class="text-danger">
@@ -116,6 +116,7 @@ export default {
                 this.errors = response.data.errors;
                 this.warnings = response.data.warnings;
                 this.messages = response.data.messages;
+                console.log(response.data);
                 console.log(`Job status returned is "${response.data.status}".`);
                 if (false === this.triedToStart && 'waiting_to_start' === response.data.status) {
                     // call to job start.
@@ -134,10 +135,6 @@ export default {
                 if ('submission_done' === response.data.status) {
                     console.log('Job is done!');
                     this.status = response.data.status;
-                    setTimeout(function () {
-                        console.log('Do redirect!')
-                        this.redirectToImport();
-                    }.bind(this), 3000);
                     return;
                 }
                 if ('submission_errored' === response.data.status) {
@@ -151,9 +148,6 @@ export default {
                     this.getJobStatus();
                 }.bind(this), 1000);
             });
-        },
-        redirectToImport: function() {
-            window.location = importStartUrl;
         },
         callStart: function () {
             console.log('Call job start URL: ' + jobStartUrl);
