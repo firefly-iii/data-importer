@@ -58,6 +58,10 @@ class Constants
     public const MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
     public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
     public const SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
+    public const SELECTED_BANK_COUNTRY         = 'selected_bank_country';
+
+    // nordigen specific constants
+    public const REQUISITION_REFERENCE = 'requisition_reference';
 
     // constants for data conversion job:
     public const CONVERSION_JOB_IDENTIFIER = 'conversion_job_id';

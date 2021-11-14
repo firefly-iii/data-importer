@@ -30,6 +30,7 @@ use UnexpectedValueException;
 
 /**
  * Class Configuration
+ * TODO move me to a shared directory
  */
 class Configuration
 {
@@ -46,6 +47,11 @@ class Configuration
     private int    $version;
     private array  $doMapping;
     private bool   $addImportTag;
+
+    // nordigen configuration
+    private string $nordigenCountry;
+    private string $nordigenBank;
+    private array  $nordigenRequisitions;
 
     // what type of import?
     private string $flow;
@@ -79,6 +85,11 @@ class Configuration
         $this->mapping        = [];
         $this->doMapping      = [];
         $this->flow           = 'csv';
+
+        // nordigen configuration
+        $this->nordigenCountry      = '';
+        $this->nordigenBank         = '';
+        $this->nordigenRequisitions = [];
 
         // double transaction detection:
         $this->duplicateDetectionMethod = 'classic';
@@ -124,6 +135,11 @@ class Configuration
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
+
+        // nordigen:
+        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
+        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -298,12 +314,12 @@ class Configuration
         $version                = $array['version'] ?? 1;
         $delimiters             = config('csv_importer.delimiters_reversed');
         $object                 = new self;
-        $object->headers        = $array['headers'];
-        $object->date           = $array['date'];
-        $object->defaultAccount = $array['default_account'];
-        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
-        $object->rules          = $array['rules'];
-        $object->skipForm       = $array['skip_form'];
+        $object->headers        = $array['headers'] ?? false;
+        $object->date           = $array['date'] ?? '';
+        $object->defaultAccount = $array['default_account'] ?? 0;
+        $object->delimiter      = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
+        $object->rules          = $array['rules'] ?? true;
+        $object->skipForm       = $array['skip_form'] ?? false;
         $object->addImportTag   = $array['add_import_tag'] ?? true;
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
@@ -311,12 +327,17 @@ class Configuration
         $object->version        = $version;
         $object->flow           = $array['flow'] ?? 'csv';
 
+        // nordigen information:
+        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
+        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
 
         // config for "classic":
-        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
-        $object->ignoreDuplicateTransactions = $array['ignore_duplicate_transactions'];
+        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
+        $object->ignoreDuplicateTransactions = $array['ignore_duplicate_transactions'] ?? true;
 
         if (!array_key_exists('duplicate_detection_method', $array)) {
             if (false === $object->ignoreDuplicateTransactions) {
@@ -429,6 +450,11 @@ class Configuration
             'unique_column_type'            => $this->uniqueColumnType,
             'version'                       => $this->version,
             'flow'                          => $this->flow,
+
+            // nordigen information:
+            'nordigen_country'              => $this->nordigenCountry,
+            'nordigen_bank'                 => $this->nordigenBank,
+            'nordigen_requisitions'         => $this->nordigenRequisitions,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -564,6 +590,55 @@ class Configuration
     public function setFlow(string $flow): void
     {
         $this->flow = $flow;
+    }
+
+    /**
+     * @param string $nordigenCountry
+     */
+    public function setNordigenCountry(string $nordigenCountry): void
+    {
+        $this->nordigenCountry = $nordigenCountry;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenBank(string $nordigenBank): void
+    {
+        $this->nordigenBank = $nordigenBank;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNordigenCountry(): string
+    {
+        return $this->nordigenCountry;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNordigenBank(): string
+    {
+        return $this->nordigenBank;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function addRequisition(string $key, string $identifier)
+    {
+        $this->nordigenRequisitions[$key] = $identifier;
+    }
+
+    /**
+     * @param string $key
+     * @return string|null
+     */
+    public function getRequisition(string $key): ?string
+    {
+        return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
     }
 
 

@@ -52,11 +52,11 @@ class AuthenticateController extends Controller
         }
 
         if ('spectre' === $flow) {
+            die('TODO');
             $subTitle  = 'Spectre';
             $validator = new SpectreValidator;
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
-
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
             }
@@ -71,8 +71,11 @@ class AuthenticateController extends Controller
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
 
+                $key = config('nordigen.key');
+                $identifier = config('nordigen.identifier');
+
                 // show for to enter data. save as cookie.
-                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
+                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle','key','identifier'));
             }
             if ($result->equals(AuthenticationStatus::authenticated())) {
                 return redirect(route('003-upload.index'));

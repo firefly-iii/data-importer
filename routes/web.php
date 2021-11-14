@@ -71,6 +71,14 @@ Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' =>
 Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
 Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
 
+// step 9: Nordigen select a country + bank
+Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => '009-selection.index']);
+Route::post('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => '009-selection.post']);
+
+// step 10: Get redirected to + callback from Nordigen for permission:
+Route::get('/import/link/build', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => '010-build-link.index']);
+Route::get('/import/link/callback', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => '010-build-link.callback']);
+
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');
 Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');

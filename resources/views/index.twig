@@ -186,11 +186,10 @@
                 $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
             }
             if ('NODATA' === data.result) {
-                $('#nordigen_result').text('If you want to use the Nordigen API, it must be configured in the next step before it can be used.');
                 $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
             }
         }).fail(function () {
-            $('#nordigen_result').text('The Nordigen API is configured incorrectly and cannot be used to import data.');
+            $('#nordigen_result').show().text('The Nordigen API is configured incorrectly and cannot be used to import data.');
             $('#nordigen_button').hide();
         });
 

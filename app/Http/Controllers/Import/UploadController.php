@@ -180,6 +180,14 @@ class UploadController extends Controller
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
 
+        if ('nordigen' === $flow) {
+            // redirect to country + bank selector
+            return redirect(route('009-selection.index'));
+        }
+        if ('spectre' === $flow) {
+            die('Spectre redirect flow after config upload');
+        }
+
         return redirect(route('004-configure.index'));
     }
 
