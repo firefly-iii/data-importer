@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Storage;
 
+use App\Exceptions\ImporterErrorException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
 use Log;
@@ -45,6 +46,9 @@ class StorageService
     {
         $fileName = hash('sha256', $content);
         $disk     = Storage::disk('uploads');
+        if('{}' === $content) {
+            throw new ImporterErrorException('Content is {}');
+        }
 
         if($disk->has($fileName)) {
             Log::warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));

@@ -99,6 +99,7 @@ class ImportRoutineManager
     {
         Log::debug('Going to generate identifier.');
         $disk  = Storage::disk('jobs');
+        throw new ImporterErrorException(__METHOD__);
         $count = 0;
         do {
             $generatedId = Str::random(16);

@@ -27,12 +27,9 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ReadyForImport;
-use App\Mail\ImportFinished;
+use App\Http\Middleware\ReadyForConversion;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
-use App\Services\Import\ImportJobStatus\ImportJobStatus;
-use App\Services\Import\ImportJobStatus\ImportJobStatusManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -42,13 +39,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
 use Log;
-use Mail;
+use Storage;
 
 /**
  * Class ConversionController
  */
 class ConversionController extends Controller
 {
+    protected const DISK_NAME = 'jobs';
 
     /**
      * StartController constructor.
@@ -57,7 +55,7 @@ class ConversionController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ReadyForImport::class);
+        $this->middleware(ReadyForConversion::class);
     }
 
     /**
@@ -66,7 +64,7 @@ class ConversionController extends Controller
     public function index()
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $mainTitle = 'Import the data';
+        $mainTitle = 'Convert the data';
 
         // get configuration object.
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
@@ -128,6 +126,7 @@ class ConversionController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws ImporterErrorException
      */
     public function start(Request $request): JsonResponse
     {
@@ -170,35 +169,54 @@ class ConversionController extends Controller
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
-        //$routine->setReader(FileReader::getReaderFromSession());
-        $result = false;
+        $result       = false;
+        $transactions = [];
         try {
-            $routine->start();
-            $result = true;
+            $transactions = $routine->start();
+            $result       = true;
         } catch (ImporterErrorException $e) {
+            Log::error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
         }
-        die('here we are');
+        if (0 === count($transactions)) {
+            Log::error('Zero transactions!');
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
+
+        }
+        // save transactions in 'jobs' directory under the same key as the conversion thing.
+        $disk = Storage::disk(self::DISK_NAME);
+        try {
+            $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        } catch (JsonException $e) {
+            Log::error(sprintf('JSON exception: %s', $e->getMessage()));
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+            return response()->json($importJobStatus->toArray());
+        }
 
         if (true === $result) {
             // set done:
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
-            // if configured, send report!
-            // TODO make event handler.
-            $log
-                = [
-                'messages' => $routine->getAllMessages(),
-                'warnings' => $routine->getAllWarnings(),
-                'errors'   => $routine->getAllErrors(),
-            ];
+            // set config as complete.
+            session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
 
-            $send = config('mail.enable_mail_report');
-            Log::debug('Log log', $log);
-            if (true === $send) {
-                Log::debug('SEND MAIL');
-                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-            }
+//            // if configured, send report!
+//            // TODO make event handler.
+//            $log
+//                = [
+//                'messages' => $routine->getAllMessages(),
+//                'warnings' => $routine->getAllWarnings(),
+//                'errors'   => $routine->getAllErrors(),
+//            ];
+//
+//            $send = config('mail.enable_mail_report');
+//            Log::debug('Log log', $log);
+//            if (true === $send) {
+//                Log::debug('SEND MAIL');
+//                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
+//            }
         }
 
 
@@ -220,11 +238,11 @@ class ConversionController extends Controller
             Log::warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
-            $fakeStatus = new ImportJobStatus;
+            $fakeStatus = new ConversionStatus;
 
             return response()->json($fakeStatus->toArray());
         }
-        $importJobStatus = ImportJobStatusManager::startOrFindJob($identifier);
+        $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
 
         return response()->json($importJobStatus->toArray());
     }

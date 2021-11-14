@@ -41,4 +41,5 @@ mix.webpackConfig({
                       }
                   });
 
-mix.js('resources/js/app.js', 'public/js').vue({ version: 2 });
+mix.js('resources/js/submit.js', 'public/js').vue({ version: 2 });
+mix.js('resources/js/convert.js', 'public/js').vue({ version: 2 });

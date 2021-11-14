@@ -23,10 +23,10 @@
     <div class="row mt-3">
         <div class="col-lg-10 offset-lg-1">
             <div class="card">
-                <div class="card-header">Data conversion</div>
+                <div class="card-header">Data submission</div>
                 <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
                     <p>
-                        TODO Your CSV file will be converted so it can be imported. Press "start job" to start.
+                        TODO Your content will be submitted. Press "start job" to start.
                     </p>
                     <p>
                         <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job
@@ -37,24 +37,24 @@
                 <div class="card-body" v-if="'waiting_to_start' === this.status && true === this.triedToStart">
                     <p>Waiting for the job to start..</p>
                 </div>
-                <div class="card-body" v-if="'conv_running' === this.status">
+                <div class="card-body" v-if="'submission_running' === this.status">
                     <p>
-                        Conversion is running, please wait.
+                        Submission is running, please wait.
                     </p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                              aria-valuenow="100" aria-valuemin="0"
                              aria-valuemax="100" style="width: 100%"></div>
                     </div>
-                    <conversion-messages
+                    <submission-messages
                         :messages="this.messages"
                         :warnings="this.warnings"
                         :errors="this.errors"
-                    ></conversion-messages>
+                    ></submission-messages>
                 </div>
-                <div class="card-body" v-if="'conv_done' === this.status ">
+                <div class="card-body" v-if="'submission_done' === this.status ">
                     <p>
-                        The TODO routine has finished 🎉. TODO Next step: importing. Please wait to be redirected! <span class="fas fa-sync fa-spin"></span>
+                        The TODO routine has finished 🎉. Done!
                     </p>
                     <conversion-messages
                         :messages="this.messages"
@@ -62,16 +62,16 @@
                         :errors="this.errors"
                     ></conversion-messages>
                 </div>
-                <div class="card-body" v-if="'conv_errored' === this.status">
+                <div class="card-body" v-if="'submission_errored' === this.status">
                     <p class="text-danger">
-                        The conversion could not be started, or failed due to an error. Please check the log files. Sorry about
+                        The submission could not be started, or failed due to an error. Please check the log files. Sorry about
                         this :(. TODO
                     </p>
-                    <conversion-messages
+                    <submission-messages
                         :messages="this.messages"
                         :warnings="this.warnings"
                         :errors="this.errors"
-                    ></conversion-messages>
+                    ></submission-messages>
                 </div>
             </div>
         </div>
@@ -80,7 +80,7 @@
 
 <script>
 export default {
-    name: "ConversionStatus",
+    name: "SubmissionStatus",
     /*
 * The component's data.
 */
@@ -107,7 +107,7 @@ export default {
             axios.get(jobStatusUrl).then((response) => {
 
                 // first try post result:
-                if (true === this.triedToStart && 'conv_errored' === this.status) {
+                if (true === this.triedToStart && 'submission_errored' === this.status) {
                     console.error('Job failed!!!');
                     return;
                 }
@@ -116,7 +116,7 @@ export default {
                 this.errors = response.data.errors;
                 this.warnings = response.data.warnings;
                 this.messages = response.data.messages;
-                console.log(`Job status is ${this.status}.`);
+                console.log(`Job status returned is "${response.data.status}".`);
                 if (false === this.triedToStart && 'waiting_to_start' === response.data.status) {
                     // call to job start.
                     console.log('Job hasn\'t started yet. Show user some info');
@@ -126,12 +126,12 @@ export default {
                 if (true === this.triedToStart && 'waiting_to_start' === response.data.status) {
                     console.log('Job hasn\'t started yet, but its been tried.');
                 }
-                if (true === this.triedToStart && 'conv_errored' === response.data.status) {
+                if (true === this.triedToStart && 'submission_errored' === response.data.status) {
                     console.error('Job failed');
                     this.status = response.data.status;
                     return;
                 }
-                if ('conv_done' === response.data.status) {
+                if ('submission_done' === response.data.status) {
                     console.log('Job is done!');
                     this.status = response.data.status;
                     setTimeout(function () {
@@ -140,7 +140,7 @@ export default {
                     }.bind(this), 3000);
                     return;
                 }
-                if ('conv_errored' === response.data.status) {
+                if ('submission_errored' === response.data.status) {
                     console.error('Job is kill.');
                     console.error(response.data);
                     return;
@@ -163,7 +163,7 @@ export default {
             }).catch((error) => {
                 console.error('JOB HAS FAILED :(');
                 this.triedToStart = true;
-                this.status = 'conv_errored';
+                this.status = 'submission_errored';
             });
             this.getJobStatus();
             this.triedToStart = true;

@@ -28,7 +28,8 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
-import ConversionStatus from "./components/import/ConversionStatus";
+import SubmissionMessages from "./components/submit/SubmissionMessages";
+import SubmissionStatus from "./components/submit/SubmissionStatus";
 
 /**
  * The following block of code may be used to automatically register your
@@ -41,8 +42,8 @@ import ConversionStatus from "./components/import/ConversionStatus";
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('conversion-messages', require('./components/import/ConversionMessages.vue').default);
-Vue.component('conversion-status', ConversionStatus);
+Vue.component('submission-messages', SubmissionMessages);
+Vue.component('submission-status', SubmissionStatus);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -51,8 +52,8 @@ Vue.component('conversion-status', ConversionStatus);
  */
 let props = {};
 new Vue({
-            el: "#app",
-            render: (createElement) => {
-                return createElement(ConversionStatus, { props: props })
-            },
-        });
+    el: "#app",
+    render: (createElement) => {
+        return createElement(SubmissionStatus, { props: props })
+    },
+});

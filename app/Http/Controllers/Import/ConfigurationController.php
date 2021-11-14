@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigComplete;
 use App\Http\Request\ConfigurationPostRequest;
@@ -139,6 +140,7 @@ class ConfigurationController extends Controller
      * @param ConfigurationPostRequest $request
      *
      * @return RedirectResponse
+     * @throws ImporterErrorException
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
@@ -148,11 +150,12 @@ class ConfigurationController extends Controller
         $configuration = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie('flow'));
 
-        $json = '[]';
+        $json = '{}';
         try {
-            $json = json_encode($configuration, JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         StorageService::storeContent($json);
 

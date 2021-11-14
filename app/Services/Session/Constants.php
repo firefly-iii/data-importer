@@ -52,13 +52,15 @@ class Constants
     public const CONFIGURATION = 'configuration';
 
     // if the user is done with specific steps:
-    public const HAS_UPLOAD                 = 'has_uploaded_file';
-    public const CONFIG_COMPLETE_INDICATOR  = 'config_complete';
-    public const ROLES_COMPLETE_INDICATOR   = 'role_config_complete';
-    public const MAPPING_COMPLETE_INDICATOR = 'mapping_config_complete';
+    public const HAS_UPLOAD                    = 'has_uploaded_file';
+    public const CONFIG_COMPLETE_INDICATOR     = 'config_complete';
+    public const ROLES_COMPLETE_INDICATOR      = 'role_config_complete';
+    public const MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
+    public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
 
     // constants for data conversion job:
     public const CONVERSION_JOB_IDENTIFIER = 'conversion_job_id';
+    public const IMPORT_JOB_IDENTIFIER     = 'import_job_id';
 
 
     //    /** @var string */

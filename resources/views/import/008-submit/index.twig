@@ -12,7 +12,7 @@
             </div>
         </div>
         <div id="app">
-            <conversion-status></conversion-status>
+            <submission-status></submission-status>
         </div>
 
         <div class="row mt-3">
@@ -23,7 +23,7 @@
                             <a href="{{ jobBackUrl }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span>
                                 Go back to the previous step</a>
                             <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
-                               data-bs-placement="top" title="If the conversion seems stuck, you can reset it."><span
+                               data-bs-placement="top" title="If the importer seems stuck, you can reset it."><span
                                     class="fas fa-redo-alt"></span> Start over</a>
                             <a class="btn btn-info text-white btn-sm" href="{{ route('004-configure.download') }}"
                                data-bs-toggle="tooltip" data-bs-placement="top"
@@ -46,12 +46,11 @@
                     return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
 
-                var importStartUrl = '{{ route('008-submit.index') }}';
-                var jobStatusUrl = '{{ route('007-convert.status') }}?identifier={{ identifier }}';
-                var jobStartUrl = '{{ route('007-convert.start') }}?identifier={{ identifier }}';
+                var jobStatusUrl = '{{ route('008-submit.status') }}?identifier={{ identifier }}';
+                var jobStartUrl = '{{ route('008-submit.start') }}?identifier={{ identifier }}';
                 var jobBackUrl = '{{ jobBackUrl }}';
                 var configDownloadUrl = '{{ route('004-configure.download') }}?identifier={{ identifier }}';
                 var flushUrl = '{{ route('flush') }}';
             </script>
-            <script src="{{ asset('js/convert.js') }}?version={{ version }}"></script>
+            <script src="{{ asset('js/submit.js') }}?version={{ version }}"></script>
         {% endblock %}

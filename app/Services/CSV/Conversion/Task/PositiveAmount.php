@@ -1,6 +1,6 @@
 <?php
 /*
- * ReadyForImport.php
+ * PositiveAmount.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -22,36 +22,46 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Middleware;
 
-use App\Exceptions\ImporterErrorException;
-use App\Services\Session\Constants;
-use Closure;
-use Illuminate\Http\Request;
+namespace App\Services\CSV\Conversion\Task;
+
+use App\Services\CSV\Converter\Amount as AmountConverter;
+
 
 /**
- * Class ReadyForImport
+ * Class PositiveAmount
  */
-class ReadyForImport
+class PositiveAmount extends AbstractTask
 {
 
-
     /**
-     * Check if the user has already set the mapping in this session. If so, continue to configuration.
+     * Make sure amount is always positive when submitting.
      *
-     * @param Request $request
-     * @param Closure $next
-     *
-     * @return mixed
-     *
-     * @throws ImporterErrorException
+     * @inheritDoc
      */
-    public function handle(Request $request, Closure $next): mixed
+    public function process(array $group): array
     {
-        if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-            return $next($request);
+        foreach ($group['transactions'] as $index => $transaction) {
+            $group['transactions'][$index]['amount'] = $group['transactions'][$index]['amount'] ?? '0';
+            $group['transactions'][$index]['amount'] = AmountConverter::positive($group['transactions'][$index]['amount']);
         }
 
-        throw new ImporterErrorException('Import is not yet ready.');
+        return $group;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
     }
 }

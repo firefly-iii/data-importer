@@ -1,6 +1,6 @@
 <?php
 /*
- * RoutineManagerInterface.php
+ * AbstractTask.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,28 +20,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Services\Shared\Conversion;
+declare(strict_types=1);
 
-use App\Services\CSV\Configuration\Configuration;
+namespace App\Services\CSV\Conversion\Task;
+
+use GrumpyDictator\FFIIIApiSupport\Model\Account;
+use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 
 /**
- * Interface RoutineManagerInterface
+ * Class AbstractTask
  */
-interface RoutineManagerInterface
+abstract class AbstractTask implements TaskInterface
 {
-    /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void;
+    protected Account             $account;
+    protected TransactionCurrency $transactionCurrency;
 
     /**
-     *
+     * @param Account $account
      */
-    public function start(): array;
+    public function setAccount(Account $account): void
+    {
+        $this->account = $account;
+    }
 
     /**
-     * @return string
+     * @param TransactionCurrency $transactionCurrency
      */
-    public function getIdentifier(): string;
+    public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void
+    {
+        $this->transactionCurrency = $transactionCurrency;
+    }
+
 
 }

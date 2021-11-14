@@ -66,6 +66,10 @@ Route::get('/import/convert', ['uses' => 'Import\ConversionController@index', 'a
 Route::any('/import/convert/start', ['uses' => 'Import\ConversionController@start', 'as' => '007-convert.start']);
 Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);
 
+// step 8: submit JSON to Firefly III
+Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' => '008-submit.index']);
+Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
+Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
 
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');
@@ -73,6 +77,7 @@ Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
 Route::get('/back/config', 'NavController@toConfig')->name('back.config');
 Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
 Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
+Route::get('/back/conversion', 'NavController@toConversion')->name('back.conversion');
 
 //
 //// import by POST

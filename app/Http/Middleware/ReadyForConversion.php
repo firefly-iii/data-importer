@@ -1,6 +1,6 @@
 <?php
 /*
- * RoutineManagerInterface.php
+ * ReadyForImport.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,28 +20,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Services\Shared\Conversion;
+declare(strict_types=1);
 
-use App\Services\CSV\Configuration\Configuration;
+namespace App\Http\Middleware;
+
+use App\Exceptions\ImporterErrorException;
+use App\Services\Session\Constants;
+use Closure;
+use Illuminate\Http\Request;
 
 /**
- * Interface RoutineManagerInterface
+ * Class ReadyForConversion
  */
-interface RoutineManagerInterface
+class ReadyForConversion
 {
     /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void;
-
-    /**
+     * Check if the user has already set the mapping in this session. If so, continue to configuration.
      *
+     * @param Request $request
+     * @param Closure $next
+     *
+     * @return mixed
+     *
+     * @throws ImporterErrorException
      */
-    public function start(): array;
+    public function handle(Request $request, Closure $next): mixed
+    {
+        if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+            return $next($request);
+        }
 
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string;
-
+        throw new ImporterErrorException('Conversion is not yet ready.');
+    }
 }

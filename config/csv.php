@@ -22,20 +22,13 @@
 
 declare(strict_types=1);
 
-use App\Services\CSV\Specifics\AbnAmroDescription;
-use App\Services\CSV\Specifics\AppendHash;
-use App\Services\CSV\Specifics\Belfius;
-use App\Services\CSV\Specifics\IngBelgium;
-use App\Services\CSV\Specifics\IngDescription;
-use App\Services\CSV\Specifics\PresidentsChoice;
-use App\Services\CSV\Specifics\SnsDescription;
-use App\Services\Import\Task\Accounts;
-use App\Services\Import\Task\Amount;
-use App\Services\Import\Task\Currency;
-use App\Services\Import\Task\EmptyAccounts;
-use App\Services\Import\Task\EmptyDescription;
-use App\Services\Import\Task\PositiveAmount;
-use App\Services\Import\Task\Tags;
+use App\Services\CSV\Conversion\Task\Accounts;
+use App\Services\CSV\Conversion\Task\Amount;
+use App\Services\CSV\Conversion\Task\Currency;
+use App\Services\CSV\Conversion\Task\EmptyAccounts;
+use App\Services\CSV\Conversion\Task\EmptyDescription;
+use App\Services\CSV\Conversion\Task\PositiveAmount;
+use App\Services\CSV\Conversion\Task\Tags;
 
 
 return [
@@ -74,15 +67,6 @@ return [
         'date-process'       => 'date_process',
         'date-due'           => 'date_due',
         'date-transaction'   => 'date_transaction',
-    ],
-    'specifics'             => [
-        AbnAmroDescription::class,
-        AppendHash::class,
-        Belfius::class,
-        IngBelgium::class,
-        IngDescription::class,
-        PresidentsChoice::class,
-        SnsDescription::class,
     ],
     'transaction_tasks'     => [
         Amount::class,

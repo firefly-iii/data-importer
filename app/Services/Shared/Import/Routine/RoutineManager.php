@@ -1,6 +1,6 @@
 <?php
 /*
- * RoutineManagerInterface.php
+ * RoutineManager.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,28 +20,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Services\Shared\Conversion;
+namespace App\Services\Shared\Import\Routine;
 
-use App\Services\CSV\Configuration\Configuration;
-
-/**
- * Interface RoutineManagerInterface
- */
-interface RoutineManagerInterface
+class RoutineManager
 {
-    /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void;
-
-    /**
-     *
-     */
-    public function start(): array;
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string;
 
 }
