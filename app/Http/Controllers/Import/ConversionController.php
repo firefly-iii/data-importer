@@ -30,6 +30,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ReadyForConversion;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
+use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -70,9 +71,9 @@ class ConversionController extends Controller
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
 
         // append info from the file on disk:
-        $configFileName = Constants::UPLOAD_CONFIG_FILE;
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
         if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent(session()->get($configFileName)), true, JSON_THROW_ON_ERROR);
+            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
             $diskConfig = Configuration::fromArray($diskArray);
             $configuration->setDoMapping($diskConfig->getDoMapping());
             $configuration->setMapping($diskConfig->getMapping());
@@ -90,6 +91,9 @@ class ConversionController extends Controller
             Log::debug('NO mapping in file, will send you back to mapping..');
             $jobBackUrl = route('back.mapping');
         }
+        if (true === $configuration->isMapAllData()) {
+            $jobBackUrl = route('back.mapping');
+        }
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -101,10 +105,10 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('csv' === $flow) {
-            $routine = new CSVRoutineManager(null);
+            $routine = new CSVRoutineManager($identifier);
         }
         if ('nordigen' === $flow) {
-            throw new ImporterErrorException('Cannot handle. :(');
+            $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
             throw new ImporterErrorException('Cannot handle. :(');
@@ -157,7 +161,7 @@ class ConversionController extends Controller
             $routine = new CSVRoutineManager($identifier);
         }
         if ('nordigen' === $flow) {
-            throw new ImporterErrorException('Cannot handle. :(');
+            $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
             throw new ImporterErrorException('Cannot handle. :(');

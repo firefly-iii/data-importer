@@ -26,14 +26,21 @@ namespace App\Http\Controllers\Import;
 
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigComplete;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
+use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\Nordigen\Request\ListAccountsRequest;
+use App\Services\Nordigen\Response\ListAccountsResponse;
+use App\Services\Nordigen\Services\AccountInformationCollector;
+use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use App\Support\Token;
+use Cache;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -62,6 +69,7 @@ class ConfigurationController extends Controller
 
     /**
      * @return Factory|RedirectResponse|View
+     * @throws ImporterErrorException
      */
     public function index(Request $request)
     {
@@ -115,16 +123,20 @@ class ConfigurationController extends Controller
         }
 
         // also get the nordigen / spectre accounts
-        if('nordigen' === $flow) {
-            die('grab config for nordigen.');
+        $nordigenAccounts = [];
+        if ('nordigen' === $flow) {
+            // list all accounts in Nordigen:
+            $reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
+            $nordigenAccounts = $this->getNordigenAccounts($reference);
+            $nordigenAccounts = $this->mergeAccountLists($nordigenAccounts, $accounts);
         }
-        if('spectre' === $flow) {
+        if ('spectre' === $flow) {
             die('grab config for spectre.');
         }
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow')
+            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'nordigenAccounts')
         );
     }
 
@@ -158,6 +170,18 @@ class ConfigurationController extends Controller
         $configuration = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie('flow'));
 
+        // TODO are all fields actually in the config?
+        // loop accounts:
+        $accounts = [];
+        foreach (array_keys($fromRequest['do_import']) as $identifier) {
+            if (isset($fromRequest['accounts'][$identifier])) {
+                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
+            }
+        }
+        $configuration->setAccounts($accounts);
+        $configuration->updateDateRange();
+
+
         $json = '{}';
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
@@ -173,7 +197,152 @@ class ConfigurationController extends Controller
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
 
         // redirect to import things?
-        return redirect()->route('005-roles.index');
+        if ('csv' === $configuration->getFlow()) {
+            return redirect(route('005-roles.index'));
+        }
+        if ('nordigen' === $configuration->getFlow()) {
+            // redirect to convert routine:
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            return redirect(route('007-convert.index'));
+        }
+        die('cannot handle.');
     }
+
+    /**
+     * List Nordigen accounts with account details, balances, and 2 transactions (if present)
+     * @return array
+     * @throws ImporterErrorException
+     */
+    private function getNordigenAccounts(string $identifier): array
+    {
+        if (Cache::has($identifier)) {
+            $result = Cache::get($identifier);
+            $return = [];
+            foreach ($result as $arr) {
+                $return[] = NordigenAccount::fromLocalArray($arr);
+            }
+            Log::debug('Grab accounts from cache', $result);
+            return $return;
+        }
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        // get banks and countries
+        $accessToken = TokenManager::getAccessToken();
+        $url         = config('nordigen.url');
+        $request     = new ListAccountsRequest($url, $identifier, $accessToken);
+        /** @var ListAccountsResponse $response */
+        try {
+            $response = $request->get();
+        } catch (ImporterErrorException $e) {
+        } catch (ImporterHttpException $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+        $total  = count($response);
+        $return = [];
+        $cache  = [];
+        Log::debug(sprintf('Found %d accounts.', $total));
+
+        /** @var Account $account */
+        foreach ($response as $index => $account) {
+            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()));
+            $account  = AccountInformationCollector::collectInformation($account);
+            $return[] = $account;
+            $cache[]  = $account->toLocalArray();
+        }
+        Cache::put($identifier, $cache, 1800); // half an hour
+        return $return;
+    }
+
+    /**
+     * @param array $nordigen
+     * @param array $firefly
+     * @return array
+     *
+     * TODO move to some helper.
+     */
+    private function mergeAccountLists(array $nordigen, array $firefly): array
+    {
+        Log::debug('Now creating account lists.');
+        $return = [];
+        /** @var NordigenAccount $nordigenAccount */
+        foreach ($nordigen as $nordigenAccount) {
+            Log::debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
+            $iban     = $nordigenAccount->getIban();
+            $currency = $nordigenAccount->getCurrency();
+            $entry    = [
+                'nordigen' => $nordigenAccount,
+                'firefly'  => [],
+            ];
+
+            // only iban?
+            $filteredByIban = $this->filterByIban($firefly, $iban);
+
+            if (1 === count($filteredByIban)) {
+                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                $entry['firefly'] = $filteredByIban;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+
+            // only currency?
+            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
+
+            if (count($filteredByCurrency) > 0) {
+                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                $entry['firefly'] = $filteredByCurrency;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug('No special filtering on the Firefly III account list.');
+            $entry['firefly'] = $firefly;
+            $return[]         = $entry;
+        }
+        return $return;
+    }
+
+    /**
+     * TODO move to some helper.
+     *
+     * @param array  $firefly
+     * @param string $iban
+     * @return array
+     */
+    private function filterByIban(array $firefly, string $iban): array
+    {
+        if ('' === $iban) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($iban === $account->iban) {
+                $result[] = $account;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param array  $firefly
+     * @param string $currency
+     * @return array
+     */
+    private function filterByCurrency(array $firefly, string $currency): array
+    {
+        if ('' === $currency) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($currency === $account->currencyCode) {
+                $result[] = $account;
+            }
+        }
+        return $result;
+    }
+
 
 }

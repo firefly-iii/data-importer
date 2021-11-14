@@ -31,6 +31,16 @@
                                     page.</a>
                             </p>
                         {% endif %}
+                        {% if 'nordigen' == flow %}
+                            <p>
+                                TODO nordigen
+                            </p>
+                        {% endif %}
+                        {% if 'spectre' == flow %}
+                            <p>
+                                TODO spectre
+                            </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -56,6 +66,7 @@
         {% endif %}
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="flow" value="{{ flow }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -63,6 +74,72 @@
                             Form
                         </div>
                         <div class="card-body">
+                            {% if 'nordigen' == flow %}
+                                <h4>Nordigen import options</h4>
+                                <div class="form-group row">
+                                    <div class="col-sm-3">Accounts</div>
+                                    <div class="col-sm-9">
+                                        <table class="table table-sm table-bordered table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>Nordigen</th>
+                                                <th>&nbsp;</th>
+                                                <th>Firefly III</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for information in nordigenAccounts %}
+                                                <tr>
+                                                    <td>
+                                                        <input
+                                                            id="do_import_{{ information.nordigen.identifier }}"
+                                                            type="checkbox"
+                                                            name="do_import[{{ information.nordigen.identifier }}]"
+                                                            value="1"
+                                                            aria-describedby="accountsHelp"
+                                                            {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+                                                        /> <label class="form-check-label"
+                                                                  {% if '' != information.nordigen.iban %}title="IBAN: {{ information.nordigen.iban }}"{% endif %}
+                                                                  for="do_import_{{ information.nordigen.identifier }}">
+                                                            Account "{{ information.nordigen.getFullName }}"
+                                                        </label>
+                                                        {% if '' != information.nordigen.iban %}<br><small>IBAN: {{ information.nordigen.iban }}</small>{% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if(information.firefly|length!=0) %}&rarr;{% endif %}
+                                                    </td>
+                                                    <td>
+
+                                                        {% if(information.firefly|length==0) %}
+                                                            <span class="text-danger">Cannot be imported</span>
+                                                        {% endif %}
+                                                        {% if(information.firefly|length>0) %}
+                                                            <select style="width:100%;"
+                                                                    class="custom-select custom-select-sm form-control"
+                                                                    name="accounts[{{ information.nordigen.identifier }}]">
+                                                                {% for ff3Account in information.firefly %}
+                                                                    {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
+                                                                    <option value="{{ ff3Account.id }}"
+                                                                            label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+                                                                        {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <small id="accountsHelp" class="form-text text-muted">
+                                            Select the accounts you want to import into your Firefly III installation.
+                                        </small>
+                                    </div>
+                                </div>
+
+                            {% endif %}
+
+
                             {% if 'csv' == flow %}
                                 <h5>File options</h5>
                                 <div class="form-group row mb-3">
@@ -206,11 +283,119 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {% if 'nordigen' == flow or 'spectre' == flow %}
+
+                                <div class="form-group row mb-3">
+                                    <div class="col-sm-3">Map data</div>
+                                    <div class="col-sm-9">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   {% if configuration.isMapAllData %}checked{% endif %} type="checkbox"
+                                                   id="map_all_data"
+                                                   name="map_all_data" value="1" aria-describedby="mapAllDataHelp">
+                                            <label class="form-check-label" for="map_all_data">
+                                                Yes
+                                            </label>
+                                            <small id="mapAllDataHelp" class="form-text text-muted">
+                                                <br>You get the opportunity to link your TODO data to existing Firefly III
+                                                data, for a cleaner import.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mb-3">
+                                    <label for="default_account" class="col-sm-3 col-form-label">Date range</label>
+                                    <div class="col-sm-9">
+                                        <div class="form-check">
+                                            <input class="form-check-input date-range-radio" id="date_range_all"
+                                                   type="radio" name="date_range" value="all"
+                                                   {% if configuration.getDateRange == 'all' %}checked{% endif %}
+                                                   aria-describedby="rangeHelp"/>
+                                            <label class="form-check-label" for="date_range_all">Import everything</label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input date-range-radio" id="date_range_partial"
+                                                   type="radio" name="date_range"
+                                                   value="partial"
+                                                   {% if configuration.getDateRange == 'partial' %}checked{% endif %}
+                                                   aria-describedby="rangeHelp"/>
+                                            <label class="form-check-label" for="date_range_partial">Go back some
+                                                time</label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input date-range-radio" id="date_range_range"
+                                                   type="radio" name="date_range" value="range"
+                                                   {% if configuration.getDateRange == 'range' %}checked{% endif %}
+                                                   aria-describedby="rangeHelp"/>
+                                            <label class="form-check-label" for="date_range_range">Import a specific
+                                                range</label>
+                                            <small id="rangeHelp" class="form-text text-muted">
+                                                <br>What range to grab from your bank through Nordigen?
+                                            </small>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mb-3" id="date_range_partial_settings">
+                                    <div class="col-sm-3">
+                                        Date range settings
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input
+                                            name="date_range_number"
+                                            id="date_range_number"
+                                            class="form-control" value="{{ configuration.getDateRangeNumber }}"
+                                            type="number" step="1" min="1" max="365">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <select class="form-control"
+                                                name="date_range_unit"
+                                                id="date_range_unit">
+                                            <option {% if 'd' == configuration.getDateRangeUnit %}selected{% endif %}
+                                                    value="d" label="days">days
+                                            </option>
+                                            <option {% if 'w' == configuration.getDateRangeUnit %}selected{% endif %}
+                                                    value="w" label="weeks">weeks
+                                            </option>
+                                            <option {% if 'm' == configuration.getDateRangeUnit %}selected{% endif %}
+                                                    value="m" label="months">months
+                                            </option>
+                                            <option {% if 'y' == configuration.getDateRangeUnit %}selected{% endif %}
+                                                    value="y" label="years">years
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mb-3" id="date_range_range_settings">
+                                    <div class="col-sm-3">
+                                        Date range settings
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="date" name="date_not_before" class="form-control"
+                                               value="{{ configuration.getDateNotBefore }}">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <input type="date" name="date_not_after" class="form-control"
+                                               value="{{ configuration.getDateNotAfter }}">
+                                    </div>
+                                </div>
+
+                            {% endif %}
+
+
+
                             <h4>Duplicate transaction detection</h4>
                             <div class="col-sm-9 offset-sm-3">
                                 <p class="text-muted">
                                     Firefly III can automatically detect duplicate transactions. This is pretty
-                                    foolproof.
+                                    foolproof. TODO
                                     In some special cases however,
                                     you want more control over this process. Read more about the options below in <a
                                         href="https://docs.firefly-iii.org/csv/usage/configure/" target="_blank">the
@@ -232,7 +417,7 @@
                                         <br>
                                         <small class="form-text text-muted" id="duplicateHelp">
                                             Whatever method you choose ahead, it's smart to make the importer ignore any
-                                            duplicated lines in your CSV file.
+                                            duplicated lines in your CSV file. TODO
                                         </small>
                                     </div>
 
@@ -365,6 +550,12 @@
             updateDateExample();
             linkToTriggers();
             triggerDetectionMethod();
+
+            // date range
+            $('#date_range_partial_settings').hide();
+            $('#date_range_range_settings').hide();
+            $('.date-range-radio').on('change', updateRange);
+            updateRange();
         });
 
         function linkToTriggers() {
@@ -388,6 +579,23 @@
                 $('#unique_column_type_holder').show();
             }
         }
+
+        function updateRange() {
+            var check = $('input[name="date_range"]:checked');
+            if ('partial' === check.val()) {
+                $('#date_range_partial_settings').show();
+                $('#date_range_range_settings').hide();
+            }
+
+            if ('range' === check.val()) {
+                $('#date_range_partial_settings').hide();
+                $('#date_range_range_settings').show();
+            }
+            if ('all' === check.val()) {
+                $('#date_range_partial_settings').hide();
+                $('#date_range_range_settings').hide();
+            }
+        }``
 
         function updateDateExample() {
             $('#date_example').text('...');

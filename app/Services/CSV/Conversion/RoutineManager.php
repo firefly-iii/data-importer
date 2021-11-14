@@ -30,6 +30,7 @@ use App\Services\CSV\Conversion\Routine\LineProcessor;
 use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
 use App\Services\Shared\Authentication\IsRunningCli;
+use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Log;
@@ -41,12 +42,9 @@ use Str;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use IsRunningCli;
-
-    private const DISK_NAME = 'conversion-routines';
+    use IsRunningCli, GeneratesIdentifier;
 
     private Configuration              $configuration;
-    private string                     $identifier;
     private CSVFileProcessor           $csvFileProcessor;
     private LineProcessor              $lineProcessor;
     private ColumnValueConverter       $columnValueConverter;
@@ -142,23 +140,6 @@ class RoutineManager implements RoutineManagerInterface
     public function getIdentifier(): string
     {
         return $this->identifier;
-    }
-
-    /**
-     *
-     */
-    private function generateIdentifier(): void
-    {
-        Log::debug('Going to generate conversion routine identifier.');
-        $disk  = Storage::disk(self::DISK_NAME);
-        $count = 0;
-        do {
-            $generatedId = sprintf('conv-%s', Str::random(12));
-            $count++;
-            Log::debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
-        } while ($count < 30 && $disk->exists($generatedId));
-        $this->identifier = $generatedId;
-        Log::info(sprintf('Job identifier is "%s"', $generatedId));
     }
 
     /**

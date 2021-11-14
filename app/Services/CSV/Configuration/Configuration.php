@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Configuration;
 
-use App\Services\CSV\Specifics\SpecificService;
+use Carbon\Carbon;
 use Log;
 use UnexpectedValueException;
 
@@ -46,12 +46,23 @@ class Configuration
     private array  $roles;
     private int    $version;
     private array  $doMapping;
+    private bool   $mapAllData;
     private bool   $addImportTag;
 
     // nordigen configuration
     private string $nordigenCountry;
     private string $nordigenBank;
     private array  $nordigenRequisitions;
+
+    // spectre + nordigen configuration
+    private array $accounts;
+
+    // date range settings
+    private string $dateRange;
+    private int    $dateRangeNumber;
+    private string $dateRangeUnit;
+    private string $dateNotBefore;
+    private string $dateNotAfter;
 
     // what type of import?
     private string $flow;
@@ -86,10 +97,23 @@ class Configuration
         $this->doMapping      = [];
         $this->flow           = 'csv';
 
+        // date range settings
+        $this->dateRange       = 'all';
+        $this->dateRangeNumber = 30;
+        $this->dateRangeUnit   = 'd';
+        $this->dateNotBefore   = '';
+        $this->dateNotAfter    = '';
+
         // nordigen configuration
         $this->nordigenCountry      = '';
         $this->nordigenBank         = '';
         $this->nordigenRequisitions = [];
+
+        // spectre + nordigen configuration
+        $this->accounts = [];
+
+        // mapping for spectre + nordigen
+        $this->mapAllData = false;
 
         // double transaction detection:
         $this->duplicateDetectionMethod = 'classic';
@@ -136,10 +160,23 @@ class Configuration
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
 
+        // mapping for spectre + nordigen
+        $object->mapAllData = $array['map_all_data'] ?? false;
+
         // nordigen:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
         $object->nordigenBank         = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+
+        // spectre + nordigen
+        $object->accounts = $array['accounts'] ?? [];
+
+        // date range settings
+        $object->dateRange       = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+        $object->dateNotBefore   = $array['date_not_before'] ?? '';
+        $object->dateNotAfter    = $array['date_not_after'] ?? '';
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -215,6 +252,17 @@ class Configuration
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'csv';
 
+        // other settings
+        $object->dateRange       = $data['date_range'] ?? 'all';
+        $object->dateRangeNumber = $data['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
+        $object->dateNotBefore   = $data['date_not_before'] ?? '';
+        $object->dateNotAfter    = $data['date_not_after'] ?? '';
+
+        // settings for spectre + nordigen
+        $object->mapAllData = $data['map_all_data'] ?? false;
+        $object->accounts   = $data['accounts'] ?? [];
+
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
 
         if (isset($data['ignore_duplicates']) && true === $data['ignore_duplicates']) {
@@ -239,17 +287,8 @@ class Configuration
         $object->roles     = [];
         $object->doMapping = [];
         $object->mapping   = [];
+        $object->accounts  = [];
 
-        // loop specifics from classic file:
-        // Fix as suggested by @FelikZ in https://github.com/firefly-iii/csv-importer/pull/4
-        $specifics = array_keys($data['specifics'] ?? []);
-
-        foreach ($specifics as $name) {
-            $class = SpecificService::fullClass($name);
-            if (class_exists($class)) {
-                $object->specifics[] = $name;
-            }
-        }
 
         // loop roles from classic file:
         $roles = $data['column-roles'] ?? [];
@@ -326,6 +365,17 @@ class Configuration
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->version        = $version;
         $object->flow           = $array['flow'] ?? 'csv';
+
+        // settings for spectre + nordigen
+        $object->mapAllData = $array['map_all_data'] ?? false;
+        $object->accounts   = $array['accounts'] ?? [];
+
+        // date range settings
+        $object->dateRange       = $data['date_range'] ?? 'all';
+        $object->dateRangeNumber = $data['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
+        $object->dateNotBefore   = $data['date_not_before'] ?? '';
+        $object->dateNotAfter    = $data['date_not_after'] ?? '';
 
         // nordigen information:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
@@ -451,6 +501,19 @@ class Configuration
             'version'                       => $this->version,
             'flow'                          => $this->flow,
 
+            // mapping for spectre + nordigen
+            'map_all_data'                  => $this->mapAllData,
+
+            // settings for spectre + nordigen
+            'accounts'                      => $this->accounts,
+
+            // date range settings:
+            'date_range'                    => $this->dateRange,
+            'date_range_number'             => $this->dateRangeNumber,
+            'date_range_unit'               => $this->dateRangeUnit,
+            'date_not_before'               => $this->dateNotBefore,
+            'date_not_after'                => $this->dateNotAfter,
+
             // nordigen information:
             'nordigen_country'              => $this->nordigenCountry,
             'nordigen_bank'                 => $this->nordigenBank,
@@ -514,6 +577,15 @@ class Configuration
     {
         return $this->doMapping ?? [];
     }
+
+    /**
+     * @return bool
+     */
+    public function isMapAllData(): bool
+    {
+        return $this->mapAllData;
+    }
+
 
     /**
      * @param array $doMapping
@@ -641,5 +713,127 @@ class Configuration
         return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
     }
 
+    /**
+     * @return string
+     */
+    public function getDateRange(): string
+    {
+        return $this->dateRange;
+    }
 
+    /**
+     * @return int
+     */
+    public function getDateRangeNumber(): int
+    {
+        return $this->dateRangeNumber;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateRangeUnit(): string
+    {
+        return $this->dateRangeUnit;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateNotBefore(): string
+    {
+        return $this->dateNotBefore;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateNotAfter(): string
+    {
+        return $this->dateNotAfter;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAccounts(): array
+    {
+        return $this->accounts;
+    }
+
+    /**
+     * @param array $accounts
+     */
+    public function setAccounts(array $accounts): void
+    {
+        $this->accounts = $accounts;
+    }
+
+    /**
+     *
+     */
+    public function updateDateRange(): void
+    {
+        Log::debug('Now in updateDateRange()');
+        // set date and time:
+        switch ($this->dateRange) {
+            case 'all':
+                Log::debug('Range is null, set all to NULL.');
+                $this->dateRangeUnit   = 'd';
+                $this->dateRangeNumber = 30;
+                $this->dateNotBefore   = '';
+                $this->dateNotAfter    = '';
+                break;
+            case 'partial':
+                Log::debug('Range is partial, after is NULL, dateNotBefore will be calculated.');
+                $this->dateNotAfter  = '';
+                $this->dateNotBefore = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
+                Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
+                break;
+            case 'range':
+                Log::debug('Range is "range", both will be created from a string.');
+                $before = $this->dateNotBefore; // string
+                $after  = $this->dateNotAfter;  // string
+                if (null !== $before) {
+                    $before = Carbon::createFromFormat('Y-m-d', $before);
+                }
+                if (null !== $after) {
+                    $after = Carbon::createFromFormat('Y-m-d', $after);
+                }
+
+                if (null !== $before && null !== $after && $before > $after) {
+                    [$before, $after] = [$after, $before];
+                }
+
+                $this->dateNotBefore = null === $before ? '' : $before->format('Y-m-d');
+                $this->dateNotAfter  = null === $after ? '' : $after->format('Y-m-d');
+                Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
+        }
+    }
+
+    /**
+     * @param string $unit
+     * @param int    $number
+     *
+     * @return string|null
+     */
+    private static function calcDateNotBefore(string $unit, int $number): ?string
+    {
+        $functions = [
+            'd' => 'subDays',
+            'w' => 'subWeeks',
+            'm' => 'subMonths',
+            'y' => 'subYears',
+        ];
+        if (isset($functions[$unit])) {
+            $today    = Carbon::now();
+            $function = $functions[$unit];
+            $today->$function($number);
+
+            return $today->format('Y-m-d');
+        }
+        app('log')->error(sprintf('Could not parse date setting. Unknown key "%s"', $unit));
+
+        return null;
+    }
 }

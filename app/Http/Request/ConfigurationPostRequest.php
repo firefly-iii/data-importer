@@ -26,6 +26,7 @@ namespace App\Http\Request;
 
 
 use App\Services\CSV\Specifics\SpecificService;
+use Illuminate\Validation\Validator;
 
 /**
  * Class ConfigurationPostRequest
@@ -47,11 +48,7 @@ class ConfigurationPostRequest extends Request
      */
     public function getAll(): array
     {
-
-        $roles     = [];
-        $mapping   = [];
-        $doMapping = [];
-        $result    = [
+        $result = [
             'headers'                       => $this->convertBoolean($this->get('headers')),
             'delimiter'                     => $this->string('delimiter'),
             'date'                          => $this->string('date'),
@@ -62,14 +59,28 @@ class ConfigurationPostRequest extends Request
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
             'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
             'specifics'                     => [],
-            'roles'                         => $roles,
-            'mapping'                       => $mapping,
-            'do_mapping'                    => $doMapping,
+            'roles'                         => [],
+            'mapping'                       => [],
+            'do_mapping'                    => [],
+            'flow'                          => $this->string('flow'),
+
             // duplicate detection:
             'duplicate_detection_method'    => $this->string('duplicate_detection_method'),
             'unique_column_index'           => $this->integer('unique_column_index'),
             'unique_column_type'            => $this->string('unique_column_type'),
+
+            // nordigen:
+            'do_import'                     => $this->get('do_import') ?? [],
+            'accounts'                      => $this->get('accounts') ?? [],
+            'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),
+            'date_range'                    => $this->string('date_range'),
+            'date_range_number'             => $this->integer('date_range_number'),
+            'date_range_unit'               => $this->string('date_range_unit'),
+            'date_not_before'               => $this->date('date_not_before'),
+            'date_not_after'                => $this->date('date_not_after'),
+
         ];
+
         // rules for specifics:
         $specifics = SpecificService::getSpecifics();
         foreach (array_keys($specifics) as $specific) {
@@ -85,10 +96,9 @@ class ConfigurationPostRequest extends Request
     public function rules(): array
     {
         $rules = [
-            //'some_weird_field' => 'required',
             'headers'                       => 'numeric|between:0,1',
-            'delimiter'                     => 'required|in:comma,semicolon,tab',
-            'date'                          => 'required|between:1,15',
+            'delimiter'                     => 'in:comma,semicolon,tab',
+            'date'                          => 'between:1,15',
             'default_account'               => 'required|numeric|min:1|max:100000',
             'rules'                         => 'numeric|between:0,1',
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
@@ -97,16 +107,34 @@ class ConfigurationPostRequest extends Request
             'add_import_tag'                => 'numeric|between:0,1',
 
             // duplicate detection:
-            'duplicate_detection_method'    => 'required|in:cell,none,classic',
+            'duplicate_detection_method'    => 'in:cell,none,classic',
             'unique_column_index'           => 'numeric',
-            'unique_column_type'            => sprintf('required|in:%s', join(',', array_keys(config('csv.unique_column_options')))),
+            'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
         ];
-        // rules for specifics:
-        $specifics = SpecificService::getSpecifics();
-        foreach (array_keys($specifics) as $specific) {
-            $rules[sprintf('specific_%s', $specific)] = 'numeric|between:0,1';
-        }
 
         return $rules;
     }
+
+
+    /**
+     * Configure the validator instance with special rules for after the basic validation rules.
+     *
+     * @param Validator $validator
+     *
+     * @return void
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(
+            function (Validator $validator) {
+                // validate all account info
+                $data     = $validator->getData();
+                $doImport = $data['do_import'] ?? [];
+                if (0 === count($doImport)) {
+                    $validator->errors()->add('do_import', 'You must select at least one account to import from.');
+                }
+            }
+        );
+    }
+
 }
