@@ -39,7 +39,7 @@ class Transaction
     public string $creditorAgent;
     public string $creditorId;
     public string $creditorName;
-    public string $currencyExchange;
+    public array $currencyExchange; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
     public string $debtorAgent;
     public string $debtorName;
     public string $entryReference;
@@ -97,7 +97,7 @@ class Transaction
         $object->creditorAgent                          = $array['creditorAgent'] ?? '';
         $object->creditorId                             = $array['creditorId'] ?? '';
         $object->creditorName                           = $array['creditorName'] ?? '';
-        $object->currencyExchange                       = $array['currencyExchange'] ?? '';
+        $object->currencyExchange                       = $array['currencyExchange'] ?? [];
         $object->debtorAgent                            = $array['debtorAgent'] ?? '';
         $object->debtorName                             = $array['debtorName'] ?? '';
         $object->entryReference                         = $array['entryReference'] ?? '';
