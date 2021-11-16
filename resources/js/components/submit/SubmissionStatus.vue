@@ -64,7 +64,8 @@
                 </div>
                 <div class="card-body" v-if="'submission_errored' === this.status">
                     <p class="text-danger">
-                        The submission could not be started, or failed due to an error. Please check the log files. Sorry about
+                        The submission could not be started, or failed due to an error. Please check the log files.
+                        Sorry about
                         this :(. TODO
                     </p>
                     <submission-messages
@@ -73,6 +74,7 @@
                         :errors="this.errors"
                     ></submission-messages>
                 </div>
+
             </div>
         </div>
     </div>
@@ -103,12 +105,12 @@ export default {
     },
     methods: {
         getJobStatus: function () {
-            console.log('getJobStatus');
+            console.log('get submission status');
             axios.get(jobStatusUrl).then((response) => {
 
                 // first try post result:
                 if (true === this.triedToStart && 'submission_errored' === this.status) {
-                    console.error('Job failed!!!');
+                    console.error('Job failed! :(');
                     return;
                 }
 
@@ -116,8 +118,7 @@ export default {
                 this.errors = response.data.errors;
                 this.warnings = response.data.warnings;
                 this.messages = response.data.messages;
-                console.log(response.data);
-                console.log(`Job status returned is "${response.data.status}".`);
+                console.log(`Submission status returned is "${response.data.status}".`);
                 if (false === this.triedToStart && 'waiting_to_start' === response.data.status) {
                     // call to job start.
                     console.log('Job hasn\'t started yet. Show user some info');
@@ -131,6 +132,10 @@ export default {
                     console.error('Job failed');
                     this.status = response.data.status;
                     return;
+                }
+                if ('submission_running' === response.data.status) {
+                    console.log('Job is running...');
+                    this.status = response.data.status;
                 }
                 if ('submission_done' === response.data.status) {
                     console.log('Job is done!');

@@ -326,7 +326,8 @@ class ApiSubmitter
         /** @var Transaction $transaction */
         foreach ($group->transactions as $index => $transaction) {
             // compare currency ID
-            if (null !== $line['transactions'][$index]['currency_id']
+            if (array_key_exists('currency_id', $line['transactions'][$index]) &&
+                null !== $line['transactions'][$index]['currency_id']
                 && (int) $line['transactions'][$index]['currency_id'] !== (int) $transaction->currencyId
             ) {
                 $this->addWarning(
@@ -338,7 +339,8 @@ class ApiSubmitter
                 );
             }
             // compare currency code:
-            if (null !== $line['transactions'][$index]['currency_code']
+            if (array_key_exists('currency_code', $line['transactions'][$index]) &&
+                null !== $line['transactions'][$index]['currency_code']
                 && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode
             ) {
                 $this->addWarning(

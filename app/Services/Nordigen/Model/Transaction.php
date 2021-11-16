@@ -40,6 +40,7 @@ class Transaction
     public string $creditorId;
     public string $creditorName;
     public array $currencyExchange; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
+    // TODO use currency exchange info in notes
     public string $debtorAgent;
     public string $debtorName;
     public string $entryReference;
@@ -155,8 +156,15 @@ class Transaction
         if ('' !== $this->remittanceInformationUnstructured) {
             $description = $this->remittanceInformationUnstructured;
         }
+
+        // try other values as well (Revolut)
+        if('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
+            $description = implode(' ', $this->remittanceInformationUnstructuredArray);
+        }
+
         if ('' === $description) {
             Log::warning(sprintf('Transaction "%s" has no description.', $this->transactionId));
+            $description = '(no description)';
         }
         return $description;
     }

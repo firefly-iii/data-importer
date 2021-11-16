@@ -3,8 +3,8 @@
  * TransactionProcessor.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
- * This file is part of the Firefly III Nordigen importer
- * (https://github.com/firefly-iii/nordigen-importer).
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,11 +22,12 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Nordigen\Conversion;
+namespace App\Services\Nordigen\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\CSV\Configuration\Configuration;
+use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Nordigen\TokenManager;
@@ -123,7 +124,7 @@ class TransactionProcessor
                 continue;
             }
             app('log')->info(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
-            $return[] = $transaction->toLocalArray();
+            $return[] = $transaction;
         }
         Log::debug(sprintf('After filtering, set is %d transaction(s)', count($return)));
 

@@ -54,7 +54,8 @@
                 </div>
                 <div class="card-body" v-if="'conv_done' === this.status ">
                     <p>
-                        The TODO routine has finished 🎉. TODO Next step: importing. Please wait to be redirected! <span class="fas fa-sync fa-spin"></span>
+                        The TODO routine has finished 🎉. TODO Next step: importing. Please wait to be redirected! <span
+                        class="fas fa-sync fa-spin"></span>
                     </p>
                     <conversion-messages
                         :messages="this.messages"
@@ -64,7 +65,8 @@
                 </div>
                 <div class="card-body" v-if="'conv_errored' === this.status">
                     <p class="text-danger">
-                        The conversion could not be started, or failed due to an error. Please check the log files. Sorry about
+                        The conversion could not be started, or failed due to an error. Please check the log files.
+                        Sorry about
                         this :(. TODO
                     </p>
                     <conversion-messages
@@ -116,7 +118,7 @@ export default {
                 this.errors = response.data.errors;
                 this.warnings = response.data.warnings;
                 this.messages = response.data.messages;
-                console.log(`Job status is ${this.status}.`);
+                console.log(`Job status is ${response.data.status}.`);
                 if (false === this.triedToStart && 'waiting_to_start' === response.data.status) {
                     // call to job start.
                     console.log('Job hasn\'t started yet. Show user some info');
@@ -130,6 +132,10 @@ export default {
                     console.error('Job failed');
                     this.status = response.data.status;
                     return;
+                }
+                if ('conv_running' === response.data.status) {
+                    console.log('Conversion is running...')
+                    this.status = response.data.status;
                 }
                 if ('conv_done' === response.data.status) {
                     console.log('Job is done!');
@@ -152,7 +158,7 @@ export default {
                 }.bind(this), 1000);
             });
         },
-        redirectToImport: function() {
+        redirectToImport: function () {
             window.location = importStartUrl;
         },
         callStart: function () {

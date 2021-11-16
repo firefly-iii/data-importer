@@ -22,7 +22,11 @@
 
 namespace App\Services\Nordigen\Conversion;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
+use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
+use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
+use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -37,6 +41,8 @@ class RoutineManager implements RoutineManagerInterface
 
     private Configuration        $configuration;
     private TransactionProcessor $transactionProcessor;
+    private GenerateTransactions $transactionGenerator;
+    private FilterTransactions   $transactionFilter;
 
     /**
      *
@@ -50,6 +56,8 @@ class RoutineManager implements RoutineManagerInterface
             $this->identifier = $identifier;
         }
         $this->transactionProcessor = new TransactionProcessor;
+        $this->transactionGenerator = new GenerateTransactions;
+        $this->transactionFilter    = new FilterTransactions;
     }
 
     /**
@@ -62,14 +70,19 @@ class RoutineManager implements RoutineManagerInterface
 
         // share config
         $this->transactionProcessor->setConfiguration($configuration);
+        $this->transactionGenerator->setConfiguration($configuration);
+        //$this->transactionFilter->setConfiguration($configuration);
 
         // set identifier
         $this->transactionProcessor->setIdentifier($this->identifier);
+        $this->transactionGenerator->setIdentifier($this->identifier);
+        $this->transactionFilter->setIdentifier($this->identifier);
 
     }
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
      */
     public function start(): array
     {
@@ -79,11 +92,18 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug('Call transaction processor download.');
         $nordigen = $this->transactionProcessor->download();
 
-        echo '<pre>';
-        var_dump($nordigen);
-        exit;
-        die('need to convert to Firefly III things, then return.');
+        // generate Firefly III ready transactions:
+        app('log')->debug('Generating Firefly III transactions.');
+        $this->transactionGenerator->collectTargetAccounts();
+        $this->transactionGenerator->collectNordigenAccounts();
 
+        $transactions = $this->transactionGenerator->getTransactions($nordigen);
+        app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
+
+        $filtered = $this->transactionFilter->filter($transactions);
+        app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
+
+        return $filtered;
     }
 
     /**
