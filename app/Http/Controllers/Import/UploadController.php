@@ -27,6 +27,7 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\UploadControllerMiddleware;
 use App\Http\Middleware\UploadedFiles;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
@@ -52,7 +53,7 @@ class UploadController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
-        $this->middleware(UploadedFiles::class);
+        $this->middleware(UploadControllerMiddleware::class);
     }
 
     /**

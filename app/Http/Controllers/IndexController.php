@@ -46,8 +46,9 @@ class IndexController extends Controller
 
     /**
      * @param Request $request
+     * @return mixed
      */
-    public function postIndex(Request $request)
+    public function postIndex(Request $request): mixed
     {
         // set cookie with flow:
         $flow = $request->get('flow');
