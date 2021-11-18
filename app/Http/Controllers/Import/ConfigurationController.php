@@ -28,7 +28,7 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ConfigComplete;
+use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
@@ -64,7 +64,7 @@ class ConfigurationController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Configuration');
-        $this->middleware(ConfigComplete::class);
+        $this->middleware(ConfigurationControllerMiddleware::class);
     }
 
     /**
@@ -150,7 +150,7 @@ class ConfigurationController extends Controller
         Log::debug(sprintf('Method %s', __METHOD__));
 
         $dateObj = new Date;
-        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
+        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
         $date = Carbon::make('1984-09-17')->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);

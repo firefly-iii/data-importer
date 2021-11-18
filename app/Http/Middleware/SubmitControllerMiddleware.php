@@ -1,6 +1,6 @@
 <?php
 /*
- * ReadyForImport.php
+ * SubmitControllerMiddleware.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,38 +20,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
 namespace App\Http\Middleware;
 
-use App\Exceptions\ImporterErrorException;
-use App\Services\Session\Constants;
-use Closure;
-use Illuminate\Http\Request;
-
-/**
- * Class ReadyForImport
- */
-class ReadyForImport
+class SubmitControllerMiddleware
 {
-
-
-    /**
-     * Check if the user has already set the mapping in this session. If so, continue to configuration.
-     *
-     * @param Request $request
-     * @param Closure $next
-     *
-     * @return mixed
-     *
-     * @throws ImporterErrorException
-     */
-    public function handle(Request $request, Closure $next): mixed
-    {
-        if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-            return $next($request);
-        }
-
-        throw new ImporterErrorException('Import is not yet ready.');
-    }
+    protected const STEP = 'submit';
+    use IsReadyForStep;
 }

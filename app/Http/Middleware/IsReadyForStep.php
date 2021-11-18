@@ -24,9 +24,11 @@ namespace App\Http\Middleware;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Log;
+
 
 /**
  * Trait IsReadyForStep
@@ -35,11 +37,31 @@ trait IsReadyForStep
 {
     /**
      * @param Request $request
-     * @param string  $step
+     * @param Closure $next
+     *
+     * @return mixed
+     * @throws ImporterErrorException
+     */
+    public function handle(Request $request, Closure $next): mixed
+    {
+        $result = $this->isReadyForStep($request);
+        if (true === $result) {
+            return $next($request);
+        }
+
+        $redirect = $this->redirectToCorrectStep($request);
+        if (null !== $redirect) {
+            return $redirect;
+        }
+        throw new ImporterErrorException(sprintf('Cannot handle middleware: %s', self::STEP));
+    }
+
+    /**
+     * @param Request $request
      * @return bool
      * @throws ImporterErrorException
      */
-    protected function isReadyForStep(Request $request, string $step): bool
+    protected function isReadyForStep(Request $request): bool
     {
         $flow = $request->cookie('flow');
         if (null === $flow) {
@@ -47,7 +69,7 @@ trait IsReadyForStep
             return true;
         }
         if ('csv' === $flow) {
-            return $this->isReadyForCSVStep($request, $step);
+            return $this->isReadyForCSVStep($request);
         }
         if ('nordigen' === $flow) {
             die('TODO');
@@ -59,31 +81,57 @@ trait IsReadyForStep
 
     /**
      * @param Request $request
-     * @param string  $step
      * @return bool
      * @throws ImporterErrorException
      */
-    private function isReadyForCSVStep(Request $request, string $step): bool
+    private function isReadyForCSVStep(Request $request): bool
     {
-        Log::debug(sprintf('isReadyForCSVStep("%s")', $step));
-        switch ($step) {
+        Log::debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
+        switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', $step));
+                throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return false;
                 }
                 return true;
+            case 'define-roles':
+                if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
+                    return false;
+                }
+                return true;
+            case 'configuration':
+                if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
+                    return false;
+                }
+                return true;
+            case 'map':
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    return false;
+                }
+                return true;
+            case 'conversion':
+                // if/else is in reverse!
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    return true;
+                }
+                // will probably never return false, but OK.
+                return false;
+            case 'submit':
+                // if/else is in reverse!
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    return true;
+                }
+                return false;
         }
     }
 
     /**
      * @param Request $request
-     * @param string  $step
      * @return RedirectResponse|null
      * @throws ImporterErrorException
      */
-    protected function redirectToCorrectStep(Request $request, string $step): ?RedirectResponse
+    protected function redirectToCorrectStep(Request $request): ?RedirectResponse
     {
         $flow = $request->cookie('flow');
         if (null === $flow) {
@@ -91,7 +139,7 @@ trait IsReadyForStep
             return null;
         }
         if ('csv' === $flow) {
-            return $this->redirectToCorrectCSVStep($step);
+            return $this->redirectToCorrectCSVStep();
         }
         if ('nordigen' === $flow) {
             die('TODO');
@@ -103,18 +151,29 @@ trait IsReadyForStep
     }
 
     /**
-     * @param         $step
      * @return RedirectResponse
      * @throws ImporterErrorException
      */
-    private function redirectToCorrectCSVStep($step): RedirectResponse
+    private function redirectToCorrectCSVStep(): RedirectResponse
     {
-        Log::debug(sprintf('redirectToCorrectCSVStep("%s")', $step));
-        switch ($step) {
+        Log::debug(sprintf('redirectToCorrectCSVStep("%s")', self::STEP));
+        switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('redirectToCorrectCSVStep: Cannot handle CSV step "%s"', $step));
+                throw new ImporterErrorException(sprintf('redirectToCorrectCSVStep: Cannot handle CSV step "%s"', self::STEP));
             case 'upload-files':
                 $route = route('004-configure.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'define-roles':
+                $route = route('006-mapping.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'configuration':
+                $route = route('005-roles.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'map':
+                $route = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
         }

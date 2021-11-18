@@ -25,6 +25,7 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ReadyForImport;
+use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Session\Constants;
 use App\Services\Shared\Import\Routine\RoutineManager;
@@ -52,7 +53,7 @@ class SubmitController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ReadyForImport::class);
+        $this->middleware(SubmitControllerMiddleware::class);
     }
 
     /**

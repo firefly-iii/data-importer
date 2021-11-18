@@ -26,7 +26,7 @@ namespace App\Http\Controllers\Import;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\MappingComplete;
+use App\Http\Middleware\MapControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
@@ -55,7 +55,7 @@ class MapController extends Controller
         parent::__construct();
 
         app('view')->share('pageTitle', 'Map data');
-        $this->middleware(MappingComplete::class);
+        $this->middleware(MapControllerMiddleware::class);
     }
 
     /**

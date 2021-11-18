@@ -26,7 +26,7 @@ namespace App\Http\Controllers\Import\CSV;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\RolesComplete;
+use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\CSV\Configuration\Configuration;
@@ -51,7 +51,7 @@ class RoleController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Define roles');
-        $this->middleware(RolesComplete::class);
+        $this->middleware(RoleControllerMiddleware::class);
     }
 
     /**
@@ -60,8 +60,8 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         Log::debug('Now in role controller');
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
-        if('csv' !== $flow) {
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        if ('csv' !== $flow) {
             die('redirect or something');
         }
         $mainTitle = 'Role definition';

@@ -1,6 +1,6 @@
 <?php
 /*
- * UploadControllerMiddleware.php
+ * RoleControllerMiddleware.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -22,11 +22,8 @@
 
 namespace App\Http\Middleware;
 
-/**
- * Class UploadControllerMiddleware
- */
-class UploadControllerMiddleware
+class RoleControllerMiddleware
 {
-    protected const STEP = 'upload-files';
+    protected const STEP = 'define-roles';
     use IsReadyForStep;
 }

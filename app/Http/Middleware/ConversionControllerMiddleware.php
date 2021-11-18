@@ -1,6 +1,6 @@
 <?php
 /*
- * UploadControllerMiddleware.php
+ * ConversionControllerMiddleware.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -23,10 +23,10 @@
 namespace App\Http\Middleware;
 
 /**
- * Class UploadControllerMiddleware
+ * Class ConversionControllerMiddleware
  */
-class UploadControllerMiddleware
+class ConversionControllerMiddleware
 {
-    protected const STEP = 'upload-files';
+    protected const STEP = 'conversion';
     use IsReadyForStep;
 }

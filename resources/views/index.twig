@@ -170,11 +170,10 @@
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
             if ('NODATA' === data.result) {
-                $('#spectre_result').text('If you want to use the Spectre / Salt Edge API, it must be configured in the next step before it can be used.');
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
         }).fail(function () {
-            $('#spectre_result').text('The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.');
+            $('#spectre_result').show().text('The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.');
             $('#spectre_button').hide();
         });
 
