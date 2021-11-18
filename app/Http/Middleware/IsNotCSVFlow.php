@@ -1,6 +1,6 @@
 <?php
 /*
- * ConfigComplete.php
+ * IsNotCSVFlow.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,8 +20,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
 namespace App\Http\Middleware;
 
 use App\Services\Session\Constants;
@@ -30,12 +28,12 @@ use Illuminate\Http\Request;
 use Log;
 
 /**
- * Class ConfigComplete
+ * Class IsNotCSVFlow
  */
-class ConfigComplete
+class IsNotCSVFlow
 {
     /**
-     * Check if the user has already uploaded files in this session. If so, continue to configuration.
+     * Check if the user is NOT doing CSV.
      *
      * @param Request $request
      * @param Closure $next
@@ -45,13 +43,14 @@ class ConfigComplete
      */
     public function handle(Request $request, Closure $next)
     {
-        Log::debug('Now check ConfigComplete');
-        if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
-            $route = route('005-roles.index');
-            Log::debug(sprintf('User has config complete, redirect to "%s', $route));
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        Log::debug(sprintf('Now in IsNotCSVFlow with flow "%s"', $flow));
+        if ('csv' === $flow) {
+            $route = route('003-upload.index');
+            Log::debug(sprintf('Flow is "%s", user will be redirected to %s', $flow, $route));
             return redirect($route);
         }
-        Log::debug('User has config not yet complete');
+        Log::debug(sprintf('Flow is "%s", user can stay.', $flow));
 
         return $next($request);
     }

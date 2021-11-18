@@ -28,6 +28,7 @@ namespace App\Http\Middleware;
 use App\Services\Session\Constants;
 use Closure;
 use Illuminate\Http\Request;
+use Log;
 
 /**
  * Class UploadedFiles
@@ -45,10 +46,13 @@ class UploadedFiles
      */
     public function handle(Request $request, Closure $next)
     {
-
-        if (session()->has(Constants::HAS_UPLOAD)) {
-            return redirect(route('004-configure.index'));
+        Log::debug('Now in UploadedFiles middleware.');
+        if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+            $route = route('004-configure.index');
+            Log::debug(sprintf('User has uploaded files, redirect to "%s"', $route));
+            return redirect($route);
         }
+        Log::debug('User has not yet uploaded files');
 
         return $next($request);
     }

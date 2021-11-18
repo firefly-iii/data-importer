@@ -91,9 +91,13 @@
                                             {% for information in nordigenAccounts %}
                                                 <tr>
                                                     <td>
+
                                                         <input
                                                             id="do_import_{{ information.nordigen.identifier }}"
                                                             type="checkbox"
+                                                            {% if 'disabled' == information.nordigen.status %}
+                                                            disabled="disabled"
+                                                            {% endif %}
                                                             name="do_import[{{ information.nordigen.identifier }}]"
                                                             value="1"
                                                             aria-describedby="accountsHelp"
@@ -103,7 +107,8 @@
                                                                   for="do_import_{{ information.nordigen.identifier }}">
                                                             Account "{{ information.nordigen.getFullName }}"
                                                         </label>
-                                                        {% if '' != information.nordigen.iban %}<br><small>IBAN: {{ information.nordigen.iban }}</small>{% endif %}
+                                                        {% if 'disabled' != information.nordigen.status and '' != information.nordigen.iban %}<br><small>IBAN: {{ information.nordigen.iban }}</small>{% endif %}
+                                                        {% if 'disabled' == information.nordigen.status %}<br><small class="text-danger">(this account is disabled)</small>{% endif %}
                                                     </td>
                                                     <td>
                                                         {% if(information.firefly|length!=0) %}&rarr;{% endif %}
@@ -114,6 +119,7 @@
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
+                                                            {% if 'disabled' != information.nordigen.status %}
                                                             <select style="width:100%;"
                                                                     class="custom-select custom-select-sm form-control"
                                                                     name="accounts[{{ information.nordigen.identifier }}]">
@@ -125,6 +131,7 @@
                                                                     </option>
                                                                 {% endfor %}
                                                             </select>
+                                                            {% endif %}
                                                         {% endif %}
                                                     </td>
                                                 </tr>

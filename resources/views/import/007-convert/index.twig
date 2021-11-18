@@ -45,8 +45,8 @@
                 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                     return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
-
-                var importStartUrl = '{{ route('008-submit.index') }}';
+                var flow = '{{ flow }}';
+                var importStartUrl = '{{ nextUrl }}';
                 var jobStatusUrl = '{{ route('007-convert.status') }}?identifier={{ identifier }}';
                 var jobStartUrl = '{{ route('007-convert.start') }}?identifier={{ identifier }}';
                 var jobBackUrl = '{{ jobBackUrl }}';

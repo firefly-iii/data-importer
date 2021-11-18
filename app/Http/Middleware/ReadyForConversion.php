@@ -46,10 +46,11 @@ class ReadyForConversion
      */
     public function handle(Request $request, Closure $next): mixed
     {
-        if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+        die('here we are');
+        if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
             return $next($request);
         }
 
-        throw new ImporterErrorException('Conversion is not yet ready.');
+        throw new ImporterErrorException('Flow is not yet ready for conversion.');
     }
 }

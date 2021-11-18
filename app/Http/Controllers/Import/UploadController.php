@@ -100,7 +100,7 @@ class UploadController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $csvFile    = $request->file('csv_file');
         $configFile = $request->file('config_file');
-        $flow       = $request->cookie('flow');
+        $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag;
 
         if (null === $csvFile && 'csv' === $flow) {
@@ -130,7 +130,7 @@ class UploadController extends Controller
 
                 $csvFileName = StorageService::storeContent($content);
                 session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
-                session()->put(Constants::HAS_UPLOAD, 'true');
+                session()->put(Constants::HAS_UPLOAD, true);
             }
         }
 

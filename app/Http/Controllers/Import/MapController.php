@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import\CSV;
+namespace App\Http\Controllers\Import;
 
 
 use App\Http\Controllers\Controller;
@@ -53,6 +53,7 @@ class MapController extends Controller
     public function __construct()
     {
         parent::__construct();
+
         app('view')->share('pageTitle', 'Map data');
         $this->middleware(MappingComplete::class);
     }
@@ -127,9 +128,10 @@ class MapController extends Controller
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
-        if(0===count($data)) {
+        if (0 === count($data)) {
             // set map config as complete.
-            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            //session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            session()->put(Constants::READY_FOR_CONVERSION, true);
             return redirect()->route('007-convert.index');
         }
 
@@ -209,7 +211,7 @@ class MapController extends Controller
 
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-
+        session()->put(Constants::READY_FOR_CONVERSION, true);
         return redirect()->route('007-convert.index');
     }
 

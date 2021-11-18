@@ -150,7 +150,7 @@ class ConfigurationController extends Controller
         Log::debug(sprintf('Method %s', __METHOD__));
 
         $dateObj = new Date;
-        [$locale, $format] = $dateObj->splitLocaleFormat($request->get('format'));
+        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
         $date = Carbon::make('1984-09-17')->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
@@ -168,7 +168,7 @@ class ConfigurationController extends Controller
         // store config on drive.
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie('flow'));
+        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
         // TODO are all fields actually in the config?
         // loop accounts:
@@ -196,16 +196,9 @@ class ConfigurationController extends Controller
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
 
-        // redirect to import things?
-        if ('csv' === $configuration->getFlow()) {
-            return redirect(route('005-roles.index'));
-        }
-        if ('nordigen' === $configuration->getFlow()) {
-            // redirect to convert routine:
-            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-            return redirect(route('007-convert.index'));
-        }
-        die('cannot handle.');
+        // always redirect to roles, even if this isn't the step yet
+        // for nordigen and spectre, roles will be skipped right away.
+        return redirect(route('005-roles.index'));
     }
 
     /**
@@ -243,7 +236,7 @@ class ConfigurationController extends Controller
 
         /** @var Account $account */
         foreach ($response as $index => $account) {
-            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()));
+            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
             $account  = AccountInformationCollector::collectInformation($account);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();

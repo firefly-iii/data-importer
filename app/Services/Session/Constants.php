@@ -54,6 +54,7 @@ class Constants
     // if the user is done with specific steps:
     public const HAS_UPLOAD                    = 'has_uploaded_file';
     public const CONFIG_COMPLETE_INDICATOR     = 'config_complete';
+    public const READY_FOR_CONVERSION          = 'ready_for_conversion';
     public const ROLES_COMPLETE_INDICATOR      = 'role_config_complete';
     public const MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
     public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';

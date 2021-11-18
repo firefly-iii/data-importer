@@ -98,6 +98,7 @@ class ConversionController extends Controller
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $flow       = $configuration->getFlow();
+        $nextUrl    = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -113,6 +114,9 @@ class ConversionController extends Controller
         if ('spectre' === $flow) {
             throw new ImporterErrorException('Cannot handle. :(');
         }
+        if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
+            $nextUrl = route('006-mapping.index');
+        }
 
         // may be a new identifier! Yay!
         $identifier = $routine->getIdentifier();
@@ -123,7 +127,7 @@ class ConversionController extends Controller
         session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
         Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
 
-        return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
+        return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl'));
     }
 
     /**

@@ -22,6 +22,7 @@
 
 declare(strict_types=1);
 
+// index: no checks
 Route::get('/', 'IndexController@index')->name('index');
 Route::post('/', 'IndexController@postIndex')->name('index.post');
 
@@ -40,28 +41,34 @@ Route::get('/flush','IndexController@flush')->name('flush');
 Route::get('/reset','IndexController@reset')->name('reset');
 
 // step 2: Authenticate Nordigen / Spectre manually if necessary.
+// check : must not be CSV flow. If so redirect to upload.
 Route::get('/authenticate', 'Import\AuthenticateController@index')->name('002-authenticate.index');
 Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
 
 // step 3: Upload CSV file + config file
+// check : Must not already have uploaded files (HAS_UPLOAD). If so redirect to configuration.
 Route::get('/upload', 'Import\UploadController@index')->name('003-upload.index');
 Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003-upload.upload']);
 
 // step 4: Configure import
+// check : must not already have done configuration. If so, redirect to roles by default.
 Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
 Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
 Route::get('/import/configure/download', ['uses' => 'Import\DownloadController@download', 'as' => '004-configure.download']);
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
 
 // step 5: Set column roles (CSV)
+// check : must be CSV and not config complete otherwise redirect to mapping.
 Route::get('/import/roles', ['uses' => 'Import\CSV\RoleController@index', 'as' => '005-roles.index']);
 Route::post('/import/roles', ['uses' => 'Import\CSV\RoleController@postIndex', 'as' => '005-roles.post']);
 
-// step 6: mapping (CSV)
-Route::get('/import/mapping', ['uses' => 'Import\CSV\MapController@index', 'as' => '006-mapping.index']);
-Route::post('/import/mapping', ['uses' => 'Import\CSV\MapController@postIndex', 'as' => '006-mapping.post']);
+// step 6: mapping
+// check: must be [CSV and roles complete] or [not csv and conversion complete] or go to conversion?
+Route::get('/import/mapping', ['uses' => 'Import\MapController@index', 'as' => '006-mapping.index']);
+Route::post('/import/mapping', ['uses' => 'Import\MapController@postIndex', 'as' => '006-mapping.post']);
 
 // step 7: convert any import to JSON transactions
+// check: config complete (see step 4) + mapping complete if CSV + roles complete  or not CSV.
 Route::get('/import/convert', ['uses' => 'Import\ConversionController@index', 'as' => '007-convert.index']);
 Route::any('/import/convert/start', ['uses' => 'Import\ConversionController@start', 'as' => '007-convert.start']);
 Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);

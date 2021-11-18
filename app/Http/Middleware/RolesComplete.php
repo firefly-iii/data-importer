@@ -27,6 +27,7 @@ namespace App\Http\Middleware;
 use App\Services\Session\Constants;
 use Closure;
 use Illuminate\Http\Request;
+use Log;
 
 /**
  * Class RolesComplete
@@ -44,10 +45,19 @@ class RolesComplete
      */
     public function handle(Request $request, Closure $next)
     {
-        if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
-            return redirect()->route('006-mapping.index');
+        Log::debug('Now validate RolesComplete');
+        $flow  = $request->cookie(Constants::FLOW_COOKIE);
+        $route = route('006-mapping.index');
+        if ('csv' !== $flow) {
+            Log::debug(sprintf('"%s" flow cant do roles, so redirect to "%s" for mapping.', $flow, $route));
+            return redirect($route);
         }
-
+        Log::debug('Flow is CSV');
+        if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
+            Log::debug('Session says roles are set so redirect to mapping.');
+            return redirect($route);
+        }
+        Log::debug('Ready for roles!');
         return $next($request);
     }
 }

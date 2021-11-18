@@ -26,18 +26,26 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\IsNotCSVFlow;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
-
+use Log;
 
 /**
  * Class AuthenticateController
  */
 class AuthenticateController extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        Log::debug('Now in AuthenticateController, calling IsNotCSVFlow middleware.');
+        $this->middleware(IsNotCSVFlow::class);
+    }
+
     /**
      * @param Request $request
      */
@@ -46,10 +54,6 @@ class AuthenticateController extends Controller
         $mainTitle = 'Auth';
         $pageTitle = 'Auth';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
-        if ('csv' === $flow) {
-            // redirect straight to upload
-            return redirect(route('003-upload.index'));
-        }
 
         if ('spectre' === $flow) {
             die('TODO');
@@ -71,11 +75,11 @@ class AuthenticateController extends Controller
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
 
-                $key = config('nordigen.key');
+                $key        = config('nordigen.key');
                 $identifier = config('nordigen.identifier');
 
                 // show for to enter data. save as cookie.
-                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle','key','identifier'));
+                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
             }
             if ($result->equals(AuthenticationStatus::authenticated())) {
                 return redirect(route('003-upload.index'));

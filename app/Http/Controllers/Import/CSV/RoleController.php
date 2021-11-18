@@ -156,8 +156,7 @@ class RoleController extends Controller
         }
         // otherwise, store empty mapping, and continue:
         // set map config as complete.
-        session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-
+        session()->put(Constants::READY_FOR_CONVERSION, true);
         return redirect()->route('007-convert.index');
     }
 

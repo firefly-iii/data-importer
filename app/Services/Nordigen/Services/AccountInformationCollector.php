@@ -22,6 +22,8 @@
 
 namespace App\Services\Nordigen\Services;
 
+use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Nordigen\Request\GetAccountBalanceRequest;
@@ -46,13 +48,34 @@ class AccountInformationCollector
         Log::debug(sprintf('Now in %s', __METHOD__));
 
         // you know nothing, Jon Snow
-        $account = self::getAccountDetails($account);
-        return self::getBalanceDetails($account);
+        $detailedAccount = $account;
+        try {
+            $detailedAccount = self::getAccountDetails($account);
+        } catch (ImporterHttpException | ImporterErrorException $e) {
+            Log::error($e->getMessage());
+            // ignore error otherwise for now.
+            $detailedAccount->setStatus('disabled');
+            $detailedAccount->setName('Disabled account');
+        }
+        $balanceAccount = $detailedAccount;
+
+        try {
+            $balanceAccount = self::getBalanceDetails($account);
+        } catch (ImporterHttpException | ImporterErrorException $e) {
+            Log::error($e->getMessage());
+            // ignore error otherwise for now.
+            $balanceAccount->setStatus('disabled');
+            $balanceAccount->setName('Disabled account');
+        }
+        $balanceAccount->setStatus('disabled');
+        return $balanceAccount;
     }
 
     /**
      * @param Account $account
      * @return Account
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     protected static function getAccountDetails(Account $account): Account
     {
@@ -88,9 +111,15 @@ class AccountInformationCollector
         return $account;
     }
 
+    /**
+     * @param Account $account
+     * @return Account
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     */
     private static function getBalanceDetails(Account $account): Account
     {
-        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        Log::debug(sprintf(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier())));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();

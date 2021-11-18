@@ -26,7 +26,14 @@
                 <div class="card-header">Data conversion</div>
                 <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
                     <p>
-                        TODO Your CSV file will be converted so it can be imported. Press "start job" to start.
+                        The first step in the import process is a conversion. TODO
+                        <span v-if="flow === 'csv'">The CSV file you uploaded</span>
+                        <span v-if="flow === 'nordigen'">The transactions downloaded from Nordigen</span>
+                        <span v-if="flow === 'spectre'">The transactions downloaded from Spectre</span>
+                        will be converted to Firefly III compatible transactions. Please press "start job" to start.
+
+                        If user wants mapping next step! its already firefly iii data at that point so info
+                        may be lost?
                     </p>
                     <p>
                         <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job
@@ -92,6 +99,7 @@ export default {
             status: '',
             messages: [],
             warnings: [],
+            flow: window.flow,
             errors: [],
             downloadUrl: window.configDownloadUrl,
             jobBackUrl: window.jobBackUrl,

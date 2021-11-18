@@ -24,9 +24,12 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use Closure;
 use Illuminate\Http\Request;
+use Log;
+use PHPUnit\TextUI\XmlConfiguration\Constant;
 
 /**
  * Class MappingComplete
@@ -44,10 +47,39 @@ class MappingComplete
      */
     public function handle(Request $request, Closure $next)
     {
-        if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-            return redirect()->route('007-convert.index');
+        Log::debug('Now in MappingComplete');
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        Log::debug(sprintf('Flow is "%s"', $flow));
+        if ('csv' === $flow) {
+            $route = route('007-convert.index');
+            if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                Log::debug(sprintf('Mapping is complete, redirect to "%s" for conversion.', $route));
+                return redirect($route);
+            }
+            Log::debug('Mapping is not yet complete for CSV, continue.');
         }
+        if ('csv' !== $flow) {
+            // ready to submit
+            if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                $route = route('008-submit.index');
+                Log::debug(sprintf('Mapping is complete, will redirect to "%s" for submit of data.', $route));
+            }
 
-        return $next($request);
+            // ready for mapping
+            if (!session()->has(Constants::MAPPING_COMPLETE_INDICATOR) &&
+                session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+            ) {
+                Log::debug(sprintf('No mapping complete indicator for "%s", but conversion is complete, ready for mapping!', $flow));
+                return $next($request);
+            }
+            // not yet ready for mapping, first do conversion:
+            if (!session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && !session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+            ) {
+                $route = route('007-convert.index');
+                Log::debug(sprintf('No mapping complete indicator + no conversion complete for "%s", redirect to "%s" for conversion first.', $flow, $route));
+                return redirect($route);
+            }
+        }
+        throw new ImporterErrorException('Should not be here in mapping.');
     }
 }
