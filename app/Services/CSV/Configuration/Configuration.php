@@ -79,6 +79,9 @@ class Configuration
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
 
+    // configuration for utf-8
+    private bool $conversion;
+
     /**
      * Configuration constructor.
      */
@@ -125,6 +128,9 @@ class Configuration
         // config for "cell":
         $this->uniqueColumnIndex = 0;
         $this->uniqueColumnType  = 'internal_reference';
+
+        // utf8
+        $this->conversion = false;
 
         $this->version = self::VERSION;
     }
@@ -188,6 +194,9 @@ class Configuration
         // config for "cell":
         $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
+
+        // utf8 conversion
+        $object->conversion = $array['conversion'] ?? false;
 
         // flow
         $object->flow = $array['flow'] ?? 'csv';
@@ -288,6 +297,9 @@ class Configuration
         $object->doMapping = [];
         $object->mapping   = [];
         $object->accounts  = [];
+
+        // utf8
+        $object->conversion = $data['conversion'] ?? false;
 
 
         // loop roles from classic file:
@@ -405,6 +417,9 @@ class Configuration
         $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
 
+        // utf8
+        $object->conversion = $array['conversion'] ?? false;
+
         return $object;
     }
 
@@ -518,6 +533,9 @@ class Configuration
             'nordigen_country'              => $this->nordigenCountry,
             'nordigen_bank'                 => $this->nordigenBank,
             'nordigen_requisitions'         => $this->nordigenRequisitions,
+
+            // utf8
+            'conversion'                    => $this->conversion,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off

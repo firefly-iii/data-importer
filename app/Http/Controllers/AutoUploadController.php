@@ -46,6 +46,7 @@ class AutoUploadController extends Controller
      */
     public function index(AutoUploadRequest $request)
     {
+        die('todo'. __METHOD__);
         $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');

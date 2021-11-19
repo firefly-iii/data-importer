@@ -24,6 +24,7 @@ namespace App\Http\Controllers\Import\Nordigen;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\LinkControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
@@ -38,6 +39,15 @@ use Ramsey\Uuid\Uuid;
  */
 class LinkController extends Controller
 {
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware(LinkControllerMiddleware::class);
+    }
 
     /**
      */

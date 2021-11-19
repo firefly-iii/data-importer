@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\ServiceControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
@@ -35,6 +36,16 @@ use Illuminate\Http\Request;
  */
 class ServiceController extends Controller
 {
+
+    /**
+     * StartController constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        app('view')->share('pageTitle', 'Importing data...');
+        $this->middleware(ServiceControllerMiddleware::class);
+    }
     /**
      * @param Request $request
      * @return JsonResponse

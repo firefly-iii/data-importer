@@ -182,6 +182,7 @@ class UploadController extends Controller
 
         if ('nordigen' === $flow) {
             // redirect to country + bank selector
+            session()->put(Constants::HAS_UPLOAD, true);
             return redirect(route('009-selection.index'));
         }
         if ('spectre' === $flow) {

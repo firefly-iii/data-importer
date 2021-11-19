@@ -69,32 +69,87 @@ trait IsReadyForStep
             return true;
         }
         if ('csv' === $flow) {
-            return $this->isReadyForCSVStep($request);
+            return $this->isReadyForCSVStep();
         }
         if ('nordigen' === $flow) {
-            die('TODO');
+            return $this->isReadyForNordigenStep();
         }
         if ('spectre' === $flow) {
-            die('TODO');
+            die('TODO ' . __METHOD__);
+        }
+        return $this->isReadyForBasicStep();
+    }
+
+    /**
+     * @return bool
+     * @throws ImporterErrorException
+     */
+    private function isReadyForBasicStep(): bool
+    {
+        Log::debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
+            case 'service-validation':
+                return true;
         }
     }
 
     /**
-     * @param Request $request
      * @return bool
      * @throws ImporterErrorException
      */
-    private function isReadyForCSVStep(Request $request): bool
+    private function isReadyForNordigenStep(): bool
     {
-        Log::debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
+        Log::debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
+                throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
+            case 'authenticate':
+            case 'service-validation':
+                return true;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return false;
                 }
                 return true;
+            case 'nordigen-selection':
+                // must have upload, thats it
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return true;
+                }
+                return false;
+            case 'nordigen-link':
+                // must have upload, thats it
+                if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    return true;
+                }
+                return false;
+            case 'configuration':
+                die('must have selected bank/country, must have had redirect.');
+        }
+    }
+
+    /**
+     * @return bool
+     * @throws ImporterErrorException
+     */
+    private function isReadyForCSVStep(): bool
+    {
+        Log::debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
+            case 'service-validation':
+                return true;
+            case 'upload-files':
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return false;
+                }
+                return true;
+            case 'authenticate':
+                // for CSV this is always false.
+                return false;
             case 'define-roles':
                 if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
                     return false;
@@ -133,7 +188,7 @@ trait IsReadyForStep
      */
     protected function redirectToCorrectStep(Request $request): ?RedirectResponse
     {
-        $flow = $request->cookie('flow');
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
             Log::debug('redirectToCorrectStep returns true because $flow is null');
             return null;
@@ -142,12 +197,48 @@ trait IsReadyForStep
             return $this->redirectToCorrectCSVStep();
         }
         if ('nordigen' === $flow) {
-            die('TODO');
+            return $this->redirectToCorrectNordigenStep();
         }
         if ('spectre' === $flow) {
-            die('TODO');
+            die('TODO ' . __METHOD__);
         }
-        die('TODO');
+        return $this->redirectToBasicStep();
+    }
+
+    /**
+     * @return RedirectResponse
+     * @throws ImporterErrorException
+     */
+    private function redirectToBasicStep(): RedirectResponse
+    {
+        Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle CSV step "%s"', self::STEP));
+        }
+
+    }
+    /**
+     * @return RedirectResponse
+     * @throws ImporterErrorException
+     */
+    private function redirectToCorrectNordigenStep(): RedirectResponse
+    {
+        Log::debug(sprintf('redirectToCorrectNordigenStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
+            case 'nordigen-selection':
+                // back to upload
+                $route = route('003-upload.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'nordigen-link':
+                // back to selection
+                $route = route('009-selection.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+        }
     }
 
     /**
@@ -174,6 +265,15 @@ trait IsReadyForStep
                 return redirect($route);
             case 'map':
                 $route = route('007-convert.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'conversion':
+                // redirect to mapping
+                $route = route('006-mapping.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'authenticate':
+                $route = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
         }

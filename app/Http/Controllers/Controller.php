@@ -24,15 +24,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ImporterHttpException;
-use App\Services\Nordigen\TokenManager;
-use App\Services\Spectre\Request\ListCustomersRequest;
-use App\Services\Spectre\Response\ErrorResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use Log;
 
 /**
  * Class Controller

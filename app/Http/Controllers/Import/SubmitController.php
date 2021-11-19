@@ -24,7 +24,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ReadyForImport;
 use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Session\Constants;
@@ -52,7 +51,6 @@ class SubmitController extends Controller
     public function __construct()
     {
         parent::__construct();
-        app('view')->share('pageTitle', 'Importing data...');
         $this->middleware(SubmitControllerMiddleware::class);
     }
 
@@ -69,7 +67,7 @@ class SubmitController extends Controller
         // get configuration object.
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
         // append info from the file on disk:
-        $configFileName = Constants::UPLOAD_CONFIG_FILE;
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
         if (null !== session()->get($configFileName)) {
             $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
             $diskConfig = Configuration::fromArray($diskArray);

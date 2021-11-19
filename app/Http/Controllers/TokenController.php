@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ApiException;
+use App\Exceptions\ImporterErrorException;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GuzzleHttp\Client;
@@ -242,6 +242,10 @@ class TokenController extends Controller
      * The user ends up here when they come back from Firefly III.
      *
      * @param Request $request
+     * @return Application|Factory|\Illuminate\Contracts\View\View|RedirectResponse|Redirector
+     * @throws ImporterErrorException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Throwable
      */
     public function callback(Request $request)
     {
@@ -292,7 +296,7 @@ class TokenController extends Controller
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             Log::error(sprintf('Response from server: "%s"', (string) $response->getBody()));
             Log::error($e->getTraceAsString());
-            throw new ApiException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
         Log::debug('Response', $data);
 

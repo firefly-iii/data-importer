@@ -25,6 +25,7 @@ namespace App\Http\Controllers\Import\Nordigen;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\ListBanksRequest;
@@ -43,6 +44,14 @@ use Log;
  */
 class SelectionController extends Controller
 {
+    /**
+     *
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware(SelectionControllerMiddleware::class);
+    }
 
     /**
      * Step 9, select a country + bank.
@@ -106,7 +115,7 @@ class SelectionController extends Controller
         StorageService::storeContent($json);
 
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
-        session()->put(Constants::SELECTED_BANK_COUNTRY, 'true');
+        session()->put(Constants::SELECTED_BANK_COUNTRY, true);
 
         // send to Nordigen for approval
         return redirect(route('010-build-link.index'));

@@ -26,7 +26,7 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\IsNotCSVFlow;
+use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
@@ -43,7 +43,7 @@ class AuthenticateController extends Controller
     {
         parent::__construct();
         Log::debug('Now in AuthenticateController, calling IsNotCSVFlow middleware.');
-        $this->middleware(IsNotCSVFlow::class);
+        $this->middleware(AuthenticateControllerMiddleware::class);
     }
 
     /**
@@ -56,7 +56,7 @@ class AuthenticateController extends Controller
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         if ('spectre' === $flow) {
-            die('TODO');
+            die('TODO '. __METHOD__);
             $subTitle  = 'Spectre';
             $validator = new SpectreValidator;
             $result    = $validator->validate();

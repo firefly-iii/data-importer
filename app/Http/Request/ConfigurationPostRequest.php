@@ -79,6 +79,9 @@ class ConfigurationPostRequest extends Request
             'date_not_before'               => $this->date('date_not_before'),
             'date_not_after'                => $this->date('date_not_after'),
 
+            // utf8 conversion
+            'conversion'                    => $this->convertBoolean($this->get('conversion')),
+
         ];
 
         // rules for specifics:
@@ -110,6 +113,9 @@ class ConfigurationPostRequest extends Request
             'duplicate_detection_method'    => 'in:cell,none,classic',
             'unique_column_index'           => 'numeric',
             'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
+
+            // conversion
+            'conversion'                    => 'numeric|between:0,1',
         ];
 
         return $rules;

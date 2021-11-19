@@ -120,6 +120,7 @@ class IndexController extends Controller
             cookie('access_token', ''),
             cookie('base_url', ''),
             cookie('refresh_token', ''),
+            cookie(Constants::FLOW_COOKIE, ''),
         ];
 
         return redirect(route('index'))->withCookies($cookies);
@@ -133,10 +134,13 @@ class IndexController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget(['csv_file_path', 'config_file_path', 'import_job_id']);
         session()->flush();
+        $cookies = [
+            cookie(Constants::FLOW_COOKIE, ''),
+        ];
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
 
-        return redirect(route('index'));
+        return redirect(route('index'))->withCookies($cookies);
     }
 
 }
