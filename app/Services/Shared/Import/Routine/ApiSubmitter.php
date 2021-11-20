@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /*
  * ApiSubmitter.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -89,9 +90,6 @@ class ApiSubmitter
         }
         Log::info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
-
-
-
     /**
      *
      */

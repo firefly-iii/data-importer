@@ -3,8 +3,8 @@
  * FilterTransactions.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
- * This file is part of the Firefly III Nordigen importer
- * (https://github.com/firefly-iii/nordigen-importer).
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as

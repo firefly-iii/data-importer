@@ -1,5 +1,5 @@
 <!--
-  - ImportMessages.vue
+  - SubmissionMessages.vue
   - Copyright (c) 2021 james@firefly-iii.org
   -
   - This file is part of the Firefly III Data Importer
