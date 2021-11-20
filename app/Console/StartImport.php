@@ -27,7 +27,6 @@ namespace App\Console;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\File\FileReader;
-use App\Services\Import\ImportRoutineManager;
 use Log;
 
 /**
@@ -54,27 +53,8 @@ trait StartImport
         $this->errors   = [];
 
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $configObject = Configuration::fromFile($configuration);
-        $manager      = new ImportRoutineManager;
+        // TODO this is where the import routine must be called. See file history.
 
-        try {
-            $manager->setConfiguration($configObject);
-        } catch (ImporterErrorException $e) {
-            $this->error($e->getMessage());
-
-            return 1;
-        }
-        $manager->setReader(FileReader::getReaderFromContent($csv));
-        $manager->start();
-
-        $this->messages = $manager->getAllMessages();
-        $this->warnings = $manager->getAllWarnings();
-        $this->errors   = $manager->getAllErrors();
-
-        $this->listMessages('ERROR', $this->errors);
-        $this->listMessages('Warning', $this->warnings);
-        $this->listMessages('Message', $this->messages);
-
-        return 0;
+        return 1;
     }
 }
