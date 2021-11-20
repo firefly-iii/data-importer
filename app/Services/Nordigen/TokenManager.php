@@ -78,7 +78,9 @@ class TokenManager
 
         // get complete set!
         try {
-            self::getNewTokenSet();
+            $identifier = config('nordigen.id');
+            $key        = config('nordigen.key');
+            self::getNewTokenSet($identifier, $key);
         } catch (ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }

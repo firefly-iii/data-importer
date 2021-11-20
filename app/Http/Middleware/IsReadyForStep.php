@@ -122,11 +122,23 @@ trait IsReadyForStep
                     return true;
                 }
                 return false;
+            case 'map':
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    return false;
+                }
+                return true;
             case 'nordigen-link':
                 // must have upload, thats it
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
                     return true;
                 }
+                return false;
+            case 'conversion':
+                // if/else is in reverse!
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    return true;
+                }
+                // will probably never return false, but OK.
                 return false;
             case 'configuration':
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
