@@ -195,7 +195,10 @@ class ConfigurationController extends Controller
 
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-
+        if('nordigen' === $configuration->getFlow()) {
+            // at this point, nordigen is ready for data conversion.
+            session()->put(Constants::READY_FOR_CONVERSION, true);
+        }
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));

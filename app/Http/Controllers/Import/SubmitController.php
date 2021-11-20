@@ -52,6 +52,7 @@ class SubmitController extends Controller
     public function __construct()
     {
         parent::__construct();
+        view()->share('pageTitle','Submit data to Firefly III');
         $this->middleware(SubmitControllerMiddleware::class);
     }
 
@@ -66,7 +67,7 @@ class SubmitController extends Controller
         $mainTitle = 'Submit the data';
 
         // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
+        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
         // append info from the file on disk:
         $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
         if (null !== $configFileName) {

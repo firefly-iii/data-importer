@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
@@ -36,8 +37,10 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use JsonException;
 use League\Csv\Exception;
 use Log;
 
@@ -46,6 +49,7 @@ use Log;
  */
 class MapController extends Controller
 {
+    protected const DISK_NAME = 'jobs';
 
     /**
      * RoleController constructor.
@@ -66,11 +70,13 @@ class MapController extends Controller
     public function index()
     {
         $mainTitle = 'Map data';
-        $subTitle  = 'Map values in CSV file to actual data in Firefly III';
+        $subTitle  = 'Map values in file to actual data in Firefly III';
+        $data      = [];
+        $roles     = [];
         Log::debug('Now in mapController index');
 
         // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
+        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
 
         // the config in the session will miss important values, we must get those from disk:
         // 'mapping', 'do_mapping', 'roles' are missing.
@@ -84,62 +90,96 @@ class MapController extends Controller
             $configuration->setRoles($diskConfig->getRoles());
         }
 
-        // then we can use them:
-        $roles           = $configuration->getRoles();
-        $existingMapping = $configuration->getMapping();
-        $doMapping       = $configuration->getDoMapping();
-        $data            = [];
+        // depends on flow how to handle mapping
+        if ('csv' === $configuration->getFlow()) {
 
-        foreach ($roles as $index => $role) {
-            $info     = config('csv.import_roles')[$role] ?? null;
-            $mappable = $info['mappable'] ?? false;
-            if (null === $info) {
-                continue;
-            }
-            if (false === $mappable) {
-                continue;
-            }
-            $mapColumn = $doMapping[$index] ?? false;
-            if (false === $mapColumn) {
-                continue;
-            }
-            Log::debug(sprintf('Mappable role is "%s"', $role));
+            // then we can use them:
+            $roles           = $configuration->getRoles();
+            $existingMapping = $configuration->getMapping();
+            $doMapping       = $configuration->getDoMapping();
+            $data            = [];
 
-            $info['role']   = $role;
-            $info['values'] = [];
+            foreach ($roles as $index => $role) {
+                $info     = config('csv.import_roles')[$role] ?? null;
+                $mappable = $info['mappable'] ?? false;
+                if (null === $info) {
+                    continue;
+                }
+                if (false === $mappable) {
+                    continue;
+                }
+                $mapColumn = $doMapping[$index] ?? false;
+                if (false === $mapColumn) {
+                    continue;
+                }
+                Log::debug(sprintf('Mappable role is "%s"', $role));
 
+                $info['role']   = $role;
+                $info['values'] = [];
+
+
+                // create the "mapper" class which will get data from Firefly III.
+                $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+                if (!class_exists($class)) {
+                    throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                }
+                Log::debug(sprintf('Associated class is %s', $class));
+
+
+                /** @var MapperInterface $object */
+                $object               = app($class);
+                $info['mapping_data'] = $object->getMap();
+                $info['mapped']       = $existingMapping[$index] ?? [];
+
+                Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+
+                $data[$index] = $info;
+            }
+
+            // get columns from file
+            $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
+            $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+            $data      = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+        }
+        /*
+         * To map Nordigen, pretend the file has one "column" (this is based on the CSV importer after all)
+         * that contains:
+         * - opposing account names (this is preordained).
+         */
+        if ('nordigen' === $configuration->getFlow()) {
+            $roles = [];
+            $data  = [];
+
+            // index 0, opposing account name:
+            $index                  = 0;
+            $opposingName           = config('csv.import_roles.opposing-name') ?? null;
+            $opposingName['role']   = 'opposing-name';
+            $opposingName['values'] = $this->getOpposingAccounts();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
-
             /** @var MapperInterface $object */
-            $object               = app($class);
-            $info['mapping_data'] = $object->getMap();
-            $info['mapped']       = $existingMapping[$index] ?? [];
-
-            Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
-
-            $data[$index] = $info;
+            $object                       = app($class);
+            $opposingName['mapping_data'] = $object->getMap();
+            $opposingName['mapped']       = $existingMapping[$index] ?? [];
+            $data[]                       = $opposingName;
+        }
+        if ('spectre' === $configuration->getFlow()) {
+            die('spectre');
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
             // set map config as complete.
-            //session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-            session()->put(Constants::READY_FOR_CONVERSION, true);
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
             return redirect()->route('007-convert.index');
         }
 
-
-        // get columns from file
-        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
-        $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
-        $data      = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
 
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
     }
@@ -183,9 +223,14 @@ class MapController extends Controller
 
         // at this point the $data array must be merged with the mapping as it is on the disk,
         // and then saved to disk once again in a new config file.
-        $diskArray       = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-        $diskConfig      = Configuration::fromArray($diskArray);
-        $originalMapping = $diskConfig->getMapping();
+        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        $originalMapping = [];
+        $diskConfig      = null;
+        if (null !== $configFileName) {
+            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig      = Configuration::fromArray($diskArray);
+            $originalMapping = $diskConfig->getMapping();
+        }
 
         // loop $data and save values:
         $mergedMapping = $this->mergeMapping($originalMapping, $data);
@@ -198,8 +243,10 @@ class MapController extends Controller
         // since the configuration saved in the session will omit 'mapping', 'do_mapping' and 'roles'
         // these must be set to the configuration file
         // no need to do this sooner because toSessionArray would have dropped them anyway.
-        $configuration->setRoles($diskConfig->getRoles());
-        $configuration->setDoMapping($diskConfig->getDoMapping());
+        if (null !== $diskConfig) {
+            $configuration->setRoles($diskConfig->getRoles());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+        }
 
         // then save entire thing to a new disk file:
         $configFileName = StorageService::storeArray($configuration->toArray());
@@ -212,6 +259,10 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
+        if('nordigen' === $configuration->getFlow()) {
+            // if nordigen, now ready for submission!
+            session()->put(Constants::READY_FOR_SUBMISSION, true);
+        }
         return redirect()->route('007-convert.index');
     }
 
@@ -238,5 +289,47 @@ class MapController extends Controller
         }
         // original has been updated:
         return $original;
+    }
+
+
+    /**
+     * @return array
+     * @throws FileNotFoundException
+     * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * TODO move to helper or something
+     */
+    private function getOpposingAccounts(): array
+    {
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk               = Storage::disk(self::DISK_NAME);
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $opposing = [];
+        $total    = count($array);
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
+                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
+            }
+
+        }
+        $filtered = array_filter(
+            $opposing,
+            static function (string $value) {
+                return '' !== $value;
+            }
+        );
+
+        return array_unique($filtered);
     }
 }

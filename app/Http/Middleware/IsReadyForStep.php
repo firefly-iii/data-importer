@@ -123,9 +123,25 @@ trait IsReadyForStep
                 }
                 return false;
             case 'map':
+                // mapping must be complete, or not ready for this step.
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug('Return false, not ready for step [1].');
                     return false;
                 }
+
+                // conversion complete?
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('Return true, ready for step [4].');
+                    return true;
+                }
+
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Return false, not yet ready for step [2].');
+                    return false;
+                }
+                // otherwise return false.
+                Log::debug('Return true, ready for step [3].');
                 return true;
             case 'nordigen-link':
                 // must have upload, thats it
@@ -134,10 +150,15 @@ trait IsReadyForStep
                 }
                 return false;
             case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    Log::debug('Return false, ready for submission.');
+                    return false;
+                }
                 // if/else is in reverse!
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
                     return true;
                 }
+
                 // will probably never return false, but OK.
                 return false;
             case 'configuration':
@@ -263,9 +284,32 @@ trait IsReadyForStep
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'define-roles':
+                // will always push to mapping, and mapping will send them to
+                // the right step.
                 $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
+            case 'map':
+                // if no conversion yet, go there first
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Is ready for conversion, so send to conversion.');
+                    $route = route('007-convert.index');
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    return redirect($route);
+                }
+                Log::debug('Is ready for submit.');
+                // otherwise go to import right away
+                $route = route('008-submit.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    $route = route('008-submit.index');
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    return redirect($route);
+                }
+                throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s" [1]', self::STEP));
         }
     }
 

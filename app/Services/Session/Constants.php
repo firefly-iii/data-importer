@@ -60,6 +60,7 @@ class Constants
     public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
     public const SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
     public const SELECTED_BANK_COUNTRY         = 'selected_bank_country';
+    public const READY_FOR_SUBMISSION          = 'ready_for_submission';
 
     // nordigen specific constants
     public const REQUISITION_REFERENCE = 'requisition_reference';
