@@ -160,7 +160,6 @@ class RoutineManager implements RoutineManagerInterface
                 $two[$i] ?? [],
                 $three[$i] ?? [],
                 $four[$i] ?? [],
-                $five[$i] ?? []
             );
         }
 
@@ -183,7 +182,6 @@ class RoutineManager implements RoutineManagerInterface
                 $two[$i] ?? [],
                 $three[$i] ?? [],
                 $four[$i] ?? [],
-                $five[$i] ?? []
             );
         }
 
@@ -206,7 +204,6 @@ class RoutineManager implements RoutineManagerInterface
                 $two[$i] ?? [],
                 $three[$i] ?? [],
                 $four[$i] ?? [],
-                $five[$i] ?? []
             );
         }
 

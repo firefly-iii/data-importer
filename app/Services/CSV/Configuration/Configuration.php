@@ -383,11 +383,11 @@ class Configuration
         $object->accounts   = $array['accounts'] ?? [];
 
         // date range settings
-        $object->dateRange       = $data['date_range'] ?? 'all';
-        $object->dateRangeNumber = $data['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
-        $object->dateNotBefore   = $data['date_not_before'] ?? '';
-        $object->dateNotAfter    = $data['date_not_after'] ?? '';
+        $object->dateRange       = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+        $object->dateNotBefore   = $array['date_not_before'] ?? '';
+        $object->dateNotAfter    = $array['date_not_after'] ?? '';
 
         // nordigen information:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
