@@ -67,7 +67,7 @@ class AccountInformationCollector
             $balanceAccount->setStatus('disabled');
             $balanceAccount->setName('Disabled account');
         }
-        $balanceAccount->setStatus('disabled');
+
         return $balanceAccount;
     }
 

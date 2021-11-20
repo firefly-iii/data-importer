@@ -132,7 +132,8 @@ abstract class Request
                 Log::error($body);
                 //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
             }
-            $exception       = new ImporterErrorException($e->getMessage(), 0, $e);
+            // if status code is 503, the account does not exist.
+            $exception = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
             $exception->json = $json;
             throw $exception;
         }

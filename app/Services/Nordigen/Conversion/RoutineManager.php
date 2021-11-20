@@ -95,7 +95,13 @@ class RoutineManager implements RoutineManagerInterface
         // generate Firefly III ready transactions:
         app('log')->debug('Generating Firefly III transactions.');
         $this->transactionGenerator->collectTargetAccounts();
-        $this->transactionGenerator->collectNordigenAccounts();
+
+        try {
+            $this->transactionGenerator->collectNordigenAccounts();
+        } catch (ImporterErrorException $e) {
+            Log::error('Could not collect info on all Nordigen accounts, but this info isnt used at the moment anyway.');
+            Log::error($e->getMessage());
+        }
 
         $transactions = $this->transactionGenerator->getTransactions($nordigen);
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
