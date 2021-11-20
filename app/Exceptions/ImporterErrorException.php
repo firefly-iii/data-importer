@@ -33,4 +33,5 @@ use Exception;
 class ImporterErrorException extends Exception
 {
     public array $json;
+    public int $statusCode = 0;
 }

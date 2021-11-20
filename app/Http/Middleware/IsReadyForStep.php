@@ -108,6 +108,8 @@ trait IsReadyForStep
             case 'authenticate':
             case 'service-validation':
                 return true;
+            case 'define-roles':
+                return false;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return false;
@@ -126,7 +128,10 @@ trait IsReadyForStep
                 }
                 return false;
             case 'configuration':
-                die('must have selected bank/country, must have had redirect.');
+                if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    return true;
+                }
+                return false;
         }
     }
 
@@ -236,6 +241,10 @@ trait IsReadyForStep
             case 'nordigen-link':
                 // back to selection
                 $route = route('009-selection.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+            case 'define-roles':
+                $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
         }
