@@ -69,7 +69,7 @@ class SubmitController extends Controller
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
         // append info from the file on disk:
         $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== session()->get($configFileName)) {
+        if (null !== $configFileName) {
             $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
             $diskConfig = Configuration::fromArray($diskArray);
             $configuration->setDoMapping($diskConfig->getDoMapping());

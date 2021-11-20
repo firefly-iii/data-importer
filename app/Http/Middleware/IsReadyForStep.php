@@ -145,6 +145,12 @@ trait IsReadyForStep
                     return true;
                 }
                 return false;
+            case 'submit':
+                // if/else is in reverse!
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    return true;
+                }
+                return false;
         }
     }
 
