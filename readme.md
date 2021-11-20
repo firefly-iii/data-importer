@@ -37,6 +37,8 @@ The data importer does not connect to your bank directly. Instead, it uses [Nord
 
 You can also import CSV files downloaded from your bank. Other import options are under construction.
 
+Eager to get started? Go to the TODO documentation!
+
 <!-- HELP TEXT -->
 ## Need help?
 
