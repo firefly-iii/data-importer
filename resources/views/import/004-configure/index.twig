@@ -111,7 +111,9 @@
                                                         {% if 'disabled' == information.nordigen.status %}<br><small class="text-danger">(this account is disabled)</small>{% endif %}
                                                     </td>
                                                     <td>
-                                                        {% if(information.firefly|length!=0) %}&rarr;{% endif %}
+                                                        {% if 'disabled' != information.nordigen.status %}
+                                                            {% if(information.firefly|length!=0) %}&rarr;{% endif %}
+                                                        {% endif %}
                                                     </td>
                                                     <td>
 
