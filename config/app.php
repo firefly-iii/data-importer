@@ -141,7 +141,7 @@ return [
     | will not be safe. Please do this before deploying an application!
     |
     */
-    // not used by CSV importer.
+    // not used by data importer.
     'key'    => 'PSPGRY5PWJ6D1UMZLBL5BNAZIN4I1QSD',
 
     'cipher' => 'AES-256-CBC',

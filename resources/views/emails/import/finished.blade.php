@@ -52,6 +52,6 @@ Go to Firefly III
 @endcomponent
 
 Enjoy!<br>
-Firefly III CSV importer, v{{ config('csv_importer.version')  }}
+Firefly III Data Importer, v{{ config('importer.version')  }}
 
 @endcomponent

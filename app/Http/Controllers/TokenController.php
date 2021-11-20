@@ -58,7 +58,7 @@ class TokenController extends Controller
      */
     public function index(Request $request)
     {
-        $pageTitle = 'CSV importer';
+        $pageTitle = 'Data importer';
         Log::debug(sprintf('Now at %s', __METHOD__));
         $configToken = (string) config('importer.access_token');
         $clientId    = (int) config('importer.client_id');

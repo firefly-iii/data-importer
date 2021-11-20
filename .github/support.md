@@ -1,7 +1,7 @@
 
 # Welcome to the Firefly III Data Importer on Github!
 
-:+1::tada: Thank you for taking the time to contribute something to the Firefly III CSV importer!
+:+1::tada: Thank you for taking the time to contribute something to the Firefly III Data Importer!
 
 ## Bugs
 

@@ -118,7 +118,7 @@ class Accounts extends AbstractTask
         if ('revenue' === $destination['type'] && 'withdrawal' === $transaction['type']) {
             Log::warning('The found destination account is of type revenue but this is a withdrawal. Out of cheese error.');
             Log::debug(
-                sprintf('CSV importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $destination['name'], $destination['iban'])
+                sprintf('Data importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $destination['name'], $destination['iban'])
             );
             $transaction['destination_id']   = null;
             $transaction['destination_name'] = $destination['name'];
@@ -132,7 +132,7 @@ class Accounts extends AbstractTask
          */
         if ('expense' === $source['type'] && 'deposit' === $transaction['type']) {
             Log::warning('The found source account is of type expense but this is a deposit. Out of cheese error.');
-            Log::debug(sprintf('CSV importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $source['name'], $source['iban']));
+            Log::debug(sprintf('Data importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $source['name'], $source['iban']));
             $transaction['source_id']   = null;
             $transaction['source_name'] = $source['name'];
             $transaction['source_iban'] = $source['iban'];
@@ -235,8 +235,8 @@ class Accounts extends AbstractTask
             return $return;
         }
         // If the IBAN search result is NULL, but the IBAN itself is not null,
-        // CSV importer will return an array with the IBAN (and optionally the name).
-        // this prevents a situation where the CSV importer
+        // data importer will return an array with the IBAN (and optionally the name).
+        // this prevents a situation where the data importer
 
 
         // find by name, return only if it's an asset or liability account.
@@ -375,7 +375,7 @@ class Accounts extends AbstractTask
 
             // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
             if (in_array($account->type, ['expense', 'revenue'], true)) {
-                Log::debug('[a] CSV importer will pretend not to have found anything. Firefly III must handle the IBAN.');
+                Log::debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
 
                 return null;
             }
