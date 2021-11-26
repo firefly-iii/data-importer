@@ -100,7 +100,7 @@ class TransactionProcessor
         }
         $return = [];
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->valueDate;
+            $madeOn = $transaction->getDate();
 
             if (null !== $this->notBefore && $madeOn->lte($this->notBefore)) {
                 app('log')->info(
