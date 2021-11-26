@@ -57,6 +57,10 @@ class Configuration
     // spectre + nordigen configuration
     private array $accounts;
 
+    // spectre configuration
+    private string $identifier;
+    private string $connection;
+
     // date range settings
     private string $dateRange;
     private int    $dateRangeNumber;
@@ -115,6 +119,10 @@ class Configuration
         // spectre + nordigen configuration
         $this->accounts = [];
 
+        // spectre
+        $this->identifier = '0';
+        $this->connection = '0';
+
         // mapping for spectre + nordigen
         $this->mapAllData = false;
 
@@ -168,6 +176,10 @@ class Configuration
 
         // mapping for spectre + nordigen
         $object->mapAllData = $array['map_all_data'] ?? false;
+
+        // spectre
+        $object->identifier = $array['identifier'] ?? '0';
+        $object->connection = $array['connection'] ?? '0';
 
         // nordigen:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
@@ -267,6 +279,10 @@ class Configuration
         $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
         $object->dateNotBefore   = $data['date_not_before'] ?? '';
         $object->dateNotAfter    = $data['date_not_after'] ?? '';
+
+        // spectre
+        $object->identifier = $data['identifier'] ?? '0';
+        $object->connection = $data['connection'] ?? '0';
 
         // settings for spectre + nordigen
         $object->mapAllData = $data['map_all_data'] ?? false;
@@ -382,6 +398,11 @@ class Configuration
         $object->mapAllData = $array['map_all_data'] ?? false;
         $object->accounts   = $array['accounts'] ?? [];
 
+
+        // spectre
+        $object->identifier = $array['identifier'] ?? '0';
+        $object->connection = $array['connection'] ?? '0';
+
         // date range settings
         $object->dateRange       = $array['date_range'] ?? 'all';
         $object->dateRangeNumber = $array['date_range_number'] ?? 30;
@@ -493,6 +514,15 @@ class Configuration
     }
 
     /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -515,6 +545,10 @@ class Configuration
             'unique_column_type'            => $this->uniqueColumnType,
             'version'                       => $this->version,
             'flow'                          => $this->flow,
+
+            // spectre
+            'identifier'                    => $this->identifier,
+            'connection'                    => $this->connection,
 
             // mapping for spectre + nordigen
             'map_all_data'                  => $this->mapAllData,
@@ -580,6 +614,29 @@ class Configuration
         return $this->headers;
     }
 
+    /**
+     * @return string
+     */
+    public function getConnection(): string
+    {
+        return $this->connection;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $connection
+     */
+    public function setConnection(string $connection): void
+    {
+        $this->connection = $connection;
+    }
     /**
      * @return bool
      */

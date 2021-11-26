@@ -56,7 +56,6 @@ class AuthenticateController extends Controller
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         if ('spectre' === $flow) {
-            die('TODO '. __METHOD__);
             $subTitle  = 'Spectre';
             $validator = new SpectreValidator;
             $result    = $validator->validate();

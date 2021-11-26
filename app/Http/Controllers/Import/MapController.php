@@ -154,7 +154,7 @@ class MapController extends Controller
             $index                  = 0;
             $opposingName           = config('csv.import_roles.opposing-name') ?? null;
             $opposingName['role']   = 'opposing-name';
-            $opposingName['values'] = $this->getOpposingAccounts();
+            $opposingName['values'] = $this->getOpposingNordigenAccounts();
 
             // create the "mapper" class which will get data from Firefly III.
             $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
@@ -170,7 +170,30 @@ class MapController extends Controller
             $data[]                       = $opposingName;
         }
         if ('spectre' === $configuration->getFlow()) {
-            die('spectre');
+            $roles = [];
+            $data = [];
+
+            // index 0, opposing account name:
+            $index                  = 0;
+            $opposingName           = config('csv.import_roles.opposing-name') ?? null;
+            $opposingName['role']   = 'opposing-name';
+            $opposingName['values'] = $this->getOpposingSpectreAccounts();
+
+            // create the "mapper" class which will get data from Firefly III.
+            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
+            if (!class_exists($class)) {
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+            }
+            Log::debug(sprintf('Associated class is %s', $class));
+
+            /** @var MapperInterface $object */
+            $object                       = app($class);
+            $opposingName['mapping_data'] = $object->getMap();
+            $opposingName['mapped']       = $existingMapping[$index] ?? [];
+            $data[]                       = $opposingName;
+
+            // index 1: category (TODO)
+
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
@@ -298,9 +321,10 @@ class MapController extends Controller
      * @throws ImporterErrorException
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
+     *
      * TODO move to helper or something
      */
-    private function getOpposingAccounts(): array
+    private function getOpposingNordigenAccounts(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);

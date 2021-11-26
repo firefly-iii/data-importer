@@ -78,6 +78,7 @@ class TokenManager
 
         // get complete set!
         try {
+            // TODO use cookie values
             $identifier = config('nordigen.id');
             $key        = config('nordigen.key');
             self::getNewTokenSet($identifier, $key);

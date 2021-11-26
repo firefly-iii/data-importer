@@ -186,7 +186,9 @@ class UploadController extends Controller
             return redirect(route('009-selection.index'));
         }
         if ('spectre' === $flow) {
-            die('Spectre redirect flow after config upload');
+            // redirect to spectre
+            session()->put(Constants::HAS_UPLOAD, true);
+            return redirect(route('011-connections.index'));
         }
 
         return redirect(route('004-configure.index'));

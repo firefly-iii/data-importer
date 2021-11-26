@@ -74,44 +74,66 @@
                             Form
                         </div>
                         <div class="card-body">
-                            {% if 'nordigen' == flow %}
-                                <h4>Nordigen import options</h4>
+                            {% if 'nordigen' == flow or 'spectre' == flow %}
+                                <h4>{{ flow|capitalize }} import options</h4>
                                 <div class="form-group row">
                                     <div class="col-sm-3">Accounts</div>
                                     <div class="col-sm-9">
                                         <table class="table table-sm table-bordered table-striped">
                                             <thead>
                                             <tr>
-                                                <th>Nordigen</th>
+                                                <th>{{ flow|capitalize }}</th>
                                                 <th>&nbsp;</th>
                                                 <th>Firefly III</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for information in nordigenAccounts %}
+                                            {% for information in importerAccounts %}
                                                 <tr>
                                                     <td>
-
-                                                        <input
-                                                            id="do_import_{{ information.nordigen.identifier }}"
-                                                            type="checkbox"
-                                                            {% if 'disabled' == information.nordigen.status %}
-                                                            disabled="disabled"
-                                                            {% endif %}
-                                                            name="do_import[{{ information.nordigen.identifier }}]"
-                                                            value="1"
-                                                            aria-describedby="accountsHelp"
-                                                            {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
-                                                        /> <label class="form-check-label"
-                                                                  {% if '' != information.nordigen.iban %}title="IBAN: {{ information.nordigen.iban }}"{% endif %}
-                                                                  for="do_import_{{ information.nordigen.identifier }}">
-                                                            Account "{{ information.nordigen.getFullName }}"
+                                                        {% if 'nordigen' == flow %}
+                                                            <input
+                                                                id="do_import_{{ information.import_service.identifier }}"
+                                                                type="checkbox"
+                                                                {% if 'disabled' == information.import_service.status %}
+                                                                    disabled="disabled"
+                                                                {% endif %}
+                                                                name="do_import[{{ information.import_service.identifier }}]"
+                                                                value="1"
+                                                                aria-describedby="accountsHelp"
+                                                                {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+                                                            /> <label class="form-check-label"
+                                                                      {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+                                                                      for="do_import_{{ information.import_service.identifier }}">
+                                                            Account "{{ information.import_service.getFullName }}"
                                                         </label>
-                                                        {% if 'disabled' != information.nordigen.status and '' != information.nordigen.iban %}<br><small>IBAN: {{ information.nordigen.iban }}</small>{% endif %}
-                                                        {% if 'disabled' == information.nordigen.status %}<br><small class="text-danger">(this account is disabled)</small>{% endif %}
+                                                            {% if 'disabled' != information.import_service.status and '' != information.import_service.iban %}
+                                                                <br><small>
+                                                                IBAN: {{ information.import_service.iban }}</small>{% endif %}
+                                                            {% if 'disabled' == information.import_service.status %}<br>
+                                                                <small class="text-danger">(this account is
+                                                                    disabled)</small>{% endif %}
+                                                        {% endif %}
+                                                        {% if 'spectre' == flow %}
+                                                            <input
+                                                                id="do_import_{{ information.import_service.id }}"
+                                                                type="checkbox"
+                                                                name="do_import[{{ information.import_service.id }}]"
+                                                                value="1"
+                                                                aria-describedby="accountsHelp"
+                                                                {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+                                                            /> <label class="form-check-label"
+                                                                      {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+                                                                      for="do_import_{{ information.import_service.id }}">
+                                                            Account "{{ information.import_service.name }}"
+                                                        </label>
+                                                            {% if '' != information.import_service.iban %}
+                                                                <br><small>
+                                                                IBAN: {{ information.import_service.iban }}</small>{% endif %}
+                                                        {% endif %}
                                                     </td>
                                                     <td>
-                                                        {% if 'disabled' != information.nordigen.status %}
+                                                        {% if 'disabled' != information.import_service.status %}
                                                             {% if(information.firefly|length!=0) %}&rarr;{% endif %}
                                                         {% endif %}
                                                     </td>
@@ -121,18 +143,18 @@
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
-                                                            {% if 'disabled' != information.nordigen.status %}
-                                                            <select style="width:100%;"
-                                                                    class="custom-select custom-select-sm form-control"
-                                                                    name="accounts[{{ information.nordigen.identifier }}]">
-                                                                {% for ff3Account in information.firefly %}
-                                                                    {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
-                                                                    <option value="{{ ff3Account.id }}"
-                                                                            label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
-                                                                        {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </select>
+                                                            {% if 'disabled' != information.import_service.status %}
+                                                                <select style="width:100%;"
+                                                                        class="custom-select custom-select-sm form-control"
+                                                                        name="accounts[{{ information.import_service.identifier }}]">
+                                                                    {% for ff3Account in information.firefly %}
+                                                                        {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
+                                                                        <option value="{{ ff3Account.id }}"
+                                                                                label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+                                                                            {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </select>
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
@@ -307,7 +329,8 @@
                                                 Yes
                                             </label>
                                             <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your TODO data to existing Firefly III
+                                                <br>You get the opportunity to link your TODO data to existing Firefly
+                                                III
                                                 data, for a cleaner import.
                                             </small>
                                         </div>
@@ -322,7 +345,8 @@
                                                    type="radio" name="date_range" value="all"
                                                    {% if configuration.getDateRange == 'all' %}checked{% endif %}
                                                    aria-describedby="rangeHelp"/>
-                                            <label class="form-check-label" for="date_range_all">Import everything</label>
+                                            <label class="form-check-label" for="date_range_all">Import
+                                                everything</label>
                                         </div>
 
                                         <div class="form-check">
@@ -601,7 +625,9 @@
                 $('#date_range_partial_settings').hide();
                 $('#date_range_range_settings').hide();
             }
-        }``
+        }
+
+        ``
 
         function updateDateExample() {
             $('#date_example').text('...');

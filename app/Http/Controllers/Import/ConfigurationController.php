@@ -38,6 +38,9 @@ use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
+use App\Services\Spectre\Model\Account as SpectreAccount;
+use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
+use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
 use App\Support\Token;
 use Cache;
@@ -123,20 +126,28 @@ class ConfigurationController extends Controller
         }
 
         // also get the nordigen / spectre accounts
-        $nordigenAccounts = [];
+        $importerAccounts = [];
         if ('nordigen' === $flow) {
             // list all accounts in Nordigen:
             $reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
-            $nordigenAccounts = $this->getNordigenAccounts($reference);
-            $nordigenAccounts = $this->mergeAccountLists($nordigenAccounts, $accounts);
+            $importerAccounts = $this->getNordigenAccounts($reference);
+            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
         }
+
         if ('spectre' === $flow) {
-            die('grab config for spectre.');
+            // get the accounts over at Spectre.
+            $url                     = config('spectre.url');
+            $appId                   = config('spectre.app_id');
+            $secret                  = config('spectre.secret');
+            $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
+            $spectreList->connection = $configuration->getConnection();
+            $spectreAccounts         = $spectreList->get();
+            $importerAccounts        = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
         }
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'nordigenAccounts')
+            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts')
         );
     }
 
@@ -195,7 +206,7 @@ class ConfigurationController extends Controller
 
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if('nordigen' === $configuration->getFlow()) {
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
             // at this point, nordigen is ready for data conversion.
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }
@@ -248,6 +259,56 @@ class ConfigurationController extends Controller
         return $return;
     }
 
+
+    /**
+     * @param SpectreGetAccountsResponse $spectre
+     * @param array                      $firefly
+     *
+     * TODO should be a helper
+     */
+    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
+    {
+        $return = [];
+        Log::debug('Now creating Spectre account lists.');
+
+        /** @var SpectreAccount $spectreAccount */
+        foreach ($spectre as $spectreAccount) {
+            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
+            $iban     = $spectreAccount->iban;
+            $currency = $spectreAccount->currencyCode;
+            $entry    = [
+                'import_service' => $spectreAccount,
+                'firefly'        => [],
+            ];
+
+            // only iban?
+            $filteredByIban = $this->filterByIban($firefly, $iban);
+
+            if (1 === count($filteredByIban)) {
+                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                $entry['firefly'] = $filteredByIban;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+
+            // only currency?
+            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
+
+            if (count($filteredByCurrency) > 0) {
+                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                $entry['firefly'] = $filteredByCurrency;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug('No special filtering on the Firefly III account list.');
+            $entry['firefly'] = $firefly;
+            $return[]         = $entry;
+        }
+        return $return;
+    }
+
+
     /**
      * @param array $nordigen
      * @param array $firefly
@@ -255,9 +316,9 @@ class ConfigurationController extends Controller
      *
      * TODO move to some helper.
      */
-    private function mergeAccountLists(array $nordigen, array $firefly): array
+    private function mergeNordigenAccountLists(array $nordigen, array $firefly): array
     {
-        Log::debug('Now creating account lists.');
+        Log::debug('Now creating Nordigen account lists.');
         $return = [];
         /** @var NordigenAccount $nordigenAccount */
         foreach ($nordigen as $nordigenAccount) {
@@ -265,8 +326,8 @@ class ConfigurationController extends Controller
             $iban     = $nordigenAccount->getIban();
             $currency = $nordigenAccount->getCurrency();
             $entry    = [
-                'nordigen' => $nordigenAccount,
-                'firefly'  => [],
+                'import_service' => $nordigenAccount,
+                'firefly'        => [],
             ];
 
             // only iban?

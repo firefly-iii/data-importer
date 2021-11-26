@@ -31,6 +31,7 @@ use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -112,7 +113,7 @@ class ConversionController extends Controller
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            throw new ImporterErrorException('Cannot handle. :(');
+            $routine = new SpectreRoutineManager($identifier);
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
             $nextUrl = route('006-mapping.index');
@@ -168,7 +169,7 @@ class ConversionController extends Controller
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            throw new ImporterErrorException('Cannot handle. :(');
+            throw new ImporterErrorException('Cannot handle. :( 2');
         }
 
         $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
