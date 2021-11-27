@@ -80,6 +80,7 @@ class ConversionController extends Controller
             $configuration->setMapping($diskConfig->getMapping());
         }
 
+
         Log::debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
         if (empty($configuration->getDoMapping())) {
@@ -169,7 +170,7 @@ class ConversionController extends Controller
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            throw new ImporterErrorException('Cannot handle. :( 2');
+            $routine = new SpectreRoutineManager($identifier);
         }
 
         $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);

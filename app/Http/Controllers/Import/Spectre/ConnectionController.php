@@ -62,11 +62,11 @@ class ConnectionController extends Controller
      */
     public function index()
     {
-        $mainTitle = 'Spectre';
+        $mainTitle = 'Select your financial organisation';
         $subTitle  = 'Select your financial organisation';
         $url       = config('spectre.url');
 
-        // TODO or cookie value
+        // TODO or cookie value, must replace them all with a helper, same for nordigen.
         $appId  = config('spectre.app_id');
         $secret = config('spectre.secret');
 
@@ -148,7 +148,7 @@ class ConnectionController extends Controller
             $secret             = config('spectre.secret');
             $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
             $newToken->customer = $configuration->getIdentifier();
-            $newToken->url      = route('import.callback.index');
+            $newToken->url      = route('011-connections.callback');
             /** @var PostConnectSessionResponse $result */
             $result = $newToken->post();
 

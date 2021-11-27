@@ -60,6 +60,7 @@ class Configuration
     // spectre configuration
     private string $identifier;
     private string $connection;
+    private bool   $ignoreSpectreCategories;
 
     // date range settings
     private string $dateRange;
@@ -120,8 +121,9 @@ class Configuration
         $this->accounts = [];
 
         // spectre
-        $this->identifier = '0';
-        $this->connection = '0';
+        $this->identifier              = '0';
+        $this->connection              = '0';
+        $this->ignoreSpectreCategories = false;
 
         // mapping for spectre + nordigen
         $this->mapAllData = false;
@@ -178,8 +180,9 @@ class Configuration
         $object->mapAllData = $array['map_all_data'] ?? false;
 
         // spectre
-        $object->identifier = $array['identifier'] ?? '0';
-        $object->connection = $array['connection'] ?? '0';
+        $object->identifier              = $array['identifier'] ?? '0';
+        $object->connection              = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
 
         // nordigen:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
@@ -281,8 +284,9 @@ class Configuration
         $object->dateNotAfter    = $data['date_not_after'] ?? '';
 
         // spectre
-        $object->identifier = $data['identifier'] ?? '0';
-        $object->connection = $data['connection'] ?? '0';
+        $object->identifier              = $data['identifier'] ?? '0';
+        $object->connection              = $data['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $data['ignore_spectre_categories'] ?? false;
 
         // settings for spectre + nordigen
         $object->mapAllData = $data['map_all_data'] ?? false;
@@ -400,8 +404,9 @@ class Configuration
 
 
         // spectre
-        $object->identifier = $array['identifier'] ?? '0';
-        $object->connection = $array['connection'] ?? '0';
+        $object->identifier              = $array['identifier'] ?? '0';
+        $object->connection              = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
 
         // date range settings
         $object->dateRange       = $array['date_range'] ?? 'all';
@@ -549,6 +554,7 @@ class Configuration
             // spectre
             'identifier'                    => $this->identifier,
             'connection'                    => $this->connection,
+            'ignore_spectre_categories'     => $this->ignoreSpectreCategories,
 
             // mapping for spectre + nordigen
             'map_all_data'                  => $this->mapAllData,
@@ -580,6 +586,14 @@ class Configuration
         }
 
         return $array;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreSpectreCategories(): bool
+    {
+        return $this->ignoreSpectreCategories;
     }
 
     /**
@@ -637,6 +651,7 @@ class Configuration
     {
         $this->connection = $connection;
     }
+
     /**
      * @return bool
      */

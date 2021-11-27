@@ -25,6 +25,9 @@ namespace App\Services\Spectre\Conversion;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
+use App\Services\Spectre\Conversion\Routine\FilterTransactions;
+use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
+use App\Services\Spectre\Conversion\Routine\TransactionProcessor;
 
 /**
  * Class RoutineManager
@@ -33,13 +36,19 @@ class RoutineManager implements RoutineManagerInterface
 {
     use GeneratesIdentifier;
 
-    private Configuration $configuration;
+    private Configuration        $configuration;
+    private TransactionProcessor $transactionProcessor;
+    private GenerateTransactions $transactionGenerator;
+    private FilterTransactions   $transactionFilter;
 
     /**
      *
      */
     public function __construct(?string $identifier)
     {
+        $this->transactionProcessor = new TransactionProcessor;
+        $this->transactionGenerator = new GenerateTransactions;
+        $this->transactionFilter    = new FilterTransactions;
         if (null === $identifier) {
             $this->generateIdentifier();
         }
@@ -55,6 +64,11 @@ class RoutineManager implements RoutineManagerInterface
     {
         // save config
         $this->configuration = $configuration;
+        $this->transactionProcessor->setConfiguration($configuration);
+        $this->transactionProcessor->setDownloadIdentifier($this->getIdentifier());
+        $this->transactionGenerator->setConfiguration($configuration);
+        $this->transactionGenerator->setIdentifier($this->getIdentifier());
+        $this->transactionFilter->setIdentifier($this->getIdentifier());
     }
 
     /**
@@ -62,14 +76,19 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        // TODO: Implement start() method.
-    }
+        // get transactions from Spectre
+        $transactions = $this->transactionProcessor->download();
 
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        // TODO: Implement getIdentifier() method.
+        // generate Firefly III ready transactions:
+        app('log')->debug('Generating Firefly III transactions.');
+        $this->transactionGenerator->collectTargetAccounts();
+
+        $converted = $this->transactionGenerator->getTransactions($transactions);
+        app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
+
+        $filtered = $this->transactionFilter->filter($converted);
+        app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
+
+        return $filtered;
     }
 }

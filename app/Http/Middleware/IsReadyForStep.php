@@ -159,6 +159,12 @@ trait IsReadyForStep
                 // otherwise return false.
                 Log::debug('Spectre: Return true, ready for step [3].');
                 return true;
+            case 'submit':
+                // if/else is in reverse!
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    return true;
+                }
+                return false;
         }
     }
 

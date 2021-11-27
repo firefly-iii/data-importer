@@ -52,4 +52,12 @@ trait GeneratesIdentifier
         Log::info(sprintf('Job identifier is "%s"', $generatedId));
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
 }

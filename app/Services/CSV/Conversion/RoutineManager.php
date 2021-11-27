@@ -137,14 +137,6 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
      * @param int $count
      */
     private function mergeMessages(int $count): void

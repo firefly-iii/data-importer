@@ -182,6 +182,7 @@ class ConfigurationController extends Controller
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
         // TODO are all fields actually in the config?
+
         // loop accounts:
         $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
@@ -204,6 +205,8 @@ class ConfigurationController extends Controller
 
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 
+
+        Log::debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
         if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {

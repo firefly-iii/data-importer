@@ -94,11 +94,4 @@ class RoutineManager implements RoutineManagerInterface
         return $filtered;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
 }

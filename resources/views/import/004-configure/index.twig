@@ -1,17 +1,12 @@
 {% extends "./layout/default" %}
 {% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                &nbsp;
-            </div>
-        </div>
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-lg-10 offset-lg-1">
                 <h1>{{ mainTitle }}</h1>
             </div>
         </div>
-        <div class="row">
+        <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
@@ -67,6 +62,9 @@
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="flow" value="{{ flow }}"/>
+            <!-- these two values are used by Spectre and must be preserved -->
+            <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>
+            <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -76,7 +74,7 @@
                         <div class="card-body">
                             {% if 'nordigen' == flow or 'spectre' == flow %}
                                 <h4>{{ flow|capitalize }} import options</h4>
-                                <div class="form-group row">
+                                <div class="form-group row mb-3">
                                     <div class="col-sm-3">Accounts</div>
                                     <div class="col-sm-9">
                                         <table class="table table-sm table-bordered table-striped">
@@ -91,6 +89,7 @@
                                             {% for information in importerAccounts %}
                                                 <tr>
                                                     <td>
+                                                        {# Nordigen uses identifier #}
                                                         {% if 'nordigen' == flow %}
                                                             <input
                                                                 id="do_import_{{ information.import_service.identifier }}"
@@ -114,6 +113,7 @@
                                                                 <small class="text-danger">(this account is
                                                                     disabled)</small>{% endif %}
                                                         {% endif %}
+                                                        {# Nordigen uses ID #}
                                                         {% if 'spectre' == flow %}
                                                             <input
                                                                 id="do_import_{{ information.import_service.id }}"
@@ -138,15 +138,32 @@
                                                         {% endif %}
                                                     </td>
                                                     <td>
-
                                                         {% if(information.firefly|length==0) %}
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
-                                                            {% if 'disabled' != information.import_service.status %}
+
+                                                            {# Nordigen: #}
+                                                            {% if 'nordigen' == flow %}
+                                                                {% if 'disabled' != information.import_service.status %}
+                                                                    <select style="width:100%;"
+                                                                            class="custom-select custom-select-sm form-control"
+                                                                            name="accounts[{{ information.import_service.identifier }}]">
+                                                                        {% for ff3Account in information.firefly %}
+                                                                            {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
+                                                                            <option value="{{ ff3Account.id }}"
+                                                                                    label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+                                                                                {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+                                                                            </option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            {# Spectre #}
+                                                            {% if 'spectre' == flow %}
                                                                 <select style="width:100%;"
                                                                         class="custom-select custom-select-sm form-control"
-                                                                        name="accounts[{{ information.import_service.identifier }}]">
+                                                                        name="accounts[{{ information.import_service.id }}]">
                                                                     {% for ff3Account in information.firefly %}
                                                                         {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
                                                                         <option value="{{ ff3Account.id }}"
@@ -161,12 +178,28 @@
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
+                                            <caption>Select the accounts you want to import into your Firefly III installation.</caption>
                                         </table>
-                                        <small id="accountsHelp" class="form-text text-muted">
-                                            Select the accounts you want to import into your Firefly III installation.
-                                        </small>
                                     </div>
                                 </div>
+
+                                {% if 'spectre' == flow %}
+                                    <div class="form-group row">
+                                        <label for="X" class="col-sm-3 col-form-label">Ignore Spectre categories</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input" {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %} type="checkbox" value="1" id="ignore_spectre_categories" name="ignore_spectre_categories" aria-describedby="duplicateSpectre">
+                                                <label class="form-check-label" for="ignore_spectre_categories">
+                                                    Ignore Spectre's categories.
+                                                </label>
+                                            </div>
+
+                                            <small class="form-text text-muted" id="duplicateSpectre">
+                                                Spectre adds categories to each transaction. You can choose to ignore them.
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% endif %}
 
                             {% endif %}
 
