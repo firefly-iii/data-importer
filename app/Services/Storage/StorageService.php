@@ -29,7 +29,6 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
 use Log;
 use Storage;
-use Str;
 use UnexpectedValueException;
 
 /**
@@ -46,11 +45,11 @@ class StorageService
     {
         $fileName = hash('sha256', $content);
         $disk     = Storage::disk('uploads');
-        if('{}' === $content) {
+        if ('{}' === $content) {
             throw new ImporterErrorException('Content is {}');
         }
 
-        if($disk->has($fileName)) {
+        if ($disk->has($fileName)) {
             Log::warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
         }
 
@@ -71,7 +70,7 @@ class StorageService
         $json     = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 256);
         $fileName = hash('sha256', $json);
 
-        if($disk->has($fileName)) {
+        if ($disk->has($fileName)) {
             Log::warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
         }
 
@@ -83,17 +82,31 @@ class StorageService
 
     /**
      * @param string $name
-     *
+     * @param bool   $convert
      * @return string
      * @throws FileNotFoundException
      */
-    public static function getContent(string $name): string
+    public static function getContent(string $name, bool $convert = false): string
     {
         $disk = Storage::disk('uploads');
-        if ($disk->exists($name)) {
+        if (!$disk->exists($name)) {
+            throw new UnexpectedValueException(sprintf('No such file %s', $name));
+        }
+        if (false === $convert) {
             return $disk->get($name);
         }
-        throw new UnexpectedValueException(sprintf('No such file %s', $name));
+        $content  = $disk->get($name);
+        $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
+        if (false === $encoding) {
+            Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
+            return $content;
+        }
+        if ('ASCII' === $encoding) {
+            return $content;
+        }
+        Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+        return mb_convert_encoding($content, 'UTF-8', $encoding);
+
     }
 
 }
