@@ -38,12 +38,15 @@ class FileReader
     /**
      * Get a CSV file reader and fill it with data from CSV file.
      *
+     * @param bool $convert
      * @return Reader
      * @throws FileNotFoundException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public static function getReaderFromSession(): Reader
+    public static function getReaderFromSession(bool $convert = false): Reader
     {
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
+        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $convert);
 
         // room for config
         return Reader::createFromString($content);

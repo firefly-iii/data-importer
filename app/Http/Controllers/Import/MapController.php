@@ -137,7 +137,7 @@ class MapController extends Controller
             }
 
             // get columns from file
-            $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE));
+            $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
             $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
             $data      = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
         }
