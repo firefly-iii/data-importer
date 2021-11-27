@@ -73,7 +73,7 @@ class ListCustomersRequest extends Request
      */
     public function post(): Response
     {
-        // TODO: Implement post() method.
+        // Implement post() method.
     }
 
     /**
@@ -81,6 +81,6 @@ class ListCustomersRequest extends Request
      */
     public function put(): Response
     {
-        // TODO: Implement put() method.
+        // Implement put() method.
     }
 }

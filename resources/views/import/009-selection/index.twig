@@ -15,13 +15,11 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            TODO
-                            Select country and bank
-                            If you would like some support, <a href="https://docs.firefly-iii.org/other-data-importers/"
+                            Select your country and the bank you would like to import from.
+                            If you would like some support, <a href="https://docs.firefly-iii.org/data-importer/"
                                                                target="_blank">check out the documentation for this
                                 page.</a>
                         </p>
-                        <p>Select country</p>
                     </div>
                 </div>
             </div>
@@ -81,7 +79,7 @@
                     <div class="col-lg-10 offset-lg-1">
                         <div class="card">
                             <div class="card-header">
-                                Select bank in TODO COUNTRY
+                                Select your bank in {{ country.code }}
                             </div>
                             <div class="card-body">
                                 <div class="form-group row">
@@ -181,6 +179,7 @@
 
                         function selectCountry() {
                             var val = $('#country').val();
+                            $('.country-code').text(val);
                             $('.bank-box').hide();
                             $('.submit-button').show();
                             $('#' + val + '-box').show();

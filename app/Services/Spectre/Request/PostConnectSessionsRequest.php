@@ -55,7 +55,7 @@ class PostConnectSessionsRequest extends Request
      */
     public function get(): Response
     {
-        // TODO: Implement get() method.
+        // Implement get() method.
     }
 
     /**
@@ -90,6 +90,6 @@ class PostConnectSessionsRequest extends Request
      */
     public function put(): Response
     {
-        // TODO: Implement put() method.
+        // Implement put() method.
     }
 }

@@ -26,7 +26,7 @@
                 <div class="card-header">Data submission</div>
                 <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
                     <p>
-                        TODO Your content will be submitted. Press "start job" to start.
+                        Your converted content will be submitted to your Firefly III installation. Press <strong>Start job</strong> to start.
                     </p>
                     <p>
                         <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job
@@ -54,7 +54,7 @@
                 </div>
                 <div class="card-body" v-if="'submission_done' === this.status ">
                     <p>
-                        The TODO routine has finished 🎉. Done!!
+                        The import routine has finished 🎉. Done!
                     </p>
                     <submission-messages
                         :messages="this.messages"
@@ -66,7 +66,7 @@
                     <p class="text-danger">
                         The submission could not be started, or failed due to an error. Please check the log files.
                         Sorry about
-                        this :(. TODO
+                        this :(
                     </p>
                     <submission-messages
                         :messages="this.messages"

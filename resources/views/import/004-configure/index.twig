@@ -15,25 +15,15 @@
                     <div class="card-body">
                         {% if 'csv' == flow %}
                             <p>
-                                TODO files come in many shapes and forms. Some of the most important settings are below.
-                                They
-                                apply
-                                to all lines in the file, and what to do with double lines or troubles during the
-                                import.
-                                If you would like some support, <a
-                                    href="https://docs.firefly-iii.org/csv/usage/configure/"
-                                    target="_blank">TODO check out the documentation for this
-                                    page.</a>
+                                CSV files come in many shapes and forms. Some of the most important settings are below.
+                                They apply to all lines in the file. If you would like some support, <a
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank"> check out the documentation for this page.</a>
                             </p>
                         {% endif %}
-                        {% if 'nordigen' == flow %}
+                        {% if 'nordigen' == flow or 'spectre' == flow %}
                             <p>
-                                TODO nordigen
-                            </p>
-                        {% endif %}
-                        {% if 'spectre' == flow %}
-                            <p>
-                                TODO spectre
+                                Your {{ flow|capitalize}} import can be configured and fine-tuned.
+                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check out the documentation for this page.</a>
                             </p>
                         {% endif %}
                     </div>
@@ -218,8 +208,7 @@
                                             </label><br>
                                             <small id="headersHelp" class="form-text text-muted">
                                                 Select this checkbox when your CSV file has headers on the first line of
-                                                the TODO
-                                                file.
+                                                the CSV file.
                                             </small>
                                         </div>
                                     </div>
@@ -236,7 +225,7 @@
                                                 Yes
                                             </label><br>
                                             <small id="conversionHelp" class="form-text text-muted">
-                                                Try to convert your TODO file to UTF-8. May lead to weird characters.
+                                                Try to convert your CSV file to UTF-8. May lead to weird characters.
                                             </small>
                                         </div>
                                     </div>
@@ -262,7 +251,6 @@
                                         </select>
                                         <small id="delimiterHelp" class="form-text text-muted">
                                             Select the field separator of our CSV file. This is almost always a comma.
-                                            TODO
                                         </small>
                                     </div>
                                 </div>
@@ -362,9 +350,7 @@
                                                 Yes
                                             </label>
                                             <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your TODO data to existing Firefly
-                                                III
-                                                data, for a cleaner import.
+                                                <br>You get the opportunity to link your data to existing Firefly III data, for a cleaner import.
                                             </small>
                                         </div>
                                     </div>
@@ -458,11 +444,9 @@
                             <div class="col-sm-9 offset-sm-3">
                                 <p class="text-muted">
                                     Firefly III can automatically detect duplicate transactions. This is pretty
-                                    foolproof. TODO
-                                    In some special cases however,
+                                    foolproof. In some special cases however,
                                     you want more control over this process. Read more about the options below in <a
-                                        href="https://docs.firefly-iii.org/csv/usage/configure/" target="_blank">the
-                                        documentation</a>.
+                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">the documentation</a>.
                                 </p>
                             </div>
 
@@ -480,7 +464,7 @@
                                         <br>
                                         <small class="form-text text-muted" id="duplicateHelp">
                                             Whatever method you choose ahead, it's smart to make the importer ignore any
-                                            duplicated lines in your CSV file. TODO
+                                            duplicated lines in your import.
                                         </small>
                                     </div>
 

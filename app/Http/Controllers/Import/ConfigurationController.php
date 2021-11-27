@@ -78,7 +78,7 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
-        $subTitle  = 'Configure your TODO file import';
+        $subTitle  = 'Configure your import';
         $accounts  = [];
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
