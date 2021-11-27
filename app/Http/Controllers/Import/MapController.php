@@ -146,15 +146,14 @@ class MapController extends Controller
          * that contains:
          * - opposing account names (this is preordained).
          */
-        if ('nordigen' === $configuration->getFlow()) {
-            $roles = [];
-            $data  = [];
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
 
+            // TODO should be in a helper or something generic.
             // index 0, opposing account name:
             $index                  = 0;
             $opposingName           = config('csv.import_roles.opposing-name') ?? null;
             $opposingName['role']   = 'opposing-name';
-            $opposingName['values'] = $this->getOpposingNordigenAccounts();
+            $opposingName['values'] = $this->getOpposingAccounts();
 
             // create the "mapper" class which will get data from Firefly III.
             $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
@@ -170,17 +169,16 @@ class MapController extends Controller
             $data[]                       = $opposingName;
         }
         if ('spectre' === $configuration->getFlow()) {
-            $roles = [];
-            $data = [];
 
-            // index 0, opposing account name:
-            $index                  = 0;
-            $opposingName           = config('csv.import_roles.opposing-name') ?? null;
-            $opposingName['role']   = 'opposing-name';
-            $opposingName['values'] = $this->getOpposingSpectreAccounts();
+            // index 1: category (TODO)
+            // index 0, category name:
+            $index                  = 1;
+            $category           = config('csv.import_roles.category-name') ?? null;
+            $category['role']   = 'category-name';
+            $category['values'] = $this->getCategories();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
+            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $category['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -190,10 +188,7 @@ class MapController extends Controller
             $object                       = app($class);
             $opposingName['mapping_data'] = $object->getMap();
             $opposingName['mapped']       = $existingMapping[$index] ?? [];
-            $data[]                       = $opposingName;
-
-            // index 1: category (TODO)
-
+            $data[]                       = $category;
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
@@ -282,7 +277,7 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
-        if('nordigen' === $configuration->getFlow()) {
+        if('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
             // if nordigen, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
         }
@@ -324,7 +319,7 @@ class MapController extends Controller
      *
      * TODO move to helper or something
      */
-    private function getOpposingNordigenAccounts(): array
+    private function getOpposingAccounts(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -349,6 +344,38 @@ class MapController extends Controller
         }
         $filtered = array_filter(
             $opposing,
+            static function (string $value) {
+                return '' !== $value;
+            }
+        );
+
+        return array_unique($filtered);
+    }
+
+    private function getCategories(): array
+    {
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk               = Storage::disk(self::DISK_NAME);
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $categories = [];
+        $total    = count($array);
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';
+            }
+
+        }
+        $filtered = array_filter(
+            $categories,
             static function (string $value) {
                 return '' !== $value;
             }

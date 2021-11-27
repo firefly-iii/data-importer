@@ -1,23 +1,24 @@
 {% extends "./layout/default" %}
 {% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                &nbsp;
+        <div class="row mt-4">
+            <div class="col-lg-10 offset-lg-1">
+                <h1>Firefly III Data Import Tool, v{{ version }}</h1>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-8 offset-lg-2">
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
                 <div class="card">
+                    <div class="card-header">
+                        Authenticate with Firefly III
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Firefly III Data Import Tool</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">v{{ version }}</h6>
                         <p class="card-text">
                             Welcome! This tool will help you import data into Firefly III.
                         </p>
                         <p>
                             This tool is sparsely documented, you can find all the details you need
-                            in the <a href="https://docs.firefly-iii.org/" target="_blank">
+                            in the <a href="https://docs.firefly-iii.org/data-importer/" target="_blank">
                                 documentation</a>. Any links you see to the docs will open in a new window or tab.
                         </p>
                         <p class="card-text">
@@ -47,31 +48,44 @@
                         <form action="{{ route('token.submitClientId') }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                             {% if '' == baseURL %}
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="input_base_url">Firefly III URL</label>
                                     <input type="url" placeholder="https://" value="{{ baseURL }}" class="form-control" id="input_base_url" autocomplete="off" name="base_url">
                                     {% if errors.has('base_url') %}<span class="text-danger">{{ errors.first('base_url') }}</span>{% endif %}
                                     {% if Session.has('secure_url') %}<span class="text-danger">{{ Session.get('secure_url') }}</span>{% endif %}
                                 </div>
                             {% endif %}
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label for="input_client_id">Client ID</label>
                                 <input type="number" step="1" min="1" class="form-control" id="input_client_id"
                                        autocomplete="off" name="client_id" value="{{ clientId }}">
                                 {% if errors.has('client_id') %}<span class="text-danger">{{ errors.first('client_id') }}</span>{% endif %}
                             </div>
-                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}">Start over</a>
-                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}">Reauthenticate</a>
                             <input type="submit" name="submit" value="Submit" class="float-end btn btn-success"/>
                         </form>
 
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <p>
+                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button resets your progress">Start over</a>
+                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button tries to connect to Firefly III again">Reauthenticate</a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
 
     </div>
-    <p>
-    </p>
 {% endblock %}
 
+{% block scripts %}
+    <script type="text/javascript">
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+    </script>
+{% endblock %}

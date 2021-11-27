@@ -779,6 +779,15 @@ class Configuration
     }
 
     /**
+     * @return bool
+     */
+    public function isConversion(): bool
+    {
+        return $this->conversion;
+    }
+
+
+    /**
      * @return string
      */
     public function getNordigenBank(): string
