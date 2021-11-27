@@ -68,7 +68,7 @@ class NavController extends Controller
     {
         session()->forget(Constants::HAS_UPLOAD);
 
-        return redirect(route('import.start'));
+        return redirect(route('003-upload.index'));
     }
 
 }

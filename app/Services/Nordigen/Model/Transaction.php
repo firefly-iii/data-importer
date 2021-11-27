@@ -33,32 +33,32 @@ use Ramsey\Uuid\Uuid;
 
 class Transaction
 {
-    public string $additionalInformation;
-    public string $additionalInformationStructured;
-    public string $balanceAfterTransaction;
-    public string $bankTransactionCode;
-    public Carbon $bookingDate;
-    public string $checkId;
-    public string $creditorAgent;
-    public string $creditorId;
-    public string $creditorName;
-    public array $currencyExchange; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
+    public string  $additionalInformation;
+    public string  $additionalInformationStructured;
+    public string  $balanceAfterTransaction;
+    public string  $bankTransactionCode;
+    public ?Carbon $bookingDate;
+    public string  $checkId;
+    public string  $creditorAgent;
+    public string  $creditorId;
+    public string  $creditorName;
+    public array   $currencyExchange; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
     // TODO use currency exchange info in notes
-    public string $debtorAgent;
-    public string $debtorName;
-    public string $entryReference;
-    public string $key;
-    public string $mandateId;
-    public string $proprietaryBank;
-    public string $purposeCode;
-    public string $remittanceInformationStructured;
-    public array  $remittanceInformationStructuredArray;
-    public string $remittanceInformationUnstructured;
-    public array  $remittanceInformationUnstructuredArray;
-    public string $transactionId;
-    public string $ultimateCreditor;
-    public string $ultimateDebtor;
-    public Carbon $valueDate;
+    public string  $debtorAgent;
+    public string  $debtorName;
+    public string  $entryReference;
+    public string  $key;
+    public string  $mandateId;
+    public string  $proprietaryBank;
+    public string  $purposeCode;
+    public string  $remittanceInformationStructured;
+    public array   $remittanceInformationStructuredArray;
+    public string  $remittanceInformationUnstructured;
+    public array   $remittanceInformationUnstructuredArray;
+    public string  $transactionId;
+    public string  $ultimateCreditor;
+    public string  $ultimateDebtor;
+    public ?Carbon $valueDate;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
@@ -95,7 +95,7 @@ class Transaction
         $object->additionalInformationStructured        = $array['additionalInformationStructured'] ?? '';
         $object->balanceAfterTransaction                = $array['balanceAfterTransaction'] ?? '';
         $object->bankTransactionCode                    = $array['bankTransactionCode'] ?? '';
-        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['bookingDate'], config('app.timezone')) : new Carbon(config('app.timezone'));
+        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['bookingDate'], config('app.timezone')) : null;
         $object->key                                    = $array['key'] ?? '';
         $object->checkId                                = $array['checkId'] ?? '';
         $object->creditorAgent                          = $array['creditorAgent'] ?? '';
@@ -115,7 +115,7 @@ class Transaction
         $object->transactionId                          = $array['transactionId'] ?? '';
         $object->ultimateCreditor                       = $array['ultimateCreditor'] ?? '';
         $object->ultimateDebtor                         = $array['ultimateDebtor'] ?? '';
-        $object->valueDate                              = array_key_exists('valueDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['valueDate'], config('app.timezone')) : new Carbon(config('app.timezone'));
+        $object->valueDate                              = array_key_exists('valueDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['valueDate'], config('app.timezone')) : null;
 
         // undocumented values
         $object->endToEndId = $array['endToEndId'] ?? ''; // from Rabobank NL
@@ -142,11 +142,26 @@ class Transaction
             } catch (JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
         }
         Log::debug(sprintf('Downloaded transaction with ID "%s"', $object->transactionId));
 
         return $object;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getDate(): Carbon
+    {
+        if (null !== $this->valueDate) {
+            return $this->valueDate;
+        }
+        if (null !== $this->bookingDate) {
+            return $this->bookingDate;
+        }
+        Log::warning('Transaction has no date, return NOW.');
+        return new Carbon(config('app.timezone'));
     }
 
     /**
@@ -161,7 +176,7 @@ class Transaction
         }
 
         // try other values as well (Revolut)
-        if('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
+        if ('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
             $description = implode(' ', $this->remittanceInformationUnstructuredArray);
         }
 

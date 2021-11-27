@@ -26,14 +26,11 @@
                 <div class="card-header">Data conversion</div>
                 <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
                     <p>
-                        The first step in the import process is a conversion. TODO
+                        The first step in the import process is a <strong>conversion</strong>.
                         <span v-if="flow === 'csv'">The CSV file you uploaded</span>
                         <span v-if="flow === 'nordigen'">The transactions downloaded from Nordigen</span>
                         <span v-if="flow === 'spectre'">The transactions downloaded from Spectre</span>
-                        will be converted to Firefly III compatible transactions. Please press "start job" to start.
-
-                        If user wants mapping next step! its already firefly iii data at that point so info
-                        may be lost?
+                        will be converted to Firefly III compatible transactions. Please press <strong>Start job</strong> to start.
                     </p>
                     <p>
                         <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job
@@ -61,8 +58,8 @@
                 </div>
                 <div class="card-body" v-if="'conv_done' === this.status ">
                     <p>
-                        The TODO routine has finished 🎉. TODO Next step: importing. Please wait to be redirected! <span
-                        class="fas fa-sync fa-spin"></span>
+                        The conversion routine has finished 🎉. Please wait to be redirected!
+                        <span class="fas fa-sync fa-spin"></span>
                     </p>
                     <conversion-messages
                         :messages="this.messages"
@@ -73,8 +70,7 @@
                 <div class="card-body" v-if="'conv_errored' === this.status">
                     <p class="text-danger">
                         The conversion could not be started, or failed due to an error. Please check the log files.
-                        Sorry about
-                        this :(. TODO
+                        Sorry about this :(
                     </p>
                     <conversion-messages
                         :messages="this.messages"

@@ -59,6 +59,12 @@ class Constants
     public const MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
     public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
     public const SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
+    public const READY_FOR_SUBMISSION          = 'ready_for_submission';
+
+    // spectre specific steps:
+    public const CONNECTION_SELECTED_INDICATOR = 'connection_selected_ind';
+
+    // nordigen specific steps
     public const SELECTED_BANK_COUNTRY         = 'selected_bank_country';
 
     // nordigen specific constants

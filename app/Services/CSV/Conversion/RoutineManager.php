@@ -111,7 +111,7 @@ class RoutineManager implements RoutineManagerInterface
         }
         if (!$this->isCli()) {
             try {
-                $this->csvFileProcessor->setReader(FileReader::getReaderFromSession());
+                $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
             } catch (FileNotFoundException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
@@ -134,14 +134,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->mergeErrors($count);
 
         return $transactions;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
     }
 
     /**

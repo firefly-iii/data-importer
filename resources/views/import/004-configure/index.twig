@@ -1,17 +1,12 @@
 {% extends "./layout/default" %}
 {% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                &nbsp;
-            </div>
-        </div>
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-lg-10 offset-lg-1">
                 <h1>{{ mainTitle }}</h1>
             </div>
         </div>
-        <div class="row">
+        <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
@@ -20,25 +15,15 @@
                     <div class="card-body">
                         {% if 'csv' == flow %}
                             <p>
-                                TODO files come in many shapes and forms. Some of the most important settings are below.
-                                They
-                                apply
-                                to all lines in the file, and what to do with double lines or troubles during the
-                                import.
-                                If you would like some support, <a
-                                    href="https://docs.firefly-iii.org/csv/usage/configure/"
-                                    target="_blank">TODO check out the documentation for this
-                                    page.</a>
+                                CSV files come in many shapes and forms. Some of the most important settings are below.
+                                They apply to all lines in the file. If you would like some support, <a
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank"> check out the documentation for this page.</a>
                             </p>
                         {% endif %}
-                        {% if 'nordigen' == flow %}
+                        {% if 'nordigen' == flow or 'spectre' == flow %}
                             <p>
-                                TODO nordigen
-                            </p>
-                        {% endif %}
-                        {% if 'spectre' == flow %}
-                            <p>
-                                TODO spectre
+                                Your {{ flow|capitalize}} import can be configured and fine-tuned.
+                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check out the documentation for this page.</a>
                             </p>
                         {% endif %}
                     </div>
@@ -67,6 +52,9 @@
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="flow" value="{{ flow }}"/>
+            <!-- these two values are used by Spectre and must be preserved -->
+            <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>
+            <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -74,77 +62,134 @@
                             Form
                         </div>
                         <div class="card-body">
-                            {% if 'nordigen' == flow %}
-                                <h4>Nordigen import options</h4>
-                                <div class="form-group row">
+                            {% if 'nordigen' == flow or 'spectre' == flow %}
+                                <h4>{{ flow|capitalize }} import options</h4>
+                                <div class="form-group row mb-3">
                                     <div class="col-sm-3">Accounts</div>
                                     <div class="col-sm-9">
                                         <table class="table table-sm table-bordered table-striped">
                                             <thead>
                                             <tr>
-                                                <th>Nordigen</th>
+                                                <th>{{ flow|capitalize }}</th>
                                                 <th>&nbsp;</th>
                                                 <th>Firefly III</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for information in nordigenAccounts %}
+                                            {% for information in importerAccounts %}
                                                 <tr>
                                                     <td>
-
-                                                        <input
-                                                            id="do_import_{{ information.nordigen.identifier }}"
-                                                            type="checkbox"
-                                                            {% if 'disabled' == information.nordigen.status %}
-                                                            disabled="disabled"
-                                                            {% endif %}
-                                                            name="do_import[{{ information.nordigen.identifier }}]"
-                                                            value="1"
-                                                            aria-describedby="accountsHelp"
-                                                            {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
-                                                        /> <label class="form-check-label"
-                                                                  {% if '' != information.nordigen.iban %}title="IBAN: {{ information.nordigen.iban }}"{% endif %}
-                                                                  for="do_import_{{ information.nordigen.identifier }}">
-                                                            Account "{{ information.nordigen.getFullName }}"
+                                                        {# Nordigen uses identifier #}
+                                                        {% if 'nordigen' == flow %}
+                                                            <input
+                                                                id="do_import_{{ information.import_service.identifier }}"
+                                                                type="checkbox"
+                                                                {% if 'disabled' == information.import_service.status %}
+                                                                    disabled="disabled"
+                                                                {% endif %}
+                                                                name="do_import[{{ information.import_service.identifier }}]"
+                                                                value="1"
+                                                                aria-describedby="accountsHelp"
+                                                                {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+                                                            /> <label class="form-check-label"
+                                                                      {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+                                                                      for="do_import_{{ information.import_service.identifier }}">
+                                                            Account "{{ information.import_service.getFullName }}"
                                                         </label>
-                                                        {% if 'disabled' != information.nordigen.status and '' != information.nordigen.iban %}<br><small>IBAN: {{ information.nordigen.iban }}</small>{% endif %}
-                                                        {% if 'disabled' == information.nordigen.status %}<br><small class="text-danger">(this account is disabled)</small>{% endif %}
+                                                            {% if 'disabled' != information.import_service.status and '' != information.import_service.iban %}
+                                                                <br><small>
+                                                                IBAN: {{ information.import_service.iban }}</small>{% endif %}
+                                                            {% if 'disabled' == information.import_service.status %}<br>
+                                                                <small class="text-danger">(this account is
+                                                                    disabled)</small>{% endif %}
+                                                        {% endif %}
+                                                        {# Nordigen uses ID #}
+                                                        {% if 'spectre' == flow %}
+                                                            <input
+                                                                id="do_import_{{ information.import_service.id }}"
+                                                                type="checkbox"
+                                                                name="do_import[{{ information.import_service.id }}]"
+                                                                value="1"
+                                                                aria-describedby="accountsHelp"
+                                                                {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+                                                            /> <label class="form-check-label"
+                                                                      {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+                                                                      for="do_import_{{ information.import_service.id }}">
+                                                            Account "{{ information.import_service.name }}"
+                                                        </label>
+                                                            {% if '' != information.import_service.iban %}
+                                                                <br><small>
+                                                                IBAN: {{ information.import_service.iban }}</small>{% endif %}
+                                                        {% endif %}
                                                     </td>
                                                     <td>
-                                                        {% if 'disabled' != information.nordigen.status %}
+                                                        {% if 'disabled' != information.import_service.status %}
                                                             {% if(information.firefly|length!=0) %}&rarr;{% endif %}
                                                         {% endif %}
                                                     </td>
                                                     <td>
-
                                                         {% if(information.firefly|length==0) %}
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
-                                                            {% if 'disabled' != information.nordigen.status %}
-                                                            <select style="width:100%;"
-                                                                    class="custom-select custom-select-sm form-control"
-                                                                    name="accounts[{{ information.nordigen.identifier }}]">
-                                                                {% for ff3Account in information.firefly %}
-                                                                    {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
-                                                                    <option value="{{ ff3Account.id }}"
-                                                                            label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
-                                                                        {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </select>
+
+                                                            {# Nordigen: #}
+                                                            {% if 'nordigen' == flow %}
+                                                                {% if 'disabled' != information.import_service.status %}
+                                                                    <select style="width:100%;"
+                                                                            class="custom-select custom-select-sm form-control"
+                                                                            name="accounts[{{ information.import_service.identifier }}]">
+                                                                        {% for ff3Account in information.firefly %}
+                                                                            {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
+                                                                            <option value="{{ ff3Account.id }}"
+                                                                                    label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+                                                                                {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+                                                                            </option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            {# Spectre #}
+                                                            {% if 'spectre' == flow %}
+                                                                <select style="width:100%;"
+                                                                        class="custom-select custom-select-sm form-control"
+                                                                        name="accounts[{{ information.import_service.id }}]">
+                                                                    {% for ff3Account in information.firefly %}
+                                                                        {# {% if configuration.getAccounts[spectreAccount.id] == ff3Account.id  %}selected{% endif %} #}
+                                                                        <option value="{{ ff3Account.id }}"
+                                                                                label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+                                                                            {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </select>
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
+                                            <caption>Select the accounts you want to import into your Firefly III installation.</caption>
                                         </table>
-                                        <small id="accountsHelp" class="form-text text-muted">
-                                            Select the accounts you want to import into your Firefly III installation.
-                                        </small>
                                     </div>
                                 </div>
+
+                                {% if 'spectre' == flow %}
+                                    <div class="form-group row">
+                                        <label for="X" class="col-sm-3 col-form-label">Ignore Spectre categories</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input" {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %} type="checkbox" value="1" id="ignore_spectre_categories" name="ignore_spectre_categories" aria-describedby="duplicateSpectre">
+                                                <label class="form-check-label" for="ignore_spectre_categories">
+                                                    Ignore Spectre's categories.
+                                                </label>
+                                            </div>
+
+                                            <small class="form-text text-muted" id="duplicateSpectre">
+                                                Spectre adds categories to each transaction. You can choose to ignore them.
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% endif %}
 
                             {% endif %}
 
@@ -163,8 +208,7 @@
                                             </label><br>
                                             <small id="headersHelp" class="form-text text-muted">
                                                 Select this checkbox when your CSV file has headers on the first line of
-                                                the TODO
-                                                file.
+                                                the CSV file.
                                             </small>
                                         </div>
                                     </div>
@@ -181,7 +225,7 @@
                                                 Yes
                                             </label><br>
                                             <small id="conversionHelp" class="form-text text-muted">
-                                                Try to convert your TODO file to UTF-8. May lead to weird characters.
+                                                Try to convert your CSV file to UTF-8. May lead to weird characters.
                                             </small>
                                         </div>
                                     </div>
@@ -207,7 +251,6 @@
                                         </select>
                                         <small id="delimiterHelp" class="form-text text-muted">
                                             Select the field separator of our CSV file. This is almost always a comma.
-                                            TODO
                                         </small>
                                     </div>
                                 </div>
@@ -307,8 +350,7 @@
                                                 Yes
                                             </label>
                                             <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your TODO data to existing Firefly III
-                                                data, for a cleaner import.
+                                                <br>You get the opportunity to link your data to existing Firefly III data, for a cleaner import.
                                             </small>
                                         </div>
                                     </div>
@@ -322,7 +364,8 @@
                                                    type="radio" name="date_range" value="all"
                                                    {% if configuration.getDateRange == 'all' %}checked{% endif %}
                                                    aria-describedby="rangeHelp"/>
-                                            <label class="form-check-label" for="date_range_all">Import everything</label>
+                                            <label class="form-check-label" for="date_range_all">Import
+                                                everything</label>
                                         </div>
 
                                         <div class="form-check">
@@ -401,11 +444,9 @@
                             <div class="col-sm-9 offset-sm-3">
                                 <p class="text-muted">
                                     Firefly III can automatically detect duplicate transactions. This is pretty
-                                    foolproof. TODO
-                                    In some special cases however,
+                                    foolproof. In some special cases however,
                                     you want more control over this process. Read more about the options below in <a
-                                        href="https://docs.firefly-iii.org/csv/usage/configure/" target="_blank">the
-                                        documentation</a>.
+                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">the documentation</a>.
                                 </p>
                             </div>
 
@@ -423,7 +464,7 @@
                                         <br>
                                         <small class="form-text text-muted" id="duplicateHelp">
                                             Whatever method you choose ahead, it's smart to make the importer ignore any
-                                            duplicated lines in your CSV file. TODO
+                                            duplicated lines in your import.
                                         </small>
                                     </div>
 
@@ -601,7 +642,9 @@
                 $('#date_range_partial_settings').hide();
                 $('#date_range_range_settings').hide();
             }
-        }``
+        }
+
+        ``
 
         function updateDateExample() {
             $('#date_example').text('...');

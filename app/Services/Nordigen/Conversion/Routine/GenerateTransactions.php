@@ -202,12 +202,12 @@ class GenerateTransactions
 
         $return = [
             'apply_rules'             => $this->configuration->isRules(),
-            'error_if_duplicate_hash' => true,
+            'error_if_duplicate_hash' => !$this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [
                 [
                     'type'          => 'withdrawal', // reverse
-                    'date'          => $entry->valueDate->format('Y-m-d'),
-                    'datetime'      => $entry->valueDate->toW3cString(),
+                    'date'          => $entry->getDate()->format('Y-m-d'),
+                    'datetime'      => $entry->getDate()->toW3cString(),
                     'amount'        => $entry->transactionAmount,
                     'description'   => $entry->getDescription(),
                     'order'         => 0,

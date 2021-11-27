@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace App\Http\Request;
 
 
-use App\Services\CSV\Specifics\SpecificService;
 use Illuminate\Validation\Validator;
 
 /**
@@ -69,6 +68,11 @@ class ConfigurationPostRequest extends Request
             'unique_column_index'           => $this->integer('unique_column_index'),
             'unique_column_type'            => $this->string('unique_column_type'),
 
+            // spectre values:
+            'connection'                    => $this->string('connection'),
+            'identifier'                    => $this->string('identifier'),
+            'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
+
             // nordigen:
             'do_import'                     => $this->get('do_import') ?? [],
             'accounts'                      => $this->get('accounts') ?? [],
@@ -83,12 +87,6 @@ class ConfigurationPostRequest extends Request
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
         ];
-
-        // rules for specifics:
-        $specifics = SpecificService::getSpecifics();
-        foreach (array_keys($specifics) as $specific) {
-            $result['specifics'][$specific] = $this->convertBoolean($this->get(sprintf('specific_%s', $specific)));
-        }
 
         return $result;
     }
@@ -108,6 +106,7 @@ class ConfigurationPostRequest extends Request
             'ignore_duplicate_transactions' => 'numeric|between:0,1',
             'skip_form'                     => 'numeric|between:0,1',
             'add_import_tag'                => 'numeric|between:0,1',
+            'ignore_spectre_categories'     => 'numeric|between:0,1',
 
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',

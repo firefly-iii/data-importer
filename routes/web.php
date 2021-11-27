@@ -83,8 +83,13 @@ Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@
 Route::post('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => '009-selection.post']);
 
 // step 10: Get redirected to + callback from Nordigen for permission:
-Route::get('/import/link/build', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => '010-build-link.index']);
-Route::get('/import/link/callback', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => '010-build-link.callback']);
+Route::get('/import/link-nordigen/build', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => '010-build-link.index']);
+Route::get('/import/link-nordigen/callback', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => '010-build-link.callback']);
+
+// step 11: list tokens (can be skipped)
+Route::get('/import/spectre-connections', ['uses' => 'Import\Spectre\ConnectionController@index', 'as' => '011-connections.index']);
+Route::post('/import/spectre-connections/submit', ['uses' => 'Import\Spectre\ConnectionController@post', 'as' => '011-connections.post']);
+Route::get('/import/spectre-connections/callback', ['uses' => 'Import\Spectre\CallbackController@index', 'as' => '011-connections.callback']);
 
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');

@@ -52,6 +52,7 @@ class ApiSubmitter
     private bool          $addTag;
     private string        $vanityURL;
     private Configuration $configuration;
+    private array         $mapping;
 
     /**
      * @param array $lines
@@ -76,20 +77,21 @@ class ApiSubmitter
          * @var array $line
          */
         foreach ($lines as $index => $line) {
-            Log::debug(sprintf('Now submitting transaction %d/%d', ($index+1), $count));
+            Log::debug(sprintf('Now submitting transaction %d/%d', ($index + 1), $count));
             // first do local duplicate transaction check (the "cell" method):
             $unique = $this->uniqueTransaction($index, $line);
             if (true === $unique) {
-                Log::debug(sprintf('Transaction #%d is unique.', $index+1));
+                Log::debug(sprintf('Transaction #%d is unique.', $index + 1));
                 $groupInfo = $this->processTransaction($index, $line);
                 $this->addTagToGroups($groupInfo);
             }
-            if(false === $unique) {
-                Log::debug(sprintf('Transaction #%d is NOT unique.', $index+1));
+            if (false === $unique) {
+                Log::debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
             }
         }
         Log::info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
+
     /**
      *
      */
@@ -225,6 +227,7 @@ class ApiSubmitter
      */
     private function processTransaction(int $index, array $line): array
     {
+        $line    = $this->replaceMappings($line);
         $return  = [];
         $url     = Token::getURL();
         $token   = Token::getAccessToken();
@@ -408,12 +411,61 @@ class ApiSubmitter
     {
         $this->configuration = $configuration;
         $this->setAddTag($configuration->isAddImportTag());
+        $this->setMapping($configuration->getMapping());
     }
+
+    /**
+     * @param array $mapping
+     */
+    public function setMapping(array $mapping): void
+    {
+        $this->mapping = $mapping;
+    }
+
     /**
      * @param bool $addTag
      */
     public function setAddTag(bool $addTag): void
     {
         $this->addTag = $addTag;
+    }
+
+    /**
+     * @param array $line
+     * @return array
+     */
+    private function replaceMappings(array $line): array
+    {
+        Log::debug('Going to map data for this line.');
+        if (array_key_exists(0, $this->mapping)) {
+            Log::debug('Configuration has mapping for opposing account name!');
+            /**
+             * @var int   $index
+             * @var array $transaction
+             */
+            foreach ($line['transactions'] as $index => $transaction) {
+                if ('withdrawal' === $transaction['type']) {
+                    // replace destination_name with destination_id
+                    $destination = $transaction['destination_name'] ?? '';
+                    if (array_key_exists($destination, $this->mapping[0])) {
+                        unset($line['transactions'][$index]['destination_name']);
+                        unset($line['transactions'][$index]['destination_iban']);
+                        $line['transactions'][$index]['destination_id'] = $this->mapping[0][$destination];
+                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
+                    }
+                }
+                if ('deposit' === $transaction['type']) {
+                    // replace source_name with source_id
+                    $source = $transaction['source_name'] ?? '';
+                    if (array_key_exists($source, $this->mapping[0])) {
+                        unset($line['transactions'][$index]['source_name']);
+                        unset($line['transactions'][$index]['source_iban']);
+                        $line['transactions'][$index]['source_id'] = $this->mapping[0][$source];
+                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
+                    }
+                }
+            }
+        }
+        return $line;
     }
 }
