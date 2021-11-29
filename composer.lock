@@ -3533,16 +3533,16 @@
         },
         {
             "name": "spatie/enum",
-            "version": "3.10.0",
+            "version": "3.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/enum.git",
-                "reference": "8a396aae725f59ef3680eb933c8702fa36614cd1"
+                "reference": "4afe5f06bb4c3cf46d8b02328bcc34c0de652ad4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/enum/zipball/8a396aae725f59ef3680eb933c8702fa36614cd1",
-                "reference": "8a396aae725f59ef3680eb933c8702fa36614cd1",
+                "url": "https://api.github.com/repos/spatie/enum/zipball/4afe5f06bb4c3cf46d8b02328bcc34c0de652ad4",
+                "reference": "4afe5f06bb4c3cf46d8b02328bcc34c0de652ad4",
                 "shasum": ""
             },
             "require": {
@@ -3605,7 +3605,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-10-20T11:21:32+00:00"
+            "time": "2021-11-25T11:30:17+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
