@@ -10,7 +10,7 @@
         "production": "mix --production"
     },
     "devDependencies": {
-        "@vue/compiler-sfc": "^3.2.22",
+        "@vue/compiler-sfc": "^3.2.23",
         "axios": "^0.24",
         "bootstrap": "^4.5.3",
         "cross-env": "^7.0",
