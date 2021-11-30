@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'           => '0.1.0',
+    'version'           => '0.2.0',
     'flows'             => ['nordigen', 'spectre', 'csv'],
     'access_token'      => env('FIREFLY_III_ACCESS_TOKEN'),
     'url'               => env('FIREFLY_III_URL'),
