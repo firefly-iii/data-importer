@@ -373,7 +373,7 @@ class ConfigurationController extends Controller
             return [];
         }
         $result = [];
-        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
+        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
         /** @var Account $account */
         foreach ($all as $account) {
             if ($iban === $account->iban) {
@@ -394,7 +394,7 @@ class ConfigurationController extends Controller
             return [];
         }
         $result = [];
-        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
+        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
         /** @var Account $account */
         foreach ($all as $account) {
             if ($currency === $account->currencyCode) {
