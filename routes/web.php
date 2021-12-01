@@ -25,6 +25,7 @@ declare(strict_types=1);
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
 Route::post('/', 'IndexController@postIndex')->name('index.post');
+Route::get('/debug', 'DebugController@index')->name('debug');
 
 // validate access token:
 Route::get('/token', 'TokenController@index')->name('token.index');
