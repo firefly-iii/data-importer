@@ -162,7 +162,7 @@ class Configuration
      */
     public static function fromRequest(array $array): self
     {
-        $delimiters             = config('csv_importer.delimiters_reversed');
+        $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->version        = self::VERSION;
         $object->headers        = $array['headers'];
@@ -266,8 +266,8 @@ class Configuration
      */
     private static function fromClassicFile(array $data): self
     {
-        $delimiters             = config('csv_importer.delimiters_reversed');
-        $classicRoleNames       = config('csv_importer.classic_roles');
+        $delimiters             = config('csv.delimiters_reversed');
+        $classicRoleNames       = config('csv.classic_roles');
         $object                 = new self;
         $object->headers        = $data['has-headers'] ?? false;
         $object->date           = $data['date-format'] ?? $object->date;
@@ -383,7 +383,7 @@ class Configuration
     public static function fromArray(array $array): self
     {
         $version                = $array['version'] ?? 1;
-        $delimiters             = config('csv_importer.delimiters_reversed');
+        $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->headers        = $array['headers'] ?? false;
         $object->date           = $array['date'] ?? '';

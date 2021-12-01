@@ -54,7 +54,7 @@ class TrustProxies extends Middleware
      */
     public function __construct(Repository $config)
     {
-        $trustedProxies = (string) config('csv_importer.trusted_proxies');
+        $trustedProxies = (string) config('importer.trusted_proxies');
         $this->proxies  = explode(',', $trustedProxies);
         if ('**' === $trustedProxies) {
             $this->proxies = '**';

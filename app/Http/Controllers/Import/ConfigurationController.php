@@ -86,6 +86,7 @@ class ConfigurationController extends Controller
         if (session()->has(Constants::CONFIGURATION)) {
             $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
         }
+
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
