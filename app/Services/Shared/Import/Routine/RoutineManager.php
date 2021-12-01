@@ -62,7 +62,7 @@ class RoutineManager
      */
     public function setConfiguration(Configuration $configuration): void
     {
-        $this->apiSubmitter  = new APISubmitter;
+        $this->apiSubmitter  = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
         Log::debug('Created APISubmitter in RoutineManager');
