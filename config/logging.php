@@ -72,7 +72,7 @@ return [
 
         'daily' => [
             'driver' => 'daily',
-            'path'   => storage_path('logs/csv-import.log'),
+            'path'   => storage_path('logs/data-import.log'),
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => 14,
         ],

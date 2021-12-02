@@ -173,11 +173,17 @@ class Transaction
         $description = '';
         if ('' !== $this->remittanceInformationUnstructured) {
             $description = $this->remittanceInformationUnstructured;
+            Log::debug('Description is now remittanceInformationUnstructured');
         }
 
         // try other values as well (Revolut)
         if ('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
             $description = implode(' ', $this->remittanceInformationUnstructuredArray);
+            Log::debug('Description is now remittanceInformationUnstructuredArray');
+        }
+        if('' === $description) {
+            Log::debug('Description is now remittanceInformationStructured');
+            $description = $this->remittanceInformationStructured;
         }
 
         if ('' === $description) {
