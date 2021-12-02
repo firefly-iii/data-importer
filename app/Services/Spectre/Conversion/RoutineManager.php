@@ -36,6 +36,10 @@ class RoutineManager implements RoutineManagerInterface
 {
     use GeneratesIdentifier;
 
+    private array $allMessages;
+    private array $allWarnings;
+    private array $allErrors;
+
     private Configuration        $configuration;
     private TransactionProcessor $transactionProcessor;
     private GenerateTransactions $transactionGenerator;
@@ -46,6 +50,11 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
+        // TODO conversion does not add errors, warnings and messages.
+        $this->allErrors   = [];
+        $this->allWarnings = [];
+        $this->allMessages = [];
+
         $this->transactionProcessor = new TransactionProcessor;
         $this->transactionGenerator = new GenerateTransactions;
         $this->transactionFilter    = new FilterTransactions;
@@ -90,5 +99,30 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         return $filtered;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
     }
 }

@@ -27,6 +27,8 @@ namespace App\Console;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
+use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Shared\Import\Routine\RoutineManager;
@@ -162,7 +164,7 @@ trait AutoImports
     private function importFile(string $directory, string $file): void
     {
         $csvFile  = sprintf('%s/%s', $directory, $file);
-        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
 
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
@@ -177,12 +179,11 @@ trait AutoImports
         $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
 
         // this is it!
-        $conversions = $this->startConversion($configuration, $csvFile);
-        // TODO report on messages, warnings and errors from the conversion
+        $this->startConversion($configuration, $csvFile);
         $this->reportConversion();
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $csvFile, $jsonFile));
-        $this->startImport($configuration, $conversions);
+        $this->startImport($configuration);
         $this->reportImport();
 
         $this->line('Done!');
@@ -280,6 +281,14 @@ trait AutoImports
                 $manager          = new CSVRoutineManager(null);
                 $this->identifier = $manager->getIdentifier();
                 $manager->setContent(file_get_contents($csvFile));
+                break;
+            case 'nordigen':
+                $manager          = new NordigenRoutineManager(null);
+                $this->identifier = $manager->getIdentifier();
+                break;
+            case 'spectre':
+                $manager          = new SpectreRoutineManager(null);
+                $this->identifier = $manager->getIdentifier();
                 break;
         }
 
@@ -390,13 +399,13 @@ trait AutoImports
      * @param Configuration $configuration
      * @param array         $transactions
      */
-    private function startImport(Configuration $configuration, array $transactions): void
+    private function startImport(Configuration $configuration): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $routine         = new RoutineManager($this->identifier);
-        $importJobStatus = SubmissionStatusManager::startOrFindSubmission($this->identifier);
-        $disk            = Storage::disk('jobs');
-        $fileName        = sprintf('%s.json', $this->identifier);
+        $routine = new RoutineManager($this->identifier);
+        SubmissionStatusManager::startOrFindSubmission($this->identifier);
+        $disk     = Storage::disk('jobs');
+        $fileName = sprintf('%s.json', $this->identifier);
 
         // get files from disk:
         if (!$disk->has($fileName)) {

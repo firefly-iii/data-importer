@@ -19,6 +19,9 @@ use Log;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    private array                      $allMessages;
+    private array                      $allWarnings;
+    private array                      $allErrors;
     use IsRunningCli, GeneratesIdentifier;
 
     private Configuration        $configuration;
@@ -31,6 +34,11 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
+        // TODO conversion does not add errors, warnings and messages.
+        $this->allErrors   = [];
+        $this->allWarnings = [];
+        $this->allMessages = [];
+
         if (null === $identifier) {
             $this->generateIdentifier();
         }
@@ -92,6 +100,31 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         return $filtered;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
     }
 
 }
