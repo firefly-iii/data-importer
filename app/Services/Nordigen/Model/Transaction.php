@@ -88,7 +88,7 @@ class Transaction
      */
     public static function fromArray($array): self
     {
-        //Log::debug('Transaction from array', $array);
+        Log::debug('Nordigen transaction from array', $array);
         $object = new self;
 
         $object->additionalInformation                  = $array['additionalInformation'] ?? '';
@@ -188,56 +188,34 @@ class Transaction
     }
 
     /**
-     * Return name of the destination account. Depends also on the amount
+     * Return name of the destination account
      *
      * @return string|null
      */
     public function getDestinationName(): ?string
     {
-        if (1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination name is "debtor" because %s > 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorName) {
-                Log::debug(sprintf('Destination name is "%s"', $this->debtorName));
-                return $this->debtorName;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->creditorName) {
+            Log::debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
+            return $this->creditorName;
         }
-        if (1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination name is "creditor" because %s < 0.', $this->transactionAmount));
-            if ('' !== $this->creditorName) {
-                Log::debug(sprintf('Destination name is "%s"', $this->creditorName));
-                return $this->creditorName;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no destination account information.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
         return null;
     }
 
     /**
-     * Return IBAN of the destination account. Depends also on the amount
+     * Return IBAN of the destination account
      *
      * @return string|null
      */
     public function getDestinationIban(): ?string
     {
-        if (1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination IBAN is "debtor" because %s > 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorAccountIban) {
-                Log::debug(sprintf('Destination IBAN is "%s"', $this->debtorAccountIban));
-                return $this->debtorAccountIban;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->creditorAccountIban) {
+            Log::debug(sprintf('Destination IBAN is "%s" (creditor)', $this->creditorAccountIban));
+            return $this->creditorAccountIban;
         }
-        if (1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination IBAN is "creditor" because %s < 0.', $this->transactionAmount));
-            if ('' !== $this->creditorAccountIban) {
-                Log::debug(sprintf('Destination IBAN is "%s"', $this->creditorAccountIban));
-                return $this->creditorAccountIban;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no destination IBAN.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->transactionId));
         return null;
     }
 
@@ -249,23 +227,12 @@ class Transaction
      */
     public function getSourceName(): ?string
     {
-        if (-1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source name is "debtor" because %s < 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorName) {
-                Log::debug(sprintf('Source name is "%s"', $this->debtorName));
-                return $this->debtorName;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->debtorName) {
+            Log::debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
+            return $this->debtorName;
         }
-        if (-1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source name is "creditor" because %s > 0.', $this->transactionAmount));
-            if ('' !== $this->creditorName) {
-                Log::debug(sprintf('Source name is "%s"', $this->creditorName));
-                return $this->creditorName;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no source account information.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no source account name information.', $this->transactionId));
         return null;
     }
 
@@ -276,22 +243,11 @@ class Transaction
      */
     public function getSourceIban(): ?string
     {
-        if (-1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source IBAN is from "debtor" because %s < 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorAccountIban) {
-                Log::debug(sprintf('Source IBAN is "%s"', $this->debtorAccountIban));
-                return $this->debtorAccountIban;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->debtorAccountIban) {
+            Log::debug(sprintf('Source IBAN is "%s" (debtor)', $this->debtorAccountIban));
+            return $this->debtorAccountIban;
         }
-        if (-1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source IBAN is "creditor" because %s > 0.', $this->transactionAmount));
-            if ('' !== $this->creditorAccountIban) {
-                Log::debug(sprintf('Source IBAN is "%s"', $this->creditorAccountIban));
-                return $this->creditorAccountIban;
-            }
-        }
-
         Log::warning(sprintf('Transaction "%s" has no source IBAN information.', $this->transactionId));
         return null;
     }
@@ -408,7 +364,7 @@ class Transaction
             } catch (JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
         }
 
         return $object;
