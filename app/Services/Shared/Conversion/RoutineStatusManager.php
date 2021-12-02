@@ -149,12 +149,14 @@ class RoutineStatusManager
      * @return ConversionStatus
      * @throws ImporterErrorException
      */
-    public static function setConversionStatus(string $status): ConversionStatus
+    public static function setConversionStatus(string $status, ?string $identifier = null): ConversionStatus
     {
-        try {
-            $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-            throw new ImporterErrorException('No identifier found');
+        if (null === $identifier) {
+            try {
+                $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+                throw new ImporterErrorException('No identifier found');
+            }
         }
         Log::debug(sprintf('Now in setConversionStatus(%s)', $status));
         Log::debug(sprintf('Found "%s" in the session', $identifier));

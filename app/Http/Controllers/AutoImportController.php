@@ -62,7 +62,7 @@ class AutoImportController extends Controller
         if (0 === count($files)) {
             $this->line(sprintf('There are no files in directory %s', $this->directory));
             $this->line('To learn more about this process, read the docs:');
-            $this->line('https://docs.firefly-iii.org/csv/install/docker/');
+            $this->line('https://docs.firefly-iii.org/data-importer/');
 
             return ' ';
         }

@@ -142,13 +142,15 @@ class SubmissionStatusManager
      *
      * @return SubmissionStatus
      */
-    public static function setSubmissionStatus(string $status): SubmissionStatus
+    public static function setSubmissionStatus(string $status, ?string $identifier = null): SubmissionStatus
     {
-        try {
-            $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
-            Log::error($e->getMessage());
-            $identifier = 'error-setSubmissionStatus';
+        if (null === $identifier) {
+            try {
+                $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+                Log::error($e->getMessage());
+                $identifier = 'error-setSubmissionStatus';
+            }
         }
         Log::debug(sprintf('Now in setSubmissionStatus(%s)', $status));
         Log::debug(sprintf('Found "%s" in the session', $identifier));

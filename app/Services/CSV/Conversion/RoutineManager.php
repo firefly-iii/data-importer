@@ -36,8 +36,8 @@ use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Log;
-use Storage;
-use Str;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoutineManager
@@ -54,12 +54,14 @@ class RoutineManager implements RoutineManagerInterface
     private array                      $allMessages;
     private array                      $allWarnings;
     private array                      $allErrors;
+    private string                     $content;
 
     /**
      *
      */
     public function __construct(?string $identifier)
     {
+        $this->content     = ''; // used in CLI
         $this->allErrors   = [];
         $this->allWarnings = [];
         $this->allMessages = [];
@@ -107,12 +109,12 @@ class RoutineManager implements RoutineManagerInterface
 
         // check if CLI or not and read as appropriate:
         if ($this->isCli()) {
-            die('CLI');
+            $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->content, $this->configuration->isConversion()));
         }
         if (!$this->isCli()) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (FileNotFoundException $e) {
+            } catch (ContainerExceptionInterface|NotFoundExceptionInterface|FileNotFoundException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }
@@ -176,7 +178,6 @@ class RoutineManager implements RoutineManagerInterface
                 $four[$i] ?? [],
             );
         }
-
         $this->allWarnings = $total;
     }
 
@@ -225,5 +226,13 @@ class RoutineManager implements RoutineManagerInterface
     public function getAllErrors(): array
     {
         return $this->allErrors;
+    }
+
+    /**
+     * @param string $content
+     */
+    public function setContent(string $content): void
+    {
+        $this->content = $content;
     }
 }
