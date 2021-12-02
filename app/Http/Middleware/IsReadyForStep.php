@@ -397,6 +397,12 @@ trait IsReadyForStep
                 $route = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
+            case 'upload-files':
+                // assume files are uploaded, go to step 11 (connection selection)
+                // back to selection
+                $route = route('009-selection.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
             case 'nordigen-link':
                 // back to selection
                 $route = route('009-selection.index');
