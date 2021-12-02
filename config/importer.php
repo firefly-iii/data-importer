@@ -31,6 +31,7 @@ return [
     'upload_path'       => storage_path('uploads'),
     'expect_secure_url' => env('EXPECT_SECURE_URL', false),
     'is_external'       => env('IS_EXTERNAL', false),
+    'namespace'         => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'         => env('USE_CACHE', false),
     'minimum_version'   => '5.6.4',
     'cache_api_calls'   => false,
