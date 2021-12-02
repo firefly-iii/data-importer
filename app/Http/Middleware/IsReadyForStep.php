@@ -358,6 +358,12 @@ trait IsReadyForStep
                 $route = route('008-submit.index');
                 Log::debug(sprintf('Spectre: Return redirect to "%s"', $route));
                 return redirect($route);
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    $route = route('008-submit.index');
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    return redirect($route);
+                }
         }
 
     }

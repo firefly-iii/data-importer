@@ -376,8 +376,8 @@ class MapController extends Controller
         }
         $filtered = array_filter(
             $categories,
-            static function (string $value) {
-                return '' !== $value;
+            static function (?string $value) {
+                return '' !== (string)$value;
             }
         );
 
