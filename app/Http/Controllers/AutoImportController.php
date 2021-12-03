@@ -76,9 +76,6 @@ class AutoImportController extends Controller
         return ' ';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function line(string $string)
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);

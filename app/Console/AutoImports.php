@@ -297,7 +297,6 @@ trait AutoImports
 
     /**
      * @param Configuration $configuration
-     * @param array         $transactions
      */
     private function startImport(Configuration $configuration): void
     {

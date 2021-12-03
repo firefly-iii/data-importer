@@ -38,7 +38,7 @@ class Iban implements ConverterInterface
      *
      * @param $value
      *
-     * @return mixed
+     * @return array|string|string[]
      *
      */
     public function convert($value)

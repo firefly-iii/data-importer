@@ -133,7 +133,7 @@ class AccountInformationCollector
      */
     private static function getBalanceDetails(Account $account): Account
     {
-        Log::debug(sprintf(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier())));
+        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();

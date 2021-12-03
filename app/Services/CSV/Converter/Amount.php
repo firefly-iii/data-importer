@@ -109,7 +109,7 @@ class Amount implements ConverterInterface
             $value  = str_replace($search, '', $value);
             Log::debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
-        if (0 === strpos($value, '.')) {
+        if (str_starts_with($value, '.')) {
             $value = '0' . $value;
         }
 
@@ -136,7 +136,7 @@ class Amount implements ConverterInterface
      */
     private function stripAmount(string $value): string
     {
-        if (0 === strpos($value, '--')) {
+        if (str_starts_with($value, '--')) {
             $value = substr($value, 2);
         }
         // have to strip the € because apparantly the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
@@ -145,7 +145,7 @@ class Amount implements ConverterInterface
         $value = trim((string) str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen($str);
-        if (0 === strpos($str, '(') && ')' === $str[$len - 1]) {
+        if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
             $str = '-' . substr($str, 1, $len - 2);
         }
         $str = trim($str);
@@ -223,7 +223,7 @@ class Amount implements ConverterInterface
      *
      * @param string $value
      *
-     * @return string
+     * @return string|null
      */
     private function findFromLeft(string $value): ?string
     {

@@ -87,7 +87,7 @@ class RoleController extends Controller
         $examples = RoleService::getExampleData($content, $configuration);
 
         // submit mapping from config.
-        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR, 512));
+        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
 
         // roles
         $roles = config('csv.import_roles');

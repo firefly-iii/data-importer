@@ -601,7 +601,7 @@ class Configuration
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getDefaultAccount(): ?int
     {

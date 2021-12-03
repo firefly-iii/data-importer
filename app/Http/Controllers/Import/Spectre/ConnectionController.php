@@ -110,7 +110,7 @@ class ConnectionController extends Controller
         // save config
         $json = '[]';
         try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
         }
@@ -170,7 +170,7 @@ class ConnectionController extends Controller
         // save config
         $json = '[]';
         try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
         }

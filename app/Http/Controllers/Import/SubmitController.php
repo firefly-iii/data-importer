@@ -104,7 +104,6 @@ class SubmitController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws JsonException
      */
     public function status(Request $request): JsonResponse
     {
@@ -128,7 +127,6 @@ class SubmitController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws ImporterErrorException
      */
     public function start(Request $request): JsonResponse
     {

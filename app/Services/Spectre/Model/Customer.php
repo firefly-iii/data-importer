@@ -30,7 +30,7 @@ namespace App\Services\Spectre\Model;
  */
 class Customer
 {
-    /** @var int */
+    /** @var string */
     public string $id;
     /** @var string */
     public string $identifier;

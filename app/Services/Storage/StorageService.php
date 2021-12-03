@@ -84,7 +84,6 @@ class StorageService
      * @param string $name
      * @param bool   $convert
      * @return string
-     * @throws FileNotFoundException
      */
     public static function getContent(string $name, bool $convert = false): string
     {

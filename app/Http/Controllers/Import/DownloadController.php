@@ -57,7 +57,7 @@ class DownloadController extends Controller
 
         $array = $configuration->toArray();
 
-        $result = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 512);
+        $result = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
 
         $response = response($result);
         $name     = sprintf('import_config_%s.json', date('Y-m-d'));

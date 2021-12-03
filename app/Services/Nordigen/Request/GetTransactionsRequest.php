@@ -65,7 +65,6 @@ class GetTransactionsRequest extends Request
         $response = $this->authenticatedGet();
         $keys     = ['booked', 'pending'];
         $return   = [];
-        /** @var string $key */
         foreach ($keys as $key) {
             if (array_key_exists($key, $response['transactions'])) {
                 $set    = $response['transactions'][$key];

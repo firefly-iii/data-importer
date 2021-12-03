@@ -58,7 +58,6 @@ class ListConnectionsRequest extends Request
 
     /**
      * @inheritDoc
-     * @throws JsonException
      */
     public function get(): Response
     {

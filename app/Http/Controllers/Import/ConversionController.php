@@ -221,7 +221,6 @@ class ConversionController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws JsonException
      */
     public function status(Request $request): JsonResponse
     {

@@ -54,7 +54,7 @@ class Date implements ConverterInterface
      *
      * @param $value
      *
-     * @return mixed
+     * @return string
      *
      */
     public function convert($value)
@@ -97,7 +97,7 @@ class Date implements ConverterInterface
 
     /**
      * @param string $format
-     * @return array|string[]
+     * @return array
      */
     public function splitLocaleFormat(string $format): array
     {

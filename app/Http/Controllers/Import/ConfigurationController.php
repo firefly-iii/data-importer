@@ -300,7 +300,6 @@ class ConfigurationController extends Controller
         $return = [];
         Log::debug('Now creating Spectre account lists.');
 
-        /** @var SpectreAccount $spectreAccount */
         foreach ($spectre as $spectreAccount) {
             Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
             $iban     = $spectreAccount->iban;
