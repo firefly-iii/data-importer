@@ -257,14 +257,14 @@ class Accounts extends AbstractTask
         $array['bic']  = $array['bic'] ?? null;
 
         // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string)$array['name']) {
+        if (null !== $array['id'] || '' !== (string) $array['name']) {
             Log::debug('Array with account has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
-        if (null !== $array['id'] || '' !== (string)$array['iban']) {
+        if (null !== $array['id'] || '' !== (string) $array['iban']) {
             Log::debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;

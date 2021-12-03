@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * SelectionController.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -20,6 +20,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Nordigen;
 
@@ -86,7 +88,11 @@ class SelectionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param SelectionRequest $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {
@@ -109,7 +115,7 @@ class SelectionController extends Controller
         // save config
         $json = '[]';
         try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
         }

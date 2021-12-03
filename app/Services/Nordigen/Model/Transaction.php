@@ -88,7 +88,7 @@ class Transaction
      */
     public static function fromArray($array): self
     {
-        //Log::debug('Transaction from array', $array);
+        Log::debug('Nordigen transaction from array', $array);
         $object = new self;
 
         $object->additionalInformation                  = $array['additionalInformation'] ?? '';
@@ -150,6 +150,69 @@ class Transaction
     }
 
     /**
+     * @param array $array
+     * @return static
+     */
+    public static function fromLocalArray(array $array): self
+    {
+        $object = new self;
+
+        $object->additionalInformation                  = $array['additional_information'];
+        $object->additionalInformationStructured        = $array['additional_information_structured'];
+        $object->balanceAfterTransaction                = $array['balance_after_transaction'];
+        $object->bankTransactionCode                    = $array['bank_transaction_code'];
+        $object->bookingDate                            = Carbon::createFromFormat(DateTimeInterface::W3C, $array['booking_date']);
+        $object->checkId                                = $array['check_id'];
+        $object->creditorAgent                          = $array['creditor_agent'];
+        $object->creditorId                             = $array['creditor_id'];
+        $object->creditorName                           = $array['creditor_name'];
+        $object->currencyExchange                       = $array['currency_exchange'];
+        $object->debtorAgent                            = $array['debtor_agent'];
+        $object->debtorName                             = $array['debtor_name'];
+        $object->entryReference                         = $array['entry_reference'];
+        $object->key                                    = $array['key'];
+        $object->mandateId                              = $array['mandate_id'];
+        $object->proprietaryBank                        = $array['proprietary_bank'];
+        $object->purposeCode                            = $array['purpose_code'];
+        $object->remittanceInformationStructured        = $array['remittance_information_structured'];
+        $object->remittanceInformationStructuredArray   = $array['remittance_information_structured_array'];
+        $object->remittanceInformationUnstructured      = $array['remittance_information_unstructured'];
+        $object->remittanceInformationUnstructuredArray = $array['remittance_information_unstructured_array'];
+        $object->transactionId                          = $array['transaction_id'];
+        $object->ultimateCreditor                       = $array['ultimate_creditor'];
+        $object->ultimateDebtor                         = $array['ultimate_debtor'];
+        $object->valueDate                              = Carbon::createFromFormat(DateTimeInterface::W3C, $array['value_date']);
+        $object->transactionAmount                      = $array['transaction_amount']['amount'];
+        $object->currencyCode                           = $array['transaction_amount']['currency'];
+        $object->accountIdentifier                      = $array['account_identifier'];
+
+        // undocumented values:
+        $object->endToEndId = $array['end_to_end_id'];
+
+        // TODO copy paste code.
+        $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
+        $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
+
+        $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
+        $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
+
+        //$object-> = $array[''];
+
+        // generate transactionID if empty:
+        if ('' === $object->transactionId) {
+            $hash = hash('sha256', (string) microtime());
+            try {
+                $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
+            } catch (JsonException $e) {
+                Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
+            }
+            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
+        }
+
+        return $object;
+    }
+
+    /**
      * @return Carbon
      */
     public function getDate(): Carbon
@@ -173,11 +236,17 @@ class Transaction
         $description = '';
         if ('' !== $this->remittanceInformationUnstructured) {
             $description = $this->remittanceInformationUnstructured;
+            Log::debug('Description is now remittanceInformationUnstructured');
         }
 
         // try other values as well (Revolut)
         if ('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
             $description = implode(' ', $this->remittanceInformationUnstructuredArray);
+            Log::debug('Description is now remittanceInformationUnstructuredArray');
+        }
+        if ('' === $description) {
+            Log::debug('Description is now remittanceInformationStructured');
+            $description = $this->remittanceInformationStructured;
         }
 
         if ('' === $description) {
@@ -188,59 +257,36 @@ class Transaction
     }
 
     /**
-     * Return name of the destination account. Depends also on the amount
+     * Return name of the destination account
      *
      * @return string|null
      */
     public function getDestinationName(): ?string
     {
-        if (1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination name is "debtor" because %s > 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorName) {
-                Log::debug(sprintf('Destination name is "%s"', $this->debtorName));
-                return $this->debtorName;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->creditorName) {
+            Log::debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
+            return $this->creditorName;
         }
-        if (1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination name is "creditor" because %s < 0.', $this->transactionAmount));
-            if ('' !== $this->creditorName) {
-                Log::debug(sprintf('Destination name is "%s"', $this->creditorName));
-                return $this->creditorName;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no destination account information.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
         return null;
     }
 
     /**
-     * Return IBAN of the destination account. Depends also on the amount
+     * Return IBAN of the destination account
      *
      * @return string|null
      */
     public function getDestinationIban(): ?string
     {
-        if (1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination IBAN is "debtor" because %s > 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorAccountIban) {
-                Log::debug(sprintf('Destination IBAN is "%s"', $this->debtorAccountIban));
-                return $this->debtorAccountIban;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->creditorAccountIban) {
+            Log::debug(sprintf('Destination IBAN is "%s" (creditor)', $this->creditorAccountIban));
+            return $this->creditorAccountIban;
         }
-        if (1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Destination IBAN is "creditor" because %s < 0.', $this->transactionAmount));
-            if ('' !== $this->creditorAccountIban) {
-                Log::debug(sprintf('Destination IBAN is "%s"', $this->creditorAccountIban));
-                return $this->creditorAccountIban;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no destination IBAN.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->transactionId));
         return null;
     }
-
 
     /**
      * Return name of the source account. Depends also on the amount
@@ -249,23 +295,12 @@ class Transaction
      */
     public function getSourceName(): ?string
     {
-        if (-1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source name is "debtor" because %s < 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorName) {
-                Log::debug(sprintf('Source name is "%s"', $this->debtorName));
-                return $this->debtorName;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->debtorName) {
+            Log::debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
+            return $this->debtorName;
         }
-        if (-1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source name is "creditor" because %s > 0.', $this->transactionAmount));
-            if ('' !== $this->creditorName) {
-                Log::debug(sprintf('Source name is "%s"', $this->creditorName));
-                return $this->creditorName;
-            }
-        }
-
-        Log::warning(sprintf('Transaction "%s" has no source account information.', $this->transactionId));
+        Log::warning(sprintf('Transaction "%s" has no source account name information.', $this->transactionId));
         return null;
     }
 
@@ -276,22 +311,11 @@ class Transaction
      */
     public function getSourceIban(): ?string
     {
-        if (-1 === bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source IBAN is from "debtor" because %s < 0.', $this->transactionAmount));
-            // amount is positive, its a deposit, return creditor
-            if ('' !== $this->debtorAccountIban) {
-                Log::debug(sprintf('Source IBAN is "%s"', $this->debtorAccountIban));
-                return $this->debtorAccountIban;
-            }
+        Log::debug(__METHOD__);
+        if ('' !== $this->debtorAccountIban) {
+            Log::debug(sprintf('Source IBAN is "%s" (debtor)', $this->debtorAccountIban));
+            return $this->debtorAccountIban;
         }
-        if (-1 !== bccomp($this->transactionAmount, '0')) {
-            Log::debug(sprintf('Source IBAN is "creditor" because %s > 0.', $this->transactionAmount));
-            if ('' !== $this->creditorAccountIban) {
-                Log::debug(sprintf('Source IBAN is "%s"', $this->creditorAccountIban));
-                return $this->creditorAccountIban;
-            }
-        }
-
         Log::warning(sprintf('Transaction "%s" has no source IBAN information.', $this->transactionId));
         return null;
     }
@@ -349,68 +373,5 @@ class Transaction
         ];
 
         return $return;
-    }
-
-    /**
-     * @param array $array
-     * @return static
-     */
-    public static function fromLocalArray(array $array): self
-    {
-        $object = new self;
-
-        $object->additionalInformation                  = $array['additional_information'];
-        $object->additionalInformationStructured        = $array['additional_information_structured'];
-        $object->balanceAfterTransaction                = $array['balance_after_transaction'];
-        $object->bankTransactionCode                    = $array['bank_transaction_code'];
-        $object->bookingDate                            = Carbon::createFromFormat(DateTimeInterface::W3C, $array['booking_date']);
-        $object->checkId                                = $array['check_id'];
-        $object->creditorAgent                          = $array['creditor_agent'];
-        $object->creditorId                             = $array['creditor_id'];
-        $object->creditorName                           = $array['creditor_name'];
-        $object->currencyExchange                       = $array['currency_exchange'];
-        $object->debtorAgent                            = $array['debtor_agent'];
-        $object->debtorName                             = $array['debtor_name'];
-        $object->entryReference                         = $array['entry_reference'];
-        $object->key                                    = $array['key'];
-        $object->mandateId                              = $array['mandate_id'];
-        $object->proprietaryBank                        = $array['proprietary_bank'];
-        $object->purposeCode                            = $array['purpose_code'];
-        $object->remittanceInformationStructured        = $array['remittance_information_structured'];
-        $object->remittanceInformationStructuredArray   = $array['remittance_information_structured_array'];
-        $object->remittanceInformationUnstructured      = $array['remittance_information_unstructured'];
-        $object->remittanceInformationUnstructuredArray = $array['remittance_information_unstructured_array'];
-        $object->transactionId                          = $array['transaction_id'];
-        $object->ultimateCreditor                       = $array['ultimate_creditor'];
-        $object->ultimateDebtor                         = $array['ultimate_debtor'];
-        $object->valueDate                              = Carbon::createFromFormat(DateTimeInterface::W3C, $array['value_date']);
-        $object->transactionAmount                      = $array['transaction_amount']['amount'];
-        $object->currencyCode                           = $array['transaction_amount']['currency'];
-        $object->accountIdentifier                      = $array['account_identifier'];
-
-        // undocumented values:
-        $object->endToEndId = $array['end_to_end_id'];
-
-        // TODO copy paste code.
-        $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
-        $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
-
-        $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
-        $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
-
-        //$object-> = $array[''];
-
-        // generate transactionID if empty:
-        if ('' === $object->transactionId) {
-            $hash = hash('sha256', (string) microtime());
-            try {
-                $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
-                Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
-            }
-            $object->transactionId = Uuid::uuid5(config('importer.namespace'), $hash);
-        }
-
-        return $object;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * GeneratesIdentifier.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Shared\Conversion;
 
 use Log;
@@ -34,6 +36,14 @@ trait GeneratesIdentifier
 {
     protected string $identifier;
     private string   $diskName = 'conversion-routines';
+
+    /**
+     * @inheritDoc
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
 
     /**
      *
@@ -50,14 +60,6 @@ trait GeneratesIdentifier
         } while ($count < 30 && $disk->exists($generatedId));
         $this->identifier = $generatedId;
         Log::info(sprintf('Job identifier is "%s"', $generatedId));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
     }
 
 }

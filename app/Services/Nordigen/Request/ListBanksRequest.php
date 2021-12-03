@@ -60,8 +60,8 @@ class ListBanksRequest extends Request
         } catch (ImporterErrorException $e) {
             $error = [
                 'error' => [
-                    'message' =>$e->getMessage()
-                ]
+                    'message' => $e->getMessage(),
+                ],
             ];
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {

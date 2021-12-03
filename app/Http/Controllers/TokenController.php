@@ -29,6 +29,7 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
@@ -40,6 +41,7 @@ use InvalidArgumentException;
 use JsonException;
 use Log;
 use Str;
+use Throwable;
 
 /**
  * Class TokenController
@@ -244,8 +246,8 @@ class TokenController extends Controller
      * @param Request $request
      * @return Application|Factory|\Illuminate\Contracts\View\View|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Throwable
+     * @throws GuzzleException
+     * @throws Throwable
      */
     public function callback(Request $request)
     {

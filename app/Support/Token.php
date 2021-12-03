@@ -40,7 +40,7 @@ class Token
         $value = request()->cookie('access_token');
         if (null === $value) {
             // fall back to config:
-            $value = (string) config('csv_importer.access_token');
+            $value = (string) config('importer.access_token');
         }
         if ('' === (string) $value) {
             throw new ImporterErrorException('No valid access token value.');
@@ -73,7 +73,7 @@ class Token
         $value = request()->cookie('base_url');
         if (null === $value) {
             // fall back to config:
-            $value = (string) config('csv_importer.url');
+            $value = (string) config('importer.url');
         }
         if ('' === (string) $value) {
             throw new ImporterErrorException('No valid URL value.');

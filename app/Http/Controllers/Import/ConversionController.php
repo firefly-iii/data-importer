@@ -31,11 +31,11 @@ use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
-use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Storage\StorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,7 +48,7 @@ use Storage;
  */
 class ConversionController extends Controller
 {
-    protected const DISK_NAME = 'jobs';
+    protected const DISK_NAME = 'jobs'; // TODO stored in several places
 
     /**
      * StartController constructor.
@@ -221,7 +221,6 @@ class ConversionController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws JsonException
      */
     public function status(Request $request): JsonResponse
     {

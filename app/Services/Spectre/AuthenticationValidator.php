@@ -51,10 +51,10 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         $secret = config('spectre.secret');
 
         if ('' === $appId && !$this->isCli()) {
-            $appId = (string)session()->get(Constants::SESSION_SPECTRE_APP_ID);
+            $appId = (string) session()->get(Constants::SESSION_SPECTRE_APP_ID);
         }
         if ('' === $secret && !$this->isCli()) {
-            $secret = (string)session()->get(Constants::SESSION_SPECTRE_SECRET);
+            $secret = (string) session()->get(Constants::SESSION_SPECTRE_SECRET);
         }
 
 

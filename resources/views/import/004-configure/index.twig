@@ -1,7 +1,7 @@
 {% extends "./layout/default" %}
 {% block content %}
     <div class="container">
-        <div class="row mt-4">
+        <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <h1>{{ mainTitle }}</h1>
             </div>
@@ -17,13 +17,15 @@
                             <p>
                                 CSV files come in many shapes and forms. Some of the most important settings are below.
                                 They apply to all lines in the file. If you would like some support, <a
-                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank"> check out the documentation for this page.</a>
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
+                                    check out the documentation for this page.</a>
                             </p>
                         {% endif %}
                         {% if 'nordigen' == flow or 'spectre' == flow %}
                             <p>
-                                Your {{ flow|capitalize}} import can be configured and fine-tuned.
-                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check out the documentation for this page.</a>
+                                Your {{ flow|capitalize }} import can be configured and fine-tuned.
+                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check
+                                    out the documentation for this page.</a>
                             </p>
                         {% endif %}
                     </div>
@@ -52,9 +54,13 @@
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="flow" value="{{ flow }}"/>
-            <!-- these two values are used by Spectre and must be preserved -->
+            <!-- these values are used by Spectre + Nordigen and must be preserved -->
             <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>
             <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
+            <input type="hidden" name="nordigen_country" value="{{ configuration.getNordigenCountry }}"/>
+            <input type="hidden" name="nordigen_bank" value="{{ configuration.getNordigenBank }}"/>
+            <input type="hidden" name="nordigen_requisitions"
+                   value="{{ configuration.getNordigenRequisitions|json_encode }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -67,6 +73,8 @@
                                 <div class="form-group row mb-3">
                                     <div class="col-sm-3">Accounts</div>
                                     <div class="col-sm-9">
+                                        {% set errorAccounts = 0 %}
+                                        {% set warningAccounts = 0 %}
                                         <table class="table table-sm table-bordered table-striped">
                                             <thead>
                                             <tr>
@@ -77,6 +85,19 @@
                                             </thead>
                                             <tbody>
                                             {% for information in importerAccounts %}
+                                                {# update a variable #}
+                                                {% if 'disabled' == information.import_service.status %}
+                                                    {% set errorAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'no-info' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'nothing' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'no-balance' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
                                                 <tr>
                                                     <td>
                                                         {# Nordigen uses identifier #}
@@ -121,6 +142,7 @@
                                                                 <br><small>
                                                                 IBAN: {{ information.import_service.iban }}</small>{% endif %}
                                                         {% endif %}
+
                                                     </td>
                                                     <td>
                                                         {% if 'disabled' != information.import_service.status %}
@@ -132,7 +154,7 @@
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
-
+                                                            {# TODO do not split this. #}
                                                             {# Nordigen: #}
                                                             {% if 'nordigen' == flow %}
                                                                 {% if 'disabled' != information.import_service.status %}
@@ -168,8 +190,20 @@
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
-                                            <caption>Select the accounts you want to import into your Firefly III installation.</caption>
+                                            <caption>Select the accounts you want to import into your Firefly III
+                                                installation.
+                                            </caption>
                                         </table>
+
+                                        {# TODO rewrite so Nordigen and Spectre use the same account object #}
+                                        {% if errorAccounts > 0 %}
+                                            <span class="text-danger"><span class="fas fa-exclamation-triangle"></span></span>
+                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                        {% endif %}
+                                        {% if warningAccounts > 0 %}
+                                            <span class="text-warning"><span class="fas fa-exclamation-triangle"></span></span>
+                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                        {% endif %}
                                     </div>
                                 </div>
 
@@ -178,18 +212,23 @@
                                         <label for="X" class="col-sm-3 col-form-label">Ignore Spectre categories</label>
                                         <div class="col-sm-9">
                                             <div class="form-check">
-                                                <input class="form-check-input" {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %} type="checkbox" value="1" id="ignore_spectre_categories" name="ignore_spectre_categories" aria-describedby="duplicateSpectre">
+                                                <input class="form-check-input"
+                                                       {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %}
+                                                       type="checkbox" value="1" id="ignore_spectre_categories"
+                                                       name="ignore_spectre_categories"
+                                                       aria-describedby="duplicateSpectre">
                                                 <label class="form-check-label" for="ignore_spectre_categories">
                                                     Ignore Spectre's categories.
                                                 </label>
                                             </div>
 
                                             <small class="form-text text-muted" id="duplicateSpectre">
-                                                Spectre adds categories to each transaction. You can choose to ignore them.
+                                                Spectre adds categories to each transaction. You can choose to ignore
+                                                them.
                                             </small>
                                         </div>
                                     </div>
-                                    {% endif %}
+                                {% endif %}
 
                             {% endif %}
 
@@ -350,7 +389,8 @@
                                                 Yes
                                             </label>
                                             <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your data to existing Firefly III data, for a cleaner import.
+                                                <br>You get the opportunity to link your data to existing Firefly III
+                                                data, for a cleaner import.
                                             </small>
                                         </div>
                                     </div>
@@ -446,7 +486,8 @@
                                     Firefly III can automatically detect duplicate transactions. This is pretty
                                     foolproof. In some special cases however,
                                     you want more control over this process. Read more about the options below in <a
-                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">the documentation</a>.
+                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/"
+                                        target="_blank">the documentation</a>.
                                 </p>
                             </div>
 
@@ -493,7 +534,7 @@
                                     </select>
                                     <small id="duplicate_detection_method_help" class="form-text text-muted">
                                         For more details on these detection method see <a
-                                            href="https://docs.firefly-iii.org/csv/usage/configure/#duplicate-transaction-detection"
+                                            href="https://docs.firefly-iii.org/data-importer/usage/configure/#duplicate-transaction-detection"
                                             target="_blank">the documentation</a>. If you're not sure, select
                                         "content-based" detection.
                                     </small>

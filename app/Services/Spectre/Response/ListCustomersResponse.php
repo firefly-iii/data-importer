@@ -37,7 +37,7 @@ use Iterator;
 class ListCustomersResponse extends Response implements Iterator, Countable
 {
     private Collection $collection;
-    private int $position = 0;
+    private int        $position = 0;
 
     /**
      * @inheritDoc

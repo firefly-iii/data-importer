@@ -23,6 +23,8 @@
 declare(strict_types=1);
 
 
+use App\Support\Facades\Steam;
+
 return [
 
     /*
@@ -77,7 +79,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL', null),
+    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -90,7 +92,7 @@ return [
     |
     */
 
-    'timezone' => env('TZ','Europe/Amsterdam'),
+    'timezone' => env('TZ', 'Europe/Amsterdam'),
 
     /*
     |--------------------------------------------------------------------------
@@ -142,7 +144,7 @@ return [
     |
     */
     // not used by data importer.
-    'key'    => 'PSPGRY5PWJ6D1UMZLBL5BNAZIN4I1QSD',
+    'key'          => 'PSPGRY5PWJ6D1UMZLBL5BNAZIN4I1QSD',
 
     'cipher' => 'AES-256-CBC',
 
@@ -251,7 +253,7 @@ return [
         'Validator'    => Illuminate\Support\Facades\Validator::class,
         'View'         => Illuminate\Support\Facades\View::class,
         'Twig'         => TwigBridge\Facade\Twig::class,
-        'Steam'         => \App\Support\Facades\Steam::class,
+        'Steam'        => Steam::class,
     ],
 
 ];

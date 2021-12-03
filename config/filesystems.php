@@ -65,31 +65,31 @@ return [
 
     'disks' => [
 
-        'local'          => [
+        'local'               => [
             'driver' => 'local',
             'root'   => storage_path('app'),
         ],
-        'uploads'        => [
+        'uploads'             => [
             'driver' => 'local',
             'root'   => storage_path('uploads'),
         ],
-        'jobs'           => [
+        'jobs'                => [
             'driver' => 'local',
             'root'   => storage_path('jobs'),
         ],
-        'conversion-routines'           => [
+        'conversion-routines' => [
             'driver' => 'local',
             'root'   => storage_path('conversion-routines'),
         ],
-        'submission-routines'           => [
+        'submission-routines' => [
             'driver' => 'local',
             'root'   => storage_path('submission-routines'),
         ],
-        'configurations' => [
+        'configurations'      => [
             'driver' => 'local',
             'root'   => envNonEmpty('JSON_CONFIGURATION_DIR', storage_path('configurations')),
         ],
-        'public'         => [
+        'public'              => [
             'driver'     => 'local',
             'root'       => storage_path('app/public'),
             'url'        => env('APP_URL') . '/storage',

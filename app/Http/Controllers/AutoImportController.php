@@ -28,7 +28,6 @@ namespace App\Http\Controllers;
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
-use App\Console\StartImport;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
@@ -39,7 +38,7 @@ use Log;
  */
 class AutoImportController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON, StartImport;
+    use HaveAccess, AutoImports, VerifyJSON;
 
     private string $directory;
 
@@ -62,7 +61,7 @@ class AutoImportController extends Controller
         if (0 === count($files)) {
             $this->line(sprintf('There are no files in directory %s', $this->directory));
             $this->line('To learn more about this process, read the docs:');
-            $this->line('https://docs.firefly-iii.org/csv/install/docker/');
+            $this->line('https://docs.firefly-iii.org/data-importer/');
 
             return ' ';
         }
@@ -77,9 +76,6 @@ class AutoImportController extends Controller
         return ' ';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function line(string $string)
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);

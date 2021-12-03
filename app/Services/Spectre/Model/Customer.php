@@ -30,7 +30,7 @@ namespace App\Services\Spectre\Model;
  */
 class Customer
 {
-    /** @var int */
+    /** @var string */
     public string $id;
     /** @var string */
     public string $identifier;
@@ -52,7 +52,7 @@ class Customer
     public static function fromArray(array $data): self
     {
         $model             = new self;
-        $model->id         = (string)$data['id'];
+        $model->id         = (string) $data['id'];
         $model->identifier = $data['identifier'];
         $model->secret     = $data['secret'];
 

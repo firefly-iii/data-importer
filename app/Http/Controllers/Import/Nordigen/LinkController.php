@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * LinkController.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Import\Nordigen;
 
 use App\Exceptions\ImporterErrorException;
@@ -33,6 +35,8 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use Illuminate\Http\Request;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -95,8 +99,8 @@ class LinkController extends Controller
 
     /**
      * @param Request $request
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {

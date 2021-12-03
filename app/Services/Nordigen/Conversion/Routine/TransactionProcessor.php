@@ -27,7 +27,6 @@ namespace App\Services\Nordigen\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\CSV\Configuration\Configuration;
-use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Nordigen\TokenManager;

@@ -38,7 +38,7 @@ use Log;
 class Request extends FormRequest
 {
     /**
-     * @param string $value
+     * @param string|null $value
      *
      * @return bool
      */

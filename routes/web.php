@@ -25,6 +25,7 @@ declare(strict_types=1);
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
 Route::post('/', 'IndexController@postIndex')->name('index.post');
+Route::get('/debug', 'DebugController@index')->name('debug');
 
 // validate access token:
 Route::get('/token', 'TokenController@index')->name('token.index');
@@ -37,8 +38,8 @@ Route::get('/validate/spectre', 'ServiceController@validateSpectre')->name('vali
 Route::get('/validate/nordigen', 'ServiceController@validateNordigen')->name('validate.nordigen');
 
 // clear session
-Route::get('/flush','IndexController@flush')->name('flush');
-Route::get('/reset','IndexController@reset')->name('reset');
+Route::get('/flush', 'IndexController@flush')->name('flush');
+Route::get('/reset', 'IndexController@reset')->name('reset');
 
 // step 2: Authenticate Nordigen / Spectre manually if necessary.
 // check : must not be CSV flow. If so redirect to upload.

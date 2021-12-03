@@ -150,7 +150,7 @@ class LineProcessor
         }
         // add a special column value for the "source"
         $columnValue = new ColumnValue;
-        $columnValue->setValue(sprintf('jc5-csv-import-v%s', config('csv_importer.version')));
+        $columnValue->setValue(sprintf('jc5-data-import-v%s', config('importer.version')));
         $columnValue->setMappedValue(0);
         $columnValue->setAppendValue(false);
         $columnValue->setRole('original-source');

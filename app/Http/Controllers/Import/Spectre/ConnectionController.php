@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * ConnectionController.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -20,6 +20,9 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
+
 
 namespace App\Http\Controllers\Import\Spectre;
 
@@ -107,7 +110,7 @@ class ConnectionController extends Controller
         // save config
         $json = '[]';
         try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
         }
@@ -167,7 +170,7 @@ class ConnectionController extends Controller
         // save config
         $json = '[]';
         try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR, 512);
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error($e->getMessage());
         }

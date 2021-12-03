@@ -113,7 +113,6 @@ class GenerateTransactions
      * @param array $entry
      *
      * @return array
-     * @throws ImporterErrorException
      */
     private function generateTransaction(array $entry): array
     {

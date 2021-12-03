@@ -46,15 +46,18 @@ class DownloadController extends Controller
         $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
 
         // append the config file with values from the disk:
-        $diskArray  = json_decode(StorageService::getContent(session()->get(Constants::UPLOAD_CONFIG_FILE)), true, JSON_THROW_ON_ERROR);
-        $diskConfig = Configuration::fromArray($diskArray);
+        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        if (null !== $configFileName) {
+            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig = Configuration::fromArray($diskArray);
+            $configuration->setRoles($diskConfig->getRoles());
+            $configuration->setMapping($diskConfig->getMapping());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+        }
 
-        $configuration->setRoles($diskConfig->getRoles());
-        $configuration->setMapping($diskConfig->getMapping());
-        $configuration->setDoMapping($diskConfig->getDoMapping());
         $array = $configuration->toArray();
 
-        $result = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 512);
+        $result = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
 
         $response = response($result);
         $name     = sprintf('import_config_%s.json', date('Y-m-d'));

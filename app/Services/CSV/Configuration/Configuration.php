@@ -162,7 +162,7 @@ class Configuration
      */
     public static function fromRequest(array $array): self
     {
-        $delimiters             = config('csv_importer.delimiters_reversed');
+        $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->version        = self::VERSION;
         $object->headers        = $array['headers'];
@@ -266,8 +266,8 @@ class Configuration
      */
     private static function fromClassicFile(array $data): self
     {
-        $delimiters             = config('csv_importer.delimiters_reversed');
-        $classicRoleNames       = config('csv_importer.classic_roles');
+        $delimiters             = config('csv.delimiters_reversed');
+        $classicRoleNames       = config('csv.classic_roles');
         $object                 = new self;
         $object->headers        = $data['has-headers'] ?? false;
         $object->date           = $data['date-format'] ?? $object->date;
@@ -287,6 +287,11 @@ class Configuration
         $object->identifier              = $data['identifier'] ?? '0';
         $object->connection              = $data['connection'] ?? '0';
         $object->ignoreSpectreCategories = $data['ignore_spectre_categories'] ?? false;
+
+        // nordigen information:
+        $object->nordigenCountry      = $data['nordigen_country'] ?? '';
+        $object->nordigenBank         = $data['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $data['nordigen_requisitions'] ?? [];
 
         // settings for spectre + nordigen
         $object->mapAllData = $data['map_all_data'] ?? false;
@@ -364,18 +369,6 @@ class Configuration
     }
 
     /**
-     * @param array $data
-     *
-     * @return static
-     */
-    private static function fromVersionThree(array $data): self
-    {
-        $object            = self::fromArray($data);
-        $object->specifics = [];
-        return $object;
-    }
-
-    /**
      * @param array $array
      *
      * @return static
@@ -383,7 +376,7 @@ class Configuration
     public static function fromArray(array $array): self
     {
         $version                = $array['version'] ?? 1;
-        $delimiters             = config('csv_importer.delimiters_reversed');
+        $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->headers        = $array['headers'] ?? false;
         $object->date           = $array['date'] ?? '';
@@ -446,6 +439,18 @@ class Configuration
         // utf8
         $object->conversion = $array['conversion'] ?? false;
 
+        return $object;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return static
+     */
+    private static function fromVersionThree(array $data): self
+    {
+        $object            = self::fromArray($data);
+        $object->specifics = [];
         return $object;
     }
 
@@ -517,15 +522,6 @@ class Configuration
         unset($array['mapping'], $array['do_mapping'], $array['roles']);
         return $array;
     }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
 
     /**
      * @return array
@@ -605,7 +601,7 @@ class Configuration
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getDefaultAccount(): ?int
     {
@@ -637,6 +633,14 @@ class Configuration
     }
 
     /**
+     * @param string $connection
+     */
+    public function setConnection(string $connection): void
+    {
+        $this->connection = $connection;
+    }
+
+    /**
      * @return string
      */
     public function getIdentifier(): string
@@ -645,11 +649,11 @@ class Configuration
     }
 
     /**
-     * @param string $connection
+     * @param string $identifier
      */
-    public function setConnection(string $connection): void
+    public function setIdentifier(string $identifier): void
     {
-        $this->connection = $connection;
+        $this->identifier = $identifier;
     }
 
     /**
@@ -669,20 +673,19 @@ class Configuration
     }
 
     /**
-     * @return bool
-     */
-    public function isMapAllData(): bool
-    {
-        return $this->mapAllData;
-    }
-
-
-    /**
      * @param array $doMapping
      */
     public function setDoMapping(array $doMapping): void
     {
         $this->doMapping = $doMapping;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMapAllData(): bool
+    {
+        return $this->mapAllData;
     }
 
     /**
@@ -755,27 +758,19 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenCountry
-     */
-    public function setNordigenCountry(string $nordigenCountry): void
-    {
-        $this->nordigenCountry = $nordigenCountry;
-    }
-
-    /**
-     * @param string $nordigenBank
-     */
-    public function setNordigenBank(string $nordigenBank): void
-    {
-        $this->nordigenBank = $nordigenBank;
-    }
-
-    /**
      * @return string
      */
     public function getNordigenCountry(): string
     {
         return $this->nordigenCountry;
+    }
+
+    /**
+     * @param string $nordigenCountry
+     */
+    public function setNordigenCountry(string $nordigenCountry): void
+    {
+        $this->nordigenCountry = $nordigenCountry;
     }
 
     /**
@@ -786,13 +781,20 @@ class Configuration
         return $this->conversion;
     }
 
-
     /**
      * @return string
      */
     public function getNordigenBank(): string
     {
         return $this->nordigenBank;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenBank(string $nordigenBank): void
+    {
+        $this->nordigenBank = $nordigenBank;
     }
 
     /**
@@ -810,6 +812,14 @@ class Configuration
     public function getRequisition(string $key): ?string
     {
         return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNordigenRequisitions(): array
+    {
+        return $this->nordigenRequisitions;
     }
 
     /**

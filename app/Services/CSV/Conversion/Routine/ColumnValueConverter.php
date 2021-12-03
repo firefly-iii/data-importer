@@ -171,7 +171,7 @@ class ColumnValueConverter
     {
         if (is_array($value)) {
             try {
-                return json_encode($value, JSON_THROW_ON_ERROR, 512);
+                return json_encode($value, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }

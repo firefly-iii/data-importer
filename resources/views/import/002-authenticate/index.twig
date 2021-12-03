@@ -1,7 +1,7 @@
 {% extends "./layout/default" %}
 {% block content %}
     <div class="container">
-        <div class="row">
+        <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <h1>{{ mainTitle }}</h1>
             </div>
@@ -13,7 +13,8 @@
                         {{ subTitle }}
                     </div>
                     <div class="card-body">
-                        <p>In order to import using {{ flow|capitalize }}, you must enter the authentication data you received from this provider.
+                        <p>In order to import using {{ flow|capitalize }}, you must enter the authentication data you
+                            received from this provider.
                             You can read how to get the necessary codes in the
                             <a target="_blank" href="https://docs.firefly-iii.org/data-importer/install/configure/">documentation</a>
                         </p>
@@ -93,8 +94,10 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.start') }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span> Go back to index</a>
-                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span class="fas fa-redo-alt"></span> Start over</a>
+                            <a href="{{ route('back.start') }}" class="btn btn-secondary"><span
+                                    class="fas fa-arrow-left"></span> Go back to index</a>
+                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
+                                    class="fas fa-redo-alt"></span> Start over</a>
                         </div>
                     </div>
                 </div>

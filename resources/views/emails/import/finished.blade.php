@@ -1,57 +1,57 @@
 @component('mail::message')
-# Result of your import on {{ $time }}
+    # Result of your import on {{ $time }}
 
-<hr>
+    <hr>
 
-@if(count($errors) > 0)
-## Errors
-@endif
+    @if(count($errors) > 0)
+        ## Errors
+    @endif
 
-@foreach($errors as $index => $objList)
-@foreach($objList as $message)
-- Line #{{ $index + 1 }}: {{ $message }}
-@endforeach
-@endforeach
+    @foreach($errors as $index => $objList)
+        @foreach($objList as $message)
+            - Line #{{ $index + 1 }}: {{ $message }}
+        @endforeach
+    @endforeach
 
-@if(count($warnings) > 0)
-## Warnings
-@endif
+    @if(count($warnings) > 0)
+        ## Warnings
+    @endif
 
-@foreach($warnings as $index => $objList)
-@foreach($objList as $message)
-- Line #{{ $index + 1 }}: {{ $message }}
-@endforeach
-@endforeach
+    @foreach($warnings as $index => $objList)
+        @foreach($objList as $message)
+            - Line #{{ $index + 1 }}: {{ $message }}
+        @endforeach
+    @endforeach
 
-@if(count($messages) > 0)
-## Messages
-@endif
+    @if(count($messages) > 0)
+        ## Messages
+    @endif
 
-@foreach($messages as $index => $objList)
-@foreach($objList as $message)
-- Line #{{ $index + 1 }}: {!! $message !!}
-@endforeach
-@endforeach
+    @foreach($messages as $index => $objList)
+        @foreach($objList as $message)
+            - Line #{{ $index + 1 }}: {!! $message !!}
+        @endforeach
+    @endforeach
 
-<hr>
+    <hr>
 
-@if(0 === count($errors))
-_No errors detected_
-@endif
+    @if(0 === count($errors))
+        _No errors detected_
+    @endif
 
-@if(0 === count($warnings))
-_No warnings detected_
-@endif
+    @if(0 === count($warnings))
+        _No warnings detected_
+    @endif
 
-@if(0 === count($messages))
-_No messages detected_
-@endif
+    @if(0 === count($messages))
+        _No messages detected_
+    @endif
 
-@component('mail::button', ['url' => $url])
-Go to Firefly III
-@endcomponent
+    @component('mail::button', ['url' => $url])
+        Go to Firefly III
+    @endcomponent
 
-Enjoy!<br>
-Firefly III Data Importer, v{{ config('importer.version')  }}
+    Enjoy!<br>
+    Firefly III Data Importer, v{{ config('importer.version')  }}
 
 @endcomponent

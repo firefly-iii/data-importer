@@ -26,7 +26,6 @@ namespace App\Console\Commands;
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
-use App\Console\StartImport;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Console\Command;
@@ -37,7 +36,7 @@ use Log;
  */
 class AutoImport extends Command
 {
-    use HaveAccess, VerifyJSON, StartImport, AutoImports;
+    use HaveAccess, VerifyJSON, AutoImports;
 
     /**
      * The console command description.
@@ -51,8 +50,6 @@ class AutoImport extends Command
      * @var string
      */
     protected $signature = 'importer:auto-import {directory : The directory from which to import automatically.}';
-    /** @var string */
-    private $directory = './';
 
     /**
      * Execute the console command.
@@ -68,21 +65,21 @@ class AutoImport extends Command
             return 1;
         }
 
-        $argument        = (string) ($this->argument('directory') ?? './');
-        $this->directory = realpath($argument);
-        $this->line(sprintf('Going to automatically import everything found in %s (%s)', $this->directory, $argument));
+        $argument  = (string) ($this->argument('directory') ?? './');
+        $directory = realpath($argument);
+        $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files = $this->getFiles();
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
-            $this->info(sprintf('There are no files in directory %s', $this->directory));
+            $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
-            $this->info('https://docs.firefly-iii.org/csv/install/docker/');
+            $this->info('https://docs.firefly-iii.org/data-importer/');
 
             return 1;
         }
-        $this->line(sprintf('Found %d CSV + JSON file sets in %s', count($files), $this->directory));
+        $this->line(sprintf('Found %d (CSV +) JSON file sets in %s', count($files), $directory));
         try {
-            $this->importFiles($files);
+            $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));

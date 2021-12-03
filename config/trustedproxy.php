@@ -1,6 +1,7 @@
 <?php
+
 /*
- * StartImport.php
+ * trustedproxy.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -22,39 +23,7 @@
 
 declare(strict_types=1);
 
-namespace App\Console;
+return [
+    'proxies' => env('TRUSTED_PROXIES'),
+];
 
-use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
-use App\Services\CSV\File\FileReader;
-use Log;
-
-/**
- * Trait StartImport
- */
-trait StartImport
-{
-    use ManageMessages;
-
-    protected array $messages;
-    protected array $warnings;
-    protected array $errors;
-
-    /**
-     * @param string $csv
-     * @param array  $configuration
-     *
-     * @return int
-     */
-    private function startImport(string $csv, array $configuration): int
-    {
-        $this->messages = [];
-        $this->warnings = [];
-        $this->errors   = [];
-
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        // TODO this is where the import routine must be called. See file history.
-
-        return 1;
-    }
-}

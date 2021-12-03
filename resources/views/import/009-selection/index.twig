@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="container">
-        <div class="row">
+        <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <h1>{{ mainTitle }}</h1>
             </div>
@@ -83,7 +83,8 @@
                             </div>
                             <div class="card-body">
                                 <div class="form-group row">
-                                    <label for="bank_{{ country.code }}" class="col-sm-3 col-form-label">Bank ({{ country.code }})</label>
+                                    <label for="bank_{{ country.code }}" class="col-sm-3 col-form-label">Bank
+                                        ({{ country.code }})</label>
                                     <div class="col-sm-9">
                                         <select class="form-control bank-selector" name="bank_{{ country.code }}"
                                                 id="bank_{{ country.code }}">
@@ -137,8 +138,10 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.upload') }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span> Go back to upload</a>
-                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span class="fas fa-redo-alt"></span> Start over</a>
+                            <a href="{{ route('back.upload') }}" class="btn btn-secondary"><span
+                                    class="fas fa-arrow-left"></span> Go back to upload</a>
+                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
+                                    class="fas fa-redo-alt"></span> Start over</a>
                         </div>
                     </div>
                 </div>

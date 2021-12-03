@@ -28,7 +28,6 @@ namespace App\Http\Controllers;
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
-use App\Console\StartImport;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
@@ -39,14 +38,14 @@ use Log;
  */
 class AutoUploadController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON, StartImport;
+    use HaveAccess, AutoImports, VerifyJSON;
 
     /**
      *
      */
     public function index(AutoUploadRequest $request)
     {
-        die('todo'. __METHOD__);
+        die('todo' . __METHOD__);
         $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
@@ -65,9 +64,6 @@ class AutoUploadController extends Controller
         return ' ';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function line(string $string)
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);

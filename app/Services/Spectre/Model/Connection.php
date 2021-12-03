@@ -32,18 +32,18 @@ use Carbon\Carbon;
  */
 class Connection
 {
-    public string       $categorization;
-    public string       $countryCode;
-    public string       $customerId;
-    public string       $id;
-    public Carbon       $lastSuccess;
-    public ?string      $nextPossibleRefreshAt;
-    public string       $providerCode;
-    public string       $providerId;
-    public string       $providerName;
-    public string       $secret;
-    public string       $status;
-    public Carbon       $updatedAt;
+    public string  $categorization;
+    public string  $countryCode;
+    public string  $customerId;
+    public string  $id;
+    public Carbon  $lastSuccess;
+    public ?string $nextPossibleRefreshAt;
+    public string  $providerCode;
+    public string  $providerId;
+    public string  $providerName;
+    public string  $secret;
+    public string  $status;
+    public Carbon  $updatedAt;
 
     /**
      * Customer constructor.
@@ -60,7 +60,7 @@ class Connection
     public static function fromArray(array $data): self
     {
         $model                        = new self;
-        $model->id                    = (string)$data['id'];
+        $model->id                    = (string) $data['id'];
         $model->categorization        = $data['categorization'];
         $model->countryCode           = $data['country_code'];
         $model->customerId            = $data['customer_id'];

@@ -82,12 +82,12 @@ class RoleController extends Controller
         }
 
         // get columns from file
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE),$configuration->isConversion());
+        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
         $columns  = RoleService::getColumns($content, $configuration);
         $examples = RoleService::getExampleData($content, $configuration);
 
         // submit mapping from config.
-        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR, 512));
+        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
 
         // roles
         $roles = config('csv.import_roles');

@@ -1,4 +1,26 @@
 <?php
+
+/*
+ * RoutineManager.php
+ * Copyright (c) 2021 james@firefly-iii.org
+ *
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 declare(strict_types=1);
 
 
@@ -19,6 +41,9 @@ use Log;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    private array $allMessages;
+    private array $allWarnings;
+    private array $allErrors;
     use IsRunningCli, GeneratesIdentifier;
 
     private Configuration        $configuration;
@@ -31,6 +56,11 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
+        // TODO conversion does not add errors, warnings and messages.
+        $this->allErrors   = [];
+        $this->allWarnings = [];
+        $this->allMessages = [];
+
         if (null === $identifier) {
             $this->generateIdentifier();
         }
@@ -92,6 +122,31 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         return $filtered;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
     }
 
 }

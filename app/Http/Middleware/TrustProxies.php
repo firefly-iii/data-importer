@@ -1,4 +1,5 @@
 <?php
+
 /*
  * TrustProxies.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -24,19 +25,16 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use Fideloper\Proxy\TrustProxies as Middleware;
-use Illuminate\Contracts\Config\Repository;
+use Illuminate\Config\Repository;
+use Illuminate\Http\Middleware\TrustProxies as Middleware;
 use Illuminate\Http\Request;
 
-/**
- * Class TrustProxies
- */
 class TrustProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
      *
-     * @var array|string
+     * @var array|string|null
      */
     protected $proxies;
 
@@ -45,7 +43,12 @@ class TrustProxies extends Middleware
      *
      * @var int
      */
-    protected $headers = Request::HEADER_X_FORWARDED_ALL;
+    protected $headers =
+        Request::HEADER_X_FORWARDED_FOR |
+        Request::HEADER_X_FORWARDED_HOST |
+        Request::HEADER_X_FORWARDED_PORT |
+        Request::HEADER_X_FORWARDED_PROTO |
+        Request::HEADER_X_FORWARDED_AWS_ELB;
 
     /**
      * TrustProxies constructor.
@@ -54,11 +57,13 @@ class TrustProxies extends Middleware
      */
     public function __construct(Repository $config)
     {
-        $trustedProxies = (string) config('csv_importer.trusted_proxies');
+        $trustedProxies = (string) config('trustedproxy.proxies');
         $this->proxies  = explode(',', $trustedProxies);
         if ('**' === $trustedProxies) {
             $this->proxies = '**';
         }
-        parent::__construct($config);
+        if ('*' === $trustedProxies) {
+            $this->proxies = '*';
+        }
     }
 }

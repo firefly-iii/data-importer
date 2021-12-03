@@ -42,7 +42,7 @@ class AuthenticateController extends Controller
     public function __construct()
     {
         parent::__construct();
-        Log::debug('Now in AuthenticateController, calling IsNotCSVFlow middleware.');
+        Log::debug('Now in AuthenticateController, calling middleware.');
         $this->middleware(AuthenticateControllerMiddleware::class);
     }
 

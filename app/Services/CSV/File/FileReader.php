@@ -29,6 +29,9 @@ use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use League\Csv\Reader;
+use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class FileReader
@@ -41,8 +44,8 @@ class FileReader
      * @param bool $convert
      * @return Reader
      * @throws FileNotFoundException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getReaderFromSession(bool $convert = false): Reader
     {
@@ -54,11 +57,18 @@ class FileReader
 
     /**
      * @param string $content
-     *
+     * @param bool   $convert
      * @return Reader
      */
-    public static function getReaderFromContent(string $content): Reader
+    public static function getReaderFromContent(string $content, bool $convert = false): Reader
     {
+        if (true === $convert) {
+            $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
+            if (false !== $encoding && 'ASCII' !== $encoding) {
+                Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+                $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+            }
+        }
         return Reader::createFromString($content);
     }
 

@@ -57,6 +57,7 @@ use Log;
 
 /**
  * Class ConfigurationController
+ * TODO for spectre and nordigen duplicate detection is only on transaction id
  */
 class ConfigurationController extends Controller
 {
@@ -86,6 +87,7 @@ class ConfigurationController extends Controller
         if (session()->has(Constants::CONFIGURATION)) {
             $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
         }
+
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
@@ -149,6 +151,189 @@ class ConfigurationController extends Controller
             'import.004-configure.index',
             compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts')
         );
+    }
+
+    /**
+     * List Nordigen accounts with account details, balances, and 2 transactions (if present)
+     * @return array
+     * @throws ImporterErrorException
+     */
+    private function getNordigenAccounts(string $identifier): array
+    {
+        if (Cache::has($identifier)) {
+            $result = Cache::get($identifier);
+            $return = [];
+            foreach ($result as $arr) {
+                $return[] = NordigenAccount::fromLocalArray($arr);
+            }
+            Log::debug('Grab accounts from cache', $result);
+            return $return;
+        }
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        // get banks and countries
+        $accessToken = TokenManager::getAccessToken();
+        $url         = config('nordigen.url');
+        $request     = new ListAccountsRequest($url, $identifier, $accessToken);
+        /** @var ListAccountsResponse $response */
+        try {
+            $response = $request->get();
+        } catch (ImporterErrorException $e) {
+        } catch (ImporterHttpException $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+        $total  = count($response);
+        $return = [];
+        $cache  = [];
+        Log::debug(sprintf('Found %d accounts.', $total));
+
+        /** @var Account $account */
+        foreach ($response as $index => $account) {
+            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
+            $account  = AccountInformationCollector::collectInformation($account);
+            $return[] = $account;
+            $cache[]  = $account->toLocalArray();
+        }
+        Cache::put($identifier, $cache, 1800); // half an hour
+        return $return;
+    }
+
+    /**
+     * @param array $nordigen
+     * @param array $firefly
+     * @return array
+     *
+     * TODO move to some helper.
+     */
+    private function mergeNordigenAccountLists(array $nordigen, array $firefly): array
+    {
+        Log::debug('Now creating Nordigen account lists.');
+        $return = [];
+        /** @var NordigenAccount $nordigenAccount */
+        foreach ($nordigen as $nordigenAccount) {
+            Log::debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
+            $iban     = $nordigenAccount->getIban();
+            $currency = $nordigenAccount->getCurrency();
+            $entry    = [
+                'import_service' => $nordigenAccount,
+                'firefly'        => [],
+            ];
+
+            // only iban?
+            $filteredByIban = $this->filterByIban($firefly, $iban);
+
+            if (1 === count($filteredByIban)) {
+                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                $entry['firefly'] = $filteredByIban;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+
+            // only currency?
+            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
+
+            if (count($filteredByCurrency) > 0) {
+                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                $entry['firefly'] = $filteredByCurrency;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug('No special filtering on the Firefly III account list.');
+            $entry['firefly'] = $firefly;
+            $return[]         = $entry;
+        }
+        return $return;
+    }
+
+    /**
+     * TODO move to some helper.
+     *
+     * @param array  $firefly
+     * @param string $iban
+     * @return array
+     */
+    private function filterByIban(array $firefly, string $iban): array
+    {
+        if ('' === $iban) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($iban === $account->iban) {
+                $result[] = $account;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param array  $firefly
+     * @param string $currency
+     * @return array
+     */
+    private function filterByCurrency(array $firefly, string $currency): array
+    {
+        if ('' === $currency) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($currency === $account->currencyCode) {
+                $result[] = $account;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param SpectreGetAccountsResponse $spectre
+     * @param array                      $firefly
+     *
+     * TODO should be a helper
+     */
+    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
+    {
+        $return = [];
+        Log::debug('Now creating Spectre account lists.');
+
+        foreach ($spectre as $spectreAccount) {
+            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
+            $iban     = $spectreAccount->iban;
+            $currency = $spectreAccount->currencyCode;
+            $entry    = [
+                'import_service' => $spectreAccount,
+                'firefly'        => [],
+            ];
+
+            // only iban?
+            $filteredByIban = $this->filterByIban($firefly, $iban);
+
+            if (1 === count($filteredByIban)) {
+                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                $entry['firefly'] = $filteredByIban;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+
+            // only currency?
+            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
+
+            if (count($filteredByCurrency) > 0) {
+                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                $entry['firefly'] = $filteredByCurrency;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug('No special filtering on the Firefly III account list.');
+            $entry['firefly'] = $firefly;
+            $return[]         = $entry;
+        }
+        return $return;
     }
 
     /**
@@ -216,192 +401,6 @@ class ConfigurationController extends Controller
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
-    }
-
-    /**
-     * List Nordigen accounts with account details, balances, and 2 transactions (if present)
-     * @return array
-     * @throws ImporterErrorException
-     */
-    private function getNordigenAccounts(string $identifier): array
-    {
-        if (Cache::has($identifier)) {
-            $result = Cache::get($identifier);
-            $return = [];
-            foreach ($result as $arr) {
-                $return[] = NordigenAccount::fromLocalArray($arr);
-            }
-            Log::debug('Grab accounts from cache', $result);
-            return $return;
-        }
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        // get banks and countries
-        $accessToken = TokenManager::getAccessToken();
-        $url         = config('nordigen.url');
-        $request     = new ListAccountsRequest($url, $identifier, $accessToken);
-        /** @var ListAccountsResponse $response */
-        try {
-            $response = $request->get();
-        } catch (ImporterErrorException $e) {
-        } catch (ImporterHttpException $e) {
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        $total  = count($response);
-        $return = [];
-        $cache  = [];
-        Log::debug(sprintf('Found %d accounts.', $total));
-
-        /** @var Account $account */
-        foreach ($response as $index => $account) {
-            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
-            $account  = AccountInformationCollector::collectInformation($account);
-            $return[] = $account;
-            $cache[]  = $account->toLocalArray();
-        }
-        Cache::put($identifier, $cache, 1800); // half an hour
-        return $return;
-    }
-
-
-    /**
-     * @param SpectreGetAccountsResponse $spectre
-     * @param array                      $firefly
-     *
-     * TODO should be a helper
-     */
-    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
-    {
-        $return = [];
-        Log::debug('Now creating Spectre account lists.');
-
-        /** @var SpectreAccount $spectreAccount */
-        foreach ($spectre as $spectreAccount) {
-            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
-            $iban     = $spectreAccount->iban;
-            $currency = $spectreAccount->currencyCode;
-            $entry    = [
-                'import_service' => $spectreAccount,
-                'firefly'        => [],
-            ];
-
-            // only iban?
-            $filteredByIban = $this->filterByIban($firefly, $iban);
-
-            if (1 === count($filteredByIban)) {
-                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
-                $entry['firefly'] = $filteredByIban;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
-
-            // only currency?
-            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
-
-            if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
-                $entry['firefly'] = $filteredByCurrency;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
-            $return[]         = $entry;
-        }
-        return $return;
-    }
-
-
-    /**
-     * @param array $nordigen
-     * @param array $firefly
-     * @return array
-     *
-     * TODO move to some helper.
-     */
-    private function mergeNordigenAccountLists(array $nordigen, array $firefly): array
-    {
-        Log::debug('Now creating Nordigen account lists.');
-        $return = [];
-        /** @var NordigenAccount $nordigenAccount */
-        foreach ($nordigen as $nordigenAccount) {
-            Log::debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
-            $iban     = $nordigenAccount->getIban();
-            $currency = $nordigenAccount->getCurrency();
-            $entry    = [
-                'import_service' => $nordigenAccount,
-                'firefly'        => [],
-            ];
-
-            // only iban?
-            $filteredByIban = $this->filterByIban($firefly, $iban);
-
-            if (1 === count($filteredByIban)) {
-                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
-                $entry['firefly'] = $filteredByIban;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
-
-            // only currency?
-            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
-
-            if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
-                $entry['firefly'] = $filteredByCurrency;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
-            $return[]         = $entry;
-        }
-        return $return;
-    }
-
-    /**
-     * TODO move to some helper.
-     *
-     * @param array  $firefly
-     * @param string $iban
-     * @return array
-     */
-    private function filterByIban(array $firefly, string $iban): array
-    {
-        if ('' === $iban) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($iban === $account->iban) {
-                $result[] = $account;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * @param array  $firefly
-     * @param string $currency
-     * @return array
-     */
-    private function filterByCurrency(array $firefly, string $currency): array
-    {
-        if ('' === $currency) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($firefly['Asset accounts'], $firefly['Liabilities']);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($currency === $account->currencyCode) {
-                $result[] = $account;
-            }
-        }
-        return $result;
     }
 
 

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * RoutineManager.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
@@ -32,12 +34,12 @@ use Log;
  */
 class RoutineManager
 {
-    private ApiSubmitter  $apiSubmitter;
-    private array         $transactions;
-    private string        $identifier;
-    private array         $allMessages;
-    private array         $allWarnings;
-    private array         $allErrors;
+    private ApiSubmitter $apiSubmitter;
+    private array        $transactions;
+    private string       $identifier;
+    private array        $allMessages;
+    private array        $allWarnings;
+    private array        $allErrors;
 
     /**
      * @param string $identifier
@@ -62,7 +64,7 @@ class RoutineManager
      */
     public function setConfiguration(Configuration $configuration): void
     {
-        $this->apiSubmitter  = new APISubmitter;
+        $this->apiSubmitter = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
         Log::debug('Created APISubmitter in RoutineManager');
@@ -82,4 +84,27 @@ class RoutineManager
         $this->allErrors   = $this->apiSubmitter->getErrors();
     }
 
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
+    }
 }
