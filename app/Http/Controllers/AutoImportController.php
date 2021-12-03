@@ -28,7 +28,6 @@ namespace App\Http\Controllers;
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
-use App\Console\StartImport;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
@@ -39,7 +38,7 @@ use Log;
  */
 class AutoImportController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON, StartImport;
+    use HaveAccess, AutoImports, VerifyJSON;
 
     private string $directory;
 

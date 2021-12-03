@@ -198,7 +198,6 @@ class GenerateTransactions
     private function generateTransaction(string $accountId, Transaction $entry): array
     {
         Log::debug(sprintf('Nordigen transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
-        //Log::debug('Original Nordigen transaction', $entry->toLocalArray());
 
         $return = [
             'apply_rules'             => $this->configuration->isRules(),

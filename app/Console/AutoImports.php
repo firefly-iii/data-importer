@@ -28,12 +28,12 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
-use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
+use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
 use Log;
@@ -187,84 +187,18 @@ trait AutoImports
         $this->reportImport();
 
         $this->line('Done!');
-//
-//        // transactions must now be converted and them imported:
-//        // TODO send mail:
-//        $log
-//            = [
-//            'messages' => $this->messages,
-//            'warnings' => $this->warnings,
-//            'errors'   => $this->errors,
-//        ];
-//
-//        $send = config('mail.enable_mail_report');
-//        Log::debug('Log log', $log);
-//        if (true === $send) {
-//            Log::debug('SEND MAIL');
-//            Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//        }
+        // TODO send mail using event handler:
+
     }
-//
-//    /**
-//     * @param string $file
-//     *
-//     * @throws ImporterErrorException
-//     */
-//    private function importUpload(string $csvFile, string $jsonFile): void
-//    {
-//        // do JSON check
-//        $jsonResult = $this->verifyJSON($jsonFile);
-//        if (false === $jsonResult) {
-//            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $csvFile, $jsonFile);
-//            $this->error($message);
-//
-//            return;
-//        }
-//        try {
-//            $configuration = json_decode(file_get_contents($jsonFile), true, 512, JSON_THROW_ON_ERROR);
-//        } catch (JsonException $e) {
-//            Log::error($e->getMessage());
-//            throw new ImporterErrorException(sprintf('Bad JSON in configuration file: %s', $e->getMessage()));
-//        }
-//        $this->line(sprintf('Going to import from file %s using configuration %s.', $csvFile, $jsonFile));
-//        // create importer
-//        $csv    = file_get_contents($csvFile);
-//        $result = $this->startImport($csv, $configuration);
-//
-//        if (0 === $result) {
-//            $this->line('Import complete.');
-//        }
-//        if (0 !== $result) {
-//            $this->warn('The import finished with errors.');
-//        }
-//
-//        $this->line(sprintf('Done importing from file %s using configuration %s.', $csvFile, $jsonFile));
-//
-//        // send mail:
-//        $log
-//            = [
-//            'messages' => $this->messages,
-//            'warnings' => $this->warnings,
-//            'errors'   => $this->errors,
-//        ];
-//
-//        $send = config('mail.enable_mail_report');
-//        Log::debug('Log log', $log);
-//        if (true === $send) {
-//            Log::debug('SEND MAIL');
-//            Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//        }
-//    }
 
 
     /**
      * @param Configuration $configuration
      *
      * @param string|null   $csvFile
-     * @return array
      * @throws ImporterErrorException
      */
-    private function startConversion(Configuration $configuration, ?string $csvFile): array
+    private function startConversion(Configuration $configuration, ?string $csvFile): void
     {
         $this->conversionMessages = [];
         $this->conversionWarnings = [];
@@ -297,18 +231,15 @@ trait AutoImports
 
         // then push stuff into the routine:
         $manager->setConfiguration($configuration);
-        $result       = false;
         $transactions = [];
         try {
             $transactions = $manager->start();
-            $result       = true;
         } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
-            return [];
         }
         if (0 === count($transactions)) {
             Log::error('Zero transactions!');
@@ -316,7 +247,6 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
-            return [];
 
         }
         // save transactions in 'jobs' directory under the same key as the conversion thing.
@@ -329,20 +259,17 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
-            return [];
+            $transactions             = [];
         }
 
-        if (true === $result) {
+        if (count($transactions) > 0) {
             // set done:
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
 
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
-            return $transactions;
         }
-
-        return [];
     }
 
     /**
@@ -459,24 +386,7 @@ trait AutoImports
         $this->importWarnings = $routine->getAllWarnings();
         $this->importErrors   = $routine->getAllErrors();
 
-        //
-////            // if configured, send report!
-////            // TODO make event handler.
-////            $log
-////                = [
-////                'messages' => $routine->getAllMessages(),
-////                'warnings' => $routine->getAllWarnings(),
-////                'errors'   => $routine->getAllErrors(),
-////            ];
-////
-////            $send = config('mail.enable_mail_report');
-////            Log::debug('Log log', $log);
-////            if (true === $send) {
-////                Log::debug('SEND MAIL');
-////                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-////            }
-//
-//
-//        return response()->json($importJobStatus->toArray());
+        // TODO make event handler and send email message
+
     }
 }

@@ -26,12 +26,9 @@ namespace App\Console\Commands;
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
-use App\Console\StartImport;
 use App\Console\VerifyJSON;
-use App\Mail\ImportFinished;
 use App\Services\CSV\Configuration\Configuration;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 use Log;
 
 /**
@@ -39,7 +36,7 @@ use Log;
  */
 class Import extends Command
 {
-    use HaveAccess, VerifyJSON, StartImport, AutoImports;
+    use HaveAccess, VerifyJSON, AutoImports;
 
     /**
      * The console command description.
@@ -117,36 +114,8 @@ class Import extends Command
         $this->reportImport();
 
         $this->line('Done!');
-//
-//        // transactions must now be converted and them imported:
-//        // TODO send mail:
+        // TODO send mail using event handler:
         return 0;
-//
-//        $csv    = file_get_contents($file);
-//        $result = $this->startImport($csv, $configuration);
-//        if (0 === $result) {
-//            $this->line('Import complete.');
-//        }
-//        if (0 !== $result) {
-//            $this->warn('The import finished with errors.');
-//        }
-//
-//        // send mail:
-//        $log
-//            = [
-//            'messages' => $this->messages,
-//            'warnings' => $this->warnings,
-//            'errors'   => $this->errors,
-//        ];
-//
-//        $send = config('mail.enable_mail_report');
-//        Log::debug('Log log', $log);
-//        if (true === $send) {
-//            Log::debug('SEND MAIL');
-//            Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//        }
-//
-//
-//        return $result;
+
     }
 }
