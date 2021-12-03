@@ -34,7 +34,7 @@ use Iterator;
 /**
  * Class GetTransactionsResponse
  */
-class GetTransactionsResponse extends Response  implements Iterator, Countable
+class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private Collection $collection;
     private int        $position = 0;
@@ -44,9 +44,9 @@ class GetTransactionsResponse extends Response  implements Iterator, Countable
      */
     public function __construct(array $data)
     {
-        $this->collection= new Collection;
+        $this->collection = new Collection;
         /** @var array $array */
-        foreach($data as $array) {
+        foreach ($data as $array) {
             $this->collection->push(Transaction::fromArray($array));
         }
     }

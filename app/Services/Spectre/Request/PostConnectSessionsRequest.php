@@ -24,8 +24,8 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
-use App\Services\Spectre\Response\PostConnectSessionResponse;
 use App\Services\Shared\Response\Response;
+use App\Services\Spectre\Response\PostConnectSessionResponse;
 
 /**
  * Class PostConnectSessionsRequest

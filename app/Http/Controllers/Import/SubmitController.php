@@ -39,6 +39,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Storage;
 
 /**
@@ -54,14 +56,14 @@ class SubmitController extends Controller
     public function __construct()
     {
         parent::__construct();
-        view()->share('pageTitle','Submit data to Firefly III');
+        view()->share('pageTitle', 'Submit data to Firefly III');
         $this->middleware(SubmitControllerMiddleware::class);
     }
 
     /**
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws FileNotFoundException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -155,10 +157,10 @@ class SubmitController extends Controller
         }
 
         try {
-            $json = $disk->get($fileName);
+            $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
+        } catch (FileNotFoundException | JsonException $e) {
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
             return response()->json($importJobStatus->toArray());

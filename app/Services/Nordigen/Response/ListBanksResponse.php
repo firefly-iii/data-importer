@@ -27,10 +27,10 @@ namespace App\Services\Nordigen\Response;
 
 use App\Services\Nordigen\Model\Bank;
 use App\Services\Nordigen\Model\Country;
+use App\Services\Shared\Response\Response;
 use Countable;
 use Illuminate\Support\Collection;
 use Iterator;
-use App\Services\Shared\Response\Response;
 
 /**
  * Class ListBanksResponse
@@ -65,18 +65,6 @@ class ListBanksResponse extends Response implements Iterator, Countable
     }
 
     /**
-     * @param Bank  $object
-     * @param array $countries
-     */
-    private function addToCountries(Bank $object, array $countries): void
-    {
-        /** @var string $code */
-        foreach ($countries as $code) {
-            $this->countries[$code]->addBank($object);
-        }
-    }
-
-    /**
      * @param array $bank
      */
     private function processCountries(array $bank): void
@@ -88,6 +76,17 @@ class ListBanksResponse extends Response implements Iterator, Countable
         }
     }
 
+    /**
+     * @param Bank  $object
+     * @param array $countries
+     */
+    private function addToCountries(Bank $object, array $countries): void
+    {
+        /** @var string $code */
+        foreach ($countries as $code) {
+            $this->countries[$code]->addBank($object);
+        }
+    }
 
     /**
      * Count elements of an object.

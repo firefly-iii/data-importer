@@ -27,7 +27,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionType;
 
 return [
     // having the source + dest will tell you the transaction type.
-    'account_to_transaction'    => [
+    'account_to_transaction' => [
 
         AccountType::ASSET           => [
             AccountType::ASSET           => TransactionType::TRANSFER,

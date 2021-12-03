@@ -84,6 +84,37 @@ class Account
     }
 
     /**
+     * @param array $array
+     * @return static
+     */
+    public static function fromLocalArray(array $array): self
+    {
+        $object                           = new self;
+        $object->identifier               = $array['identifier'];
+        $object->bban                     = $array['bban'];
+        $object->bic                      = $array['bic'];
+        $object->cashAccountType          = $array['cash_account_type'];
+        $object->currency                 = $array['currency'];
+        $object->details                  = $array['details'];
+        $object->displayName              = $array['display_name'];
+        $object->iban                     = $array['iban'];
+        $object->linkedAccounts           = $array['linked_accounts'];
+        $object->msisdn                   = $array['msisdn'];
+        $object->name                     = $array['name'];
+        $object->ownerAddressUnstructured = $array['owner_address_unstructured'];
+        $object->ownerName                = $array['owner_name'];
+        $object->product                  = $array['product'];
+        $object->resourceId               = $array['resource_id'];
+        $object->status                   = $array['status'];
+        $object->usage                    = $array['usage'];
+        $object->balances                 = [];
+        foreach ($array['balances'] as $arr) {
+            $object->balances[] = Balance::fromLocalArray($arr);
+        }
+        return $object;
+    }
+
+    /**
      * @param Balance $balance
      */
     public function addBalance(Balance $balance): void
@@ -190,38 +221,6 @@ class Account
     /**
      * @return string
      */
-    public function getDisplayName(): string
-    {
-        return $this->displayName;
-    }
-
-    /**
-     * @param string $displayName
-     */
-    public function setDisplayName(string $displayName): void
-    {
-        $this->displayName = $displayName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIban(): string
-    {
-        return $this->iban;
-    }
-
-    /**
-     * @param string $iban
-     */
-    public function setIban(string $iban): void
-    {
-        $this->iban = $iban;
-    }
-
-    /**
-     * @return string
-     */
     public function getLinkedAccounts(): string
     {
         return $this->linkedAccounts;
@@ -249,14 +248,6 @@ class Account
     public function setMsisdn(string $msisdn): void
     {
         $this->msisdn = $msisdn;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**
@@ -293,6 +284,14 @@ class Account
     }
 
     /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
      * @param string $name
      */
     public function setName(string $name): void
@@ -303,17 +302,17 @@ class Account
     /**
      * @return string
      */
-    public function getOwnerAddressUnstructured(): string
+    public function getDisplayName(): string
     {
-        return $this->ownerAddressUnstructured;
+        return $this->displayName;
     }
 
     /**
-     * @param string $ownerAddressUnstructured
+     * @param string $displayName
      */
-    public function setOwnerAddressUnstructured(string $ownerAddressUnstructured): void
+    public function setDisplayName(string $displayName): void
     {
-        $this->ownerAddressUnstructured = $ownerAddressUnstructured;
+        $this->displayName = $displayName;
     }
 
     /**
@@ -330,6 +329,38 @@ class Account
     public function setOwnerName(string $ownerName): void
     {
         $this->ownerName = $ownerName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIban(): string
+    {
+        return $this->iban;
+    }
+
+    /**
+     * @param string $iban
+     */
+    public function setIban(string $iban): void
+    {
+        $this->iban = $iban;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwnerAddressUnstructured(): string
+    {
+        return $this->ownerAddressUnstructured;
+    }
+
+    /**
+     * @param string $ownerAddressUnstructured
+     */
+    public function setOwnerAddressUnstructured(string $ownerAddressUnstructured): void
+    {
+        $this->ownerAddressUnstructured = $ownerAddressUnstructured;
     }
 
     /**
@@ -428,37 +459,6 @@ class Account
 
 
         return $array;
-    }
-
-    /**
-     * @param array $array
-     * @return static
-     */
-    public static function fromLocalArray(array $array): self
-    {
-        $object                           = new self;
-        $object->identifier               = $array['identifier'];
-        $object->bban                     = $array['bban'];
-        $object->bic                      = $array['bic'];
-        $object->cashAccountType          = $array['cash_account_type'];
-        $object->currency                 = $array['currency'];
-        $object->details                  = $array['details'];
-        $object->displayName              = $array['display_name'];
-        $object->iban                     = $array['iban'];
-        $object->linkedAccounts           = $array['linked_accounts'];
-        $object->msisdn                   = $array['msisdn'];
-        $object->name                     = $array['name'];
-        $object->ownerAddressUnstructured = $array['owner_address_unstructured'];
-        $object->ownerName                = $array['owner_name'];
-        $object->product                  = $array['product'];
-        $object->resourceId               = $array['resource_id'];
-        $object->status                   = $array['status'];
-        $object->usage                    = $array['usage'];
-        $object->balances                 = [];
-        foreach ($array['balances'] as $arr) {
-            $object->balances[] = Balance::fromLocalArray($arr);
-        }
-        return $object;
     }
 
 

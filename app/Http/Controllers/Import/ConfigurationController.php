@@ -154,73 +154,6 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function phpDate(Request $request): JsonResponse
-    {
-        Log::debug(sprintf('Method %s', __METHOD__));
-
-        $dateObj = new Date;
-        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
-        $date = Carbon::make('1984-09-17')->locale($locale);
-
-        return response()->json(['result' => $date->translatedFormat($format)]);
-    }
-
-    /**
-     * @param ConfigurationPostRequest $request
-     *
-     * @return RedirectResponse
-     * @throws ImporterErrorException
-     */
-    public function postIndex(ConfigurationPostRequest $request): RedirectResponse
-    {
-        Log::debug(sprintf('Now running %s', __METHOD__));
-        // store config on drive.
-        $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
-
-        // TODO are all fields actually in the config?
-
-        // loop accounts:
-        $accounts = [];
-        foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (isset($fromRequest['accounts'][$identifier])) {
-                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
-            }
-        }
-        $configuration->setAccounts($accounts);
-        $configuration->updateDateRange();
-
-
-        $json = '{}';
-        try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
-            Log::error($e->getMessage());
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        StorageService::storeContent($json);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-
-        Log::debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
-        // set config as complete.
-        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-            // at this point, nordigen is ready for data conversion.
-            session()->put(Constants::READY_FOR_CONVERSION, true);
-        }
-        // always redirect to roles, even if this isn't the step yet
-        // for nordigen and spectre, roles will be skipped right away.
-        return redirect(route('005-roles.index'));
-    }
-
-    /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
      * @return array
      * @throws ImporterErrorException
@@ -263,56 +196,6 @@ class ConfigurationController extends Controller
         Cache::put($identifier, $cache, 1800); // half an hour
         return $return;
     }
-
-
-    /**
-     * @param SpectreGetAccountsResponse $spectre
-     * @param array                      $firefly
-     *
-     * TODO should be a helper
-     */
-    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
-    {
-        $return = [];
-        Log::debug('Now creating Spectre account lists.');
-
-        /** @var SpectreAccount $spectreAccount */
-        foreach ($spectre as $spectreAccount) {
-            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
-            $iban     = $spectreAccount->iban;
-            $currency = $spectreAccount->currencyCode;
-            $entry    = [
-                'import_service' => $spectreAccount,
-                'firefly'        => [],
-            ];
-
-            // only iban?
-            $filteredByIban = $this->filterByIban($firefly, $iban);
-
-            if (1 === count($filteredByIban)) {
-                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
-                $entry['firefly'] = $filteredByIban;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
-
-            // only currency?
-            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
-
-            if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
-                $entry['firefly'] = $filteredByCurrency;
-                $return[]         = $entry;
-                continue;
-            }
-            Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
-            $return[]         = $entry;
-        }
-        return $return;
-    }
-
 
     /**
      * @param array $nordigen
@@ -404,6 +287,121 @@ class ConfigurationController extends Controller
             }
         }
         return $result;
+    }
+
+    /**
+     * @param SpectreGetAccountsResponse $spectre
+     * @param array                      $firefly
+     *
+     * TODO should be a helper
+     */
+    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
+    {
+        $return = [];
+        Log::debug('Now creating Spectre account lists.');
+
+        /** @var SpectreAccount $spectreAccount */
+        foreach ($spectre as $spectreAccount) {
+            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
+            $iban     = $spectreAccount->iban;
+            $currency = $spectreAccount->currencyCode;
+            $entry    = [
+                'import_service' => $spectreAccount,
+                'firefly'        => [],
+            ];
+
+            // only iban?
+            $filteredByIban = $this->filterByIban($firefly, $iban);
+
+            if (1 === count($filteredByIban)) {
+                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                $entry['firefly'] = $filteredByIban;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+
+            // only currency?
+            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
+
+            if (count($filteredByCurrency) > 0) {
+                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                $entry['firefly'] = $filteredByCurrency;
+                $return[]         = $entry;
+                continue;
+            }
+            Log::debug('No special filtering on the Firefly III account list.');
+            $entry['firefly'] = $firefly;
+            $return[]         = $entry;
+        }
+        return $return;
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function phpDate(Request $request): JsonResponse
+    {
+        Log::debug(sprintf('Method %s', __METHOD__));
+
+        $dateObj = new Date;
+        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
+        $date = Carbon::make('1984-09-17')->locale($locale);
+
+        return response()->json(['result' => $date->translatedFormat($format)]);
+    }
+
+    /**
+     * @param ConfigurationPostRequest $request
+     *
+     * @return RedirectResponse
+     * @throws ImporterErrorException
+     */
+    public function postIndex(ConfigurationPostRequest $request): RedirectResponse
+    {
+        Log::debug(sprintf('Now running %s', __METHOD__));
+        // store config on drive.
+        $fromRequest   = $request->getAll();
+        $configuration = Configuration::fromRequest($fromRequest);
+        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
+
+        // TODO are all fields actually in the config?
+
+        // loop accounts:
+        $accounts = [];
+        foreach (array_keys($fromRequest['do_import']) as $identifier) {
+            if (isset($fromRequest['accounts'][$identifier])) {
+                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
+            }
+        }
+        $configuration->setAccounts($accounts);
+        $configuration->updateDateRange();
+
+
+        $json = '{}';
+        try {
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+        StorageService::storeContent($json);
+
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+
+        Log::debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
+        // set config as complete.
+        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+            // at this point, nordigen is ready for data conversion.
+            session()->put(Constants::READY_FOR_CONVERSION, true);
+        }
+        // always redirect to roles, even if this isn't the step yet
+        // for nordigen and spectre, roles will be skipped right away.
+        return redirect(route('005-roles.index'));
     }
 
 

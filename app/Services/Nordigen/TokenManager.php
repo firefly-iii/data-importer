@@ -39,25 +39,19 @@ use Psr\Container\NotFoundExceptionInterface;
 class TokenManager
 {
     /**
-     * @return bool
+     * @return string
+     * @throws ImporterErrorException
      */
-    public static function hasValidAccessToken(): bool
+    public static function getAccessToken(): string
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
-        if (false === $hasAccessToken) {
-            Log::debug('No Nordigen token is present, so no valid access token');
-            return false;
+        self::validateAllTokens();
+        try {
+            $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
-        $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
-        Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
-        $result = time() < $tokenValidity;
-        if (false === $result) {
-            Log::debug('Nordigen token is no longer valid');
-            return false;
-        }
-        Log::debug('Nordigen token is valid.');
-        return true;
+        return $token;
     }
 
     /**
@@ -105,6 +99,28 @@ class TokenManager
     /**
      * @return bool
      */
+    public static function hasValidAccessToken(): bool
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
+        if (false === $hasAccessToken) {
+            Log::debug('No Nordigen token is present, so no valid access token');
+            return false;
+        }
+        $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
+        Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
+        $result = time() < $tokenValidity;
+        if (false === $result) {
+            Log::debug('Nordigen token is no longer valid');
+            return false;
+        }
+        Log::debug('Nordigen token is valid.');
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
     public static function hasExpiredRefreshToken(): bool
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
@@ -113,6 +129,14 @@ class TokenManager
             Log::debug('No refresh token, so return false.');
             return false;
         }
+        die(__METHOD__);
+    }
+
+    /**
+     *
+     */
+    public static function getFreshAccessToken(): void
+    {
         die(__METHOD__);
     }
 
@@ -133,30 +157,6 @@ class TokenManager
 
         session()->put(Constants::NORDIGEN_ACCESS_EXPIRY_TIME, $result->accessExpires);
         session()->put(Constants::NORDIGEN_REFRESH_EXPIRY_TIME, $result->refreshExpires);
-    }
-
-    /**
-     * @return string
-     * @throws ImporterErrorException
-     */
-    public static function getAccessToken(): string
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        self::validateAllTokens();
-        try {
-            $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        return $token;
-    }
-
-    /**
-     *
-     */
-    public static function getFreshAccessToken(): void
-    {
-        die(__METHOD__);
     }
 
 }

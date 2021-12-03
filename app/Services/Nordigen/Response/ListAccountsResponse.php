@@ -53,6 +53,7 @@ class ListAccountsResponse extends Response implements Iterator, Countable
         }
         $this->collection = new Collection($this->accounts);
     }
+
     /**
      * Count elements of an object.
      *

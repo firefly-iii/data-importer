@@ -83,7 +83,7 @@ class TransactionExtra
         $model->postingDate              = isset($data['posting_date']) ? new Carbon($data['posting_date']) : null;
         $model->postingTime              = isset($data['posting_time']) ? new Carbon($data['posting_time']) : null;
         $model->accountNumber            = $data['account_number'] ?? null;
-        $model->originalAmount           = isset($data['original_amount']) ? (string)$data['original_amount'] : null;
+        $model->originalAmount           = isset($data['original_amount']) ? (string) $data['original_amount'] : null;
         $model->originalCurrencyCode     = $data['original_currency_code'] ?? null;
         $model->assetCode                = $data['asset_code'] ?? null;
         $model->assetAmount              = $data['asset_amount'] ?? null;
@@ -100,8 +100,8 @@ class TransactionExtra
         $model->units                    = $data['units'] ?? null;
         $model->additional               = $data['additional'] ?? null;
         $model->unitPrice                = $data['unit_price'] ?? null;
-        $model->accountBalanceSnapshot   = isset($data['account_balance_snapshot']) ? (string)$data['account_balance_snapshot'] : null;
-        $model->categorizationConfidence = isset($data['categorization_confidence']) ? (string)$data['categorization_confidence'] : null;
+        $model->accountBalanceSnapshot   = isset($data['account_balance_snapshot']) ? (string) $data['account_balance_snapshot'] : null;
+        $model->categorizationConfidence = isset($data['categorization_confidence']) ? (string) $data['categorization_confidence'] : null;
 
         return $model;
     }

@@ -87,22 +87,6 @@ trait AutoImports
         return $return;
     }
 
-
-    /**
-     * @param string $directory
-     * @param array  $files
-     *
-     * @throws ImporterErrorException
-     */
-    protected function importFiles(string $directory, array $files): void
-    {
-        /** @var string $file */
-        foreach ($files as $file) {
-            $this->importFile($directory, $file);
-        }
-    }
-
-
     /**
      * @param string $file
      *
@@ -154,6 +138,20 @@ trait AutoImports
         }
 
         return true;
+    }
+
+    /**
+     * @param string $directory
+     * @param array  $files
+     *
+     * @throws ImporterErrorException
+     */
+    protected function importFiles(string $directory, array $files): void
+    {
+        /** @var string $file */
+        foreach ($files as $file) {
+            $this->importFile($directory, $file);
+        }
     }
 
     /**
@@ -298,31 +296,6 @@ trait AutoImports
     }
 
     /**
-     *
-     */
-    private function reportImport(): void
-    {
-        $list = [
-            'info'  => $this->importMessages,
-            'warn'  => $this->importWarnings,
-            'error' => $this->importErrors,
-        ];
-        foreach ($list as $func => $set) {
-            /**
-             * @var int   $index
-             * @var array $messages
-             */
-            foreach ($set as $index => $messages) {
-                if (count($messages) > 0) {
-                    foreach ($messages as $message) {
-                        $this->$func(sprintf('Import index %d: %s', $index, $message));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * @param Configuration $configuration
      * @param array         $transactions
      */
@@ -388,5 +361,30 @@ trait AutoImports
 
         // TODO make event handler and send email message
 
+    }
+
+    /**
+     *
+     */
+    private function reportImport(): void
+    {
+        $list = [
+            'info'  => $this->importMessages,
+            'warn'  => $this->importWarnings,
+            'error' => $this->importErrors,
+        ];
+        foreach ($list as $func => $set) {
+            /**
+             * @var int   $index
+             * @var array $messages
+             */
+            foreach ($set as $index => $messages) {
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $this->$func(sprintf('Import index %d: %s', $index, $message));
+                    }
+                }
+            }
+        }
     }
 }

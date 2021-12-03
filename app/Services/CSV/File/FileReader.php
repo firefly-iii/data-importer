@@ -30,6 +30,8 @@ use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use League\Csv\Reader;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class FileReader
@@ -42,8 +44,8 @@ class FileReader
      * @param bool $convert
      * @return Reader
      * @throws FileNotFoundException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getReaderFromSession(bool $convert = false): Reader
     {

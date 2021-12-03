@@ -26,9 +26,9 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterHttpException;
+use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListCustomersResponse;
-use App\Services\Shared\Response\Response;
 
 /**
  * Class ListCustomersRequest

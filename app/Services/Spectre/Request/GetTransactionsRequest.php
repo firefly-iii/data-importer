@@ -77,7 +77,7 @@ class GetTransactionsRequest extends Request
 
             // extract next ID
             $hasNextPage = false;
-            if (isset($response['meta']['next_id']) && (int)$response['meta']['next_id'] > $nextId) {
+            if (isset($response['meta']['next_id']) && (int) $response['meta']['next_id'] > $nextId) {
                 $hasNextPage = true;
                 $nextId      = $response['meta']['next_id'];
                 Log::debug(sprintf('Next ID is now %d.', $nextId));

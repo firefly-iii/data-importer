@@ -27,6 +27,7 @@ namespace App\Console\Commands;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Configuration\Configuration;
 use Illuminate\Console\Command;
 use Log;
@@ -58,7 +59,7 @@ class Import extends Command
      * Execute the console command.
      *
      * @return int
-     * @throws \App\Exceptions\ImporterErrorException
+     * @throws ImporterErrorException
      */
     public function handle(): int
     {

@@ -26,8 +26,8 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Shared\Response\Response;
+use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListConnectionsResponse;
 use JsonException;
 use Log;

@@ -58,20 +58,6 @@ class Balance
     }
 
     /**
-     * @return array
-     */
-    public function toLocalArray(): array
-    {
-        return [
-            'amount'                => $this->amount,
-            'currency'              => $this->currency,
-            'type'                  => $this->type,
-            'date'                  => $this->date,
-            'last_change_date_time' => $this->lastChangeDateTime,
-        ];
-    }
-
-    /**
      * @return $this
      */
     public static function fromLocalArray(array $array): self
@@ -83,5 +69,19 @@ class Balance
         $object->date               = $array['date'];
         $object->lastChangeDateTime = $array['last_change_date_time'];
         return $object;
+    }
+
+    /**
+     * @return array
+     */
+    public function toLocalArray(): array
+    {
+        return [
+            'amount'                => $this->amount,
+            'currency'              => $this->currency,
+            'type'                  => $this->type,
+            'date'                  => $this->date,
+            'last_change_date_time' => $this->lastChangeDateTime,
+        ];
     }
 }

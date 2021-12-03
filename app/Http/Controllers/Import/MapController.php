@@ -43,6 +43,8 @@ use InvalidArgumentException;
 use JsonException;
 use League\Csv\Exception;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class MapController
@@ -172,7 +174,7 @@ class MapController extends Controller
 
             // index 1: category (TODO)
             // index 0, category name:
-            $index                  = 1;
+            $index              = 1;
             $category           = config('csv.import_roles.category-name') ?? null;
             $category['role']   = 'category-name';
             $category['values'] = $this->getCategories();
@@ -200,6 +202,80 @@ class MapController extends Controller
 
 
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+    }
+
+    /**
+     * @return array
+     * @throws FileNotFoundException
+     * @throws ImporterErrorException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     *
+     * TODO move to helper or something
+     */
+    private function getOpposingAccounts(): array
+    {
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk               = Storage::disk(self::DISK_NAME);
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $opposing = [];
+        $total    = count($array);
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
+                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
+            }
+
+        }
+        $filtered = array_filter(
+            $opposing,
+            static function (string $value) {
+                return '' !== $value;
+            }
+        );
+
+        return array_unique($filtered);
+    }
+
+    private function getCategories(): array
+    {
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk               = Storage::disk(self::DISK_NAME);
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $categories = [];
+        $total      = count($array);
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';
+            }
+
+        }
+        $filtered = array_filter(
+            $categories,
+            static function (?string $value) {
+                return '' !== (string) $value;
+            }
+        );
+
+        return array_unique($filtered);
     }
 
     /**
@@ -277,7 +353,7 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
-        if('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
             // if nordigen, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
         }
@@ -307,80 +383,5 @@ class MapController extends Controller
         }
         // original has been updated:
         return $original;
-    }
-
-
-    /**
-     * @return array
-     * @throws FileNotFoundException
-     * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     *
-     * TODO move to helper or something
-     */
-    private function getOpposingAccounts(): array
-    {
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk               = Storage::disk(self::DISK_NAME);
-        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
-        try {
-            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        }
-        $opposing = [];
-        $total    = count($array);
-        /** @var array $transaction */
-        foreach ($array as $index => $transaction) {
-            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
-            /** @var array $row */
-            foreach ($transaction['transactions'] as $row) {
-                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
-                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
-            }
-
-        }
-        $filtered = array_filter(
-            $opposing,
-            static function (string $value) {
-                return '' !== $value;
-            }
-        );
-
-        return array_unique($filtered);
-    }
-
-    private function getCategories(): array
-    {
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk               = Storage::disk(self::DISK_NAME);
-        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
-        try {
-            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        }
-        $categories = [];
-        $total    = count($array);
-        /** @var array $transaction */
-        foreach ($array as $index => $transaction) {
-            Log::debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
-            /** @var array $row */
-            foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';
-            }
-
-        }
-        $filtered = array_filter(
-            $categories,
-            static function (?string $value) {
-                return '' !== (string)$value;
-            }
-        );
-
-        return array_unique($filtered);
     }
 }

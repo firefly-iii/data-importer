@@ -38,6 +38,14 @@ trait GeneratesIdentifier
     private string   $diskName = 'conversion-routines';
 
     /**
+     * @inheritDoc
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
      *
      */
     protected function generateIdentifier(): void
@@ -52,14 +60,6 @@ trait GeneratesIdentifier
         } while ($count < 30 && $disk->exists($generatedId));
         $this->identifier = $generatedId;
         Log::info(sprintf('Job identifier is "%s"', $generatedId));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
     }
 
 }

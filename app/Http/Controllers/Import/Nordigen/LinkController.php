@@ -35,6 +35,8 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use Illuminate\Http\Request;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -97,8 +99,8 @@ class LinkController extends Controller
 
     /**
      * @param Request $request
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {

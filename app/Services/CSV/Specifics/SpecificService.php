@@ -44,8 +44,8 @@ class SpecificService
     /**
      * @param array $row
      * @param array $specifics
-     * @deprecated
      * @return array
+     * @deprecated
      */
     public static function runSpecifics(array $row, array $specifics): array
     {

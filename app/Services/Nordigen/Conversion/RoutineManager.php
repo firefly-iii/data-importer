@@ -41,9 +41,9 @@ use Log;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    private array                      $allMessages;
-    private array                      $allWarnings;
-    private array                      $allErrors;
+    private array $allMessages;
+    private array $allWarnings;
+    private array $allErrors;
     use IsRunningCli, GeneratesIdentifier;
 
     private Configuration        $configuration;

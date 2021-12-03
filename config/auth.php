@@ -41,11 +41,11 @@ return [
     ],
 
     //  Al stewart - A small fruit song
-    'line_a' => 'Said the apple to the orange',
-    'line_b' => 'Oh I wanted you to come',
-    'line_c' => 'Close to me and kiss me to the core',
-    'line_d' => 'Then you might know me like no other orange',
-    'line_e' => 'Has ever done before',
+    'line_a'   => 'Said the apple to the orange',
+    'line_b'   => 'Oh I wanted you to come',
+    'line_c'   => 'Close to me and kiss me to the core',
+    'line_d'   => 'Then you might know me like no other orange',
+    'line_e'   => 'Has ever done before',
 
     /*
     |--------------------------------------------------------------------------

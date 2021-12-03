@@ -23,11 +23,11 @@
 declare(strict_types=1);
 
 return [
-    'id'  => env('NORDIGEN_ID', ''),
-    'key' => env('NORDIGEN_KEY', ''),
-    'url' => 'https://ob.nordigen.com',
+    'id'          => env('NORDIGEN_ID', ''),
+    'key'         => env('NORDIGEN_KEY', ''),
+    'url'         => 'https://ob.nordigen.com',
     'use_sandbox' => env('NORDIGEN_SANDBOX', false),
-    'countries'       => [
+    'countries'   => [
         'AF' => 'Afghanistan', 'AX' => 'Åland Islands', 'AL' => 'Albania', 'DZ' => 'Algeria', 'AS' => 'American Samoa', 'AD' => 'Andorra', 'AO' => 'Angola',
         'AI' => 'Anguilla', 'AQ' => 'Antarctica', 'AG' => 'Antigua and Barbuda', 'AR' => 'Argentina', 'AM' => 'Armenia', 'AW' => 'Aruba', 'AU' => 'Australia',
         'AT' => 'Austria', 'AZ' => 'Azerbaijan', 'BS' => 'Bahamas', 'BH' => 'Bahrain', 'BD' => 'Bangladesh', 'BB' => 'Barbados', 'BY' => 'Belarus',

@@ -34,14 +34,10 @@ use FireflyIII\Exceptions\FireflyException;
 use FireflyIII\Http\Middleware\IsDemoUser;
 use FireflyIII\Support\Http\Controllers\GetConfigurationData;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Redirector;
-use Illuminate\Routing\Route;
 use Illuminate\View\View;
 use Log;
 use Monolog\Handler\RotatingFileHandler;
-use Route as RouteFacade;
 
 
 class DebugController extends Controller
@@ -59,22 +55,22 @@ class DebugController extends Controller
         $search  = ['~', '#'];
         $replace = ['\~', '# '];
 
-        $now                  = Carbon::now()->format('Y-m-d H:i:s e');
-        $phpVersion           = str_replace($search, $replace, PHP_VERSION);
-        $phpOs                = str_replace($search, $replace, PHP_OS);
-        $interface            = PHP_SAPI;
-        $userAgent            = $request->header('user-agent');
-        $trustedProxies       = config('importer.trusted_proxies');
-        $displayErrors        = ini_get('display_errors');
-        $errorReporting       = $this->errorReporting((int)ini_get('error_reporting'));
-        $appEnv               = config('app.env');
-        $appDebug             = var_export(config('app.debug'), true);
-        $logChannel           = config('logging.default');
-        $appLogLevel          = config('logging.level');
-        $cacheDriver          = config('cache.default');
-        $bcscale              = bcscale();
-        $tz                   = env('TZ');
-        $isDocker        = env('IS_DOCKER', false);
+        $now            = Carbon::now()->format('Y-m-d H:i:s e');
+        $phpVersion     = str_replace($search, $replace, PHP_VERSION);
+        $phpOs          = str_replace($search, $replace, PHP_OS);
+        $interface      = PHP_SAPI;
+        $userAgent      = $request->header('user-agent');
+        $trustedProxies = config('importer.trusted_proxies');
+        $displayErrors  = ini_get('display_errors');
+        $errorReporting = $this->errorReporting((int) ini_get('error_reporting'));
+        $appEnv         = config('app.env');
+        $appDebug       = var_export(config('app.debug'), true);
+        $logChannel     = config('logging.default');
+        $appLogLevel    = config('logging.level');
+        $cacheDriver    = config('cache.default');
+        $bcscale        = bcscale();
+        $tz             = env('TZ');
+        $isDocker       = env('IS_DOCKER', false);
 
         // get latest log file:
         $logger     = Log::driver();
@@ -122,6 +118,7 @@ class DebugController extends Controller
             )
         );
     }
+
     /**
      * Some common combinations.
      *
@@ -141,6 +138,6 @@ class DebugController extends Controller
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 
-        return $array[$value] ?? (string)$value;
+        return $array[$value] ?? (string) $value;
     }
 }

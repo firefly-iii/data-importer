@@ -50,16 +50,20 @@
                             {% if '' == baseURL %}
                                 <div class="form-group mb-3">
                                     <label for="input_base_url">Firefly III URL</label>
-                                    <input type="url" placeholder="https://" value="{{ baseURL }}" class="form-control" id="input_base_url" autocomplete="off" name="base_url">
-                                    {% if errors.has('base_url') %}<span class="text-danger">{{ errors.first('base_url') }}</span>{% endif %}
-                                    {% if Session.has('secure_url') %}<span class="text-danger">{{ Session.get('secure_url') }}</span>{% endif %}
+                                    <input type="url" placeholder="https://" value="{{ baseURL }}" class="form-control"
+                                           id="input_base_url" autocomplete="off" name="base_url">
+                                    {% if errors.has('base_url') %}<span
+                                        class="text-danger">{{ errors.first('base_url') }}</span>{% endif %}
+                                    {% if Session.has('secure_url') %}<span
+                                        class="text-danger">{{ Session.get('secure_url') }}</span>{% endif %}
                                 </div>
                             {% endif %}
                             <div class="form-group mb-3">
                                 <label for="input_client_id">Client ID</label>
                                 <input type="number" step="1" min="1" class="form-control" id="input_client_id"
                                        autocomplete="off" name="client_id" value="{{ clientId }}">
-                                {% if errors.has('client_id') %}<span class="text-danger">{{ errors.first('client_id') }}</span>{% endif %}
+                                {% if errors.has('client_id') %}<span
+                                    class="text-danger">{{ errors.first('client_id') }}</span>{% endif %}
                             </div>
                             <input type="submit" name="submit" value="Submit" class="float-end btn btn-success"/>
                         </form>
@@ -69,8 +73,10 @@
                 <div class="card mt-3">
                     <div class="card-body">
                         <p>
-                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button resets your progress">Start over</a>
-                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="This button tries to connect to Firefly III again">Reauthenticate</a>
+                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
+                               data-bs-placement="top" title="This button resets your progress">Start over</a>
+                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}" data-bs-toggle="tooltip"
+                               data-bs-placement="top" title="This button tries to connect to Firefly III again">Reauthenticate</a>
                         </p>
                     </div>
                 </div>

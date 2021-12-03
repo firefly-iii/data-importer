@@ -17,13 +17,15 @@
                             <p>
                                 CSV files come in many shapes and forms. Some of the most important settings are below.
                                 They apply to all lines in the file. If you would like some support, <a
-                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank"> check out the documentation for this page.</a>
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
+                                    check out the documentation for this page.</a>
                             </p>
                         {% endif %}
                         {% if 'nordigen' == flow or 'spectre' == flow %}
                             <p>
-                                Your {{ flow|capitalize}} import can be configured and fine-tuned.
-                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check out the documentation for this page.</a>
+                                Your {{ flow|capitalize }} import can be configured and fine-tuned.
+                                <a href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">Check
+                                    out the documentation for this page.</a>
                             </p>
                         {% endif %}
                     </div>
@@ -57,7 +59,8 @@
             <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
             <input type="hidden" name="nordigen_country" value="{{ configuration.getNordigenCountry }}"/>
             <input type="hidden" name="nordigen_bank" value="{{ configuration.getNordigenBank }}"/>
-            <input type="hidden" name="nordigen_requisitions" value="{{ configuration.getNordigenRequisitions|json_encode }}"/>
+            <input type="hidden" name="nordigen_requisitions"
+                   value="{{ configuration.getNordigenRequisitions|json_encode }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -82,7 +85,7 @@
                                             </thead>
                                             <tbody>
                                             {% for information in importerAccounts %}
-                                                {#  update a variable #}
+                                                {# update a variable #}
                                                 {% if 'disabled' == information.import_service.status %}
                                                     {% set errorAccounts = errorAccounts+1 %}
                                                 {% endif %}
@@ -187,7 +190,9 @@
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
-                                            <caption>Select the accounts you want to import into your Firefly III installation.</caption>
+                                            <caption>Select the accounts you want to import into your Firefly III
+                                                installation.
+                                            </caption>
                                         </table>
 
                                         {# TODO rewrite so Nordigen and Spectre use the same account object #}
@@ -207,18 +212,23 @@
                                         <label for="X" class="col-sm-3 col-form-label">Ignore Spectre categories</label>
                                         <div class="col-sm-9">
                                             <div class="form-check">
-                                                <input class="form-check-input" {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %} type="checkbox" value="1" id="ignore_spectre_categories" name="ignore_spectre_categories" aria-describedby="duplicateSpectre">
+                                                <input class="form-check-input"
+                                                       {% if configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %}
+                                                       type="checkbox" value="1" id="ignore_spectre_categories"
+                                                       name="ignore_spectre_categories"
+                                                       aria-describedby="duplicateSpectre">
                                                 <label class="form-check-label" for="ignore_spectre_categories">
                                                     Ignore Spectre's categories.
                                                 </label>
                                             </div>
 
                                             <small class="form-text text-muted" id="duplicateSpectre">
-                                                Spectre adds categories to each transaction. You can choose to ignore them.
+                                                Spectre adds categories to each transaction. You can choose to ignore
+                                                them.
                                             </small>
                                         </div>
                                     </div>
-                                    {% endif %}
+                                {% endif %}
 
                             {% endif %}
 
@@ -379,7 +389,8 @@
                                                 Yes
                                             </label>
                                             <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your data to existing Firefly III data, for a cleaner import.
+                                                <br>You get the opportunity to link your data to existing Firefly III
+                                                data, for a cleaner import.
                                             </small>
                                         </div>
                                     </div>
@@ -475,7 +486,8 @@
                                     Firefly III can automatically detect duplicate transactions. This is pretty
                                     foolproof. In some special cases however,
                                     you want more control over this process. Read more about the options below in <a
-                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">the documentation</a>.
+                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/"
+                                        target="_blank">the documentation</a>.
                                 </p>
                             </div>
 

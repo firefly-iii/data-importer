@@ -80,7 +80,7 @@ class PostNewRequisitionRequest extends Request
             [
                 'redirect'       => route('010-build-link.callback'),
                 'institution_id' => $this->bank,
-                'reference' => $this->reference,
+                'reference'      => $this->reference,
             ];
 
         $result = $this->authenticatedJsonPost($array);

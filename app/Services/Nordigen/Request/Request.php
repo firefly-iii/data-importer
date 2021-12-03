@@ -133,7 +133,7 @@ abstract class Request
                 //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
             }
             // if status code is 503, the account does not exist.
-            $exception = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
+            $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
             $exception->json = $json;
             throw $exception;
         }
@@ -164,46 +164,6 @@ abstract class Request
         }
         Log::debug('Return JSON result of authenticatedGet');
 
-        return $json;
-    }
-
-    /**
-     * @return array
-     * @throws ImporterHttpException
-     */
-    protected function authenticatedJsonPost(array $json): array
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
-
-        if (null !== $this->parameters) {
-            $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
-        }
-
-        $client = $this->getClient();
-        try {
-            $res = $client->request(
-                'POST', $fullUrl, [
-                          'json'    => $json,
-                          'headers' => [
-                              'Accept'        => 'application/json',
-                              'Content-Type'  => 'application/json',
-                              'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                          ],
-                      ]
-            );
-        } catch (ClientException $e) {
-            // TODO error response, not an exception.
-            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
-        }
-        $body = (string) $res->getBody();
-
-        try {
-            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            // TODO error response, not an exception.
-            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
-        }
         return $json;
     }
 
@@ -267,6 +227,46 @@ abstract class Request
     public function setToken(string $token): void
     {
         $this->token = $token;
+    }
+
+    /**
+     * @return array
+     * @throws ImporterHttpException
+     */
+    protected function authenticatedJsonPost(array $json): array
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
+
+        if (null !== $this->parameters) {
+            $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
+        }
+
+        $client = $this->getClient();
+        try {
+            $res = $client->request(
+                'POST', $fullUrl, [
+                          'json'    => $json,
+                          'headers' => [
+                              'Accept'        => 'application/json',
+                              'Content-Type'  => 'application/json',
+                              'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                          ],
+                      ]
+            );
+        } catch (ClientException $e) {
+            // TODO error response, not an exception.
+            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
+        }
+        $body = (string) $res->getBody();
+
+        try {
+            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            // TODO error response, not an exception.
+            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
+        }
+        return $json;
     }
 
 

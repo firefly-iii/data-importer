@@ -34,12 +34,12 @@ use Log;
  */
 class RoutineManager
 {
-    private ApiSubmitter  $apiSubmitter;
-    private array         $transactions;
-    private string        $identifier;
-    private array         $allMessages;
-    private array         $allWarnings;
-    private array         $allErrors;
+    private ApiSubmitter $apiSubmitter;
+    private array        $transactions;
+    private string       $identifier;
+    private array        $allMessages;
+    private array        $allWarnings;
+    private array        $allErrors;
 
     /**
      * @param string $identifier
@@ -64,7 +64,7 @@ class RoutineManager
      */
     public function setConfiguration(Configuration $configuration): void
     {
-        $this->apiSubmitter  = new ApiSubmitter;
+        $this->apiSubmitter = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
         Log::debug('Created APISubmitter in RoutineManager');

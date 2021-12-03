@@ -369,18 +369,6 @@ class Configuration
     }
 
     /**
-     * @param array $data
-     *
-     * @return static
-     */
-    private static function fromVersionThree(array $data): self
-    {
-        $object            = self::fromArray($data);
-        $object->specifics = [];
-        return $object;
-    }
-
-    /**
      * @param array $array
      *
      * @return static
@@ -455,6 +443,18 @@ class Configuration
     }
 
     /**
+     * @param array $data
+     *
+     * @return static
+     */
+    private static function fromVersionThree(array $data): self
+    {
+        $object            = self::fromArray($data);
+        $object->specifics = [];
+        return $object;
+    }
+
+    /**
      * @return bool
      */
     public function isSkipForm(): bool
@@ -522,15 +522,6 @@ class Configuration
         unset($array['mapping'], $array['do_mapping'], $array['roles']);
         return $array;
     }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
 
     /**
      * @return array
@@ -642,6 +633,14 @@ class Configuration
     }
 
     /**
+     * @param string $connection
+     */
+    public function setConnection(string $connection): void
+    {
+        $this->connection = $connection;
+    }
+
+    /**
      * @return string
      */
     public function getIdentifier(): string
@@ -650,11 +649,11 @@ class Configuration
     }
 
     /**
-     * @param string $connection
+     * @param string $identifier
      */
-    public function setConnection(string $connection): void
+    public function setIdentifier(string $identifier): void
     {
-        $this->connection = $connection;
+        $this->identifier = $identifier;
     }
 
     /**
@@ -674,20 +673,19 @@ class Configuration
     }
 
     /**
-     * @return bool
-     */
-    public function isMapAllData(): bool
-    {
-        return $this->mapAllData;
-    }
-
-
-    /**
      * @param array $doMapping
      */
     public function setDoMapping(array $doMapping): void
     {
         $this->doMapping = $doMapping;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMapAllData(): bool
+    {
+        return $this->mapAllData;
     }
 
     /**
@@ -760,27 +758,19 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenCountry
-     */
-    public function setNordigenCountry(string $nordigenCountry): void
-    {
-        $this->nordigenCountry = $nordigenCountry;
-    }
-
-    /**
-     * @param string $nordigenBank
-     */
-    public function setNordigenBank(string $nordigenBank): void
-    {
-        $this->nordigenBank = $nordigenBank;
-    }
-
-    /**
      * @return string
      */
     public function getNordigenCountry(): string
     {
         return $this->nordigenCountry;
+    }
+
+    /**
+     * @param string $nordigenCountry
+     */
+    public function setNordigenCountry(string $nordigenCountry): void
+    {
+        $this->nordigenCountry = $nordigenCountry;
     }
 
     /**
@@ -791,13 +781,20 @@ class Configuration
         return $this->conversion;
     }
 
-
     /**
      * @return string
      */
     public function getNordigenBank(): string
     {
         return $this->nordigenBank;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenBank(string $nordigenBank): void
+    {
+        $this->nordigenBank = $nordigenBank;
     }
 
     /**
