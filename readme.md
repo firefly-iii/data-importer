@@ -37,7 +37,7 @@ The data importer does not connect to your bank directly. Instead, it uses [Nord
 
 You can also import CSV files downloaded from your bank. Other import options are under construction.
 
-Eager to get started? Go to the TODO documentation!
+Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/data-importer)!
 
 <!-- HELP TEXT -->
 ## Need help?
@@ -58,7 +58,7 @@ If you need support using Firefly III or the associated tools, come find us!
 * Import over an API for easy automation
 * Use rules and data mapping for transaction clarity
 
-Many more features are listed in the TODO [documentation](https://docs.firefly-iii.org/).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
 
 ## Who's it for?
 
@@ -66,7 +66,7 @@ This application is for people who want to track their finances, keep an eye on 
 
 ## Getting Started
 
-Many more features are listed in the TODO [documentation](https://docs.firefly-iii.org/).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
 
 ## Contributing
 
