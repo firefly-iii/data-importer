@@ -116,7 +116,7 @@ class ColumnValue
 
         // run converter on data:
         $converterClass = (string) config(sprintf('csv.import_roles.%s.converter', $this->role));
-        Log::debug(sprintf('getParsedValue will run %s', $converterClass));
+        Log::debug(sprintf('getParsedValue will run "%s"', $converterClass));
         return ConverterService::convert($converterClass, $this->value, $this->configuration);
     }
 

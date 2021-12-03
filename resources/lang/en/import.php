@@ -60,6 +60,7 @@ return [
     'column_opposing-bic'           => 'Opposing account (BIC)',
     'column_opposing-id'            => 'Opposing account ID (matching FF3)',
     'column_external-id'            => 'External ID',
+    'column_external-url'           => 'External URL',
     'column_opposing-name'          => 'Opposing account (name)',
     'column_rabo-debit-credit'      => 'Rabobank specific debit/credit indicator',
     'column_ing-debit-credit'       => 'ING specific debit/credit indicator',

@@ -170,6 +170,7 @@ class PseudoTransactionProcessor
 
             $line = $object->process($line);
         }
+        Log::debug('Final transaction: ', $line);
 
         return $line;
     }
