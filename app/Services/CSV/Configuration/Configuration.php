@@ -886,6 +886,7 @@ class Configuration
         Log::debug('Now in updateDateRange()');
         // set date and time:
         switch ($this->dateRange) {
+            default:
             case 'all':
                 Log::debug('Range is null, set all to NULL.');
                 $this->dateRangeUnit   = 'd';

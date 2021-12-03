@@ -173,6 +173,8 @@ trait AutoImports
             return;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration->updateDateRange();
+
 
         $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
 
