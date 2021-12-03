@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * SelectionController.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,7 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
 namespace App\Http\Controllers\Import\Nordigen;
 
 use App\Exceptions\ImporterErrorException;

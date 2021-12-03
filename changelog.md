@@ -14,13 +14,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - More consistent layout
 
 ### Fixed
-- #5336 Undefined array key "Liabilities
-- #5337 Config download fails
-- #5338 APISubmitter not found in RoutineManager
-- #5339 fails to read CSV delimiter correctly
-- #5343 Missing config variable
-- #5344 Protocol mismatch
-- #5345 Some transactions are said to have the same source and destination
+- [Issue 5336](https://github.com/firefly-iii/firefly-iii/issues/5336) Undefined array key "Liabilities
+- [Issue 5337](https://github.com/firefly-iii/firefly-iii/issues/5337) Config download fails
+- [Issue 5338](https://github.com/firefly-iii/firefly-iii/issues/5338) APISubmitter not found in RoutineManager
+- [Issue 5339](https://github.com/firefly-iii/firefly-iii/issues/5339) fails to read CSV delimiter correctly
+- [Issue 5343](https://github.com/firefly-iii/firefly-iii/issues/5343) Missing config variable
+- [Issue 5344](https://github.com/firefly-iii/firefly-iii/issues/5344) Protocol mismatch
+- [Issue 5345](https://github.com/firefly-iii/firefly-iii/issues/5345) Some transactions are said to have the same source and destination
 
 ## 0.1.0 - 2021-11-27
 
