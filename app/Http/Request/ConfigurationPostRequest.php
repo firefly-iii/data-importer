@@ -74,6 +74,11 @@ class ConfigurationPostRequest extends Request
             'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
 
             // nordigen:
+            'nordigen_country'              => $this->string('nordigen_country'),
+            'nordigen_bank'                 => $this->string('nordigen_bank'),
+            'nordigen_requisitions'         => json_decode($this->string('nordigen_requisitions'), true) ?? [],
+
+            // nordigen + spectre
             'do_import'                     => $this->get('do_import') ?? [],
             'accounts'                      => $this->get('accounts') ?? [],
             'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),

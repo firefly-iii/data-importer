@@ -288,6 +288,11 @@ class Configuration
         $object->connection              = $data['connection'] ?? '0';
         $object->ignoreSpectreCategories = $data['ignore_spectre_categories'] ?? false;
 
+        // nordigen information:
+        $object->nordigenCountry      = $data['nordigen_country'] ?? '';
+        $object->nordigenBank         = $data['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $data['nordigen_requisitions'] ?? [];
+
         // settings for spectre + nordigen
         $object->mapAllData = $data['map_all_data'] ?? false;
         $object->accounts   = $data['accounts'] ?? [];
@@ -810,6 +815,14 @@ class Configuration
     public function getRequisition(string $key): ?string
     {
         return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNordigenRequisitions(): array
+    {
+        return $this->nordigenRequisitions;
     }
 
     /**
