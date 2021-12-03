@@ -165,8 +165,9 @@ class MapController extends Controller
      */
     private function getImporterMapInformation(): array
     {
-        $data          = [];
-        $configuration = $this->restoreConfiguration();
+        $data            = [];
+        $configuration   = $this->restoreConfiguration();
+        $existingMapping = $configuration->getMapping();
         /*
          * To map Nordigen, pretend the file has one "column" (this is based on the CSV importer after all)
          * that contains:
@@ -211,10 +212,10 @@ class MapController extends Controller
             Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
-            $object                       = app($class);
-            $opposingName['mapping_data'] = $object->getMap();
-            $opposingName['mapped']       = $existingMapping[$index] ?? [];
-            $data[]                       = $category;
+            $object                   = app($class);
+            $category['mapping_data'] = $object->getMap();
+            $category['mapped']       = $existingMapping[$index] ?? [];
+            $data[]                   = $category;
         }
         return $data;
     }
