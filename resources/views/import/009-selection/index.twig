@@ -61,6 +61,7 @@
                                         <option label="(no selection)" value="XX">(no selection)</option>
                                         {% for country in response %}
                                             <option label="{{ countries[country.code]|default('Unknown') }}"
+                                                    {% if country.code == configuration.getNordigenCountry %}selected="selected"{% endif %}
                                                     value="{{ country.code }}">{{ countries[country.code]|default('Unknown') }}</option>
                                         {% endfor %}
                                     </select>
@@ -91,6 +92,7 @@
                                             <option label="(no bank)" value="XX" data-days="0">(no bank)</option>
                                             {% for bank in country.banks %}
                                                 <option label="{{ bank.name }}"
+                                                        {% if bank.id == configuration.getNordigenBank %}selected="selected"{% endif %}
                                                         data-days="{{ bank.transactionTotalDays }}"
                                                         value="{{ bank.id }}">{{ bank.name }}</option>
                                             {% endfor %}
@@ -172,6 +174,7 @@
                         $(document).ready(function () {
                             $('#country').change(selectCountry)
                             $('.bank-selector').change(showDayCounter);
+                            selectCountry();
                         });
 
                         function showDayCounter() {

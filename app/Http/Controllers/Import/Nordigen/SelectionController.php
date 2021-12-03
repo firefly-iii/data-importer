@@ -70,9 +70,11 @@ class SelectionController extends Controller
     public function index()
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $countries = config('nordigen.countries');
-        $mainTitle = 'Selection';
-        $subTitle  = 'Select your country and the bank you wish to use.';
+        $countries     = config('nordigen.countries');
+        $mainTitle     = 'Selection';
+        $subTitle      = 'Select your country and the bank you wish to use.';
+        $configuration = $this->restoreConfiguration();
+
 
         // get banks and countries
         $accessToken = TokenManager::getAccessToken();
@@ -90,7 +92,7 @@ class SelectionController extends Controller
         if ($response instanceof ErrorResponse) {
             throw new ImporterErrorException((string) $response->message);
         }
-        return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries'));
+        return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries', 'configuration'));
     }
 
     /**

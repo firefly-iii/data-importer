@@ -183,7 +183,7 @@ class GenerateTransactions
                 Log::debug(sprintf('[%d/%d] Done parsing transaction.', ($index + 1), $total));
             }
         }
-        $this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));
+        $this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
         Log::debug('Done parsing transactions.');
         return $return;
     }
