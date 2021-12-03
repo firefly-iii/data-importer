@@ -70,6 +70,8 @@
                                 <div class="form-group row mb-3">
                                     <div class="col-sm-3">Accounts</div>
                                     <div class="col-sm-9">
+                                        {% set errorAccounts = 0 %}
+                                        {% set warningAccounts = 0 %}
                                         <table class="table table-sm table-bordered table-striped">
                                             <thead>
                                             <tr>
@@ -80,6 +82,19 @@
                                             </thead>
                                             <tbody>
                                             {% for information in importerAccounts %}
+                                                {#  update a variable #}
+                                                {% if 'disabled' == information.import_service.status %}
+                                                    {% set errorAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'no-info' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'nothing' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
+                                                {% if 'no-balance' == information.import_service.status %}
+                                                    {% set warningAccounts = errorAccounts+1 %}
+                                                {% endif %}
                                                 <tr>
                                                     <td>
                                                         {# Nordigen uses identifier #}
@@ -124,6 +139,7 @@
                                                                 <br><small>
                                                                 IBAN: {{ information.import_service.iban }}</small>{% endif %}
                                                         {% endif %}
+
                                                     </td>
                                                     <td>
                                                         {% if 'disabled' != information.import_service.status %}
@@ -135,7 +151,7 @@
                                                             <span class="text-danger">Cannot be imported</span>
                                                         {% endif %}
                                                         {% if(information.firefly|length>0) %}
-
+                                                            {# TODO do not split this. #}
                                                             {# Nordigen: #}
                                                             {% if 'nordigen' == flow %}
                                                                 {% if 'disabled' != information.import_service.status %}
@@ -173,6 +189,16 @@
                                             </tbody>
                                             <caption>Select the accounts you want to import into your Firefly III installation.</caption>
                                         </table>
+
+                                        {# TODO rewrite so Nordigen and Spectre use the same account object #}
+                                        {% if errorAccounts > 0 %}
+                                            <span class="text-danger"><span class="fas fa-exclamation-triangle"></span></span>
+                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                        {% endif %}
+                                        {% if warningAccounts > 0 %}
+                                            <span class="text-warning"><span class="fas fa-exclamation-triangle"></span></span>
+                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                        {% endif %}
                                     </div>
                                 </div>
 

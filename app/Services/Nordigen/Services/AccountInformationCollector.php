@@ -57,8 +57,8 @@ class AccountInformationCollector
         } catch (ImporterHttpException | ImporterErrorException $e) {
             Log::error($e->getMessage());
             // ignore error otherwise for now.
-            $detailedAccount->setStatus('disabled');
-            $detailedAccount->setName('Disabled account');
+            $detailedAccount->setStatus('no-info');
+            $detailedAccount->setName('Unknown account');
         }
         $balanceAccount = $detailedAccount;
 
@@ -67,9 +67,20 @@ class AccountInformationCollector
         } catch (ImporterHttpException | ImporterErrorException $e) {
             Log::error($e->getMessage());
             // ignore error otherwise for now.
-            $balanceAccount->setStatus('disabled');
-            $balanceAccount->setName('Disabled account');
+            $status = $balanceAccount->getStatus();
+            if ('no-info' === $status) {
+                $balanceAccount->setStatus('nothing');
+            }
+            if ('no-info' !== $status) {
+                $balanceAccount->setStatus('no-balance');
+            }
         }
+        // overrule settings to test layout:
+//        $balanceAccount->setIban('');
+//        $balanceAccount->setName('');
+//        $balanceAccount->setDisplayName('');
+//        $balanceAccount->setOwnerName('');
+//        $balanceAccount->setStatus('no-info');
 
         return $balanceAccount;
     }
