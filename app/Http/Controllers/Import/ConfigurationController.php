@@ -57,6 +57,7 @@ use Log;
 
 /**
  * Class ConfigurationController
+ * TODO for spectre and nordigen duplicate detection is only on transaction id
  */
 class ConfigurationController extends Controller
 {

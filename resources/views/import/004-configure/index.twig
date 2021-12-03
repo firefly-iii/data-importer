@@ -52,9 +52,12 @@
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="flow" value="{{ flow }}"/>
-            <!-- these two values are used by Spectre and must be preserved -->
+            <!-- these values are used by Spectre + Nordigen and must be preserved -->
             <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>
             <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
+            <input type="hidden" name="nordigen_country" value="{{ configuration.getNordigenCountry }}"/>
+            <input type="hidden" name="nordigen_bank" value="{{ configuration.getNordigenBank }}"/>
+            <input type="hidden" name="nordigen_requisitions" value="{{ configuration.getNordigenRequisitions|json_encode }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -493,7 +496,7 @@
                                     </select>
                                     <small id="duplicate_detection_method_help" class="form-text text-muted">
                                         For more details on these detection method see <a
-                                            href="https://docs.firefly-iii.org/csv/usage/configure/#duplicate-transaction-detection"
+                                            href="https://docs.firefly-iii.org/data-importer/usage/configure/#duplicate-transaction-detection"
                                             target="_blank">the documentation</a>. If you're not sure, select
                                         "content-based" detection.
                                     </small>
