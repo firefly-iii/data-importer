@@ -38,7 +38,6 @@ use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
-use App\Services\Spectre\Model\Account as SpectreAccount;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
@@ -63,6 +62,7 @@ use Log;
 class ConfigurationController extends Controller
 {
     use RestoresConfiguration;
+
     /**
      * StartController constructor.
      */
@@ -86,7 +86,7 @@ class ConfigurationController extends Controller
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         // create configuration:
-        $configuration  = $this->restoreConfiguration();
+        $configuration = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');

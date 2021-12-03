@@ -36,10 +36,15 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use JsonException;
 use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class SelectionController
@@ -90,10 +95,10 @@ class SelectionController extends Controller
 
     /**
      * @param SelectionRequest $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {

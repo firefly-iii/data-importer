@@ -27,6 +27,7 @@ namespace App\Http\Controllers\Import;
 
 use App\Http\Controllers\Controller;
 use App\Support\Http\RestoresConfiguration;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 
@@ -38,9 +39,9 @@ class DownloadController extends Controller
     use RestoresConfiguration;
 
     /**
-     * @return \Illuminate\Contracts\Foundation\Application|ResponseFactory|Response
+     * @return Application|ResponseFactory|Response
      */
-    public function download(): Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
+    public function download(): Response|Application|ResponseFactory
     {
         // do something
         $configuration = $this->restoreConfiguration();

@@ -28,8 +28,6 @@ namespace App\Http\Controllers\Import\CSV;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
-use App\Services\CSV\Configuration\ConfigFileProcessor;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
@@ -46,6 +44,7 @@ use Log;
 class RoleController extends Controller
 {
     use RestoresConfiguration;
+
     /**
      * RoleController constructor.
      */
