@@ -26,7 +26,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;

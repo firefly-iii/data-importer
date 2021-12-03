@@ -26,7 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;

@@ -22,7 +22,7 @@
 
 namespace App\Support\Http;
 
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 

@@ -20,21 +20,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
-namespace App\Services\CSV\Configuration;
+namespace App\Services\Shared\Configuration;
 
 use Carbon\Carbon;
 use Log;
 use UnexpectedValueException;
 
+
 /**
  * Class Configuration
- * TODO move me to a shared directory
  */
 class Configuration
 {
-    /** @var int */
     public const VERSION = 3;
     private string $date;
     private int    $defaultAccount;
@@ -148,7 +145,7 @@ class Configuration
     /**
      * Create a standard empty configuration.
      *
-     * @return static
+     * @return \App\Services\CSV\Configuration\Configuration
      */
     public static function make(): self
     {

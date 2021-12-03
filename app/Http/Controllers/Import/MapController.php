@@ -28,7 +28,7 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
 use App\Services\Session\Constants;

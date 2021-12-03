@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Import\Status\ProgressInformation;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;

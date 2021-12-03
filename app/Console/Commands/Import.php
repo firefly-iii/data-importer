@@ -28,7 +28,7 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
 use Log;
 

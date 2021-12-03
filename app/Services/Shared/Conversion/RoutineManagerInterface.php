@@ -26,7 +26,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 
 /**
  * Interface RoutineManagerInterface

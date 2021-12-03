@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace App\Services\Nordigen\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
 use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;

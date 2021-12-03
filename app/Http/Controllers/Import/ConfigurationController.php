@@ -30,7 +30,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Request\ListAccountsRequest;

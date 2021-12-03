@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Specifics\SpecificInterface;
 use App\Services\CSV\Specifics\SpecificService;
 use InvalidArgumentException;

@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Conversion\Routine\ColumnValueConverter;
 use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
 use App\Services\CSV\Conversion\Routine\LineProcessor;

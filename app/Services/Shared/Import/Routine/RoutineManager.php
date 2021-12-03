@@ -26,7 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use Log;
 
 /**
