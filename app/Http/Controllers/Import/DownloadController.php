@@ -26,9 +26,7 @@ namespace App\Http\Controllers\Import;
 
 
 use App\Http\Controllers\Controller;
-use App\Services\CSV\Configuration\Configuration;
-use App\Services\Session\Constants;
-use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 
@@ -37,27 +35,17 @@ use Illuminate\Http\Response;
  */
 class DownloadController extends Controller
 {
+    use RestoresConfiguration;
+
     /**
-     * @return ResponseFactory|Response
+     * @return \Illuminate\Contracts\Foundation\Application|ResponseFactory|Response
      */
-    public function download()
+    public function download(): Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
         // do something
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-
-        // append the config file with values from the disk:
-        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setRoles($diskConfig->getRoles());
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-        }
-
-        $array = $configuration->toArray();
-
-        $result = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        $configuration = $this->restoreConfiguration();
+        $array         = $configuration->toArray();
+        $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
 
         $response = response($result);
         $name     = sprintf('import_config_%s.json', date('Y-m-d'));

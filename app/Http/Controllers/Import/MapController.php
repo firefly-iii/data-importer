@@ -33,6 +33,7 @@ use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -41,7 +42,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use JsonException;
-use League\Csv\Exception;
 use Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -51,6 +51,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class MapController extends Controller
 {
+    use RestoresConfiguration;
+
     protected const DISK_NAME = 'jobs';
 
     /**
@@ -77,19 +79,7 @@ class MapController extends Controller
         Log::debug('Now in mapController index');
 
         // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
-
-        // the config in the session will miss important values, we must get those from disk:
-        // 'mapping', 'do_mapping', 'roles' are missing.
-        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
-        }
+        $configuration = $this->restoreConfiguration();
 
         // depends on flow how to handle mapping
         if ('csv' === $configuration->getFlow()) {
@@ -290,7 +280,7 @@ class MapController extends Controller
         $mapping = !is_array($mapping) ? [] : $mapping;
         $data    = [];
 
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
+        $configuration = $this->restoreConfiguration();
 
         /**
          * Loop array with available columns.
@@ -342,6 +332,7 @@ class MapController extends Controller
         }
 
         // then save entire thing to a new disk file:
+        // TODO write config needs helper too
         $configFileName = StorageService::storeArray($configuration->toArray());
         Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 

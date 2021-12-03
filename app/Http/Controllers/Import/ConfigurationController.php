@@ -42,6 +42,7 @@ use App\Services\Spectre\Model\Account as SpectreAccount;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use App\Support\Token;
 use Cache;
 use Carbon\Carbon;
@@ -61,6 +62,7 @@ use Log;
  */
 class ConfigurationController extends Controller
 {
+    use RestoresConfiguration;
     /**
      * StartController constructor.
      */
@@ -83,10 +85,8 @@ class ConfigurationController extends Controller
         $accounts  = [];
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
-        $configuration = null;
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
+        // create configuration:
+        $configuration  = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
@@ -120,11 +120,6 @@ class ConfigurationController extends Controller
         /** @var Account $account */
         foreach ($response as $account) {
             $accounts['Liabilities'][$account->id] = $account;
-        }
-
-        // created default configuration object for sensible defaults:
-        if (null === $configuration) {
-            $configuration = Configuration::make();
         }
 
         // also get the nordigen / spectre accounts

@@ -28,11 +28,11 @@ namespace App\Http\Controllers\Import\Nordigen;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\LinkControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\Request;
 use Log;
 use Psr\Container\ContainerExceptionInterface;
@@ -44,6 +44,7 @@ use Ramsey\Uuid\Uuid;
  */
 class LinkController extends Controller
 {
+    use RestoresConfiguration;
 
     /**
      *
@@ -61,10 +62,7 @@ class LinkController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
         // create a new config thing
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
+        $configuration = $this->restoreConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
             return redirect(route('back.selection'));
         }
@@ -109,11 +107,8 @@ class LinkController extends Controller
         Log::debug(sprintf('Reference is %s', $reference));
 
         // create a new config thing
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
-        $requisition = $configuration->getRequisition($reference);
+        $configuration = $this->restoreConfiguration();
+        $requisition   = $configuration->getRequisition($reference);
         if (null === $requisition) {
             throw new ImporterErrorException('No such requisition.');
         }

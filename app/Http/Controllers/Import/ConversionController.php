@@ -28,7 +28,6 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
@@ -36,7 +35,7 @@ use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
-use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
@@ -48,6 +47,8 @@ use Storage;
  */
 class ConversionController extends Controller
 {
+    use RestoresConfiguration;
+
     protected const DISK_NAME = 'jobs'; // TODO stored in several places
 
     /**
@@ -68,17 +69,8 @@ class ConversionController extends Controller
         Log::debug(sprintf('Now in %s', __METHOD__));
         $mainTitle = 'Convert the data';
 
-        // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-
-        // append info from the file on disk:
-        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setMapping($diskConfig->getMapping());
-        }
+        // create configuration:
+        $configuration = $this->restoreConfiguration();
 
 
         Log::debug('Will now verify configuration content.');
@@ -141,21 +133,8 @@ class ConversionController extends Controller
     public function start(Request $request): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
-
-        // start new conversion routine, depending on the type of import:
-        // read configuration from session
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-
-        // read configuration from disk (to append data)
-        $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configurationFile) {
-            $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
-        }
+        $identifier    = $request->get('identifier');
+        $configuration = $this->restoreConfiguration();
 
         // now create the right class:
         $flow = $configuration->getFlow();

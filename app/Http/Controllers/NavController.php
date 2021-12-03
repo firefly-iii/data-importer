@@ -28,6 +28,7 @@ use App\Services\Session\Constants;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Log;
 
 /**
  * Class NavController
@@ -39,9 +40,10 @@ class NavController extends Controller
      */
     public function toConfig()
     {
+        Log::debug(__METHOD__);
         session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
 
-        return redirect(route('004-configure.index')) . '?overruleskip=true';
+        return redirect(route('004-configure.index') . '?overruleskip=true');
     }
 
     /**
@@ -49,6 +51,7 @@ class NavController extends Controller
      */
     public function toRoles()
     {
+        Log::debug(__METHOD__);
         session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
         return redirect(route('005-roles.index'));
     }
@@ -58,6 +61,7 @@ class NavController extends Controller
      */
     public function toStart()
     {
+        Log::debug(__METHOD__);
         return redirect(route('index'));
     }
 
@@ -66,6 +70,7 @@ class NavController extends Controller
      */
     public function toUpload()
     {
+        Log::debug(__METHOD__);
         session()->forget(Constants::HAS_UPLOAD);
 
         return redirect(route('003-upload.index'));

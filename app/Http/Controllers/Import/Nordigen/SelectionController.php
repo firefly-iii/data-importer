@@ -30,14 +30,13 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\ListBanksRequest;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
 use Log;
@@ -47,6 +46,8 @@ use Log;
  */
 class SelectionController extends Controller
 {
+    use RestoresConfiguration;
+
     /**
      *
      */
@@ -98,11 +99,8 @@ class SelectionController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
-        $values = $request->getAll();
+        $configuration = $this->restoreConfiguration();
+        $values        = $request->getAll();
 
         // overrule with sandbox?
         if (config('nordigen.use_sandbox')) {
