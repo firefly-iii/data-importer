@@ -26,11 +26,11 @@ namespace App\Services\Nordigen\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Services\Shared\Configuration\Configuration;
 use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Cache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;

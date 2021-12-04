@@ -33,10 +33,10 @@ use Symfony\Component\HttpFoundation\Cookie;
  */
 class SecretManager
 {
-    public const ACCESS_TOKEN = 'access_token';
-    public const BASE_URL     = 'base_url';
-    public const VANITY_URL     = 'base_url';
+    public const ACCESS_TOKEN  = 'access_token';
+    public const BASE_URL      = 'base_url';
     public const REFRESH_TOKEN = 'refresh_token';
+    public const VANITY_URL    = 'base_url';
 
     /**
      * Will return true if the session / cookies hold valid secrets (access token, URLs)
@@ -97,28 +97,6 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has an client ID defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasClientId(): bool
-    {
-        return '' !== (string) request()->cookie('client_id');
-    }
-
-    /**
-     * Will verify if the user has a vanity URL defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasVanityUrl(): bool
-    {
-        return '' !== (string) request()->cookie(self::VANITY_URL);
-    }
-
-    /**
      * Will return the access token. From a cookie if its there, otherwise from configuration.
      *
      * @return string
@@ -147,6 +125,17 @@ class SecretManager
     }
 
     /**
+     * Will verify if the user has an client ID defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasClientId(): bool
+    {
+        return '' !== (string) request()->cookie('client_id');
+    }
+
+    /**
      * @return string
      */
     public static function getBaseUrl(): string
@@ -171,6 +160,17 @@ class SecretManager
             return (string) config('importer.vanity_url');
         }
         return (string) request()->cookie(self::VANITY_URL);
+    }
+
+    /**
+     * Will verify if the user has a vanity URL defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasVanityUrl(): bool
+    {
+        return '' !== (string) request()->cookie(self::VANITY_URL);
     }
 
     /**

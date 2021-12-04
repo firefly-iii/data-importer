@@ -26,7 +26,6 @@ namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
-use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;

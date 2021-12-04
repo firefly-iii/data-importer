@@ -25,13 +25,13 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Conversion\Routine\ColumnValueConverter;
 use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
 use App\Services\CSV\Conversion\Routine\LineProcessor;
 use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
 use App\Services\Shared\Authentication\IsRunningCli;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;

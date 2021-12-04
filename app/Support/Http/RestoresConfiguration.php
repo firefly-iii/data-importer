@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace App\Support\Http;
 
-use App\Services\Shared\Configuration\Configuration;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 
 trait RestoresConfiguration

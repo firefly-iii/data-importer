@@ -28,7 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Conversion\Task\AbstractTask;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\ProgressInformation;
-use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
