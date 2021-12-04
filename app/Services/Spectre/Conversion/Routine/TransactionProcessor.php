@@ -27,6 +27,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Spectre\Model\Transaction;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
@@ -123,7 +124,6 @@ class TransactionProcessor
             Log::debug(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
-        /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 

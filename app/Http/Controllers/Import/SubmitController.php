@@ -63,7 +63,6 @@ class SubmitController extends Controller
     }
 
     /**
-     * @throws FileNotFoundException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */

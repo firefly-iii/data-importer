@@ -43,7 +43,6 @@ class FileReader
      *
      * @param bool $convert
      * @return Reader
-     * @throws FileNotFoundException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */

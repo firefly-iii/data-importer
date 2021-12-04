@@ -146,7 +146,7 @@ class Configuration
     /**
      * Create a standard empty configuration.
      *
-     * @return \App\Services\CSV\Configuration\Configuration
+     * @return Configuration
      */
     public static function make(): self
     {

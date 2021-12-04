@@ -26,6 +26,7 @@ namespace App\Services\CSV\Configuration;
 
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;

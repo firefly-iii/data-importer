@@ -97,8 +97,6 @@ class LinkController extends Controller
 
     /**
      * @param Request $request
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {

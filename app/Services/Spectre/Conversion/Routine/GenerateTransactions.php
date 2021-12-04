@@ -95,7 +95,6 @@ class GenerateTransactions
      * @param array $spectre
      *
      * @return array
-     * @throws ImporterErrorException
      */
     public function getTransactions(array $spectre): array
     {

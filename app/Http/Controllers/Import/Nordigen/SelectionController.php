@@ -99,8 +99,6 @@ class SelectionController extends Controller
      * @param SelectionRequest $request
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {
