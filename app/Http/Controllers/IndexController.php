@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
+use App\Services\Shared\Authentication\SecretManager;
 use Artisan;
 use Illuminate\Http\Request;
 use Log;
@@ -68,40 +69,34 @@ class IndexController extends Controller
     public function index(Request $request): mixed
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        // check for access token cookie. if not, redirect to flow to get it.
-        $accessToken  = (string) $request->cookie('access_token');
-        $refreshToken = (string) $request->cookie('refresh_token');
-        $baseURL      = (string) $request->cookie('base_url');
-        $vanityURL    = (string) $request->cookie('vanity_url');
 
-        Log::debug(sprintf('Base URL   : "%s"', $baseURL));
-        Log::debug(sprintf('Vanity URL : "%s"', $vanityURL));
-
-        if ('' === $accessToken && '' === $refreshToken && '' === $baseURL) {
-            Log::debug('No access token cookie, redirect to token.index');
+        // global methods to get these values, from cookies or configuration.
+        // it's up to the manager to provide them.
+        // if invalid values, redirect to token index.
+        $validInfo = SecretManager::hasValidSecrets();
+        if (!$validInfo) {
+            Log::debug('No valid secrets, redirect to token.index');
             return redirect(route('token.index'));
         }
-        Log::debug('Has access token cookie.');
 
         // display to user the method of authentication
         $pat = false;
-        if ('' !== (string) env('FIREFLY_III_ACCESS_TOKEN')) {
+        if ('' !== (string) config('importer.access_token')) {
             $pat = true;
         }
         $clientIdWithURL = false;
-        if ('' !== (string) env('FIREFLY_III_URL') && '' !== (string) env('FIREFLY_III_CLIENT_ID')) {
+        if ('' !== (string) config('importer.url') && '' !== (string) config('importer.client_id')) {
             $clientIdWithURL = true;
         }
         $URLonly = false;
-        if ('' !== (string) env('FIREFLY_III_URL') && '' === (string) env('FIREFLY_III_CLIENT_ID') && '' === (string) env('FIREFLY_III_ACCESS_TOKEN')
+        if ('' !== (string) config('importer.url') && '' === (string) config('importer.client_id') && '' === (string) config('importer.access_token')
         ) {
             $URLonly = true;
         }
         $flexible = false;
-        if ('' === (string) env('FIREFLY_III_URL') && '' === (string) env('FIREFLY_III_CLIENT_ID')) {
+        if ('' === (string) config('importer.url') && '' === (string) config('importer.client_id')) {
             $flexible = true;
         }
-
 
         return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible'));
     }
@@ -117,9 +112,9 @@ class IndexController extends Controller
         Artisan::call('cache:clear');
 
         $cookies = [
-            cookie('access_token', ''),
-            cookie('base_url', ''),
-            cookie('refresh_token', ''),
+            SecretManager::saveAccessToken(''),
+            SecretManager::saveBaseUrl(''),
+            SecretManager::saveRefreshToken(''),
             cookie(Constants::FLOW_COOKIE, ''),
         ];
 

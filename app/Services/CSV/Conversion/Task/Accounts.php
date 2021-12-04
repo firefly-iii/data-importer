@@ -27,6 +27,7 @@ namespace App\Services\CSV\Conversion\Task;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Conversion\Support\DeterminesTransactionType;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiException;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException as GrumpyApiHttpException;
@@ -291,8 +292,8 @@ class Accounts extends AbstractTask
     private function findById(string $value): ?Account
     {
         Log::debug(sprintf('Going to search account with ID "%s"', $value));
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -332,8 +333,8 @@ class Accounts extends AbstractTask
     private function findByIban(string $iban, string $transactionType): ?Account
     {
         Log::debug(sprintf('Going to search account with IBAN "%s"', $iban));
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -401,8 +402,8 @@ class Accounts extends AbstractTask
     private function findByName(string $name): ?Account
     {
         Log::debug(sprintf('Going to search account with name "%s"', $name));
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));

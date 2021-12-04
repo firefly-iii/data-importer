@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Budget;
@@ -46,8 +47,8 @@ class Budgets implements MapperInterface
     public function getMap(): array
     {
         $result  = [];
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetBudgetsRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));

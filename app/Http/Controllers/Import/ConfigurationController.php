@@ -30,6 +30,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
@@ -83,7 +84,7 @@ class ConfigurationController extends Controller
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
         $accounts  = [];
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
 
         // create configuration:
         $configuration = $this->restoreConfiguration();
@@ -96,8 +97,8 @@ class ConfigurationController extends Controller
         }
 
         // get list of asset accounts:
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
         $request->setVerify(config('importer.connection.verify'));
@@ -110,8 +111,8 @@ class ConfigurationController extends Controller
         }
 
         // also get liabilities
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetAccountsRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));

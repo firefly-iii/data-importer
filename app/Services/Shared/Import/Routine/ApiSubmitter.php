@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Import\Status\ProgressInformation;
 use App\Support\Token;
@@ -105,8 +106,8 @@ class ApiSubmitter
 
             return;
         }
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -201,8 +202,8 @@ class ApiSubmitter
 
         Log::debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
 
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetSearchTransactionsRequest($url, $token);
         $request->setQuery($query);
         try {
@@ -232,8 +233,8 @@ class ApiSubmitter
     {
         $line    = $this->replaceMappings($line);
         $return  = [];
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new PostTransactionRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -431,8 +432,8 @@ class ApiSubmitter
                     'tags'                   => $currentTags,
                 ];
         }
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new PutTransactionRequest($url, $token, $groupId);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));

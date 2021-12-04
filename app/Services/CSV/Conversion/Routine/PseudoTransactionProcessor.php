@@ -26,6 +26,7 @@ namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Conversion\Task\AbstractTask;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
@@ -71,8 +72,8 @@ class PseudoTransactionProcessor
      */
     private function getDefaultAccount(?int $accountId): void
     {
-        $url   = Token::getURL();
-        $token = Token::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
 
         if (null !== $accountId) {
             $accountRequest = new GetAccountRequest($url, $token);
@@ -95,8 +96,8 @@ class PseudoTransactionProcessor
      */
     private function getDefaultCurrency(): void
     {
-        $url   = Token::getURL();
-        $token = Token::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
 
         $prefRequest = new GetPreferenceRequest($url, $token);
         $prefRequest->setVerify(config('importer.connection.verify'));
