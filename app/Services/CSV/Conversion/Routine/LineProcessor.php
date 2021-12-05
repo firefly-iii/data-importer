@@ -125,13 +125,13 @@ class LineProcessor
             Log::debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
             $role        = $this->getRoleForColumn($columnIndex, $mapped);
-            $appendValue = config(sprintf('csv_importer.import_roles.%s.append_value', $originalRole));
+            $appendValue = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
 
             if (null === $appendValue) {
                 $appendValue = false;
             }
 
-            Log::debug(sprintf('Append value config: %s', sprintf('csv_importer.import_roles.%s.append_value', $originalRole)));
+            Log::debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
             $columnValue = new ColumnValue;
             $columnValue->setValue($value);

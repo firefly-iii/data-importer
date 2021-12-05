@@ -197,7 +197,7 @@ class ApiSubmitter
     private function searchField(string $field, string $value): int
     {
         // search for the exact description and not just a part of it:
-        $searchModifier = config(sprintf('csv_importer.search_modifier.%s', $field));
+        $searchModifier = config(sprintf('csv.search_modifier.%s', $field));
         $query          = sprintf('%s:"%s"', $searchModifier, $value);
 
         Log::debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));

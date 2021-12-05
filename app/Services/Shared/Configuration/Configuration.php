@@ -331,7 +331,7 @@ class Configuration
             // some roles have been given a new name some time in the past.
             $role = $classicRoleNames[$role] ?? $role;
 
-            $config = config(sprintf('csv_importer.import_roles.%s', $role));
+            $config = config(sprintf('csv.import_roles.%s', $role));
             if (null !== $config) {
                 $object->roles[] = $role;
             }
