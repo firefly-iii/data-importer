@@ -206,7 +206,7 @@ class GenerateTransactions
 
         $return = [
             'apply_rules'             => $this->configuration->isRules(),
-            'error_if_duplicate_hash' => !$this->configuration->isIgnoreDuplicateTransactions(),
+            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [
                 [
                     'type'          => 'withdrawal', // reverse
