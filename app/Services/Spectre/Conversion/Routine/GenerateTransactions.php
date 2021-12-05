@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Conversion\Routine;
 
 
-use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -63,10 +63,8 @@ class GenerateTransactions
     {
         Log::debug('Going to collect all target accounts from Firefly III.');
         // send account list request to Firefly III.
-        // TODO can only handle access token config
-        $token = (string) config('importer.access_token');
-        $url   = (string) config('importer.url');
-
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
         $request = new GetAccountsRequest($url, $token);
         /** @var GetAccountsResponse $result */
         $result = $request->get();
@@ -79,7 +77,7 @@ class GenerateTransactions
                 continue;
             }
             $iban = $entry->iban;
-            if ('' === (string) $iban) {
+            if ('' === (string)$iban) {
                 continue;
             }
             Log::debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
@@ -120,7 +118,7 @@ class GenerateTransactions
         $spectreAccountId = $entry['account_id'];
         // add info to the description:
         if (array_key_exists('extra', $entry) && array_key_exists('additional', $entry['extra'])) {
-            $description = trim(sprintf('%s %s', $description, (string) $entry['extra']['additional']));
+            $description = trim(sprintf('%s %s', $description, (string)$entry['extra']['additional']));
         }
 
         $return = [
@@ -156,7 +154,7 @@ class GenerateTransactions
             $return['transactions'][0]['amount'] = $entry['amount'];
 
             // destination is Spectre
-            $return['transactions'][0]['destination_id'] = (int) $this->accounts[$spectreAccountId];
+            $return['transactions'][0]['destination_id'] = (int)$this->accounts[$spectreAccountId];
 
             // source is the other side:
             $return['transactions'][0]['source_name'] = $entry['extra']['payee'] ?? '(unknown source account)';
@@ -168,7 +166,7 @@ class GenerateTransactions
             $return['transactions'][0]['amount'] = bcmul($entry['amount'], '-1');
 
             // source is Spectre:
-            $return['transactions'][0]['source_id'] = (int) $this->accounts[$spectreAccountId];
+            $return['transactions'][0]['source_id'] = (int)$this->accounts[$spectreAccountId];
             // dest is shop
             $return['transactions'][0]['destination_name'] = $entry['extra']['payee'] ?? '(unknown destination account)';
 

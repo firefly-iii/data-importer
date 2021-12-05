@@ -30,6 +30,7 @@ use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Cache;
@@ -75,12 +76,13 @@ class GenerateTransactions
             $info                 = Cache::get('collect_target_accounts');
             $this->targetAccounts = $info['accounts'];
             $this->targetTypes    = $info['types'];
+
             return;
         }
         Log::debug('Going to collect all target accounts from Firefly III.');
         // send account list request to Firefly III.
-        $token   = (string) config('importer.access_token');
-        $url     = (string) config('importer.url');
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
         $request = new GetAccountsRequest($url, $token);
         /** @var GetAccountsResponse $result */
         $result = $request->get();
@@ -93,7 +95,7 @@ class GenerateTransactions
                 continue;
             }
             $iban = $entry->iban;
-            if ('' === (string) $iban) {
+            if ('' === (string)$iban) {
                 continue;
             }
             Log::debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
@@ -124,6 +126,7 @@ class GenerateTransactions
         if (config('importer.use_cache') && Cache::has('collect_nordigen_accounts')) {
             Log::debug('Grab Nordigen accounts from cache.');
             $this->nordigenAccountInfo = Cache::get('collect_nordigen_accounts');
+
             return;
         }
         $url         = config('nordigen.url');
@@ -185,6 +188,7 @@ class GenerateTransactions
         }
         $this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
         Log::debug('Done parsing transactions.');
+
         return $return;
     }
 
@@ -193,6 +197,7 @@ class GenerateTransactions
      *
      * @param string      $accountId
      * @param Transaction $entry
+     *
      * @return array
      */
     private function generateTransaction(string $accountId, Transaction $entry): array
@@ -229,7 +234,7 @@ class GenerateTransactions
             $return['transactions'][0]['amount'] = $entry->transactionAmount;
 
             // destination is a Nordigen account
-            $return['transactions'][0]['destination_id'] = (int) $this->accounts[$accountId];
+            $return['transactions'][0]['destination_id'] = (int)$this->accounts[$accountId];
 
             // source iban valid?
             $sourceIban = $entry->getSourceIban() ?? '';
@@ -278,7 +283,7 @@ class GenerateTransactions
 
             // source is a Nordigen account
             // TODO entry may not exist, then what?
-            $return['transactions'][0]['source_id'] = (int) $this->accounts[$accountId];
+            $return['transactions'][0]['source_id'] = (int)$this->accounts[$accountId];
 
             // destination iban valid?
             $destinationIban = $entry->getDestinationIban() ?? '';
@@ -336,7 +341,7 @@ class GenerateTransactions
     private function getMappedAccountId(string $name): ?int
     {
         if (isset($this->configuration->getMapping()['accounts'][$name])) {
-            return (int) $this->configuration->getMapping()['accounts'][$name];
+            return (int)$this->configuration->getMapping()['accounts'][$name];
         }
 
         return null;
@@ -374,8 +379,8 @@ class GenerateTransactions
      */
     private function getAccountType(int $accountId): string
     {
-        $url   = (string) config('importer.url');
-        $token = (string) config('importer.access_token');
+        $token = SecretManager::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
         app('log')->debug(sprintf('Going to download account #%d', $accountId));
         $request = new GetAccountRequest($url, $token);
         $request->setId($accountId);
