@@ -99,7 +99,7 @@ class StorageService
             Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
             return $content;
         }
-        if ('ASCII' === $encoding) {
+        if ('ASCII' === $encoding || 'UTF-8' === $encoding) {
             return $content;
         }
         Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));

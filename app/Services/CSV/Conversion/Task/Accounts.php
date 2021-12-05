@@ -86,8 +86,9 @@ class Accounts extends AbstractTask
         $transaction         = $this->setSource($transaction, $source);
         $transaction         = $this->setDestination($transaction, $destination);
         $transaction['type'] = $this->determineType($source['type'], $destination['type']);
+        Log::debug(sprintf('Transaction type is set to "%s"', $transaction['type']));
 
-        $amount = (string) $transaction['amount'];
+        $amount = (string)$transaction['amount'];
         $amount = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
@@ -97,17 +98,25 @@ class Accounts extends AbstractTask
         /*
          * If the amount is positive, the transaction is a deposit. We switch Source
          * and Destination and see if we can still handle the transaction, but only if the transaction
-         * isn't already a deposit
+         * isn't already a deposit.
+         *
+         *
          */
         if ('deposit' !== $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
-            Log::debug(sprintf('%s is positive.', $amount));
+            Log::debug(sprintf('%s is positive and type is "%s".', $amount, $transaction['type']));
             $transaction         = $this->setSource($transaction, $destination);
             $transaction         = $this->setDestination($transaction, $source);
             $transaction['type'] = $this->determineType($destination['type'], $source['type']);
         }
+
         if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             Log::debug('Transaction is a deposit, and amount is positive. Will not change account types.');
+        }
+        if ('transfer' === $transaction['type'] && 1 === bccomp($amount, '0')) {
+            Log::debug('Transaction is a transfer, and amount is positive, must reverse accounts again.');
+            $transaction = $this->setSource($transaction, $source);
+            $transaction = $this->setDestination($transaction, $destination);
         }
 
         /*
@@ -212,7 +221,7 @@ class Accounts extends AbstractTask
         // if the ID is set, at least search for the ID.
         if (is_int($array['id']) && $array['id'] > 0) {
             Log::debug('Find by ID field.');
-            $result = $this->findById((string) $array['id']);
+            $result = $this->findById((string)$array['id']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -222,10 +231,10 @@ class Accounts extends AbstractTask
         }
 
         // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string) $array['iban']) {
+        if (isset($array['iban']) && '' !== (string)$array['iban']) {
             Log::debug('Find by IBAN.');
-            $transactionType = (string) ($array['transaction_type'] ?? null);
-            $result          = $this->findByIban((string) $array['iban'], $transactionType);
+            $transactionType = (string)($array['transaction_type'] ?? null);
+            $result          = $this->findByIban((string)$array['iban'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -239,9 +248,9 @@ class Accounts extends AbstractTask
 
 
         // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string) $array['name']) {
+        if (isset($array['name']) && '' !== (string)$array['name']) {
             Log::debug('Find by name.');
-            $result = $this->findByName((string) $array['name']);
+            $result = $this->findByName((string)$array['name']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -257,14 +266,14 @@ class Accounts extends AbstractTask
         $array['bic']  = $array['bic'] ?? null;
 
         // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string) $array['name']) {
+        if (null !== $array['id'] || '' !== (string)$array['name']) {
             Log::debug('Array with account has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
-        if (null !== $array['id'] || '' !== (string) $array['iban']) {
+        if (null !== $array['id'] || '' !== (string)$array['iban']) {
             Log::debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;
@@ -385,6 +394,7 @@ class Accounts extends AbstractTask
 
         if (2 === count($response)) {
             Log::debug('Found 2 results, Firefly III will have to make the correct decision.');
+
             return null;
         }
         Log::debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
@@ -421,7 +431,8 @@ class Accounts extends AbstractTask
         }
         /** @var Account $account */
         foreach ($response as $account) {
-            if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true) && strtolower($account->name) === strtolower($name)) {
+            if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
+                && strtolower($account->name) === strtolower($name)) {
                 Log::debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
 
                 return $account;
