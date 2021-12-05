@@ -127,7 +127,7 @@ class TransactionProcessor
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 
-            if (null !== $this->notBefore && $madeOn->lte($this->notBefore)) {
+            if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
                 app('log')->info(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
@@ -137,7 +137,7 @@ class TransactionProcessor
                 );
                 continue;
             }
-            if (null !== $this->notAfter && $madeOn->gte($this->notAfter)) {
+            if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
                 app('log')->info(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
