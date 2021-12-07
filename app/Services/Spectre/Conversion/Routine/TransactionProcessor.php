@@ -116,19 +116,19 @@ class TransactionProcessor
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        Log::debug(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        Log::info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            Log::debug(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            Log::debug(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->info(
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -138,7 +138,7 @@ class TransactionProcessor
                 continue;
             }
             if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
-                app('log')->info(
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -148,10 +148,10 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->info(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
             $return[] = $transaction->toArray();
         }
-        Log::debug(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        Log::info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }
