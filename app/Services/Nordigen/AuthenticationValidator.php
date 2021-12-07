@@ -27,6 +27,7 @@ namespace App\Services\Nordigen;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
+use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
@@ -40,23 +41,15 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     use IsRunningCli;
 
-
     /**
      * @inheritDoc
      */
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier = config('nordigen.id');
-        $key        = config('nordigen.key');
 
-        if ('' === $identifier && !$this->isCli()) {
-            $identifier = (string) session()->get(Constants::SESSION_NORDIGEN_ID);
-        }
-        if ('' === $key && !$this->isCli()) {
-            $key = (string) session()->get(Constants::SESSION_NORDIGEN_KEY);
-        }
-
+        $identifier = SecretManager::getId();
+        $key        = SecretManager::getKey();
 
         if ('' === $identifier || '' === $key) {
             return AuthenticationStatus::nodata();

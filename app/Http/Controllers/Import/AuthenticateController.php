@@ -30,6 +30,8 @@ use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
+use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
 use Log;
@@ -54,9 +56,9 @@ class AuthenticateController extends Controller
         $mainTitle = 'Auth';
         $pageTitle = 'Auth';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $subTitle  = ucfirst($flow);
 
         if ('spectre' === $flow) {
-            $subTitle  = 'Spectre';
             $validator = new SpectreValidator;
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
@@ -69,7 +71,6 @@ class AuthenticateController extends Controller
         }
 
         if ('nordigen' === $flow) {
-            $subTitle  = 'Nordigen';
             $validator = new NordigenValidator;
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
@@ -101,9 +102,13 @@ class AuthenticateController extends Controller
                 // todo show error
                 return redirect(route('002-authenticate.index'));
             }
+            // give to secret manager to store:
+            SpectreSecretManager::storeSpectreAppId($appId);
+            SpectreSecretManager::storeSpectreSecret($secret);
+
             // store ID and key in session:
-            session()->put(Constants::SESSION_SPECTRE_APP_ID, $appId);
-            session()->put(Constants::SESSION_SPECTRE_SECRET, $secret);
+//            session()->put(Constants::SESSION_SPECTRE_APP_ID, $appId);
+//            session()->put(Constants::SESSION_SPECTRE_SECRET, $secret);
             return redirect(route('002-authenticate.index'));
         }
         if ('nordigen' === $flow) {
@@ -114,10 +119,12 @@ class AuthenticateController extends Controller
                 return redirect(route('002-authenticate.index'));
             }
             // store ID and key in session:
-            session()->put(Constants::SESSION_NORDIGEN_ID, $identifier);
-            session()->put(Constants::SESSION_NORDIGEN_KEY, $key);
+            $cookies = [
+            NordigenSecretManager::saveId($identifier),
+            NordigenSecretManager::saveKey($key),
+            ];
 
-            return redirect(route('002-authenticate.index'));
+            return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
 
         throw new ImporterErrorException('Impossible flow exception.');

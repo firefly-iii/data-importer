@@ -23,7 +23,93 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Authentication;
 
+use Log;
+use Symfony\Component\HttpFoundation\Cookie;
+
+/**
+ * Class SecretManager
+ */
 class SecretManager
 {
+    public const NORDIGEN_ID  = 'nordigen_id';
+    public const NORDIGEN_KEY = 'nordigen_key';
+
+
+    /**
+     * Will verify if the user has a Nordigen ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasId(): bool
+    {
+        return '' !== (string) request()->cookie(self::NORDIGEN_ID);
+    }
+
+    /**
+     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     *
+     * @return string
+     */
+    public static function getId(): string
+    {
+        if (!self::hasId()) {
+            Log::debug('No Nordigen ID in hasId(), will return config variable.');
+            return (string) config('nordigen.id');
+
+        }
+        return request()->cookie(self::NORDIGEN_ID);
+    }
+
+
+    /**
+     * Will verify if the user has a Nordigen Key (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasKey(): bool
+    {
+        return '' !== (string) request()->cookie(self::NORDIGEN_KEY);
+    }
+
+    /**
+     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     *
+     * @return string
+     */
+    public static function getKey(): string
+    {
+        if (!self::hasKey()) {
+            Log::debug('No Nordigen key in hasKey(), will return config variable.');
+            return (string) config('nordigen.key');
+
+        }
+        return request()->cookie(self::NORDIGEN_KEY);
+    }
+
+    /**
+     * Store access token in a cookie.
+     * TODO is a cookie the best place?
+     *
+     * @param string $identifier
+     * @return Cookie
+     */
+    public static function saveId(string $identifier): Cookie
+    {
+        return cookie(self::NORDIGEN_ID, $identifier);
+    }
+
+    /**
+     * Store access token in a cookie.
+     * TODO is a cookie the best place?
+     *
+     * @param string $key
+     * @return Cookie
+     */
+    public static function saveKey(string $key): Cookie
+    {
+        return cookie(self::NORDIGEN_KEY, $key);
+    }
 
 }

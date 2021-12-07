@@ -27,6 +27,7 @@ namespace App\Services\Spectre;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
+use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
@@ -46,6 +47,9 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
      */
     public function validate(): AuthenticationStatus
     {
+        die('must validate nordigen using secret manager');
+//        SecretManager::getUrl();
+
         $url    = config('spectre.url');
         $appId  = config('spectre.app_id');
         $secret = config('spectre.secret');

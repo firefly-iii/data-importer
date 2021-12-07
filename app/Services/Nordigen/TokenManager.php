@@ -26,6 +26,7 @@ namespace App\Services\Nordigen;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Nordigen\Request\PostNewTokenRequest;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
@@ -72,9 +73,8 @@ class TokenManager
 
         // get complete set!
         try {
-            // TODO use cookie values
-            $identifier = config('nordigen.id');
-            $key        = config('nordigen.key');
+            $identifier = SecretManager::getId();
+            $key        = SecretManager::getKey();
             self::getNewTokenSet($identifier, $key);
         } catch (ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
