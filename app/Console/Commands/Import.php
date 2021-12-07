@@ -30,7 +30,6 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
-use Log;
 
 /**
  * Class Import
@@ -71,14 +70,14 @@ class Import extends Command
         }
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         $file   = (string) $this->argument('file');
         $config = (string) $this->argument('config');
 
         if (!file_exists($config) || (file_exists($config) && !is_file($config))) {
             $message = sprintf('The importer can\'t import: configuration file "%s" does not exist or could not be read.', $config);
             $this->error($message);
-            Log::error($message);
+            app('log')->error($message);
 
             return 1;
         }
@@ -95,7 +94,7 @@ class Import extends Command
         if ('csv' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
             $message = sprintf('The importer can\'t import: CSV file "%s" does not exist or could not be read.', $file);
             $this->error($message);
-            Log::error($message);
+            app('log')->error($message);
 
             return 1;
         }

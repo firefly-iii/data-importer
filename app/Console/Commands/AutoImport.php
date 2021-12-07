@@ -29,7 +29,6 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Console\Command;
-use Log;
 
 /**
  * Class AutoImport
@@ -81,7 +80,7 @@ class AutoImport extends Command
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
 
