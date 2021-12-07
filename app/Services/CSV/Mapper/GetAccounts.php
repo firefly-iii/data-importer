@@ -30,7 +30,6 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
-use Log;
 
 /**
  * Trait GetAccounts
@@ -60,8 +59,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
 
@@ -114,8 +113,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
         }
 
@@ -137,8 +136,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
         }
 

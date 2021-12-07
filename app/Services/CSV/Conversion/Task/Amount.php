@@ -25,8 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Task;
 
-use Log;
-
 /**
  * Class Amount
  */
@@ -53,25 +51,25 @@ class Amount extends AbstractTask
      */
     private function processAmount(array $transaction): array
     {
-        Log::debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
+        app('log')->debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
         $amount = null;
         if (null === $amount && $this->validAmount((string) $transaction['amount'])) {
-            Log::debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
+            app('log')->debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_debit'])) {
-            Log::debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
+            app('log')->debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
             $amount = $transaction['amount_debit'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_credit'])) {
-            Log::debug(sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit']));
+            app('log')->debug(sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit']));
             $amount = $transaction['amount_credit'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_negated'])) {
-            Log::debug(sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated']));
+            app('log')->debug(sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated']));
             $amount = $transaction['amount_negated'];
         }
 
@@ -83,19 +81,19 @@ class Amount extends AbstractTask
         }
         $amount = (string) $amount;
         if ('' === $amount) {
-            Log::error('Amount is EMPTY. This will give problems further ahead.', $transaction);
+            app('log')->error('Amount is EMPTY. This will give problems further ahead.', $transaction);
 
             return $transaction;
         }
         // modify amount:
         $amount = bcmul($amount, $transaction['amount_modifier']);
 
-        Log::debug(sprintf('Amount is now %s.', $amount));
+        app('log')->debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
         if (isset($transaction['foreign_amount']) && null !== $transaction['foreign_amount']) {
             $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
-            Log::debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
+            app('log')->debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }
 
         // unset those fields:
@@ -104,11 +102,11 @@ class Amount extends AbstractTask
 
         // depending on pos or min, also pre-set the expected type.
         if (1 === bccomp('0', $amount)) {
-            Log::debug(sprintf('Amount %s is negative, so this is probably a withdrawal.', $amount));
+            app('log')->debug(sprintf('Amount %s is negative, so this is probably a withdrawal.', $amount));
             $transaction['type'] = 'withdrawal';
         }
         if (-1 === bccomp('0', $amount)) {
-            Log::debug(sprintf('Amount %s is positive, so this is probably a deposit.', $amount));
+            app('log')->debug(sprintf('Amount %s is positive, so this is probably a deposit.', $amount));
             $transaction['type'] = 'deposit';
         }
         return $transaction;

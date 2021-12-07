@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Support;
 
-use Log;
-
 /**
  * Trait DeterminesTransactionType
  */
@@ -40,27 +38,27 @@ trait DeterminesTransactionType
      */
     protected function determineType(?string $sourceType, ?string $destinationType): string
     {
-        Log::debug(sprintf('Now in determineType::determineType("%s", "%s")', $sourceType, $destinationType));
+        app('log')->debug(sprintf('Now in determineType::determineType("%s", "%s")', $sourceType, $destinationType));
         if (null === $sourceType && null === $destinationType) {
-            Log::debug('Return withdrawal, both are NULL');
+            app('log')->debug('Return withdrawal, both are NULL');
 
             return 'withdrawal';
         }
         if ('revenue' === $sourceType) {
-            Log::debug('Return deposit, source is a revenue account.');
+            app('log')->debug('Return deposit, source is a revenue account.');
 
             return 'deposit';
         }
 
         // if source is a asset and dest is NULL, its a withdrawal
         if ('asset' === $sourceType && null === $destinationType) {
-            Log::debug('Return withdrawal, source is asset');
+            app('log')->debug('Return withdrawal, source is asset');
 
             return 'withdrawal';
         }
         // if destination is asset and source is NULL, its a deposit
         if (null === $sourceType && 'asset' === $destinationType) {
-            Log::debug('Return deposit, destination is asset');
+            app('log')->debug('Return deposit, destination is asset');
 
             return 'deposit';
         }
@@ -68,7 +66,7 @@ trait DeterminesTransactionType
         $key   = sprintf('transaction_types.account_to_transaction.%s.%s', $sourceType, $destinationType);
         $type  = config($key);
         $value = $type ?? 'withdrawal';
-        Log::debug(sprintf('Check config for "%s" and found "%s". Returning "%s"', $key, $type, $value));
+        app('log')->debug(sprintf('Check config for "%s" and found "%s". Returning "%s"', $key, $type, $value));
 
         return $value;
     }

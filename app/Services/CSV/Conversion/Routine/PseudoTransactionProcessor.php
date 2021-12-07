@@ -37,7 +37,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetPreferenceRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PreferenceResponse;
-use Log;
 
 /**
  * Class PseudoTransactionProcessor
@@ -83,7 +82,7 @@ class PseudoTransactionProcessor
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
-                Log::error($e->getMessage());
+                app('log')->error($e->getMessage());
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
             $this->defaultAccount = $result->getAccount();
@@ -107,7 +106,7 @@ class PseudoTransactionProcessor
             /** @var PreferenceResponse $response */
             $response = $prefRequest->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             throw new ImporterErrorException('Could not load the users currency preference.');
         }
         $code            = $response->getPreference()->data ?? 'EUR';
@@ -120,7 +119,7 @@ class PseudoTransactionProcessor
             $result                = $currencyRequest->get();
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             throw new ImporterErrorException(sprintf('The default currency ("%s") could not be loaded.', $code));
         }
     }
@@ -132,17 +131,17 @@ class PseudoTransactionProcessor
      */
     public function processPseudo(array $lines): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         $count     = count($lines);
         $processed = [];
-        Log::info(sprintf('Converting %d lines into transactions.', $count));
+        app('log')->info(sprintf('Converting %d lines into transactions.', $count));
         /** @var array $line */
         foreach ($lines as $index => $line) {
-            Log::info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
+            app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
             $processed[] = $this->processPseudoLine($line);
             $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
         }
-        Log::info(sprintf('Done converting %d lines into transactions.', $count));
+        app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
 
         return $processed;
 
@@ -155,11 +154,11 @@ class PseudoTransactionProcessor
      */
     private function processPseudoLine(array $line): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         foreach ($this->tasks as $task) {
             /** @var AbstractTask $object */
             $object = app($task);
-            Log::debug(sprintf('Now running task %s', $task));
+            app('log')->debug(sprintf('Now running task %s', $task));
 
             if ($object->requiresDefaultAccount()) {
                 $object->setAccount($this->defaultAccount);
@@ -170,7 +169,7 @@ class PseudoTransactionProcessor
 
             $line = $object->process($line);
         }
-        Log::debug('Final transaction: ', $line);
+        app('log')->debug('Final transaction: ', $line);
 
         return $line;
     }

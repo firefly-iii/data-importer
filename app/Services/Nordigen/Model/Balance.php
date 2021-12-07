@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Model;
 
-use Log;
-
 /**
  * Class Balance
  */
@@ -43,7 +41,7 @@ class Balance
      */
     public static function createFromArray(array $data): self
     {
-        Log::debug('Create Balance from array', $data);
+        app('log')->debug('Create Balance from array', $data);
         $self                     = new self;
         $self->amount             = $data['balanceAmount']['amount'];
         $self->currency           = $data['balanceAmount']['currency'];
@@ -52,7 +50,7 @@ class Balance
         $self->lastChangeDateTime = $data['lastChangeDateTime'] ?? '';
 
         if ('' === $self->date && '' === $self->lastChangeDateTime) {
-            Log::warning('Balance has invalid date!');
+            app('log')->warning('Balance has invalid date!');
         }
         return $self;
     }

@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Specifics;
 
-use Log;
-
 /**
  * Class IngDescription.
  *
@@ -108,7 +106,7 @@ class IngDescription implements SpecificInterface
      */
     protected function removeIBANIngDescription(): void
     {
-        Log::debug('Remove IBAN.');
+        app('log')->debug('Remove IBAN.');
         // Try replace the iban number with nothing. The IBAN nr is found in the third column
         $this->row[8] = preg_replace('/\sIBAN:\s' . $this->row[3] . '/', '', $this->row[8]);
     }
@@ -118,7 +116,7 @@ class IngDescription implements SpecificInterface
      */
     protected function removeNameIngDescription(): void
     {
-        Log::debug('Remove Naam.');
+        app('log')->debug('Remove Naam.');
         $this->row[8] = preg_replace('/Naam:.*?([a-zA-Z\/]+:)/', '$1', $this->row[8]);
     }
 
@@ -127,7 +125,7 @@ class IngDescription implements SpecificInterface
      */
     protected function removeIngDescription(): void
     {
-        Log::debug('Remove "Omschrijving:"');
+        app('log')->debug('Remove "Omschrijving:"');
         $this->row[8] = preg_replace('/Omschrijving: /', '', $this->row[8] ?? '');
     }
 

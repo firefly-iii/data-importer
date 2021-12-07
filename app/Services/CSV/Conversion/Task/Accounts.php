@@ -34,7 +34,6 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\AccountType;
 use GrumpyDictator\FFIIIApiSupport\Request\GetSearchAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
-use Log;
 
 /**
  * Class Accounts
@@ -50,10 +49,10 @@ class Accounts extends AbstractTask
      */
     public function process(array $group): array
     {
-        Log::debug('Now in Accounts::process()');
+        app('log')->debug('Now in Accounts::process()');
         $total = count($group['transactions']);
         foreach ($group['transactions'] as $index => $transaction) {
-            Log::debug(sprintf('Now processing transaction %d of %d', $index + 1, $total));
+            app('log')->debug(sprintf('Now processing transaction %d of %d', $index + 1, $total));
             $group['transactions'][$index] = $this->processTransaction($transaction);
         }
 
@@ -67,7 +66,7 @@ class Accounts extends AbstractTask
      */
     private function processTransaction(array $transaction): array
     {
-        Log::debug('Now in Accounts::processTransaction()');
+        app('log')->debug('Now in Accounts::processTransaction()');
 
         /*
          * Try to find the source and destination accounts in the transaction.
@@ -86,13 +85,13 @@ class Accounts extends AbstractTask
         $transaction         = $this->setSource($transaction, $source);
         $transaction         = $this->setDestination($transaction, $destination);
         $transaction['type'] = $this->determineType($source['type'], $destination['type']);
-        Log::debug(sprintf('Transaction type is set to "%s"', $transaction['type']));
+        app('log')->debug(sprintf('Transaction type is set to "%s"', $transaction['type']));
 
-        $amount = (string)$transaction['amount'];
+        $amount = (string) $transaction['amount'];
         $amount = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
-            Log::error('Amount is ZERO. This will give trouble further down the line.');
+            app('log')->error('Amount is ZERO. This will give trouble further down the line.');
         }
 
         /*
@@ -104,17 +103,17 @@ class Accounts extends AbstractTask
          */
         if ('deposit' !== $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
-            Log::debug(sprintf('%s is positive and type is "%s".', $amount, $transaction['type']));
+            app('log')->debug(sprintf('%s is positive and type is "%s".', $amount, $transaction['type']));
             $transaction         = $this->setSource($transaction, $destination);
             $transaction         = $this->setDestination($transaction, $source);
             $transaction['type'] = $this->determineType($destination['type'], $source['type']);
         }
 
         if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0')) {
-            Log::debug('Transaction is a deposit, and amount is positive. Will not change account types.');
+            app('log')->debug('Transaction is a deposit, and amount is positive. Will not change account types.');
         }
         if ('transfer' === $transaction['type'] && 1 === bccomp($amount, '0')) {
-            Log::debug('Transaction is a transfer, and amount is positive, must reverse accounts again.');
+            app('log')->debug('Transaction is a transfer, and amount is positive, must reverse accounts again.');
             $transaction = $this->setSource($transaction, $source);
             $transaction = $this->setDestination($transaction, $destination);
         }
@@ -124,8 +123,8 @@ class Accounts extends AbstractTask
          * we found the wrong one. Just submit the name and hope for the best.
          */
         if ('revenue' === $destination['type'] && 'withdrawal' === $transaction['type']) {
-            Log::warning('The found destination account is of type revenue but this is a withdrawal. Out of cheese error.');
-            Log::debug(
+            app('log')->warning('The found destination account is of type revenue but this is a withdrawal. Out of cheese error.');
+            app('log')->debug(
                 sprintf('Data importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $destination['name'], $destination['iban'])
             );
             $transaction['destination_id']   = null;
@@ -139,8 +138,8 @@ class Accounts extends AbstractTask
          * Submit just the name.
          */
         if ('expense' === $source['type'] && 'deposit' === $transaction['type']) {
-            Log::warning('The found source account is of type expense but this is a deposit. Out of cheese error.');
-            Log::debug(sprintf('Data importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $source['name'], $source['iban']));
+            app('log')->warning('The found source account is of type expense but this is a deposit. Out of cheese error.');
+            app('log')->debug(sprintf('Data importer will submit name "%s" and IBAN "%s" and let Firefly III sort it out.', $source['name'], $source['iban']));
             $transaction['source_id']   = null;
             $transaction['source_name'] = $source['name'];
             $transaction['source_iban'] = $source['iban'];
@@ -209,36 +208,36 @@ class Accounts extends AbstractTask
      */
     private function findAccount(array $array, ?Account $defaultAccount): array
     {
-        Log::debug('Now in findAccount', $array);
+        app('log')->debug('Now in findAccount', $array);
         if (null === $defaultAccount) {
-            Log::debug('findAccount() default account is NULL.');
+            app('log')->debug('findAccount() default account is NULL.');
         }
         if (null !== $defaultAccount) {
-            Log::debug(sprintf('Default account is #%d ("%s")', $defaultAccount->id, $defaultAccount->name));
+            app('log')->debug(sprintf('Default account is #%d ("%s")', $defaultAccount->id, $defaultAccount->name));
         }
 
         $result = null;
         // if the ID is set, at least search for the ID.
         if (is_int($array['id']) && $array['id'] > 0) {
-            Log::debug('Find by ID field.');
-            $result = $this->findById((string)$array['id']);
+            app('log')->debug('Find by ID field.');
+            $result = $this->findById((string) $array['id']);
         }
         if (null !== $result) {
             $return = $result->toArray();
-            Log::debug('Result of findById is not null, returning:', $return);
+            app('log')->debug('Result of findById is not null, returning:', $return);
 
             return $return;
         }
 
         // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string)$array['iban']) {
-            Log::debug('Find by IBAN.');
-            $transactionType = (string)($array['transaction_type'] ?? null);
-            $result          = $this->findByIban((string)$array['iban'], $transactionType);
+        if (isset($array['iban']) && '' !== (string) $array['iban']) {
+            app('log')->debug('Find by IBAN.');
+            $transactionType = (string) ($array['transaction_type'] ?? null);
+            $result          = $this->findByIban((string) $array['iban'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
-            Log::debug('Result of findByIBAN is not null, returning:', $return);
+            app('log')->debug('Result of findByIBAN is not null, returning:', $return);
 
             return $return;
         }
@@ -248,33 +247,33 @@ class Accounts extends AbstractTask
 
 
         // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string)$array['name']) {
-            Log::debug('Find by name.');
-            $result = $this->findByName((string)$array['name']);
+        if (isset($array['name']) && '' !== (string) $array['name']) {
+            app('log')->debug('Find by name.');
+            $result = $this->findByName((string) $array['name']);
         }
         if (null !== $result) {
             $return = $result->toArray();
-            Log::debug('Result of findByName is not null, returning:', $return);
+            app('log')->debug('Result of findByName is not null, returning:', $return);
 
             return $return;
         }
 
-        Log::debug('Found no account or haven\'t searched for one.');
+        app('log')->debug('Found no account or haven\'t searched for one.');
 
         // append an empty type to the array for consistency's sake.
         $array['type'] = $array['type'] ?? null;
         $array['bic']  = $array['bic'] ?? null;
 
         // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string)$array['name']) {
-            Log::debug('Array with account has some name info, return that.', $array);
+        if (null !== $array['id'] || '' !== (string) $array['name']) {
+            app('log')->debug('Array with account has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
-        if (null !== $array['id'] || '' !== (string)$array['iban']) {
-            Log::debug('Array with account has some IBAN info, return that.', $array);
+        if (null !== $array['id'] || '' !== (string) $array['iban']) {
+            app('log')->debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;
         }
@@ -282,11 +281,11 @@ class Accounts extends AbstractTask
         // if the default account is not NULL, return that one instead:
         if (null !== $defaultAccount) {
             $default = $defaultAccount->toArray();
-            Log::debug('Default account is not null, so will return:', $default);
+            app('log')->debug('Default account is not null, so will return:', $default);
 
             return $default;
         }
-        Log::debug('Default account is NULL, so will return: ', $array);
+        app('log')->debug('Default account is NULL, so will return: ', $array);
 
         return $array;
     }
@@ -299,7 +298,7 @@ class Accounts extends AbstractTask
      */
     private function findById(string $value): ?Account
     {
-        Log::debug(sprintf('Going to search account with ID "%s"', $value));
+        app('log')->debug(sprintf('Going to search account with ID "%s"', $value));
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
@@ -321,12 +320,12 @@ class Accounts extends AbstractTask
                 throw new ImporterErrorException($e->getMessage());
             }
 
-            Log::debug(sprintf('[a] Found %s account #%d based on ID "%s"', $account->type, $account->id, $value));
+            app('log')->debug(sprintf('[a] Found %s account #%d based on ID "%s"', $account->type, $account->id, $value));
 
             return $account;
         }
 
-        Log::debug('Found NOTHING.');
+        app('log')->debug('Found NOTHING.');
 
         return null;
     }
@@ -340,7 +339,7 @@ class Accounts extends AbstractTask
      */
     private function findByIban(string $iban, string $transactionType): ?Account
     {
-        Log::debug(sprintf('Going to search account with IBAN "%s"', $iban));
+        app('log')->debug(sprintf('Going to search account with IBAN "%s"', $iban));
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
@@ -355,7 +354,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            Log::debug('Found NOTHING.');
+            app('log')->debug('Found NOTHING.');
 
             return null;
         }
@@ -369,21 +368,21 @@ class Accounts extends AbstractTask
             }
             // catch impossible combination "expense" with "deposit"
             if ('expense' === $account->type && 'deposit' === $transactionType) {
-                Log::debug(
+                app('log')->debug(
                     sprintf(
                         'Out of cheese error (IBAN). Found Found %s account #%d based on IBAN "%s". But not going to use expense/deposit combi.',
                         $account->type, $account->id, $iban
                     )
                 );
-                Log::debug('Firefly III will have to make the correct decision.');
+                app('log')->debug('Firefly III will have to make the correct decision.');
 
                 return null;
             }
-            Log::debug(sprintf('[a] Found %s account #%d based on IBAN "%s"', $account->type, $account->id, $iban));
+            app('log')->debug(sprintf('[a] Found %s account #%d based on IBAN "%s"', $account->type, $account->id, $iban));
 
             // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
             if (in_array($account->type, ['expense', 'revenue'], true)) {
-                Log::debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
+                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
 
                 return null;
             }
@@ -393,11 +392,11 @@ class Accounts extends AbstractTask
         }
 
         if (2 === count($response)) {
-            Log::debug('Found 2 results, Firefly III will have to make the correct decision.');
+            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
 
             return null;
         }
-        Log::debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
+        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
 
         return null;
     }
@@ -410,7 +409,7 @@ class Accounts extends AbstractTask
      */
     private function findByName(string $name): ?Account
     {
-        Log::debug(sprintf('Going to search account with name "%s"', $name));
+        app('log')->debug(sprintf('Going to search account with name "%s"', $name));
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
         $request = new GetSearchAccountRequest($url, $token);
@@ -425,7 +424,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            Log::debug('Found NOTHING.');
+            app('log')->debug('Found NOTHING.');
 
             return null;
         }
@@ -433,12 +432,12 @@ class Accounts extends AbstractTask
         foreach ($response as $account) {
             if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
                 && strtolower($account->name) === strtolower($name)) {
-                Log::debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
+                app('log')->debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
 
                 return $account;
             }
         }
-        Log::debug(sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name));
+        app('log')->debug(sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name));
 
         return null;
     }

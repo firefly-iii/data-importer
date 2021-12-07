@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace App\Services\Shared\Authentication;
 
 
-use Log;
 use Symfony\Component\HttpFoundation\Cookie;
 
 
@@ -44,7 +43,7 @@ class SecretManager
      */
     public static function hasValidSecrets(): bool
     {
-        Log::debug(__METHOD__);
+        app('log')->debug(__METHOD__);
         // check for access token cookie. if not, redirect to flow to get it.
         if (!self::hasAccessToken() && !self::hasRefreshToken() && !self::hasBaseUrl()) {
             return false;
@@ -55,11 +54,11 @@ class SecretManager
 //        $baseURL      = (string) $request->cookie('base_url');
 //        $vanityURL    = (string) $request->cookie('vanity_url');
 //
-//        Log::debug(sprintf('Base URL   : "%s"', $baseURL));
-//        Log::debug(sprintf('Vanity URL : "%s"', $vanityURL));
+//        app('log')->debug(sprintf('Base URL   : "%s"', $baseURL));
+//        app('log')->debug(sprintf('Vanity URL : "%s"', $vanityURL));
 //
 //        if ('' === $accessToken && '' === $refreshToken && '' === $baseURL) {
-//            Log::debug('No access token cookie, redirect to token.index');
+//            app('log')->debug('No access token cookie, redirect to token.index');
 //            return redirect(route('token.index'));
 //        }
     }
@@ -104,7 +103,7 @@ class SecretManager
     public static function getAccessToken(): string
     {
         if (!self::hasAccessToken()) {
-            Log::debug('No access token in hasAccessToken(), will return config variable.');
+            app('log')->debug('No access token in hasAccessToken(), will return config variable.');
             return (string) config('importer.access_token');
         }
         return request()->cookie(self::ACCESS_TOKEN);
@@ -118,7 +117,7 @@ class SecretManager
     public static function getClientId(): int
     {
         if (!self::hasClientId()) {
-            Log::debug('No client id in hasClientId(), will return config variable.');
+            app('log')->debug('No client id in hasClientId(), will return config variable.');
             return (int) config('importer.client_id');
         }
         return (int) request()->cookie('client_id');
@@ -141,7 +140,7 @@ class SecretManager
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
-            Log::debug('No base url in getBaseUrl(), will return config variable.');
+            app('log')->debug('No base url in getBaseUrl(), will return config variable.');
             return (string) config('importer.url');
         }
         return (string) request()->cookie(self::BASE_URL);
@@ -153,7 +152,7 @@ class SecretManager
     public static function getVanityUrl(): string
     {
         if (!self::hasVanityUrl()) {
-            Log::debug('No vanity url in getVanityUrl(), will return config variable.');
+            app('log')->debug('No vanity url in getVanityUrl(), will return config variable.');
             if ('' === (string) config('importer.vanity_url')) {
                 return (string) config('importer.url');
             }

@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Specifics;
 
-use Log;
-
 /**
  * Class AppendHash.
  *
@@ -77,7 +75,7 @@ class AppendHash implements SpecificInterface
         $to_hash = sprintf('%s,%s', $representation, $this->lines_counter[$representation]);
         $hash    = hash('sha256', $to_hash);
 
-        Log::debug(sprintf('Row is hashed to %s', $hash));
+        app('log')->debug(sprintf('Row is hashed to %s', $hash));
 
         $row[] = $hash;
 

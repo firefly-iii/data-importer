@@ -27,13 +27,11 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Spectre\Model\Transaction;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetTransactionsResponse;
 use Carbon\Carbon;
-use Log;
 
 /**
  * Class TransactionProcessor
@@ -62,13 +60,13 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        Log::debug('Now in download()');
+        app('log')->debug('Now in download()');
         $accounts = array_keys($this->configuration->getAccounts());
-        Log::debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
+        app('log')->debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return = [];
         foreach ($accounts as $account) {
             $account = (string) $account;
-            Log::debug(sprintf('Going to download transactions for account #%s', $account));
+            app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
             $appId                 = config('spectre.app_id');
             $secret                = config('spectre.secret');
@@ -106,8 +104,8 @@ class TransactionProcessor
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
         if ($response instanceof ErrorResponse) {
-            Log::alert('Could not refresh connection.');
-            Log::alert(sprintf('%s: %s', $response->class, $response->message));
+            app('log')->alert('Could not refresh connection.');
+            app('log')->alert(sprintf('%s: %s', $response->class, $response->message));
         }
     }
 
@@ -116,12 +114,12 @@ class TransactionProcessor
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        Log::info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            Log::info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
@@ -151,7 +149,7 @@ class TransactionProcessor
             app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
             $return[] = $transaction->toArray();
         }
-        Log::info(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }

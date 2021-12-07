@@ -25,8 +25,6 @@ declare(strict_types=1);
 namespace App\Services\CSV\Converter;
 
 
-use Log;
-
 /**
  *
  * Class BankDebitCredit
@@ -43,7 +41,7 @@ class BankDebitCredit implements ConverterInterface
      */
     public function convert($value): int
     {
-        Log::debug('Going to convert ', ['value' => $value]);
+        app('log')->debug('Going to convert ', ['value' => $value]);
         $negative = [
             'D', // Old style Rabobank (NL). Short for "Debit"
             'A', // New style Rabobank (NL). Short for "Af"

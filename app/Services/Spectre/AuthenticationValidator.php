@@ -27,13 +27,11 @@ namespace App\Services\Spectre;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
-use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Response\ErrorResponse;
-use Log;
 
 /**
  * Class AuthenticationValidator
@@ -72,11 +70,11 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         try {
             $response = $request->get();
         } catch (ImporterHttpException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             return AuthenticationStatus::error();
         }
         if ($response instanceof ErrorResponse) {
-            Log::error(sprintf('%s: %s', $response->class, $response->message));
+            app('log')->error(sprintf('%s: %s', $response->class, $response->message));
             return AuthenticationStatus::error();
         }
 

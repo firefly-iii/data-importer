@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Authentication;
 
-use Log;
 use Symfony\Component\HttpFoundation\Cookie;
 
 /**
@@ -34,6 +33,20 @@ class SecretManager
     public const NORDIGEN_ID  = 'nordigen_id';
     public const NORDIGEN_KEY = 'nordigen_key';
 
+    /**
+     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     *
+     * @return string
+     */
+    public static function getId(): string
+    {
+        if (!self::hasId()) {
+            app('log')->debug('No Nordigen ID in hasId(), will return config variable.');
+            return (string) config('nordigen.id');
+
+        }
+        return request()->cookie(self::NORDIGEN_ID);
+    }
 
     /**
      * Will verify if the user has a Nordigen ID (in a cookie)
@@ -51,16 +64,15 @@ class SecretManager
      *
      * @return string
      */
-    public static function getId(): string
+    public static function getKey(): string
     {
-        if (!self::hasId()) {
-            Log::debug('No Nordigen ID in hasId(), will return config variable.');
-            return (string) config('nordigen.id');
+        if (!self::hasKey()) {
+            app('log')->debug('No Nordigen key in hasKey(), will return config variable.');
+            return (string) config('nordigen.key');
 
         }
-        return request()->cookie(self::NORDIGEN_ID);
+        return request()->cookie(self::NORDIGEN_KEY);
     }
-
 
     /**
      * Will verify if the user has a Nordigen Key (in a cookie)
@@ -71,21 +83,6 @@ class SecretManager
     private static function hasKey(): bool
     {
         return '' !== (string) request()->cookie(self::NORDIGEN_KEY);
-    }
-
-    /**
-     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     *
-     * @return string
-     */
-    public static function getKey(): string
-    {
-        if (!self::hasKey()) {
-            Log::debug('No Nordigen key in hasKey(), will return config variable.');
-            return (string) config('nordigen.key');
-
-        }
-        return request()->cookie(self::NORDIGEN_KEY);
     }
 
     /**

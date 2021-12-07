@@ -42,7 +42,6 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetTransactionsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTagResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTransactionResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
-use Log;
 
 /**
  * Class ApiSubmitter
@@ -67,11 +66,11 @@ class ApiSubmitter
         $this->tag     = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
         $this->tagDate = date('Y-m-d');
         $count         = count($lines);
-        Log::info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
+        app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         $this->vanityURL = Token::getVanityURL();
 
-        Log::debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
+        app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 
         // create the tag, to be used later on.
         $this->createTag();
@@ -81,19 +80,19 @@ class ApiSubmitter
          * @var array $line
          */
         foreach ($lines as $index => $line) {
-            Log::debug(sprintf('Now submitting transaction %d/%d', ($index + 1), $count));
+            app('log')->debug(sprintf('Now submitting transaction %d/%d', ($index + 1), $count));
             // first do local duplicate transaction check (the "cell" method):
             $unique = $this->uniqueTransaction($index, $line);
             if (true === $unique) {
-                Log::debug(sprintf('Transaction #%d is unique.', $index + 1));
+                app('log')->debug(sprintf('Transaction #%d is unique.', $index + 1));
                 $groupInfo = $this->processTransaction($index, $line);
                 $this->addTagToGroups($groupInfo);
             }
             if (false === $unique) {
-                Log::debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
+                app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
             }
         }
-        Log::info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
+        app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
 
     /**
@@ -102,7 +101,7 @@ class ApiSubmitter
     private function createTag(): void
     {
         if (false === $this->addTag) {
-            Log::debug('Not instructed to add a tag, so will not create one.');
+            app('log')->debug('Not instructed to add a tag, so will not create one.');
 
             return;
         }
@@ -122,19 +121,19 @@ class ApiSubmitter
             $response = $request->post();
         } catch (ApiHttpException $e) {
             $message = sprintf('Could not create tag. %s', $e->getMessage());
-            Log::error($message);
-            Log::error($e->getTraceAsString());
+            app('log')->error($message);
+            app('log')->error($e->getTraceAsString());
             $this->addError(0, $message);
 
             return;
         }
         if ($response instanceof ValidationErrorResponse) {
-            Log::error(json_encode($response->errors->toArray()));
+            app('log')->error(json_encode($response->errors->toArray()));
 
             return;
         }
         if (null !== $response->getTag()) {
-            Log::info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
+            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
         }
     }
 
@@ -150,7 +149,7 @@ class ApiSubmitter
     private function uniqueTransaction(int $index, array $line): bool
     {
         if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
-            Log::debug(
+            app('log')->debug(
                 sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod())
             );
 
@@ -164,7 +163,7 @@ class ApiSubmitter
         foreach ($transactions as $transactionIndex => $transaction) {
             $value = (string) ($transaction[$field] ?? '');
             if ('' === $value) {
-                Log::debug(
+                app('log')->debug(
                     sprintf(
                         'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).', $field, $index,
                         $transactionIndex
@@ -174,14 +173,14 @@ class ApiSubmitter
             }
             $searchResult = $this->searchField($field, $value);
             if (0 !== $searchResult) {
-                Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult));
+                app('log')->debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult));
                 $message = sprintf('There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).', $field, $value, $this->vanityURL, $searchResult);
                 $this->addError($index, $message);
 
                 return false;
             }
         }
-        Log::debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
+        app('log')->debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
 
         return true;
     }
@@ -200,7 +199,7 @@ class ApiSubmitter
         $searchModifier = config(sprintf('csv.search_modifier.%s', $field));
         $query          = sprintf('%s:"%s"', $searchModifier, $value);
 
-        Log::debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
+        app('log')->debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
 
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
@@ -210,7 +209,7 @@ class ApiSubmitter
             /** @var GetTransactionsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
 
             return 0;
         }
@@ -218,7 +217,7 @@ class ApiSubmitter
             return 0;
         }
         $first = $response->current();
-        Log::debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
+        app('log')->debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
 
         return $first->id;
     }
@@ -238,13 +237,13 @@ class ApiSubmitter
         $request = new PostTransactionRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        Log::debug('Submitting to Firefly III:', $line);
+        app('log')->debug('Submitting to Firefly III:', $line);
         $request->setBody($line);
         try {
             $response = $request->post();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             $message = sprintf('Submission HTTP error: %s', $e->getMessage());
             $this->addError($index, $message);
 
@@ -253,12 +252,12 @@ class ApiSubmitter
 
         if ($response instanceof ValidationErrorResponse) {
             foreach ($response->errors->messages() as $key => $errors) {
-                Log::error(sprintf('Submission error: %d', $key), $errors);
+                app('log')->error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
                     $msg = sprintf('%s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
                     // plus 1 to keep the count.
                     $this->addError($index, $msg);
-                    Log::error($msg);
+                    app('log')->error($msg);
                 }
             }
 
@@ -270,7 +269,7 @@ class ApiSubmitter
             $group = $response->getTransactionGroup();
             if (null === $group) {
                 $message = 'Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
-                Log::error($message, $response->getRawData());
+                app('log')->error($message, $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
@@ -292,7 +291,7 @@ class ApiSubmitter
                 // plus 1 to keep the count.
                 $this->addMessage($index, $message);
                 $this->compareArrays($index, $line, $group);
-                Log::info($message);
+                app('log')->info($message);
                 $return['journals'][$transaction->id] = $transaction->tags;
             }
         }
@@ -306,9 +305,9 @@ class ApiSubmitter
      */
     private function replaceMappings(array $line): array
     {
-        Log::debug('Going to map data for this line.');
+        app('log')->debug('Going to map data for this line.');
         if (array_key_exists(0, $this->mapping)) {
-            Log::debug('Configuration has mapping for opposing account name!');
+            app('log')->debug('Configuration has mapping for opposing account name!');
             /**
              * @var int   $index
              * @var array $transaction
@@ -321,7 +320,7 @@ class ApiSubmitter
                         unset($line['transactions'][$index]['destination_name']);
                         unset($line['transactions'][$index]['destination_iban']);
                         $line['transactions'][$index]['destination_id'] = $this->mapping[0][$destination];
-                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
+                        app('log')->debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
@@ -331,7 +330,7 @@ class ApiSubmitter
                         unset($line['transactions'][$index]['source_name']);
                         unset($line['transactions'][$index]['source_iban']);
                         $line['transactions'][$index]['source_id'] = $this->mapping[0][$source];
-                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
+                        app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
             }
@@ -405,18 +404,18 @@ class ApiSubmitter
     private function addTagToGroups(array $groupInfo): void
     {
         if ([] === $groupInfo) {
-            Log::info('No info on group.');
+            app('log')->info('No info on group.');
 
             return;
         }
         if (false === $this->addTag) {
-            Log::debug('Will not add import tag.');
+            app('log')->debug('Will not add import tag.');
 
             return;
         }
 
         $groupId = (int) $groupInfo['group_id'];
-        Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
+        app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
         $body = [
             'transactions' => [],
         ];
@@ -441,8 +440,8 @@ class ApiSubmitter
         try {
             $request->put();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             $this->addError(0, 'Could not store transaction: see the log files.');
         }
     }

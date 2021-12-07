@@ -30,7 +30,6 @@ use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Nordigen\Request\PostNewTokenRequest;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
-use Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -45,7 +44,7 @@ class TokenManager
      */
     public static function getAccessToken(): string
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         self::validateAllTokens();
         try {
             $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
@@ -60,7 +59,7 @@ class TokenManager
      */
     public static function validateAllTokens(): void
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         // is there a valid access and refresh token?
         if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
             return;
@@ -86,10 +85,10 @@ class TokenManager
      */
     public static function hasValidRefreshToken(): bool
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            Log::debug('No Nordigen refresh token, so return false.');
+            app('log')->debug('No Nordigen refresh token, so return false.');
             return false;
         }
         $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
@@ -101,20 +100,20 @@ class TokenManager
      */
     public static function hasValidAccessToken(): bool
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
         if (false === $hasAccessToken) {
-            Log::debug('No Nordigen token is present, so no valid access token');
+            app('log')->debug('No Nordigen token is present, so no valid access token');
             return false;
         }
         $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
-        Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
+        app('log')->debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
         $result = time() < $tokenValidity;
         if (false === $result) {
-            Log::debug('Nordigen token is no longer valid');
+            app('log')->debug('Nordigen token is no longer valid');
             return false;
         }
-        Log::debug('Nordigen token is valid.');
+        app('log')->debug('Nordigen token is valid.');
         return true;
     }
 
@@ -123,10 +122,10 @@ class TokenManager
      */
     public static function hasExpiredRefreshToken(): bool
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            Log::debug('No refresh token, so return false.');
+            app('log')->debug('No refresh token, so return false.');
             return false;
         }
         die(__METHOD__);
@@ -146,7 +145,7 @@ class TokenManager
      */
     public static function getNewTokenSet(string $identifier, string $key): void
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $client = new PostNewTokenRequest($identifier, $key);
         /** @var TokenSetResponse $result */
         $result = $client->post();

@@ -28,7 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use JsonException;
-use Log;
 use UnexpectedValueException;
 
 /**
@@ -63,16 +62,16 @@ class ColumnValueConverter
      */
     public function processValueArrays(array $lines): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         $processed = [];
         $count     = count($lines);
-        Log::info(sprintf('Now parsing and combining %d lines.', $count));
+        app('log')->info(sprintf('Now parsing and combining %d lines.', $count));
         foreach ($lines as $index => $line) {
-            Log::debug(sprintf('Now processing line %d/%d', ($index + 1), $count));
+            app('log')->debug(sprintf('Now processing line %d/%d', ($index + 1), $count));
             $processed[] = $this->processValueArray($line);
         }
-        Log::info(sprintf('Done parsing and combining %d lines.', $count));
+        app('log')->info(sprintf('Done parsing and combining %d lines.', $count));
 
         return $processed;
     }
@@ -86,7 +85,7 @@ class ColumnValueConverter
     private function processValueArray(array $line): array
     {
         $count = count($line);
-        Log::debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
+        app('log')->debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
         // make a new transaction:
         $transaction = [
             //'user'          => 1, // ??
@@ -127,20 +126,20 @@ class ColumnValueConverter
                 throw new UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
             }
             if (null === $parsedValue) {
-                Log::debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
+                app('log')->debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
                 continue;
             }
-            Log::debug(
+            app('log')->debug(
                 sprintf('Stored column #%d with value "%s" and role "%s" in field "%s"', $columnIndex + 1, $this->toString($parsedValue), $role, $transactionField)
             );
 
             // if append, append.
             if (true === $value->isAppendValue()) {
-                Log::debug(sprintf('Column #%d with role "%s" (in field "%s") must be appended to the previous value.', $columnIndex + 1, $role, $transactionField), [$parsedValue]);
+                app('log')->debug(sprintf('Column #%d with role "%s" (in field "%s") must be appended to the previous value.', $columnIndex + 1, $role, $transactionField), [$parsedValue]);
                 if (is_array($parsedValue)) {
                     $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? [];
                     $transaction['transactions'][0][$transactionField] = array_merge($transaction['transactions'][0][$transactionField], $parsedValue);
-                    Log::debug(sprintf('Value for [transactions][#0][%s] is now ', $transactionField), $transaction['transactions'][0][$transactionField]);
+                    app('log')->debug(sprintf('Value for [transactions][#0][%s] is now ', $transactionField), $transaction['transactions'][0][$transactionField]);
                 }
                 if (!is_array($parsedValue)) {
                     $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? '';
@@ -152,11 +151,11 @@ class ColumnValueConverter
             }
             // if not, not.
             if (false === $value->isAppendValue()) {
-                Log::debug(sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField));
+                app('log')->debug(sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField));
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
             }
         }
-        Log::debug('Almost final transaction', $transaction);
+        app('log')->debug('Almost final transaction', $transaction);
 
         return $transaction;
     }

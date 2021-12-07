@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Specifics;
 
-use Log;
-
 /**
  * Class SpecificService
  */
@@ -51,10 +49,10 @@ class SpecificService
     {
         // if the array keys are strings, pluck those.
         if (empty($specifics)) {
-            Log::debug('Not configured to run any specifics on this row.');
+            app('log')->debug('Not configured to run any specifics on this row.');
             return $row;
         }
-        Log::debug(sprintf('Going to run %d specifics on this row.', count($specifics)), $specifics);
+        app('log')->debug(sprintf('Going to run %d specifics on this row.', count($specifics)), $specifics);
 
         // little hack.
         $newSpecifics = $specifics;

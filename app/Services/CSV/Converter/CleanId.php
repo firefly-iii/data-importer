@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-use Log;
-
 /**
  * Class CleanId
  */
@@ -42,7 +40,7 @@ class CleanId implements ConverterInterface
      */
     public function convert($value)
     {
-        Log::debug(sprintf('Now applying CleanId converter on "%s"', $value));
+        app('log')->debug(sprintf('Now applying CleanId converter on "%s"', $value));
         $value = (int) $value;
 
         return 0 === $value ? null : $value;

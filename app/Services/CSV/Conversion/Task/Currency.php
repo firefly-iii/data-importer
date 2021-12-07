@@ -25,8 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Task;
 
-use Log;
-
 /**
  * Class Currency
  */
@@ -59,7 +57,7 @@ class Currency extends AbstractTask
             && (null === $transaction['currency_code'] || '' === $transaction['currency_code'])) {
             $transaction['currency_id']   = $this->transactionCurrency->id;
             $transaction['currency_code'] = null;
-            Log::debug(sprintf('Set currency to %d because it was NULL or empty.', $this->transactionCurrency->id));
+            app('log')->debug(sprintf('Set currency to %d because it was NULL or empty.', $this->transactionCurrency->id));
         }
 
         return $transaction;
