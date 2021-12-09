@@ -51,9 +51,10 @@ class ImportedTransactionsEventHandler
             'warnings' => $event->warnings,
             'errors' => $event->errors,
         ];
-
+        app('log')->info('Will send report message.');
+        app('log')->debug('If no error below this line, mail was sent!');
         Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
-
+        app('log')->debug('If no error above this line, mail was sent!');
     }
 
 }
