@@ -1,6 +1,6 @@
 <?php
 /*
- * EventServiceProvider.php
+ * ImportedTransactions.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -20,32 +20,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
+namespace App\Events;
 
-namespace App\Providers;
+use Illuminate\Queue\SerializesModels;
 
-use App\Events\ImportedTransactions;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 /**
- * Class EventServiceProvider
+ * Class ImportedTransactions
  */
-class EventServiceProvider extends ServiceProvider
+class ImportedTransactions
 {
-    /**
-     * The event listener mappings for the application.
-     *
-     * @var array
-     */
-    protected $listen = [
-        Registered::class           => [
-            SendEmailVerificationNotification::class,
-        ],
-        ImportedTransactions::class => [
-            'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
-        ],
-    ];
+    use SerializesModels;
 
+    public array $messages;
+    public array $warnings;
+    public array $errors;
+
+    /**
+     * @param array $messages
+     * @param array $warnings
+     * @param array $errors
+     */
+    public function __construct(array $messages, array $warnings, array $errors)
+    {
+        app('log')->debug('Created event ImportedTransactions');
+        $this->messages = $messages;
+        $this->warnings = $warnings;
+        $this->errors   = $errors;
+
+    }
 }

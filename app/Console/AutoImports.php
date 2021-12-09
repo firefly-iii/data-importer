@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
@@ -186,7 +187,12 @@ trait AutoImports
         $this->reportImport();
 
         $this->line('Done!');
-        // TODO send mail using event handler:
+        event(new ImportedTransactions(
+                  array_merge($this->conversionMessages, $this->importMessages),
+                  array_merge($this->conversionWarnings, $this->importWarnings),
+                  array_merge($this->conversionErrors, $this->importErrors)
+              )
+        );
 
     }
 

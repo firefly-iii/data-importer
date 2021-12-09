@@ -27,6 +27,7 @@ namespace App\Console\Commands;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
+use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
@@ -114,7 +115,8 @@ class Import extends Command
         $this->reportImport();
 
         $this->line('Done!');
-        // TODO send mail using event handler:
+
+        event(new ImportedTransactions($this->importMessages, $this->importWarnings, $this->importErrors));
         return 0;
 
     }
