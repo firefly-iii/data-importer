@@ -23,7 +23,67 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Authentication;
 
+/**
+ * Class SecretManager
+ */
 class SecretManager
 {
+    public const APP_ID = 'spectre_app_id';
+    public const SECRET = 'spectre_secret';
+
+
+    /**
+     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     * TODO is a cookie the best place?
+     *
+     * @return string
+     */
+    public static function getAppId(): string
+    {
+        if (!self::hasAppId()) {
+            app('log')->debug('No Spectre App ID in hasAppId(), will return config variable.');
+            return (string) config('spectre.app_id');
+
+        }
+        return request()->cookie(self::APP_ID);
+    }
+
+    /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasAppId(): bool
+    {
+        return '' !== (string) request()->cookie(self::APP_ID);
+    }
+
+    /**
+     * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     * TODO is a cookie the best place?
+     *
+     * @return string
+     */
+    public static function getSecret(): string
+    {
+        if (!self::hasSecret()) {
+            app('log')->debug('No Spectre secret in hasSecret(), will return config variable.');
+            return (string) config('spectre.secret');
+
+        }
+        return request()->cookie(self::SECRET);
+    }
+
+    /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasSecret(): bool
+    {
+        return '' !== (string) request()->cookie(self::SECRET);
+    }
 
 }

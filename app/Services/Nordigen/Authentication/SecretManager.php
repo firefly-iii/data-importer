@@ -35,6 +35,7 @@ class SecretManager
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
+     * TODO is a cookie the best place?
      *
      * @return string
      */
