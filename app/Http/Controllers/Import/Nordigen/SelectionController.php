@@ -84,9 +84,6 @@ class SelectionController extends Controller
             // send to Nordigen for approval
             return redirect(route('010-build-link.index'));
         }
-
-
-
         // get banks and countries
         $accessToken = TokenManager::getAccessToken();
         $url         = config('nordigen.url');

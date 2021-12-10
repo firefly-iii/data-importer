@@ -193,8 +193,10 @@ class Configuration
         $object->dateRange       = $array['date_range'] ?? 'all';
         $object->dateRangeNumber = $array['date_range_number'] ?? 30;
         $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
-        $object->dateNotBefore   = $array['date_not_before'] ?? '';
-        $object->dateNotAfter    = $array['date_not_after'] ?? '';
+
+        // null or Carbon
+        $object->dateNotBefore   = null === $array['date_not_before']  ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter    = null === $array['date_not_after']  ? '' : $array['date_not_before']->format('Y-m-d');
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
