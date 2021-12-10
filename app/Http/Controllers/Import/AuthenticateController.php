@@ -34,7 +34,9 @@ use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
+use Illuminate\Support\ViewErrorBag;
 use Log;
+use Session;
 
 /**
  * Class AuthenticateController
@@ -53,17 +55,20 @@ class AuthenticateController extends Controller
      */
     public function index(Request $request)
     {
-        $mainTitle = 'Auth';
-        $pageTitle = 'Auth';
+        // variables for page:
+        $mainTitle = 'Authentication';
+        $pageTitle = 'Authentication';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
+        $error     = Session::get('error');
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator;
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
+
                 // show for to enter data. save as cookie.
-                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
+                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
             if ($result->equals(AuthenticationStatus::authenticated())) {
                 return redirect(route('003-upload.index'));
@@ -93,30 +98,30 @@ class AuthenticateController extends Controller
      */
     public function postIndex(Request $request)
     {
+        // variables for page:
+        $mainTitle = 'Authentication';
+        $pageTitle = 'Authentication';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $subTitle  = ucfirst($flow);
+
         // set cookies and redirect, validator will pick it up.
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
         if ('spectre' === $flow) {
-            $appId  = $request->get('spectre_app_id');
-            $secret = $request->get('spectre_secret');
+            $appId  = (string) $request->get('spectre_app_id');
+            $secret = (string) $request->get('spectre_secret');
             if ('' === $appId || '' === $secret) {
-                // todo show error
-                return redirect(route('002-authenticate.index'));
+                return redirect(route('002-authenticate.index'))->with(['error' => 'Both fields must be filled in.']);
             }
             // give to secret manager to store:
-            SpectreSecretManager::storeSpectreAppId($appId);
-            SpectreSecretManager::storeSpectreSecret($secret);
+            SpectreSecretManager::saveAppId($appId);
+            SpectreSecretManager::saveSecret($secret);
 
-            // store ID and key in session:
-//            session()->put(Constants::SESSION_SPECTRE_APP_ID, $appId);
-//            session()->put(Constants::SESSION_SPECTRE_SECRET, $secret);
             return redirect(route('002-authenticate.index'));
         }
         if ('nordigen' === $flow) {
             $key        = $request->get('nordigen_key');
             $identifier = $request->get('nordigen_id');
             if ('' === $key || '' === $identifier) {
-                // todo show error
-                return redirect(route('002-authenticate.index'));
+                return redirect(route('002-authenticate.index'))->with(['error' => 'Both fields must be filled in.']);
             }
             // store ID and key in session:
             $cookies = [

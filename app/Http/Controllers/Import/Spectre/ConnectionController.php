@@ -73,7 +73,7 @@ class ConnectionController extends Controller
         $subTitle  = 'Select your financial organisation';
         $url       = config('spectre.url');
 
-        $appId = SecretManager::getAppId();
+        $appId  = SecretManager::getAppId();
         $secret = SecretManager::getSecret();
 
         // check if already has the correct customer:
@@ -142,10 +142,9 @@ class ConnectionController extends Controller
             $configuration = $this->restoreConfiguration();
 
             // make a new connection.
-            // TODO grab from cookie
             $url                = config('spectre.url');
-            $appId                   = SpectreSecretManager::getAppId();
-            $secret                  = SpectreSecretManager::getSecret();
+            $appId              = SpectreSecretManager::getAppId();
+            $secret             = SpectreSecretManager::getSecret();
             $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
             $newToken->customer = $configuration->getIdentifier();
             $newToken->url      = route('011-connections.callback');

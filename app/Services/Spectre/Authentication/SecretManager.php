@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Authentication;
 
+use Symfony\Component\HttpFoundation\Cookie;
+
 /**
  * Class SecretManager
  */
@@ -86,4 +88,28 @@ class SecretManager
         return '' !== (string) request()->cookie(self::SECRET);
     }
 
+
+    /**
+     * Store app ID.
+     * TODO is a cookie the best place?
+     *
+     * @param string $appId
+     * @return Cookie
+     */
+    public static function saveAppId(string $appId): Cookie
+    {
+        return cookie(self::APP_ID, $appId);
+    }
+
+    /**
+     * Store access token in a cookie.
+     * TODO is a cookie the best place?
+     *
+     * @param string $secret
+     * @return Cookie
+     */
+    public static function saveSecret(string $secret): Cookie
+    {
+        return cookie(self::SECRET, $secret);
+    }
 }

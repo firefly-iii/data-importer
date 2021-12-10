@@ -38,8 +38,8 @@ use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
-use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
@@ -98,9 +98,8 @@ class ConfigurationController extends Controller
         }
 
         // get list of asset accounts:
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
 
 
         $request = new GetAccountsRequest($url, $token);
@@ -127,11 +126,15 @@ class ConfigurationController extends Controller
             $accounts['Liabilities'][$account->id] = $account;
         }
 
+        // possibilities for duplicate detection (unique columns)
+        $uniqueColumns = config('csv.unique_column_options');
+
         // also get the nordigen / spectre accounts
         $importerAccounts = [];
         if ('nordigen' === $flow) {
-            $requisitions= $configuration->getNordigenRequisitions();
-            $reference = array_shift($requisitions);
+            $uniqueColumns = config('nordigen.unique_column_options');
+            $requisitions  = $configuration->getNordigenRequisitions();
+            $reference     = array_shift($requisitions);
             // list all accounts in Nordigen:
             //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
             $importerAccounts = $this->getNordigenAccounts($reference);
@@ -139,20 +142,20 @@ class ConfigurationController extends Controller
         }
 
         if ('spectre' === $flow) {
-            // get the accounts over at Spectre.
+            $uniqueColumns           = config('spectre.unique_column_options');
             $url                     = config('spectre.url');
             $appId                   = SpectreSecretManager::getAppId();
             $secret                  = SpectreSecretManager::getSecret();
             $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
             $spectreList->connection = $configuration->getConnection();
             /** @var GetAccountsResponse $spectreAccounts */
-            $spectreAccounts         = $spectreList->get();
-            $importerAccounts        = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
+            $spectreAccounts  = $spectreList->get();
+            $importerAccounts = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
         }
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts')
+            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
         );
     }
 

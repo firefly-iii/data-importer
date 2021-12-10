@@ -26,4 +26,7 @@ return [
     'app_id'              => env('SPECTRE_APP_ID', ''),
     'secret'              => env('SPECTRE_SECRET', ''),
     'url'                 => 'https://www.saltedge.com/api/v5',
+    'unique_column_options' => [
+        'external-id'        => 'External identifier',
+    ],
 ];
