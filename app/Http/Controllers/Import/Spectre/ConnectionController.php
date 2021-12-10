@@ -30,6 +30,8 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConnectionControllerMiddleware;
 use App\Services\Session\Constants;
+use App\Services\Spectre\Authentication\SecretManager;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Model\Customer;
 use App\Services\Spectre\Request\ListConnectionsRequest;
 use App\Services\Spectre\Request\ListCustomersRequest;
@@ -71,9 +73,8 @@ class ConnectionController extends Controller
         $subTitle  = 'Select your financial organisation';
         $url       = config('spectre.url');
 
-        // TODO or cookie value, must replace them all with a helper, same for nordigen.
-        $appId  = config('spectre.app_id');
-        $secret = config('spectre.secret');
+        $appId = SecretManager::getAppId();
+        $secret = SecretManager::getSecret();
 
         // check if already has the correct customer:
         $hasCustomer = false;
@@ -143,8 +144,8 @@ class ConnectionController extends Controller
             // make a new connection.
             // TODO grab from cookie
             $url                = config('spectre.url');
-            $appId              = config('spectre.app_id');
-            $secret             = config('spectre.secret');
+            $appId                   = SpectreSecretManager::getAppId();
+            $secret                  = SpectreSecretManager::getSecret();
             $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
             $newToken->customer = $configuration->getIdentifier();
             $newToken->url      = route('011-connections.callback');

@@ -27,6 +27,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
@@ -68,8 +69,8 @@ class TransactionProcessor
             $account = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
-            $appId                 = config('spectre.app_id');
-            $secret                = config('spectre.secret');
+            $appId                   = SpectreSecretManager::getAppId();
+            $secret                  = SpectreSecretManager::getSecret();
             $request               = new GetTransactionsRequest($url, $appId, $secret);
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
@@ -98,8 +99,8 @@ class TransactionProcessor
     {
         // refresh connection
         $url    = config('spectre.url');
-        $appId  = config('spectre.app_id');
-        $secret = config('spectre.secret');
+        $appId                   = SpectreSecretManager::getAppId();
+        $secret                  = SpectreSecretManager::getSecret();
         $put    = new PutRefreshConnectionRequest($url, $appId, $secret);
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();

@@ -28,10 +28,10 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
+use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
-use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
 use Log;
@@ -75,8 +75,8 @@ class AuthenticateController extends Controller
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
 
-                $key        = config('nordigen.key');
-                $identifier = config('nordigen.identifier');
+                $key        = NordigenSecretManager::getKey();
+                $identifier = NordigenSecretManager::getId();
 
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
@@ -120,8 +120,8 @@ class AuthenticateController extends Controller
             }
             // store ID and key in session:
             $cookies = [
-            NordigenSecretManager::saveId($identifier),
-            NordigenSecretManager::saveKey($key),
+                NordigenSecretManager::saveId($identifier),
+                NordigenSecretManager::saveKey($key),
             ];
 
             return redirect(route('002-authenticate.index'))->withCookies($cookies);

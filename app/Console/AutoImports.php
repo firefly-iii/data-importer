@@ -364,9 +364,6 @@ trait AutoImports
         $this->importMessages = $routine->getAllMessages();
         $this->importWarnings = $routine->getAllWarnings();
         $this->importErrors   = $routine->getAllErrors();
-
-        // TODO make event handler and send email message
-
     }
 
     /**

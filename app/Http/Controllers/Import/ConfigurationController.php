@@ -38,8 +38,10 @@ use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
+use App\Services\Spectre\Response\GetAccountsResponse;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
@@ -139,10 +141,11 @@ class ConfigurationController extends Controller
         if ('spectre' === $flow) {
             // get the accounts over at Spectre.
             $url                     = config('spectre.url');
-            $appId                   = config('spectre.app_id');
-            $secret                  = config('spectre.secret');
+            $appId                   = SpectreSecretManager::getAppId();
+            $secret                  = SpectreSecretManager::getSecret();
             $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
             $spectreList->connection = $configuration->getConnection();
+            /** @var GetAccountsResponse $spectreAccounts */
             $spectreAccounts         = $spectreList->get();
             $importerAccounts        = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
         }
