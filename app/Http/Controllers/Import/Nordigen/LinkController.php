@@ -28,15 +28,15 @@ namespace App\Http\Controllers\Import\Nordigen;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\LinkControllerMiddleware;
+use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
+use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\Request;
 use Log;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -69,6 +69,23 @@ class LinkController extends Controller
 
         TokenManager::validateAllTokens();
 
+
+        // if already a requisition in config file, no need to make a new one unless its invalid.
+        $requisitions = $configuration->getNordigenRequisitions();
+        if (1 === count($requisitions)) {
+            $url         = config('nordigen.url');
+            $accessToken = TokenManager::getAccessToken();
+            $reference   = array_shift($requisitions);
+            $request     = new GetRequisitionRequest($url, $accessToken, $reference);
+            /** @var GetRequisitionResponse $result */
+            $result = $request->get();
+
+            $configuration->setAccounts($result->accounts);
+
+            session()->put(Constants::REQUISITION_REFERENCE, $reference);
+            return redirect(route('004-configure.index'));
+        }
+
         // create and save local reference:
         $uuid = Uuid::uuid4()->toString();
 
@@ -89,6 +106,7 @@ class LinkController extends Controller
 
         // save config!
         $configuration->addRequisition($uuid, $response->id);
+
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
         return redirect($response->link);

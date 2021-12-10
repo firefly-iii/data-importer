@@ -43,8 +43,6 @@ use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use JsonException;
 use Log;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class SelectionController
@@ -74,6 +72,19 @@ class SelectionController extends Controller
         $mainTitle     = 'Selection';
         $subTitle      = 'Select your country and the bank you wish to use.';
         $configuration = $this->restoreConfiguration();
+
+        // if there is a requisition & country etc in the config file, go to next step.
+        $requisitions = $configuration->getNordigenRequisitions();
+        $country  =$configuration->getNordigenCountry();
+        $bank = $configuration->getNordigenBank();
+        if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
+            session()->put(Constants::CONFIGURATION, $configuration->toArray());
+            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
+
+            // send to Nordigen for approval
+            return redirect(route('010-build-link.index'));
+        }
+
 
 
         // get banks and countries

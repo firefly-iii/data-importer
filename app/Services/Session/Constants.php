@@ -48,7 +48,7 @@ class Constants
     // cookie name to remember the flow:
     public const NORDIGEN_ACCESS_TOKEN = 'nordigen_access_token';
 
-    //     stores the configuration array
+    // stores the configuration array
     public const NORDIGEN_REFRESH_EXPIRY_TIME = 'nordigen_refresh_expiry_time';
 
     // if the user is done with specific steps:
@@ -60,6 +60,7 @@ class Constants
     public const SELECTED_BANK_COUNTRY    = 'selected_bank_country';
     public const SESSION_NORDIGEN_ID      = 'nordigen_id';
     public const SESSION_NORDIGEN_KEY     = 'nordigen_key';
+    public const REQUISITION_PRESENT      = 'requisition_present';
 
     // spectre specific steps:
     public const SESSION_SPECTRE_APP_ID = 'spectre_app_id';

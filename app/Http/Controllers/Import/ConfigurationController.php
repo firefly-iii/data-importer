@@ -98,6 +98,9 @@ class ConfigurationController extends Controller
         // get list of asset accounts:
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
+
+
+
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
         $request->setVerify(config('importer.connection.verify'));
@@ -125,8 +128,10 @@ class ConfigurationController extends Controller
         // also get the nordigen / spectre accounts
         $importerAccounts = [];
         if ('nordigen' === $flow) {
+            $requisitions= $configuration->getNordigenRequisitions();
+            $reference = array_shift($requisitions);
             // list all accounts in Nordigen:
-            $reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
+            //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
             $importerAccounts = $this->getNordigenAccounts($reference);
             $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
         }
