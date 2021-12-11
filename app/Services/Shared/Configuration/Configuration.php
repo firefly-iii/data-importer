@@ -194,7 +194,7 @@ class Configuration
         $object->dateRangeNumber = $array['date_range_number'] ?? 30;
         $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
 
-        // null or Carbon
+        // null or Carbon because fromRequest will give Carbon object.
         $object->dateNotBefore   = null === $array['date_not_before']  ? '' : $array['date_not_before']->format('Y-m-d');
         $object->dateNotAfter    = null === $array['date_not_after']  ? '' : $array['date_not_before']->format('Y-m-d');
 
