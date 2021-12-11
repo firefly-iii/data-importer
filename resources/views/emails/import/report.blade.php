@@ -9,7 +9,7 @@
 
 @foreach($errors as $index => $objList)
 @foreach($objList as $message)
-    - Line #{{ $index + 1 }}: {!! $message !!}
+- Line #{{ $index + 1 }}: {!! $message !!}
 @endforeach
 @endforeach
 
@@ -19,7 +19,7 @@
 
 @foreach($warnings as $index => $objList)
 @foreach($objList as $message)
-    - Line #{{ $index + 1 }}: {!! $message !!}
+- Line #{{ $index + 1 }}: {!! $message !!}
 @endforeach
 @endforeach
 
@@ -29,7 +29,7 @@
 
 @foreach($messages as $index => $objList)
 @foreach($objList as $message)
-    - Line #{{ $index + 1 }}: {!! $message !!}
+- Line #{{ $index + 1 }}: {!! $message !!}
 @endforeach
 @endforeach
 
