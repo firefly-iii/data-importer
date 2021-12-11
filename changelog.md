@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.0 - 2021-12-11
+
+### Added
+- [Issue 5342](https://github.com/firefly-iii/firefly-iii/issues/5342) Can import "external URL" field.
+- Will now send report messages over mail if you want.
+
+### Fixed
+- Remove TODO's from README file.
+- Respect date range when importing.
+- Nordigen will pre-select country + bank
+- Nordigen will recycle requisition
+- Mapping works for Spectre + Nordigen
+- Better secret management for Nordigen + Spectre
+- [Issue 5351](https://github.com/firefly-iii/firefly-iii/issues/5351) Fix URL's
+- Fix duplicate detection.
+- Fix issue with transfers being imported as deposits.
+- New debit indicator thanks to @reeperbahnause
+
 ## 0.2.0 - 2021-12-04
 
 ### Added
