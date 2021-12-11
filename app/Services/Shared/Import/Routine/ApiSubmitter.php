@@ -404,7 +404,7 @@ class ApiSubmitter
     private function addTagToGroups(array $groupInfo): void
     {
         if ([] === $groupInfo) {
-            app('log')->info('No info on group.');
+            app('log')->debug('Group is empty, may not have been stored correctly.');
 
             return;
         }
