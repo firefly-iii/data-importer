@@ -27,9 +27,7 @@ namespace App\Services\CSV\File;
 
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use League\Csv\Reader;
-use Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -43,7 +41,6 @@ class FileReader
      *
      * @param bool $convert
      * @return Reader
-     * @throws FileNotFoundException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -65,7 +62,7 @@ class FileReader
         if (true === $convert) {
             $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
             if (false !== $encoding && 'ASCII' !== $encoding && 'UTF-8' !== $encoding) {
-                Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+                app('log')->warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
                 $content = mb_convert_encoding($content, 'UTF-8', $encoding);
             }
         }

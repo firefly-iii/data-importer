@@ -25,11 +25,10 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
-use App\Support\Token;
+use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;
-use Log;
 
 /**
  * Class TransactionCurrencies
@@ -46,8 +45,8 @@ class TransactionCurrencies implements MapperInterface
     public function getMap(): array
     {
         $result = [];
-        $url    = Token::getURL();
-        $token  = Token::getAccessToken();
+        $url    = SecretManager::getBaseUrl();
+        $token  = SecretManager::getAccessToken();
 
         $request = new GetCurrenciesRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
@@ -56,8 +55,8 @@ class TransactionCurrencies implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download currencies: %s', $e->getMessage()));
         }
         /** @var TransactionCurrency $currency */

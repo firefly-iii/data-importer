@@ -28,7 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetAccountsResponse;
-use Log;
 
 /**
  * Class GetAccountsRequest
@@ -60,7 +59,7 @@ class GetAccountsRequest extends Request
      */
     public function get(): Response
     {
-        Log::debug('GetAccountsRequest::get()');
+        app('log')->debug('GetAccountsRequest::get()');
         $this->setParameters(
             [
                 'connection_id' => $this->connection,

@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Artisan;
 use Carbon\Carbon;
-use DB;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
@@ -44,7 +42,6 @@ class DebugController extends Controller
      * @param Request $request
      *
      * @return Factory|View
-     * @throws FireflyException
      */
     public function index(Request $request)
     {

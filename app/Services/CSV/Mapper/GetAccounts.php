@@ -25,12 +25,11 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
-use App\Support\Token;
+use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
-use Log;
 
 /**
  * Trait GetAccounts
@@ -48,8 +47,8 @@ trait GetAccounts
     {
         // get list of asset accounts:
         $accounts = [];
-        $url      = Token::getURL();
-        $token    = Token::getAccessToken();
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
         $request  = new GetAccountsRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
@@ -60,8 +59,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
 
@@ -102,8 +101,8 @@ trait GetAccounts
         // get list of asset accounts:
         $accounts    = [];
         $liabilities = [];
-        $url         = Token::getURL();
-        $token       = Token::getAccessToken();
+        $url         = SecretManager::getBaseUrl();
+        $token       = SecretManager::getAccessToken();
         $request     = new GetAccountsRequest($url, $token);
 
         $request->setType(GetAccountsRequest::ASSET);
@@ -114,8 +113,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
         }
 
@@ -137,8 +136,8 @@ trait GetAccounts
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
         }
 

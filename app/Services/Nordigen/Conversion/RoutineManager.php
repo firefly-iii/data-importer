@@ -27,14 +27,13 @@ declare(strict_types=1);
 namespace App\Services\Nordigen\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
 use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;
 use App\Services\Shared\Authentication\IsRunningCli;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
-use Log;
 
 /**
  * Class RoutineManager
@@ -98,10 +97,10 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // get transactions from Nordigen
-        Log::debug('Call transaction processor download.');
+        app('log')->debug('Call transaction processor download.');
         $nordigen = $this->transactionProcessor->download();
 
         // generate Firefly III ready transactions:
@@ -111,8 +110,8 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectNordigenAccounts();
         } catch (ImporterErrorException $e) {
-            Log::error('Could not collect info on all Nordigen accounts, but this info isnt used at the moment anyway.');
-            Log::error($e->getMessage());
+            app('log')->error('Could not collect info on all Nordigen accounts, but this info isnt used at the moment anyway.');
+            app('log')->error($e->getMessage());
         }
 
         $transactions = $this->transactionGenerator->getTransactions($nordigen);

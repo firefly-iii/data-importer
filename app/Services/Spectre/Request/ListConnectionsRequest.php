@@ -29,8 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListConnectionsResponse;
-use JsonException;
-use Log;
 
 /**
  * Class ListConnectionsRequest
@@ -61,7 +59,7 @@ class ListConnectionsRequest extends Request
      */
     public function get(): Response
     {
-        Log::debug('ListConnectionsRequest::get()');
+        app('log')->debug('ListConnectionsRequest::get()');
         $this->setParameters(
             [
                 'customer_id' => $this->customer,

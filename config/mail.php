@@ -34,7 +34,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'smtp'),
+    'default' => env('MAIL_MAILER', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -107,7 +107,7 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name'    => env('MAIL_FROM_NAME', 'Firefly III Data Importer'),
     ],
-    'destination'        => env('MAIL_DESTINATION', 'badly_configured@example.com'),
+    'destination'        => env('MAIL_DESTINATION', ''),
     'enable_mail_report' => env('ENABLE_MAIL_REPORT', false),
 
     /*

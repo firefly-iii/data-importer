@@ -491,27 +491,28 @@
                                 </p>
                             </div>
 
-                            <div class="form-group row mb-3">
-                                <label for="X" class="col-sm-3 col-form-label">General detection options</label>
-                                <div class="col-sm-9">
-                                    <div class="form-check">
-                                        <input class="form-check-input"
-                                               {% if configuration.isIgnoreDuplicateLines or null == configuration %}checked{% endif %}
-                                               type="checkbox" value="1" id="ignore_duplicate_lines"
-                                               name="ignore_duplicate_lines" aria-describedby="duplicateHelp">
-                                        <label class="form-check-label" for="ignore_duplicate_lines">
-                                            Do not import duplicate lines in the import.
-                                        </label>
-                                        <br>
-                                        <small class="form-text text-muted" id="duplicateHelp">
-                                            Whatever method you choose ahead, it's smart to make the importer ignore any
-                                            duplicated lines in your import.
-                                        </small>
+                            {% if 'csv' == flow %}
+                                <div class="form-group row mb-3">
+                                    <label for="X" class="col-sm-3 col-form-label">General detection options</label>
+                                    <div class="col-sm-9">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   {% if configuration.isIgnoreDuplicateLines or null == configuration %}checked{% endif %}
+                                                   type="checkbox" value="1" id="ignore_duplicate_lines"
+                                                   name="ignore_duplicate_lines" aria-describedby="duplicateHelp">
+                                            <label class="form-check-label" for="ignore_duplicate_lines">
+                                                Do not import duplicate lines in the import.
+                                            </label>
+                                            <br>
+                                            <small class="form-text text-muted" id="duplicateHelp">
+                                                Whatever method you choose ahead, it's smart to make the importer ignore
+                                                any
+                                                duplicated lines in your import.
+                                            </small>
+                                        </div>
                                     </div>
-
-
                                 </div>
-                            </div>
+                            {% endif %}
 
                             <div class="form-group row mb-3">
                                 <label for="duplicate_detection_method" class="col-sm-3 col-form-label">Detection
@@ -556,29 +557,29 @@
                                         </small>
                                     </div>
                                 </div>
-
-                                <div class="form-group row" id="unique_column_type_holder">
-                                    <label for="unique_column_type" class="col-sm-3 col-form-label">Unique column
-                                        type</label>
-                                    <div class="col-sm-9">
-                                        <select id="unique_column_type" name="unique_column_type" class="form-control"
-                                                aria-describedby="unique_column_type_help">
-                                            {% for columnType, columnName in config('csv.unique_column_options') %}
-                                                <option label="{{ columnName }}"
-                                                        {% if configuration.getUniqueColumnType == columnType %}selected{% endif %}
-                                                        value="{{ columnType }}">{{ columnName }}</option>
-                                            {% endfor %}
-                                        </select>
-
-                                        <small id="unique_column_type_help" class="form-text text-muted">
-                                            This field is only relevant for the "identifier-based" detection option.
-                                            Select
-                                            the type of value you expect in
-                                            the unique identifier. What must Firefly III search for?
-                                        </small>
-                                    </div>
-                                </div>
                             {% endif %}
+
+                            <div class="form-group row" id="unique_column_type_holder">
+                                <label for="unique_column_type" class="col-sm-3 col-form-label">Unique column
+                                    type</label>
+                                <div class="col-sm-9">
+                                    <select id="unique_column_type" name="unique_column_type" class="form-control"
+                                            aria-describedby="unique_column_type_help">
+                                        {% for columnType, columnName in uniqueColumns %}
+                                            <option label="{{ columnName }}"
+                                                    {% if configuration.getUniqueColumnType == columnType %}selected{% endif %}
+                                                    value="{{ columnType }}">{{ columnName }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <small id="unique_column_type_help" class="form-text text-muted">
+                                        This field is only relevant for the "identifier-based" detection option.
+                                        Select
+                                        the type of value you expect in
+                                        the unique identifier. What must Firefly III search for?
+                                    </small>
+                                </div>
+                            </div>
 
                             <h4>Other options</h4>
                             <div class="form-group row mb-3">

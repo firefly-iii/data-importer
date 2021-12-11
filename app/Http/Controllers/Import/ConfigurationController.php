@@ -30,7 +30,6 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Converter\Date;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Request\ListAccountsRequest;
@@ -38,11 +37,14 @@ use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
-use App\Services\Spectre\Model\Account as SpectreAccount;
+use App\Services\Shared\Authentication\SecretManager;
+use App\Services\Shared\Configuration\Configuration;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
+use App\Services\Spectre\Response\GetAccountsResponse;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
-use App\Support\Token;
+use App\Support\Http\RestoresConfiguration;
 use Cache;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -61,6 +63,8 @@ use Log;
  */
 class ConfigurationController extends Controller
 {
+    use RestoresConfiguration;
+
     /**
      * StartController constructor.
      */
@@ -81,12 +85,10 @@ class ConfigurationController extends Controller
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
         $accounts  = [];
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
 
-        $configuration = null;
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
+        // create configuration:
+        $configuration = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
@@ -96,8 +98,10 @@ class ConfigurationController extends Controller
         }
 
         // get list of asset accounts:
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
+
+
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
         $request->setVerify(config('importer.connection.verify'));
@@ -110,8 +114,8 @@ class ConfigurationController extends Controller
         }
 
         // also get liabilities
-        $url     = Token::getURL();
-        $token   = Token::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
         $request = new GetAccountsRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -122,34 +126,36 @@ class ConfigurationController extends Controller
             $accounts['Liabilities'][$account->id] = $account;
         }
 
-        // created default configuration object for sensible defaults:
-        if (null === $configuration) {
-            $configuration = Configuration::make();
-        }
+        // possibilities for duplicate detection (unique columns)
+        $uniqueColumns = config('csv.unique_column_options');
 
         // also get the nordigen / spectre accounts
         $importerAccounts = [];
         if ('nordigen' === $flow) {
+            $uniqueColumns = config('nordigen.unique_column_options');
+            $requisitions  = $configuration->getNordigenRequisitions();
+            $reference     = array_shift($requisitions);
             // list all accounts in Nordigen:
-            $reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
+            //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
             $importerAccounts = $this->getNordigenAccounts($reference);
             $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
         }
 
         if ('spectre' === $flow) {
-            // get the accounts over at Spectre.
+            $uniqueColumns           = config('spectre.unique_column_options');
             $url                     = config('spectre.url');
-            $appId                   = config('spectre.app_id');
-            $secret                  = config('spectre.secret');
+            $appId                   = SpectreSecretManager::getAppId();
+            $secret                  = SpectreSecretManager::getSecret();
             $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
             $spectreList->connection = $configuration->getConnection();
-            $spectreAccounts         = $spectreList->get();
-            $importerAccounts        = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
+            /** @var GetAccountsResponse $spectreAccounts */
+            $spectreAccounts  = $spectreList->get();
+            $importerAccounts = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
         }
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts')
+            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
         );
     }
 

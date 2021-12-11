@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
-use Log;
 use Storage;
 use Str;
 
@@ -50,16 +49,16 @@ trait GeneratesIdentifier
      */
     protected function generateIdentifier(): void
     {
-        Log::debug('Going to generate conversion routine identifier.');
+        app('log')->debug('Going to generate conversion routine identifier.');
         $disk  = Storage::disk($this->diskName);
         $count = 0;
         do {
             $generatedId = sprintf('conv-%s', Str::random(12));
             $count++;
-            Log::debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
+            app('log')->debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
         } while ($count < 30 && $disk->exists($generatedId));
         $this->identifier = $generatedId;
-        Log::info(sprintf('Job identifier is "%s"', $generatedId));
+        app('log')->info(sprintf('Job identifier is "%s"', $generatedId));
     }
 
 }

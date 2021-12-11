@@ -26,7 +26,6 @@ namespace App\Console;
 
 use Exception;
 use JsonException;
-use Log;
 
 /**
  * Trait VerifyJSON
@@ -46,7 +45,7 @@ trait VerifyJSON
             json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception | JsonException $e) {
             $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
-            Log::error($message);
+            app('log')->error($message);
 
             return false;
 

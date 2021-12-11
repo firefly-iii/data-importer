@@ -33,7 +33,6 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use JsonException;
-use Log;
 
 /**
  * Class Request
@@ -79,7 +78,7 @@ abstract class Request
      */
     public function setParameters(array $parameters): void
     {
-        Log::debug('Request parameters will be set to: ', $parameters);
+        app('log')->debug('Request parameters will be set to: ', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -103,7 +102,7 @@ abstract class Request
         if (null !== $this->parameters) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
-        Log::debug(sprintf('authenticatedGet(%s)', $fullUrl));
+        app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
         $client = $this->getClient();
         $body   = null;
         try {
@@ -118,7 +117,7 @@ abstract class Request
                      ]
             );
         } catch (TransferException | GuzzleException $e) {
-            Log::error(sprintf('TransferException: %s', $e->getMessage()));
+            app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response
             if (!$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
@@ -128,8 +127,8 @@ abstract class Request
             try {
                 $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $ee) {
-                Log::error(sprintf('Could not decode error: %s', $ee->getMessage()));
-                Log::error($body);
+                app('log')->error(sprintf('Could not decode error: %s', $ee->getMessage()));
+                app('log')->error($body);
                 //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
             }
             // if status code is 503, the account does not exist.
@@ -139,7 +138,7 @@ abstract class Request
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this
-            Log::error(sprintf('Status code is %d', $res->getStatusCode()));
+            app('log')->error(sprintf('Status code is %d', $res->getStatusCode()));
 
             $body = (string) $res->getBody();
         }
@@ -162,7 +161,7 @@ abstract class Request
         if (null === $json) {
             throw new ImporterHttpException(sprintf('Body is empty. Status code is %d.', $res->getStatusCode()));
         }
-        Log::debug('Return JSON result of authenticatedGet');
+        app('log')->debug('Return JSON result of authenticatedGet');
 
         return $json;
     }
@@ -235,7 +234,7 @@ abstract class Request
      */
     protected function authenticatedJsonPost(array $json): array
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
         if (null !== $this->parameters) {

@@ -34,7 +34,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use JsonException;
-use Log;
 use RuntimeException;
 
 /**
@@ -82,7 +81,7 @@ abstract class Request
      */
     public function setParameters(array $parameters): void
     {
-        Log::debug('setParameters', $parameters);
+        app('log')->debug('setParameters', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -122,7 +121,7 @@ abstract class Request
                      ]
             );
         } catch (TransferException $e) {
-            Log::error(sprintf('TransferException: %s', $e->getMessage()));
+            app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response.re
             if (!$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
@@ -132,7 +131,7 @@ abstract class Request
             try {
                 $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
-                Log::error(sprintf('Could not decode error: %s', $e->getMessage()));
+                app('log')->error(sprintf('Could not decode error: %s', $e->getMessage()));
             }
 
             $exception       = new ImporterErrorException;
@@ -141,7 +140,7 @@ abstract class Request
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this
-            Log::error(sprintf('Status code is %d', $res->getStatusCode()));
+            app('log')->error(sprintf('Status code is %d', $res->getStatusCode()));
 
             $body = (string) $res->getBody();
         }
@@ -267,7 +266,7 @@ abstract class Request
             throw new ImporterErrorException($e->getMessage());
         }
 
-        Log::debug('Final headers for spectre signed POST request:', $headers);
+        app('log')->debug('Final headers for spectre signed POST request:', $headers);
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
@@ -278,7 +277,7 @@ abstract class Request
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            Log::error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -336,25 +335,25 @@ abstract class Request
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
 
-        Log::debug('Final headers for spectre UNsigned POST request:', $headers);
+        app('log')->debug('Final headers for spectre UNsigned POST request:', $headers);
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
         } catch (GuzzleException | Exception $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            Log::error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -394,12 +393,12 @@ abstract class Request
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
-        //Log::debug('Final body + headers for spectre UNsigned PUT request:', $opts);
+        //app('log')->debug('Final body + headers for spectre UNsigned PUT request:', $opts);
         try {
             $client = $this->getClient();
             $res    = $client->request('PUT', $fullUrl, $opts);
@@ -414,16 +413,16 @@ abstract class Request
                 try {
                     $json = json_decode((string) $e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
                 } catch (JsonException $e) {
-                    Log::error($e->getMessage());
+                    app('log')->error($e->getMessage());
                 }
                 $json['ResponseHeaders']    = $responseHeaders;
                 $json['ResponseStatusCode'] = $statusCode;
 
                 return $json;
             }
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             if (null !== $response) {
-                Log::error((string) $e->getResponse()->getBody());
+                app('log')->error((string) $e->getResponse()->getBody());
             }
             throw new ImporterHttpException(sprintf('Request Exception: %s', $e->getMessage()));
         }
@@ -431,7 +430,7 @@ abstract class Request
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            Log::error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 

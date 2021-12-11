@@ -27,7 +27,6 @@ namespace App\Services\Spectre\Request;
 
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\GetTransactionsResponse;
-use Log;
 
 /**
  * Class GetTransactionsRequest
@@ -61,7 +60,7 @@ class GetTransactionsRequest extends Request
         $nextId       = 0;
         $transactions = [];
         while ($hasNextPage) {
-            Log::debug(sprintf('Now calling GetTransactionsRequest for next_id %d', $nextId));
+            app('log')->debug(sprintf('Now calling GetTransactionsRequest for next_id %d', $nextId));
 
             $this->setParameters(
                 [
@@ -73,14 +72,14 @@ class GetTransactionsRequest extends Request
             $response = $this->authenticatedGet();
 
             // count entries:
-            Log::debug(sprintf('Found %d entries in data-array', count($response['data'])));
+            app('log')->debug(sprintf('Found %d entries in data-array', count($response['data'])));
 
             // extract next ID
             $hasNextPage = false;
             if (isset($response['meta']['next_id']) && (int) $response['meta']['next_id'] > $nextId) {
                 $hasNextPage = true;
                 $nextId      = $response['meta']['next_id'];
-                Log::debug(sprintf('Next ID is now %d.', $nextId));
+                app('log')->debug(sprintf('Next ID is now %d.', $nextId));
             }
 
             // store customers:

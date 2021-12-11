@@ -26,13 +26,13 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetTransactionsResponse;
 use Carbon\Carbon;
-use Log;
 
 /**
  * Class TransactionProcessor
@@ -61,16 +61,16 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        Log::debug('Now in download()');
+        app('log')->debug('Now in download()');
         $accounts = array_keys($this->configuration->getAccounts());
-        Log::debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
+        app('log')->debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return = [];
         foreach ($accounts as $account) {
             $account = (string) $account;
-            Log::debug(sprintf('Going to download transactions for account #%s', $account));
+            app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
-            $appId                 = config('spectre.app_id');
-            $secret                = config('spectre.secret');
+            $appId                   = SpectreSecretManager::getAppId();
+            $secret                  = SpectreSecretManager::getSecret();
             $request               = new GetTransactionsRequest($url, $appId, $secret);
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
@@ -99,14 +99,14 @@ class TransactionProcessor
     {
         // refresh connection
         $url    = config('spectre.url');
-        $appId  = config('spectre.app_id');
-        $secret = config('spectre.secret');
+        $appId                   = SpectreSecretManager::getAppId();
+        $secret                  = SpectreSecretManager::getSecret();
         $put    = new PutRefreshConnectionRequest($url, $appId, $secret);
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
         if ($response instanceof ErrorResponse) {
-            Log::alert('Could not refresh connection.');
-            Log::alert(sprintf('%s: %s', $response->class, $response->message));
+            app('log')->alert('Could not refresh connection.');
+            app('log')->alert(sprintf('%s: %s', $response->class, $response->message));
         }
     }
 
@@ -115,20 +115,19 @@ class TransactionProcessor
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        Log::debug(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            Log::debug(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            Log::debug(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
-        /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 
-            if (null !== $this->notBefore && $madeOn->lte($this->notBefore)) {
-                app('log')->info(
+            if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -137,8 +136,8 @@ class TransactionProcessor
                 );
                 continue;
             }
-            if (null !== $this->notAfter && $madeOn->gte($this->notAfter)) {
-                app('log')->info(
+            if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -148,10 +147,10 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->info(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
             $return[] = $transaction->toArray();
         }
-        Log::debug(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }

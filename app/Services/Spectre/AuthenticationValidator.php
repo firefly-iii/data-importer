@@ -27,12 +27,11 @@ namespace App\Services\Spectre;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
-use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Response\ErrorResponse;
-use Log;
+use App\Services\Spectre\Authentication\SecretManager;
 
 /**
  * Class AuthenticationValidator
@@ -46,33 +45,27 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
      */
     public function validate(): AuthenticationStatus
     {
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+
         $url    = config('spectre.url');
-        $appId  = config('spectre.app_id');
-        $secret = config('spectre.secret');
-
-        if ('' === $appId && !$this->isCli()) {
-            $appId = (string) session()->get(Constants::SESSION_SPECTRE_APP_ID);
-        }
-        if ('' === $secret && !$this->isCli()) {
-            $secret = (string) session()->get(Constants::SESSION_SPECTRE_SECRET);
-        }
-
+        $appId  = SecretManager::getAppId();
+        $secret = SecretManager::getSecret();
 
         if ('' === $appId || '' === $secret) {
             return AuthenticationStatus::nodata();
         }
-        $request = new ListCustomersRequest($url, $appId, $secret);
 
+        $request = new ListCustomersRequest($url, $appId, $secret);
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
             $response = $request->get();
         } catch (ImporterHttpException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             return AuthenticationStatus::error();
         }
         if ($response instanceof ErrorResponse) {
-            Log::error(sprintf('%s: %s', $response->class, $response->message));
+            app('log')->error(sprintf('%s: %s', $response->class, $response->message));
             return AuthenticationStatus::error();
         }
 

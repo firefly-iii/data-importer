@@ -67,7 +67,7 @@ trait IsReadyForStep
      */
     protected function isReadyForStep(Request $request): bool
     {
-        $flow = $request->cookie('flow');
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
             Log::debug('isReadyForStep returns true because $flow is null');
             return true;

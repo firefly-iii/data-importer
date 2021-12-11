@@ -26,8 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
-use Log;
+use App\Services\Shared\Configuration\Configuration;
 
 /**
  * Class RoutineManager
@@ -56,7 +55,7 @@ class RoutineManager
     public function setTransactions(array $transactions): void
     {
         $this->transactions = $transactions;
-        Log::debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
+        app('log')->debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
     }
 
     /**
@@ -67,7 +66,7 @@ class RoutineManager
         $this->apiSubmitter = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
-        Log::debug('Created APISubmitter in RoutineManager');
+        app('log')->debug('Created APISubmitter in RoutineManager');
     }
 
     /**
@@ -76,7 +75,7 @@ class RoutineManager
      */
     public function start(): void
     {
-        Log::debug('Now starting submission by calling API Submitter');
+        app('log')->debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
         $this->apiSubmitter->processTransactions($this->transactions);
         $this->allMessages = $this->apiSubmitter->getMessages();

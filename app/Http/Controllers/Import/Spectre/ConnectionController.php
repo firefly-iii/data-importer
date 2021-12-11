@@ -29,8 +29,9 @@ namespace App\Http\Controllers\Import\Spectre;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConnectionControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Session\Constants;
+use App\Services\Spectre\Authentication\SecretManager;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Model\Customer;
 use App\Services\Spectre\Request\ListConnectionsRequest;
 use App\Services\Spectre\Request\ListCustomersRequest;
@@ -40,6 +41,7 @@ use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\PostConnectSessionResponse;
 use App\Services\Spectre\Response\PostCustomerResponse;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\Request;
 use JsonException;
 use Log;
@@ -49,6 +51,8 @@ use Log;
  */
 class ConnectionController extends Controller
 {
+    use RestoresConfiguration;
+
     /**
      *
      */
@@ -69,9 +73,8 @@ class ConnectionController extends Controller
         $subTitle  = 'Select your financial organisation';
         $url       = config('spectre.url');
 
-        // TODO or cookie value, must replace them all with a helper, same for nordigen.
-        $appId  = config('spectre.app_id');
-        $secret = config('spectre.secret');
+        $appId  = SecretManager::getAppId();
+        $secret = SecretManager::getSecret();
 
         // check if already has the correct customer:
         $hasCustomer = false;
@@ -101,10 +104,7 @@ class ConnectionController extends Controller
 
         // store identifier in config
         // skip next time?
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
+        $configuration = $this->restoreConfiguration();
         $configuration->setIdentifier($identifier);
 
         // save config
@@ -139,16 +139,12 @@ class ConnectionController extends Controller
 
         if ('00' === $connectionId) {
             // get identifier
-            $configuration = Configuration::fromArray([]);
-            if (session()->has(Constants::CONFIGURATION)) {
-                $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-            }
+            $configuration = $this->restoreConfiguration();
 
             // make a new connection.
-            // TODO grab from cookie
             $url                = config('spectre.url');
-            $appId              = config('spectre.app_id');
-            $secret             = config('spectre.secret');
+            $appId              = SpectreSecretManager::getAppId();
+            $secret             = SpectreSecretManager::getSecret();
             $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
             $newToken->customer = $configuration->getIdentifier();
             $newToken->url      = route('011-connections.callback');
@@ -161,10 +157,7 @@ class ConnectionController extends Controller
         // store connection in config, go to fancy JS page.
         // store identifier in config
         // skip next time?
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
+        $configuration = $this->restoreConfiguration();
         $configuration->setConnection($connectionId);
 
         // save config

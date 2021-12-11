@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-use Log;
-
 /**
  * Class Amount.
  */
@@ -72,19 +70,19 @@ class Amount implements ConverterInterface
             return '0';
         }
 
-        Log::debug(sprintf('Start with amount "%s"', $value));
+        app('log')->debug(sprintf('Start with amount "%s"', $value));
         $original = $value;
         $value    = $this->stripAmount((string) $value);
         $decimal  = null;
 
         if ($this->decimalIsDot($value)) {
             $decimal = '.';
-            Log::debug(sprintf('Decimal character in "%s" seems to be a dot.', $value));
+            app('log')->debug(sprintf('Decimal character in "%s" seems to be a dot.', $value));
         }
 
         if ($this->decimalIsComma($value)) {
             $decimal = ',';
-            Log::debug(sprintf('Decimal character in "%s" seems to be a comma.', $value));
+            app('log')->debug(sprintf('Decimal character in "%s" seems to be a comma.', $value));
         }
 
         // decimal character is null? find out if "0.1" or ".1" or "0,1" or ",1"
@@ -100,28 +98,28 @@ class Amount implements ConverterInterface
         // if decimal is dot, replace all comma's and spaces with nothing
         if (null !== $decimal) {
             $value = $this->replaceDecimal($decimal, $value);
-            Log::debug(sprintf('Converted amount from "%s" to "%s".', $original, $value));
+            app('log')->debug(sprintf('Converted amount from "%s" to "%s".', $original, $value));
         }
 
         if (null === $decimal) {
             // replace all:
             $search = ['.', ' ', ','];
             $value  = str_replace($search, '', $value);
-            Log::debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
+            app('log')->debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
         if (str_starts_with($value, '.')) {
             $value = '0' . $value;
         }
 
         if (is_numeric($value)) {
-            Log::debug(sprintf('Final NUMERIC value is: "%s"', $value));
+            app('log')->debug(sprintf('Final NUMERIC value is: "%s"', $value));
 
             return $value;
         }
         // @codeCoverageIgnoreStart
-        Log::debug(sprintf('Final value is: "%s"', $value));
+        app('log')->debug(sprintf('Final value is: "%s"', $value));
         $formatted = sprintf('%01.12f', $value);
-        Log::debug(sprintf('Is formatted to : "%s"', $formatted));
+        app('log')->debug(sprintf('Is formatted to : "%s"', $formatted));
 
         return $formatted;
         // @codeCoverageIgnoreEnd
@@ -150,7 +148,7 @@ class Amount implements ConverterInterface
         }
         $str = trim($str);
 
-        Log::debug(sprintf('Stripped "%s" away to "%s"', $value, $str));
+        app('log')->debug(sprintf('Stripped "%s" away to "%s"', $value, $str));
 
         return $str;
     }
@@ -228,11 +226,11 @@ class Amount implements ConverterInterface
     private function findFromLeft(string $value): ?string
     {
         $decimal = null;
-        Log::debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
+        app('log')->debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
         $res = strrpos($value, '.');
         if (false !== $res) {
             // blandly assume this is the one.
-            Log::debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
+            app('log')->debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
             $decimal = '.';
         }
 

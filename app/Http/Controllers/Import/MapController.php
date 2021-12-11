@@ -28,11 +28,12 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -41,7 +42,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use JsonException;
-use League\Csv\Exception;
 use Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -51,6 +51,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class MapController extends Controller
 {
+    use RestoresConfiguration;
+
     protected const DISK_NAME = 'jobs';
 
     /**
@@ -66,82 +68,105 @@ class MapController extends Controller
 
     /**
      * @return Factory|View
-     * @throws FileNotFoundException
      */
     public function index()
     {
-        $mainTitle = 'Map data';
-        $subTitle  = 'Map values in file to actual data in Firefly III';
-        $data      = [];
-        $roles     = [];
         Log::debug('Now in mapController index');
 
-        // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
+        $mainTitle     = 'Map data';
+        $subTitle      = 'Map values in file to actual data in Firefly III';
+        $configuration = $this->restoreConfiguration();
+        $data          = [];
+        $roles         = [];
 
-        // the config in the session will miss important values, we must get those from disk:
-        // 'mapping', 'do_mapping', 'roles' are missing.
-        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
-        }
-
-        // depends on flow how to handle mapping
         if ('csv' === $configuration->getFlow()) {
-
-            // then we can use them:
-            $roles           = $configuration->getRoles();
-            $existingMapping = $configuration->getMapping();
-            $doMapping       = $configuration->getDoMapping();
-            $data            = [];
-
-            foreach ($roles as $index => $role) {
-                $info     = config('csv.import_roles')[$role] ?? null;
-                $mappable = $info['mappable'] ?? false;
-                if (null === $info) {
-                    continue;
-                }
-                if (false === $mappable) {
-                    continue;
-                }
-                $mapColumn = $doMapping[$index] ?? false;
-                if (false === $mapColumn) {
-                    continue;
-                }
-                Log::debug(sprintf('Mappable role is "%s"', $role));
-
-                $info['role']   = $role;
-                $info['values'] = [];
-
-
-                // create the "mapper" class which will get data from Firefly III.
-                $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
-                if (!class_exists($class)) {
-                    throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
-                }
-                Log::debug(sprintf('Associated class is %s', $class));
-
-
-                /** @var MapperInterface $object */
-                $object               = app($class);
-                $info['mapping_data'] = $object->getMap();
-                $info['mapped']       = $existingMapping[$index] ?? [];
-
-                Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
-
-                $data[$index] = $info;
-            }
-
-            // get columns from file
-            $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
-            $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
-            $data      = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+            $roles = $configuration->getRoles();
+            $data  = $this->getCSVMapInformation();
         }
+
+        // nordigen, spectre and others:
+        if ('csv' !== $configuration->getFlow()) {
+            $roles = [];
+            $data  = $this->getImporterMapInformation();
+        }
+
+        // if nothing to map, just set mappable to true and go to the next step:
+        if (0 === count($data)) {
+            // set map config as complete.
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            return redirect()->route('007-convert.index');
+        }
+
+
+        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+    }
+
+    /**
+     * Return the map data necessary for the CSV mapping based on some weird helpers.
+     * TODO needs refactoring and proper splitting into helpers.
+     *
+     * @return array
+     */
+    private function getCSVMapInformation(): array
+    {
+        $configuration   = $this->restoreConfiguration();
+        $roles           = $configuration->getRoles();
+        $existingMapping = $configuration->getMapping();
+        $doMapping       = $configuration->getDoMapping();
+        $data            = [];
+
+        foreach ($roles as $index => $role) {
+            $info     = config('csv.import_roles')[$role] ?? null;
+            $mappable = $info['mappable'] ?? false;
+            if (null === $info) {
+                continue;
+            }
+            if (false === $mappable) {
+                continue;
+            }
+            $mapColumn = $doMapping[$index] ?? false;
+            if (false === $mapColumn) {
+                continue;
+            }
+            Log::debug(sprintf('Mappable role is "%s"', $role));
+
+            $info['role']   = $role;
+            $info['values'] = [];
+
+
+            // create the "mapper" class which will get data from Firefly III.
+            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+            if (!class_exists($class)) {
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+            }
+            Log::debug(sprintf('Associated class is %s', $class));
+
+
+            /** @var MapperInterface $object */
+            $object               = app($class);
+            $info['mapping_data'] = $object->getMap();
+            $info['mapped']       = $existingMapping[$index] ?? [];
+
+            Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+
+            $data[$index] = $info;
+        }
+
+        // get columns from file
+        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
+        $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+        return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+    }
+
+    /**
+     * Weird bunch of code to return info on Spectre and Nordigen.
+     * @return array
+     */
+    private function getImporterMapInformation(): array
+    {
+        $data            = [];
+        $configuration   = $this->restoreConfiguration();
+        $existingMapping = $configuration->getMapping();
         /*
          * To map Nordigen, pretend the file has one "column" (this is based on the CSV importer after all)
          * that contains:
@@ -186,21 +211,12 @@ class MapController extends Controller
             Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
-            $object                       = app($class);
-            $opposingName['mapping_data'] = $object->getMap();
-            $opposingName['mapped']       = $existingMapping[$index] ?? [];
-            $data[]                       = $category;
+            $object                   = app($class);
+            $category['mapping_data'] = $object->getMap();
+            $category['mapped']       = $existingMapping[$index] ?? [];
+            $data[]                   = $category;
         }
-
-        // if nothing to map, just set mappable to true and go to the next step:
-        if (0 === count($data)) {
-            // set map config as complete.
-            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-            return redirect()->route('007-convert.index');
-        }
-
-
-        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+        return $data;
     }
 
     /**
@@ -245,6 +261,13 @@ class MapController extends Controller
         return array_unique($filtered);
     }
 
+    /**
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws FileNotFoundException
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     */
     private function getCategories(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
@@ -290,7 +313,7 @@ class MapController extends Controller
         $mapping = !is_array($mapping) ? [] : $mapping;
         $data    = [];
 
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
+        $configuration = $this->restoreConfiguration();
 
         /**
          * Loop array with available columns.
@@ -342,6 +365,7 @@ class MapController extends Controller
         }
 
         // then save entire thing to a new disk file:
+        // TODO write config needs helper too
         $configFileName = StorageService::storeArray($configuration->toArray());
         Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 

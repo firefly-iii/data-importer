@@ -1,6 +1,6 @@
 <?php
 /*
- * ImportFinished.php
+ * ImportReportMail.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -29,17 +29,17 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Class ImportFinished
+ * Class ImportReportMail
  */
-class ImportFinished extends Mailable
+class ImportReportMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $time;
-    public $errors;
-    public $warnings;
-    public $messages;
-    public $url;
+    public string $time;
+    public array $errors;
+    public array $warnings;
+    public array $messages;
+    public string $url;
 
     /**
      * Create a new message instance.
@@ -65,6 +65,6 @@ class ImportFinished extends Mailable
         $address = (string) config('mail.from.address');
         $name    = (string) config('mail.from.name');
 
-        return $this->from($address, $name)->markdown('emails.import.finished');
+        return $this->from($address, $name)->markdown('emails.import.report');
     }
 }

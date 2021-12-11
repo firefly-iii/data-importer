@@ -25,14 +25,13 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use JsonException;
 use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
 use League\Csv\Statement;
-use Log;
 
 /**
  * Class CSVFileProcessor
@@ -78,26 +77,26 @@ class CSVFileProcessor
      */
     public function processCSVFile(): array
     {
-        Log::debug('Now in processCSVFile()');
+        app('log')->debug('Now in processCSVFile()');
 
 
         $offset = $this->hasHeaders ? 1 : 0;
         try {
             $this->reader->setDelimiter($this->delimiter);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
         }
-        Log::debug(sprintf('Offset is %d', $offset));
+        app('log')->debug(sprintf('Offset is %d', $offset));
         try {
             $stmt    = (new Statement)->offset($offset);
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not read CSV: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
@@ -106,8 +105,8 @@ class CSVFileProcessor
         try {
             return $this->processCSVLines($records);
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not parse CSV: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
@@ -126,20 +125,20 @@ class CSVFileProcessor
     {
         $updatedRecords = [];
         $count          = $records->count();
-        Log::info(sprintf('Now in %s with %d records', __METHOD__, $count));
+        app('log')->info(sprintf('Now in %s with %d records', __METHOD__, $count));
         $currentIndex = 1;
         foreach ($records as $line) {
             $line = $this->sanitize($line);
-            Log::debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
+            app('log')->debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
             $updatedRecords[] = $line;
             $currentIndex++;
 
         }
-        Log::info(sprintf('Parsed all %d lines.', $count));
+        app('log')->info(sprintf('Parsed all %d lines.', $count));
 
         // exclude double lines.
         if ($this->configuration->isIgnoreDuplicateLines()) {
-            Log::info('Going to remove duplicate lines.');
+            app('log')->info('Going to remove duplicate lines.');
             $updatedRecords = $this->removeDuplicateLines($updatedRecords);
         }
 
@@ -179,13 +178,13 @@ class CSVFileProcessor
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
-                Log::error($e->getMessage());
-                Log::error($e->getTraceAsString());
+                app('log')->error($e->getMessage());
+                app('log')->error($e->getTraceAsString());
                 throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
             }
             if (in_array($hash, $hashes, true)) {
                 $message = sprintf('Going to skip line #%d because it\'s in the file twice. This may reset the count below.', $index);
-                Log::warning($message);
+                app('log')->warning($message);
                 $this->addWarning($index, $message);
             }
             if (!in_array($hash, $hashes, true)) {
@@ -193,7 +192,7 @@ class CSVFileProcessor
                 $return[] = $line;
             }
         }
-        Log::info(sprintf('Went from %d line(s) to %d line(s)', count($array), count($return)));
+        app('log')->info(sprintf('Went from %d line(s) to %d line(s)', count($array), count($return)));
 
         return $return;
     }

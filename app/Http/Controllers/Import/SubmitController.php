@@ -28,12 +28,11 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Session\Constants;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
-use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,7 +47,10 @@ use Storage;
  */
 class SubmitController extends Controller
 {
+    use RestoresConfiguration;
+
     protected const DISK_NAME = 'jobs';
+
 
     /**
      * StartController constructor.
@@ -61,7 +63,6 @@ class SubmitController extends Controller
     }
 
     /**
-     * @throws FileNotFoundException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -71,16 +72,8 @@ class SubmitController extends Controller
         $mainTitle = 'Submit the data';
 
         // get configuration object.
-        $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
-        // append info from the file on disk:
-        $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setMapping($diskConfig->getMapping());
-        }
-        $jobBackUrl = route('back.conversion');
+        $configuration = $this->restoreConfiguration();
+        $jobBackUrl    = route('back.conversion');
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -131,21 +124,12 @@ class SubmitController extends Controller
     public function start(Request $request): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier        = $request->get('identifier');
-        $configuration     = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        $configurationFile = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        $routine           = new RoutineManager($identifier);
-        $importJobStatus   = SubmissionStatusManager::startOrFindSubmission($identifier);
-        $disk              = Storage::disk(self::DISK_NAME);
-        $fileName          = sprintf('%s.json', $identifier);
-
-        if (null !== $configurationFile) {
-            $diskArray  = json_decode(StorageService::getContent($configurationFile), true, JSON_THROW_ON_ERROR);
-            $diskConfig = Configuration::fromArray($diskArray);
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
-        }
+        $identifier      = $request->get('identifier');
+        $configuration   = $this->restoreConfiguration();
+        $routine         = new RoutineManager($identifier);
+        $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);
+        $disk            = Storage::disk(self::DISK_NAME);
+        $fileName        = sprintf('%s.json', $identifier);
 
         // get files from disk:
         if (!$disk->has($fileName)) {

@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Request;
 
 
+use App\Services\Session\Constants;
 use Illuminate\Validation\Validator;
 
 /**
@@ -138,7 +139,7 @@ class ConfigurationPostRequest extends Request
         $validator->after(
             function (Validator $validator) {
                 // validate all account info
-                $flow     = request()->cookie('flow');
+                $flow     = request()->cookie(Constants::FLOW_COOKIE);
                 $data     = $validator->getData();
                 $doImport = $data['do_import'] ?? [];
                 if (0 === count($doImport) && 'csv' !== $flow) {

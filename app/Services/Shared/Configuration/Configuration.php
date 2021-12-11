@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /*
  * Configuration.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -20,21 +21,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
-
-namespace App\Services\CSV\Configuration;
+namespace App\Services\Shared\Configuration;
 
 use Carbon\Carbon;
-use Log;
 use UnexpectedValueException;
+
 
 /**
  * Class Configuration
- * TODO move me to a shared directory
  */
 class Configuration
 {
-    /** @var int */
     public const VERSION = 3;
     private string $date;
     private int    $defaultAccount;
@@ -148,7 +145,7 @@ class Configuration
     /**
      * Create a standard empty configuration.
      *
-     * @return static
+     * @return Configuration
      */
     public static function make(): self
     {
@@ -196,8 +193,10 @@ class Configuration
         $object->dateRange       = $array['date_range'] ?? 'all';
         $object->dateRangeNumber = $array['date_range_number'] ?? 30;
         $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
-        $object->dateNotBefore   = $array['date_not_before'] ?? '';
-        $object->dateNotAfter    = $array['date_not_after'] ?? '';
+
+        // null or Carbon because fromRequest will give Carbon object.
+        $object->dateNotBefore   = null === $array['date_not_before']  ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter    = null === $array['date_not_after']  ? '' : $array['date_not_before']->format('Y-m-d');
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -238,20 +237,20 @@ class Configuration
      */
     public static function fromFile(array $data): self
     {
-        Log::debug('Now in Configuration::fromFile. Data is omitted and will not be printed.');
+        app('log')->debug('Now in Configuration::fromFile. Data is omitted and will not be printed.');
         $version = $data['version'] ?? 1;
         if (1 === $version) {
-            Log::debug('v1, going for classic.');
+            app('log')->debug('v1, going for classic.');
 
             return self::fromClassicFile($data);
         }
         if (2 === $version) {
-            Log::debug('v2 config file!');
+            app('log')->debug('v2 config file!');
 
             return self::fromVersionTwo($data);
         }
         if (3 === $version) {
-            Log::debug('v3 config file!');
+            app('log')->debug('v3 config file!');
 
             return self::fromVersionThree($data);
         }
@@ -300,19 +299,19 @@ class Configuration
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
 
         if (isset($data['ignore_duplicates']) && true === $data['ignore_duplicates']) {
-            Log::debug('Will ignore duplicates.');
+            app('log')->debug('Will ignore duplicates.');
             $object->ignoreDuplicateTransactions = true;
             $object->duplicateDetectionMethod    = 'classic';
         }
 
         if (isset($data['ignore_duplicates']) && false === $data['ignore_duplicates']) {
-            Log::debug('Will NOT ignore duplicates.');
+            app('log')->debug('Will NOT ignore duplicates.');
             $object->ignoreDuplicateTransactions = false;
             $object->duplicateDetectionMethod    = 'none';
         }
 
         if (isset($data['ignore_lines']) && true === $data['ignore_lines']) {
-            Log::debug('Will ignore duplicate lines.');
+            app('log')->debug('Will ignore duplicate lines.');
             $object->ignoreDuplicateLines = true;
         }
 
@@ -333,7 +332,7 @@ class Configuration
             // some roles have been given a new name some time in the past.
             $role = $classicRoleNames[$role] ?? $role;
 
-            $config = config(sprintf('csv_importer.import_roles.%s', $role));
+            $config = config(sprintf('csv.import_roles.%s', $role));
             if (null !== $config) {
                 $object->roles[] = $role;
             }
@@ -422,7 +421,7 @@ class Configuration
 
         if (!array_key_exists('duplicate_detection_method', $array)) {
             if (false === $object->ignoreDuplicateTransactions) {
-                Log::debug('Set the duplicate method to "none".');
+                app('log')->debug('Set the duplicate method to "none".');
                 $object->duplicateDetectionMethod = 'none';
             }
         }
@@ -883,24 +882,25 @@ class Configuration
      */
     public function updateDateRange(): void
     {
-        Log::debug('Now in updateDateRange()');
+        app('log')->debug('Now in updateDateRange()');
         // set date and time:
         switch ($this->dateRange) {
+            default:
             case 'all':
-                Log::debug('Range is null, set all to NULL.');
+                app('log')->debug('Range is null, set all to NULL.');
                 $this->dateRangeUnit   = 'd';
                 $this->dateRangeNumber = 30;
                 $this->dateNotBefore   = '';
                 $this->dateNotAfter    = '';
                 break;
             case 'partial':
-                Log::debug('Range is partial, after is NULL, dateNotBefore will be calculated.');
+                app('log')->debug('Range is partial, after is NULL, dateNotBefore will be calculated.');
                 $this->dateNotAfter  = '';
                 $this->dateNotBefore = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
-                Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
+                app('log')->debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
                 break;
             case 'range':
-                Log::debug('Range is "range", both will be created from a string.');
+                app('log')->debug('Range is "range", both will be created from a string.');
                 $before = $this->dateNotBefore; // string
                 $after  = $this->dateNotAfter;  // string
                 if (null !== $before) {
@@ -916,7 +916,7 @@ class Configuration
 
                 $this->dateNotBefore = null === $before ? '' : $before->format('Y-m-d');
                 $this->dateNotAfter  = null === $after ? '' : $after->format('Y-m-d');
-                Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
+                app('log')->debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
     }
 

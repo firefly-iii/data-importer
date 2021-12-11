@@ -28,7 +28,6 @@ use Carbon\Carbon;
 use Carbon\Language;
 use Exception;
 use InvalidArgumentException;
-use Log;
 
 /**
  * Class Date
@@ -67,16 +66,16 @@ class Date implements ConverterInterface
         }
 
         if ('' === $string) {
-            Log::warning('Empty date string, so date is set to today.');
+            app('log')->warning('Empty date string, so date is set to today.');
             $carbon = today();
             $carbon->startOfDay();
         }
         if ('' !== $string) {
-            Log::debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
+            app('log')->debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
             } catch (InvalidArgumentException | Exception $e) {
-                Log::error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
+                app('log')->error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
 
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
             }

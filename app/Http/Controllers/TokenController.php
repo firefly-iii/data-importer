@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GuzzleHttp\Client;
@@ -62,45 +63,41 @@ class TokenController extends Controller
     {
         $pageTitle = 'Data importer';
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $configToken = (string) config('importer.access_token');
-        $clientId    = (int) config('importer.client_id');
-        $baseURL     = (string) config('importer.url');
-        $vanityURL   = $baseURL;
-        if ('' !== (string) config('importer.vanity_url')) {
-            $vanityURL = config('importer.vanity_url');
-        }
+
+        $accessToken = SecretManager::getAccessToken();
+        $clientId    = SecretManager::getClientId();
+        $baseUrl     = SecretManager::getBaseUrl();
+        $vanityUrl   = SecretManager::getVanityUrl();
 
         Log::info('The following configuration information was found:');
-        Log::info(sprintf('Personal Access Token: "%s" (limited to 25 chars if present)', substr($configToken, 0, 25)));
+        Log::info(sprintf('Personal Access Token: "%s" (limited to 25 chars if present)', substr($accessToken, 0, 25)));
         Log::info(sprintf('Client ID            : "%s"', $clientId));
-        Log::info(sprintf('Base URL             : "%s"', $baseURL));
-        Log::info(sprintf('Vanity URL           : "%s"', $vanityURL));
+        Log::info(sprintf('Base URL             : "%s"', $baseUrl));
+        Log::info(sprintf('Vanity URL           : "%s"', $vanityUrl));
 
         // Option 1: access token and url are present:
-        if ('' !== $configToken && '' !== $baseURL) {
-            Log::debug(sprintf('Found personal access token + URL "%s" in config, set cookie and return to index.', $baseURL));
+        if ('' !== $accessToken && '' !== $baseUrl) {
+            Log::debug(sprintf('Found personal access token + URL "%s" in config, set cookie and return to index.', $baseUrl));
 
-            // set cookies.
             $cookies = [
-                cookie('access_token', $configToken),
-                cookie('base_url', $baseURL),
-                cookie('vanity_url', $vanityURL),
-                cookie('refresh_token', ''),
+                SecretManager::saveAccessToken($accessToken),
+                SecretManager::saveBaseUrl($baseUrl),
+                SecretManager::saveVanityUrl($vanityUrl),
+                SecretManager::saveRefreshToken(''),
             ];
-
             return redirect(route('index'))->withCookies($cookies);
         }
 
         // Option 2: client ID + base URL.
-        if (0 !== $clientId && '' !== $baseURL) {
-            Log::debug(sprintf('Found client ID "%d" + URL "%s" in config, redirect to Firefly III for permission.', $clientId, $baseURL));
-            return $this->redirectForPermission($request, $baseURL, $vanityURL, $clientId);
+        if (0 !== $clientId && '' !== $baseUrl) {
+            Log::debug(sprintf('Found client ID "%d" + URL "%s" in config, redirect to Firefly III for permission.', $clientId, $baseUrl));
+            return $this->redirectForPermission($request, $baseUrl, $vanityUrl, $clientId);
         }
 
         // Option 3: either is empty, ask for client ID and/or base URL:
         $clientId = 0 === $clientId ? '' : $clientId;
 
-        return view('token.client_id', compact('baseURL', 'clientId', 'pageTitle'));
+        return view('token.client_id', compact('baseUrl', 'clientId', 'pageTitle'));
     }
 
     /**
@@ -211,9 +208,11 @@ class TokenController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $response = ['result' => 'OK', 'message' => null];
-        $url      = (string) $request->cookie('base_url');
-        $token    = (string) $request->cookie('access_token');
-        $request  = new SystemInformationRequest($url, $token);
+
+        // get values from secret manager:
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -304,10 +303,10 @@ class TokenController extends Controller
 
         // set cookies.
         $cookies = [
-            cookie('access_token', (string) $data['access_token']),
-            cookie('base_url', $baseURL),
-            cookie('vanity_url', $vanityURL),
-            cookie('refresh_token', (string) $data['refresh_token']),
+            SecretManager::saveAccessToken((string) $data['access_token']),
+            SecretManager::saveBaseUrl($baseURL),
+            SecretManager::saveVanityUrl($vanityURL),
+            SecretManager::saveRefreshToken((string) $data['refresh_token']),
         ];
         Log::debug(sprintf('Return redirect with cookies to "%s"', route('index')));
 

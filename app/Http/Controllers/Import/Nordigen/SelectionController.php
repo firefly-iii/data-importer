@@ -30,14 +30,16 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\ListBanksRequest;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use JsonException;
 use Log;
@@ -47,6 +49,8 @@ use Log;
  */
 class SelectionController extends Controller
 {
+    use RestoresConfiguration;
+
     /**
      *
      */
@@ -64,10 +68,22 @@ class SelectionController extends Controller
     public function index()
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $countries = config('nordigen.countries');
-        $mainTitle = 'Selection';
-        $subTitle  = 'Select your country and the bank you wish to use.';
+        $countries     = config('nordigen.countries');
+        $mainTitle     = 'Selection';
+        $subTitle      = 'Select your country and the bank you wish to use.';
+        $configuration = $this->restoreConfiguration();
 
+        // if there is a requisition & country etc in the config file, go to next step.
+        $requisitions = $configuration->getNordigenRequisitions();
+        $country  =$configuration->getNordigenCountry();
+        $bank = $configuration->getNordigenBank();
+        if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
+            session()->put(Constants::CONFIGURATION, $configuration->toArray());
+            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
+
+            // send to Nordigen for approval
+            return redirect(route('010-build-link.index'));
+        }
         // get banks and countries
         $accessToken = TokenManager::getAccessToken();
         $url         = config('nordigen.url');
@@ -84,25 +100,20 @@ class SelectionController extends Controller
         if ($response instanceof ErrorResponse) {
             throw new ImporterErrorException((string) $response->message);
         }
-        return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries'));
+        return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries', 'configuration'));
     }
 
     /**
      * @param SelectionRequest $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
-        $configuration = Configuration::fromArray([]);
-        if (session()->has(Constants::CONFIGURATION)) {
-            $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION));
-        }
-        $values = $request->getAll();
+        $configuration = $this->restoreConfiguration();
+        $values        = $request->getAll();
 
         // overrule with sandbox?
         if (config('nordigen.use_sandbox')) {

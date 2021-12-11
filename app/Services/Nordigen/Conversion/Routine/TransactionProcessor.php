@@ -26,12 +26,11 @@ namespace App\Services\Nordigen\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Services\CSV\Configuration\Configuration;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Nordigen\TokenManager;
+use App\Services\Shared\Configuration\Configuration;
 use Carbon\Carbon;
-use Log;
 
 /**
  * Class TransactionProcessor
@@ -51,14 +50,14 @@ class TransactionProcessor
      */
     public function download(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
-        if ('' !== (string) $this->configuration->getDateNotBefore()) {
+        if ('' !==  $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
-        if ('' !== (string) $this->configuration->getDateNotAfter()) {
+        if ('' !==  $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
@@ -66,7 +65,7 @@ class TransactionProcessor
 
         $return = [];
         foreach ($accounts as $key => $account) {
-            Log::debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
+            app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             $account     = (string) $account;
             $accessToken = TokenManager::getAccessToken();
             $url         = config('nordigen.url');
@@ -78,9 +77,9 @@ class TransactionProcessor
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
             $return[$account] = $this->filterTransactions($transactions);
-            Log::debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
+            app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
-        Log::debug('Done with download');
+        app('log')->debug('Done with download');
 
         return $return;
     }
@@ -90,19 +89,19 @@ class TransactionProcessor
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        Log::debug(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            Log::debug(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            Log::debug(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->getDate();
 
-            if (null !== $this->notBefore && $madeOn->lte($this->notBefore)) {
-                app('log')->info(
+            if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -111,8 +110,8 @@ class TransactionProcessor
                 );
                 continue;
             }
-            if (null !== $this->notAfter && $madeOn->gte($this->notAfter)) {
-                app('log')->info(
+            if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
+                app('log')->debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -122,10 +121,10 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->info(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
             $return[] = $transaction;
         }
-        Log::debug(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }

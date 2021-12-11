@@ -27,7 +27,6 @@ namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Shared\Response\Response;
-use Log;
 
 /**
  * Class PostNewRequisitionRequest
@@ -75,7 +74,7 @@ class PostNewRequisitionRequest extends Request
      */
     public function post(): Response
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array =
             [
                 'redirect'       => route('010-build-link.callback'),

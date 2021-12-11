@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\Statement;
-use Log;
 
 /**
  * Class MapperService
@@ -51,7 +50,7 @@ class MapperService
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
     {
-        Log::debug('Now in getMapData');
+        app('log')->debug('Now in getMapData');
         // make file reader first.
         $reader = Reader::createFromString($content);
 
@@ -59,8 +58,8 @@ class MapperService
         try {
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
-            Log::error($e->getTraceAsString());
+            app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 
@@ -72,11 +71,11 @@ class MapperService
             $stmt    = (new Statement)->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             throw new ImporterErrorException($e->getMessage());
         }
         // loop each row, apply specific:
-        Log::debug('Going to loop all records to collect information');
+        app('log')->debug('Going to loop all records to collect information');
         foreach ($records as $row) {
             //$row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data

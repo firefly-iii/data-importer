@@ -25,8 +25,6 @@ declare(strict_types=1);
 namespace App\Services\CSV\Converter;
 
 
-use Log;
-
 /**
  *
  * Class BankDebitCredit
@@ -43,7 +41,7 @@ class BankDebitCredit implements ConverterInterface
      */
     public function convert($value): int
     {
-        Log::debug('Going to convert ', ['value' => $value]);
+        app('log')->debug('Going to convert ', ['value' => $value]);
         $negative = [
             'D', // Old style Rabobank (NL). Short for "Debit"
             'A', // New style Rabobank (NL). Short for "Af"
@@ -52,6 +50,7 @@ class BankDebitCredit implements ConverterInterface
             'Debet', // Triodos (NL)
             'Debit', // ING (EN), thx Quibus!
             'S', // Volksbank (DE), Short for "Soll"
+            'DBIT', // https://subsembly.com/index.html (Banking4 App)
         ];
         if (in_array(trim($value), $negative, true)) {
             return -1;

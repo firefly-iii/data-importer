@@ -26,7 +26,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion;
 
-use App\Services\CSV\Configuration\Configuration;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;

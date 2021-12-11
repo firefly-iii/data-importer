@@ -33,7 +33,6 @@ use App\Services\Nordigen\Request\GetAccountBalanceRequest;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
-use Log;
 
 /**
  * Class AccountInformationCollector
@@ -48,14 +47,14 @@ class AccountInformationCollector
      */
     public static function collectInformation(Account $account): Account
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
         try {
             $detailedAccount = self::getAccountDetails($account);
         } catch (ImporterHttpException | ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $detailedAccount->setStatus('no-info');
             $detailedAccount->setName('Unknown account');
@@ -65,7 +64,7 @@ class AccountInformationCollector
         try {
             $balanceAccount = self::getBalanceDetails($account);
         } catch (ImporterHttpException | ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $status = $balanceAccount->getStatus();
             if ('no-info' === $status) {
@@ -93,7 +92,7 @@ class AccountInformationCollector
      */
     protected static function getAccountDetails(Account $account): Account
     {
-        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
@@ -101,7 +100,7 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
         $response    = $request->get();
         $information = $response->data['account'];
-        Log::debug('Collected information for account', $information);
+        app('log')->debug('Collected information for account', $information);
 
         $account->setResourceId($information['resource_id'] ?? '');
         $account->setBban($information['bban'] ?? '');
@@ -133,7 +132,7 @@ class AccountInformationCollector
      */
     private static function getBalanceDetails(Account $account): Account
     {
-        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
@@ -142,7 +141,7 @@ class AccountInformationCollector
         $response = $request->get();
 
         foreach ($response->data['balances'] as $array) {
-            Log::debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
+            app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
             $account->addBalance(Balance::createFromArray($array));
         }
         return $account;

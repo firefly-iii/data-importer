@@ -186,6 +186,13 @@ return [
             'field'           => 'external-id',
             'append_value'    => false,
         ],
+        'external-url'          => [
+            'mappable'        => false,
+            'pre-process-map' => false,
+            'converter'       => 'CleanUrl',
+            'field'           => 'external-url',
+            'append_value'    => false,
+        ],
         'currency-symbol'       => [
             'mappable'        => true,
             'pre-process-map' => false,
@@ -540,6 +547,7 @@ return [
         'rabo-debit-credit'     => 'amount_modifier',
         'generic-debit-credit'  => 'amount_modifier',
         'external-id'           => 'external_id',
+        'external-url'          => 'external_uri',
         'internal_reference'    => 'internal_reference',
         'original-source'       => 'original_source',
         'tags-comma'            => 'tags_comma',
