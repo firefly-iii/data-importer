@@ -103,7 +103,7 @@ Route::get('/back/conversion', 'NavController@toConversion')->name('back.convers
 
 // import by POST
 Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
-//Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
+Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 //
 
 //

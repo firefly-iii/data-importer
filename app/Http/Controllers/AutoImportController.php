@@ -48,11 +48,6 @@ class AutoImportController extends Controller
      */
     public function index(Request $request): Response
     {
-        $access = $this->haveAccess();
-        if (false === $access) {
-            throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
-        }
-
         if (false === config('importer.can_post_autoimport')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
@@ -68,6 +63,11 @@ class AutoImportController extends Controller
 
         if (!$this->isAllowedPath($directory)) {
             throw new ImporterErrorException('Not allowed to import from this path.');
+        }
+
+        $access = $this->haveAccess();
+        if (false === $access) {
+            throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
         }
 
         // take code from auto importer.
