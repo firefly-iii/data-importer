@@ -161,8 +161,13 @@ trait AutoImports
      */
     private function importFile(string $directory, string $file): void
     {
+        app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
+        app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
         $csvFile  = sprintf('%s/%s', $directory, $file);
-        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+
+        app('log')->debug(sprintf('ImportFile: CSV       "%s"', $csvFile));
+        app('log')->debug(sprintf('ImportFile: JSON      "%s"', $jsonFile));
 
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);

@@ -100,9 +100,9 @@ Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
 Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
 Route::get('/back/conversion', 'NavController@toConversion')->name('back.conversion');
 
-//
-//// import by POST
-//Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
+
+// import by POST
+Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
 //Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 //
 
