@@ -31,6 +31,8 @@ return [
         'spectre'  => 'Spectre',
     ],
     'import_dir_whitelist' => explode(',', env('IMPORT_DIR_WHITELIST', '')),
+    'auto_import_secret'   => env('AUTO_IMPORT_SECRET', ''),
+    'can_post_autoimport'  => env('CAN_POST_AUTOIMPORT', false),
     'access_token'         => env('FIREFLY_III_ACCESS_TOKEN'),
     'url'                  => env('FIREFLY_III_URL'),
     'client_id'            => env('FIREFLY_III_CLIENT_ID'),
