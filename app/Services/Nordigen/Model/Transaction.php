@@ -267,6 +267,12 @@ class Transaction
             app('log')->debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
             return $this->creditorName;
         }
+
+        if ('' !== $this->debtorName) {
+            app('log')->debug(sprintf('Destination name is "%s" (debtor)', $this->debtorName));
+            return $this->debtorName;
+        }
+
         app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
         return null;
     }
@@ -283,6 +289,12 @@ class Transaction
             app('log')->debug(sprintf('Destination IBAN is "%s" (creditor)', $this->creditorAccountIban));
             return $this->creditorAccountIban;
         }
+
+        if ('' !== $this->debtorAccountIban) {
+            app('log')->debug(sprintf('Destination IBAN is "%s" (debtor)', $this->debtorAccountIban));
+            return $this->debtorAccountIban;
+        }
+
         app('log')->warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->transactionId));
         return null;
     }
