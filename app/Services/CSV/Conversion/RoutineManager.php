@@ -54,13 +54,15 @@ class RoutineManager implements RoutineManagerInterface
     private array                      $allWarnings;
     private array                      $allErrors;
     private string                     $content;
+    private bool                       $forceCli = false;
 
     /**
      *
      */
     public function __construct(?string $identifier)
     {
-        $this->content     = ''; // used in CLI
+        $this->forceCli    = false; // used in POST auto import
+        $this->content     = '';    // used in CLI
         $this->allErrors   = [];
         $this->allWarnings = [];
         $this->allMessages = [];
@@ -107,10 +109,10 @@ class RoutineManager implements RoutineManagerInterface
         $this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
 
         // check if CLI or not and read as appropriate:
-        if ($this->isCli()) {
+        if ('' !== $this->content) {
             $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->content, $this->configuration->isConversion()));
         }
-        if (!$this->isCli()) {
+        if ('' === $this->content) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
             } catch (ContainerExceptionInterface | NotFoundExceptionInterface | FileNotFoundException $e) {
@@ -234,4 +236,14 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->content = $content;
     }
+
+    /**
+     * @param bool $forceCli
+     */
+    public function setForceCli(bool $forceCli): void
+    {
+        $this->forceCli = $forceCli;
+    }
+
+
 }

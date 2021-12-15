@@ -62,4 +62,27 @@ trait HaveAccess
      * @return void
      */
     abstract public function error($string, $verbosity = null);
+
+    /**
+     * @param string $path
+     * @return bool
+     */
+    private function isAllowedPath(string $path): bool
+    {
+        $paths = config('importer.import_dir_whitelist');
+        if (null === $paths) {
+            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            return false;
+        }
+        if (is_array($paths) && 0 === count($paths)) {
+            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            return false;
+        }
+        if (is_array($paths) && 1 === count($paths) && '' === $paths[0]) {
+            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            return false;
+        }
+
+        return in_array($path, $paths, true);
+    }
 }

@@ -45,7 +45,16 @@ class AutoUploadController extends Controller
      */
     public function index(AutoUploadRequest $request)
     {
-        die('todo' . __METHOD__);
+        if (false === config('importer.can_post_files')) {
+            throw new ImporterErrorException('Disabled, not allowed to import.');
+        }
+
+        $secret       = (string) ($request->get('secret') ?? '');
+        $systemSecret = (string) config('importer.auto_import_secret');
+        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+            throw new ImporterErrorException('Bad secret, not allowed to import.');
+        }
+
         $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');

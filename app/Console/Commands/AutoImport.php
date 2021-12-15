@@ -66,6 +66,10 @@ class AutoImport extends Command
 
         $argument  = (string) ($this->argument('directory') ?? './');
         $directory = realpath($argument);
+        if (!$this->isAllowedPath($directory)) {
+            $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+            return 1;
+        }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
         $files = $this->getFiles($directory);
@@ -86,5 +90,4 @@ class AutoImport extends Command
 
         return 0;
     }
-
 }

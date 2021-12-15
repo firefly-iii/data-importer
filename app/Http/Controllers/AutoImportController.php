@@ -31,6 +31,7 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Log;
 
 /**
@@ -45,35 +46,45 @@ class AutoImportController extends Controller
     /**
      *
      */
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        die('todo' . __METHOD__);
+        if (false === config('importer.can_post_autoimport')) {
+            throw new ImporterErrorException('Disabled, not allowed to import.');
+        }
+
+        $secret       = (string) ($request->get('secret') ?? '');
+        $systemSecret = (string) config('importer.auto_import_secret');
+        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+            throw new ImporterErrorException('Bad secret, not allowed to import.');
+        }
+
+        $argument  = (string) ($request->get('directory') ?? './');
+        $directory = realpath($argument);
+
+        if (!$this->isAllowedPath($directory)) {
+            throw new ImporterErrorException('Not allowed to import from this path.');
+        }
+
         $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
         }
 
-        $argument        = (string) ($request->get('directory') ?? './');
-        $this->directory = realpath($argument);
-        $this->line(sprintf('Going to automatically import everything found in %s (%s)', $this->directory, $argument));
+        // take code from auto importer.
+        app('log')->info(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files = $this->getFiles();
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
-            $this->line(sprintf('There are no files in directory %s', $this->directory));
-            $this->line('To learn more about this process, read the docs:');
-            $this->line('https://docs.firefly-iii.org/data-importer/');
-
-            return ' ';
+            return response('');
         }
-        $this->line(sprintf('Found %d CSV + JSON file sets in %s', count($files), $this->directory));
+        app('log')->info(sprintf('Found %d (CSV +) JSON file sets in %s', count($files), $directory));
         try {
-            $this->importFiles($files);
+            $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
-            $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
+            app('log')->error($e->getMessage());
+            throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
-
-        return ' ';
+        return response('');
     }
 
     public function line(string $string)
