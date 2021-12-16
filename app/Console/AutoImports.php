@@ -164,7 +164,12 @@ trait AutoImports
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
         $csvFile  = sprintf('%s/%s', $directory, $file);
-        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+
+        // TODO not yet sure why the distinction is necessary.
+        if ('csv' === $this->getExtension($file)) {
+            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        }
 
         app('log')->debug(sprintf('ImportFile: CSV       "%s"', $csvFile));
         app('log')->debug(sprintf('ImportFile: JSON      "%s"', $jsonFile));
