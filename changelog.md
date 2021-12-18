@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.0 - 2021-12-19
+
+### Added
+- POST import and import via upload is now possible. Several security measures are listed in `.env.example`.
+
+### Fixed
+- #5397 Could not import into liabilities.
+- [Issue 23](https://github.com/firefly-iii/data-importer/pull/23), fixed date range settings, thanks @p-rintz
+
 ## 0.3.0 - 2021-12-11
 
 ### Added
