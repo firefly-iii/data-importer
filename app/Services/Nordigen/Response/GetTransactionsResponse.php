@@ -48,13 +48,12 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
         /** @var array $array */
         foreach ($data as $index => $array) {
             // correct code:
-            //$this->collection->push(Transaction::fromArray($array));
+            $this->collection->push(Transaction::fromArray($array));
 
-            // TODO debug code:
-            if($index < 1) {
-                $array = json_decode('{"bookingDate":"2021-11-15","transactionAmount":{"amount":"-1392.08","currency":"EUR"},"creditorAccount":{"bban":"12016402050"},"debtorAccount":{"iban":"NO4296502736156","bban":"96502736156"},"remittanceInformationUnstructured":"KLP Skadeforsik","remittanceInformationUnstructuredArray":["KLP Skadeforsik"],"proprietaryBankTransactionCode":"R_156","key":"booked"}', true);
-                $this->collection->push(Transaction::fromArray($array));
-            }
+//            if($index < 1) {
+//                $array = json_decode('{"bookingDate":"2021-11-15","transactionAmount":{"amount":"-1392.08","currency":"EUR"},"creditorAccount":{"bban":"12016402050"},"debtorAccount":{"iban":"NO4296502736156","bban":"96502736156"},"remittanceInformationUnstructured":"KLP Skadeforsik","remittanceInformationUnstructuredArray":["KLP Skadeforsik"],"proprietaryBankTransactionCode":"R_156","key":"booked"}', true);
+//                $this->collection->push(Transaction::fromArray($array));
+//            }
         }
 
     }
