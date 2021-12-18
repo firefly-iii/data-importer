@@ -130,7 +130,7 @@ class LineProcessor
                 $appendValue = false;
             }
 
-            app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
+            //app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
             $columnValue = new ColumnValue;
             $columnValue->setValue($value);
