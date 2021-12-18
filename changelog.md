@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - POST import and import via upload is now possible. Several security measures are listed in `.env.example`.
 
 ### Fixed
-- #5397 Could not import into liabilities.
+- [Issue 5397](https://github.com/firefly-iii/firefly-iii/issues/5397) Could not import into liabilities.
 - [Issue 23](https://github.com/firefly-iii/data-importer/pull/23), fixed date range settings, thanks @p-rintz
 
 ## 0.3.0 - 2021-12-11

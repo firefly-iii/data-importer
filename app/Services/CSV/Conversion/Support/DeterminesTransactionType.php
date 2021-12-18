@@ -77,9 +77,6 @@ trait DeterminesTransactionType
 
             return 'deposit';
         }
-
-
-
         $key   = sprintf('transaction_types.account_to_transaction.%s.%s', $sourceType, $destinationType);
         $type  = config($key);
         $value = $type ?? 'withdrawal';
