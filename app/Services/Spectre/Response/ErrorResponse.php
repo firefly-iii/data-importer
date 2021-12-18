@@ -33,8 +33,8 @@ use App\Services\Shared\Response\Response;
  */
 class ErrorResponse extends Response
 {
-    public $class;
-    public $message;
+    public string $class;
+    public string $message;
 
     /**
      * @inheritDoc

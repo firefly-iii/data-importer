@@ -95,8 +95,9 @@ abstract class Request
 
     /**
      * @return array
-     * @throws ImporterHttpException
+     * @throws GuzzleException
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     protected function authenticatedGet(): array
     {

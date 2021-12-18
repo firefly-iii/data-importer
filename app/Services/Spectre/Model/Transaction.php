@@ -57,6 +57,7 @@ class Transaction
      * Transaction constructor.
      *
      * @param array $data
+     * @return Transaction
      */
     public static function fromArray(array $data): self
     {

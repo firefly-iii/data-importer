@@ -36,6 +36,8 @@ trait RestoresConfiguration
      * Restore configuration from session and drive.
      *
      * @return Configuration
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function restoreConfiguration(): Configuration
     {

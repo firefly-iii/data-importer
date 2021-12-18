@@ -86,6 +86,7 @@ class TransactionProcessor
 
     /**
      * @param GetTransactionsResponse $transactions
+     * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {

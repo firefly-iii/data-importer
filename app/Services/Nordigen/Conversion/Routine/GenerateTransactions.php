@@ -350,6 +350,7 @@ class GenerateTransactions
      * @param int $mappedId
      *
      * @return string
+     * @throws ImporterHttpException
      */
     private function getMappedAccountType(int $mappedId): string
     {

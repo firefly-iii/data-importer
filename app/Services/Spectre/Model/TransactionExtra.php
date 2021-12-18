@@ -72,6 +72,7 @@ class TransactionExtra
      * TransactionExtra constructor.
      *
      * @param array $data
+     * @return TransactionExtra
      */
     public static function fromArray(array $data): self
     {

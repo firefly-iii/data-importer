@@ -405,6 +405,7 @@ trait AutoImports
     /**
      * @param string $csvFile
      * @param string $jsonFile
+     * @throws ImporterErrorException
      */
     private function importUpload(string $csvFile, string $jsonFile): void
     {

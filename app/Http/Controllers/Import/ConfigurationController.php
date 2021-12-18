@@ -76,8 +76,13 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws \GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function index(Request $request)
     {
@@ -161,6 +166,7 @@ class ConfigurationController extends Controller
 
     /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
+     * @param string $identifier
      * @return array
      * @throws ImporterErrorException
      */
@@ -300,6 +306,7 @@ class ConfigurationController extends Controller
      * @param array                      $firefly
      *
      * TODO should be a helper
+     * @return array
      */
     private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
     {

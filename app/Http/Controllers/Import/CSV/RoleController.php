@@ -56,7 +56,14 @@ class RoleController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return Factory|View
+     * @throws \JsonException
+     * @throws \League\Csv\Exception
+     * @throws \League\Csv\InvalidArgument
+     * @throws \League\Csv\UnableToProcessCsv
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function index(Request $request)
     {
@@ -99,6 +106,9 @@ class RoleController extends Controller
      * @param RolesPostRequest $request
      *
      * @return RedirectResponse
+     * @throws \JsonException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {

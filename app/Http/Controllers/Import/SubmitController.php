@@ -63,7 +63,9 @@ class SubmitController extends Controller
     }
 
     /**
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
      * @throws NotFoundExceptionInterface
      */
     public function index()

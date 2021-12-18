@@ -38,6 +38,7 @@ class StorageService
      * @param string $content
      *
      * @return string
+     * @throws ImporterErrorException
      */
     public static function storeContent(string $content): string
     {

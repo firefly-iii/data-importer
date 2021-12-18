@@ -65,7 +65,11 @@ class ConnectionController extends Controller
 
     /**
      *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      * @throws ImporterErrorException
+     * @throws \App\Exceptions\ImporterHttpException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function index()
     {
@@ -132,6 +136,11 @@ class ConnectionController extends Controller
 
     /**
      * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws ImporterErrorException
+     * @throws \App\Exceptions\ImporterHttpException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function post(Request $request)
     {

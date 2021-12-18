@@ -115,7 +115,7 @@ class RoutineManager implements RoutineManagerInterface
         if ('' === $this->content) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface | NotFoundExceptionInterface | FileNotFoundException $e) {
+            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }

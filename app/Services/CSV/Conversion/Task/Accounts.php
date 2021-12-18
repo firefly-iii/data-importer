@@ -63,6 +63,7 @@ class Accounts extends AbstractTask
      * @param array $transaction
      *
      * @return array
+     * @throws ImporterErrorException
      */
     private function processTransaction(array $transaction): array
     {
@@ -272,7 +273,7 @@ class Accounts extends AbstractTask
         }
 
         // Return ID or IBAN if not null
-        if (null !== $array['id'] || '' !== (string) $array['iban']) {
+        if ('' !== (string) $array['iban']) {
             app('log')->debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;

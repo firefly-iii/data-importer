@@ -87,6 +87,8 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function isReadyForCSVStep(): bool
     {
@@ -138,6 +140,8 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function isReadyForNordigenStep(): bool
     {
@@ -217,6 +221,8 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function isReadyForSpectreStep(): bool
     {
@@ -366,6 +372,8 @@ trait IsReadyForStep
     /**
      * @return RedirectResponse
      * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function redirectToCorrectNordigenStep(): RedirectResponse
     {
@@ -418,6 +426,8 @@ trait IsReadyForStep
     /**
      * @return RedirectResponse
      * @throws ImporterErrorException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function redirectToCorrectSpectreStep(): RedirectResponse
     {

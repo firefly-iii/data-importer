@@ -47,6 +47,7 @@ class TransactionProcessor
 
     /**
      * @return array
+     * @throws ImporterHttpException
      */
     public function download(): array
     {
@@ -112,6 +113,7 @@ class TransactionProcessor
 
     /**
      * @param GetTransactionsResponse $transactions
+     * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {

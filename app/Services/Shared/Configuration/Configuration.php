@@ -799,6 +799,7 @@ class Configuration
     }
 
     /**
+     * @param string $key
      * @param string $identifier
      */
     public function addRequisition(string $key, string $identifier)
