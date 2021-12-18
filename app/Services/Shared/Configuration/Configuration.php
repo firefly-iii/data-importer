@@ -197,8 +197,8 @@ class Configuration
         $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
 
         // null or Carbon because fromRequest will give Carbon object.
-        $object->dateNotBefore   = null === $array['date_not_before']  ? '' : $array['date_not_before']->format('Y-m-d');
-        $object->dateNotAfter    = null === $array['date_not_after']  ? '' : $array['date_not_after']->format('Y-m-d');
+        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';

@@ -34,7 +34,6 @@ use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
-use Illuminate\Support\ViewErrorBag;
 use Log;
 use Session;
 

@@ -38,21 +38,21 @@ class ImportedTransactionsEventHandler
     {
         app('log')->debug('Now in sendReportOverMail');
 
-        $mailer = config('mail.default');
+        $mailer   = config('mail.default');
         $receiver = config('mail.destination');
-        if('' === $mailer) {
+        if ('' === $mailer) {
             app('log')->info('No mailer configured, will not mail.');
             return;
         }
-        if('' === $receiver) {
+        if ('' === $receiver) {
             app('log')->info('No mail receiver configured, will not mail.');
             return;
         }
 
-        $log  =[
+        $log = [
             'messages' => $event->messages,
             'warnings' => $event->warnings,
-            'errors' => $event->errors,
+            'errors'   => $event->errors,
         ];
         app('log')->info('Will send report message.');
         app('log')->debug('If no error below this line, mail was sent!');

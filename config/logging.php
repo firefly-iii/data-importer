@@ -62,7 +62,7 @@ return [
             'driver'            => 'stack',
             'channels'          => ['daily', 'stdout'],
             'ignore_exceptions' => false,
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'level'             => env('LOG_LEVEL', 'debug'),
         ],
 
         'single' => [
@@ -88,7 +88,7 @@ return [
 
         'papertrail' => [
             'driver'       => 'monolog',
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'level'        => env('LOG_LEVEL', 'debug'),
             'handler'      => SyslogUdpHandler::class,
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
@@ -107,7 +107,7 @@ return [
         'stdout' => [
             'driver'    => 'monolog',
             'handler'   => StreamHandler::class,
-            'level'  => env('LOG_LEVEL', 'debug'),
+            'level'     => env('LOG_LEVEL', 'debug'),
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'with'      => [
                 'stream' => 'php://stdout',

@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
-use App\Services\Nordigen\Response\ListBanksResponse;
 use App\Services\Shared\Response\Response;
 
 /**

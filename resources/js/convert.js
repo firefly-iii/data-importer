@@ -52,8 +52,8 @@ Vue.component('conversion-status', ConversionStatus);
  */
 let props = {};
 new Vue({
-            el: "#app",
-            render: (createElement) => {
-                return createElement(ConversionStatus, { props: props })
-            },
-        });
+    el: "#app",
+    render: (createElement) => {
+        return createElement(ConversionStatus, {props: props})
+    },
+});

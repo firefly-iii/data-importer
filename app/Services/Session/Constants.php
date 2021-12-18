@@ -55,12 +55,12 @@ class Constants
     public const NORDIGEN_REFRESH_TOKEN   = 'nordigen_refresh_token';
     public const READY_FOR_CONVERSION     = 'ready_for_conversion';
     public const READY_FOR_SUBMISSION     = 'ready_for_submission';
+    public const REQUISITION_PRESENT      = 'requisition_present';
     public const REQUISITION_REFERENCE    = 'requisition_reference';
     public const ROLES_COMPLETE_INDICATOR = 'role_config_complete';
     public const SELECTED_BANK_COUNTRY    = 'selected_bank_country';
     public const SESSION_NORDIGEN_ID      = 'nordigen_id';
     public const SESSION_NORDIGEN_KEY     = 'nordigen_key';
-    public const REQUISITION_PRESENT      = 'requisition_present';
 
     // spectre specific steps:
     public const SESSION_SPECTRE_APP_ID = 'spectre_app_id';

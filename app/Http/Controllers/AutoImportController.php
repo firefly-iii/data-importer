@@ -87,17 +87,17 @@ class AutoImportController extends Controller
         return response('');
     }
 
-    public function line(string $string)
-    {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
-    }
-
     /**
      * @inheritDoc
      */
     public function error($string, $verbosity = null)
     {
         $this->line($string);
+    }
+
+    public function line(string $string)
+    {
+        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
     /**

@@ -54,6 +54,6 @@ let props = {};
 new Vue({
     el: "#app",
     render: (createElement) => {
-        return createElement(SubmissionStatus, { props: props })
+        return createElement(SubmissionStatus, {props: props})
     },
 });

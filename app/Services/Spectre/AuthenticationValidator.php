@@ -29,9 +29,9 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
+use App\Services\Spectre\Authentication\SecretManager;
 use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Response\ErrorResponse;
-use App\Services\Spectre\Authentication\SecretManager;
 
 /**
  * Class AuthenticationValidator
