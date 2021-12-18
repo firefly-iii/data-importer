@@ -228,102 +228,12 @@ class GenerateTransactions
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
             app('log')->debug('Amount is positive: perhaps transfer or deposit.');
-            // amount is positive: deposit or transfer. Spectre account is destination
-            $return['transactions'][0]['type']   = 'deposit';
-            $return['transactions'][0]['amount'] = $entry->transactionAmount;
-
-            // destination is a Nordigen account
-            $return['transactions'][0]['destination_id'] = (int) $this->accounts[$accountId];
-
-            // source iban valid?
-            $sourceIban = $entry->getSourceIban() ?? '';
-            if ('' !== $sourceIban && array_key_exists($sourceIban, $this->targetAccounts)) {
-                // source is also an ID:
-                app('log')->debug(sprintf('Recognized %s as a Firefly III asset account so this is a transfer.', $sourceIban));
-                $return['transactions'][0]['source_id'] = $this->targetAccounts[$sourceIban];
-                $return['transactions'][0]['type']      = 'transfer';
-            }
-
-            if ('' === $sourceIban || !array_key_exists($sourceIban, $this->targetAccounts)) {
-                app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $sourceIban));
-                // source is the other side:
-                $return['transactions'][0]['source_name'] = $entry->getSourceName() ?? '(unknown source account)';
-                $return['transactions'][0]['source_iban'] = $entry->getSourceIban() ?? null;
-            }
-
-            $mappedId = null;
-            if (isset($return['transactions'][0]['source_name'])) {
-                app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $return['transactions'][0]['source_name']));
-                $mappedId = $this->getMappedAccountId($return['transactions'][0]['source_name']);
-            }
-
-            if (null !== $mappedId && 0 !== $mappedId) {
-                app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $return['transactions'][0]['source_name'], $mappedId));
-                $mappedType                             = $this->getMappedAccountType($mappedId);
-                $originalSourceName                     = $return['transactions'][0]['source_name'];
-                $return['transactions'][0]['source_id'] = $mappedId;
-                // catch error here:
-                try {
-                    $return['transactions'][0]['type'] = $this->getTransactionType($mappedType, 'asset');
-                    app('log')->debug(sprintf('Transaction type seems to be %s', $return['transactions'][0]['type']));
-                } catch (ImporterErrorException $e) {
-                    app('log')->error($e->getMessage());
-                    app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
-                    unset($return['transactions'][0]['source_id']);
-                    $return['transactions'][0]['source_name'] = $originalSourceName;
-                }
-            }
+            $return = $this->appendPositiveAmountInfo($accountId, $return, $entry);
         }
 
         if (-1 === bccomp($entry->transactionAmount, '0')) {
-            // amount is negative: withdrawal or transfer.
             app('log')->debug('Amount is negative: assume transfer or withdrawal.');
-            $return['transactions'][0]['amount'] = bcmul($entry->transactionAmount, '-1');
-
-            // source is a Nordigen account
-            // TODO entry may not exist, then what?
-            $return['transactions'][0]['source_id'] = (int) $this->accounts[$accountId];
-
-            // destination iban valid?
-            $destinationIban = $entry->getDestinationIban() ?? '';
-            if ('' !== $destinationIban && array_key_exists($destinationIban, $this->targetAccounts)) {
-                // source is also an ID:
-                app('log')->debug(sprintf('Recognized %s as a Firefly III asset account so this is a transfer.', $destinationIban));
-                $return['transactions'][0]['destination_id'] = $this->targetAccounts[$destinationIban];
-                $return['transactions'][0]['type']           = 'transfer';
-            }
-            // destination iban valid or doesn't exist:
-            if ('' === $destinationIban || !array_key_exists($destinationIban, $this->targetAccounts)) {
-                app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $destinationIban));
-                // destination is the other side:
-                $return['transactions'][0]['destination_name'] = $entry->getDestinationName() ?? '(unknown destination account)';
-                $return['transactions'][0]['destination_iban'] = $entry->getDestinationIban() ?? null;
-            }
-
-            $mappedId = null;
-            if (isset($return['transactions'][0]['destination_name'])) {
-                app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $return['transactions'][0]['destination_name']));
-                $mappedId = $this->getMappedAccountId($return['transactions'][0]['destination_name']);
-            }
-
-            if (null !== $mappedId && 0 !== $mappedId) {
-                app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $return['transactions'][0]['destination_name'], $mappedId));
-                $mappedType = $this->getMappedAccountType($mappedId);
-
-                $originalDestName                            = $return['transactions'][0]['destination_name'];
-                $return['transactions'][0]['destination_id'] = $mappedId;
-                // catch error here:
-                try {
-                    $return['transactions'][0]['type'] = $this->getTransactionType('asset', $mappedType);
-                    app('log')->debug(sprintf('Transaction type seems to be %s', $return['transactions'][0]['type']));
-                } catch (ImporterErrorException $e) {
-                    app('log')->error($e->getMessage());
-                    app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
-                    unset($return['transactions'][0]['destination_id']);
-                    $return['transactions'][0]['destination_name'] = $originalDestName;
-                }
-                app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $return);
-            }
+            $return = $this->appendNegativeAmountInfo($accountId, $return, $entry);
         }
 
         app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId));
@@ -428,5 +338,130 @@ class GenerateTransactions
     {
         $this->configuration = $configuration;
         $this->accounts      = $configuration->getAccounts();
+    }
+
+    /**
+     * Handle transaction information when the amount is positive, and this is probably a deposit or a transfer.
+     * @param string      $accountId
+     * @param array       $return
+     * @param Transaction $entry
+     * @return array
+     * @throws ImporterHttpException
+     */
+    private function appendPositiveAmountInfo(string $accountId, array $return, Transaction $entry): array
+    {
+        // amount is positive: deposit or transfer. Spectre account is destination
+        $return['transactions'][0]['type']   = 'deposit';
+        $return['transactions'][0]['amount'] = $entry->transactionAmount;
+
+        // destination is a Nordigen account
+        $return['transactions'][0]['destination_id'] = (int) $this->accounts[$accountId];
+
+        // source iban valid?
+        $sourceIban   = $entry->getSourceIban() ?? '';
+        $sourceNumber = $entry->getSourceNumber() ?? '';
+        if ('' !== $sourceIban && array_key_exists($sourceIban, $this->targetAccounts)) {
+            // source is also an ID:
+            app('log')->debug(sprintf('Recognized %s as a Firefly III asset account so this is a transfer.', $sourceIban));
+            $return['transactions'][0]['source_id'] = $this->targetAccounts[$sourceIban];
+            $return['transactions'][0]['type']      = 'transfer';
+        }
+
+        if ('' === $sourceIban || !array_key_exists($sourceIban, $this->targetAccounts)) {
+            app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $sourceIban));
+            // source is the other side:
+            $return['transactions'][0]['source_name'] = $entry->getSourceName() ?? '(unknown source account)';
+            $return['transactions'][0]['source_iban'] = $entry->getSourceIban() ?? null;
+        }
+        if ('' !== $sourceNumber) {
+            $return['transactions'][0]['source_number'] = $sourceNumber;
+        }
+
+        $mappedId = null;
+        if (isset($return['transactions'][0]['source_name'])) {
+            app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $return['transactions'][0]['source_name']));
+            $mappedId = $this->getMappedAccountId($return['transactions'][0]['source_name']);
+        }
+
+        if (null !== $mappedId && 0 !== $mappedId) {
+            app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $return['transactions'][0]['source_name'], $mappedId));
+            $mappedType                             = $this->getMappedAccountType($mappedId);
+            $originalSourceName                     = $return['transactions'][0]['source_name'];
+            $return['transactions'][0]['source_id'] = $mappedId;
+            // catch error here:
+            try {
+                $return['transactions'][0]['type'] = $this->getTransactionType($mappedType, 'asset');
+                app('log')->debug(sprintf('Transaction type seems to be %s', $return['transactions'][0]['type']));
+            } catch (ImporterErrorException $e) {
+                app('log')->error($e->getMessage());
+                app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
+                unset($return['transactions'][0]['source_id']);
+                $return['transactions'][0]['source_name'] = $originalSourceName;
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.
+     * @param string      $accountId
+     * @param array       $return
+     * @param Transaction $entry
+     * @return array
+     * @throws ImporterHttpException
+     */
+    private function appendNegativeAmountInfo(string $accountId, array $return, Transaction $entry): array
+    {
+        $return['transactions'][0]['amount']    = bcmul($entry->transactionAmount, '-1');
+        $return['transactions'][0]['source_id'] = (int) $this->accounts[$accountId]; // TODO entry may not exist, then what?
+
+        // is the destination iban valid?
+        $destinationIban   = $entry->getDestinationIban() ?? '';
+        $destinationNumber = $entry->getDestinationNumber() ?? '';
+        if ('' !== $destinationIban && array_key_exists($destinationIban, $this->targetAccounts)) {
+            // source is also an ID:
+            app('log')->debug(sprintf('Recognized %s as a Firefly III asset account so this is a transfer.', $destinationIban));
+            $return['transactions'][0]['destination_id'] = $this->targetAccounts[$destinationIban];
+            $return['transactions'][0]['type']           = 'transfer';
+        }
+
+        // destination iban valid or doesn't exist:
+        if ('' === $destinationIban || !array_key_exists($destinationIban, $this->targetAccounts)) {
+            app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $destinationIban));
+            // destination is the other side:
+            $return['transactions'][0]['destination_name'] = $entry->getDestinationName() ?? '(unknown destination account)';
+            $return['transactions'][0]['destination_iban'] = $entry->getDestinationIban() ?? null;
+        }
+
+        // set destination number:
+        if ('' !== $destinationNumber) {
+            $return['transactions'][0]['destination_number'] = $destinationNumber;
+        }
+
+        $mappedId = null;
+        if (isset($return['transactions'][0]['destination_name'])) {
+            app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $return['transactions'][0]['destination_name']));
+            $mappedId = $this->getMappedAccountId($return['transactions'][0]['destination_name']);
+        }
+
+        if (null !== $mappedId && 0 !== $mappedId) {
+            app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $return['transactions'][0]['destination_name'], $mappedId));
+            $mappedType = $this->getMappedAccountType($mappedId);
+
+            $originalDestName                            = $return['transactions'][0]['destination_name'];
+            $return['transactions'][0]['destination_id'] = $mappedId;
+            // catch error here:
+            try {
+                $return['transactions'][0]['type'] = $this->getTransactionType('asset', $mappedType);
+                app('log')->debug(sprintf('Transaction type seems to be %s', $return['transactions'][0]['type']));
+            } catch (ImporterErrorException $e) {
+                app('log')->error($e->getMessage());
+                app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
+                unset($return['transactions'][0]['destination_id']);
+                $return['transactions'][0]['destination_name'] = $originalDestName;
+            }
+            app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $return);
+        }
+        return $return;
     }
 }

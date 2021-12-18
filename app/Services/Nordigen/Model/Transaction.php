@@ -62,11 +62,13 @@ class Transaction
     // debtorAccount is an array, but is saved as strings
     // iban, currency
     public string $debtorAccountIban;
+    public string $debtorAccountBban;
     public string $debtorAccountCurrency;
 
     // creditorAccount is an array, but saved as strings:
     // iban, currency
     public string $creditorAccountIban;
+    public string $creditorAccountBban;
     public string $creditorAccountCurrency;
 
     // transactionAmount is an array, but is saved as strings
@@ -122,9 +124,11 @@ class Transaction
 
         // array values:
         $object->creditorAccountIban     = $array['creditorAccount']['iban'] ?? '';
+        $object->creditorAccountBban     = $array['creditorAccount']['bban'] ?? '';
         $object->creditorAccountCurrency = $array['creditorAccount']['currency'] ?? '';
 
         $object->debtorAccountIban     = $array['debtorAccount']['iban'] ?? '';
+        $object->debtorAccountBban     = $array['debtorAccount']['bban'] ?? '';
         $object->debtorAccountCurrency = $array['debtorAccount']['currency'] ?? '';
 
         $object->transactionAmount = $array['transactionAmount']['amount'] ?? '';
@@ -191,6 +195,9 @@ class Transaction
         // TODO copy paste code.
         $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
         $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
+
+        $object->debtorAccountBban   = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
+        $object->creditorAccountBban = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
 
         $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
         $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
@@ -288,7 +295,23 @@ class Transaction
     }
 
     /**
-     * Return name of the source account. Depends also on the amount
+     * Return IBAN of the destination account
+     *
+     * @return string|null
+     */
+    public function getDestinationNumber(): ?string
+    {
+        app('log')->debug(__METHOD__);
+        if ('' !== $this->creditorAccountBban) {
+            app('log')->debug(sprintf('Destination BBAN is "%s" (creditor)', $this->creditorAccountBban));
+            return $this->creditorAccountBban;
+        }
+        app('log')->warning(sprintf('Transaction "%s" has no destination BBAN information.', $this->transactionId));
+        return null;
+    }
+
+    /**
+     * Return name of the source account.
      *
      * @return string|null
      */
@@ -304,7 +327,7 @@ class Transaction
     }
 
     /**
-     * Return name of the source account. Depends also on the amount
+     * Return IBAN of the source account.
      *
      * @return string|null
      */
@@ -316,6 +339,22 @@ class Transaction
             return $this->debtorAccountIban;
         }
         app('log')->warning(sprintf('Transaction "%s" has no source IBAN information.', $this->transactionId));
+        return null;
+    }
+
+    /**
+     * Return account number of the source account.
+     *
+     * @return string|null
+     */
+    public function getSourceNumber(): ?string
+    {
+        app('log')->debug(__METHOD__);
+        if ('' !== $this->debtorAccountBban) {
+            app('log')->debug(sprintf('Source BBAN is "%s" (debtor)', $this->debtorAccountBban));
+            return $this->debtorAccountBban;
+        }
+        app('log')->warning(sprintf('Transaction "%s" has no source BBAN information.', $this->transactionId));
         return null;
     }
 
