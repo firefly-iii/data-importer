@@ -223,11 +223,13 @@ class Transaction
      */
     public function getDate(): Carbon
     {
-        if (null !== $this->valueDate) {
-            return $this->valueDate;
-        }
         if (null !== $this->bookingDate) {
+            app('log')->debug('Returning book date');
             return $this->bookingDate;
+        }
+        if (null !== $this->valueDate) {
+            app('log')->debug('Returning value date');
+            return $this->valueDate;
         }
         app('log')->warning('Transaction has no date, return NOW.');
         return new Carbon(config('app.timezone'));
