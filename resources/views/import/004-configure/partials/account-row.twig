@@ -1,0 +1,41 @@
+{# update a variable #}
+{% if 'disabled' == information.import_service.status %}
+    {% set errorAccounts = errorAccounts+1 %}
+{% endif %}
+{% if 'no-info' == information.import_service.status %}
+    {% set warningAccounts = errorAccounts+1 %}
+{% endif %}
+{% if 'nothing' == information.import_service.status %}
+    {% set warningAccounts = errorAccounts+1 %}
+{% endif %}
+{% if 'no-balance' == information.import_service.status %}
+    {% set warningAccounts = errorAccounts+1 %}
+{% endif %}
+<tr>
+    <td>
+        {% if 'nordigen' == flow %}
+            {% include './import/004-configure/partials/account-title-nordigen' with information %}
+        {% endif %}
+        {% if 'spectre' == flow %}
+            {% include './import/004-configure/partials/account-title-spectre' with information %}
+        {% endif %}
+    </td>
+    <td>
+        {% if 'disabled' != information.import_service.status %}
+            {% if(information.firefly|length!=0) %}&rarr;{% endif %}
+        {% endif %}
+    </td>
+    <td>
+        {% if(information.firefly|length==0) %}
+            <span class="text-danger">Cannot be imported</span>
+        {% endif %}
+        {% if(information.firefly|length>0) %}
+            {% if 'nordigen' == flow %}
+                {% include './import/004-configure/partials/ff3-account-nordigen' with information %}
+            {% endif %}
+            {% if 'spectre' == flow %}
+                {% include './import/004-configure/partials/ff3-account-spectre' with information %}
+            {% endif %}
+        {% endif %}
+    </td>
+</tr>

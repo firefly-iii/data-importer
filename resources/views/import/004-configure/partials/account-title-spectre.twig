@@ -1,0 +1,16 @@
+<input
+    id="do_import_{{ information.import_service.id }}"
+    type="checkbox"
+    name="do_import[{{ information.import_service.id }}]"
+    value="1"
+    aria-describedby="accountsHelp"
+    {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+/> <label class="form-check-label"
+          {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+          for="do_import_{{ information.import_service.id }}">
+    Account "{{ information.import_service.name }}"
+</label>
+{% if '' != information.import_service.iban %}
+    <br><small>
+    IBAN: {{ information.import_service.iban }}</small>
+{% endif %}

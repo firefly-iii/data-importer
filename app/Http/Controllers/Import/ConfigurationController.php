@@ -89,7 +89,10 @@ class ConfigurationController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
-        $accounts  = [];
+        $accounts  = [
+            'Asset accounts' => [],
+            'Liabilities'    => [],
+        ];
         $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
 
         // create configuration:
@@ -251,7 +254,7 @@ class ConfigurationController extends Controller
                 continue;
             }
             Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
+            $entry['firefly'] = array_merge($firefly['Asset accounts'] , $firefly['Liabilities']);
             $return[]         = $entry;
         }
         return $return;

@@ -1,0 +1,23 @@
+{# Nordigen uses identifier #}
+<input
+    id="do_import_{{ information.import_service.identifier }}"
+    type="checkbox"
+    {% if 'disabled' == information.import_service.status %}
+        disabled="disabled"
+    {% endif %}
+    name="do_import[{{ information.import_service.identifier }}]"
+    value="1"
+    aria-describedby="accountsHelp"
+    {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
+/>
+<label class="form-check-label"
+          {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+          for="do_import_{{ information.import_service.identifier }}">
+Account "{{ information.import_service.getFullName }}"
+</label>
+{% if 'disabled' != information.import_service.status and '' != information.import_service.iban %}
+    <br><small>
+    IBAN: {{ information.import_service.iban }}</small>{% endif %}
+{% if 'disabled' == information.import_service.status %}<br>
+    <small class="text-danger">(this account is
+        disabled)</small>{% endif %}
