@@ -48,6 +48,7 @@ class DebugController extends Controller
         $search  = ['~', '#'];
         $replace = ['\~', '# '];
 
+        $buildNr        = '(unknown)';
         $now            = Carbon::now()->format('Y-m-d H:i:s e');
         $phpVersion     = str_replace($search, $replace, PHP_VERSION);
         $phpOs          = str_replace($search, $replace, PHP_OS);
@@ -64,6 +65,10 @@ class DebugController extends Controller
         $bcscale        = bcscale();
         $tz             = env('TZ');
         $isDocker       = env('IS_DOCKER', false);
+
+        if(file_exists('/var/www/counter-main.txt')) {
+            $buildNr = file_get_contents('/var/www/counter-main.txt');
+        }
 
         // get latest log file:
         $logger     = Log::driver();
@@ -105,6 +110,7 @@ class DebugController extends Controller
                 'phpOs',
                 'interface',
                 'logContent',
+                'buildNr',
                 'cacheDriver',
                 'trustedProxies',
                 'isDocker'
