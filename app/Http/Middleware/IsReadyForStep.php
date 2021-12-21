@@ -151,19 +151,24 @@ trait IsReadyForStep
                 throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
             case 'authenticate':
             case 'service-validation':
+                Log::debug('return true');
                 return true;
             case 'define-roles':
+                Log::debug('return false');
                 return false;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    Log::debug('return false');
                     return false;
                 }
                 return true;
             case 'nordigen-selection':
                 // must have upload, thats it
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    Log::debug('return true');
                     return true;
                 }
+                Log::debug('return false');
                 return false;
             case 'map':
                 // mapping must be complete, or not ready for this step.
@@ -180,7 +185,7 @@ trait IsReadyForStep
 
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('Return false, not yet ready for step [2].');
+                    Log::debug('Nordigen: return false, not yet ready for step [2].');
                     return false;
                 }
                 // otherwise return false.
@@ -189,8 +194,10 @@ trait IsReadyForStep
             case 'nordigen-link':
                 // must have upload, thats it
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    Log::debug('return true');
                     return true;
                 }
+                Log::debug('return false');
                 return false;
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
@@ -199,21 +206,26 @@ trait IsReadyForStep
                 }
                 // if/else is in reverse!
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('return true');
                     return true;
                 }
-
+                Log::debug('return false');
                 // will probably never return false, but OK.
                 return false;
             case 'configuration':
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    Log::debug('return true');
                     return true;
                 }
+                Log::debug('return false');
                 return false;
             case 'submit':
                 // if/else is in reverse!
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('return true');
                     return true;
                 }
+                Log::debug('return false');
                 return false;
         }
     }

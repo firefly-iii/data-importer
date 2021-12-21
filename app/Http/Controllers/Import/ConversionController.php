@@ -75,24 +75,26 @@ class ConversionController extends Controller
 
         Log::debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
-        if (empty($configuration->getDoMapping())) {
+        if (empty($configuration->getDoMapping()) && 'csv' === $configuration->getFlow()) {
             // no mapping, back to roles
-            Log::debug('NO role info in config, will send you back to roles..');
+            Log::debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
         if (empty($configuration->getMapping())) {
             // back to mapping
-            Log::debug('NO mapping in file, will send you back to mapping..');
+            Log::debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
         if (true === $configuration->isMapAllData()) {
+            Log::debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $flow       = $configuration->getFlow();
-        $nextUrl    = route('008-submit.index');
+        Log::debug('Will redirect to submission after conversion.');
+        $nextUrl = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -100,15 +102,19 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('csv' === $flow) {
+            Log::debug('Create CSV routine manager.');
             $routine = new CSVRoutineManager($identifier);
         }
         if ('nordigen' === $flow) {
+            Log::debug('Create Nordigen routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
+            Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
+            Log::debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
 
@@ -158,22 +164,20 @@ class ConversionController extends Controller
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
-        $result       = false;
-        $transactions = [];
         try {
             $transactions = $routine->start();
-            $result       = true;
         } catch (ImporterErrorException $e) {
             Log::error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
         }
+        Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
             Log::error('Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
-
         }
+        Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk = Storage::disk(self::DISK_NAME);
         try {
@@ -183,15 +187,15 @@ class ConversionController extends Controller
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
         }
+        Log::debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
 
-        if (true === $result) {
-            // set done:
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
-            // set config as complete.
-            session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-        }
+        // set done:
+        RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
+        // set config as complete.
+        session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
+        Log::debug('Set conversion as complete.');
 
         return response()->json($importJobStatus->toArray());
     }
@@ -203,7 +207,7 @@ class ConversionController extends Controller
      */
     public function status(Request $request): JsonResponse
     {
-
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier = $request->get('identifier');
         Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
