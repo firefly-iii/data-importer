@@ -97,42 +97,56 @@ trait IsReadyForStep
             default:
                 throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
             case 'service-validation':
+                Log::debug('return true');
                 return true;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    Log::debug('return false');
                     return false;
                 }
+                Log::debug('return true');
                 return true;
             case 'authenticate':
                 // for CSV this is always false.
+                Log::debug('return false');
                 return false;
             case 'define-roles':
                 if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
+                    Log::debug('return false');
                     return false;
                 }
+                Log::debug('return true');
                 return true;
             case 'configuration':
                 if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
+                    Log::debug('return false');
                     return false;
                 }
+                Log::debug('return true');
                 return true;
             case 'map':
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug('return false');
                     return false;
                 }
+                Log::debug('return true');
                 return true;
             case 'conversion':
                 // if/else is in reverse!
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('return true');
                     return true;
                 }
                 // will probably never return false, but OK.
+                Log::debug('return false');
                 return false;
             case 'submit':
                 // if/else is in reverse!
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('return true');
                     return true;
                 }
+                Log::debug('return false');
                 return false;
         }
     }
