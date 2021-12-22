@@ -76,15 +76,23 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws \GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
-        $accounts  = [];
+        $accounts  = [
+            'Asset accounts' => [],
+            'Liabilities'    => [],
+        ];
         $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
 
         // create configuration:
@@ -161,6 +169,7 @@ class ConfigurationController extends Controller
 
     /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
+     * @param string $identifier
      * @return array
      * @throws ImporterErrorException
      */
@@ -245,7 +254,7 @@ class ConfigurationController extends Controller
                 continue;
             }
             Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
+            $entry['firefly'] = array_merge($firefly['Asset accounts'] , $firefly['Liabilities']);
             $return[]         = $entry;
         }
         return $return;
@@ -300,6 +309,7 @@ class ConfigurationController extends Controller
      * @param array                      $firefly
      *
      * TODO should be a helper
+     * @return array
      */
     private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
     {

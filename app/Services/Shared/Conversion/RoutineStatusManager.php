@@ -143,8 +143,8 @@ class RoutineStatusManager
 
 
     /**
-     * @param string $status
-     *
+     * @param string      $status
+     * @param string|null $identifier
      * @return ConversionStatus
      * @throws ImporterErrorException
      */

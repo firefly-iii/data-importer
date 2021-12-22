@@ -229,7 +229,9 @@ abstract class Request
     }
 
     /**
+     * @param array $json
      * @return array
+     * @throws GuzzleException
      * @throws ImporterHttpException
      */
     protected function authenticatedJsonPost(array $json): array

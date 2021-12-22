@@ -95,8 +95,9 @@ abstract class Request
 
     /**
      * @return array
-     * @throws ImporterHttpException
+     * @throws GuzzleException
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     protected function authenticatedGet(): array
     {
@@ -120,23 +121,23 @@ abstract class Request
                          ],
                      ]
             );
+
         } catch (TransferException $e) {
             app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response.re
             if (!$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
+
             $body = (string) $e->getResponse()->getBody();
             $json = [];
             try {
                 $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
-                app('log')->error(sprintf('Could not decode error: %s', $e->getMessage()));
+                app('log')->error('Could not decode error.');
             }
 
-            $exception       = new ImporterErrorException;
-            $exception->json = $json;
-            throw $exception;
+            throw new ImporterErrorException('Transfer exception leads to error.',0,$e);
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this

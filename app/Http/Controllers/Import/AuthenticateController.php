@@ -34,7 +34,6 @@ use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\Request;
-use Illuminate\Support\ViewErrorBag;
 use Log;
 use Session;
 
@@ -52,6 +51,8 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws ImporterErrorException
      */
     public function index(Request $request)
     {
@@ -95,6 +96,8 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws ImporterErrorException
      */
     public function postIndex(Request $request)
     {

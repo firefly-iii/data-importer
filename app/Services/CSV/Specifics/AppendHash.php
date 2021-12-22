@@ -31,7 +31,7 @@ namespace App\Services\CSV\Specifics;
 class AppendHash implements SpecificInterface
 {
     /** @var array Counter for each line. */
-    public $lines_counter = [];
+    public array $lines_counter = [];
 
     /**
      * Description of the current specific.

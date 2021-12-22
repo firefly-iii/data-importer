@@ -82,6 +82,8 @@ class TokenManager
 
     /**
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function hasValidRefreshToken(): bool
     {
@@ -97,6 +99,8 @@ class TokenManager
 
     /**
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function hasValidAccessToken(): bool
     {

@@ -55,6 +55,7 @@ class TokenController extends Controller
      * 1. All info is present. Set some cookies and continue.
      * 2. Has client ID + URL. Will send user to Firefly III for permission.
      * 3. Has either 1 of those. Will show user some input form.
+     *
      * @param Request $request
      *
      * @return Application|Factory|RedirectResponse|Redirector|View
@@ -85,12 +86,14 @@ class TokenController extends Controller
                 SecretManager::saveVanityUrl($vanityUrl),
                 SecretManager::saveRefreshToken(''),
             ];
+
             return redirect(route('index'))->withCookies($cookies);
         }
 
         // Option 2: client ID + base URL.
         if (0 !== $clientId && '' !== $baseUrl) {
             Log::debug(sprintf('Found client ID "%d" + URL "%s" in config, redirect to Firefly III for permission.', $clientId, $baseUrl));
+
             return $this->redirectForPermission($request, $baseUrl, $vanityUrl, $clientId);
         }
 
@@ -149,6 +152,7 @@ class TokenController extends Controller
      * Whatever happens, we redirect the user to Firefly III and beg for permission.
      *
      * @param Request $request
+     *
      * @return Application|RedirectResponse|Redirector
      */
     public function submitClientId(Request $request)
@@ -168,7 +172,7 @@ class TokenController extends Controller
             return redirect(route('token.index'));
         }
 
-        $data['client_id'] = (int) $data['client_id'];
+        $data['client_id'] = (int)$data['client_id'];
 
         // grab base URL from config first, otherwise from submitted data:
         $baseURL = config('importer.url');
@@ -178,7 +182,7 @@ class TokenController extends Controller
         Log::debug(sprintf('Vanity URL is now "%s"', $vanityURL));
 
         // if the config has a vanity URL it will always overrule.
-        if ('' !== (string) config('importer.vanity_url')) {
+        if ('' !== (string)config('importer.vanity_url')) {
             $vanityURL = config('importer.vanity_url');
             Log::debug(sprintf('Vanity URL is now "%s"', $vanityURL));
         }
@@ -188,7 +192,7 @@ class TokenController extends Controller
             $baseURL = $data['base_url'];
             Log::debug(sprintf('Base URL is now "%s"', $baseURL));
         }
-        if ('' === (string) $vanityURL) {
+        if ('' === (string)$vanityURL) {
             $vanityURL = $baseURL;
             Log::debug(sprintf('Vanity URL is now "%s"', $vanityURL));
         }
@@ -202,6 +206,7 @@ class TokenController extends Controller
      * and the base URL (also from the cookie). The base_url is NEVER the vanity URL.§
      *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function doValidate(Request $request): JsonResponse
@@ -220,21 +225,25 @@ class TokenController extends Controller
         try {
             $result = $request->get();
         } catch (ApiHttpException $e) {
+            Log::error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
+
             return response()->json(['result' => 'NOK', 'message' => $e->getMessage()]);
         }
         // -1 = OK (minimum is smaller)
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum = (string) config('importer.minimum_version');
+        $minimum = (string)config('importer.minimum_version');
         $compare = version_compare($minimum, $result->version);
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',
                 $result->version, $minimum
             );
-            $response     = ['result' => 'NOK', 'message' => $errorMessage];
+            Log::error(sprintf('Could not link to Firefly III: %s', $errorMessage));
+            $response = ['result' => 'NOK', 'message' => $errorMessage];
         }
+        Log::debug('Result is', $response);
 
         return response()->json($response);
     }
@@ -243,6 +252,7 @@ class TokenController extends Controller
      * The user ends up here when they come back from Firefly III.
      *
      * @param Request $request
+     *
      * @return Application|Factory|\Illuminate\Contracts\View\View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      * @throws GuzzleException
@@ -251,11 +261,11 @@ class TokenController extends Controller
     public function callback(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $state        = (string) $request->session()->pull('state');
-        $codeVerifier = (string) $request->session()->pull('code_verifier');
-        $clientId     = (int) $request->session()->pull('form_client_id');
-        $baseURL      = (string) $request->session()->pull('form_base_url');
-        $vanityURL    = (string) $request->session()->pull('form_vanity_url');
+        $state        = (string)$request->session()->pull('state');
+        $codeVerifier = (string)$request->session()->pull('code_verifier');
+        $clientId     = (int)$request->session()->pull('form_client_id');
+        $baseURL      = (string)$request->session()->pull('form_base_url');
+        $vanityURL    = (string)$request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
         throw_unless(
@@ -284,18 +294,19 @@ class TokenController extends Controller
         try {
             $response = (new Client($opts))->post($finalURL, $params);
         } catch (ClientException $e) {
-            $body = (string) $e->getResponse()->getBody();
+            $body = (string)$e->getResponse()->getBody();
             Log::error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
             Log::error(sprintf('Response from server: "%s"', $body));
             Log::error($e->getTraceAsString());
+
             return view('error')->with('message', $e->getMessage())->with('body', $body);
         }
 
         try {
-            $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
-            Log::error(sprintf('Response from server: "%s"', (string) $response->getBody()));
+            Log::error(sprintf('Response from server: "%s"', (string)$response->getBody()));
             Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
@@ -303,10 +314,10 @@ class TokenController extends Controller
 
         // set cookies.
         $cookies = [
-            SecretManager::saveAccessToken((string) $data['access_token']),
+            SecretManager::saveAccessToken((string)$data['access_token']),
             SecretManager::saveBaseUrl($baseURL),
             SecretManager::saveVanityUrl($vanityURL),
-            SecretManager::saveRefreshToken((string) $data['refresh_token']),
+            SecretManager::saveRefreshToken((string)$data['refresh_token']),
         ];
         Log::debug(sprintf('Return redirect with cookies to "%s"', route('index')));
 

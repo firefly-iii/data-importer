@@ -24,54 +24,55 @@
         <div class="col-lg-10 offset-lg-1">
             <div class="card">
                 <div class="card-header">Data submission</div>
-                <div class="card-body" v-if="'waiting_to_start' === this.status && false === this.triedToStart">
+                <div v-if="'waiting_to_start' === this.status && false === this.triedToStart" class="card-body">
                     <p>
-                        Your converted content will be submitted to your Firefly III installation. Press <strong>Start job</strong> to start.
+                        Your converted content will be submitted to your Firefly III installation. Press <strong>Start
+                        job</strong> to start.
                     </p>
                     <p>
-                        <button class="btn btn-success float-end" v-on:click="callStart" type="button">Start job
+                        <button class="btn btn-success float-end" type="button" v-on:click="callStart">Start job
                             &rarr;
                         </button>
                     </p>
                 </div>
-                <div class="card-body" v-if="'waiting_to_start' === this.status && true === this.triedToStart">
+                <div v-if="'waiting_to_start' === this.status && true === this.triedToStart" class="card-body">
                     <p>Waiting for the job to start..</p>
                 </div>
-                <div class="card-body" v-if="'submission_running' === this.status">
+                <div v-if="'submission_running' === this.status" class="card-body">
                     <p>
                         Submission is running, please wait.
                     </p>
                     <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                             aria-valuenow="100" aria-valuemin="0"
-                             aria-valuemax="100" style="width: 100%"></div>
+                        <div aria-valuemax="100" aria-valuemin="0"
+                             aria-valuenow="100" class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 100%"></div>
                     </div>
                     <submission-messages
+                        :errors="this.errors"
                         :messages="this.messages"
                         :warnings="this.warnings"
-                        :errors="this.errors"
                     ></submission-messages>
                 </div>
-                <div class="card-body" v-if="'submission_done' === this.status ">
+                <div v-if="'submission_done' === this.status " class="card-body">
                     <p>
                         The import routine has finished 🎉. Done!
                     </p>
                     <submission-messages
+                        :errors="this.errors"
                         :messages="this.messages"
                         :warnings="this.warnings"
-                        :errors="this.errors"
                     ></submission-messages>
                 </div>
-                <div class="card-body" v-if="'submission_errored' === this.status">
+                <div v-if="'submission_errored' === this.status" class="card-body">
                     <p class="text-danger">
                         The submission could not be started, or failed due to an error. Please check the log files.
                         Sorry about
                         this :(
                     </p>
                     <submission-messages
+                        :errors="this.errors"
                         :messages="this.messages"
                         :warnings="this.warnings"
-                        :errors="this.errors"
                     ></submission-messages>
                 </div>
 

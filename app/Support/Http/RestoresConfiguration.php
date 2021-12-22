@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * RestoresConfiguration.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Support\Http;
 
 use App\Services\Session\Constants;
@@ -34,6 +36,8 @@ trait RestoresConfiguration
      * Restore configuration from session and drive.
      *
      * @return Configuration
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function restoreConfiguration(): Configuration
     {

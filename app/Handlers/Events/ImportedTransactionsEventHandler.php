@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * ImportedTransactionsEventHandler.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,6 +21,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Handlers\Events;
 
 use App\Events\ImportedTransactions;
@@ -36,21 +38,21 @@ class ImportedTransactionsEventHandler
     {
         app('log')->debug('Now in sendReportOverMail');
 
-        $mailer = config('mail.default');
+        $mailer   = config('mail.default');
         $receiver = config('mail.destination');
-        if('' === $mailer) {
+        if ('' === $mailer) {
             app('log')->info('No mailer configured, will not mail.');
             return;
         }
-        if('' === $receiver) {
+        if ('' === $receiver) {
             app('log')->info('No mail receiver configured, will not mail.');
             return;
         }
 
-        $log  =[
+        $log = [
             'messages' => $event->messages,
             'warnings' => $event->warnings,
-            'errors' => $event->errors,
+            'errors'   => $event->errors,
         ];
         app('log')->info('Will send report message.');
         app('log')->debug('If no error below this line, mail was sent!');

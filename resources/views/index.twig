@@ -164,6 +164,10 @@
             if ('NODATA' === data.result) {
                 $('#spectre_button').removeClass('disabled').text('Import from Spectre').removeAttr('disabled');
             }
+            if ('NOK' === data.result) {
+                $('#spectre_result').show().text('The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.');
+                $('#spectre_button').hide();
+            }
         }).fail(function () {
             $('#spectre_result').show().text('The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.');
             $('#spectre_button').hide();

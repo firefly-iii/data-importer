@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * Configuration.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -20,6 +20,8 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
@@ -195,8 +197,8 @@ class Configuration
         $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
 
         // null or Carbon because fromRequest will give Carbon object.
-        $object->dateNotBefore   = null === $array['date_not_before']  ? '' : $array['date_not_before']->format('Y-m-d');
-        $object->dateNotAfter    = null === $array['date_not_after']  ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -797,6 +799,7 @@ class Configuration
     }
 
     /**
+     * @param string $key
      * @param string $identifier
      */
     public function addRequisition(string $key, string $identifier)

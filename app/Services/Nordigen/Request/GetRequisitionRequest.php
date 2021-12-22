@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+
 /*
  * GetRequisitionRequest.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -21,13 +21,14 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Nordigen\Request;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
-use App\Services\Nordigen\Response\ListBanksResponse;
 use App\Services\Shared\Response\Response;
 
 /**

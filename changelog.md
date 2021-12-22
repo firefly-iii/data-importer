@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.0 - 2021-12-22
+
+### Known issues
+
+- ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.
+- 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
+
+### Changed
+- The importer will search for, and match account numbers as well as IBANs.
+- The importer will prefer 'bookDate' over 'valueDate'
+
+### Added
+- POST import and import via upload is now possible. Several mandatory security measures are listed in `.env.example`.
+
+### Fixed
+- [Issue 5397](https://github.com/firefly-iii/firefly-iii/issues/5397) Could not import into liabilities.
+- [Issue 23](https://github.com/firefly-iii/data-importer/pull/23), fixed date range settings, thanks @p-rintz
+- [Issue 5407](https://github.com/firefly-iii/firefly-iii/issues/5407) Fix issue with empty accountlists.
+
 ## 0.3.0 - 2021-12-11
 
 ### Added

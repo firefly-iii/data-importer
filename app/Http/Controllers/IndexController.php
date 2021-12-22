@@ -51,9 +51,11 @@ class IndexController extends Controller
      */
     public function postIndex(Request $request): mixed
     {
+        Log::debug(sprintf('Now in %s', __METHOD__));
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {
+            Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
             $cookies = [
                 cookie(Constants::FLOW_COOKIE, $flow),
             ];
@@ -68,7 +70,7 @@ class IndexController extends Controller
      */
     public function index(Request $request): mixed
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.

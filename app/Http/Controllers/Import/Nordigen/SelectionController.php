@@ -75,8 +75,8 @@ class SelectionController extends Controller
 
         // if there is a requisition & country etc in the config file, go to next step.
         $requisitions = $configuration->getNordigenRequisitions();
-        $country  =$configuration->getNordigenCountry();
-        $bank = $configuration->getNordigenBank();
+        $country      = $configuration->getNordigenCountry();
+        $bank         = $configuration->getNordigenBank();
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
             session()->put(Constants::CONFIGURATION, $configuration->toArray());
             session()->put(Constants::SELECTED_BANK_COUNTRY, true);

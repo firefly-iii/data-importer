@@ -161,8 +161,18 @@ trait AutoImports
      */
     private function importFile(string $directory, string $file): void
     {
+        app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
+        app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
         $csvFile  = sprintf('%s/%s', $directory, $file);
         $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+
+        // TODO not yet sure why the distinction is necessary.
+        if ('csv' === $this->getExtension($file)) {
+            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        }
+
+        app('log')->debug(sprintf('ImportFile: CSV       "%s"', $csvFile));
+        app('log')->debug(sprintf('ImportFile: JSON      "%s"', $jsonFile));
 
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
@@ -389,5 +399,44 @@ trait AutoImports
                 }
             }
         }
+    }
+
+
+    /**
+     * @param string $csvFile
+     * @param string $jsonFile
+     * @throws ImporterErrorException
+     */
+    private function importUpload(string $csvFile, string $jsonFile): void
+    {
+        // do JSON check
+        $jsonResult = $this->verifyJSON($jsonFile);
+        if (false === $jsonResult) {
+            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $csvFile, $jsonFile);
+            $this->error($message);
+
+            return;
+        }
+        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration->updateDateRange();
+
+
+        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
+
+        // this is it!
+        $this->startConversion($configuration, $csvFile);
+        $this->reportConversion();
+
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $csvFile, $jsonFile));
+        $this->startImport($configuration);
+        $this->reportImport();
+
+        $this->line('Done!');
+        event(new ImportedTransactions(
+                  array_merge($this->conversionMessages, $this->importMessages),
+                  array_merge($this->conversionWarnings, $this->importWarnings),
+                  array_merge($this->conversionErrors, $this->importErrors)
+              )
+        );
     }
 }

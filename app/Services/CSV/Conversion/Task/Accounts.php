@@ -63,6 +63,7 @@ class Accounts extends AbstractTask
      * @param array $transaction
      *
      * @return array
+     * @throws ImporterErrorException
      */
     private function processTransaction(array $transaction): array
     {
@@ -243,7 +244,19 @@ class Accounts extends AbstractTask
         }
         // If the IBAN search result is NULL, but the IBAN itself is not null,
         // data importer will return an array with the IBAN (and optionally the name).
-        // this prevents a situation where the data importer
+
+        // if the account number is set, search for the account number.
+        if (isset($array['number']) && '' !== (string) $array['number']) {
+            app('log')->debug('Find by account number.');
+            $transactionType = (string) ($array['transaction_type'] ?? null);
+            $result          = $this->findByNumber((string) $array['number'], $transactionType);
+        }
+        if (null !== $result) {
+            $return = $result->toArray();
+            app('log')->debug('Result of findByNumber is not null, returning:', $return);
+
+            return $return;
+        }
 
 
         // find by name, return only if it's an asset or liability account.
@@ -272,7 +285,7 @@ class Accounts extends AbstractTask
         }
 
         // Return ID or IBAN if not null
-        if (null !== $array['id'] || '' !== (string) $array['iban']) {
+        if ('' !== (string) $array['iban']) {
             app('log')->debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;
@@ -383,6 +396,77 @@ class Accounts extends AbstractTask
             // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
             if (in_array($account->type, ['expense', 'revenue'], true)) {
                 app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
+
+                return null;
+            }
+
+
+            return $account;
+        }
+
+        if (2 === count($response)) {
+            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
+
+            return null;
+        }
+        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
+
+        return null;
+    }
+
+    /**
+     * @param string $accountNumber
+     * @param string $transactionType
+     *
+     * @return Account|null
+     * @throws ImporterErrorException
+     */
+    private function findByNumber(string $accountNumber, string $transactionType): ?Account
+    {
+        app('log')->debug(sprintf('Going to search account with account number "%s"', $accountNumber));
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchAccountRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setField('number');
+        $request->setQuery($accountNumber);
+        /** @var GetAccountsResponse $response */
+        try {
+            $response = $request->get();
+        } catch (GrumpyApiHttpException $e) {
+            throw new ImporterErrorException($e->getMessage());
+        }
+        if (0 === count($response)) {
+            app('log')->debug('Found NOTHING.');
+
+            return null;
+        }
+
+        if (1 === count($response)) {
+            /** @var Account $account */
+            try {
+                $account = $response->current();
+            } catch (ApiException $e) {
+                throw new ImporterErrorException($e->getMessage());
+            }
+            // catch impossible combination "expense" with "deposit"
+            if ('expense' === $account->type && 'deposit' === $transactionType) {
+                app('log')->debug(
+                    sprintf(
+                        'Out of cheese error (account number). Found Found %s account #%d based on account number "%s". But not going to use expense/deposit combi.',
+                        $account->type, $account->id, $accountNumber
+                    )
+                );
+                app('log')->debug('Firefly III will have to make the correct decision.');
+
+                return null;
+            }
+            app('log')->debug(sprintf('[a] Found %s account #%d based on account number "%s"', $account->type, $account->id, $accountNumber));
+
+            // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
+            if (in_array($account->type, ['expense', 'revenue'], true)) {
+                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the account number.');
 
                 return null;
             }

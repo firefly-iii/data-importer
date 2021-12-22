@@ -25,10 +25,12 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListCustomersResponse;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class ListCustomersRequest
@@ -60,7 +62,8 @@ class ListCustomersRequest extends Request
     {
         try {
             $response = $this->authenticatedGet();
-        } catch (ImporterHttpException $e) {
+        } catch (GuzzleException | ImporterHttpException | ImporterErrorException $e) {
+            app('log')->error($e->getMessage());
             // JSON thing.
             return new ErrorResponse($e->json ?? []);
         }

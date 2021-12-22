@@ -75,6 +75,22 @@ class Import extends Command
         $file   = (string) $this->argument('file');
         $config = (string) $this->argument('config');
 
+        // validate config path:
+        if ('' !== $config) {
+            $directory = dirname($config);
+            if (!$this->isAllowedPath($directory)) {
+                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+                return 1;
+            }
+        }
+        if ('' !== $file) {
+            $directory = dirname($file);
+            if (!$this->isAllowedPath($directory)) {
+                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+                return 1;
+            }
+        }
+
         if (!file_exists($config) || (file_exists($config) && !is_file($config))) {
             $message = sprintf('The importer can\'t import: configuration file "%s" does not exist or could not be read.', $config);
             $this->error($message);

@@ -53,11 +53,11 @@ class TransactionProcessor
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
-        if ('' !==  $this->configuration->getDateNotBefore()) {
+        if ('' !== $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
-        if ('' !==  $this->configuration->getDateNotAfter()) {
+        if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
@@ -86,6 +86,7 @@ class TransactionProcessor
 
     /**
      * @param GetTransactionsResponse $transactions
+     * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {

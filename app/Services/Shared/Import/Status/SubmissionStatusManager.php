@@ -140,8 +140,8 @@ class SubmissionStatusManager
 
 
     /**
-     * @param string $status
-     *
+     * @param string      $status
+     * @param string|null $identifier
      * @return SubmissionStatus
      */
     public static function setSubmissionStatus(string $status, ?string $identifier = null): SubmissionStatus

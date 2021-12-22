@@ -94,6 +94,7 @@ class UploadController extends Controller
      * @param Request $request
      *
      * @return RedirectResponse|Redirector
+     * @throws ImporterErrorException
      */
     public function upload(Request $request)
     {

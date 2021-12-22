@@ -47,7 +47,7 @@
             <strong class="text-info">Message(s)</strong>
             <ul>
                 <li v-for="(messageList, line) in this.messages">Line #{{ line }}:
-                    <span v-if="1 === messageList.length" v-html="messageList[0]" />
+                    <span v-if="1 === messageList.length" v-html="messageList[0]"/>
                     <ul v-if="messageList.length > 1">
                         <li v-for="(message) in messageList" v-html="message"/>
                     </ul>
@@ -58,32 +58,32 @@
 </template>
 
 <script>
-    export default {
-        name: "ConversionMessages",
-        props: {
-            messages: {
-                type: [Array, Object],
-                default: function () {
-                    return {};
-                }
-            },
-            warnings: {
-                type: [Array, Object],
-                default: function () {
-                    return {};
-                }
-            },
-            errors: {
-                type: [Array, Object],
-                default: function () {
-                    return {};
-                }
-            },
-        },
-        methods: {
-            isEmpty(obj) {
-                return _.isEmpty(obj);
+export default {
+    name: "ConversionMessages",
+    props: {
+        messages: {
+            type: [Array, Object],
+            default: function () {
+                return {};
             }
+        },
+        warnings: {
+            type: [Array, Object],
+            default: function () {
+                return {};
+            }
+        },
+        errors: {
+            type: [Array, Object],
+            default: function () {
+                return {};
+            }
+        },
+    },
+    methods: {
+        isEmpty(obj) {
+            return _.isEmpty(obj);
         }
     }
+}
 </script>

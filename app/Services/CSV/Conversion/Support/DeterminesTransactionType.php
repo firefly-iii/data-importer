@@ -50,12 +50,20 @@ trait DeterminesTransactionType
             return 'deposit';
         }
 
-        // if source is a asset and dest is NULL, its a withdrawal
+        // if source is an asset and dest is NULL, it's a withdrawal
         if ('asset' === $sourceType && null === $destinationType) {
             app('log')->debug('Return withdrawal, source is asset');
 
             return 'withdrawal';
         }
+        // if source is liabilities and destination is NULL, it's a withdrawal
+        if ('liabilities' === $sourceType && null === $destinationType) {
+            app('log')->debug('Return withdrawal, source is "liabilities".');
+
+            return 'withdrawal';
+        }
+
+
         // if destination is asset and source is NULL, its a deposit
         if (null === $sourceType && 'asset' === $destinationType) {
             app('log')->debug('Return deposit, destination is asset');
@@ -63,6 +71,12 @@ trait DeterminesTransactionType
             return 'deposit';
         }
 
+        // if destination is liabilities and source is NULL, it's a deposit
+        if (null === $sourceType && 'liabilities' === $destinationType) {
+            app('log')->debug('Return liabilities, destination is asset');
+
+            return 'deposit';
+        }
         $key   = sprintf('transaction_types.account_to_transaction.%s.%s', $sourceType, $destinationType);
         $type  = config($key);
         $value = $type ?? 'withdrawal';

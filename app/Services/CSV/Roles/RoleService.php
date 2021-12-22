@@ -45,7 +45,8 @@ class RoleService
      * @param Configuration $configuration
      *
      * @return array
-     * @throws Exception
+     * @throws \League\Csv\InvalidArgument
+     * @throws \League\Csv\UnableToProcessCsv
      */
     public static function getColumns(string $content, Configuration $configuration): array
     {

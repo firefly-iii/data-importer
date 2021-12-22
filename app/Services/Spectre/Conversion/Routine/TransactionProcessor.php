@@ -47,6 +47,7 @@ class TransactionProcessor
 
     /**
      * @return array
+     * @throws ImporterHttpException
      */
     public function download(): array
     {
@@ -69,8 +70,8 @@ class TransactionProcessor
             $account = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
-            $appId                   = SpectreSecretManager::getAppId();
-            $secret                  = SpectreSecretManager::getSecret();
+            $appId                 = SpectreSecretManager::getAppId();
+            $secret                = SpectreSecretManager::getSecret();
             $request               = new GetTransactionsRequest($url, $appId, $secret);
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
@@ -99,8 +100,8 @@ class TransactionProcessor
     {
         // refresh connection
         $url    = config('spectre.url');
-        $appId                   = SpectreSecretManager::getAppId();
-        $secret                  = SpectreSecretManager::getSecret();
+        $appId  = SpectreSecretManager::getAppId();
+        $secret = SpectreSecretManager::getSecret();
         $put    = new PutRefreshConnectionRequest($url, $appId, $secret);
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
@@ -112,6 +113,7 @@ class TransactionProcessor
 
     /**
      * @param GetTransactionsResponse $transactions
+     * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
