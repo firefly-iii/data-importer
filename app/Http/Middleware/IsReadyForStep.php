@@ -73,13 +73,19 @@ trait IsReadyForStep
             return true;
         }
         if ('csv' === $flow) {
-            return $this->isReadyForCSVStep();
+            $result = $this->isReadyForCSVStep();
+            Log::debug(sprintf('isReadyForCSVStep: Return %s', var_export($result, true)));
+            return $result;
         }
         if ('nordigen' === $flow) {
-            return $this->isReadyForNordigenStep();
+            $result = $this->isReadyForNordigenStep();
+            Log::debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
+            return $result;
         }
         if ('spectre' === $flow) {
-            return $this->isReadyForSpectreStep();
+            $result = $this->isReadyForSpectreStep();
+            Log::debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
+            return $result;
         }
         return $this->isReadyForBasicStep();
     }
@@ -97,56 +103,42 @@ trait IsReadyForStep
             default:
                 throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
             case 'service-validation':
-                Log::debug('return true');
                 return true;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    Log::debug('return false');
                     return false;
                 }
-                Log::debug('return true');
                 return true;
             case 'authenticate':
                 // for CSV this is always false.
-                Log::debug('return false');
                 return false;
             case 'define-roles':
                 if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
-                    Log::debug('return false');
                     return false;
                 }
-                Log::debug('return true');
                 return true;
             case 'configuration':
                 if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
-                    Log::debug('return false');
                     return false;
                 }
-                Log::debug('return true');
                 return true;
             case 'map':
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-                    Log::debug('return false');
                     return false;
                 }
-                Log::debug('return true');
                 return true;
             case 'conversion':
                 // if/else is in reverse!
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('return true');
                     return true;
                 }
                 // will probably never return false, but OK.
-                Log::debug('return false');
                 return false;
             case 'submit':
                 // if/else is in reverse!
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 return false;
         }
     }
@@ -165,24 +157,19 @@ trait IsReadyForStep
                 throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
             case 'authenticate':
             case 'service-validation':
-                Log::debug('return true');
                 return true;
             case 'define-roles':
-                Log::debug('return false');
                 return false;
             case 'upload-files':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    Log::debug('return false');
                     return false;
                 }
                 return true;
             case 'nordigen-selection':
                 // must have upload, thats it
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 return false;
             case 'map':
                 // mapping must be complete, or not ready for this step.
@@ -208,10 +195,8 @@ trait IsReadyForStep
             case 'nordigen-link':
                 // must have upload, thats it
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 return false;
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
@@ -220,26 +205,20 @@ trait IsReadyForStep
                 }
                 // if/else is in reverse!
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 // will probably never return false, but OK.
                 return false;
             case 'configuration':
                 if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 return false;
             case 'submit':
                 // if/else is in reverse!
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-                    Log::debug('return true');
                     return true;
                 }
-                Log::debug('return false');
                 return false;
         }
     }

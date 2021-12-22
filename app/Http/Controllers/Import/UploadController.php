@@ -34,6 +34,7 @@ use App\Services\Storage\StorageService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
@@ -104,78 +105,15 @@ class UploadController extends Controller
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag;
 
-        if (null === $csvFile && 'csv' === $flow) {
-            $errors->add('csv_file', 'No file was uploaded.');
+        // process CSV file (if present)
+        $errors = $this->processCsvFile($flow, $errors, $csvFile);
 
-            return redirect(route('003-upload.index'))->withErrors($errors);
-        }
-        if ('csv' === $flow) {
-            $errorNumber = $csvFile->getError();
-            if (0 !== $errorNumber) {
-                $errors->add('csv_file', $this->getError($errorNumber));
-            }
+        // process config file (if present)
+        $errors = $this->processConfigFile($errors, $configFile);
 
+        // process pre-selected file (if present):
+        $errors = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
 
-            // upload the file to a temp directory and use it from there.
-            if (0 === $errorNumber) {
-                $content = file_get_contents($csvFile->getPathname());
-
-                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                // This one is for you: 🤦‍♀️
-                $eol = $this->detectEOL($content);
-                if ("\r" === $eol) {
-                    Log::error('You bank is dumb. Tell them to fix their CSV files.');
-                    $content = str_replace("\r", "\n", $content);
-                }
-
-                $csvFileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
-                session()->put(Constants::HAS_UPLOAD, true);
-            }
-        }
-
-        // if present, and no errors, upload the config file and store it in the session.
-        if (null !== $configFile) {
-            Log::debug('Config file is present.');
-            $errorNumber = $configFile->getError();
-            if (0 !== $errorNumber) {
-                $errors->add('config_file', $errorNumber);
-            }
-            // upload the file to a temp directory and use it from there.
-            if (0 === $errorNumber) {
-                Log::debug('Config file uploaded.');
-                $configFileName = StorageService::storeContent(file_get_contents($configFile->getPathname()));
-
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-                // process the config file
-                try {
-                    $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
-                    session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                } catch (ImporterErrorException $e) {
-                    $errors->add('config_file', $e->getMessage());
-                }
-            }
-        }
-        // if no uploaded config file, read and use the submitted existing file, if any.
-        $existingFile = (string) $request->get('existing_config');
-
-        if (null === $configFile && '' !== $existingFile) {
-            Log::debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
-            $configFileName = StorageService::storeContent($disk->get($existingFile));
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // process the config file
-            try {
-                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
-            }
-        }
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
@@ -243,6 +181,105 @@ class UploadController extends Controller
         }
 
         return $curEol;
+    }
+
+    /**
+     * @return MessageBag
+     */
+    private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
+    {
+        if (null === $file && 'csv' === $flow) {
+            $errors->add('csv_file', 'No file was uploaded.');
+            return $errors;
+        }
+        if ('csv' === $flow) {
+            $errorNumber = $file->getError();
+            if (0 !== $errorNumber) {
+                $errors->add('csv_file', $this->getError($errorNumber));
+            }
+
+
+            // upload the file to a temp directory and use it from there.
+            if (0 === $errorNumber) {
+                $content = file_get_contents($file->getPathname());
+
+                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                // This one is for you: 🤦‍♀️
+                $eol = $this->detectEOL($content);
+                if ("\r" === $eol) {
+                    Log::error('You bank is dumb. Tell them to fix their CSV files.');
+                    $content = str_replace("\r", "\n", $content);
+                }
+
+                $csvFileName = StorageService::storeContent($content);
+                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
+                session()->put(Constants::HAS_UPLOAD, true);
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * @param MessageBag        $errors
+     * @param UploadedFile|null $file
+     * @return MessageBag
+     * @throws ImporterErrorException
+     */
+    private function processConfigFile(MessageBag $errors, UploadedFile|null $file): MessageBag
+    {
+        if (count($errors) > 0 || null === $file) {
+            return $errors;
+        }
+        Log::debug('Config file is present.');
+        $errorNumber = $file->getError();
+        if (0 !== $errorNumber) {
+            $errors->add('config_file', $errorNumber);
+        }
+        // upload the file to a temp directory and use it from there.
+        if (0 === $errorNumber) {
+            Log::debug('Config file uploaded.');
+            $configFileName = StorageService::storeContent(file_get_contents($file->getPathname()));
+
+            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+            // process the config file
+            try {
+                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            } catch (ImporterErrorException $e) {
+                $errors->add('config_file', $e->getMessage());
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * @param MessageBag        $errors
+     * @param string            $selection
+     * @param UploadedFile|null $file
+     * @return MessageBag
+     * @throws ImporterErrorException
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    private function processSelection(MessageBag $errors, string $selection, UploadedFile|null $file): MessageBag
+    {
+        if (null === $file && '' !== $selection) {
+            Log::debug('User selected a config file from the store.');
+            $disk           = Storage::disk('configurations');
+            $configFileName = StorageService::storeContent($disk->get($selection));
+
+            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+            // process the config file
+            try {
+                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            } catch (ImporterErrorException $e) {
+                $errors->add('config_file', $e->getMessage());
+            }
+        }
+        return $errors;
     }
 
 }

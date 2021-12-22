@@ -338,7 +338,7 @@ class Accounts extends AbstractTask
             return $account;
         }
 
-        app('log')->debug('Found NOTHING.');
+        app('log')->debug('Found NOTHING in findById.');
 
         return null;
     }
@@ -367,7 +367,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            app('log')->debug('Found NOTHING.');
+            app('log')->debug('Found NOTHING in findbyiban.');
 
             return null;
         }
@@ -438,7 +438,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            app('log')->debug('Found NOTHING.');
+            app('log')->debug('Found NOTHING in findbynumber.');
 
             return null;
         }
@@ -508,7 +508,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            app('log')->debug('Found NOTHING.');
+            app('log')->debug('Found NOTHING in findbyna,e.');
 
             return null;
         }

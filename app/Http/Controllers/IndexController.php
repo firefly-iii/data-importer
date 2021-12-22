@@ -82,21 +82,23 @@ class IndexController extends Controller
         }
 
         // display to user the method of authentication
-        $pat = false;
+        $clientId = (string) config('importer.client_id');
+        $url      = (string) config('importer.url');
+        $pat      = false;
         if ('' !== (string) config('importer.access_token')) {
             $pat = true;
         }
         $clientIdWithURL = false;
-        if ('' !== (string) config('importer.url') && '' !== (string) config('importer.client_id')) {
+        if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
         $URLonly = false;
-        if ('' !== (string) config('importer.url') && '' === (string) config('importer.client_id') && '' === (string) config('importer.access_token')
+        if ('' !== $url && '' === $clientId && '' === (string) config('importer.access_token')
         ) {
             $URLonly = true;
         }
         $flexible = false;
-        if ('' === (string) config('importer.url') && '' === (string) config('importer.client_id')) {
+        if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
 

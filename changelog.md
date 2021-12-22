@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.1 - 2021-12-23
+
+- ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.
+- 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
+
+### Added
+- Dark mode. Responds to your browser or OS.
+
+### Fixed
+- [Issue 5416](https://github.com/firefly-iii/firefly-iii/issues/5416) Mismatch in function name breaks Nordigen.
+
 ## 0.4.0 - 2021-12-22
 
 ### Known issues

@@ -176,7 +176,7 @@ class Request extends FormRequest
      *
      * @return Carbon|null
      */
-    protected function date(string $field): ?Carbon
+    protected function getCarbonDate(string $field): ?Carbon
     {
         $result = null;
         try {
