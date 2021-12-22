@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.0 - 2021-12-xx
+
+### Added
+- Dark mode
+
 ## 0.4.0 - 2021-12-22
 
 ### Known issues

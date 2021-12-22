@@ -5,10 +5,15 @@
     <base href="{{ route('index') }}/">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="color-scheme" content="light dark">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}?version={{ version }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap-dark.min.css') }}?version={{ version }}">
     <link href="{{ asset('fa/css/all.min.css') }}" rel="stylesheet">
+
+    <!-- Optional Meta Theme Color is also supported on Safari and Chrome -->
+    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#eeeeee" media="(prefers-color-scheme: dark)">
 
     <title>Firefly III Data Importer // {{ pageTitle|default('No title') }}</title>
 </head>
