@@ -63,6 +63,9 @@ use Log;
  */
 class ConfigurationController extends Controller
 {
+    protected const ASSET_ACCOUNTS = 'assets';
+    protected const LIABILITIES    = 'liabilities';
+
     use RestoresConfiguration;
 
     /**
@@ -90,8 +93,8 @@ class ConfigurationController extends Controller
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
         $accounts  = [
-            'Asset accounts' => [],
-            'Liabilities'    => [],
+            self::ASSET_ACCOUNTS => [],
+            self::LIABILITIES    => [],
         ];
         $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
 
@@ -118,7 +121,7 @@ class ConfigurationController extends Controller
 
         /** @var Account $account */
         foreach ($response as $account) {
-            $accounts['Asset accounts'][$account->id] = $account;
+            $accounts[self::ASSET_ACCOUNTS][$account->id] = $account;
         }
 
         // also get liabilities
@@ -131,7 +134,7 @@ class ConfigurationController extends Controller
         $response = $request->get();
         /** @var Account $account */
         foreach ($response as $account) {
-            $accounts['Liabilities'][$account->id] = $account;
+            $accounts[self::LIABILITIES][$account->id] = $account;
         }
 
         // possibilities for duplicate detection (unique columns)
@@ -254,7 +257,7 @@ class ConfigurationController extends Controller
                 continue;
             }
             Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = array_merge($firefly['Asset accounts'] , $firefly['Liabilities']);
+            $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
             $return[]         = $entry;
         }
         return $return;
@@ -273,7 +276,7 @@ class ConfigurationController extends Controller
             return [];
         }
         $result = [];
-        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
+        $all    = array_merge($firefly[self::ASSET_ACCOUNTS] ?? [], $firefly[self::LIABILITIES] ?? []);
         /** @var Account $account */
         foreach ($all as $account) {
             if ($iban === $account->iban) {
@@ -294,7 +297,7 @@ class ConfigurationController extends Controller
             return [];
         }
         $result = [];
-        $all    = array_merge($firefly['Asset accounts'] ?? [], $firefly['Liabilities'] ?? []);
+        $all    = array_merge($firefly[self::ASSET_ACCOUNTS] ?? [], $firefly[self::LIABILITIES] ?? []);
         /** @var Account $account */
         foreach ($all as $account) {
             if ($currency === $account->currencyCode) {

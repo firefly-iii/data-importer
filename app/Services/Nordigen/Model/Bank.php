@@ -36,13 +36,6 @@ class Bank
     public string $logo;
 
     /**
-     *
-     */
-    private function __construct()
-    {
-    }
-
-    /**
      * @param array $array
      * @return static
      */

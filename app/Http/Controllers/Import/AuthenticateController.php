@@ -42,6 +42,8 @@ use Session;
  */
 class AuthenticateController extends Controller
 {
+    private const AUTH_ROUTE = '002-authenticate.index';
+
     public function __construct()
     {
         parent::__construct();
@@ -112,19 +114,19 @@ class AuthenticateController extends Controller
             $appId  = (string) $request->get('spectre_app_id');
             $secret = (string) $request->get('spectre_secret');
             if ('' === $appId || '' === $secret) {
-                return redirect(route('002-authenticate.index'))->with(['error' => 'Both fields must be filled in.']);
+                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
             }
             // give to secret manager to store:
             SpectreSecretManager::saveAppId($appId);
             SpectreSecretManager::saveSecret($secret);
 
-            return redirect(route('002-authenticate.index'));
+            return redirect(route(self::AUTH_ROUTE));
         }
         if ('nordigen' === $flow) {
             $key        = $request->get('nordigen_key');
             $identifier = $request->get('nordigen_id');
             if ('' === $key || '' === $identifier) {
-                return redirect(route('002-authenticate.index'))->with(['error' => 'Both fields must be filled in.']);
+                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
             }
             // store ID and key in session:
             $cookies = [
@@ -132,7 +134,7 @@ class AuthenticateController extends Controller
                 NordigenSecretManager::saveKey($key),
             ];
 
-            return redirect(route('002-authenticate.index'))->withCookies($cookies);
+            return redirect(route(self::AUTH_ROUTE))->withCookies($cookies);
         }
 
         throw new ImporterErrorException('Impossible flow exception.');

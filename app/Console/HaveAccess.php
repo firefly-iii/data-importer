@@ -69,17 +69,18 @@ trait HaveAccess
      */
     private function isAllowedPath(string $path): bool
     {
+        $error = 'No valid paths in IMPORT_DIR_WHITELIST, cannot continue.';
         $paths = config('importer.import_dir_whitelist');
         if (null === $paths) {
-            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            $this->warn($error);
             return false;
         }
         if (is_array($paths) && 0 === count($paths)) {
-            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            $this->warn($error);
             return false;
         }
         if (is_array($paths) && 1 === count($paths) && '' === $paths[0]) {
-            $this->warn('No valid paths in IMPORT_DIR_WHITELIST, cannot continue.');
+            $this->warn($error);
             return false;
         }
 

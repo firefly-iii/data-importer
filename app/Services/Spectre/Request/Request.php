@@ -278,7 +278,7 @@ abstract class Request
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('sendSignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -354,7 +354,7 @@ abstract class Request
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('sendUnsignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -431,7 +431,7 @@ abstract class Request
         try {
             $body = $res->getBody()->getContents();
         } catch (RuntimeException $e) {
-            app('log')->error(sprintf('Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+            app('log')->error(sprintf('sendUnsignedSpectrePut: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
