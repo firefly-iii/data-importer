@@ -35,18 +35,6 @@
 
 <hr>
 
-@if(0 === count($errors))
-_No errors detected_
-@endif
-
-@if(0 === count($warnings))
-_No warnings detected_
-@endif
-
-@if(0 === count($messages))
-_No messages detected_
-@endif
-
 @component('mail::button', ['url' => $url])
 Go to Firefly III
 @endcomponent
