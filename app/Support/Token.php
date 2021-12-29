@@ -56,6 +56,9 @@ class Token
     {
         $value = request()->cookie('vanity_url');
         if (null === $value) {
+            $value = config('importer.vanity_url');
+        }
+        if (null === $value) {
             $value = self::getURL();
         }
         if ('' === (string) $value) {
