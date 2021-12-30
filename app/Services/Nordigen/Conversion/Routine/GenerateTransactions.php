@@ -228,7 +228,7 @@ class GenerateTransactions
         ];
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
-            app('log')->debug('Amount is positive: perhaps transfer or deposit.');
+            app('log')->debug('Amount is positive: assume transfer or deposit.');
             $transaction = $this->appendPositiveAmountInfo($accountId, $transaction, $entry);
         }
 
@@ -237,7 +237,6 @@ class GenerateTransactions
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
         $return['transactions'][] = $transaction;
-
         app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId));
 
 
@@ -352,12 +351,13 @@ class GenerateTransactions
      */
     private function appendPositiveAmountInfo(string $accountId, array $transaction, Transaction $entry): array
     {
-        // amount is positive: deposit or transfer. Spectre account is destination
+        // amount is positive: deposit or transfer. Nordigen account is the destination
         $transaction['type']   = 'deposit';
         $transaction['amount'] = $entry->transactionAmount;
 
         // destination is a Nordigen account (has to be!)
         $transaction['destination_id'] = (int) $this->accounts[$accountId];
+        app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']))
 
         // append source iban and number (if present)
         $transaction = $this->appendAccountFields($transaction, $entry, 'source');
@@ -367,6 +367,9 @@ class GenerateTransactions
         if (isset($transaction['source_name'])) {
             app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
             $mappedId = $this->getMappedAccountId($transaction['source_name']);
+        }
+        if (null === $mappedId) {
+            app('log')->debug('Its not mapped by the user.');
         }
 
         if (null !== $mappedId && 0 !== $mappedId) {
@@ -410,6 +413,9 @@ class GenerateTransactions
             app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['destination_name']));
             $mappedId = $this->getMappedAccountId($transaction['destination_name']);
         }
+        if (null === $mappedId) {
+            app('log')->debug('Its not mapped by the user.');
+        }
 
         if (null !== $mappedId && 0 !== $mappedId) {
             app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['destination_name'], $mappedId));
@@ -427,7 +433,6 @@ class GenerateTransactions
                 unset($transaction['destination_id']);
                 $transaction['destination_name'] = $originalDestName;
             }
-            app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $transaction);
         }
         return $transaction;
     }
@@ -440,6 +445,7 @@ class GenerateTransactions
      */
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
     {
+        app('log')->debug(sprintf('Now in %s(transaction, entry, "%s")', __METHOD__, $direction));
         switch ($direction) {
             default:
                 die(sprintf('Cannot handle direction "%s"', $direction));
@@ -476,22 +482,35 @@ class GenerateTransactions
             app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $iban));
             // source is the other side:
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
-            $transaction[$ibanKey] = $iban;
+            if ('' !== (string) $iban) {
+                app('log')->debug(sprintf('Set field "%s" to "%s".', $ibanKey, $iban));
+                $transaction[$ibanKey] = $iban;
+            }
+            if ('' === (string) $iban) {
+                app('log')->debug(sprintf('IBAN is "%s", so leave field "%s" empty.', $iban, $ibanKey));
+            }
         }
 
         // source is also an ID, so use it!
-        if ('' !== (string) $number && array_key_exists($numberSearch, $this->targetAccounts)) {
-            app('log')->debug(sprintf('Recognized %s (number) as a Firefly III asset account so this is a transfer.', $number));
+        if ('' !== (string) $number && '.' !== $numberSearch && array_key_exists($numberSearch, $this->targetAccounts)) {
+            app('log')->debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$numberSearch];
             $transaction['type'] = 'transfer';
         }
 
-        if ('' === (string) $number || !array_key_exists($numberSearch, $this->targetAccounts)) {
+        if ('' === (string) $number || '.' === $numberSearch || !array_key_exists($numberSearch, $this->targetAccounts)) {
             app('log')->debug(sprintf('"%s" is not a valid account nr OR not recognized as Firefly III asset account so submitted as-is.', $number));
             // source is the other side:
-            $transaction[$nameKey]   = $name ?? sprintf('(unknown %s account)', $direction);
-            $transaction[$numberKey] = $number;
+            $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
+            if ('' !== (string) $number) {
+                app('log')->debug(sprintf('Set field "%s" to "%s".', $numberKey, $number));
+                $transaction[$numberKey] = $number;
+            }
+            if ('' === (string) $number) {
+                app('log')->debug(sprintf('Account number is "%s", so leave field "%s" empty.', $number, $numberKey));
+            }
         }
+        app('log')->debug(sprintf('End of %s', __METHOD__));
         return $transaction;
     }
 }
