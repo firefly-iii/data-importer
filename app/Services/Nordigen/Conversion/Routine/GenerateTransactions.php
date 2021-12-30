@@ -357,7 +357,7 @@ class GenerateTransactions
 
         // destination is a Nordigen account (has to be!)
         $transaction['destination_id'] = (int) $this->accounts[$accountId];
-        app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']))
+        app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
 
         // append source iban and number (if present)
         $transaction = $this->appendAccountFields($transaction, $entry, 'source');
