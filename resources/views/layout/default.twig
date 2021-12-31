@@ -52,7 +52,7 @@
             g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
         })();
     </script>
-    <noscript><p><img src="https://analytics.firefly-iii.org/matomo.php?idsite=9&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+    <noscript><p><img src="{{ config('importer.tracker_url') }}matomo.php?idsite={{ config('importer.tracker_site_id') }}&amp;rec=1" style="border:0;" alt="" /></p></noscript>
     <!-- End Matomo Code -->
 
 
