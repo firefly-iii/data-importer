@@ -73,7 +73,9 @@ class ApiSubmitter
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 
         // create the tag, to be used later on.
-        $this->createTag();
+        if ($count > 0) {
+            $this->createTag();
+        }
 
         /**
          * @var int   $index
