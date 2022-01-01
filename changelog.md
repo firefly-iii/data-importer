@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.0 - 2022-01-01
+
+- ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.
+- 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
+
+### Added
+- Code to support the [cloud installation](https://docs.firefly-iii.org/data-importer/install/public/).
+- Proper page for maintenance mode.
+
+### Changed
+- [Issue 5453](https://github.com/firefly-iii/firefly-iii/issues/5453) Different text for button
+- Importer will complain about bad environment variables.
+- Only create the import tag when necessary.
+
+### Fixed
+- [Issue 5354](https://github.com/firefly-iii/firefly-iii/issues/5354) Fix edge case when importing CSV files.
+- [Issue 5440](https://github.com/firefly-iii/firefly-iii/issues/5440) Can now handle amounts formatted `0,xxxxx`
+- [Issue 5452](https://github.com/firefly-iii/firefly-iii/issues/5452) Bad vanity URL in reports
+- [Issue 5459](https://github.com/firefly-iii/firefly-iii/issues/5459) Fix issue when skipping configuration page.
+- Filter spaces from IBANs
+
 ## 0.4.1 - 2021-12-23
 
 - ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.

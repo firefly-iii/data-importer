@@ -137,7 +137,7 @@ class Amount implements ConverterInterface
         if (str_starts_with($value, '--')) {
             $value = substr($value, 2);
         }
-        // have to strip the € because apparantly the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
+        // have to strip the € because apparently the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
         // 2020-12-01 added "EUR" because another German bank doesn't know what a data format is.
         // This way of stripping exceptions is unsustainable.
         $value = trim((string) str_replace(['€', 'EUR'], '', $value));
@@ -148,7 +148,7 @@ class Amount implements ConverterInterface
         }
         $str = trim($str);
 
-        app('log')->debug(sprintf('Stripped "%s" away to "%s"', $value, $str));
+        app('log')->debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 
         return $str;
     }
@@ -179,8 +179,16 @@ class Amount implements ConverterInterface
     {
         $length          = strlen($value);
         $decimalPosition = $length - 3;
-
-        return $length > 2 && ',' === $value[$decimalPosition];
+        $result          = $length > 2 && ',' === $value[$decimalPosition];
+        if (true === $result) {
+            return true;
+        }
+        // if false, try to see if this number happens to be formatted like:
+        // 0,xxxxxxxxxx
+        if (1 === substr_count($value, ',') && str_starts_with($value, '0,')) {
+            return true;
+        }
+        return false;
     }
 
     /**

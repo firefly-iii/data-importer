@@ -104,6 +104,13 @@ class ConfigurationController extends Controller
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
+            Log::debug('Skip configuration, go straight to the next step.');
+            // set config as complete.
+            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
+            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+                // at this point, nordigen is ready for data conversion.
+                session()->put(Constants::READY_FOR_CONVERSION, true);
+            }
             // skipForm
             return redirect()->route('005-roles.index');
         }

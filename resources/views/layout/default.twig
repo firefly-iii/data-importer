@@ -18,6 +18,11 @@
     <title>Firefly III Data Importer // {{ pageTitle|default('No title') }}</title>
 </head>
 <body>
+{% if config('importer.is_external') %}
+<div class="alert alert-warning" role="alert">
+    This Firefly III Data Importer installation is <strong>publicly accessible</strong>. Please read <a href="https://docs.firefly-iii.org/data-importer/install/public/" class="alert-link" target="_blank">the considerations</a> (link opens in a new window or tab).
+</div>
+{% endif %}
 
 {% block content %}{% endblock %}
 
@@ -27,5 +32,30 @@
 <script src="{{ asset('js/popper.min.js') }}?version={{ version }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}?version={{ version }}"></script>
 {% block scripts %}{% endblock %}
+
+{# The analytics block is optional and only used on #}
+{# the public cloud instance over at https://data-importer.firefly-iii.org #}
+{% if '' != config('importer.tracker_site_id') and '' != config('importer.tracker_url') %}
+
+
+    <!-- Matomo -->
+    <script>
+        var _paq = window._paq = window._paq || [];
+        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+            var u="{{ config('importer.tracker_url') }}";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', '{{ config('importer.tracker_site_id') }}']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+        })();
+    </script>
+    <noscript><p><img src="{{ config('importer.tracker_url') }}matomo.php?idsite={{ config('importer.tracker_site_id') }}&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+    <!-- End Matomo Code -->
+
+
+{% endif  %}
 </body>
 </html>

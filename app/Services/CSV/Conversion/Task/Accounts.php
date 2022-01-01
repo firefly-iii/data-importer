@@ -87,6 +87,8 @@ class Accounts extends AbstractTask
         $transaction         = $this->setDestination($transaction, $destination);
         $transaction['type'] = $this->determineType($source['type'], $destination['type']);
         app('log')->debug(sprintf('Transaction type is set to "%s"', $transaction['type']));
+        app('log')->debug('Source is now:', $source);
+        app('log')->debug('Destination is now:', $destination);
 
         $amount = (string) $transaction['amount'];
         $amount = '' === $amount ? '0' : $amount;
@@ -104,19 +106,41 @@ class Accounts extends AbstractTask
          */
         if ('deposit' !== $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
-            app('log')->debug(sprintf('%s is positive and type is "%s".', $amount, $transaction['type']));
+            app('log')->debug(sprintf('%s is positive and type is "%s", switch source/destination', $amount, $transaction['type']));
             $transaction         = $this->setSource($transaction, $destination);
             $transaction         = $this->setDestination($transaction, $source);
             $transaction['type'] = $this->determineType($destination['type'], $source['type']);
+            app('log')->debug('Source is now:', $destination); // yes this is correct.
+            app('log')->debug('Destination is now:', $source); // yes this is correct.
         }
 
+        /*
+         * If the amount is positive and the type is a transfer, switch accounts around.
+         */
+        if ('transfer' === $transaction['type'] && 1 === bccomp($amount, '0')) {
+            app('log')->debug('Transaction is a transfer, and amount is positive, will switch accounts.');
+            $transaction = $this->setSource($transaction, $destination);
+            $transaction = $this->setDestination($transaction, $source);
+            app('log')->debug('Source is now:', $destination); // yes this is correct!
+            app('log')->debug('Destination is now:', $source); // yes this is correct!
+        }
+
+        /*
+         * If deposit and amount is positive, do nothing.
+         */
         if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             app('log')->debug('Transaction is a deposit, and amount is positive. Will not change account types.');
         }
-        if ('transfer' === $transaction['type'] && 1 === bccomp($amount, '0')) {
-            app('log')->debug('Transaction is a transfer, and amount is positive, must reverse accounts again.');
+
+        /*
+         * If amount is negative and type is transfer, make sure accounts are "original".
+         */
+        if ('transfer' === $transaction['type'] && -1 === bccomp($amount, '0')) {
+            app('log')->debug('Transaction is a transfer, and amount is negative, must not change accounts.');
             $transaction = $this->setSource($transaction, $source);
             $transaction = $this->setDestination($transaction, $destination);
+            app('log')->debug('Source is now:', $source);
+            app('log')->debug('Destination is now:', $destination);
         }
 
         /*

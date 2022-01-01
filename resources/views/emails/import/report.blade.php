@@ -35,16 +35,10 @@
 
 <hr>
 
-@if(0 === count($errors))
-_No errors detected_
-@endif
+@if(0 === count($errors) and 0 === count($messages) and 0 === count($warnings))
 
-@if(0 === count($warnings))
-_No warnings detected_
-@endif
+*No messages, warnings or errors: nothing to report*
 
-@if(0 === count($messages))
-_No messages detected_
 @endif
 
 @component('mail::button', ['url' => $url])
