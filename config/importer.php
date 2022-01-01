@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'              => '0.4.2',
+    'version'              => '0.5.0',
     'flows'                => ['nordigen', 'spectre', 'csv'],
     'flow_titles'          => [
         'csv'      => 'CSV',
@@ -42,7 +42,7 @@ return [
     'is_external'          => env('IS_EXTERNAL', false),
     'namespace'            => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'            => env('USE_CACHE', false),
-    'minimum_version'      => '5.6.4',
+    'minimum_version'      => '5.6.8',
     'cache_api_calls'      => false,
     'ignored_files'        => ['.gitignore'],
     'tracker_site_id'      => env('TRACKER_SITE_ID', ''),
