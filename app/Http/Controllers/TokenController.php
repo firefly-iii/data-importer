@@ -205,11 +205,9 @@ class TokenController extends Controller
      * This method will check if Firefly III accepts the access_token from the cookie
      * and the base URL (also from the cookie). The base_url is NEVER the vanity URL.§
      *
-     * @param Request $request
-     *
      * @return JsonResponse
      */
-    public function doValidate(Request $request): JsonResponse
+    public function doValidate(): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $response = ['result' => 'OK', 'message' => null];
@@ -217,13 +215,13 @@ class TokenController extends Controller
         // get values from secret manager:
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
-        $request = new SystemInformationRequest($url, $token);
+        $infoRequest = new SystemInformationRequest($url, $token);
 
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
+        $infoRequest->setVerify(config('importer.connection.verify'));
+        $infoRequest->setTimeOut(config('importer.connection.timeout'));
 
         try {
-            $result = $request->get();
+            $result = $infoRequest->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
 
