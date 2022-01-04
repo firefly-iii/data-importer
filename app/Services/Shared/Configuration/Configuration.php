@@ -343,14 +343,14 @@ class Configuration
         // loop do mapping from classic file.
         $doMapping = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
-            $index                     = (int)$index;
+            $index                     = (int) $index;
             $object->doMapping[$index] = $map;
         }
 
         // loop mapping from classic file.
         $mapping = $data['column-mapping-config'] ?? [];
         foreach ($mapping as $index => $map) {
-            $index                   = (int)$index;
+            $index                   = (int) $index;
             $object->mapping[$index] = $map;
         }
         // set version to "2" and return.
@@ -452,7 +452,6 @@ class Configuration
     {
         $object            = self::fromArray($data);
         $object->specifics = [];
-
         return $object;
     }
 
@@ -516,14 +515,12 @@ class Configuration
 
     /**
      * Return the array but drop some potentially massive arrays.
-     *
      * @return array
      */
     public function toSessionArray(): array
     {
         $array = $this->toArray();
         unset($array['mapping'], $array['do_mapping'], $array['roles']);
-
         return $array;
     }
 
@@ -549,7 +546,6 @@ class Configuration
             'unique_column_index'           => $this->uniqueColumnIndex,
             'unique_column_type'            => $this->uniqueColumnType,
             'version'                       => $this->version,
-            'importer_version'              => sprintf('data-importer-%s', config('importer.version')),
             'flow'                          => $this->flow,
 
             // spectre
@@ -813,7 +809,6 @@ class Configuration
 
     /**
      * @param string $key
-     *
      * @return string|null
      */
     public function getRequisition(string $key): ?string
