@@ -51,7 +51,7 @@ class ConfigFileProcessor
             $content = StorageService::getContent($fileName);
         } catch (FileNotFoundException $e) {
             app('log')->error($e->getMessage());
-            throw new ImporterErrorException(sprintf('Cpuld not find config file: %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Could not find config file: %s', $e->getMessage()));
         }
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
