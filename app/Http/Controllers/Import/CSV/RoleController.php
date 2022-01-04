@@ -67,7 +67,7 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        Log::debug('Now in role controller');
+        Log::debug('Now in role controller index');
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if ('csv' !== $flow) {
             die('redirect or something');
@@ -112,6 +112,7 @@ class RoleController extends Controller
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
+        Log::debug('Now in role controller postindex');
         $data = $request->getAll();
 
         // get configuration object.
