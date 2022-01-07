@@ -156,7 +156,7 @@ class GenerateTransactions
             $return['transactions'][0]['destination_id'] = (int) $this->accounts[$spectreAccountId];
 
             // source is the other side:
-            $return['transactions'][0]['source_name'] = $entry['extra']['payee'] ?? '(unknown source account)';
+            $return['transactions'][0]['source_name'] = $entry['extra']['payee'] ?? $entry['extra']['payee_information'] ?? '(unknown source account)';
         }
 
         if (-1 === bccomp($entry['amount'], '0')) {
@@ -167,7 +167,7 @@ class GenerateTransactions
             // source is Spectre:
             $return['transactions'][0]['source_id'] = (int) $this->accounts[$spectreAccountId];
             // dest is shop
-            $return['transactions'][0]['destination_name'] = $entry['extra']['payee'] ?? '(unknown destination account)';
+            $return['transactions'][0]['destination_name'] = $entry['extra']['payee'] ?? $entry['extra']['payee_information'] ?? '(unknown destination account)';
 
         }
         app('log')->debug(sprintf('Parsed Spectre transaction #%d', $entry['id']));
