@@ -100,4 +100,101 @@ class Transaction
             'extra'         => $this->extra->toArray(),
         ];
     }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        $description = app('steam')->cleanString($this->description);
+        $additional  = $this->extra->getAdditional();
+        if ('' === $description) {
+            $description = '(no description)';
+        }
+        if (null !== $additional) {
+            $description = sprintf('%s %s', $description, app('steam')->cleanString($additional));
+        }
+
+        return $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountId(): string
+    {
+        return $this->accountId;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getMadeOn(): Carbon
+    {
+        return $this->madeOn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrencyCode(): string
+    {
+        return $this->currencyCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode(): string
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCategory(): string
+    {
+        return $this->category;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAmount(): string
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param string $direction
+     * @return string
+     */
+    public function getPayee(string $direction): string
+    {
+        $value = $this->extra->getPayee();
+        if (null === $value) {
+            $value = $this->extra->getPayeeInformation();
+        }
+        if (null === $value) {
+            $value = sprintf('(unknown %s account)', $direction);
+        }
+        return $value;
+    }
 }
