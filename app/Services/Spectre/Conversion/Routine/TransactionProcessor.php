@@ -28,6 +28,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
+use App\Services\Spectre\Model\Transaction;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
@@ -125,14 +126,12 @@ class TransactionProcessor
             app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
+        /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->debug(
-                    sprintf(
-                        'Skip transaction because "%s" is before "%s".',
-                        $madeOn->format(self::DATE_TIME_FORMAT),
+                app('log')->debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT),
                         $this->notBefore->format(self::DATE_TIME_FORMAT)
                     )
                 );
@@ -150,7 +149,7 @@ class TransactionProcessor
                 continue;
             }
             app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
-            $return[] = $transaction->toArray();
+            $return[] = $transaction;
         }
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 

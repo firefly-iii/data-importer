@@ -28,6 +28,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
+use App\Services\Spectre\Model\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
@@ -96,6 +97,7 @@ class GenerateTransactions
     public function getTransactions(array $spectre): array
     {
         $return = [];
+        /** @var Transaction $entry */
         foreach ($spectre as $entry) {
             $return[] = $this->generateTransaction($entry);
             // TODO error handling at this point.
@@ -106,35 +108,32 @@ class GenerateTransactions
     }
 
     /**
-     * @param array $entry
+     * @param Transaction $entry
      *
      * @return array
      */
-    private function generateTransaction(array $entry): array
+    private function generateTransaction(Transaction $entry): array
     {
-        app('log')->debug('Original Spectre transaction', $entry);
-        $description      = $entry['description'];
-        $spectreAccountId = $entry['account_id'];
-        // add info to the description:
-        if (array_key_exists('extra', $entry) && array_key_exists('additional', $entry['extra'])) {
-            $description = trim(sprintf('%s %s', $description, (string) $entry['extra']['additional']));
-        }
-
-        $return = [
+        app('log')->debug('Original Spectre transaction', $entry->toArray());
+        $description      = $entry->getDescription();
+        $spectreAccountId = $entry->getAccountId();
+        $madeOn           = $entry->getMadeOn()->toW3cString();
+        $amount           = $entry->getAmount();
+        $return           = [
             'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [
                 [
                     'type'          => 'withdrawal', // reverse
-                    'date'          => str_replace('T', ' ', substr($entry['made_on'], 0, 19)),
-                    'datetime'      => $entry['made_on'], // not used in API, only for transaction filtering.
+                    'date'          => str_replace('T', ' ', substr($madeOn, 0, 19)),
+                    'datetime'      => $madeOn, // not used in API, only for transaction filtering.
                     'amount'        => 0,
                     'description'   => $description,
                     'order'         => 0,
-                    'currency_code' => $entry['currency_code'],
-                    'tags'          => [$entry['mode'], $entry['status'], $entry['category']],
-                    'category_name' => $entry['category'],
-                    'category_id'   => $this->configuration->getMapping()['categories'][$entry['category']] ?? null,
+                    'currency_code' => $entry->getCurrencyCode(),
+                    'tags'          => [$entry->getMode(), $entry->getStatus(), $entry->getCategory()],
+                    'category_name' => $entry->getCategory(),
+                    'category_id'   => $this->configuration->getMapping()['categories'][$entry->getCategory()] ?? null,
                 ],
             ],
         ];
@@ -143,34 +142,34 @@ class GenerateTransactions
             unset($return['transactions'][0]['tags'], $return['transactions'][0]['category_name'], $return['transactions'][0]['category_id']);
         }
         // save meta:
-        $return['transactions'][0]['external_id']        = $entry['id'];
-        $return['transactions'][0]['internal_reference'] = $entry['account_id'];
+        $return['transactions'][0]['external_id']        = $entry->getId();
+        $return['transactions'][0]['internal_reference'] = $entry->getAccountId();
 
-        if (1 === bccomp($entry['amount'], '0')) {
+        if (1 === bccomp($amount, '0')) {
             app('log')->debug('Amount is positive: assume transfer or deposit.');
             // amount is positive: deposit or transfer. Spectre account is destination
             $return['transactions'][0]['type']   = 'deposit';
-            $return['transactions'][0]['amount'] = $entry['amount'];
+            $return['transactions'][0]['amount'] = $amount;
 
             // destination is Spectre
             $return['transactions'][0]['destination_id'] = (int) $this->accounts[$spectreAccountId];
 
             // source is the other side:
-            $return['transactions'][0]['source_name'] = $entry['extra']['payee'] ?? $entry['extra']['payee_information'] ?? '(unknown source account)';
+            $return['transactions'][0]['source_name'] = $entry->getPayee('source');
         }
 
-        if (-1 === bccomp($entry['amount'], '0')) {
+        if (-1 === bccomp($amount, '0')) {
             // amount is negative: withdrawal or transfer.
             app('log')->debug('Amount is negative: assume transfer or withdrawal.');
-            $return['transactions'][0]['amount'] = bcmul($entry['amount'], '-1');
+            $return['transactions'][0]['amount'] = bcmul($amount, '-1');
 
             // source is Spectre:
             $return['transactions'][0]['source_id'] = (int) $this->accounts[$spectreAccountId];
             // dest is shop
-            $return['transactions'][0]['destination_name'] = $entry['extra']['payee'] ?? $entry['extra']['payee_information'] ?? '(unknown destination account)';
+            $return['transactions'][0]['destination_name'] =$entry->getPayee('destination');
 
         }
-        app('log')->debug(sprintf('Parsed Spectre transaction #%d', $entry['id']));
+        app('log')->debug(sprintf('Parsed Spectre transaction #%d', $entry->getId()));
 
         return $return;
     }
