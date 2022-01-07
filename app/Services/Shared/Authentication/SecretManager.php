@@ -37,7 +37,7 @@ class SecretManager
     public const ACCESS_TOKEN  = 'access_token';
     public const BASE_URL      = 'base_url';
     public const REFRESH_TOKEN = 'refresh_token';
-    public const VANITY_URL    = 'base_url';
+    public const VANITY_URL    = 'vanity_url';
 
     /**
      * Will return true if the session / cookies hold valid secrets (access token, URLs)
