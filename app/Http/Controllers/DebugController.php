@@ -30,7 +30,6 @@ use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Log;
 use Monolog\Handler\RotatingFileHandler;
 
 
@@ -45,10 +44,23 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
+
+
+        app('log')->emergency('I am a EMERGENCY message.');
+        app('log')->alert('I am a ALERT message.');
+        app('log')->critical('I am a CRITICAL message.');
+        app('log')->error('I am a ERROR message.');
+        app('log')->warning('I am a WARNING message.');
+        app('log')->notice('I am a NOTICE message.');
+        app('log')->info('I am a INFO message.');
+        app('log')->debug('I am a DEBUG message.');
+
+
         $search  = ['~', '#'];
         $replace = ['\~', '# '];
 
         $buildNr        = '(unknown)';
+        $buildDate      = '(unknown)';
         $now            = Carbon::now()->format('Y-m-d H:i:s e');
         $phpVersion     = str_replace($search, $replace, PHP_VERSION);
         $phpOs          = str_replace($search, $replace, PHP_OS);
@@ -66,12 +78,15 @@ class DebugController extends Controller
         $tz             = env('TZ');
         $isDocker       = env('IS_DOCKER', false);
 
-        if(file_exists('/var/www/counter-main.txt')) {
+        if (file_exists('/var/www/counter-main.txt')) {
             $buildNr = trim(file_get_contents('/var/www/counter-main.txt'));
+        }
+        if (file_exists('/var/www/build-date-main.txt')) {
+            $buildDate = trim(file_get_contents('/var/www/build-date-main.txt'));
         }
 
         // get latest log file:
-        $logger     = Log::driver();
+        $logger     = app('log')->driver();
         $handlers   = $logger->getHandlers();
         $logContent = '';
         foreach ($handlers as $handler) {
@@ -92,6 +107,9 @@ class DebugController extends Controller
             // last few lines
             $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
         }
+        if(true === config('importer.is_external')) {
+            $logContent = 'No logs, external installation.';
+        }
 
         return view(
             'debug',
@@ -104,6 +122,7 @@ class DebugController extends Controller
                 'appLogLevel',
                 'now',
                 'bcscale',
+                'buildDate',
                 'userAgent',
                 'displayErrors',
                 'errorReporting',

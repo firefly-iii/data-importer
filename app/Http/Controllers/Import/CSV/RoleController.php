@@ -36,7 +36,12 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Log;
+use JsonException;
+use League\Csv\Exception;
+use League\Csv\InvalidArgument;
+use League\Csv\UnableToProcessCsv;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoleController
@@ -58,16 +63,16 @@ class RoleController extends Controller
     /**
      * @param Request $request
      * @return Factory|View
-     * @throws \JsonException
-     * @throws \League\Csv\Exception
-     * @throws \League\Csv\InvalidArgument
-     * @throws \League\Csv\UnableToProcessCsv
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws JsonException
+     * @throws Exception
+     * @throws InvalidArgument
+     * @throws UnableToProcessCsv
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function index(Request $request)
     {
-        Log::debug('Now in role controller');
+        app('log')->debug('Now in role controller');
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if ('csv' !== $flow) {
             die('redirect or something');
@@ -106,9 +111,9 @@ class RoleController extends Controller
      * @param RolesPostRequest $request
      *
      * @return RedirectResponse
-     * @throws \JsonException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws JsonException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
@@ -129,12 +134,12 @@ class RoleController extends Controller
 
         // and it can be saved on disk:
         $configFileName = StorageService::storeArray($fullArray);
-        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // this is a new config file name.
         session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
-        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);

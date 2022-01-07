@@ -32,7 +32,6 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Log;
 
 /**
  *
@@ -42,6 +41,19 @@ class AutoImportController extends Controller
     use HaveAccess, AutoImports, VerifyJSON;
 
     private string $directory;
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        $this->line($string);
+    }
+
+    public function line(string $string)
+    {
+        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+    }
 
     /**
      *
@@ -88,16 +100,12 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @inheritDoc
+     * @param      $string
+     * @param null $verbosity
      */
-    public function error($string, $verbosity = null)
+    public function info($string, $verbosity = null)
     {
         $this->line($string);
-    }
-
-    public function line(string $string)
-    {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
     /**
@@ -105,15 +113,6 @@ class AutoImportController extends Controller
      * @param null $verbosity
      */
     public function warn($string, $verbosity = null)
-    {
-        $this->line($string);
-    }
-
-    /**
-     * @param      $string
-     * @param null $verbosity
-     */
-    public function info($string, $verbosity = null)
     {
         $this->line($string);
     }

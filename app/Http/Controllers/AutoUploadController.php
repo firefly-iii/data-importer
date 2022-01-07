@@ -31,7 +31,6 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
-use Log;
 
 /**
  *
@@ -39,6 +38,14 @@ use Log;
 class AutoUploadController extends Controller
 {
     use HaveAccess, AutoImports, VerifyJSON;
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        $this->line($string);
+    }
 
     /**
      *
@@ -66,7 +73,7 @@ class AutoUploadController extends Controller
         try {
             $this->importUpload($csv->getPathname(), $json->getPathname());
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
 
@@ -79,9 +86,10 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @inheritDoc
+     * @param      $string
+     * @param null $verbosity
      */
-    public function error($string, $verbosity = null)
+    public function info($string, $verbosity = null)
     {
         $this->line($string);
     }
@@ -91,15 +99,6 @@ class AutoUploadController extends Controller
      * @param null $verbosity
      */
     public function warn($string, $verbosity = null)
-    {
-        $this->line($string);
-    }
-
-    /**
-     * @param      $string
-     * @param null $verbosity
-     */
-    public function info($string, $verbosity = null)
     {
         $this->line($string);
     }

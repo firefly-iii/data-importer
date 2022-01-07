@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import\Spectre;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConnectionControllerMiddleware;
 use App\Services\Session\Constants;
@@ -42,9 +43,15 @@ use App\Services\Spectre\Response\PostConnectSessionResponse;
 use App\Services\Spectre\Response\PostCustomerResponse;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use JsonException;
-use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class ConnectionController
@@ -65,11 +72,11 @@ class ConnectionController extends Controller
 
     /**
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @return Application|Factory|View
      * @throws ImporterErrorException
-     * @throws \App\Exceptions\ImporterHttpException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ImporterHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -116,13 +123,13 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
         }
         StorageService::storeContent($json);
 
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
-        Log::debug('About to get connections.');
+        app('log')->debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
         $request->customer = (string) $identifier;
         $list              = $request->get();
@@ -136,11 +143,11 @@ class ConnectionController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws \App\Exceptions\ImporterHttpException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ImporterHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function post(Request $request)
     {
@@ -174,7 +181,7 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
         }
         StorageService::storeContent($json);
 

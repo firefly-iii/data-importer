@@ -31,6 +31,7 @@ use App\Http\Middleware\UploadControllerMiddleware;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
-use Log;
 use Storage;
 
 /**
@@ -61,7 +61,7 @@ class UploadController extends Controller
      */
     public function index(Request $request)
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Upload your file(s)';
         $subTitle  = 'Start page and instructions';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
@@ -69,7 +69,7 @@ class UploadController extends Controller
 
         // get existing configs.
         $disk = Storage::disk('configurations');
-        Log::debug(
+        app('log')->debug(
             sprintf(
                 'Going to check directory for config files: %s',
                 config('filesystems.disks.configurations.root'),
@@ -86,7 +86,7 @@ class UploadController extends Controller
             }
         }
 
-        Log::debug('List of files:', $list);
+        app('log')->debug('List of files:', $list);
 
         return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow'));
     }
@@ -99,7 +99,7 @@ class UploadController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $csvFile    = $request->file('csv_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
@@ -131,6 +131,43 @@ class UploadController extends Controller
         }
 
         return redirect(route('004-configure.index'));
+    }
+
+    /**
+     * @return MessageBag
+     */
+    private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
+    {
+        if (null === $file && 'csv' === $flow) {
+            $errors->add('csv_file', 'No file was uploaded.');
+            return $errors;
+        }
+        if ('csv' === $flow) {
+            $errorNumber = $file->getError();
+            if (0 !== $errorNumber) {
+                $errors->add('csv_file', $this->getError($errorNumber));
+            }
+
+
+            // upload the file to a temp directory and use it from there.
+            if (0 === $errorNumber) {
+                $content = file_get_contents($file->getPathname());
+
+                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                // This one is for you: 🤦‍♀️
+                $eol = $this->detectEOL($content);
+                if ("\r" === $eol) {
+                    app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
+                    $content = str_replace("\r", "\n", $content);
+                }
+
+                $csvFileName = StorageService::storeContent($content);
+                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
+                session()->put(Constants::HAS_UPLOAD, true);
+            }
+        }
+        return $errors;
     }
 
     /**
@@ -172,52 +209,15 @@ class UploadController extends Controller
         $curEol   = '';
         foreach ($eols as $eolKey => $eol) {
             $count = substr_count($string, $eol);
-            Log::debug(sprintf('Counted %dx "%s" EOL in upload.', $count, $eolKey));
+            app('log')->debug(sprintf('Counted %dx "%s" EOL in upload.', $count, $eolKey));
             if ($count > $curCount) {
                 $curCount = $count;
                 $curEol   = $eol;
-                Log::debug(sprintf('Conclusion: "%s" is the EOL in this file.', $eolKey));
+                app('log')->debug(sprintf('Conclusion: "%s" is the EOL in this file.', $eolKey));
             }
         }
 
         return $curEol;
-    }
-
-    /**
-     * @return MessageBag
-     */
-    private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
-    {
-        if (null === $file && 'csv' === $flow) {
-            $errors->add('csv_file', 'No file was uploaded.');
-            return $errors;
-        }
-        if ('csv' === $flow) {
-            $errorNumber = $file->getError();
-            if (0 !== $errorNumber) {
-                $errors->add('csv_file', $this->getError($errorNumber));
-            }
-
-
-            // upload the file to a temp directory and use it from there.
-            if (0 === $errorNumber) {
-                $content = file_get_contents($file->getPathname());
-
-                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                // This one is for you: 🤦‍♀️
-                $eol = $this->detectEOL($content);
-                if ("\r" === $eol) {
-                    Log::error('You bank is dumb. Tell them to fix their CSV files.');
-                    $content = str_replace("\r", "\n", $content);
-                }
-
-                $csvFileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
-                session()->put(Constants::HAS_UPLOAD, true);
-            }
-        }
-        return $errors;
     }
 
     /**
@@ -231,14 +231,14 @@ class UploadController extends Controller
         if (count($errors) > 0 || null === $file) {
             return $errors;
         }
-        Log::debug('Config file is present.');
+        app('log')->debug('Config file is present.');
         $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('config_file', $errorNumber);
         }
         // upload the file to a temp directory and use it from there.
         if (0 === $errorNumber) {
-            Log::debug('Config file uploaded.');
+            app('log')->debug('Config file uploaded.');
             $configFileName = StorageService::storeContent(file_get_contents($file->getPathname()));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
@@ -260,12 +260,12 @@ class UploadController extends Controller
      * @param UploadedFile|null $file
      * @return MessageBag
      * @throws ImporterErrorException
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @throws FileNotFoundException
      */
     private function processSelection(MessageBag $errors, string $selection, UploadedFile|null $file): MessageBag
     {
         if (null === $file && '' !== $selection) {
-            Log::debug('User selected a config file from the store.');
+            app('log')->debug('User selected a config file from the store.');
             $disk           = Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 

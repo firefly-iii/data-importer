@@ -48,12 +48,11 @@ class ServiceController extends Controller
     }
 
     /**
-     * @param Request $request
      * @return JsonResponse
      */
-    public function validateSpectre(Request $request): JsonResponse
+    public function validateNordigen(): JsonResponse
     {
-        $validator = new SpectreValidator;
+        $validator = new NordigenValidator;
         $result    = $validator->validate();
 
         if ($result->equals(AuthenticationStatus::error())) {
@@ -69,11 +68,12 @@ class ServiceController extends Controller
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      */
-    public function validateNordigen(): JsonResponse
+    public function validateSpectre(Request $request): JsonResponse
     {
-        $validator = new NordigenValidator;
+        $validator = new SpectreValidator;
         $result    = $validator->validate();
 
         if ($result->equals(AuthenticationStatus::error())) {
