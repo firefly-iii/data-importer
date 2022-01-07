@@ -56,6 +56,7 @@ class ApiSubmitter
     private string        $vanityURL;
     private Configuration $configuration;
     private array         $mapping;
+    private bool          $createdTag;
 
     /**
      * @param array $lines
@@ -63,19 +64,15 @@ class ApiSubmitter
      */
     public function processTransactions(array $lines): void
     {
-        $this->tag     = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
-        $this->tagDate = date('Y-m-d');
-        $count         = count($lines);
+        $this->createdTag = false;
+        $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $this->tagDate    = date('Y-m-d');
+        $count            = count($lines);
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         $this->vanityURL = Token::getVanityURL();
 
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
-
-        // create the tag, to be used later on.
-        if ($count > 0) {
-            $this->createTag();
-        }
 
         /**
          * @var int   $index
@@ -94,6 +91,8 @@ class ApiSubmitter
                 app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
             }
         }
+
+
         app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
 
@@ -416,6 +415,10 @@ class ApiSubmitter
             app('log')->debug('Will not add import tag.');
 
             return;
+        }
+        if (false === $this->createdTag) {
+            $this->createTag();
+            $this->createdTag = true;
         }
 
         $groupId = (int) $groupInfo['group_id'];
