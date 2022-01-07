@@ -164,7 +164,7 @@ class Configuration
         $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->version        = self::VERSION;
-        $object->headers        = $array['headers'];
+        $object->headers        = $array['headers'] ?? false;
         $object->date           = $array['date'];
         $object->defaultAccount = $array['default_account'];
         $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
