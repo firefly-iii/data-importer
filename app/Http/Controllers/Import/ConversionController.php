@@ -39,7 +39,6 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
-use Log;
 use Storage;
 
 /**
@@ -66,34 +65,34 @@ class ConversionController extends Controller
      */
     public function index()
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         $mainTitle = 'Convert the data';
 
         // create configuration:
         $configuration = $this->restoreConfiguration();
 
 
-        Log::debug('Will now verify configuration content.');
+        app('log')->debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
         if (empty($configuration->getDoMapping()) && 'csv' === $configuration->getFlow()) {
             // no mapping, back to roles
-            Log::debug('Pressing "back" will send you to roles.');
+            app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
         if (empty($configuration->getMapping())) {
             // back to mapping
-            Log::debug('Pressing "back" will send you to mapping.');
+            app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
         if (true === $configuration->isMapAllData()) {
-            Log::debug('Pressing "back" will send you to mapping.');
+            app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $flow       = $configuration->getFlow();
-        Log::debug('Will redirect to submission after conversion.');
+        app('log')->debug('Will redirect to submission after conversion.');
         $nextUrl = route('008-submit.index');
 
         // switch based on flow:
@@ -102,30 +101,30 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('csv' === $flow) {
-            Log::debug('Create CSV routine manager.');
+            app('log')->debug('Create CSV routine manager.');
             $routine = new CSVRoutineManager($identifier);
         }
         if ('nordigen' === $flow) {
-            Log::debug('Create Nordigen routine manager.');
+            app('log')->debug('Create Nordigen routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            Log::debug('Create Spectre routine manager.');
+            app('log')->debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
-            Log::debug('Will redirect to mapping after conversion.');
+            app('log')->debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
 
         // may be a new identifier! Yay!
         $identifier = $routine->getIdentifier();
 
-        Log::debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
+        app('log')->debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
         // store identifier in session so the status can get it.
         session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
-        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
+        app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
 
         return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl'));
     }
@@ -138,7 +137,7 @@ class ConversionController extends Controller
      */
     public function start(Request $request): JsonResponse
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier    = $request->get('identifier');
         $configuration = $this->restoreConfiguration();
 
@@ -167,27 +166,27 @@ class ConversionController extends Controller
         try {
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
         }
-        Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
+        app('log')->debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
-            Log::error('Zero transactions!');
+            app('log')->error('Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
         }
-        Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
+        app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk = Storage::disk(self::DISK_NAME);
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
         } catch (JsonException $e) {
-            Log::error(sprintf('JSON exception: %s', $e->getMessage()));
+            app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
             return response()->json($importJobStatus->toArray());
         }
-        Log::debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
+        app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
 
 
         // set done:
@@ -195,7 +194,7 @@ class ConversionController extends Controller
 
         // set config as complete.
         session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-        Log::debug('Set conversion as complete.');
+        app('log')->debug('Set conversion as complete.');
 
         return response()->json($importJobStatus->toArray());
     }
@@ -207,11 +206,11 @@ class ConversionController extends Controller
      */
     public function status(Request $request): JsonResponse
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier = $request->get('identifier');
-        Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+        app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
-            Log::warning('Identifier is NULL.');
+            app('log')->warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
             $fakeStatus = new ConversionStatus;

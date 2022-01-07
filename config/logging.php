@@ -64,6 +64,12 @@ return [
             'ignore_exceptions' => false,
             'level'             => env('LOG_LEVEL', 'debug'),
         ],
+        'cloud' => [
+            'driver'            => 'stack',
+            'channels'          => ['daily', 'papertrail'],
+            'ignore_exceptions' => false,
+            'level'             => env('LOG_LEVEL', 'debug'),
+        ],
 
         'single' => [
             'driver' => 'single',
@@ -88,7 +94,7 @@ return [
 
         'papertrail' => [
             'driver'       => 'monolog',
-            'level'        => env('LOG_LEVEL', 'debug'),
+            'level'        => 'warning',
             'handler'      => SyslogUdpHandler::class,
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),

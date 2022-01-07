@@ -28,7 +28,6 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Artisan;
 use Illuminate\Http\Request;
-use Log;
 
 /**
  *
@@ -46,22 +45,20 @@ class IndexController extends Controller
     }
 
     /**
-     * @param Request $request
      * @return mixed
      */
-    public function postIndex(Request $request): mixed
+    public function flush(): mixed
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        // set cookie with flow:
-        $flow = $request->get('flow');
-        if (in_array($flow, config('importer.flows'), true)) {
-            Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
-            $cookies = [
-                cookie(Constants::FLOW_COOKIE, $flow),
-            ];
-            return redirect(route('002-authenticate.index'))->withCookies($cookies);
-        }
-        return redirect(route('index'));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        session()->forget(['csv_file_path', 'config_file_path', 'import_job_id']);
+        session()->flush();
+        $cookies = [
+            cookie(Constants::FLOW_COOKIE, ''),
+        ];
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+
+        return redirect(route('index'))->withCookies($cookies);
     }
 
     /**
@@ -70,14 +67,14 @@ class IndexController extends Controller
      */
     public function index(Request $request): mixed
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
         $validInfo = SecretManager::hasValidSecrets();
         if (!$validInfo) {
-            Log::debug('No valid secrets, redirect to token.index');
+            app('log')->debug('No valid secrets, redirect to token.index');
             return redirect(route('token.index'));
         }
 
@@ -106,11 +103,30 @@ class IndexController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function postIndex(Request $request): mixed
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        // set cookie with flow:
+        $flow = $request->get('flow');
+        if (in_array($flow, config('importer.flows'), true)) {
+            app('log')->debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
+            $cookies = [
+                cookie(Constants::FLOW_COOKIE, $flow),
+            ];
+            return redirect(route('002-authenticate.index'))->withCookies($cookies);
+        }
+        return redirect(route('index'));
+    }
+
+    /**
      * @return mixed
      */
     public function reset(): mixed
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         session()->forget(['csv_file_path', 'config_file_path', 'import_job_id']);
         session()->flush();
         Artisan::call('cache:clear');
@@ -121,23 +137,6 @@ class IndexController extends Controller
             SecretManager::saveRefreshToken(''),
             cookie(Constants::FLOW_COOKIE, ''),
         ];
-
-        return redirect(route('index'))->withCookies($cookies);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function flush(): mixed
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        session()->forget(['csv_file_path', 'config_file_path', 'import_job_id']);
-        session()->flush();
-        $cookies = [
-            cookie(Constants::FLOW_COOKIE, ''),
-        ];
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
 
         return redirect(route('index'))->withCookies($cookies);
     }

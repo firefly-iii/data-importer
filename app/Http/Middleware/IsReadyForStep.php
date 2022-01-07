@@ -31,7 +31,8 @@ use App\Services\Session\Constants;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 
 /**
@@ -69,22 +70,22 @@ trait IsReadyForStep
     {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
-            Log::debug('isReadyForStep returns true because $flow is null');
+            app('log')->debug('isReadyForStep returns true because $flow is null');
             return true;
         }
         if ('csv' === $flow) {
             $result = $this->isReadyForCSVStep();
-            Log::debug(sprintf('isReadyForCSVStep: Return %s', var_export($result, true)));
+            app('log')->debug(sprintf('isReadyForCSVStep: Return %s', var_export($result, true)));
             return $result;
         }
         if ('nordigen' === $flow) {
             $result = $this->isReadyForNordigenStep();
-            Log::debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
+            app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
             return $result;
         }
         if ('spectre' === $flow) {
             $result = $this->isReadyForSpectreStep();
-            Log::debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
+            app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
             return $result;
         }
         return $this->isReadyForBasicStep();
@@ -93,12 +94,12 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function isReadyForCSVStep(): bool
     {
-        Log::debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
+        app('log')->debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
@@ -146,12 +147,12 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function isReadyForNordigenStep(): bool
     {
-        Log::debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
+        app('log')->debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
@@ -174,23 +175,23 @@ trait IsReadyForStep
             case 'map':
                 // mapping must be complete, or not ready for this step.
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-                    Log::debug('Return false, not ready for step [1].');
+                    app('log')->debug('Return false, not ready for step [1].');
                     return false;
                 }
 
                 // conversion complete?
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-                    Log::debug('Return true, ready for step [4].');
+                    app('log')->debug('Return true, ready for step [4].');
                     return true;
                 }
 
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('Nordigen: return false, not yet ready for step [2].');
+                    app('log')->debug('Nordigen: return false, not yet ready for step [2].');
                     return false;
                 }
                 // otherwise return false.
-                Log::debug('Return true, ready for step [3].');
+                app('log')->debug('Return true, ready for step [3].');
                 return true;
             case 'nordigen-link':
                 // must have upload, thats it
@@ -200,7 +201,7 @@ trait IsReadyForStep
                 return false;
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
-                    Log::debug('Return false, ready for submission.');
+                    app('log')->debug('Return false, ready for submission.');
                     return false;
                 }
                 // if/else is in reverse!
@@ -226,12 +227,12 @@ trait IsReadyForStep
     /**
      * @return bool
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function isReadyForSpectreStep(): bool
     {
-        Log::debug(sprintf('isReadyForSpectreStep("%s")', self::STEP));
+        app('log')->debug(sprintf('isReadyForSpectreStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSpectreStep: Cannot handle Spectre step "%s"', self::STEP));
@@ -240,7 +241,7 @@ trait IsReadyForStep
                 return true;
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
-                    Log::debug('Spectre: Return false, ready for submission.');
+                    app('log')->debug('Spectre: Return false, ready for submission.');
                     return false;
                 }
                 // if/else is in reverse!
@@ -270,23 +271,23 @@ trait IsReadyForStep
             case 'map':
                 // mapping must be complete, or not ready for this step.
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-                    Log::debug('Spectre: Return false, not ready for step [1].');
+                    app('log')->debug('Spectre: Return false, not ready for step [1].');
                     return false;
                 }
 
                 // conversion complete?
                 if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
-                    Log::debug('Spectre: Return true, ready for step [4].');
+                    app('log')->debug('Spectre: Return true, ready for step [4].');
                     return true;
                 }
 
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('Spectre: Return false, not yet ready for step [2].');
+                    app('log')->debug('Spectre: Return false, not yet ready for step [2].');
                     return false;
                 }
                 // otherwise return false.
-                Log::debug('Spectre: Return true, ready for step [3].');
+                app('log')->debug('Spectre: Return true, ready for step [3].');
                 return true;
             case 'submit':
                 // if/else is in reverse!
@@ -303,7 +304,7 @@ trait IsReadyForStep
      */
     private function isReadyForBasicStep(): bool
     {
-        Log::debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
+        app('log')->debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
@@ -321,7 +322,7 @@ trait IsReadyForStep
     {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
-            Log::debug('redirectToCorrectStep returns true because $flow is null');
+            app('log')->debug('redirectToCorrectStep returns true because $flow is null');
             return null;
         }
         if ('csv' === $flow) {
@@ -342,34 +343,34 @@ trait IsReadyForStep
      */
     private function redirectToCorrectCSVStep(): RedirectResponse
     {
-        Log::debug(sprintf('redirectToCorrectCSVStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToCorrectCSVStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectCSVStep: Cannot handle CSV step "%s"', self::STEP));
             case 'upload-files':
                 $route = route('004-configure.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'define-roles':
                 $route = route('006-mapping.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'configuration':
                 $route = route('005-roles.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'map':
                 $route = route('007-convert.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'conversion':
                 // redirect to mapping
                 $route = route('006-mapping.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'authenticate':
                 $route = route('003-upload.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
         }
     }
@@ -377,51 +378,51 @@ trait IsReadyForStep
     /**
      * @return RedirectResponse
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function redirectToCorrectNordigenStep(): RedirectResponse
     {
-        Log::debug(sprintf('redirectToCorrectNordigenStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToCorrectNordigenStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
             case 'nordigen-selection':
                 // back to upload
                 $route = route('003-upload.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'upload-files':
             case 'nordigen-link':
                 // assume files are uploaded, go to step 11 (connection selection)
                 // back to selection
                 $route = route('009-selection.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'define-roles':
                 // will always push to mapping, and mapping will send them to
                 // the right step.
                 $route = route('006-mapping.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'map':
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('Is ready for conversion, so send to conversion.');
+                    app('log')->debug('Is ready for conversion, so send to conversion.');
                     $route = route('007-convert.index');
-                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    app('log')->debug(sprintf('Return redirect to "%s"', $route));
                     return redirect($route);
                 }
-                Log::debug('Is ready for submit.');
+                app('log')->debug('Is ready for submit.');
                 // otherwise go to import right away
                 $route = route('008-submit.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
-                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    app('log')->debug(sprintf('Return redirect to "%s"', $route));
                     return redirect($route);
                 }
                 throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s" [1]', self::STEP));
@@ -431,12 +432,12 @@ trait IsReadyForStep
     /**
      * @return RedirectResponse
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function redirectToCorrectSpectreStep(): RedirectResponse
     {
-        Log::debug(sprintf('redirectToCorrectSpectreStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToCorrectSpectreStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
@@ -444,32 +445,32 @@ trait IsReadyForStep
                 // assume files are uploaded, go to step 11 (connection selection)
                 // back to selection
                 $route = route('011-connections.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'define-roles':
                 // will always push to mapping, and mapping will send them to
                 // the right step.
                 $route = route('006-mapping.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
             case 'map':
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    Log::debug('Spectre: Is ready for conversion, so send to conversion.');
+                    app('log')->debug('Spectre: Is ready for conversion, so send to conversion.');
                     $route = route('007-convert.index');
-                    Log::debug(sprintf('Spectre: Return redirect to "%s"', $route));
+                    app('log')->debug(sprintf('Spectre: Return redirect to "%s"', $route));
                     return redirect($route);
                 }
-                Log::debug('Spectre: Is ready for submit.');
+                app('log')->debug('Spectre: Is ready for submit.');
                 // otherwise go to import right away
                 $route = route('008-submit.index');
-                Log::debug(sprintf('Spectre: Return redirect to "%s"', $route));
+                app('log')->debug(sprintf('Spectre: Return redirect to "%s"', $route));
                 return redirect($route);
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
-                    Log::debug(sprintf('Return redirect to "%s"', $route));
+                    app('log')->debug(sprintf('Return redirect to "%s"', $route));
                     return redirect($route);
                 }
         }
@@ -482,7 +483,7 @@ trait IsReadyForStep
      */
     private function redirectToBasicStep(): RedirectResponse
     {
-        Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToBasicStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));

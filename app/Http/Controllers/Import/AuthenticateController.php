@@ -33,8 +33,12 @@ use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Log;
+use Illuminate\Routing\Redirector;
 use Session;
 
 /**
@@ -47,13 +51,13 @@ class AuthenticateController extends Controller
     public function __construct()
     {
         parent::__construct();
-        Log::debug('Now in AuthenticateController, calling middleware.');
+        app('log')->debug('Now in AuthenticateController, calling middleware.');
         $this->middleware(AuthenticateControllerMiddleware::class);
     }
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
     public function index(Request $request)
@@ -98,7 +102,7 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
     public function postIndex(Request $request)

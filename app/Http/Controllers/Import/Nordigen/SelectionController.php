@@ -42,7 +42,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use JsonException;
-use Log;
 
 /**
  * Class SelectionController
@@ -67,7 +66,7 @@ class SelectionController extends Controller
      */
     public function index()
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $countries     = config('nordigen.countries');
         $mainTitle     = 'Selection';
         $subTitle      = 'Select your country and the bank you wish to use.';
@@ -110,7 +109,7 @@ class SelectionController extends Controller
      */
     public function postIndex(SelectionRequest $request)
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
         $configuration = $this->restoreConfiguration();
         $values        = $request->getAll();
@@ -128,7 +127,7 @@ class SelectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
         }
         StorageService::storeContent($json);
 

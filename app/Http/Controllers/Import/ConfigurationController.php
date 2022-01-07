@@ -47,6 +47,7 @@ use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Cache;
 use Carbon\Carbon;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use Illuminate\Contracts\View\Factory;
@@ -55,7 +56,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
-use Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class ConfigurationController
@@ -83,13 +85,13 @@ class ConfigurationController extends Controller
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
      * @throws ImporterHttpException
-     * @throws \GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ApiHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function index(Request $request)
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
         $subTitle  = 'Configure your import';
         $accounts  = [
@@ -104,7 +106,7 @@ class ConfigurationController extends Controller
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
-            Log::debug('Skip configuration, go straight to the next step.');
+            app('log')->debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
             if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
@@ -191,10 +193,10 @@ class ConfigurationController extends Controller
             foreach ($result as $arr) {
                 $return[] = NordigenAccount::fromLocalArray($arr);
             }
-            Log::debug('Grab accounts from cache', $result);
+            app('log')->debug('Grab accounts from cache', $result);
             return $return;
         }
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         // get banks and countries
         $accessToken = TokenManager::getAccessToken();
         $url         = config('nordigen.url');
@@ -209,11 +211,11 @@ class ConfigurationController extends Controller
         $total  = count($response);
         $return = [];
         $cache  = [];
-        Log::debug(sprintf('Found %d accounts.', $total));
+        app('log')->debug(sprintf('Found %d accounts.', $total));
 
         /** @var Account $account */
         foreach ($response as $index => $account) {
-            Log::debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
+            app('log')->debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
             $account  = AccountInformationCollector::collectInformation($account);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();
@@ -231,11 +233,11 @@ class ConfigurationController extends Controller
      */
     private function mergeNordigenAccountLists(array $nordigen, array $firefly): array
     {
-        Log::debug('Now creating Nordigen account lists.');
+        app('log')->debug('Now creating Nordigen account lists.');
         $return = [];
         /** @var NordigenAccount $nordigenAccount */
         foreach ($nordigen as $nordigenAccount) {
-            Log::debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
+            app('log')->debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
             $iban     = $nordigenAccount->getIban();
             $currency = $nordigenAccount->getCurrency();
             $entry    = [
@@ -247,23 +249,23 @@ class ConfigurationController extends Controller
             $filteredByIban = $this->filterByIban($firefly, $iban);
 
             if (1 === count($filteredByIban)) {
-                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
                 $entry['firefly'] = $filteredByIban;
                 $return[]         = $entry;
                 continue;
             }
-            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+            app('log')->debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
 
             // only currency?
             $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
 
             if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                app('log')->debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
                 $entry['firefly'] = $filteredByCurrency;
                 $return[]         = $entry;
                 continue;
             }
-            Log::debug('No special filtering on the Firefly III account list.');
+            app('log')->debug('No special filtering on the Firefly III account list.');
             $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
             $return[]         = $entry;
         }
@@ -324,10 +326,10 @@ class ConfigurationController extends Controller
     private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
     {
         $return = [];
-        Log::debug('Now creating Spectre account lists.');
+        app('log')->debug('Now creating Spectre account lists.');
 
         foreach ($spectre as $spectreAccount) {
-            Log::debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
+            app('log')->debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
             $iban     = $spectreAccount->iban;
             $currency = $spectreAccount->currencyCode;
             $entry    = [
@@ -339,23 +341,23 @@ class ConfigurationController extends Controller
             $filteredByIban = $this->filterByIban($firefly, $iban);
 
             if (1 === count($filteredByIban)) {
-                Log::debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
                 $entry['firefly'] = $filteredByIban;
                 $return[]         = $entry;
                 continue;
             }
-            Log::debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
+            app('log')->debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
 
             // only currency?
             $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
 
             if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
+                app('log')->debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
                 $entry['firefly'] = $filteredByCurrency;
                 $return[]         = $entry;
                 continue;
             }
-            Log::debug('No special filtering on the Firefly III account list.');
+            app('log')->debug('No special filtering on the Firefly III account list.');
             $entry['firefly'] = $firefly;
             $return[]         = $entry;
         }
@@ -369,7 +371,7 @@ class ConfigurationController extends Controller
      */
     public function phpDate(Request $request): JsonResponse
     {
-        Log::debug(sprintf('Method %s', __METHOD__));
+        app('log')->debug(sprintf('Method %s', __METHOD__));
 
         $dateObj = new Date;
         [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
@@ -386,7 +388,7 @@ class ConfigurationController extends Controller
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
-        Log::debug(sprintf('Now running %s', __METHOD__));
+        app('log')->debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
@@ -409,7 +411,7 @@ class ConfigurationController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            app('log')->error($e->getMessage());
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         StorageService::storeContent($json);
@@ -417,7 +419,7 @@ class ConfigurationController extends Controller
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 
 
-        Log::debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
+        app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
         if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {

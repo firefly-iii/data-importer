@@ -8,7 +8,7 @@
     Firefly III data importer debug page
 </p>
 <p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:600px;">
-    Copy and paste this textarea in your issue. DO NOT ADD BACKTICKS.
+    Copy and paste this textarea in your issue. <strong>DO NOT ADD BACKTICKS or QUOTES</strong>
 </p>
 <textarea rows="30" cols="100" name="debug_info" id="debug_info" style="font-family:Menlo, Monaco, Consolas, monospace;font-size:8pt;">
 Debug information generated at {{ now }} for Firefly III Data Importer version **{{ config('importer.version') }}**.
@@ -16,7 +16,7 @@ Debug information generated at {{ now }} for Firefly III Data Importer version *
 | Scope | Version |
 | --- | --- |
 | FIDI | {{ config('importer.version') }} |
-| Build | {{ buildNr }} |
+| Build | {{ buildNr }}, {{ buildDate}} |
 | PHP | {{ phpVersion }} |
 | Host | {{ phpOs }} |
 

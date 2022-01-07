@@ -35,8 +35,12 @@ use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Support\Http\RestoresConfiguration;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Log;
+use Illuminate\Routing\Redirector;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -59,7 +63,7 @@ class LinkController extends Controller
      */
     public function build()
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
         // create a new config thing
         $configuration = $this->restoreConfiguration();
@@ -96,13 +100,13 @@ class LinkController extends Controller
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
 
-        Log::debug(sprintf('Reference is %s', $uuid));
+        app('log')->debug(sprintf('Reference is %s', $uuid));
 
         /** @var NewRequisitionResponse $response */
         $response = $request->post();
-        Log::debug(sprintf('Got a new requisition with id %s', $response->id));
-        Log::debug(sprintf('Status: %s, returned reference: %s', $response->status, $response->reference));
-        Log::debug(sprintf('Will now redirect the user to %s', $response->link));
+        app('log')->debug(sprintf('Got a new requisition with id %s', $response->id));
+        app('log')->debug(sprintf('Status: %s, returned reference: %s', $response->status, $response->reference));
+        app('log')->debug(sprintf('Will now redirect the user to %s', $response->link));
 
         // save config!
         $configuration->addRequisition($uuid, $response->id);
@@ -115,16 +119,16 @@ class LinkController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {
         $reference = $request->get('ref');
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        Log::debug(sprintf('Reference is %s', $reference));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Reference is %s', $reference));
 
         // create a new config thing
         $configuration = $this->restoreConfiguration();
