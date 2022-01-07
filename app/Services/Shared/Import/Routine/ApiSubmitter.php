@@ -177,8 +177,9 @@ class ApiSubmitter
             if (0 !== $searchResult) {
                 app('log')->debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult));
                 $message = sprintf('There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).', $field, $value, $this->vanityURL, $searchResult);
-                $this->addError($index, $message);
-
+                if (false === config('importer.ignore_duplicate_errors')) {
+                    $this->addError($index, $message);
+                }
                 return false;
             }
         }
@@ -257,8 +258,9 @@ class ApiSubmitter
                 app('log')->error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
                     $msg = sprintf('%s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
-                    // plus 1 to keep the count.
-                    $this->addError($index, $msg);
+                    if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
+                        $this->addError($index, $msg);
+                    }
                     app('log')->error($msg);
                 }
             }
@@ -472,5 +474,20 @@ class ApiSubmitter
     public function setMapping(array $mapping): void
     {
         $this->mapping = $mapping;
+    }
+
+    /**
+     * @param string $key
+     * @param string $error
+     * @return bool
+     */
+    private function isDuplicationError(string $key, string $error): bool
+    {
+        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
+            app('log')->debug('This is a duplicate transaction error');
+            return true;
+        }
+        app('log')->debug('This is not a duplicate transaction error');
+        return false;
     }
 }
