@@ -112,7 +112,7 @@ class Transaction
             $description = '(no description)';
         }
         if (null !== $additional) {
-            $description = sprintf('%s %s', $description, app('steam')->cleanString($additional));
+            $description = trim(sprintf('%s %s', $description, app('steam')->cleanString($additional)));
         }
 
         return $description;
@@ -189,11 +189,14 @@ class Transaction
     public function getPayee(string $direction): string
     {
         $value = $this->extra->getPayee();
+        app('log')->debug(sprintf('Payee is "%s"', $value));
         if (null === $value) {
             $value = $this->extra->getPayeeInformation();
+            app('log')->debug(sprintf('Payee is "%s" (payee information)', $value));
         }
         if (null === $value) {
             $value = sprintf('(unknown %s account)', $direction);
+            app('log')->debug(sprintf('Payee is "%s" (empty fallback)', $value));
         }
         return $value;
     }
