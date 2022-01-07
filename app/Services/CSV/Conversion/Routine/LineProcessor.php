@@ -115,6 +115,7 @@ class LineProcessor
             }
             if ('' === $value) {
                 app('log')->debug(sprintf('Ignore column #%d because value is "".', $columnIndex + 1));
+                continue;
             }
 
             // is a mapped value present?
