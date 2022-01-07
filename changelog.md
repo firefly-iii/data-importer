@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.1 - 2022-01-08
+
+### Fixed
+
+- Missing continue statement in transaction processor
+
 ## 0.6.0 - 2022-01-08
 
 - ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.
