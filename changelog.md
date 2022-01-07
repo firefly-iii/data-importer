@@ -21,6 +21,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - In some cases, the "mapping" feature was hidden.
 - The debug page could add newlines, breaking the table.
 - The autoupload endpoint would require CSV files, even when using Nordigen or Spectre.
+- [Issue 5502](https://github.com/firefly-iii/firefly-iii/issues/5502) Sloppy copy/paste bug leads to confusion between the base URL and the vanity URL.
 
 ## 0.5.0 - 2022-01-01
 
