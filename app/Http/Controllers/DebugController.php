@@ -67,7 +67,7 @@ class DebugController extends Controller
         $isDocker       = env('IS_DOCKER', false);
 
         if(file_exists('/var/www/counter-main.txt')) {
-            $buildNr = file_get_contents('/var/www/counter-main.txt');
+            $buildNr = trim(file_get_contents('/var/www/counter-main.txt'));
         }
 
         // get latest log file:

@@ -45,7 +45,7 @@ class AutoUploadRequest extends Request
     public function rules(): array
     {
         return [
-            'csv'  => 'required|file',
+            'csv'  => 'file',
             'json' => 'required|file',
         ];
 

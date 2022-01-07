@@ -56,6 +56,7 @@ class ApiSubmitter
     private string        $vanityURL;
     private Configuration $configuration;
     private array         $mapping;
+    private bool          $createdTag;
 
     /**
      * @param array $lines
@@ -63,19 +64,15 @@ class ApiSubmitter
      */
     public function processTransactions(array $lines): void
     {
-        $this->tag     = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
-        $this->tagDate = date('Y-m-d');
-        $count         = count($lines);
+        $this->createdTag = false;
+        $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $this->tagDate    = date('Y-m-d');
+        $count            = count($lines);
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         $this->vanityURL = Token::getVanityURL();
 
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
-
-        // create the tag, to be used later on.
-        if ($count > 0) {
-            $this->createTag();
-        }
 
         /**
          * @var int   $index
@@ -94,6 +91,8 @@ class ApiSubmitter
                 app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
             }
         }
+
+
         app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
 
@@ -177,8 +176,9 @@ class ApiSubmitter
             if (0 !== $searchResult) {
                 app('log')->debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult));
                 $message = sprintf('There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).', $field, $value, $this->vanityURL, $searchResult);
-                $this->addError($index, $message);
-
+                if (false === config('importer.ignore_duplicate_errors')) {
+                    $this->addError($index, $message);
+                }
                 return false;
             }
         }
@@ -257,8 +257,9 @@ class ApiSubmitter
                 app('log')->error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
                     $msg = sprintf('%s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
-                    // plus 1 to keep the count.
-                    $this->addError($index, $msg);
+                    if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
+                        $this->addError($index, $msg);
+                    }
                     app('log')->error($msg);
                 }
             }
@@ -415,6 +416,10 @@ class ApiSubmitter
 
             return;
         }
+        if (false === $this->createdTag) {
+            $this->createTag();
+            $this->createdTag = true;
+        }
 
         $groupId = (int) $groupInfo['group_id'];
         app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
@@ -472,5 +477,20 @@ class ApiSubmitter
     public function setMapping(array $mapping): void
     {
         $this->mapping = $mapping;
+    }
+
+    /**
+     * @param string $key
+     * @param string $error
+     * @return bool
+     */
+    private function isDuplicationError(string $key, string $error): bool
+    {
+        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
+            app('log')->debug('This is a duplicate transaction error');
+            return true;
+        }
+        app('log')->debug('This is not a duplicate transaction error');
+        return false;
     }
 }

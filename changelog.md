@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.0 - 2022-01-08
+
+- ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.
+- 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
+
+### Added
+- The Spectre import checks more fields for payee information, thanks @ddelbondio!
+
+### Changed
+- The importer can stop warning you about duplicate transactions, making for a cleaner import. Check out `.env.example`.
+- If there is nothing to report, there will be no email message.
+- The import tag will not be created until the first transaction is successfully imported.
+- The configuration file export will mention the data importer version.
+
+### Fixed
+- Various issues where people would end up in a redirect loop.
+- In some cases, the "mapping" feature was hidden.
+- The debug page could add newlines, breaking the table.
+- The autoupload endpoint would require CSV files, even when using Nordigen or Spectre.
+- [Issue 5502](https://github.com/firefly-iii/firefly-iii/issues/5502) Sloppy copy/paste bug leads to confusion between the base URL and the vanity URL.
+
 ## 0.5.0 - 2022-01-01
 
 - ⚠️ Duplicate detection could be broken, due to changes in the way transactions are handled. Be careful importing large batches.

@@ -177,9 +177,9 @@ class RoutineStatusManager
     {
         app('log')->debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
         $disk = Storage::disk(self::DISK_NAME);
-        app('log')->debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
+        //app('log')->debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
         if ($disk->exists($identifier)) {
-            app('log')->debug(sprintf('Status file exists for conversion "%s".', $identifier));
+            //app('log')->debug(sprintf('Status file exists for conversion "%s".', $identifier));
             try {
                 $array  = json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                 $status = ConversionStatus::fromArray($array);
@@ -187,6 +187,7 @@ class RoutineStatusManager
                 app('log')->error($e->getMessage());
                 $status = new ConversionStatus;
             }
+            app('log')->debug(sprintf('Conversion status is "%s"', $status->status));
 
             return $status;
 

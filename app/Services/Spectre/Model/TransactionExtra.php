@@ -49,6 +49,7 @@ class TransactionExtra
     private ?string $originalCurrencyCode;
     private ?string $originalSubCategory;
     private ?string $payee;
+    private ?string $payeeInformation;
     private ?bool   $possibleDuplicate;
     private ?Carbon $postingDate;
     private ?Carbon $postingTime;
@@ -96,6 +97,7 @@ class TransactionExtra
         $model->tags                     = $data['tags'] ?? null;
         $model->mcc                      = $data['mcc'] ?? null;
         $model->payee                    = $data['payee'] ?? null;
+        $model->payeeInformation         = $data['payee_information'] ?? null;
         $model->type                     = $data['type'] ?? null;
         $model->checkNumber              = $data['check_number'] ?? null;
         $model->units                    = $data['units'] ?? null;
@@ -132,6 +134,7 @@ class TransactionExtra
             'tags'                      => $this->tags,
             'mcc'                       => $this->mcc,
             'payee'                     => $this->payee,
+            'payee_information'         => $this->payeeInformation,
             'type'                      => $this->type,
             'check_number'              => $this->checkNumber,
             'units'                     => $this->units,
@@ -140,5 +143,29 @@ class TransactionExtra
             'account_balance_snapshot'  => $this->accountBalanceSnapshot,
             'categorization_confidence' => $this->categorizationConfidence,
         ];
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAdditional(): ?string
+    {
+        return $this->additional;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayee(): ?string
+    {
+        return $this->payee;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayeeInformation(): ?string
+    {
+        return $this->payeeInformation;
     }
 }
