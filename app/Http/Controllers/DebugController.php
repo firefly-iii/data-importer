@@ -44,6 +44,8 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
+
+
         app('log')->emergency('I am a EMERGENCY message.');
         app('log')->alert('I am a ALERT message.');
         app('log')->critical('I am a CRITICAL message.');
@@ -104,6 +106,9 @@ class DebugController extends Controller
         if ('' !== $logContent) {
             // last few lines
             $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
+        }
+        if(true === config('importer.is_external')) {
+            $logContent = 'No logs, external installation.';
         }
 
         return view(
