@@ -40,7 +40,7 @@ class Account
     private string $linkedAccounts;
     private string $msisdn;
     private string $name;
-    private string $ownerAddressUnstructured;
+    private array $ownerAddressUnstructured;
     private string $ownerName;
     private string $product;
     private string $resourceId;
@@ -64,7 +64,7 @@ class Account
         $this->linkedAccounts           = '';
         $this->msisdn                   = '';
         $this->name                     = '';
-        $this->ownerAddressUnstructured = '';
+        $this->ownerAddressUnstructured = [];
         $this->ownerName                = '';
         $this->product                  = '';
         $this->resourceId               = '';
@@ -346,17 +346,17 @@ class Account
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getOwnerAddressUnstructured(): string
+    public function getOwnerAddressUnstructured(): array
     {
         return $this->ownerAddressUnstructured;
     }
 
     /**
-     * @param string $ownerAddressUnstructured
+     * @param array $ownerAddressUnstructured
      */
-    public function setOwnerAddressUnstructured(string $ownerAddressUnstructured): void
+    public function setOwnerAddressUnstructured(array $ownerAddressUnstructured): void
     {
         $this->ownerAddressUnstructured = $ownerAddressUnstructured;
     }
