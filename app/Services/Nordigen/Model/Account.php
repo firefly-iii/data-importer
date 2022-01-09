@@ -40,7 +40,7 @@ class Account
     private string $linkedAccounts;
     private string $msisdn;
     private string $name;
-    private array $ownerAddressUnstructured;
+    private array  $ownerAddressUnstructured;
     private string $ownerName;
     private string $product;
     private string $resourceId;
