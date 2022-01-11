@@ -114,12 +114,23 @@ class AccountInformationCollector
         $account->setLinkedAccounts($information['linkedAccounts'] ?? '');
         $account->setMsisdn($information['msisdn'] ?? '');
         $account->setName($information['name'] ?? '');
-        $account->setOwnerAddressUnstructured($information['ownerAddressUnstructured'] ?? '');
+        $account->setOwnerAddressUnstructured($information['ownerAddressUnstructured']);
         $account->setOwnerName($information['ownerName'] ?? '');
         $account->setProduct($information['product'] ?? '');
         $account->setResourceId($information['resourceId'] ?? '');
         $account->setStatus($information['status'] ?? '');
         $account->setUsage($information['usage'] ?? '');
+
+        // set owner info (could be array or string)
+        $ownerAddress = [];
+        if (array_key_exists('ownerAddressUnstructured', $information) && is_array($information['ownerAddressUnstructured'])) {
+            $ownerAddress = $information['ownerAddressUnstructured'];
+        }
+        if (array_key_exists('ownerAddressUnstructured', $information) && is_string($information['ownerAddressUnstructured'])) {
+            $ownerAddress = ['ownerAddressUnstructured' => $information['ownerAddressUnstructured']];
+        }
+        $account->setOwnerAddressUnstructured($ownerAddress);
+
 
         return $account;
     }
