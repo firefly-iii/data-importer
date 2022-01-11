@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.3 - 2022-01-12
+
+### Fixed
+
+- Nordigen reports the `ownerAddressUnstructured` both as string and array, thanks @dawid-czarnecki
+
 ## 0.6.2 - 2022-01-12
 
 ### Fixed
