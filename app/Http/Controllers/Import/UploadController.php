@@ -154,7 +154,7 @@ class UploadController extends Controller
                 $content = file_get_contents($file->getPathname());
 
                 // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                // because apparantly there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                 // This one is for you: 🤦‍♀️
                 $eol = $this->detectEOL($content);
                 if ("\r" === $eol) {

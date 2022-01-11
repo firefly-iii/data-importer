@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.2 - 2022-01-12
+
+### Fixed
+
+- [Issue 5507](https://github.com/firefly-iii/firefly-iii/issues/5507) `ownerAddressUnstructured` field is of the wrong data type.
+- Version 0.6.1 also reports as 0.6.0.
+
 ## 0.6.1 - 2022-01-08
 
 ### Fixed
