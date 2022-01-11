@@ -114,7 +114,11 @@ class AccountInformationCollector
         $account->setLinkedAccounts($information['linkedAccounts'] ?? '');
         $account->setMsisdn($information['msisdn'] ?? '');
         $account->setName($information['name'] ?? '');
-        $account->setOwnerAddressUnstructured($information['ownerAddressUnstructured'] ?? '');
+        if(isset($information['ownerAddressUnstructured'])) {
+            if(is_string($information['ownerAddressUnstructured'])) $information['ownerAddressUnstructured'] = [$information['ownerAddressUnstructured']];
+        }
+        else $information['ownerAddressUnstructured'] = [];
+        $account->setOwnerAddressUnstructured($information['ownerAddressUnstructured']);
         $account->setOwnerName($information['ownerName'] ?? '');
         $account->setProduct($information['product'] ?? '');
         $account->setResourceId($information['resourceId'] ?? '');
