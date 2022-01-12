@@ -114,7 +114,6 @@ class AccountInformationCollector
         $account->setLinkedAccounts($information['linkedAccounts'] ?? '');
         $account->setMsisdn($information['msisdn'] ?? '');
         $account->setName($information['name'] ?? '');
-        $account->setOwnerAddressUnstructured($information['ownerAddressUnstructured']);
         $account->setOwnerName($information['ownerName'] ?? '');
         $account->setProduct($information['product'] ?? '');
         $account->setResourceId($information['resourceId'] ?? '');
