@@ -43,15 +43,11 @@ class Balance
     {
         app('log')->debug('Create Balance from array', $data);
         $self                     = new self;
-        $self->amount             = $data['balanceAmount']['amount'];
-        $self->currency           = $data['balanceAmount']['currency'];
-        $self->type               = $data['balanceType'];
+        $self->amount             = $data['balanceAmount']['amount'] ?? '0';
+        $self->currency           = $data['balanceAmount']['currency'] ?? '';
+        $self->type               = $data['balanceType'] ?? '';
         $self->date               = $data['referenceDate'] ?? '';
         $self->lastChangeDateTime = $data['lastChangeDateTime'] ?? '';
-
-        if ('' === $self->date && '' === $self->lastChangeDateTime) {
-            app('log')->warning('Balance has invalid date!');
-        }
         return $self;
     }
 
