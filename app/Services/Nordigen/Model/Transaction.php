@@ -121,7 +121,17 @@ class Transaction
         $object->endToEndId = $array['endToEndId'] ?? ''; // from Rabobank NL
 
         // models:
-        $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction'] ?? []);
+        if (array_key_exists('balanceAfterTransaction', $array) && is_array($array['balanceAfterTransaction'])) {
+            $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction'] ?? []);
+        }
+        if (array_key_exists('balanceAfterTransaction', $array) && !is_array($array['balanceAfterTransaction'])) {
+            app('log')->warning(sprintf('balanceAfterTransaction is not an array: %s', $array['balanceAfterTransaction']));
+            $object->balanceAfterTransaction = Balance::createFromArray([]);
+        }
+        if (!array_key_exists('balanceAfterTransaction', $array)) {
+            $object->balanceAfterTransaction = Balance::createFromArray([]);
+        }
+
 
         // array values:
         $object->creditorAccountIban     = $array['creditorAccount']['iban'] ?? '';
