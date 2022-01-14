@@ -34,7 +34,7 @@ class Transaction
 {
     public string  $additionalInformation;
     public string  $additionalInformationStructured;
-    public string  $balanceAfterTransaction;
+    public Balance $balanceAfterTransaction;
     public string  $bankTransactionCode;
     public ?Carbon $bookingDate;
     public string  $checkId;
@@ -94,7 +94,6 @@ class Transaction
 
         $object->additionalInformation                  = $array['additionalInformation'] ?? '';
         $object->additionalInformationStructured        = $array['additionalInformationStructured'] ?? '';
-        $object->balanceAfterTransaction                = $array['balanceAfterTransaction'] ?? '';
         $object->bankTransactionCode                    = $array['bankTransactionCode'] ?? '';
         $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['bookingDate'], config('app.timezone')) : null;
         $object->key                                    = $array['key'] ?? '';
@@ -120,6 +119,18 @@ class Transaction
 
         // undocumented values
         $object->endToEndId = $array['endToEndId'] ?? ''; // from Rabobank NL
+
+        // models:
+        if (array_key_exists('balanceAfterTransaction', $array) && is_array($array['balanceAfterTransaction'])) {
+            $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction'] ?? []);
+        }
+        if (array_key_exists('balanceAfterTransaction', $array) && !is_array($array['balanceAfterTransaction'])) {
+            app('log')->warning(sprintf('balanceAfterTransaction is not an array: %s', $array['balanceAfterTransaction']));
+            $object->balanceAfterTransaction = Balance::createFromArray([]);
+        }
+        if (!array_key_exists('balanceAfterTransaction', $array)) {
+            $object->balanceAfterTransaction = Balance::createFromArray([]);
+        }
 
 
         // array values:
@@ -162,7 +173,7 @@ class Transaction
 
         $object->additionalInformation                  = $array['additional_information'];
         $object->additionalInformationStructured        = $array['additional_information_structured'];
-        $object->balanceAfterTransaction                = $array['balance_after_transaction'];
+        $object->balanceAfterTransaction                = Balance::fromLocalArray($array['balance_after_transaction']);
         $object->bankTransactionCode                    = $array['bank_transaction_code'];
         $object->bookingDate                            = Carbon::createFromFormat(DateTimeInterface::W3C, $array['booking_date']);
         $object->checkId                                = $array['check_id'];
@@ -370,7 +381,7 @@ class Transaction
         $return = [
             'additional_information'                    => $this->additionalInformation,
             'additional_information_structured'         => $this->additionalInformationStructured,
-            'balance_after_transaction'                 => $this->balanceAfterTransaction,
+            'balance_after_transaction'                 => $this->balanceAfterTransaction->toLocalArray(),
             'bank_transaction_code'                     => $this->bankTransactionCode,
             'booking_date'                              => $this->bookingDate->toW3cString(),
             'check_id'                                  => $this->checkId,
