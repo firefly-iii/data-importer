@@ -38,7 +38,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
-use InvalidArgumentException;
 use JsonException;
 use Str;
 use Throwable;
@@ -68,10 +67,10 @@ class TokenController extends Controller
         $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        throw_unless(
-            strlen($state) > 0 && $state === $request->state,
-            InvalidArgumentException::class
-        );
+        $state = '';
+        if (0 === strlen($state) || $state !== $request->state) {
+            throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
+        }
         // always POST to the base URL, never the vanity URL.
         $finalURL = sprintf('%s/oauth/token', $baseURL);
         $params   = [
