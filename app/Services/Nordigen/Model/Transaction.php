@@ -356,6 +356,21 @@ class Transaction
     }
 
     /**
+     * Returns notes based on info in the transaction.
+     * @return string
+     */
+    public function getNotes(): string
+    {
+        $notes = '';
+        if ('' !== $this->additionalInformation) {
+            $notes = $this->additionalInformation;
+        }
+        // room for other fields
+
+        return $notes;
+    }
+
+    /**
      * Return account number of the source account.
      *
      * @return string|null
