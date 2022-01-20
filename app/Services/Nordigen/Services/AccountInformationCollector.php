@@ -74,13 +74,6 @@ class AccountInformationCollector
                 $balanceAccount->setStatus('no-balance');
             }
         }
-        // overrule settings to test layout:
-//        $balanceAccount->setIban('');
-//        $balanceAccount->setName('');
-//        $balanceAccount->setDisplayName('');
-//        $balanceAccount->setOwnerName('');
-//        $balanceAccount->setStatus('no-info');
-
         return $balanceAccount;
     }
 
