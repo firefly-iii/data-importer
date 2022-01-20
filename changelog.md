@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.0 - 2022-01-22
+
+- ⚠️ Using Nordigen? This release WILL create duplicate transactions. Don't import large batches.
+
+A special thanks to the excellent folks over at @nordigen for some quick debugging and fixing.
+
+### Added
+- A special 500 page so you can see what's happening.
+- Nordigen will now import transaction details in notes.
+- If you have no Firefly III accounts, the importer will warn you.
+- Extra account details debug information.
+
+### Fixed
+- A missing method broke navigation.
+- Sometimes session details would get lost in translation.
+
 ## 0.6.5 - 2022-01-15
 
 ### Fixed
