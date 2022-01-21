@@ -47,8 +47,11 @@ class ListAccountsResponse extends Response implements Iterator, Countable
     {
         $this->accounts = [];
 
+        app('log')->debug('ListAccountsResponse:', $data ?? []);
+
         /** @var string $account */
         foreach ($data['accounts'] as $account) {
+            app('log')->debug(sprintf('ListAccountsResponse includes account "%s"', $account));
             $this->accounts[] = Account::createFromIdentifier($account);
         }
         $this->collection = new Collection($this->accounts);

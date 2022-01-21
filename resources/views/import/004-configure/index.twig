@@ -6,6 +6,45 @@
                 <h1>{{ mainTitle }}</h1>
             </div>
         </div>
+
+        {% if 0 == fireflyAccounts and ('nordigen' == flow or 'spectre' == flow ) %}
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        Error :(
+                    </div>
+                    <div class="card-body">
+                        <p>It looks like you have no Firefly III asset accounts yet. The importer will not create
+                            these for you. You must create them yourself.</p>
+                        <p>
+                            Please go to your Firefly III installation and create them, then refresh this page.
+                        </p>
+                        {% if 'nordigen' == flow and importerAccounts|length > 0 %}
+                            <p>
+                                Feel free to use this information collected from Nordigen as inspiration:
+                            </p>
+                            <ul>
+                                {% for info in importerAccounts %}
+                                    <li>
+                                        Name: {{ info.import_service.name }}<br>
+                                        (Internal) identifier: {{ info.import_service.identifier }}<br>
+                                        Resource identifier: {{ info.import_service.resourceId }}<br>
+                                        BBAN: {{ info.import_service.bban }}<br>
+                                        BIC: {{ info.import_service.bic }}<br>
+                                        IBAN: {{ info.import_service.iban }}<br>
+                                        Owner name: {{ info.import_service.ownerName }}<br>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+
+
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
@@ -504,7 +543,7 @@
                 </div>
             </div>
         </form>
-
+        {% endif %}
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
@@ -520,8 +559,10 @@
             </div>
         </div>
     </div>
+
     <p>&nbsp;</p>
     <p>&nbsp;</p><p>&nbsp;</p>
+
 
 {% endblock %}
 {% block scripts %}

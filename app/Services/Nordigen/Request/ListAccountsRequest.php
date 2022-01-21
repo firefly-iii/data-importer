@@ -66,6 +66,7 @@ class ListAccountsRequest extends Request
     public function get(): Response
     {
         $json = $this->authenticatedGet();
+
         return new ListAccountsResponse($json);
     }
 

@@ -31,6 +31,7 @@ use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
@@ -38,7 +39,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
-use InvalidArgumentException;
 use JsonException;
 use Str;
 use Throwable;
@@ -61,17 +61,18 @@ class TokenController extends Controller
     public function callback(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $state        = (string) $request->session()->pull('state');
+        $state        = (string) session()->pull('state');
         $codeVerifier = (string) $request->session()->pull('code_verifier');
         $clientId     = (int) $request->session()->pull('form_client_id');
         $baseURL      = (string) $request->session()->pull('form_base_url');
         $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        throw_unless(
-            strlen($state) > 0 && $state === $request->state,
-            InvalidArgumentException::class
-        );
+        if (0 === strlen($state) || $state !== $request->state) {
+            app('log')->error(sprintf('State according to session: "%s"', $state));
+            app('log')->error(sprintf('State returned in request : "%s"', $request->state));
+            throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
+        }
         // always POST to the base URL, never the vanity URL.
         $finalURL = sprintf('%s/oauth/token', $baseURL);
         $params   = [
@@ -93,11 +94,14 @@ class TokenController extends Controller
         ];
         try {
             $response = (new Client($opts))->post($finalURL, $params);
-        } catch (ClientException $e) {
-            $body = (string) $e->getResponse()->getBody();
-            app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
-            app('log')->error(sprintf('Response from server: "%s"', $body));
-            app('log')->error($e->getTraceAsString());
+        } catch (ClientException | RequestException $e) {
+            $body = $e->getMessage();
+            if ($e->hasResponse()) {
+                $body = (string) $e->getResponse()->getBody();
+                app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
+                app('log')->error(sprintf('Response from server: "%s"', $body));
+                app('log')->error($e->getTraceAsString());
+            }
 
             return view('error')->with('message', $e->getMessage())->with('body', $body);
         }

@@ -120,7 +120,7 @@ class ConfigurationController extends Controller
         // get list of asset accounts:
         $url   = SecretManager::getBaseUrl();
         $token = SecretManager::getAccessToken();
-
+        $fireflyAccounts = 0;
 
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
@@ -131,6 +131,7 @@ class ConfigurationController extends Controller
         /** @var Account $account */
         foreach ($response as $account) {
             $accounts[self::ASSET_ACCOUNTS][$account->id] = $account;
+            $fireflyAccounts++;
         }
 
         // also get liabilities
@@ -144,6 +145,7 @@ class ConfigurationController extends Controller
         /** @var Account $account */
         foreach ($response as $account) {
             $accounts[self::LIABILITIES][$account->id] = $account;
+            $fireflyAccounts++;
         }
 
         // possibilities for duplicate detection (unique columns)
@@ -175,7 +177,7 @@ class ConfigurationController extends Controller
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
+            compact('mainTitle', 'subTitle', 'fireflyAccounts','accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
         );
     }
 
@@ -187,7 +189,7 @@ class ConfigurationController extends Controller
      */
     private function getNordigenAccounts(string $identifier): array
     {
-        if (Cache::has($identifier)) {
+        if (Cache::has($identifier) && config('importer.use_cache')) {
             $result = Cache::get($identifier);
             $return = [];
             foreach ($result as $arr) {

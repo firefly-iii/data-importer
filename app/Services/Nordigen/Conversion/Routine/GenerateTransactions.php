@@ -224,6 +224,7 @@ class GenerateTransactions
             'tags'               => [],
             'category_name'      => null,
             'category_id'        => null,
+            'notes'              => $entry->getNotes(),
             'external_id'        => $entry->transactionId,
             'internal_reference' => $entry->accountIdentifier,
         ];

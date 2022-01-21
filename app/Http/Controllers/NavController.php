@@ -56,6 +56,16 @@ class NavController extends Controller
     }
 
     /**
+     * @return Application|RedirectResponse|Redirector
+     */
+    public function toConversion()
+    {
+        app('log')->debug(__METHOD__);
+        session()->forget(Constants::CONVERSION_COMPLETE_INDICATOR);
+        return redirect(route('005-roles.index'));
+    }
+
+    /**
      * Return back to index. Needs no session updates.
      */
     public function toStart()
