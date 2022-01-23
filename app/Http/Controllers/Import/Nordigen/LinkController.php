@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import\Nordigen;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\LinkControllerMiddleware;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
@@ -90,13 +91,7 @@ class LinkController extends Controller
             return redirect(route('004-configure.index'));
         }
 
-        // https://github.com/firefly-iii/firefly-iii/issues/5590
-        $uuid = (string) Uuid::uuid4()->toString();
-        if ('' === $uuid) {
-            $uuid = sha1(microtime());
-        }
-
-
+        $uuid        = (string) Uuid::uuid4()->toString();
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
         $request     = new PostNewRequisitionRequest($url, $accessToken);
@@ -108,8 +103,8 @@ class LinkController extends Controller
 
         /** @var NewRequisitionResponse $response */
         $response = $request->post();
-        app('log')->debug(sprintf('Got a new requisition with id %s', $response->id));
-        app('log')->debug(sprintf('Status: %s, returned reference: %s', $response->status, $response->reference));
+        app('log')->debug(sprintf('Got a new requisition with id "%s"', $response->id));
+        app('log')->debug(sprintf('Status: %s, returned reference: "%s"', $response->status, $response->reference));
         app('log')->debug(sprintf('Will now redirect the user to %s', $response->link));
 
         // save config!
@@ -125,14 +120,19 @@ class LinkController extends Controller
      * @param Request $request
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {
-        $reference = $request->get('ref');
+        $reference = (string) $request->get('ref');
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        app('log')->debug(sprintf('Reference is %s', $reference));
+        app('log')->debug(sprintf('Reference is "%s"', $reference));
+
+        if('' === $reference) {
+            throw new ImporterHttpException('The reference returned by Nordigen was unexpectedly empty.');
+        }
 
         // create a new config thing
         $configuration = $this->restoreConfiguration();

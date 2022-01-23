@@ -83,6 +83,7 @@ class PostNewRequisitionRequest extends Request
             ];
 
         $result = $this->authenticatedJsonPost($array);
+        app('log')->debug('Returned from POST: ', $result);
         return new NewRequisitionResponse($result);
     }
 
