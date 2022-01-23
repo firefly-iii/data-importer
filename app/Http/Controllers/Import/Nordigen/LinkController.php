@@ -90,8 +90,12 @@ class LinkController extends Controller
             return redirect(route('004-configure.index'));
         }
 
-        // create and save local reference:
-        $uuid = Uuid::uuid4()->toString();
+        // https://github.com/firefly-iii/firefly-iii/issues/5590
+        $uuid = (string) Uuid::uuid4()->toString();
+        if ('' === $uuid) {
+            $uuid = sha1(microtime());
+        }
+
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
@@ -100,7 +104,7 @@ class LinkController extends Controller
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
 
-        app('log')->debug(sprintf('Reference is %s', $uuid));
+        app('log')->debug(sprintf('Reference is "%s"', $uuid));
 
         /** @var NewRequisitionResponse $response */
         $response = $request->post();
