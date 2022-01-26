@@ -139,7 +139,7 @@ class PseudoTransactionProcessor
         foreach ($lines as $index => $line) {
             app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
             $processed[] = $this->processPseudoLine($line);
-            $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
+            // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
         }
         app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
 
