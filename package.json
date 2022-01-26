@@ -10,8 +10,8 @@
         "production": "mix --production"
     },
     "devDependencies": {
-        "@vue/compiler-sfc": "^3.2.27",
-        "axios": "^0.24",
+        "@vue/compiler-sfc": "^3.2.29",
+        "axios": "^0.25",
         "bootstrap": "^4.6.1",
         "cross-env": "^7.0",
         "jquery": "^3.6",
@@ -19,7 +19,7 @@
         "lodash": "^4.17.21",
         "popper.js": "^1.12",
         "postcss": "^8.4",
-        "resolve-url-loader": "4.0.0",
+        "resolve-url-loader": "5.0.0",
         "sass": "^1.47.0",
         "sass-loader": "12.*",
         "vue": "^2.6.14",
