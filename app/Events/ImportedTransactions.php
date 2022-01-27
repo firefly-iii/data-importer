@@ -46,10 +46,26 @@ class ImportedTransactions
      */
     public function __construct(array $messages, array $warnings, array $errors)
     {
-        app('log')->debug('Created event ImportedTransactions');
-        $this->messages = $messages;
-        $this->warnings = $warnings;
-        $this->errors   = $errors;
+        app('log')->debug('Created event ImportedTransactions with filtering');
+        $this->messages = [];
+        $this->warnings = [];
+        $this->errors   = [];
+        foreach ($messages as $index => $message) {
+            if ('' !== trim((string) $message)) {
+                $this->messages[$index] = $message;
+            }
+        }
 
+        foreach ($warnings as $index => $warning) {
+            if ('' !== trim((string) $warning)) {
+                $this->warnings[$index] = $warning;
+            }
+        }
+
+        foreach ($errors as $index => $error) {
+            if ('' !== trim((string) $error)) {
+                $this->errors[$index] = $error;
+            }
+        }
     }
 }

@@ -56,6 +56,9 @@ class ImportedTransactionsEventHandler
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {
             app('log')->info('Will send report message.');
+            app('log')->debug(sprintf('Messages count: %s', count($event->messages)));
+            app('log')->debug(sprintf('Warnings count: %s', count($event->warnings)));
+            app('log')->debug(sprintf('Errors count  : %s', count($event->errors)));
             app('log')->debug('If no error below this line, mail was sent!');
             Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
             app('log')->debug('If no error above this line, mail was sent!');
