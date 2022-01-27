@@ -46,26 +46,36 @@ class ImportedTransactions
      */
     public function __construct(array $messages, array $warnings, array $errors)
     {
-        app('log')->debug('Created event ImportedTransactions with filtering');
-        $this->messages = [];
-        $this->warnings = [];
-        $this->errors   = [];
-        foreach ($messages as $index => $message) {
-            if ('' !== trim((string) $message)) {
-                $this->messages[$index] = $message;
-            }
-        }
+        app('log')->debug('Created event ImportedTransactions with filtering (2)');
 
-        foreach ($warnings as $index => $warning) {
-            if ('' !== trim((string) $warning)) {
-                $this->warnings[$index] = $warning;
-            }
-        }
+        // filter messages:
+        $this->messages = $this->filterArray($messages);
+        $this->warnings = $this->filterArray($warnings);
+        $this->errors   = $this->filterArray($errors);
+    }
 
-        foreach ($errors as $index => $error) {
-            if ('' !== trim((string) $error)) {
-                $this->errors[$index] = $error;
+    /**
+     * @param array $collection
+     * @return array
+     */
+    private function filterArray(array $collection): array
+    {
+        $count         = 0;
+        $newCollection = [];
+        foreach ($collection as $index => $set) {
+            $newSet = [];
+            foreach ($set as $line) {
+                $line = (string) $line;
+                if ('' !== $line) {
+                    $newSet[] = $line;
+                    $count++;
+                }
+            }
+            if (count($newSet) > 0) {
+                $newCollection[$index] = $newSet;
             }
         }
+        app('log')->debug(sprintf('Array contains %d line(s)', $count));
+        return $newCollection;
     }
 }
