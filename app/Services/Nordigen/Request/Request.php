@@ -119,17 +119,19 @@ abstract class Request
         } catch (TransferException | GuzzleException $e) {
             app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response
-            if (!$e->hasResponse()) {
+            if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
             }
-            $body = (string) $e->getResponse()->getBody();
             $json = [];
-            try {
-                $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            } catch (JsonException $ee) {
-                app('log')->error(sprintf('Could not decode error: %s', $ee->getMessage()));
-                app('log')->error($body);
-                //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
+            if (method_exists($e, 'getResponse')) {
+                $body = (string) $e->getResponse()->getBody();
+                try {
+                    $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+                } catch (JsonException $ee) {
+                    app('log')->error(sprintf('Could not decode error: %s', $ee->getMessage()));
+                    app('log')->error($body);
+                    //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
+                }
             }
             // if status code is 503, the account does not exist.
             $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
