@@ -74,6 +74,10 @@ class AccountInformationCollector
                 $balanceAccount->setStatus('no-balance');
             }
         }
+
+        // also collect some extra information, but don't use it right now.
+        self::getBasicDetails($balanceAccount);
+
         return $balanceAccount;
     }
 
@@ -148,6 +152,23 @@ class AccountInformationCollector
             $account->addBalance(Balance::createFromArray($array));
         }
         return $account;
+    }
+
+    /**
+     * @param Account $account
+     */
+    private static function getBasicDetails(Account $account): void
+    {
+        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+
+        $url         = config('nordigen.url');
+        $accessToken = TokenManager::getAccessToken();
+        $request     = new GetAccountBasicRequest($url, $accessToken, $account->getIdentifier());
+        /** @var ArrayResponse $response */
+        $response = $request->get();
+        $array    = $response->data;
+
+        app('log')->debug('Response for basic information request:', $array);
     }
 
 }
