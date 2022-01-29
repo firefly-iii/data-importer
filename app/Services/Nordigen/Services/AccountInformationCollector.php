@@ -77,9 +77,7 @@ class AccountInformationCollector
         }
 
         // also collect some extra information, but don't use it right now.
-        self::getBasicDetails($balanceAccount);
-
-        return $balanceAccount;
+        return self::getBasicDetails($balanceAccount);
     }
 
     /**
@@ -98,7 +96,7 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
         $response    = $request->get();
         $information = $response->data['account'];
-        app('log')->debug('Collected information for account', $information);
+        app('log')->debug('getAccountDetails: Collected information for account', $information);
 
         $account->setResourceId($information['resource_id'] ?? '');
         $account->setBban($information['bban'] ?? '');
@@ -158,7 +156,7 @@ class AccountInformationCollector
     /**
      * @param Account $account
      */
-    private static function getBasicDetails(Account $account): void
+    private static function getBasicDetails(Account $account): Account
     {
         app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
@@ -168,8 +166,15 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
         $response = $request->get();
         $array    = $response->data;
-
         app('log')->debug('Response for basic information request:', $array);
+
+        // save IBAN if not already present
+        if (array_key_exists('iban', $array) && '' !== $array['iban'] && '' === $account->getIban()) {
+            app('log')->debug('Set new IBAN from basic details.');
+            $account->setIban($array['iban']);
+        }
+
+        return $account;
     }
 
 }
