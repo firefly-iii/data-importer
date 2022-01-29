@@ -30,6 +30,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Nordigen\Request\GetAccountBalanceRequest;
+use App\Services\Nordigen\Request\GetAccountBasicRequest;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
