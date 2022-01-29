@@ -26,8 +26,10 @@ namespace App\Services\Nordigen\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
+use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
 use Carbon\Carbon;
@@ -65,8 +67,15 @@ class TransactionProcessor
 
         $return = [];
         foreach ($accounts as $key => $account) {
-            app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             $account     = (string) $account;
+            app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
+
+            app('log')->debug(sprintf('Will also download information on the account for debug purposes.'));
+            $object = new Account();
+            $object->setIdentifier($account);
+            AccountInformationCollector::collectInformation($object);
+            app('log')->debug(sprintf('Done downloading information for debug purposes.'));
+
             $accessToken = TokenManager::getAccessToken();
             $url         = config('nordigen.url');
             $request     = new GetTransactionsRequest($url, $accessToken, $account);
