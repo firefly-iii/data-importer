@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.1 - 2022-02-03
+
+- ⚠️ Using Nordigen? This release WILL create duplicate transactions. Don't import large batches.
+
+### Added
+- Collect more Nordigen information for future debug.
+- Collect IBAN from secondary source if possible.
+- Add value date as "payment date" whenever possible.
+
+### Fixed
+- #5590 500 error when attempting to add bank account from Nordigen
+- #5650 Better error catching for timeouts
+- Clean up some logging.
+- Better check on session states
+- Better check on messages to report
+- Will not email if not configured to
+
 ## 0.7.0 - 2022-01-22
 
 - ⚠️ Using Nordigen? This release WILL create duplicate transactions. Don't import large batches.
