@@ -426,6 +426,11 @@ trait IsReadyForStep
                     return redirect($route);
                 }
                 throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s" [1]', self::STEP));
+            case 'submit':
+                $route = route('007-convert.index');
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
+
         }
     }
 
