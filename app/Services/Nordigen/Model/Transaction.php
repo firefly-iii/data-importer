@@ -247,6 +247,19 @@ class Transaction
     }
 
     /**
+     * @return Carbon|null
+     */
+    public function getValueDate(): ?Carbon
+    {
+        if (null !== $this->valueDate) {
+            app('log')->debug('Returning value date for getValueDate');
+            return $this->valueDate;
+        }
+        app('log')->warning('Transaction has no valueDate, return NULL.');
+        return null;
+    }
+
+    /**
      * Return transaction description, which depends on the values in the object:
      * @return string
      */
