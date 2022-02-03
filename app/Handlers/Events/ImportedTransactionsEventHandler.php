@@ -48,6 +48,10 @@ class ImportedTransactionsEventHandler
             app('log')->info('No mail receiver configured, will not mail.');
             return;
         }
+        if(false === config('mail.enable_mail_report')) {
+            app('log')->info('Configuration does not allow mail, will not mail.');
+            return;
+        }
 
         $log = [
             'messages' => $event->messages,
