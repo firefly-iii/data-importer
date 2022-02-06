@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.7.1 - 2022-02-03
+## 0.8.0 - 2022-02-07
 
 - ⚠️ Using Nordigen? This release WILL create duplicate transactions. Don't import large batches.
 
@@ -12,8 +12,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Add value date as "payment date" whenever possible.
 
 ### Fixed
-- #5590 500 error when attempting to add bank account from Nordigen
-- #5650 Better error catching for timeouts
+- [Issue 5590](https://github.com/firefly-iii/firefly-iii/issues/5590) 500 error when attempting to add bank account from Nordigen
+- [Issue 5650](https://github.com/firefly-iii/firefly-iii/issues/5650) Better error catching for timeouts
+- [Issue 5700](https://github.com/firefly-iii/firefly-iii/issues/5700) Missing route for Nordigen (experimental fix)
 - Clean up some logging.
 - Better check on session states
 - Better check on messages to report
