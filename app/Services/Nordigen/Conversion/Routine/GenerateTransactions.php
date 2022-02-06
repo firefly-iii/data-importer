@@ -93,14 +93,14 @@ class GenerateTransactions
             if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
                 continue;
             }
-            $iban = $this->filterSpaces((string) $entry->iban);
+            $iban = $this->filterSpaces((string)$entry->iban);
 
             if ('' !== $iban) {
                 app('log')->debug(sprintf('Collected IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
                 $return[$iban] = $entry->id;
                 $types[$iban]  = $entry->type;
             }
-            $number = sprintf('%s.', (string) $entry->number);
+            $number = sprintf('%s.', (string)$entry->number);
             if ('.' !== $number) {
                 app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
                 $return[$number] = $entry->id;
@@ -213,12 +213,14 @@ class GenerateTransactions
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
+        $valueDate   = $entry->getValueDate();
         $transaction = [
             'type'               => 'withdrawal',
             'date'               => $entry->getDate()->format('Y-m-d'),
             'datetime'           => $entry->getDate()->toW3cString(),
             'amount'             => $entry->transactionAmount,
             'description'        => $entry->getDescription(),
+            'payment_date'       => is_null($valueDate) ? '' : $valueDate->format('Y-m-d'),
             'order'              => 0,
             'currency_code'      => $entry->currencyCode,
             'tags'               => [],
@@ -253,7 +255,7 @@ class GenerateTransactions
     private function getMappedAccountId(string $name): ?int
     {
         if (isset($this->configuration->getMapping()['accounts'][$name])) {
-            return (int) $this->configuration->getMapping()['accounts'][$name];
+            return (int)$this->configuration->getMapping()['accounts'][$name];
         }
 
         return null;
@@ -345,9 +347,11 @@ class GenerateTransactions
 
     /**
      * Handle transaction information when the amount is positive, and this is probably a deposit or a transfer.
+     *
      * @param string      $accountId
      * @param array       $transaction
      * @param Transaction $entry
+     *
      * @return array
      * @throws ImporterHttpException
      */
@@ -358,7 +362,7 @@ class GenerateTransactions
         $transaction['amount'] = $entry->transactionAmount;
 
         // destination is a Nordigen account (has to be!)
-        $transaction['destination_id'] = (int) $this->accounts[$accountId];
+        $transaction['destination_id'] = (int)$this->accounts[$accountId];
         app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
 
         // append source iban and number (if present)
@@ -390,14 +394,17 @@ class GenerateTransactions
                 $transaction['source_name'] = $originalSourceName;
             }
         }
+
         return $transaction;
     }
 
     /**
      * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.
+     *
      * @param string      $accountId
      * @param array       $transaction
      * @param Transaction $entry
+     *
      * @return array
      * @throws ImporterHttpException
      */
@@ -405,7 +412,7 @@ class GenerateTransactions
     {
 
         $transaction['amount']    = bcmul($entry->transactionAmount, '-1');
-        $transaction['source_id'] = (int) $this->accounts[$accountId]; // TODO entry may not exist, then what?
+        $transaction['source_id'] = (int)$this->accounts[$accountId]; // TODO entry may not exist, then what?
 
         // append source iban and number (if present)
         $transaction = $this->appendAccountFields($transaction, $entry, 'destination');
@@ -436,6 +443,7 @@ class GenerateTransactions
                 $transaction['destination_name'] = $originalDestName;
             }
         }
+
         return $transaction;
     }
 
@@ -443,6 +451,7 @@ class GenerateTransactions
      * @param array       $transaction
      * @param Transaction $entry
      * @param string      $direction
+     *
      * @return array
      */
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
@@ -473,51 +482,53 @@ class GenerateTransactions
         $numberSearch = sprintf('%s.', $number);
 
         // IBAN is also an ID, so use that!
-        if ('' !== (string) $iban && array_key_exists((string) $iban, $this->targetAccounts)) {
+        if ('' !== (string)$iban && array_key_exists((string)$iban, $this->targetAccounts)) {
             app('log')->debug(sprintf('Recognized %s (IBAN) as a Firefly III asset account so this is a transfer.', $iban));
             $transaction[$idKey] = $this->targetAccounts[$iban];
             $transaction['type'] = 'transfer';
         }
 
         // IBAN is not an ID, so just submit it as a field.
-        if ('' === (string) $iban || !array_key_exists((string) $iban, $this->targetAccounts)) {
+        if ('' === (string)$iban || !array_key_exists((string)$iban, $this->targetAccounts)) {
             app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $iban));
             // source is the other side:
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
-            if ('' !== (string) $iban) {
+            if ('' !== (string)$iban) {
                 app('log')->debug(sprintf('Set field "%s" to "%s".', $ibanKey, $iban));
                 $transaction[$ibanKey] = $iban;
             }
-            if ('' === (string) $iban) {
+            if ('' === (string)$iban) {
                 app('log')->debug(sprintf('IBAN is "%s", so leave field "%s" empty.', $iban, $ibanKey));
             }
         }
 
         // source is also an ID, so use it!
-        if ('' !== (string) $number && '.' !== $numberSearch && array_key_exists($numberSearch, $this->targetAccounts)) {
+        if ('' !== (string)$number && '.' !== $numberSearch && array_key_exists($numberSearch, $this->targetAccounts)) {
             app('log')->debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$numberSearch];
             $transaction['type'] = 'transfer';
         }
 
-        if ('' === (string) $number || '.' === $numberSearch || !array_key_exists($numberSearch, $this->targetAccounts)) {
+        if ('' === (string)$number || '.' === $numberSearch || !array_key_exists($numberSearch, $this->targetAccounts)) {
             app('log')->debug(sprintf('"%s" is not a valid account nr OR not recognized as Firefly III asset account so submitted as-is.', $number));
             // source is the other side:
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
-            if ('' !== (string) $number) {
+            if ('' !== (string)$number) {
                 app('log')->debug(sprintf('Set field "%s" to "%s".', $numberKey, $number));
                 $transaction[$numberKey] = $number;
             }
-            if ('' === (string) $number) {
+            if ('' === (string)$number) {
                 app('log')->debug(sprintf('Account number is "%s", so leave field "%s" empty.', $number, $numberKey));
             }
         }
         app('log')->debug(sprintf('End of %s', __METHOD__));
+
         return $transaction;
     }
 
     /**
      * @param string $iban
+     *
      * @return string
      */
     private function filterSpaces(string $iban): string
@@ -570,6 +581,7 @@ class GenerateTransactions
             "\u{FEFF}", // zero width no -break space
             "\x20", // plain old normal space
         ];
+
         return str_replace($search, '', $iban);
     }
 }

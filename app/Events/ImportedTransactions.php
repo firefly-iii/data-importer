@@ -46,10 +46,36 @@ class ImportedTransactions
      */
     public function __construct(array $messages, array $warnings, array $errors)
     {
-        app('log')->debug('Created event ImportedTransactions');
-        $this->messages = $messages;
-        $this->warnings = $warnings;
-        $this->errors   = $errors;
+        app('log')->debug('Created event ImportedTransactions with filtering (2)');
 
+        // filter messages:
+        $this->messages = $this->filterArray($messages);
+        $this->warnings = $this->filterArray($warnings);
+        $this->errors   = $this->filterArray($errors);
+    }
+
+    /**
+     * @param array $collection
+     * @return array
+     */
+    private function filterArray(array $collection): array
+    {
+        $count         = 0;
+        $newCollection = [];
+        foreach ($collection as $index => $set) {
+            $newSet = [];
+            foreach ($set as $line) {
+                $line = (string) $line;
+                if ('' !== $line) {
+                    $newSet[] = $line;
+                    $count++;
+                }
+            }
+            if (count($newSet) > 0) {
+                $newCollection[$index] = $newSet;
+            }
+        }
+        app('log')->debug(sprintf('Array contains %d line(s)', $count));
+        return $newCollection;
     }
 }

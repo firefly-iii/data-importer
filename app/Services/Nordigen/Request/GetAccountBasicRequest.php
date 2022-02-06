@@ -1,6 +1,6 @@
 <?php
 /*
- * PostNewRequisitionRequest.php
+ * GetAccountInformationRequest.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -25,48 +25,56 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
-use App\Services\Nordigen\Response\NewRequisitionResponse;
+use App\Exceptions\ImporterErrorException;
+use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Shared\Response\Response;
 
 /**
- * Class PostNewRequisitionRequest
+ * Class GetAccountBasicRequest
  */
-class PostNewRequisitionRequest extends Request
+class GetAccountBasicRequest extends Request
 {
-    private string $bank;
-    private string $reference;
+    private string $identifier;
 
-    public function __construct(string $url, string $token)
+    /**
+     * @param string $url
+     * @param string $token
+     * @param string $identifier
+     */
+    public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
-        $this->setUrl('api/v2/requisitions/');
-        $this->reference = '';
+        $this->setIdentifier($identifier);
+        $this->setUrl(sprintf('api/v2/accounts/%s', $identifier));
     }
 
     /**
-     * @param string $bank
+     * @return string
      */
-    public function setBank(string $bank): void
+    public function getIdentifier(): string
     {
-        $this->bank = $bank;
+        return $this->identifier;
     }
 
     /**
-     * @param string $reference
+     * @param string $identifier
      */
-    public function setReference(string $reference): void
+    public function setIdentifier(string $identifier): void
     {
-        $this->reference = $reference;
+        $this->identifier = $identifier;
     }
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
      */
     public function get(): Response
     {
-        // Implement get() method.
+
+        $array = $this->authenticatedGet();
+        return new ArrayResponse($array);
     }
 
     /**
@@ -74,17 +82,7 @@ class PostNewRequisitionRequest extends Request
      */
     public function post(): Response
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $array =
-            [
-                'redirect'       => route('010-build-link.callback'),
-                'institution_id' => $this->bank,
-                'reference'      => $this->reference,
-            ];
-
-        $result = $this->authenticatedJsonPost($array);
-        app('log')->debug('Returned from POST: ', $result);
-        return new NewRequisitionResponse($result);
+        // Implement post() method.
     }
 
     /**

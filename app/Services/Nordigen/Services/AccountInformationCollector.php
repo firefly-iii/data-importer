@@ -30,6 +30,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Nordigen\Request\GetAccountBalanceRequest;
+use App\Services\Nordigen\Request\GetAccountBasicRequest;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
@@ -74,7 +75,9 @@ class AccountInformationCollector
                 $balanceAccount->setStatus('no-balance');
             }
         }
-        return $balanceAccount;
+
+        // also collect some extra information, but don't use it right now.
+        return self::getBasicDetails($balanceAccount);
     }
 
     /**
@@ -93,7 +96,7 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
         $response    = $request->get();
         $information = $response->data['account'];
-        app('log')->debug('Collected information for account', $information);
+        app('log')->debug('getAccountDetails: Collected information for account', $information);
 
         $account->setResourceId($information['resource_id'] ?? '');
         $account->setBban($information['bban'] ?? '');
@@ -147,6 +150,30 @@ class AccountInformationCollector
             app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
             $account->addBalance(Balance::createFromArray($array));
         }
+        return $account;
+    }
+
+    /**
+     * @param Account $account
+     */
+    private static function getBasicDetails(Account $account): Account
+    {
+        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+
+        $url         = config('nordigen.url');
+        $accessToken = TokenManager::getAccessToken();
+        $request     = new GetAccountBasicRequest($url, $accessToken, $account->getIdentifier());
+        /** @var ArrayResponse $response */
+        $response = $request->get();
+        $array    = $response->data;
+        app('log')->debug('Response for basic information request:', $array);
+
+        // save IBAN if not already present
+        if (array_key_exists('iban', $array) && '' !== $array['iban'] && '' === $account->getIban()) {
+            app('log')->debug('Set new IBAN from basic details.');
+            $account->setIban($array['iban']);
+        }
+
         return $account;
     }
 

@@ -68,7 +68,7 @@ class TokenController extends Controller
         $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        if (0 === strlen($state) || $state !== $request->state) {
+        if ($state !== $request->state) {
             app('log')->error(sprintf('State according to session: "%s"', $state));
             app('log')->error(sprintf('State returned in request : "%s"', $request->state));
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
