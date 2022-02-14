@@ -100,7 +100,7 @@ class TokenController extends Controller
                 $body = (string) $e->getResponse()->getBody();
                 app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
                 app('log')->error(sprintf('Response from server: "%s"', $body));
-                app('log')->error($e->getTraceAsString());
+                //app('log')->error($e->getTraceAsString());
             }
 
             return view('error')->with('message', $e->getMessage())->with('body', $body);
@@ -111,7 +111,7 @@ class TokenController extends Controller
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             app('log')->error(sprintf('Response from server: "%s"', (string) $response->getBody()));
-            app('log')->error($e->getTraceAsString());
+            //app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
         app('log')->debug('Response', $data);

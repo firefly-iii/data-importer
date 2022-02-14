@@ -123,7 +123,7 @@ class ApiSubmitter
         } catch (ApiHttpException $e) {
             $message = sprintf('Could not create tag. %s', $e->getMessage());
             app('log')->error($message);
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             $this->addError(0, $message);
 
             return;
@@ -245,7 +245,7 @@ class ApiSubmitter
             $response = $request->post();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+            //app('log')->error($e->getTraceAsString());
             $message = sprintf('Submission HTTP error: %s', $e->getMessage());
             $this->addError($index, $message);
 
@@ -448,7 +448,7 @@ class ApiSubmitter
             $request->put();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             $this->addError(0, 'Could not store transaction: see the log files.');
         }
     }

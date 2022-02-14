@@ -85,7 +85,7 @@ class CSVFileProcessor
             $this->reader->setDelimiter($this->delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+            //app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
@@ -96,7 +96,7 @@ class CSVFileProcessor
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not read CSV: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
@@ -106,7 +106,7 @@ class CSVFileProcessor
             return $this->processCSVLines($records);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not parse CSV: %s', $e->getMessage());
             $this->addError(0, $message);
             return [];
@@ -179,7 +179,7 @@ class CSVFileProcessor
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
                 app('log')->error($e->getMessage());
-                app('log')->error($e->getTraceAsString());
+//                app('log')->error($e->getTraceAsString());
                 throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
             }
             if (in_array($hash, $hashes, true)) {

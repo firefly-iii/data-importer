@@ -56,7 +56,7 @@ class TransactionCurrencies implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download currencies: %s', $e->getMessage()));
         }
         /** @var TransactionCurrency $currency */
