@@ -245,7 +245,8 @@ class GenerateTransactions
 
         /* Triodos NL, see https://developer.triodos.com/docs/proprietary-bank-transaction-codes  */
         if (('' === $transactiontype) and ('BA' === $entry->proprietaryBankTransactionCode)) {
-            app('log')->debug('"BetaalAutomaat": assume withdrawal.');
+            $entry->creditorName = explode("\\", $transaction['description'])[0];
+            app('log')->debug(sprintf('"BetaalAutomaat": assume withdrawal for "%s".', $entry->creditorName));
             $transactiontype = 'withdrawal';
 		}	
 
