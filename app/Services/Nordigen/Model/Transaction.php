@@ -49,6 +49,7 @@ class Transaction
     public string  $key;
     public string  $mandateId;
     public string  $proprietaryBank;
+    public string  $proprietaryBankTransactionCode;  // Triodos NL, see https://developer.triodos.com/docs/proprietary-bank-transaction-codes
     public string  $purposeCode;
     public string  $remittanceInformationStructured;
     public array   $remittanceInformationStructuredArray;
@@ -107,6 +108,7 @@ class Transaction
         $object->entryReference                         = $array['entryReference'] ?? '';
         $object->mandateId                              = $array['mandateId'] ?? '';
         $object->proprietaryBank                        = $array['proprietaryBank'] ?? '';
+        $object->proprietaryBankTransactionCode         = $array['proprietaryBankTransactionCode'] ?? '';
         $object->purposeCode                            = $array['purposeCode'] ?? '';
         $object->remittanceInformationStructured        = $array['remittanceInformationStructured'] ?? '';
         $object->remittanceInformationStructuredArray   = $array['remittanceInformationStructuredArray'] ?? [];
@@ -187,6 +189,7 @@ class Transaction
         $object->key                                    = $array['key'];
         $object->mandateId                              = $array['mandate_id'];
         $object->proprietaryBank                        = $array['proprietary_bank'];
+        $object->proprietaryBankTransactionCode         = $array['proprietary_bank_transcode'];
         $object->purposeCode                            = $array['purpose_code'];
         $object->remittanceInformationStructured        = $array['remittance_information_structured'];
         $object->remittanceInformationStructuredArray   = $array['remittance_information_structured_array'];
@@ -423,6 +426,7 @@ class Transaction
             'key'                                       => $this->key,
             'mandate_id'                                => $this->mandateId,
             'proprietary_bank'                          => $this->proprietaryBank,
+            'proprietary_bank_transcode'                => $this->proprietaryBankTransactionCode,
             'purpose_code'                              => $this->purposeCode,
             'remittance_information_structured'         => $this->remittanceInformationStructured,
             'remittance_information_structured_array'   => $this->remittanceInformationStructuredArray,
