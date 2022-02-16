@@ -82,7 +82,7 @@ class Amount extends AbstractTask
         $amount = (string) $amount;
         if ('' === $amount) {
             app('log')->error('Amount is EMPTY. This will give problems further ahead.', $transaction);
-
+            unset($transaction['amount_modifier']);
             return $transaction;
         }
         // modify amount:
@@ -109,6 +109,7 @@ class Amount extends AbstractTask
             app('log')->debug(sprintf('Amount %s is positive, so this is probably a deposit.', $amount));
             $transaction['type'] = 'deposit';
         }
+        unset($transaction['amount_modifier']);
         return $transaction;
     }
 
