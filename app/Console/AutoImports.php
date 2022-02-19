@@ -183,9 +183,14 @@ trait AutoImports
             return;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+
+        // sanity check. If the csvFile is a .json file and it parses as valid json, don't import it:
+        if ('csv' === $configuration->getFlow() && str_ends_with(strtolower($csvFile), '.json') && $this->verifyJSON($csvFile)) {
+            app('log')->warning('Almost tried to import a JSON file as CSV lol. Skip it.');
+            return;
+        }
+
         $configuration->updateDateRange();
-
-
         $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
 
         // this is it!
