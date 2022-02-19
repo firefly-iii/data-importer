@@ -57,6 +57,7 @@ class ApiSubmitter
     private Configuration $configuration;
     private array         $mapping;
     private bool          $createdTag;
+    private array         $accountInfo;
 
     /**
      * @param array $lines
@@ -320,9 +321,9 @@ class ApiSubmitter
                     // replace destination_name with destination_id
                     $destination = $transaction['destination_name'] ?? '';
                     if (array_key_exists($destination, $this->mapping[0])) {
-                        unset($line['transactions'][$index]['destination_name']);
-                        unset($line['transactions'][$index]['destination_iban']);
-                        $line['transactions'][$index]['destination_id'] = $this->mapping[0][$destination];
+                        unset($transaction['destination_name']);
+                        unset($transaction['destination_iban']);
+                        $transaction['destination_id'] = $this->mapping[0][$destination];
                         app('log')->debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
                     }
                 }
@@ -330,12 +331,13 @@ class ApiSubmitter
                     // replace source_name with source_id
                     $source = $transaction['source_name'] ?? '';
                     if (array_key_exists($source, $this->mapping[0])) {
-                        unset($line['transactions'][$index]['source_name']);
-                        unset($line['transactions'][$index]['source_iban']);
-                        $line['transactions'][$index]['source_id'] = $this->mapping[0][$source];
+                        unset($transaction['source_name']);
+                        unset($transaction['source_iban']);
+                        $transaction['source_id'] = $this->mapping[0][$source];
                         app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
+                $line['transactions'][$index] = $this->updateTransactionType($transaction);
             }
         }
         return $line;
@@ -492,5 +494,35 @@ class ApiSubmitter
         }
         app('log')->debug('This is not a duplicate transaction error');
         return false;
+    }
+
+    /**
+     * @param array $accountInfo
+     */
+    public function setAccountInfo(array $accountInfo): void
+    {
+        $this->accountInfo = $accountInfo;
+    }
+
+    /**
+     * @param array $transaction
+     * @return array
+     */
+    private function updateTransactionType(array $transaction): array
+    {
+        if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
+            app('log')->debug('Transaction has source_id/destination_id');
+            $sourceId        = (int) $transaction['source_id'];
+            $destinationId   = (int) $transaction['destination_id'];
+            $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
+            $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
+            $combi           = sprintf('%s-%s', $sourceType, $destinationType);
+            app('log')->debug(sprintf('Account type combination is "%s"', $combi));
+            if ('asset-asset' === $combi) {
+                app('log')->debug('Both accounts are assets, so this transaction is a transfer.');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        return $transaction;
     }
 }

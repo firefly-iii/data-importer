@@ -119,56 +119,48 @@ class GenerateTransactions
         $spectreAccountId = $entry->getAccountId();
         $madeOn           = $entry->getMadeOn()->toW3cString();
         $amount           = $entry->getAmount();
-        $return           = [
+
+        $transaction = [
+            'type'              => 'withdrawal', // reverse
+            'date'              => str_replace('T', ' ', substr($madeOn, 0, 19)),
+            'datetime'          => $madeOn, // not used in API, only for transaction filtering.
+            'amount'            => 0,
+            'description'       => $description,
+            'order'             => 0,
+            'currency_code'     => $entry->getCurrencyCode(),
+            'tags'              => [$entry->getMode(), $entry->getStatus(), $entry->getCategory()],
+            'category_name'     => $entry->getCategory(),
+            'category_id'       => $this->configuration->getMapping()['categories'][$entry->getCategory()] ?? null,
+            'external_id'       => $entry->getId(),
+            'interal_reference' => $entry->getAccountId(),
+        ];
+
+        $return = [
             'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [
-                [
-                    'type'          => 'withdrawal', // reverse
-                    'date'          => str_replace('T', ' ', substr($madeOn, 0, 19)),
-                    'datetime'      => $madeOn, // not used in API, only for transaction filtering.
-                    'amount'        => 0,
-                    'description'   => $description,
-                    'order'         => 0,
-                    'currency_code' => $entry->getCurrencyCode(),
-                    'tags'          => [$entry->getMode(), $entry->getStatus(), $entry->getCategory()],
-                    'category_name' => $entry->getCategory(),
-                    'category_id'   => $this->configuration->getMapping()['categories'][$entry->getCategory()] ?? null,
-                ],
-            ],
+            'transactions'            => [],
         ];
-        if ($this->configuration->isIgnoreSpectreCategories()) {
-            app('log')->debug('Remove Spectre categories + tags.');
-            unset($return['transactions'][0]['tags'], $return['transactions'][0]['category_name'], $return['transactions'][0]['category_id']);
-        }
-        // save meta:
-        $return['transactions'][0]['external_id']        = $entry->getId();
-        $return['transactions'][0]['internal_reference'] = $entry->getAccountId();
 
+        if ($this->configuration->isIgnoreSpectreCategories()) {
+            app('log')->debug('Remove Spectre categories and tags.');
+            unset($transaction['tags']);
+            unset($transaction['category_name']);
+            unset($transaction['category_id']);
+        }
+
+        // amount is positive?
         if (1 === bccomp($amount, '0')) {
             app('log')->debug('Amount is positive: assume transfer or deposit.');
-            // amount is positive: deposit or transfer. Spectre account is destination
-            $return['transactions'][0]['type']   = 'deposit';
-            $return['transactions'][0]['amount'] = $amount;
-
-            // destination is Spectre
-            $return['transactions'][0]['destination_id'] = (int) $this->accounts[$spectreAccountId];
-
-            // source is the other side:
-            $return['transactions'][0]['source_name'] = $entry->getPayee('source');
+            $transaction = $this->processPositiveTransaction($entry, $transaction, $amount, $spectreAccountId);
         }
 
         if (-1 === bccomp($amount, '0')) {
-            // amount is negative: withdrawal or transfer.
             app('log')->debug('Amount is negative: assume transfer or withdrawal.');
-            $return['transactions'][0]['amount'] = bcmul($amount, '-1');
-
-            // source is Spectre:
-            $return['transactions'][0]['source_id'] = (int) $this->accounts[$spectreAccountId];
-            // dest is shop
-            $return['transactions'][0]['destination_name'] =$entry->getPayee('destination');
-
+            $transaction = $this->processNegativeTransaction($entry, $transaction, $amount, $spectreAccountId);
         }
+
+        $return['transactions'][] = $transaction;
+
         app('log')->debug(sprintf('Parsed Spectre transaction #%d', $entry->getId()));
 
         return $return;
@@ -181,5 +173,51 @@ class GenerateTransactions
     {
         $this->configuration = $configuration;
         $this->accounts      = $configuration->getAccounts();
+    }
+
+    /**
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
+     * @return array
+     */
+    private function processPositiveTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
+    {
+
+        // amount is positive: deposit or transfer. Spectre account is destination
+        $transaction['type']   = 'deposit';
+        $transaction['amount'] = $amount;
+
+        // destination is Spectre
+        $transaction['destination_id'] = (int) $this->accounts[$spectreAccountId];
+
+        // source is the other side (name!)
+        $transaction['source_name'] = $entry->getPayee('source');
+
+        app('log')->debug(sprintf('source_name = "%s", destination_id = %d', $transaction['source_name'], $transaction['destination_id']));
+
+        return $transaction;
+    }
+
+    /**
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
+     * @return array
+     */
+    private function processNegativeTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
+    {
+        // amount is negative: withdrawal or transfer.
+        $transaction['amount'] = bcmul($amount, '-1');
+
+        // source is Spectre:
+        $transaction['source_id'] = (int) $this->accounts[$spectreAccountId];
+        // dest is shop
+        $transaction['destination_name'] = $entry->getPayee('destination');
+
+        app('log')->debug(sprintf('source_id = %d, destination_name = "%s"', $transaction['source_id'], $transaction['destination_name']));
+        return $transaction;
     }
 }

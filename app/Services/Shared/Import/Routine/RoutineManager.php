@@ -33,6 +33,7 @@ use App\Services\Shared\Configuration\Configuration;
  */
 class RoutineManager
 {
+    private InfoCollector $infoCollector;
     private ApiSubmitter $apiSubmitter;
     private array        $transactions;
     private string       $identifier;
@@ -63,9 +64,11 @@ class RoutineManager
      */
     public function setConfiguration(Configuration $configuration): void
     {
+        $this->infoCollector = new InfoCollector;
         $this->apiSubmitter = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
+
         app('log')->debug('Created APISubmitter in RoutineManager');
     }
 
@@ -75,8 +78,14 @@ class RoutineManager
      */
     public function start(): void
     {
+        app('log')->debug('Start of shared import routine.');
+
+        app('log')->debug('First collect account information from Firefly III.');
+        $accountInfo = $this->infoCollector->collectAccountTypes();
+
         app('log')->debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
+        $this->apiSubmitter->setAccountInfo($accountInfo);
         $this->apiSubmitter->processTransactions($this->transactions);
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
