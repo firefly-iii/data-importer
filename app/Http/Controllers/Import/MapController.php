@@ -257,7 +257,7 @@ class MapController extends Controller
         $total    = count($array);
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            app('log')->debug(sprintf('[%s/%s] Parsing transaction (1)', ($index + 1), $total));
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
                 $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
@@ -297,7 +297,7 @@ class MapController extends Controller
         $total      = count($array);
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction', ($index + 1), $total));
+            app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', ($index + 1), $total));
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
                 $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';

@@ -185,7 +185,7 @@ class GenerateTransactions
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
-                app('log')->debug(sprintf('[%d/%d] Parsing transaction.', ($index + 1), $total));
+                app('log')->debug(sprintf('[%d/%d] Parsing transaction (3)', ($index + 1), $total));
                 $return[] = $this->generateTransaction($accountId, $entry);
                 app('log')->debug(sprintf('[%d/%d] Done parsing transaction.', ($index + 1), $total));
             }
