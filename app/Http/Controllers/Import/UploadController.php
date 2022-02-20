@@ -244,12 +244,20 @@ class UploadController extends Controller
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
             // process the config file
+            $success = false;
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+                $success = true;
             } catch (ImporterErrorException $e) {
                 $errors->add('config_file', $e->getMessage());
             }
+            // if conversion of the config file was a success, store the new version again:
+            if (true === $success) {
+                $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+            }
+
         }
         return $errors;
     }
