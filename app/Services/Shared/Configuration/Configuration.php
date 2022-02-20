@@ -330,13 +330,9 @@ class Configuration
 
         // loop roles from classic file:
         $roles = $data['column-roles'] ?? [];
-        app('log')->debug(sprintf('There are %d roles in the array.', count($roles)));
         foreach ($roles as $index => $role) {
             // some roles have been given a new name some time in the past.
-            $role = $classicRoleNames[$role] ?? $role;
-
-            app('log')->debug(sprintf('Role #%d is "%s".', $index, $role));
-
+            $role   = $classicRoleNames[$role] ?? $role;
             $config = config(sprintf('csv.import_roles.%s', $role));
             if (null !== $config) {
                 $object->roles[$index] = $role;
