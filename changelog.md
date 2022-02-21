@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.0 - 2022-02-22
+
+- ⚠️ This release WILL create duplicate transactions. Don't import large batches!
+
+### Added
+- Add command to upgrade import configurations.
+
+### Changed
+- Stop logging stack traces to prevent logs from filling up.
+- ⚠️ Don't submit unused `amount_modifier` field
+
+### Fixed
+- Better error catching in configuration controller and other places.
+- Sanity check to prevent the importer from treating JSON files as CSV files.
+- [Issue 5731](https://github.com/firefly-iii/firefly-iii/issues/5731) Could not import transfers from Spectre
+- [Issue 5735](https://github.com/firefly-iii/firefly-iii/issues/5735) Better support for old import configuration files
+
 ## 0.8.0 - 2022-02-07
 
 - ⚠️ Using Nordigen? This release WILL create duplicate transactions. Don't import large batches.
