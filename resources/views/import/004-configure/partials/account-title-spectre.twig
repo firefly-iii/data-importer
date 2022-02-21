@@ -1,8 +1,12 @@
+
+
+
 <input
     id="do_import_{{ information.import_service.id }}"
     type="checkbox"
     name="do_import[{{ information.import_service.id }}]"
     value="1"
+    {% if 0 != configuration.getAccounts[information.import_service.id] %}checked="checked"{% endif %}
     aria-describedby="accountsHelp"
     {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
 /> <label class="form-check-label"

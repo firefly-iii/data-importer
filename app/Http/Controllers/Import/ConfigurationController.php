@@ -118,8 +118,8 @@ class ConfigurationController extends Controller
         }
 
         // get list of asset accounts:
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
         $fireflyAccounts = 0;
 
         $request = new GetAccountsRequest($url, $token);
@@ -177,7 +177,7 @@ class ConfigurationController extends Controller
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'fireflyAccounts','accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
+            compact('mainTitle', 'subTitle', 'fireflyAccounts', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
         );
     }
 
@@ -206,8 +206,7 @@ class ConfigurationController extends Controller
         /** @var ListAccountsResponse $response */
         try {
             $response = $request->get();
-        } catch (ImporterErrorException $e) {
-        } catch (ImporterHttpException $e) {
+        } catch (ImporterErrorException | ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         $total  = count($response);

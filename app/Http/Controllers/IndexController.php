@@ -118,6 +118,7 @@ class IndexController extends Controller
             ];
             return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
+        app('log')->debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
         return redirect(route('index'));
     }
 

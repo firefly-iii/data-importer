@@ -123,6 +123,7 @@ class Transaction
      */
     public function getAccountId(): string
     {
+        app('log')->debug(sprintf('Get getAccountId(): "%s"', $this->accountId));
         return $this->accountId;
     }
 

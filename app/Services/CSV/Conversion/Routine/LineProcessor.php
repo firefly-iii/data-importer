@@ -80,7 +80,7 @@ class LineProcessor
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
                 app('log')->error($e->getMessage());
-                app('log')->error($e->getTraceAsString());
+//                app('log')->error($e->getTraceAsString());
                 $this->addError(0, $e->getMessage());
             }
         }

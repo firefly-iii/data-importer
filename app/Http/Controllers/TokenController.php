@@ -68,7 +68,7 @@ class TokenController extends Controller
         $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        if ($state !== $request->state) {
+        if ($state !== (string) $request->state) {
             app('log')->error(sprintf('State according to session: "%s"', $state));
             app('log')->error(sprintf('State returned in request : "%s"', $request->state));
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
@@ -100,7 +100,7 @@ class TokenController extends Controller
                 $body = (string) $e->getResponse()->getBody();
                 app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
                 app('log')->error(sprintf('Response from server: "%s"', $body));
-                app('log')->error($e->getTraceAsString());
+                //app('log')->error($e->getTraceAsString());
             }
 
             return view('error')->with('message', $e->getMessage())->with('body', $body);
@@ -111,7 +111,7 @@ class TokenController extends Controller
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             app('log')->error(sprintf('Response from server: "%s"', (string) $response->getBody()));
-            app('log')->error($e->getTraceAsString());
+            //app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
         app('log')->debug('Response', $data);

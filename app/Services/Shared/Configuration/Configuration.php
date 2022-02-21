@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Configuration;
 
 use Carbon\Carbon;
+use DateTimeInterface;
 use UnexpectedValueException;
 
 
@@ -277,24 +278,24 @@ class Configuration
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'csv';
 
-        // other settings
+        // other settings (are not in v1 anyway)
         $object->dateRange       = $data['date_range'] ?? 'all';
         $object->dateRangeNumber = $data['date_range_number'] ?? 30;
         $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
         $object->dateNotBefore   = $data['date_not_before'] ?? '';
         $object->dateNotAfter    = $data['date_not_after'] ?? '';
 
-        // spectre
+        // spectre settings (are not in v1 anyway)
         $object->identifier              = $data['identifier'] ?? '0';
         $object->connection              = $data['connection'] ?? '0';
         $object->ignoreSpectreCategories = $data['ignore_spectre_categories'] ?? false;
 
-        // nordigen information:
+        // nordigen settings (are not in v1 anyway)
         $object->nordigenCountry      = $data['nordigen_country'] ?? '';
         $object->nordigenBank         = $data['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $data['nordigen_requisitions'] ?? [];
 
-        // settings for spectre + nordigen
+        // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData = $data['map_all_data'] ?? false;
         $object->accounts   = $data['accounts'] ?? [];
 
@@ -330,15 +331,18 @@ class Configuration
 
         // loop roles from classic file:
         $roles = $data['column-roles'] ?? [];
-        foreach ($roles as $role) {
+        foreach ($roles as $index => $role) {
             // some roles have been given a new name some time in the past.
-            $role = $classicRoleNames[$role] ?? $role;
-
+            $role   = $classicRoleNames[$role] ?? $role;
             $config = config(sprintf('csv.import_roles.%s', $role));
             if (null !== $config) {
-                $object->roles[] = $role;
+                $object->roles[$index] = $role;
+            }
+            if (null === $config) {
+                app('log')->warn(sprintf('There is no config for "%s"!', $role));
             }
         }
+        ksort($object->roles);
 
         // loop do mapping from classic file.
         $doMapping = $data['column-do-mapping'] ?? [];
@@ -346,6 +350,7 @@ class Configuration
             $index                     = (int) $index;
             $object->doMapping[$index] = $map;
         }
+        ksort($object->doMapping);
 
         // loop mapping from classic file.
         $mapping = $data['column-mapping-config'] ?? [];
@@ -353,8 +358,10 @@ class Configuration
             $index                   = (int) $index;
             $object->mapping[$index] = $map;
         }
-        // set version to "2" and return.
-        $object->version = 2;
+        ksort($object->mapping);
+
+        // set version to latest version and return.
+        $object->version = self::VERSION;
 
         return $object;
     }
@@ -376,7 +383,6 @@ class Configuration
      */
     public static function fromArray(array $array): self
     {
-        $version                = $array['version'] ?? 1;
         $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->headers        = $array['headers'] ?? false;
@@ -389,8 +395,13 @@ class Configuration
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->version        = $version;
+        $object->version        = self::VERSION;
         $object->flow           = $array['flow'] ?? 'csv';
+
+        // sort
+        ksort($object->doMapping);
+        ksort($object->mapping);
+        ksort($object->roles);
 
         // settings for spectre + nordigen
         $object->mapAllData = $array['map_all_data'] ?? false;
@@ -530,6 +541,9 @@ class Configuration
     public function toArray(): array
     {
         $array = [
+            'version'                       => $this->version,
+            'source'                        => sprintf('fidi-%s', config('importer.version')),
+            'created_at'                    => date(DateTimeInterface::W3C),
             'date'                          => $this->date,
             'default_account'               => $this->defaultAccount,
             'delimiter'                     => $this->delimiter,
@@ -545,7 +559,6 @@ class Configuration
             'ignore_duplicate_transactions' => $this->ignoreDuplicateTransactions,
             'unique_column_index'           => $this->uniqueColumnIndex,
             'unique_column_type'            => $this->uniqueColumnType,
-            'version'                       => $this->version,
             'flow'                          => $this->flow,
 
             // spectre

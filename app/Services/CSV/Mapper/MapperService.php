@@ -59,7 +59,7 @@ class MapperService
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+//            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 

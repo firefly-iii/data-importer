@@ -1,7 +1,8 @@
 <?php
+
 /*
- * TransactionCurrencies.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * InfoCollector.php
+ * Copyright (c) 2022 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -22,49 +23,46 @@
 
 declare(strict_types=1);
 
-namespace App\Services\CSV\Mapper;
+namespace App\Services\Shared\Import\Routine;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
-use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
-use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;
+use GrumpyDictator\FFIIIApiSupport\Model\Account;
+use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 
 /**
- * Class TransactionCurrencies
+ * Class InfoCollector
  */
-class TransactionCurrencies implements MapperInterface
+class InfoCollector
 {
 
     /**
-     * Get map of objects.
+     * Collect various accounts from Firefly III and save the account type.
+     *
+     * Will be used in mapping routine.
      *
      * @return array
-     * @throws ImporterErrorException
      */
-    public function getMap(): array
+    public function collectAccountTypes(): array
     {
-        $result = [];
+        app('log')->debug('Now in collectAccountTypes()');
+        // get list of asset accounts:
         $url    = SecretManager::getBaseUrl();
         $token  = SecretManager::getAccessToken();
+        $return = [];
+        $count  = 0;
 
-        $request = new GetCurrenciesRequest($url, $token);
+        $request = new GetAccountsRequest($url, $token);
+        $request->setType(GetAccountsRequest::ALL);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
+        $response = $request->get();
 
-        try {
-            $response = $request->get();
-        } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
-            throw new ImporterErrorException(sprintf('Could not download currencies: %s', $e->getMessage()));
+        /** @var Account $account */
+        foreach ($response as $account) {
+            $return[$account->id] = $account->type;
+            $count++;
         }
-        /** @var TransactionCurrency $currency */
-        foreach ($response as $currency) {
-            $result[$currency->id] = sprintf('%s (%s)', $currency->name, $currency->code);
-        }
-        asort($result, SORT_STRING);
-
-        return $result;
+        app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
+        return $return;
     }
 }

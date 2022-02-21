@@ -141,7 +141,7 @@ abstract class Request
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this
-            app('log')->error(sprintf('Status code is %d', $res->getStatusCode()));
+            app('log')->error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
             $body = (string) $res->getBody();
         }
@@ -162,7 +162,7 @@ abstract class Request
         }
 
         if (null === $json) {
-            throw new ImporterHttpException(sprintf('Body is empty. Status code is %d.', $res->getStatusCode()));
+            throw new ImporterHttpException(sprintf('Body is empty. [4] Status code is %d.', $res->getStatusCode()));
         }
 
         return $json;
