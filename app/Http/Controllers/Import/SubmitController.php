@@ -106,6 +106,12 @@ class SubmitController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
+        if(null === $identifier) {
+            app('log')->error('Identifier is NULL');
+            $status = new SubmissionStatus;
+            $status->status = SubmissionStatus::SUBMISSION_ERRORED;
+            return response()->json($status->toArray());
+        }
         $configuration   = $this->restoreConfiguration();
         $routine         = new RoutineManager($identifier);
         $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);

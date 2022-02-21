@@ -372,6 +372,11 @@ trait IsReadyForStep
                 $route = route('003-upload.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
+            case 'submit':
+                // return back to conversion:
+                $route = route('007-convert.index');
+                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                return redirect($route);
         }
     }
 
