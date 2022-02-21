@@ -73,7 +73,7 @@ class UpgradeImportConfigurations extends Command
     }
 
     /**
-     * @param string      $name
+     * @param string $name
      */
     private function processFile(string $name): void
     {
@@ -86,8 +86,10 @@ class UpgradeImportConfigurations extends Command
             $this->error('File does not contain valid JSON. Skipped.');
             return;
         }
-        $configuration = Configuration::fromFile(json_decode($content, true));
-        $newJson       = $configuration->toArray();
+        $configuration              = Configuration::fromFile(json_decode($content, true));
+        $newJson                    = $configuration->toArray();
+        $newJson['mapping']         = [];
+        $newJson['default_account'] = 0;
         file_put_contents($name, json_encode($newJson, JSON_PRETTY_PRINT));
     }
 

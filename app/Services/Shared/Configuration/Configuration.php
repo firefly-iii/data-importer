@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Configuration;
 
 use Carbon\Carbon;
+use DateTimeInterface;
 use UnexpectedValueException;
 
 
@@ -341,7 +342,7 @@ class Configuration
                 app('log')->warn(sprintf('There is no config for "%s"!', $role));
             }
         }
-        $object->roles = array_values($object->roles);
+        ksort($object->roles);
 
         // loop do mapping from classic file.
         $doMapping = $data['column-do-mapping'] ?? [];
@@ -349,6 +350,7 @@ class Configuration
             $index                     = (int) $index;
             $object->doMapping[$index] = $map;
         }
+        ksort($object->doMapping);
 
         // loop mapping from classic file.
         $mapping = $data['column-mapping-config'] ?? [];
@@ -356,6 +358,8 @@ class Configuration
             $index                   = (int) $index;
             $object->mapping[$index] = $map;
         }
+        ksort($object->mapping);
+
         // set version to latest version and return.
         $object->version = self::VERSION;
 
@@ -379,7 +383,6 @@ class Configuration
      */
     public static function fromArray(array $array): self
     {
-        $version                = $array['version'] ?? 1;
         $delimiters             = config('csv.delimiters_reversed');
         $object                 = new self;
         $object->headers        = $array['headers'] ?? false;
@@ -392,8 +395,13 @@ class Configuration
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->version        = $version;
+        $object->version        = self::VERSION;
         $object->flow           = $array['flow'] ?? 'csv';
+
+        // sort
+        ksort($object->doMapping);
+        ksort($object->mapping);
+        ksort($object->roles);
 
         // settings for spectre + nordigen
         $object->mapAllData = $array['map_all_data'] ?? false;
@@ -535,6 +543,7 @@ class Configuration
         $array = [
             'version'                       => $this->version,
             'source'                        => sprintf('fidi-%s', config('importer.version')),
+            'created_at'                    => date(DateTimeInterface::W3C),
             'date'                          => $this->date,
             'default_account'               => $this->defaultAccount,
             'delimiter'                     => $this->delimiter,
