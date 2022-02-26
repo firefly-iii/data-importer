@@ -1,7 +1,7 @@
 <?php
 /*
  * PostNewRequisitionRequest.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2022 https://github.com/krehl
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -34,8 +34,8 @@ use App\Services\Shared\Response\Response;
 class PostNewUserAgreement extends Request
 {
     private string $bank;
-    private string $max_historical_days;
-    private string $access_valid_for_days;
+    private string $maxHistoricalDays;
+    private string $accessValidForDays;
 
     public function __construct(string $url, string $token)
     {
@@ -43,9 +43,9 @@ class PostNewUserAgreement extends Request
         $this->setBase($url);
         $this->setToken($token);
         $this->setUrl('api/v2/agreements/enduser/');
-        $this->max_historical_days = '';
-        $this->access_valid_for_days = '';
-        $this->bank = '';
+        $this->maxHistoricalDays  = '';
+        $this->accessValidForDays = '';
+        $this->bank               = '';
     }
 
     /**
@@ -57,19 +57,19 @@ class PostNewUserAgreement extends Request
     }
 
     /**
-     * @param string $max_historical_days
+     * @param string $maxHistoricalDays
      */
-    public function setMaxHistoricalDays(string $max_historical_days): void
+    public function setMaxHistoricalDays(string $maxHistoricalDays): void
     {
-        $this->max_historical_days = $max_historical_days;
+        $this->maxHistoricalDays = $maxHistoricalDays;
     }
 
     /**
-     * @param string $access_valid_for_days
+     * @param string $accessValidForDays
      */
-    public function setAccessValidForDays(string $access_valid_for_days): void
+    public function setAccessValidForDays(string $accessValidForDays): void
     {
-        $this->access_valid_for_days = $access_valid_for_days;
+        $this->accessValidForDays = $accessValidForDays;
     }
 
     /**
@@ -88,9 +88,9 @@ class PostNewUserAgreement extends Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array =
             [
-                'institution_id' => $this->bank,
-                'max_historical_days'      => $this->max_historical_days,
-                'access_valid_for_days'     => $this->access_valid_for_days,
+                'institution_id'        => $this->bank,
+                'max_historical_days'   => $this->maxHistoricalDays,
+                'access_valid_for_days' => $this->accessValidForDays,
             ];
 
         $result = $this->authenticatedJsonPost($array);

@@ -1,7 +1,7 @@
 <?php
 /*
  * NewRequisitionResponse.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2022 https://github.com/krehl
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -35,19 +35,17 @@ class NewUserAgreementResponse extends Response
 
     public string $id;
     public string $created;
-    public int $max_historical_days;
-    #public string $accepted;
-    public string $institution_id;
+    public int    $maxHistoricalDays;
+    public string $institutionId;
 
     /**
      * @inheritDoc
      */
     public function __construct(array $data)
     {
-        $this->id        = $data['id'];
-        $this->created  = $data['created'];
-        $this->max_historical_days    = $data['max_historical_days'];
-        #$this->accepted      = $data['accepted'];
-        $this->institution_id      = $data['institution_id'];
+        $this->id                = $data['id'];
+        $this->created           = $data['created'];
+        $this->maxHistoricalDays = $data['max_historical_days'];
+        $this->institutionId    = $data['institution_id'];
     }
 }
