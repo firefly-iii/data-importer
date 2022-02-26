@@ -96,12 +96,12 @@ class LinkController extends Controller
         $uuid        = (string) Uuid::uuid4()->toString();
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
+
         $agreementRequest = new PostNewUserAgreement($url, $accessToken);
         $agreementRequest->setBank($configuration->getNordigenBank());
         $agreementRequest->setAccessValidForDays("90");
-        $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays()); #TODO
+        $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
         $agreementResponse = $agreementRequest->post();
-
 
         $request     = new PostNewRequisitionRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
