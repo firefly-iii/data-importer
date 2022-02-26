@@ -31,6 +31,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\LinkControllerMiddleware;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
+use App\Services\Nordigen\Request\PostNewUserAgreement;
+use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
@@ -94,10 +96,18 @@ class LinkController extends Controller
         $uuid        = (string) Uuid::uuid4()->toString();
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
+        $agreementRequest = new PostNewUserAgreement($url, $accessToken);
+        $agreementRequest->setBank($configuration->getNordigenBank());
+        $agreementRequest->setAccessValidForDays("90");
+        $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays()); #TODO
+        $agreementResponse = $agreementRequest->post();
+
+
         $request     = new PostNewRequisitionRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
+        $request->setAgreement($agreementResponse->id);
 
         app('log')->debug(sprintf('Reference is "%s"', $uuid));
 
@@ -113,7 +123,6 @@ class LinkController extends Controller
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
         return redirect($response->link);
-
     }
 
     /**
@@ -130,7 +139,7 @@ class LinkController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         app('log')->debug(sprintf('Reference is "%s"', $reference));
 
-        if('' === $reference) {
+        if ('' === $reference) {
             throw new ImporterHttpException('The reference returned by Nordigen was unexpectedly empty.');
         }
 

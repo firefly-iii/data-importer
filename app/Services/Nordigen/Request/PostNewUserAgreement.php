@@ -25,26 +25,27 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
-use App\Services\Nordigen\Response\NewRequisitionResponse;
+use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Shared\Response\Response;
 
 /**
- * Class PostNewRequisitionRequest
+ * Class PostNewUserAgreement
  */
-class PostNewRequisitionRequest extends Request
+class PostNewUserAgreement extends Request
 {
     private string $bank;
-    private string $reference;
-    private string $agreement;
+    private string $max_historical_days;
+    private string $access_valid_for_days;
 
     public function __construct(string $url, string $token)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
-        $this->setUrl('api/v2/requisitions/');
-        $this->reference = '';
-        $this->agreement = '';
+        $this->setUrl('api/v2/agreements/enduser/');
+        $this->max_historical_days = '';
+        $this->access_valid_for_days = '';
+        $this->bank = '';
     }
 
     /**
@@ -56,19 +57,19 @@ class PostNewRequisitionRequest extends Request
     }
 
     /**
-     * @param string $reference
+     * @param string $max_historical_days
      */
-    public function setReference(string $reference): void
+    public function setMaxHistoricalDays(string $max_historical_days): void
     {
-        $this->reference = $reference;
+        $this->max_historical_days = $max_historical_days;
     }
 
     /**
-     * @param string $agreement
+     * @param string $access_valid_for_days
      */
-    public function setAgreement(string $agreement): void
+    public function setAccessValidForDays(string $access_valid_for_days): void
     {
-        $this->agreement = $agreement;
+        $this->access_valid_for_days = $access_valid_for_days;
     }
 
     /**
@@ -87,15 +88,14 @@ class PostNewRequisitionRequest extends Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array =
             [
-                'redirect'       => route('010-build-link.callback'),
                 'institution_id' => $this->bank,
-                'reference'      => $this->reference,
-                'agreement'     => $this->agreement,
+                'max_historical_days'      => $this->max_historical_days,
+                'access_valid_for_days'     => $this->access_valid_for_days,
             ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
-        return new NewRequisitionResponse($result);
+        return new NewUserAgreementResponse($result);
     }
 
     /**
