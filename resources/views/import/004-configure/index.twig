@@ -93,10 +93,12 @@
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="flow" value="{{ flow }}"/>
+
             <!-- these values are used by Spectre + Nordigen and must be preserved -->
             <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>
             <input type="hidden" name="connection" value="{{ configuration.getConnection }}"/>
             <input type="hidden" name="nordigen_country" value="{{ configuration.getNordigenCountry }}"/>
+            <input type="hidden" name="nordigen_max_days" value="{{ configuration.getNordigenMaxDays }}"/>
             <input type="hidden" name="nordigen_bank" value="{{ configuration.getNordigenBank }}"/>
             <input type="hidden" name="nordigen_requisitions"
                    value="{{ configuration.getNordigenRequisitions|json_encode }}"/>
