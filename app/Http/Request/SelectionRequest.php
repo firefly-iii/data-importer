@@ -54,6 +54,7 @@ class SelectionRequest extends Request
         return [
             'country' => 'required|not_in:XX',
             'bank_*'  => 'required',
+            'days'    => 'required|numeric|between:1,1000',
         ];
     }
 
