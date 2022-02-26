@@ -38,7 +38,7 @@ class SelectionRequest extends Request
     public function getAll(): array
     {
         $country = $this->get('country');
-        $days = $this->get('days');
+        $days    = $this->get('days');
         return [
             'country' => $country,
             'bank'    => $this->get(sprintf('bank_%s', $country)),

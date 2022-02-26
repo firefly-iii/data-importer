@@ -90,7 +90,7 @@ class PostNewRequisitionRequest extends Request
                 'redirect'       => route('010-build-link.callback'),
                 'institution_id' => $this->bank,
                 'reference'      => $this->reference,
-                'agreement'     => $this->agreement,
+                'agreement'      => $this->agreement,
             ];
 
         $result = $this->authenticatedJsonPost($array);
