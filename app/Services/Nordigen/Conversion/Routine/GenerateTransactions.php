@@ -241,7 +241,7 @@ class GenerateTransactions
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
         $return['transactions'][] = $transaction;
-        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId));
+        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $transaction);
 
 
         return $return;
