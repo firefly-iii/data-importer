@@ -79,6 +79,7 @@ class TransactionProcessor
             $accessToken = TokenManager::getAccessToken();
             $url         = config('nordigen.url');
             $request     = new GetTransactionsRequest($url, $accessToken, $account);
+            $request->setTimeOut(config('importer.connection.timeout'));
             /** @var GetTransactionsResponse $transactions */
             try {
                 $transactions = $request->get();

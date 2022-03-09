@@ -203,6 +203,7 @@ class ConfigurationController extends Controller
         $accessToken = TokenManager::getAccessToken();
         $url         = config('nordigen.url');
         $request     = new ListAccountsRequest($url, $identifier, $accessToken);
+        $request->setTimeOut(config('importer.connection.timeout'));
         /** @var ListAccountsResponse $response */
         try {
             $response = $request->get();

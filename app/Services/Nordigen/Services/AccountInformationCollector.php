@@ -143,6 +143,7 @@ class AccountInformationCollector
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
+        $request->setTimeOut(config('importer.connection.timeout'));
         /** @var ArrayResponse $response */
         $response = $request->get();
 
@@ -163,6 +164,7 @@ class AccountInformationCollector
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
         $request     = new GetAccountBasicRequest($url, $accessToken, $account->getIdentifier());
+        $request->setTimeOut(config('importer.connection.timeout'));
         /** @var ArrayResponse $response */
         $response = $request->get();
         $array    = $response->data;

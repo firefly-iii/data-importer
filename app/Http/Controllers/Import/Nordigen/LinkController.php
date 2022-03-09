@@ -84,6 +84,7 @@ class LinkController extends Controller
             $accessToken = TokenManager::getAccessToken();
             $reference   = array_shift($requisitions);
             $request     = new GetRequisitionRequest($url, $accessToken, $reference);
+            $request->setTimeOut(config('importer.connection.timeout'));
             /** @var GetRequisitionResponse $result */
             $result = $request->get();
 
@@ -98,6 +99,7 @@ class LinkController extends Controller
         $accessToken = TokenManager::getAccessToken();
 
         $agreementRequest = new PostNewUserAgreement($url, $accessToken);
+        $agreementRequest->setTimeOut(config('importer.connection.timeout'));
         $agreementRequest->setBank($configuration->getNordigenBank());
         $agreementRequest->setAccessValidForDays("90");
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());

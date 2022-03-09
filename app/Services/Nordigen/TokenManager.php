@@ -151,6 +151,7 @@ class TokenManager
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $client = new PostNewTokenRequest($identifier, $key);
+        $client->setTimeOut(config('importer.connection.timeout'));
         /** @var TokenSetResponse $result */
         $result = $client->post();
 
