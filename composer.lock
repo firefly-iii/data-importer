@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f9b791138a0d58732f966419d3ab4cd",
+    "content-hash": "99625f3620776d4de2e0f0110a095685",
     "packages": [
         {
             "name": "brick/math",
@@ -3444,16 +3444,16 @@
         },
         {
             "name": "rcrowe/twigbridge",
-            "version": "v0.13.1",
+            "version": "v0.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rcrowe/TwigBridge.git",
-                "reference": "ea5b2e18caca6c341fb8ceff2ce8e4fddb77d0df"
+                "reference": "f4968efb99537cc1b37c5bf20280614aadc31825"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rcrowe/TwigBridge/zipball/ea5b2e18caca6c341fb8ceff2ce8e4fddb77d0df",
-                "reference": "ea5b2e18caca6c341fb8ceff2ce8e4fddb77d0df",
+                "url": "https://api.github.com/repos/rcrowe/TwigBridge/zipball/f4968efb99537cc1b37c5bf20280614aadc31825",
+                "reference": "f4968efb99537cc1b37c5bf20280614aadc31825",
                 "shasum": ""
             },
             "require": {
@@ -3514,9 +3514,9 @@
             ],
             "support": {
                 "issues": "https://github.com/rcrowe/TwigBridge/issues",
-                "source": "https://github.com/rcrowe/TwigBridge/tree/v0.13.1"
+                "source": "https://github.com/rcrowe/TwigBridge/tree/v0.14.0"
             },
-            "time": "2022-02-10T13:51:53+00:00"
+            "time": "2022-03-08T17:21:17+00:00"
         },
         {
             "name": "spatie/enum",
