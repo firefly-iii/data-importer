@@ -408,11 +408,11 @@ trait AutoImports
 
 
     /**
-     * @param string $csvFile
      * @param string $jsonFile
+     * @param null|string $csvFile
      * @throws ImporterErrorException
      */
-    private function importUpload(string $csvFile, string $jsonFile): void
+    private function importUpload(string $jsonFile, ?string $csvFile): void
     {
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
@@ -426,7 +426,7 @@ trait AutoImports
         $configuration->updateDateRange();
 
 
-        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
+        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
 
         // this is it!
         $this->startConversion($configuration, $csvFile);
