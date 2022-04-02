@@ -102,7 +102,7 @@ class GenerateTransactions
             $return[] = $this->generateTransaction($entry);
             // TODO error handling at this point.
         }
-        $this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));
+        //$this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));
 
         return $return;
     }
