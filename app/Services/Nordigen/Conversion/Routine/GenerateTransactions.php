@@ -191,7 +191,7 @@ class GenerateTransactions
                 app('log')->debug(sprintf('[%d/%d] Done parsing transaction.', ($index + 1), $total));
             }
         }
-        $this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
+        //$this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
         app('log')->debug('Done parsing transactions.');
 
         return $return;
