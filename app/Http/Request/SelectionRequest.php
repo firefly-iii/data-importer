@@ -38,9 +38,11 @@ class SelectionRequest extends Request
     public function getAll(): array
     {
         $country = $this->get('country');
+        $days    = $this->get('days');
         return [
             'country' => $country,
             'bank'    => $this->get(sprintf('bank_%s', $country)),
+            'days'    => $days,
         ];
     }
 
@@ -52,6 +54,7 @@ class SelectionRequest extends Request
         return [
             'country' => 'required|not_in:XX',
             'bank_*'  => 'required',
+            'days'    => 'required|numeric|between:1,1000',
         ];
     }
 
@@ -78,5 +81,4 @@ class SelectionRequest extends Request
             }
         );
     }
-
 }

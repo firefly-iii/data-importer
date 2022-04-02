@@ -1,7 +1,7 @@
 <?php
 /*
  * PostNewRequisitionRequest.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2022 https://github.com/krehl
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -25,26 +25,27 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
-use App\Services\Nordigen\Response\NewRequisitionResponse;
+use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Shared\Response\Response;
 
 /**
- * Class PostNewRequisitionRequest
+ * Class PostNewUserAgreement
  */
-class PostNewRequisitionRequest extends Request
+class PostNewUserAgreement extends Request
 {
     private string $bank;
-    private string $reference;
-    private string $agreement;
+    private string $maxHistoricalDays;
+    private string $accessValidForDays;
 
     public function __construct(string $url, string $token)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
-        $this->setUrl('api/v2/requisitions/');
-        $this->reference = '';
-        $this->agreement = '';
+        $this->setUrl('api/v2/agreements/enduser/');
+        $this->maxHistoricalDays  = '';
+        $this->accessValidForDays = '';
+        $this->bank               = '';
     }
 
     /**
@@ -56,19 +57,19 @@ class PostNewRequisitionRequest extends Request
     }
 
     /**
-     * @param string $reference
+     * @param string $maxHistoricalDays
      */
-    public function setReference(string $reference): void
+    public function setMaxHistoricalDays(string $maxHistoricalDays): void
     {
-        $this->reference = $reference;
+        $this->maxHistoricalDays = $maxHistoricalDays;
     }
 
     /**
-     * @param string $agreement
+     * @param string $accessValidForDays
      */
-    public function setAgreement(string $agreement): void
+    public function setAccessValidForDays(string $accessValidForDays): void
     {
-        $this->agreement = $agreement;
+        $this->accessValidForDays = $accessValidForDays;
     }
 
     /**
@@ -87,15 +88,14 @@ class PostNewRequisitionRequest extends Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array =
             [
-                'redirect'       => route('010-build-link.callback'),
-                'institution_id' => $this->bank,
-                'reference'      => $this->reference,
-                'agreement'      => $this->agreement,
+                'institution_id'        => $this->bank,
+                'max_historical_days'   => $this->maxHistoricalDays,
+                'access_valid_for_days' => $this->accessValidForDays,
             ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
-        return new NewRequisitionResponse($result);
+        return new NewUserAgreementResponse($result);
     }
 
     /**

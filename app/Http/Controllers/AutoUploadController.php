@@ -67,11 +67,12 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
         }
 
-        $json = $request->file('json');
-        $csv  = $request->file('csv');
+        $json    = $request->file('json');
+        $csv     = $request->file('csv');
+        $csvPath = $csv?->getPathname();
 
         try {
-            $this->importUpload($csv->getPathname(), $json->getPathname());
+            $this->importUpload($json->getPathname(), $csvPath);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));

@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.1 - 2022-04-02
+
+### Added
+- There is an option to set the maximum days to import from Nordigen, thanks @krehl!
+- Importer will now report expired Nordigen User Agreements, thanks @MacPaille!
+
+### Fixed
+- [Issue 5871](https://github.com/firefly-iii/firefly-iii/issues/5871) Importer would ignore time-outs
+
 ## 0.9.0 - 2022-02-22
 
 - ⚠️ This release WILL create duplicate transactions. Don't import large batches!

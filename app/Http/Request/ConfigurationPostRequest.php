@@ -77,6 +77,7 @@ class ConfigurationPostRequest extends Request
             // nordigen:
             'nordigen_country'              => $this->string('nordigen_country'),
             'nordigen_bank'                 => $this->string('nordigen_bank'),
+            'nordigen_max_days'             => $this->string('nordigen_max_days'),
             'nordigen_requisitions'         => json_decode($this->string('nordigen_requisitions'), true) ?? [],
 
             // nordigen + spectre

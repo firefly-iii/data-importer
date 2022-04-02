@@ -78,12 +78,12 @@
         "doctrine/dbal": "^3.0",
         "fideloper/proxy": "^4.0",
         "firefly-iii/api-support-classes": "@dev",
-        "fruitcake/laravel-cors": "^2.0",
+        "fruitcake/laravel-cors": "^3.0",
         "guzzlehttp/guzzle": "^7.0",
         "laravel/framework": "^8.0",
         "laravel/tinker": "^2.0",
         "league/csv": "9.*",
-        "rcrowe/twigbridge": "^0.13.0",
+        "rcrowe/twigbridge": "^0.14.0",
         "spatie/enum": "^3.10"
     },
     "require-dev": {

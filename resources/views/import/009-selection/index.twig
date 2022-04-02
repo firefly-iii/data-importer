@@ -108,6 +108,7 @@
                     </div>
                 </div>
             {% endfor %}
+
             <div class="row mt-3 bank-box" id="XX-box" style="display: block;">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -122,9 +123,34 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row mt-3 bank-selected" style="display: none;">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card">
+                        <div class="card-header">
+                            Number of days to import
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label for="days" class="col-sm-3 col-form-label">Maximum days to import</label>
+                                <div class="col-sm-9">
+                                    <input name="days" class="form-control" step="1" min="1" id="days" type="number"
+                                           value="{{ configuration.getNordigenMaxDays }}"/>
+                                    <small id="daysHelp" class="form-text text-muted">
+                                        Be careful importing large amounts of data.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="row mt-3 submit-button" style="display: none;">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
+
                         <div class="card-header">
                             Submit!
                         </div>
@@ -150,24 +176,6 @@
             </div>
         </div>
     </div>
-
-
-    <!--
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <a href="{{ route('back.upload') }}" class="btn btn-secondary">&larr; Go back to
-                                    upload</a>
-                                <br>
-                                <small class="text-muted">Changes on this page will not be saved.</small>
-                            </div>
-                            <div class="col-lg-6">
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-    -->
 {% endblock %}
                 {% block scripts %}
                     <script type="text/javascript">
@@ -180,10 +188,14 @@
                         function showDayCounter() {
                             $('.bank-selected').show();
                             let val = $('#country').val();
-                            $('.days').text(($('#bank_' + val + ' option:selected').data('days')));
+
+                            let maxDays = parseInt($('#bank_' + val + ' option:selected').data('days'));
+
+                            $('.days').text(maxDays);
                         }
 
                         function selectCountry() {
+                            $('.bank-selected').hide();
                             var val = $('#country').val();
                             $('.country-code').text(val);
                             $('.bank-box').hide();

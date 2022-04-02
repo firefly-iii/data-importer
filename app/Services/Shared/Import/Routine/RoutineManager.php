@@ -34,12 +34,12 @@ use App\Services\Shared\Configuration\Configuration;
 class RoutineManager
 {
     private InfoCollector $infoCollector;
-    private ApiSubmitter $apiSubmitter;
-    private array        $transactions;
-    private string       $identifier;
-    private array        $allMessages;
-    private array        $allWarnings;
-    private array        $allErrors;
+    private ApiSubmitter  $apiSubmitter;
+    private array         $transactions;
+    private string        $identifier;
+    private array         $allMessages;
+    private array         $allWarnings;
+    private array         $allErrors;
 
     /**
      * @param string $identifier
@@ -48,6 +48,9 @@ class RoutineManager
     {
         $this->identifier   = $identifier;
         $this->transactions = [];
+        $this->allMessages  = [];
+        $this->allWarnings  = [];
+        $this->allErrors  = [];
     }
 
     /**
@@ -65,7 +68,7 @@ class RoutineManager
     public function setConfiguration(Configuration $configuration): void
     {
         $this->infoCollector = new InfoCollector;
-        $this->apiSubmitter = new ApiSubmitter;
+        $this->apiSubmitter  = new ApiSubmitter;
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
 

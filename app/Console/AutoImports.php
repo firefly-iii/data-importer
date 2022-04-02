@@ -345,11 +345,19 @@ trait AutoImports
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
             $message = sprintf('File "%s" could not be decoded, cannot continue..', $fileName);
             $this->error($message);
             SubmissionStatusManager::addError($this->identifier, 0, $message);
+            $this->importMessages = $routine->getAllMessages();
+            $this->importWarnings = $routine->getAllWarnings();
+            $this->importErrors   = $routine->getAllErrors();
+            return;
+        }
+        if (0 === count($transactions)) {
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);
+            app('log')->error('No transactions in array, there is nothing to import.');
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
@@ -408,11 +416,11 @@ trait AutoImports
 
 
     /**
-     * @param string $csvFile
-     * @param string $jsonFile
+     * @param string      $jsonFile
+     * @param null|string $csvFile
      * @throws ImporterErrorException
      */
-    private function importUpload(string $csvFile, string $jsonFile): void
+    private function importUpload(string $jsonFile, ?string $csvFile): void
     {
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
@@ -425,8 +433,7 @@ trait AutoImports
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
         $configuration->updateDateRange();
 
-
-        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
+        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
 
         // this is it!
         $this->startConversion($configuration, $csvFile);

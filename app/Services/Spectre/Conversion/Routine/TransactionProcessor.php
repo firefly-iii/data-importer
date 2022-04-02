@@ -74,6 +74,7 @@ class TransactionProcessor
             $appId                 = SpectreSecretManager::getAppId();
             $secret                = SpectreSecretManager::getSecret();
             $request               = new GetTransactionsRequest($url, $appId, $secret);
+            $request->setTimeOut(config('importer.connection.timeout'));
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
             /** @var GetTransactionsResponse $transactions */

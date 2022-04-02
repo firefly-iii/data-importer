@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
@@ -94,6 +95,7 @@ abstract class Request
      * @return array
      * @throws ImporterErrorException
      * @throws ImporterHttpException
+     * @throws AgreementExpiredException
      */
     protected function authenticatedGet(): array
     {
@@ -116,23 +118,27 @@ abstract class Request
                          ],
                      ]
             );
-        } catch (TransferException | GuzzleException $e) {
+        } catch (TransferException|GuzzleException $e) {
             app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
-            // if response, parse as error response
+
+            // if no response, parse as normal error response
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
+                die('here we are A');
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
             }
+
             $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string) $e->getResponse()->getBody();
-                try {
-                    $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-                } catch (JsonException $ee) {
-                    app('log')->error(sprintf('Could not decode error: %s', $ee->getMessage()));
-                    app('log')->error($body);
-                    //throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()), 0, $e);
-                }
+                $json = json_decode($body, true, 512) ?? [];
             }
+            if (array_key_exists('summary', $json) and str_ends_with($json['summary'], 'has expired')) {
+                $exception       = new AgreementExpiredException();
+                $exception->json = $json;
+                throw $exception;
+            }
+
+
             // if status code is 503, the account does not exist.
             $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
             $exception->json = $json;

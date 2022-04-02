@@ -146,6 +146,7 @@ class GenerateTransactions
             $set = [];
             // get account details
             $request = new GetAccountInformationRequest($url, $accessToken, $nordigenIdentifier);
+            $request->setTimeOut(config('importer.connection.timeout'));
             /** @var ArrayResponse $response */
             try {
                 $response = $request->get();
@@ -241,7 +242,7 @@ class GenerateTransactions
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
         $return['transactions'][] = $transaction;
-        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId));
+        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $transaction);
 
 
         return $return;

@@ -53,6 +53,7 @@ class Configuration
     private string $nordigenCountry;
     private string $nordigenBank;
     private array  $nordigenRequisitions;
+    private string $nordigenMaxDays;
 
     // spectre + nordigen configuration
     private array $accounts;
@@ -116,6 +117,7 @@ class Configuration
         $this->nordigenCountry      = '';
         $this->nordigenBank         = '';
         $this->nordigenRequisitions = [];
+        $this->nordigenMaxDays      = '90';
 
         // spectre + nordigen configuration
         $this->accounts = [];
@@ -188,6 +190,7 @@ class Configuration
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
         $object->nordigenBank         = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
 
         // spectre + nordigen
         $object->accounts = $array['accounts'] ?? [];
@@ -294,6 +297,7 @@ class Configuration
         $object->nordigenCountry      = $data['nordigen_country'] ?? '';
         $object->nordigenBank         = $data['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $data['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $data['nordigen_max_days'] ?? '90';
 
         // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData = $data['map_all_data'] ?? false;
@@ -424,6 +428,7 @@ class Configuration
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
         $object->nordigenBank         = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
@@ -583,6 +588,7 @@ class Configuration
             'nordigen_country'              => $this->nordigenCountry,
             'nordigen_bank'                 => $this->nordigenBank,
             'nordigen_requisitions'         => $this->nordigenRequisitions,
+            'nordigen_max_days'             => $this->nordigenMaxDays,
 
             // utf8
             'conversion'                    => $this->conversion,
@@ -801,6 +807,23 @@ class Configuration
     public function getNordigenBank(): string
     {
         return $this->nordigenBank;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getNordigenMaxDays(): string
+    {
+        return $this->nordigenMaxDays;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenMaxDays(string $nordigenMaxDays): void
+    {
+        $this->nordigenMaxDays = $nordigenMaxDays;
     }
 
     /**
