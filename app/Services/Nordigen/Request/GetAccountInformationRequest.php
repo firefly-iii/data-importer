@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Shared\Response\Response;
@@ -69,6 +70,7 @@ class GetAccountInformationRequest extends Request
     /**
      * @inheritDoc
      * @throws ImporterErrorException
+     * @throws AgreementExpiredException
      */
     public function get(): Response
     {

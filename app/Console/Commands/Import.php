@@ -132,7 +132,11 @@ class Import extends Command
 
         $this->line('Done!');
 
-        event(new ImportedTransactions($this->importMessages, $this->importWarnings, $this->importErrors));
+        event(new ImportedTransactions(
+                  array_merge($this->importMessages, $this->conversionMessages),
+                  array_merge($this->importWarnings, $this->conversionWarnings),
+                  array_merge($this->importErrors, $this->conversionErrors)
+              ));
         return 0;
 
     }

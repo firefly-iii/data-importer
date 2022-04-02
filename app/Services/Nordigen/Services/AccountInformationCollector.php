@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Services;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account;
@@ -45,6 +46,7 @@ class AccountInformationCollector
     /**
      * @param Account $account
      * @return Account
+     * @throws AgreementExpiredException
      */
     public static function collectInformation(Account $account): Account
     {
@@ -54,7 +56,7 @@ class AccountInformationCollector
         $detailedAccount = $account;
         try {
             $detailedAccount = self::getAccountDetails($account);
-        } catch (ImporterHttpException | ImporterErrorException $e) {
+        } catch (ImporterHttpException|ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $detailedAccount->setStatus('no-info');
@@ -64,7 +66,7 @@ class AccountInformationCollector
 
         try {
             $balanceAccount = self::getBalanceDetails($account);
-        } catch (ImporterHttpException | ImporterErrorException $e) {
+        } catch (ImporterHttpException|ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $status = $balanceAccount->getStatus();
@@ -85,6 +87,7 @@ class AccountInformationCollector
      * @return Account
      * @throws ImporterErrorException
      * @throws ImporterHttpException
+     * @throws AgreementExpiredException
      */
     protected static function getAccountDetails(Account $account): Account
     {
@@ -94,6 +97,7 @@ class AccountInformationCollector
         $accessToken = TokenManager::getAccessToken();
         $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         /** @var ArrayResponse $response */
+
         $response    = $request->get();
         $information = $response->data['account'];
         app('log')->debug('getAccountDetails: Collected information for account', $information);

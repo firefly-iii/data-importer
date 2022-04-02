@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Conversion\Routine;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account;
@@ -32,6 +33,7 @@ use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
 
 /**
@@ -39,10 +41,11 @@ use Carbon\Carbon;
  */
 class TransactionProcessor
 {
+    use ProgressInformation;
+
     /** @var string */
     private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
-    private string        $identifier;
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
@@ -59,6 +62,7 @@ class TransactionProcessor
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
+
         if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
@@ -67,13 +71,25 @@ class TransactionProcessor
 
         $return = [];
         foreach ($accounts as $key => $account) {
-            $account     = (string) $account;
+            $account = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
 
             app('log')->debug(sprintf('Will also download information on the account for debug purposes.'));
             $object = new Account();
             $object->setIdentifier($account);
-            AccountInformationCollector::collectInformation($object);
+            try {
+                AccountInformationCollector::collectInformation($object);
+            } catch (AgreementExpiredException $e) {
+                $this->addError(0, 'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III user interface. See the other error messages for more information.');
+                if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
+                    $this->addError(0, $e->json['summary']);
+                }
+                if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
+                    $this->addError(0, $e->json['detail']);
+                }
+
+                return [];
+            }
             app('log')->debug(sprintf('Done downloading information for debug purposes.'));
 
             $accessToken = TokenManager::getAccessToken();
