@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.3 - 2022-04-05
+
+### Fixed
+
+- A small change should make it easier for the data importer to detect failed transaction creation attempts.
+
 ## 0.9.2 - 2022-04-02
 
 ### Fixed
