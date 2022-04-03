@@ -281,13 +281,13 @@ class ApiSubmitter
 
             // perhaps zero transactions in the array.
             if(0 === count($group->transactions)) {
-                $message = 'Could not create transaction. Transaction-ocunt from Firefly III is zero. Check the logs.';
+                $message = 'Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
                 app('log')->error($message, $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
             }
-            
+
             $return = [
                 'group_id' => $group->id,
                 'journals' => [],
