@@ -99,7 +99,14 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
 
         $response    = $request->get();
+
+        if(!array_key_exists('account', $response->data)) {
+            app('log')->error('Missing account array', $response->data);
+            throw new ImporterHttpException('No account array, exit.');
+        }
+        
         $information = $response->data['account'];
+
         app('log')->debug('getAccountDetails: Collected information for account', $information);
 
         $account->setResourceId($information['resource_id'] ?? '');
