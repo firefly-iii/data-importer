@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - A small change should make it easier for the data importer to detect failed transaction creation attempts.
+- [Issue 5964](https://github.com/firefly-iii/firefly-iii/issues/5964) Updated libraries to fix issue.
 
 ## 0.9.2 - 2022-04-02
 
