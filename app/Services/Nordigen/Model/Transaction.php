@@ -25,10 +25,13 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Model;
 
+use App\Rules\Iban;
 use Carbon\Carbon;
 use DateTimeInterface;
 use JsonException;
 use Ramsey\Uuid\Uuid;
+
+use Validator;
 
 class Transaction
 {
@@ -361,6 +364,14 @@ class Transaction
     {
         app('log')->debug(__METHOD__);
         if ('' !== $this->debtorAccountIban) {
+            $data      = ['iban' => $this->debtorAccountIban];
+            $rules     = ['iban' => ['required', new Iban]];
+            $validator = Validator::make($data, $rules);
+            if ($validator->fails()) {
+                app('log')->warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));
+                return null;
+            }
+
             app('log')->debug(sprintf('Source IBAN is "%s" (debtor)', $this->debtorAccountIban));
             return $this->debtorAccountIban;
         }
