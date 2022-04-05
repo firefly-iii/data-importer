@@ -1,9 +1,10 @@
 <?php
-/**
- * FireflyValidator.php
- * Copyright (c) 2019 james@firefly-iii.org
+/*
+ * Iban.php
+ * Copyright (c) 2021 james@firefly-iii.org
  *
- * This file is part of Firefly III (https://github.com/firefly-iii).
+ * This file is part of the Firefly III Data Importer
+ * (https://github.com/firefly-iii/data-importer).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,25 +21,23 @@
  */
 declare(strict_types=1);
 
-namespace App\Validation;
+namespace App\Rules;
 
-use Illuminate\Validation\Validator;
-use Log;
-use ValueError;
-use function is_string;
+use Illuminate\Contracts\Validation\Rule;
 
 /**
- * Class FireflyValidator.
+ * IBAN rule class.
  */
-class FireflyValidator extends Validator
+class Iban implements Rule
 {
     /**
-     * @param mixed $attribute
-     * @param mixed $value
+     * Determine if the given value is a valid IBAN.
      *
+     * @param  string  $attribute
+     * @param  mixed  $value
      * @return bool
      */
-    public function validateIban($attribute, $value): bool
+    public function passes($attribute, $value)
     {
         if (null === $value || !is_string($value) || strlen($value) < 6) {
             return false;
@@ -98,8 +97,6 @@ class FireflyValidator extends Validator
         $value   = str_replace($search, $replace, $value);
         $value   = strtoupper($value);
 
-        // replace characters outside of ASCI range.
-        $value   = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
         $search  = [' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
         $replace = ['', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31',
                     '32', '33', '34', '35',];
@@ -123,5 +120,15 @@ class FireflyValidator extends Validator
         }
 
         return 1 === (int)$checksum;
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return 'The :attribute is not a valid IBAN.';
     }
 }

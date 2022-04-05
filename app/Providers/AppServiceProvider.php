@@ -25,9 +25,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Support\Steam;
-use App\Validation\FireflyValidator;
 use Illuminate\Support\ServiceProvider;
-use Validator;
 
 /**
  * Class AppServiceProvider
@@ -56,10 +54,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Validator::resolver(
-            static function ($translator, $data, $rules, $messages) {
-                return new FireflyValidator($translator, $data, $rules, $messages);
-            }
-        );
+        //
     }
 }
