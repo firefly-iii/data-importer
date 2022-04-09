@@ -72,6 +72,9 @@ class AutoImportController extends Controller
 
         $argument  = (string) ($request->get('directory') ?? './');
         $directory = realpath($argument);
+        if(false === $directory) {
+            throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
+        }
 
         if (!$this->isAllowedPath($directory)) {
             throw new ImporterErrorException('Not allowed to import from this path.');

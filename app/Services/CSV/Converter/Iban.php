@@ -42,7 +42,7 @@ class Iban implements ConverterInterface
      */
     public function convert($value)
     {
-        if ($this->isValidIban($value)) {
+        if (self::isValidIban($value)) {
             // strip spaces from IBAN and make upper case.
             $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
             app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
@@ -59,7 +59,7 @@ class Iban implements ConverterInterface
      *
      * @return bool
      */
-    private function isValidIban(string $value): bool
+    public static function isValidIban(string $value): bool
     {
         app('log')->debug(sprintf('isValidIBAN("%s")', $value));
         $value = strtoupper(trim(app('steam')->cleanStringAndNewlines($value)));
