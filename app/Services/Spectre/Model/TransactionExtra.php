@@ -156,6 +156,14 @@ class TransactionExtra
     /**
      * @return string|null
      */
+    public function getInformation(): ?string
+    {
+        return $this->information;
+    }
+
+    /**
+     * @return string|null
+     */
     public function getPayee(): ?string
     {
         return $this->payee;
