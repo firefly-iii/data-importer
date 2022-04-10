@@ -109,7 +109,7 @@ class PseudoTransactionProcessor
             app('log')->error($e->getMessage());
             throw new ImporterErrorException('Could not load the users currency preference.');
         }
-        $code            = $response->getPreference()->data ?? 'EUR';
+        $code            = $response->getPreference()->stringData ?? 'EUR';
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
         $currencyRequest->setTimeOut(config('importer.connection.timeout'));
