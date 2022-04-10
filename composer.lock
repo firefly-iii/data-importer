@@ -848,12 +848,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/JC5/api-support-classes.git",
-                "reference": "2b2202554d2897f4adf66456e1ddfe6ef95b7f5c"
+                "reference": "3bc1187183f02ab5da7f47bca67b000cf3ef0955"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/2b2202554d2897f4adf66456e1ddfe6ef95b7f5c",
-                "reference": "2b2202554d2897f4adf66456e1ddfe6ef95b7f5c",
+                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/3bc1187183f02ab5da7f47bca67b000cf3ef0955",
+                "reference": "3bc1187183f02ab5da7f47bca67b000cf3ef0955",
                 "shasum": ""
             },
             "require": {
@@ -947,7 +947,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2022-04-10T05:14:37+00:00"
+            "time": "2022-04-10T10:22:59+00:00"
         },
         {
             "name": "fruitcake/laravel-cors",
