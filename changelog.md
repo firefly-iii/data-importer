@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.6 - 2022-04-11
+
+### Fixed
+- Fixes an issue with an underlying package.
+
 ## 0.9.5 - 2022-04-10
 
 ### Fixed
