@@ -120,6 +120,9 @@ class GenerateTransactions
         $madeOn           = $entry->getMadeOn()->toW3cString();
         $amount           = $entry->getAmount();
 
+        // extra information from the "extra" array. May be NULL.
+        $notes = trim(sprintf('%s %s',$entry->extra->getInformation(), $entry->extra->getAdditional()));
+
         $transaction = [
             'type'              => 'withdrawal', // reverse
             'date'              => str_replace('T', ' ', substr($madeOn, 0, 19)),
@@ -133,6 +136,7 @@ class GenerateTransactions
             'category_id'       => $this->configuration->getMapping()['categories'][$entry->getCategory()] ?? null,
             'external_id'       => $entry->getId(),
             'interal_reference' => $entry->getAccountId(),
+            'notes'             => $notes,
         ];
 
         $return = [
