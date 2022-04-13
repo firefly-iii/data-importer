@@ -73,7 +73,7 @@ class Constants
 
     // constants for data conversion job:
     public const UPLOAD_CONFIG_FILE = 'config_file_path';
-    public const UPLOAD_CSV_FILE    = 'csv_file_path';
+    public const UPLOAD_CSV_FILE    = 'csv_file_path'; // TODO this variable must be renamed.
 
 
     //    /** @var string */

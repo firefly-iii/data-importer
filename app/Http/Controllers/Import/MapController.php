@@ -79,7 +79,7 @@ class MapController extends Controller
         $roles         = [];
 
         if ('file' === $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for CSV');
+            app('log')->debug('Get mapping data for importable file');
             $roles = $configuration->getRoles();
             $data  = $this->getCSVMapInformation();
         }
@@ -109,8 +109,9 @@ class MapController extends Controller
     }
 
     /**
-     * Return the map data necessary for the CSV mapping based on some weird helpers.
+     * Return the map data necessary for the importable file mapping based on some weird helpers.
      * TODO needs refactoring and proper splitting into helpers.
+     * TODO needs renaming or specific CAMT counterpart.
      *
      * @return array
      * @throws ContainerExceptionInterface

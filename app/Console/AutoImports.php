@@ -125,6 +125,8 @@ trait AutoImports
     }
 
     /**
+     * TODO this function must be more universal.
+     *
      * @param string $directory
      * @param string $file
      *
@@ -165,7 +167,7 @@ trait AutoImports
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $csvFile  = sprintf('%s/%s', $directory, $file);
+        $importableFile  = sprintf('%s/%s', $directory, $file);
         $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
 
         // TODO not yet sure why the distinction is necessary.
@@ -174,33 +176,33 @@ trait AutoImports
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
 
-        app('log')->debug(sprintf('ImportFile: importable "%s"', $csvFile));
+        app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
-            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $csvFile, $jsonFile);
+            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
 
             return;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
-        // sanity check. If the csvFile is a .json file and it parses as valid json, don't import it:
-        if ('file' === $configuration->getFlow() && str_ends_with(strtolower($csvFile), '.json') && $this->verifyJSON($csvFile)) {
+        // sanity check. If the importableFile is a .json file and it parses as valid json, don't import it:
+        if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
             return;
         }
 
         $configuration->updateDateRange();
-        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $csvFile, $jsonFile, $configuration->getFlow()));
+        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
 
         // this is it!
-        $this->startConversion($configuration, $csvFile);
+        $this->startConversion($configuration, $importableFile);
         $this->reportConversion();
 
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $csvFile, $jsonFile));
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImport($configuration);
         $this->reportImport();
 

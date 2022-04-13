@@ -101,6 +101,7 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
+            // TODO needs a file check here
             app('log')->debug('Create CSV routine manager.');
             $routine = new CSVRoutineManager($identifier);
         }

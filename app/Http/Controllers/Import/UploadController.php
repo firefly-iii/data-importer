@@ -105,7 +105,8 @@ class UploadController extends Controller
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag;
 
-        // process CSV file (if present)
+        // process uploaded file (if present)
+        // TODO needs to be file agnostic.
         $errors = $this->processCsvFile($flow, $errors, $csvFile);
 
         // process config file (if present)
@@ -134,6 +135,7 @@ class UploadController extends Controller
     }
 
     /**
+     * TODO method needs to be file agnostic.
      * @return MessageBag
      */
     private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
@@ -162,8 +164,8 @@ class UploadController extends Controller
                     $content = str_replace("\r", "\n", $content);
                 }
 
-                $csvFileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
+                $fileName = StorageService::storeContent($content);
+                session()->put(Constants::UPLOAD_CSV_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
             }
         }
