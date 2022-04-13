@@ -42,7 +42,7 @@ class AutoImport extends Command
      *
      * @var string
      */
-    protected $description = 'Will automatically import from the given directory and use the JSON and CSV files found.';
+    protected $description = 'Will automatically import from the given directory and use the JSON and importable files found.';
     /**
      * The name and signature of the console command.
      *
@@ -80,7 +80,7 @@ class AutoImport extends Command
 
             return 1;
         }
-        $this->line(sprintf('Found %d (CSV +) JSON file sets in %s', count($files), $directory));
+        $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
