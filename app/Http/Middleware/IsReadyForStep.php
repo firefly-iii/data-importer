@@ -73,9 +73,9 @@ trait IsReadyForStep
             app('log')->debug('isReadyForStep returns true because $flow is null');
             return true;
         }
-        if ('csv' === $flow) {
-            $result = $this->isReadyForCSVStep();
-            app('log')->debug(sprintf('isReadyForCSVStep: Return %s', var_export($result, true)));
+        if ('file' === $flow) {
+            $result = $this->isReadyForFileStep();
+            app('log')->debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
             return $result;
         }
         if ('nordigen' === $flow) {
@@ -97,12 +97,12 @@ trait IsReadyForStep
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function isReadyForCSVStep(): bool
+    private function isReadyForFileStep(): bool
     {
-        app('log')->debug(sprintf('isReadyForCSVStep("%s")', self::STEP));
+        app('log')->debug(sprintf('isReadyForFileStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('isReadyForCSVStep: Cannot handle CSV step "%s"', self::STEP));
+                throw new ImporterErrorException(sprintf('isReadyForFileStep: Cannot handle file step "%s"', self::STEP));
             case 'service-validation':
                 return true;
             case 'upload-files':
@@ -111,7 +111,7 @@ trait IsReadyForStep
                 }
                 return true;
             case 'authenticate':
-                // for CSV this is always false.
+                // for files this is always false.
                 return false;
             case 'define-roles':
                 if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
@@ -325,8 +325,8 @@ trait IsReadyForStep
             app('log')->debug('redirectToCorrectStep returns true because $flow is null');
             return null;
         }
-        if ('csv' === $flow) {
-            return $this->redirectToCorrectCSVStep();
+        if ('file' === $flow) {
+            return $this->redirectToCorrectFileStep();
         }
         if ('nordigen' === $flow) {
             return $this->redirectToCorrectNordigenStep();
@@ -341,12 +341,12 @@ trait IsReadyForStep
      * @return RedirectResponse
      * @throws ImporterErrorException
      */
-    private function redirectToCorrectCSVStep(): RedirectResponse
+    private function redirectToCorrectFileStep(): RedirectResponse
     {
-        app('log')->debug(sprintf('redirectToCorrectCSVStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToCorrectFileStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('redirectToCorrectCSVStep: Cannot handle CSV step "%s"', self::STEP));
+                throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
             case 'upload-files':
                 $route = route('004-configure.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));

@@ -104,7 +104,7 @@ class Configuration
         $this->roles          = [];
         $this->mapping        = [];
         $this->doMapping      = [];
-        $this->flow           = 'csv';
+        $this->flow           = 'file';
 
         // date range settings
         $this->dateRange       = 'all';
@@ -219,7 +219,7 @@ class Configuration
         $object->conversion = $array['conversion'] ?? false;
 
         // flow
-        $object->flow = $array['flow'] ?? 'csv';
+        $object->flow = $array['flow'] ?? 'file';
 
         // overrule a setting:
         if ('none' === $object->duplicateDetectionMethod) {
@@ -231,6 +231,9 @@ class Configuration
             if (true === $enabled) {
                 $object->specifics[] = $key;
             }
+        }
+        if('csv' === $object->flow) {
+            $object->flow = 'file';
         }
 
         return $object;
@@ -279,7 +282,7 @@ class Configuration
         $object->delimiter      = $delimiters[$data['delimiter']] ?? 'comma';
         $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
         $object->rules          = $data['apply-rules'] ?? true;
-        $object->flow           = $data['flow'] ?? 'csv';
+        $object->flow           = $data['flow'] ?? 'file';
 
         // other settings (are not in v1 anyway)
         $object->dateRange       = $data['date_range'] ?? 'all';
@@ -367,6 +370,10 @@ class Configuration
         // set version to latest version and return.
         $object->version = self::VERSION;
 
+        if('csv' === $object->flow) {
+            $object->flow = 'file';
+        }
+
         return $object;
     }
 
@@ -400,7 +407,7 @@ class Configuration
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->version        = self::VERSION;
-        $object->flow           = $array['flow'] ?? 'csv';
+        $object->flow           = $array['flow'] ?? 'file';
 
         // sort
         ksort($object->doMapping);
@@ -455,6 +462,10 @@ class Configuration
 
         // utf8
         $object->conversion = $array['conversion'] ?? false;
+
+        if('csv' === $object->flow) {
+            $object->flow = 'file';
+        }
 
         return $object;
     }
@@ -561,7 +572,6 @@ class Configuration
             'mapping'                       => $this->mapping,
             'duplicate_detection_method'    => $this->duplicateDetectionMethod,
             'ignore_duplicate_lines'        => $this->ignoreDuplicateLines,
-            'ignore_duplicate_transactions' => $this->ignoreDuplicateTransactions,
             'unique_column_index'           => $this->uniqueColumnIndex,
             'unique_column_type'            => $this->uniqueColumnType,
             'flow'                          => $this->flow,

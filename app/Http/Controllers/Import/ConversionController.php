@@ -74,7 +74,7 @@ class ConversionController extends Controller
 
         app('log')->debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
-        if (empty($configuration->getDoMapping()) && 'csv' === $configuration->getFlow()) {
+        if (empty($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
@@ -100,7 +100,7 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
         /** @var RoutineManagerInterface $routine */
-        if ('csv' === $flow) {
+        if ('file' === $flow) {
             app('log')->debug('Create CSV routine manager.');
             $routine = new CSVRoutineManager($identifier);
         }
@@ -147,7 +147,7 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
         /** @var RoutineManagerInterface $routine */
-        if ('csv' === $flow) {
+        if ('file' === $flow) {
             $routine = new CSVRoutineManager($identifier);
         }
         if ('nordigen' === $flow) {

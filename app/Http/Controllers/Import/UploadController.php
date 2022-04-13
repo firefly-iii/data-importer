@@ -138,14 +138,14 @@ class UploadController extends Controller
      */
     private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
     {
-        if (null === $file && 'csv' === $flow) {
-            $errors->add('csv_file', 'No file was uploaded.');
+        if (null === $file && 'file' === $flow) {
+            $errors->add('importable_file', 'No file was uploaded.');
             return $errors;
         }
-        if ('csv' === $flow) {
+        if ('file' === $flow) {
             $errorNumber = $file->getError();
             if (0 !== $errorNumber) {
-                $errors->add('csv_file', $this->getError($errorNumber));
+                $errors->add('importable_file', $this->getError($errorNumber));
             }
 
 

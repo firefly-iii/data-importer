@@ -108,7 +108,7 @@ class Import extends Command
             return 1;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
-        if ('csv' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
+        if ('file' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
             $message = sprintf('The importer can\'t import: CSV file "%s" does not exist or could not be read.', $file);
             $this->error($message);
             app('log')->error($message);

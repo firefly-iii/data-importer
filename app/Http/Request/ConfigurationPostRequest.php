@@ -143,7 +143,7 @@ class ConfigurationPostRequest extends Request
                 $flow     = request()->cookie(Constants::FLOW_COOKIE);
                 $data     = $validator->getData();
                 $doImport = $data['do_import'] ?? [];
-                if (0 === count($doImport) && 'csv' !== $flow) {
+                if (0 === count($doImport) && 'file' !== $flow) {
                     $validator->errors()->add('do_import', 'You must select at least one account to import from.');
                 }
             }

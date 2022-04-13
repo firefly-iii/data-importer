@@ -78,14 +78,14 @@ class MapController extends Controller
         $data          = [];
         $roles         = [];
 
-        if ('csv' === $configuration->getFlow()) {
+        if ('file' === $configuration->getFlow()) {
             app('log')->debug('Get mapping data for CSV');
             $roles = $configuration->getRoles();
             $data  = $this->getCSVMapInformation();
         }
 
         // nordigen, spectre and others:
-        if ('csv' !== $configuration->getFlow()) {
+        if ('file' !== $configuration->getFlow()) {
             app('log')->debug('Get mapping data for nordigen and spectre');
             $roles = [];
             $data  = $this->getImporterMapInformation();
@@ -96,9 +96,9 @@ class MapController extends Controller
             // set map config as complete.
             session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
-            // if CSV, now ready for conversion
-            if ('csv' === $configuration->getFlow()) {
-                app('log')->debug('Its CSV, also set ready for conversion.');
+            // if file, now ready for conversion
+            if ('file' === $configuration->getFlow()) {
+                app('log')->debug('Its a file, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
             return redirect()->route('007-convert.index');
