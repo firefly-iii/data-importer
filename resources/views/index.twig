@@ -73,11 +73,11 @@
                         <div class="col-lg-4">
                             <div class="card">
                                 <div class="card-header">
-                                    Import from CSV file
+                                    Import from file
                                 </div>
                                 <div class="card-body">
-                                    <button class="btn btn-info disabled" value="csv" name="flow" disabled="disabled"
-                                            id="csv_button"><span class="fas fa-cog fa-spin"></span></button>
+                                    <button class="btn btn-info disabled" value="file" name="flow" disabled="disabled"
+                                            id="file_button"><span class="fas fa-cog fa-spin"></span></button>
                                 </div>
                             </div>
                         </div>
@@ -137,14 +137,13 @@
         var tokenPageUrl = '{{ route('token.index') }}';
         $.getJSON(url).done(function (data) {
             if ('OK' === data.result) {
-                $('#csv_button').removeClass('disabled').text('Import CSV file').removeAttr('disabled');
+                $('#file_button').removeClass('disabled').text('Import file').removeAttr('disabled');
             } else {
 
                 $('#importers').hide();
                 $('#error_explain').show();
                 $('#firefly_expl').hide();
                 $('#error_txt').text(data.message);
-                // window.location = tokenPageUrl;
             }
         }).fail(function () {
             $('#importers').hide();

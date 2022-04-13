@@ -52,9 +52,9 @@
                         {{ subTitle }}
                     </div>
                     <div class="card-body">
-                        {% if 'csv' == flow %}
+                        {% if 'file' == flow %}
                             <p>
-                                CSV files come in many shapes and forms. Some of the most important settings are below.
+                                Importable files come in many shapes and forms. Some of the most important settings are below.
                                 They apply to all lines in the file. If you would like some support, <a
                                     href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
                                     check out the documentation for this page.</a>
@@ -172,7 +172,7 @@
                             {% endif %}
 
 
-                            {% if 'csv' == flow %}
+                            {% if 'file' == flow %}
                                 <h5>File options</h5>
                                 <div class="form-group row mb-3">
                                     <div class="col-sm-3">Headers</div>
@@ -185,8 +185,7 @@
                                                 Yes
                                             </label><br>
                                             <small id="headersHelp" class="form-text text-muted">
-                                                Select this checkbox when your CSV file has headers on the first line of
-                                                the CSV file.
+                                                Select this checkbox when your importable file is a CSV-like file and has headers on the first line of the file.
                                             </small>
                                         </div>
                                     </div>
@@ -203,14 +202,14 @@
                                                 Yes
                                             </label><br>
                                             <small id="conversionHelp" class="form-text text-muted">
-                                                Try to convert your CSV file to UTF-8. May lead to weird characters.
+                                                Try to convert your file to UTF-8. May lead to weird characters.
                                             </small>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group row mb-3">
-                                    <label for="delimiter" class="col-sm-3 col-form-label">CSV delimiter</label>
+                                    <label for="delimiter" class="col-sm-3 col-form-label">CSV-file delimiter</label>
                                     <div class="col-sm-9">
                                         <select id="delimiter" name="delimiter" class="form-control"
                                                 aria-describedby="delimiterHelp">
@@ -228,7 +227,7 @@
                                             </option>
                                         </select>
                                         <small id="delimiterHelp" class="form-text text-muted">
-                                            Select the field separator of our CSV file. This is almost always a comma.
+                                            If your file is a CSV file, select the field separator of the file. This is almost always a comma.
                                         </small>
                                     </div>
                                 </div>
@@ -247,7 +246,7 @@
                                             <a href="https://www.php.net/manual/en/function.date.php">on this page</a>.
                                             Don't stop playing with this setting until <strong
                                                 id="date_example">1984-09-17</strong> matches what you see in your
-                                            CSV file.
+                                            importable file.
                                         </small>
                                     </div>
                                 </div>
@@ -427,7 +426,7 @@
                                 </p>
                             </div>
 
-                            {% if 'csv' == flow %}
+                            {% if 'file' == flow %}
                                 <div class="form-group row mb-3">
                                     <label for="X" class="col-sm-3 col-form-label">General detection options</label>
                                     <div class="col-sm-9">
@@ -437,13 +436,13 @@
                                                    type="checkbox" value="1" id="ignore_duplicate_lines"
                                                    name="ignore_duplicate_lines" aria-describedby="duplicateHelp">
                                             <label class="form-check-label" for="ignore_duplicate_lines">
-                                                Do not import duplicate lines in the import.
+                                                Do not import duplicate lines or entries in the importable file.
                                             </label>
                                             <br>
                                             <small class="form-text text-muted" id="duplicateHelp">
                                                 Whatever method you choose ahead, it's smart to make the importer ignore
                                                 any
-                                                duplicated lines in your import.
+                                                duplicated lines or entries in your importable file.
                                             </small>
                                         </div>
                                     </div>
@@ -477,7 +476,7 @@
                                     </small>
                                 </div>
                             </div>
-                            {% if 'csv' == flow %}
+                            {% if 'file' == flow %}
                                 <div class="form-group row mb-3" id="unique_column_index_holder">
                                     <label for="unique_column_index" class="col-sm-3 col-form-label">Unique column
                                         index</label>
@@ -488,7 +487,7 @@
                                                aria-describedby="unique_column_index_help">
                                         <small id="unique_column_index_help" class="form-text text-muted">
                                             This field is only relevant for the "identifier-based" detection option.
-                                            Indicate which column contains the unique identifier. Start counting from
+                                            Indicate which column / field contains the unique identifier. Start counting from
                                             zero!
                                         </small>
                                     </div>
