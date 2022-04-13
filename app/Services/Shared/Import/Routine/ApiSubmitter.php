@@ -247,7 +247,7 @@ class ApiSubmitter
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
             //app('log')->error($e->getTraceAsString());
-            $message = sprintf('Submission HTTP error: %s', $e->getMessage());
+            $message = sprintf('Submission HTTP error: %s', e($e->getMessage()));
             $this->addError($index, $message);
 
             return $return;

@@ -100,7 +100,7 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $csvFile    = $request->file('csv_file');
+        $csvFile    = $request->file('importable_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag;
