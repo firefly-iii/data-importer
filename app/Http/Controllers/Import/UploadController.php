@@ -256,6 +256,7 @@ class UploadController extends Controller
             }
             // if conversion of the config file was a success, store the new version again:
             if (true === $success) {
+                $configuration->updateDateRange();
                 $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             }
