@@ -106,7 +106,7 @@ class ConfigurationPostRequest extends Request
         $rules = [
             'headers'                       => 'numeric|between:0,1',
             'delimiter'                     => 'in:comma,semicolon,tab',
-            'date'                          => 'between:1,15',
+            'date'                          => 'between:1,25',
             'default_account'               => 'required|numeric|min:1|max:100000',
             'rules'                         => 'numeric|between:0,1',
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
