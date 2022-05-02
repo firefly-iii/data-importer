@@ -74,7 +74,7 @@ class RoleController extends Controller
     {
         app('log')->debug('Now in role controller');
         $flow = $request->cookie(Constants::FLOW_COOKIE);
-        if ('csv' !== $flow) {
+        if ('file' !== $flow) {
             die('redirect or something');
         }
         $mainTitle = 'Role definition';

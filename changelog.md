@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.9 - 2021-05-04
+
+### Changed
+- Made the texts more generic to accommodate future changes
+- Catch deleted transactions
+- Require most recent Firefly III
+
+### Deprecated
+- Initial release.
+
+### Removed
+- Initial release.
+
+### Fixed
+- [Issue 5980](https://github.com/firefly-iii/firefly-iii/issues/5980) Fix date range.
+
+### Security
+- Initial release.
+
 
 ## 0.9.8 - 2022-04-13
 

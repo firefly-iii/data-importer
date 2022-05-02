@@ -100,12 +100,13 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $csvFile    = $request->file('csv_file');
+        $csvFile    = $request->file('importable_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag;
 
-        // process CSV file (if present)
+        // process uploaded file (if present)
+        // TODO needs to be file agnostic.
         $errors = $this->processCsvFile($flow, $errors, $csvFile);
 
         // process config file (if present)
@@ -134,18 +135,19 @@ class UploadController extends Controller
     }
 
     /**
+     * TODO method needs to be file agnostic.
      * @return MessageBag
      */
     private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
     {
-        if (null === $file && 'csv' === $flow) {
-            $errors->add('csv_file', 'No file was uploaded.');
+        if (null === $file && 'file' === $flow) {
+            $errors->add('importable_file', 'No file was uploaded.');
             return $errors;
         }
-        if ('csv' === $flow) {
+        if ('file' === $flow) {
             $errorNumber = $file->getError();
             if (0 !== $errorNumber) {
-                $errors->add('csv_file', $this->getError($errorNumber));
+                $errors->add('importable_file', $this->getError($errorNumber));
             }
 
 
@@ -162,8 +164,8 @@ class UploadController extends Controller
                     $content = str_replace("\r", "\n", $content);
                 }
 
-                $csvFileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $csvFileName);
+                $fileName = StorageService::storeContent($content);
+                session()->put(Constants::UPLOAD_CSV_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
             }
         }
@@ -254,6 +256,7 @@ class UploadController extends Controller
             }
             // if conversion of the config file was a success, store the new version again:
             if (true === $success) {
+                $configuration->updateDateRange();
                 $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             }

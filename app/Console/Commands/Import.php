@@ -52,7 +52,7 @@ class Import extends Command
      */
     protected $signature = 'importer:import
     {config : The configuration file. }
-    {file? : Optionally, the CSV file you want to import}
+    {file? : Optionally, the importable file you want to import}
     ';
 
     /**
@@ -108,8 +108,8 @@ class Import extends Command
             return 1;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
-        if ('csv' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
-            $message = sprintf('The importer can\'t import: CSV file "%s" does not exist or could not be read.', $file);
+        if ('file' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
+            $message = sprintf('The importer can\'t import: importable file "%s" does not exist or could not be read.', $file);
             $this->error($message);
             app('log')->error($message);
 

@@ -23,10 +23,10 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '0.9.8',
-    'flows'                   => ['nordigen', 'spectre', 'csv'],
+    'version'                 => '0.9.9',
+    'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
-        'csv'      => 'CSV',
+        'file'     => 'File',
         'nordigen' => 'Nordigen',
         'spectre'  => 'Spectre',
     ],
@@ -43,7 +43,7 @@ return [
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
-    'minimum_version'         => '5.6.16',
+    'minimum_version'         => '5.7.3',
     'cache_api_calls'         => false,
     'ignored_files'           => ['.gitignore'],
     'tracker_site_id'         => env('TRACKER_SITE_ID', ''),

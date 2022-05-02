@@ -245,11 +245,23 @@ class ApiSubmitter
         try {
             $response = $request->post();
         } catch (ApiHttpException $e) {
+            $isDeleted = false;
+            $body      = $request->getResponseBody();
+            $json      = json_decode($body, true);
             app('log')->error($e->getMessage());
-            //app('log')->error($e->getTraceAsString());
-            $message = sprintf('Submission HTTP error: %s', $e->getMessage());
-            $this->addError($index, $message);
+            // before we complain, first check what the error is:
+            if (is_array($json) && array_key_exists('message', $json)) {
+                if (str_contains($json['message'], '200032')) {
 
+                    $isDeleted = true;
+                }
+            }
+            if (true === $isDeleted) {
+                $this->addWarning($index, 'The transaction was created, but deleted by a rule.');
+                return $return;
+            }
+            $message = sprintf('Submission HTTP error: %s', e($e->getMessage()));
+            $this->addError($index, $message);
             return $return;
         }
 
@@ -280,7 +292,7 @@ class ApiSubmitter
             }
 
             // perhaps zero transactions in the array.
-            if(0 === count($group->transactions)) {
+            if (0 === count($group->transactions)) {
                 $message = 'Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
                 app('log')->error($message, $response->getRawData());
                 $this->addError($index, $message);

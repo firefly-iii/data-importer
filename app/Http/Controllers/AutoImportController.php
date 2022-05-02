@@ -92,7 +92,7 @@ class AutoImportController extends Controller
         if (0 === count($files)) {
             return response('');
         }
-        app('log')->info(sprintf('Found %d (CSV +) JSON file sets in %s', count($files), $directory));
+        app('log')->info(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {

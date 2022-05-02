@@ -68,11 +68,12 @@ class AutoUploadController extends Controller
         }
 
         $json    = $request->file('json');
-        $csv     = $request->file('csv');
-        $csvPath = $csv?->getPathname();
+        // TODO update documentation to document rename of importable file variable.
+        $importable     = $request->file('importable');
+        $importablePath = $importable?->getPathname();
 
         try {
-            $this->importUpload($json->getPathname(), $csvPath);
+            $this->importUpload($json->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
