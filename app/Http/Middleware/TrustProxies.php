@@ -29,6 +29,9 @@ use Illuminate\Config\Repository;
 use Illuminate\Http\Middleware\TrustProxies as Middleware;
 use Symfony\Component\HttpFoundation\Request as RequestAlias;
 
+/**
+ * Class TrustProxies
+ */
 class TrustProxies extends Middleware
 {
     /**
