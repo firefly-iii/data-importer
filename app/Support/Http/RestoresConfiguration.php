@@ -49,12 +49,14 @@ trait RestoresConfiguration
         // 'mapping', 'do_mapping', 'roles' are missing.
         $configFileName = session()->get(Constants::UPLOAD_CONFIG_FILE);
         if (null !== $configFileName) {
-            $diskArray  = json_decode(StorageService::getContent($configFileName), true);
-            $diskConfig = Configuration::fromArray($diskArray);
+            $diskArray = json_decode(StorageService::getContent($configFileName), true);
+            if (null !== $diskArray) {
+                $diskConfig = Configuration::fromArray($diskArray);
 
-            $configuration->setMapping($diskConfig->getMapping());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-            $configuration->setRoles($diskConfig->getRoles());
+                $configuration->setMapping($diskConfig->getMapping());
+                $configuration->setDoMapping($diskConfig->getDoMapping());
+                $configuration->setRoles($diskConfig->getRoles());
+            }
         }
         return $configuration;
     }

@@ -73,7 +73,7 @@
                         <div class="col-lg-4">
                             <div class="card">
                                 <div class="card-header">
-                                    Import from file
+                                    Import from file(s)
                                 </div>
                                 <div class="card-body">
                                     <button class="btn btn-info disabled" value="file" name="flow" disabled="disabled"
@@ -137,7 +137,7 @@
         var tokenPageUrl = '{{ route('token.index') }}';
         $.getJSON(url).done(function (data) {
             if ('OK' === data.result) {
-                $('#file_button').removeClass('disabled').text('Import file').removeAttr('disabled');
+                $('#file_button').removeClass('disabled').text('Import file(s)').removeAttr('disabled');
             } else {
 
                 $('#importers').hide();

@@ -43,6 +43,7 @@ return [
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
+    'support_zip_files'       => env('SUPPORT_ZIP_FILES', false),
     'minimum_version'         => '5.7.4',
     'cache_api_calls'         => false,
     'ignored_files'           => ['.gitignore'],

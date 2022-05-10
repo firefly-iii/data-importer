@@ -50,7 +50,7 @@ class IndexController extends Controller
     public function flush(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER, Constants::CONFIGURATION]);
         session()->flush();
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),

@@ -42,15 +42,19 @@
                             {# importable FILE #}
                             {% if 'file' == flow %}
                                 <div class="form-group row mb-3">
-                                    <label for="importable_file" class="col-sm-4 col-form-label">Importable file</label>
+                                    <label for="importable_file" class="col-sm-4 col-form-label">Importable file(s)</label>
                                     <div class="col-sm-8">
-                                        <input type="file"
+                                        <input type="file" multiple="multiple"
                                                class="form-control{% if errors.has('importable_file') %} is-invalid{% endif %}"
-                                               id="importable_file" name="importable_file"
+                                               id="importable_file" name="importable_file[]"
                                                placeholder="Importable file"/>
                                         {% if errors.has('importable_file') %}
                                             <div class="invalid-feedback">
-                                                {{ errors.first('importable_file') }}
+                                                <ul>
+                                                    {% for err in errors.get('importable_file') %}
+                                                        <li>{{ err }}</li>
+                                                    {% endfor %}
+                                                </ul>
                                             </div>
                                         {% endif %}
                                     </div>
@@ -60,10 +64,19 @@
                             {# CONFIG FILE #}
                             <div class="form-group row mb-3">
                                 <label for="config_file" class="col-sm-4 col-form-label">Optional configuration
-                                    file</label>
+                                    file(s)</label>
                                 <div class="col-sm-8">
-                                    <input type="file" class="form-control" id="config_file" name="config_file"
+                                    <input type="file" multiple="multiple" class="form-control{% if errors.has('config_file') %} is-invalid{% endif %}" id="config_file" name="config_file[]"
                                            placeholder="Configuration file"/>
+                                    {% if errors.has('config_file') %}
+                                        <div class="invalid-feedback">
+                                            <ul>
+                                                {% for err in errors.get('config_file') %}
+                                                    <li>{{ err }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -82,6 +95,23 @@
                                         </select>
                                     </div>
                                 </div>
+                            {% endif %}
+                            {% if 'file' == flow %}
+                            <div class="form-group row mb-3">
+                                <label for="config_file" class="col-sm-4 col-form-label">Configuration details</label>
+                                <div class="col-sm-8">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               id="one_config" name="one_config" value="1" aria-describedby="oneConfig">
+                                        <label class="form-check-label" for="one_config">
+                                            One configuration is enough
+                                        </label>
+                                        <small id="oneConfig" class="form-text text-muted">
+                                            <br>Check this box when all your importable files can share the same settings.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                             {% endif %}
                             <div class="row">
                                 <div class="col-lg-12">

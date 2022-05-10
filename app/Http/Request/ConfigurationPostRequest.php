@@ -50,8 +50,8 @@ class ConfigurationPostRequest extends Request
     {
         $result = [
             'headers'                       => $this->convertBoolean($this->get('headers')),
-            'delimiter'                     => $this->string('delimiter'),
-            'date'                          => $this->string('date'),
+            'delimiter'                     => $this->convertString('delimiter'),
+            'date'                          => $this->convertString('date'),
             'default_account'               => $this->integer('default_account'),
             'rules'                         => $this->convertBoolean($this->get('rules')),
             'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
@@ -62,31 +62,31 @@ class ConfigurationPostRequest extends Request
             'roles'                         => [],
             'mapping'                       => [],
             'do_mapping'                    => [],
-            'flow'                          => $this->string('flow'),
+            'flow'                          => $this->convertString('flow'),
 
             // duplicate detection:
-            'duplicate_detection_method'    => $this->string('duplicate_detection_method'),
+            'duplicate_detection_method'    => $this->convertString('duplicate_detection_method'),
             'unique_column_index'           => $this->integer('unique_column_index'),
-            'unique_column_type'            => $this->string('unique_column_type'),
+            'unique_column_type'            => $this->convertString('unique_column_type'),
 
             // spectre values:
-            'connection'                    => $this->string('connection'),
-            'identifier'                    => $this->string('identifier'),
+            'connection'                    => $this->convertString('connection'),
+            'identifier'                    => $this->convertString('identifier'),
             'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
 
             // nordigen:
-            'nordigen_country'              => $this->string('nordigen_country'),
-            'nordigen_bank'                 => $this->string('nordigen_bank'),
-            'nordigen_max_days'             => $this->string('nordigen_max_days'),
-            'nordigen_requisitions'         => json_decode($this->string('nordigen_requisitions'), true) ?? [],
+            'nordigen_country'              => $this->convertString('nordigen_country'),
+            'nordigen_bank'                 => $this->convertString('nordigen_bank'),
+            'nordigen_max_days'             => $this->convertString('nordigen_max_days'),
+            'nordigen_requisitions'         => json_decode($this->convertString('nordigen_requisitions'), true) ?? [],
 
             // nordigen + spectre
             'do_import'                     => $this->get('do_import') ?? [],
             'accounts'                      => $this->get('accounts') ?? [],
             'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),
-            'date_range'                    => $this->string('date_range'),
+            'date_range'                    => $this->convertString('date_range'),
             'date_range_number'             => $this->integer('date_range_number'),
-            'date_range_unit'               => $this->string('date_range_unit'),
+            'date_range_unit'               => $this->convertString('date_range_unit'),
             'date_not_before'               => $this->getCarbonDate('date_not_before'),
             'date_not_after'                => $this->getCarbonDate('date_not_after'),
 

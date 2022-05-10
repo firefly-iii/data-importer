@@ -93,20 +93,33 @@ class ConfigurationController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Configuration';
-        $subTitle  = 'Configure your import';
+        $subTitle  = 'Configure your import(s)';
         $accounts  = [
             self::ASSET_ACCOUNTS => [],
             self::LIABILITIES    => [],
         ];
-        $flow      = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+
+        $configurations = session()->get(Constants::CONFIG_FILE_PATHS);
+        $importables    = session()->get(Constants::IMPORT_FILE_PATHS);
+        $flow           = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+        $count          = count($configurations);
+        $overruleSkip   = 'true' === $request->get('overruleskip');
+
+        if (0 === $count) {
+            $configurations = [null];
+        }
+
+        var_dump($configurations);
+        var_dump($importables);
+
 
         // create configuration:
         $configuration = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
-        $overruleSkip = 'true' === $request->get('overruleskip');
+        // FIXME must check for ALL.
         if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
-            app('log')->debug('Skip configuration, go straight to the next step.');
+            app('log')->debug('Skip configuration(s), go straight to the next step.');
             // set config as complete.
             session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
             if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
@@ -177,7 +190,9 @@ class ConfigurationController extends Controller
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'fireflyAccounts', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
+            compact('mainTitle', 'subTitle', 'fireflyAccounts', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns',
+                    'count','importables'
+            )
         );
     }
 
@@ -207,7 +222,7 @@ class ConfigurationController extends Controller
         /** @var ListAccountsResponse $response */
         try {
             $response = $request->get();
-        } catch (ImporterErrorException | ImporterHttpException $e) {
+        } catch (ImporterErrorException|ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         $total  = count($response);

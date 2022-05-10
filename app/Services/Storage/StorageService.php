@@ -80,6 +80,19 @@ class StorageService
     }
 
     /**
+     * @param string $file
+     * @return string
+     */
+    public static function hash(string $file): string {
+        $disk     = Storage::disk('uploads');
+        if ($disk->has($file)) {
+            $content = $disk->get($file);
+            return hash('sha256', $content);
+        }
+        return 'thanks-for-all-the-fish';
+    }
+
+    /**
      * @param string $name
      * @param bool   $convert
      * @return string
@@ -87,6 +100,12 @@ class StorageService
     public static function getContent(string $name, bool $convert = false): string
     {
         $disk = Storage::disk('uploads');
+
+        // the value may have the full disk path appended to it:
+        if (str_starts_with($name, storage_path('uploads'))) {
+            $name = str_replace(storage_path('uploads'), '', $name);
+        }
+
         if (!$disk->exists($name)) {
             throw new UnexpectedValueException(sprintf('No such file %s', $name));
         }

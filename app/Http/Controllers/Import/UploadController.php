@@ -30,6 +30,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
+use App\Services\Shared\Upload\UploadProcessor;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
@@ -37,15 +38,20 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
-use Storage;
+use League\Csv\Exception;
+use League\Csv\Reader;
 
 /**
  * Class UploadController
  */
 class UploadController extends Controller
 {
+    private array $processedImportables;
+    private array $processedConfigurations;
+
     /**
      * UploadController constructor.
      */
@@ -54,6 +60,8 @@ class UploadController extends Controller
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadControllerMiddleware::class);
+        $this->processedImportables    = [];
+        $this->processedConfigurations = [];
     }
 
     /**
@@ -100,36 +108,89 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $csvFile    = $request->file('importable_file');
-        $configFile = $request->file('config_file');
-        $flow       = $request->cookie(Constants::FLOW_COOKIE);
-        $errors     = new MessageBag;
 
-        // process uploaded file (if present)
-        // TODO needs to be file agnostic.
-        $errors = $this->processCsvFile($flow, $errors, $csvFile);
+        $importableFiles            = $request->file('importable_file');
+        $configFiles                = $request->file('config_file');
+        $this->processedImportables = [];
+        $flow                       = $request->cookie(Constants::FLOW_COOKIE);
+        $errors                     = new MessageBag;
+        $importCount                = null === $importableFiles ? 0 : count($importableFiles);
+        $configCount                = null === $configFiles ? 0 : count($configFiles);
+        $oneConfig                  = '1' === $request->get('one_config');
 
-        // process config file (if present)
-        $errors = $this->processConfigFile($errors, $configFile);
+        // basic sanity checks:
+        // 1. can only upload zero or one config
+        if ($oneConfig && $configCount > 1) {
+            // return with error.
+            $errors->add('config_file', 'If you select that one configuration is enough, please do not upload multiple files.');
 
-        // process pre-selected file (if present):
-        $errors = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
+            return redirect(route('003-upload.index'))->withErrors($errors);
+        }
 
+        // 2. if more than one file uploaded, nr of config files uploaded must be equal.
+        if (!$oneConfig && $configCount !== 0 && $importCount !== $configCount && 'file' === $flow) {
+            // return with error.
+            $errors->add('importable_file', 'Please upload an equal number of importable files and configuration files.');
+            $errors->add('config_file', 'Please upload an equal number of importable files and configuration files.');
+
+            return redirect(route('003-upload.index'))->withErrors($errors);
+        }
+        // 3. if not uploaded anything, return:
+        if (0 === $importCount && 'file' === $flow) {
+            // return with error.
+            $errors->add('importable_file', 'Please upload something.');
+
+            return redirect(route('003-upload.index'))->withErrors($errors);
+        }
+
+        /** @var UploadProcessor $processor */
+        $processor = app(UploadProcessor::class);
+        $processor->setContent($importableFiles, $configFiles);
+
+        // collect array with upload info:
+        $uploaded = $processor->getUploads($oneConfig);
+
+        var_dump($uploaded);
+        exit;
+
+        $this->processedImportables    = $processor->getImportables();
+        $this->processedConfigurations = $processor->getConfigurations();
+
+        $processor->validateFiles($oneConfig);
+
+        $errors                        = $processor->getErrors();
+
+        // maybe the user selected a config file from the dropdown.
+        $this->processSelection((string) $request->get('existing_config'));
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
+        // error for Spectre and Nordigen
+        if (count($this->processedConfigurations) > 1 && 'file' !== $flow) {
+            $errors->add('config_file', 'This routine cannot handle more than 1 configuration.');
+            return redirect(route('003-upload.index'))->withErrors($errors);
+        }
 
         if ('nordigen' === $flow) {
+            if (1 === count($this->processedConfigurations)) {
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $this->processedConfigurations[0]);
+            }
             // redirect to country + bank selector
             session()->put(Constants::HAS_UPLOAD, true);
             return redirect(route('009-selection.index'));
         }
+
         if ('spectre' === $flow) {
+            if (1 === count($this->processedConfigurations)) {
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $this->processedConfigurations[0]);
+            }
             // redirect to spectre
             session()->put(Constants::HAS_UPLOAD, true);
             return redirect(route('011-connections.index'));
         }
+        session()->put(Constants::CONFIG_FILE_PATHS, $this->processedConfigurations);
+        session()->put(Constants::IMPORT_FILE_PATHS, $this->processedImportables);
 
         return redirect(route('004-configure.index'));
     }
@@ -266,31 +327,152 @@ class UploadController extends Controller
     }
 
     /**
-     * @param MessageBag        $errors
-     * @param string            $selection
-     * @param UploadedFile|null $file
-     * @return MessageBag
-     * @throws ImporterErrorException
-     * @throws FileNotFoundException
+     * @param string $selection
      */
-    private function processSelection(MessageBag $errors, string $selection, UploadedFile|null $file): MessageBag
+    private function processSelection(string $selection): void
     {
-        if (null === $file && '' !== $selection) {
-            app('log')->debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
-            $configFileName = StorageService::storeContent($disk->get($selection));
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // process the config file
+        if ('' === $selection) {
+            return;
+        }
+        app('log')->debug('User selected a config file from the store.');
+        $disk       = Storage::disk('configurations');
+        $uploadDisk = Storage::disk('uploads');
+        if ($disk->has($selection)) {
             try {
-                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
+                $content = $disk->get($selection);
+                $file    = StorageService::storeContent($content);
+            } catch (FileNotFoundException|ImporterErrorException $e) {
+                app('log')->warning(sprintf('Could not save pre-selected config: %s', $e->getMessage()));
+                return;
+            }
+            $this->processedConfigurations[] = sprintf('%s/%s', storage_path('uploads'), $file);
+        }
+    }
+
+    /**
+     * @param array|null $importableFiles
+     * @return MessageBag
+     */
+    private function processImportableFiles(array|null $importableFiles): MessageBag
+    {
+        $errors = new MessageBag;
+        if (null === $importableFiles) {
+            $errors->add('importable_file', 'No files were uploaded.');
+            return $errors;
+        }
+
+        /** @var UploadedFile $file */
+        foreach ($importableFiles as $file) {
+            $errors = $this->processImportableFile($file);
+            if ($errors->count() > 0) {
+                return $errors;
             }
         }
         return $errors;
+    }
+
+    /**
+     * @param UploadedFile $file
+     * @return MessageBag
+     * @throws ImporterErrorException
+     */
+    private function processImportableFile(UploadedFile $file): MessageBag
+    {
+        $errors      = new MessageBag;
+        $errorNumber = $file->getError();
+
+        if (0 !== $errorNumber) {
+            $errors->add('importable_file', $this->getError($errorNumber));
+            return $errors;
+        }
+
+
+        $type = $this->detectType($file->getPathname());
+
+        // if is a zip,
+
+        $content = file_get_contents($file->getPathname());
+
+
+        if (false === $content) {
+            $errors->add('importable_file', 'Could not read uploaded file from drive.');
+            return $errors;
+        }
+
+        // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+        // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+        // This one is for you: 🤦‍♀️
+        if ('csv' === $type) {
+            $eol = $this->detectEOL($content);
+            if ("\r" === $eol) {
+                app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
+                $content = str_replace("\r", "\n", $content);
+            }
+        }
+
+        $fileName                     = StorageService::storeContent($content);
+        $array                        = [
+            'upload'  => $file->getPathname(),
+            'storage' => $fileName,
+            'type'    => $type,
+        ];
+        $this->processedImportables[] = $array;
+
+        return $errors;
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function detectType(string $path): string
+    {
+        if (!file_exists($path)) {
+            return 'not-existing';
+        }
+
+        // is a ZIP file?
+        $pointer = fopen($path, 'r', false);
+        $blob    = fgets($pointer, 5);
+        if (str_contains($blob, 'PK')) {
+            $this->processZipFile($path);
+            return 'zip';
+        }
+
+        // basic CSV check
+        $reader   = Reader::createFromPath($path, 'r');
+        $continue = true;
+        try {
+            $reader->setHeaderOffset(0);
+        } catch (Exception $e) {
+            app('log')->warning('Tried to process as CSV, but failed.');
+            $continue = false;
+        }
+        if (true === $continue) {
+            $header = $reader->getHeader();
+            if (count($header) > 1) {
+                return 'csv';
+            }
+        }
+
+        // basic JSON test:
+        $result = json_decode(file_get_contents($path), true);
+        if (false !== $result) {
+            return 'json';
+        }
+        // basic camt test. CAMT is XML.
+
+        return 'unknown';
+    }
+
+    /**
+     * Unzip ZIP file and process content.
+     *
+     * @param string $path
+     * @return void
+     */
+    private function processZipFile(string $path): void
+    {
     }
 
 }

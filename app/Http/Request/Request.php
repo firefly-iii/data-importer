@@ -145,7 +145,7 @@ class Request extends FormRequest
      *
      * @return string
      */
-    public function string(string $field): string
+    public function convertString(string $field): string
     {
         return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
     }
