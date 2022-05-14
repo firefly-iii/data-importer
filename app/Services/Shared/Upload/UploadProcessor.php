@@ -22,7 +22,9 @@
 
 namespace App\Services\Shared\Upload;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Storage\StorageService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use ZipArchive;
@@ -32,39 +34,45 @@ use ZipArchive;
  */
 class UploadProcessor
 {
-    private array      $configFiles;
+    private array      $combinations;
     private MessageBag $errors;
-    private array      $importableFiles;
-    private array      $returnableFiles;
-    private array      $returnableConfigurations;
+    private string     $existingConfiguration;
+    private array      $processedConfigs;
+    private array      $processedImportables;
+    private bool       $singleConfiguration;
+    private array      $uploadedConfigs;
+    private array      $uploadedImportables;
+    private string     $flow;
 
     // original file names
-    private array $importableNames;
-    private array $configNames;
 
     public function __construct()
     {
-        $this->importableFiles          = [];
-        $this->configFiles              = [];
-        $this->returnableFiles          = [];
-        $this->returnableConfigurations = [];
-        $this->importableNames          = [];
-        $this->configNames              = [];
-        $this->errors                   = new MessageBag;
+        $this->uploadedConfigs       = [];
+        $this->uploadedImportables   = [];
+        $this->processedConfigs      = [];
+        $this->processedImportables  = [];
+        $this->combinations          = [];
+        $this->existingConfiguration = '';
+        $this->flow                  = 'file';
+        $this->singleConfiguration   = false;
+        $this->errors                = new MessageBag;
+    }
+
+    /**
+     * @param string $flow
+     */
+    public function setFlow(string $flow): void
+    {
+        $this->flow = $flow;
     }
 
     /**
      * @return array
      */
-    public function getConfigurations(): array
+    public function getCombinations(): array
     {
-        app('log')->debug('getConfigurations()');
-        /** @var UploadedFile $file */
-        foreach ($this->configFiles as $file) {
-            $this->processUploadedConfig($file);
-        }
-        $this->returnableConfigurations = $this->removeDuplicates($this->returnableConfigurations);
-        return $this->returnableConfigurations;
+        return $this->combinations;
     }
 
     /**
@@ -76,47 +84,70 @@ class UploadProcessor
     }
 
     /**
-     * @return array
+     * Process all uploaded files.
+     * @return void
+     * @throws ImporterErrorException
      */
-    public function getImportables(): array
+    public function process(): void
     {
-        app('log')->debug('getImportables()');
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
         /** @var UploadedFile $file */
-        foreach ($this->importableFiles as $file) {
+        foreach ($this->uploadedImportables as $file) {
             $this->processUploadedFile($file);
         }
-        $this->returnableFiles = $this->removeDuplicates($this->returnableFiles);
-        return $this->returnableFiles;
+        /** @var UploadedFile $file */
+        foreach ($this->uploadedConfigs as $file) {
+            $this->processUploadedConfig($file);
+        }
+        // also process pre-selected config, if any:
+        $this->processExistingConfig();
+
+
+        // here we mix and match into a new array:
+        $this->validateUploads();
+        if (0 === $this->errors->count()) {
+            $this->combine();
+        }
+        var_dump($this->processedImportables);
+        var_dump($this->processedConfigs);
+        var_dump($this->combinations);
+        exit;
+
     }
 
     /**
+     * Process an upload. Could be a ZIP file, CSV file, anything. After a first sanity check
+     * the uploaded (temp) name and the original file name are retrieved and forwarded to the next method.
+     *
      * @param UploadedFile $file
      * @return void
+     * @throws ImporterErrorException
      */
     private function processUploadedFile(UploadedFile $file): void
     {
-        app('log')->debug('processUploadedFile()');
-        $errorNumber = $file->getError();
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $errorNumber  = $file->getError();
+        $errorMessage = $this->getErrorMessage($errorNumber);
         if (0 !== $errorNumber) {
-            $this->errors->add('importable_file', $this->getError($errorNumber));
+            app('log')->error(sprintf(sprintf('Detected error #%d (%s) with file upload.', $errorNumber, $errorMessage)));
+            $this->errors->add('importable_file', $errorMessage);
             return;
         }
         $name = $file->getClientOriginalName();
         $path = $file->getPathname();
 
         $this->includeForSelection($path, $name);
-
-
     }
 
     /**
+     * Returns a nice error message for uploads.
      * @param int $error
      *
      * @return string
      */
-    private function getError(int $error): string
+    private function getErrorMessage(int $error): string
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        app('log')->debug(sprintf('Now in %s(%d)', __METHOD__, $error));
         $errors = [
             UPLOAD_ERR_OK         => 'There is no error, the file uploaded with success.',
             UPLOAD_ERR_INI_SIZE   => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
@@ -132,12 +163,47 @@ class UploadProcessor
     }
 
     /**
+     * This method checks the original file type and decides which processing steps must be taken.
+     *
+     * @param string $path
+     * @param string $name
+     * @return void
+     * @throws ImporterErrorException
+     */
+    private function includeForSelection(string $path, string $name): void
+    {
+        app('log')->debug(sprintf('Now in %s("%s", "%s")', __METHOD__, $path, $name));
+        $type = $this->detectFileType($path);
+
+        app('log')->debug(sprintf('File type of "%s" ("%s") is "%s"', $path, $name, $type));
+
+        switch ($type) {
+            default:
+                app('log')->error(sprintf('Cannot handle unknown file type "%s" (file "%s"). Will ignore file.', $type, $name));
+                break;
+            case 'zip':
+                $this->processZipFile($path);
+                break;
+            case 'json':
+                $this->processJsonFile($path, $name);
+                break;
+            // can later be extended to split between XML, CAMT, etc.
+            case 'text':
+            case 'xml':
+                $this->processImportableFile($path, $name);
+                break;
+        }
+    }
+
+    /**
+     * This method detects the file type of the uploaded file.
+     *
      * @param string $path
      * @return string
      */
-    private function detectType(string $path): string
+    private function detectFileType(string $path): string
     {
-        app('log')->debug('detectType()');
+        app('log')->debug(sprintf('Now in %s("%s")', __METHOD__, $path));
         $fileType   = mime_content_type($path);
         $returnType = 'unknown';
         switch ($fileType) {
@@ -164,16 +230,22 @@ class UploadProcessor
     }
 
     /**
+     * This method will unpack a zip file and return the found files back to the "inclusion" method for further processing.
+     *
      * @param string $path
      * @return void
+     * @throws ImporterErrorException
      */
     private function processZipFile(string $path): void
     {
-        app('log')->debug('processZipFile()');
+        app('log')->debug(sprintf('Now in %s("%s")', __METHOD__, $path));
+        if (!config('importer.support_zip_files')) {
+            app('log')->warning(sprintf('Will ignore ZIP file "%s".', $path));
+            return;
+        }
         $archive = new ZipArchive;
         $archive->open($path);
         app('log')->debug(sprintf('Unpacking zip file "%s"', $path));
-
 
         for ($index = 0; $index < $archive->count(); $index++) {
             $currentName = $archive->getNameIndex($index);
@@ -189,237 +261,163 @@ class UploadProcessor
     }
 
     /**
-     * Process the uploaded files and configuration files. Returns array with
-     * both.
+     * This method saves the config file to the disk and stores the file name + original name in an array of processed
+     * configuration files.
      *
-     * @return array
-     */
-    public function getUploads(): array
-    {
-        $return = [];
-        // first process all uploads (which are mandatory)
-        if (0 === count($this->importableFiles) && 0 === count($this->configFiles)) {
-            return [
-                [
-                    'configuration' => [
-                        'original_name' => null,
-                        'location'      => null,
-                    ],
-                    'importable'    => [
-                        'original_name' => null,
-                        'location'      => null,
-                    ],
-                ],
-            ];
-        }
-        // "primary" source is the importable files.
-        // first process them (and unpack zip files etc.
-        /** @var UploadedFile $importableFile */
-        foreach ($this->importableFiles as $importableFile) {
-            $this->processUploadedFile($importableFile);
-        }
-
-
-        die('here we are');
-    }
-
-    /**
-     * @param array|null $importableFiles
-     * @param array|null $configFiles
-     * @return void
-     */
-    public function setContent(?array $importableFiles, ?array $configFiles): void
-    {
-        if (is_array($importableFiles)) {
-            $this->importableFiles = $importableFiles;
-        }
-        if (is_array($configFiles)) {
-            $this->configFiles = $configFiles;
-        }
-    }
-
-    /**
      * @param string $path
      * @param string $name
      * @return void
+     * @throws ImporterErrorException
      */
-    private function includeForSelection(string $path, string $name): void
+    private function processJsonFile(string $path, string $name): void
     {
-        app('log')->debug(sprintf('includeForSelection("%s", "%s")', $path, $name));
-        $type = $this->detectType($path);
+        app('log')->debug(sprintf('Now in %s("%s", "%s")', __METHOD__, $path, $name));
 
-        app('log')->debug(sprintf('File type of "%s" ("%s") is "%s"', $path, $name, $type));
+        // use storage service to save the file:
+        $result = StorageService::storeContent(file_get_contents($path));
 
-        switch ($type) {
-            default:
-                app('log')->error(sprintf('Cannot handle unknown file type "%s" (file "%s"). Will ignore file.', $type, $name));
-                break;
-            case 'zip':
-                if (config('importer.support_zip_files')) {
-                    $this->processZipFile($path);
-                }
-                if (!config('importer.support_zip_files')) {
-                    app('log')->warning(sprintf('Will ignore ZIP file "%s".', $name));
-                }
-                break;
-            case 'json':
-                // add uploaded JSON files to the configuration array
-                app('log')->info(sprintf('Will include file "%s" (in config array).', $name));
-
-                // use storage service to save the file:
-                $result                           = StorageService::storeContent(file_get_contents($path));
-                $this->returnableConfigurations[] =
-                    [
-                        'original_name'    => $name,
-                        'storage_location' => $result,
-                    ];
-                // technically this extra array is no longer necessary. But it is easier.
-                $this->configNames[] = $name;
-                break;
-            // can later be extended to split between XML, CAMT, etc.
-            case 'text':
-            case 'xml':
-                app('log')->info(sprintf('Will include file "%s".', $name));
-                $result                  = StorageService::storeContent(file_get_contents($path));
-                $this->returnableFiles[] = [
-                    'original_name'    => $name,
-                    'storage_location' => $result,
-                ];
-                // technically this extra array is no longer necessary. But it is easier.
-                $this->importableNames[] = $name;
-                break;
-        }
+        $this->processedConfigs[] =
+            [
+                'original_name'    => $name,
+                'storage_location' => $result,
+            ];
     }
 
     /**
+     * This method saves the importable file to the disk and stores the file name + original name in an array of processed
+     * importable files.
+     *
+     * @param string $path
+     * @param string $name
+     * @return void
+     * @throws ImporterErrorException
+     */
+    private function processImportableFile(string $path, string $name): void
+    {
+        app('log')->debug(sprintf('Now in %s("%s", "%s")', __METHOD__, $path, $name));
+        $result                       = StorageService::storeContent(file_get_contents($path));
+        $this->processedImportables[] = [
+            'original_name'    => $name,
+            'storage_location' => $result,
+        ];
+    }
+
+    /**
+     * Process an uploaded configuration file. Could be anything at this point.
+     *
      * @param UploadedFile $file
      * @return void
+     * @throws ImporterErrorException
      */
     private function processUploadedConfig(UploadedFile $file): void
     {
-        app('log')->debug('processUploadedConfig()');
-        $errorNumber = $file->getError();
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $errorNumber  = $file->getError();
+        $errorMessage = $this->getErrorMessage($errorNumber);
         if (0 !== $errorNumber) {
-            $this->errors->add('config_file', $this->getError($errorNumber));
+            app('log')->error(sprintf(sprintf('Detected error #%d (%s) with file upload.', $errorNumber, $errorMessage)));
+            $this->errors->add('config_file', $errorMessage);
             return;
         }
+
         $name = $file->getClientOriginalName();
         $path = $file->getPathname();
-        app('log')->debug(sprintf('processUploadedConfig "%s" "%s"', $name, $path));
 
         $this->includeForSelection($path, $name);
     }
 
     /**
-     * @param array $array
-     * @return array
-     */
-    private function removeDuplicates(array $array): array
-    {
-        app('log')->debug('removeDuplicates()');
-        $hashes = [];
-        $return = [];
-        foreach ($array as $file) {
-            $hash = StorageService::hash($file['storage_location']);
-            if (!in_array($hash, $hashes, true)) {
-                // include in return.
-                $return[] = $file;
-                $hashes[] = $hash;
-            }
-        }
-        return $return;
-    }
-
-    /**
-     * @return array
-     */
-    public function getImportableNames(): array
-    {
-        return $this->importableNames;
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfigNames(): array
-    {
-        return $this->configNames;
-    }
-
-    /**
+     * This method processes the existing configuration file, if any, and "uploads" it so it can be processed as a normal file.
+     *
      * @return void
      */
-    public function validateFiles(bool $singleConfig): void
+    private function processExistingConfig(): void
     {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        if ('' === $this->existingConfiguration) {
+            return;
+        }
+        $name = $this->existingConfiguration;
+        $disk = Storage::disk('configurations');
+        if ($disk->exists($name)) {
+            $content                  = $disk->get($name);
+            $result                   = StorageService::storeContent($content);
+            $this->processedConfigs[] = [
+                'original_name'    => $name,
+                'storage_location' => $result,
+            ];
+        }
+    }
 
-        app('log')->debug('validateFiles()');
-        if (0 === count($this->configNames)) {
+    /**
+     * This method checks if all uploaded files also have a configuration file. It's not mandatory to have one.
+     * @return void
+     */
+    public function validateUploads(): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        if (0 === count($this->processedConfigs)) {
             // no config files, nothing to validate.
             return;
         }
-        if (1 === count($this->configNames) && true === $singleConfig) {
+        if (1 === count($this->processedConfigs) && true === $this->singleConfiguration) {
             // a single config file applies to all, nothing to validate.
             return;
         }
 
-        // check uploads first:
-        /** @var string $name */
-        foreach ($this->importableNames as $name) {
-            app('log')->debug(sprintf('Check file "%s".', $name));
-            $short = $this->removeExtension($name);
-            app('log')->debug(sprintf('Short name is "%s".', $short));
-            // need a similar file in the config array
-            $found = false;
-            /** @var string $configFile */
-            foreach ($this->configNames as $configFile) {
-                app('log')->debug(sprintf('Checking config file "%s"', $configFile));
-                $configShort = $this->removeExtension($configFile);
-                app('log')->debug(sprintf('Short name is "%s"', $configShort));
-                if ($configShort === $short) {
-                    $found = true;
-                    app('log')->debug('Is the same!');
-                }
-                if ($configShort !== $short) {
-                    app('log')->debug('Is not same!');
-                }
-            }
-            if (false === $found) {
-                $this->errors->add('importable_file', sprintf('File "%s" needs a configuration file called "%s.json"', $name, $short));
-            }
-        }
-        unset($name, $found, $configShort, $short);
-        // check configurations next:
-        foreach ($this->configNames as $configName) {
-            app('log')->debug(sprintf('Check config "%s".', $configName));
-            $short = $this->removeExtension($configName);
-            app('log')->debug(sprintf('Short name is "%s".', $short));
-            // need a similar file in the config array
-            $found = false;
+        // reset errors
+        $this->errors = new MessageBag;
+        $this->validateImportables();
+        $this->validateConfigurations();
+    }
 
-            /** @var string $importName */
-            foreach ($this->importableNames as $importName) {
-                app('log')->debug(sprintf('Checking importable file "%s"', $importName));
-                $importShort = $this->removeExtension($importName);
-                app('log')->debug(sprintf('Short name is "%s"', $importShort));
-                if ($importShort === $short) {
-                    $found = true;
-                    app('log')->debug('Is the same!');
-                }
-                if ($importShort !== $short) {
-                    app('log')->debug('Is not same!');
-                }
-            }
-            if (false === $found) {
-                $this->errors->add('config_file', sprintf('Config file "%s" needs an importable file called "%s.*"', $configName, $short));
-            }
+    /**
+     * This method will validate all importable files.
+     * @return void
+     */
+    private function validateImportables(): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        /** @var array $array */
+        foreach ($this->processedImportables as $array) {
+            $this->validateSingleImportable($array);
         }
     }
 
     /**
+     * This method will see if a single importable has a configuration file counterpart. It will give an error when there is no such file.
+     * Technically speaking, this is not necessary, but right now it's "all or nothing". Either ALL importable files have a configuration
+     * or NO importable files have a configuration.
+     *
+     * @param array $file
+     * @return void
+     */
+    private function validateSingleImportable(array $file): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $name  = $file['original_name'];
+        $short = $this->removeFileExtension($name);
+
+        // need a similar file in the config array, so loop them all:
+        $found = false;
+
+        /** @var array $configuration */
+        foreach ($this->processedConfigs as $configuration) {
+            $configName  = $configuration['original_name'];
+            $configShort = $this->removeFileExtension($configName);
+            $found       = $configShort === $short ? true : $found;
+        }
+        if (false === $found) {
+            $this->errors->add('importable_file', sprintf('File "%s" needs a configuration file called "%s.json"', $name, $short));
+        }
+    }
+
+    /**
+     * Remove the extension from a file name. "a.csv" > "a".
      * @param string $name
      * @return string
      */
-    private function removeExtension(string $name): string
+    private function removeFileExtension(string $name): string
     {
         $parts = explode('.', $name);
         if (1 === count($parts)) {
@@ -432,5 +430,136 @@ class UploadProcessor
         return implode('.', $parts);
     }
 
+    /**
+     * This method will validate all importable files.
+     * @return void
+     */
+    private function validateConfigurations(): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        /** @var array $array */
+        foreach ($this->processedConfigs as $array) {
+            $this->validateSingleConfiguration($array);
+        }
+    }
+
+    /**
+     * Will check if the configuration has an importable counterpart. This is mandatory.
+     * @param array $configuration
+     * @return void
+     */
+    private function validateSingleConfiguration(array $configuration): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $name  = $configuration['original_name'];
+        $short = $this->removeFileExtension($name);
+        $found = false;
+
+        /** @var array $importable */
+        foreach ($this->processedImportables as $importable) {
+            $importableName  = $importable['original_name'];
+            $importableShort = $this->removeFileExtension($importableName);
+            $found           = $importableShort === $short ? true : $found;
+        }
+        if (false === $found && 'file' === $this->flow) {
+            $this->errors->add('config_file', sprintf('Config file "%s" needs an importable file called "%s.*"', $configName, $short));
+        }
+    }
+
+    /**
+     * Creates a new array that includes a configuration file reference (or NULL) for each uploaded file.
+     *
+     * @return void
+     */
+    private function combine(): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $result = [];
+        if ('file' === $this->flow) {
+            /** @var array $importable */
+            foreach ($this->processedImportables as $importable) {
+                $configuration = $this->findConfigForCombination($importable['original_name']);
+                $result[]      = [
+                    'original_name'    => $importable['original_name'],
+                    'storage_location' => $importable['storage_location'],
+                    'config_name'      => null === $configuration ? null : $configuration['original_name'],
+                    'config_location'  => null === $configuration ? null : $configuration['storage_location'],
+                ];
+            }
+
+            $this->combinations = $result;
+            return;
+        }
+        // if flow is not 'file', returning the first config file is enough:
+        $array              = $this->processedConfigs;
+        $configuration      = array_shift($array);
+        $result[]           = [
+            'original_name'    => null,
+            'storage_location' => null,
+            'config_name'      => $configuration['original_name'],
+            'config_location'  => $configuration['storage_location'],
+        ];
+        $this->combinations = $result;
+    }
+
+    /**
+     * Loop the configurations we have and return the proper matching configuration for the given file name.
+     * @param string $name
+     * @return array|null
+     */
+    private function findConfigForCombination(string $name): ?array
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+
+        // if single config, just return the first one.
+        if ($this->singleConfiguration) {
+            $array = $this->processedConfigs;
+            return array_shift($array);
+        }
+
+        $short = $this->removeFileExtension($name);
+        /** @var array $config */
+        foreach ($this->processedConfigs as $config) {
+            $configShort = $this->removeFileExtension($config['original_name']);
+            if ($short === $configShort) {
+                return $config;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * This method sets the uploaded files to be processed.
+     *
+     * @param array|null $importableFiles
+     * @param array|null $configFiles
+     * @return void
+     */
+    public function setContent(?array $importableFiles, ?array $configFiles): void
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        if (is_array($importableFiles)) {
+            $this->uploadedImportables = $importableFiles;
+        }
+        if (is_array($configFiles)) {
+            $this->uploadedConfigs = $configFiles;
+        }
+    }
+
+    /**
+     * @param string $existingConfiguration
+     */
+    public function setExistingConfiguration(string $existingConfiguration): void
+    {
+        $this->existingConfiguration = $existingConfiguration;
+    }
+
+    /**
+     * @param bool $singleConfiguration
+     */
+    public function setSingleConfiguration(bool $singleConfiguration): void
+    {
+        $this->singleConfiguration = $singleConfiguration;
+    }
 
 }

@@ -78,6 +78,7 @@ class Constants
     // specific variables for the ability to upload multiple (config) files at once
     public const IMPORT_FILE_PATHS = 'upload_file_paths';
     public const CONFIG_FILE_PATHS = 'config_file_paths';
+    public const UPLOADED_COMBINATIONS = 'uploaded_combinations';
     //    /** @var string */
 //    /** @var string */
 //    public const JOB_STATUS = 'import_job_status';
