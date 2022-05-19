@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /*
  * UploadProcessor.php
  * Copyright (c) 2022 james@firefly-iii.org
@@ -108,11 +109,6 @@ class UploadProcessor
         if (0 === $this->errors->count()) {
             $this->combine();
         }
-        var_dump($this->processedImportables);
-        var_dump($this->processedConfigs);
-        var_dump($this->combinations);
-        exit;
-
     }
 
     /**
@@ -496,8 +492,8 @@ class UploadProcessor
         $result[]           = [
             'original_name'    => null,
             'storage_location' => null,
-            'config_name'      => $configuration['original_name'],
-            'config_location'  => $configuration['storage_location'],
+            'config_name'      => $configuration['original_name'] ?? null,
+            'config_location'  => $configuration['storage_location'] ?? null,
         ];
         $this->combinations = $result;
     }

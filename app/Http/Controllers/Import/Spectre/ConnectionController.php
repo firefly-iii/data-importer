@@ -183,9 +183,22 @@ class ConnectionController extends Controller
         } catch (JsonException $e) {
             app('log')->error($e->getMessage());
         }
-        StorageService::storeContent($json);
+        // store configuration in 1.0 thing
+        $configuration->setFlow('spectre');
+        $location = StorageService::storeArray($configuration->toArray());
 
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+        // save configuration as new 1.0 configuration thing:
+        $combinations = [
+            [
+                'original_name'    => 'spectre',
+                'storage_location' => null,
+                'config_name'      => 'spectre.json',
+                'config_location'  => $location,
+            ]
+        ];
+        session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
+
+        //session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
         session()->put(Constants::CONNECTION_SELECTED_INDICATOR, true);
 
         // redirect to job configuration

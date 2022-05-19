@@ -60,4 +60,19 @@ trait RestoresConfiguration
         }
         return $configuration;
     }
+
+    /**
+     * Restore configuration from filename.
+     *
+     * @param string|null $file
+     * @return Configuration
+     */
+    protected function restoreConfigurationFromFile(?string $file): Configuration
+    {
+        if (null === $file) {
+            return Configuration::make();
+        }
+        $content = json_decode(StorageService::getContent($file), true);
+        return Configuration::fromArray($content);
+    }
 }

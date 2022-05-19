@@ -104,24 +104,24 @@ class ConfigurationPostRequest extends Request
     public function rules(): array
     {
         $rules = [
-            'headers'                       => 'numeric|between:0,1',
-            'delimiter'                     => 'in:comma,semicolon,tab',
-            'date'                          => 'between:1,25',
-            'default_account'               => 'required|numeric|min:1|max:100000',
-            'rules'                         => 'numeric|between:0,1',
-            'ignore_duplicate_lines'        => 'numeric|between:0,1',
-            'ignore_duplicate_transactions' => 'numeric|between:0,1',
-            'skip_form'                     => 'numeric|between:0,1',
-            'add_import_tag'                => 'numeric|between:0,1',
-            'ignore_spectre_categories'     => 'numeric|between:0,1',
-
-            // duplicate detection:
-            'duplicate_detection_method'    => 'in:cell,none,classic',
-            'unique_column_index'           => 'numeric',
-            'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
-
-            // conversion
-            'conversion'                    => 'numeric|between:0,1',
+//            'headers'                       => 'numeric|between:0,1',
+//            'delimiter'                     => 'in:comma,semicolon,tab',
+//            'date'                          => 'between:1,25',
+//            'default_account'               => 'required|numeric|min:1|max:100000',
+//            'rules'                         => 'numeric|between:0,1',
+//            'ignore_duplicate_lines'        => 'numeric|between:0,1',
+//            'ignore_duplicate_transactions' => 'numeric|between:0,1',
+//            'skip_form'                     => 'numeric|between:0,1',
+//            'add_import_tag'                => 'numeric|between:0,1',
+//            'ignore_spectre_categories'     => 'numeric|between:0,1',
+//
+//            // duplicate detection:
+//            'duplicate_detection_method'    => 'in:cell,none,classic',
+//            'unique_column_index'           => 'numeric',
+//            'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
+//
+//            // conversion
+//            'conversion'                    => 'numeric|between:0,1',
         ];
 
         return $rules;

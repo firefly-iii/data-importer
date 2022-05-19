@@ -37,6 +37,7 @@ use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
+use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
@@ -147,12 +148,28 @@ class LinkController extends Controller
 
         // create a new config thing
         $configuration = $this->restoreConfiguration();
+        $configuration->setFlow('nordigen');
         $requisition   = $configuration->getRequisition($reference);
         if (null === $requisition) {
             throw new ImporterErrorException('No such requisition.');
         }
         // continue!
         session()->put(Constants::REQUISITION_REFERENCE, $reference);
+
+        $location = StorageService::storeArray($configuration->toArray());
+
+        // save configuration as new 1.0 configuration thing:
+        $combinations = [
+             [
+                'original_name'    => 'nordigen',
+                'storage_location' => null,
+                'config_name'      => 'nordigen.json',
+                'config_location'  => $location,
+            ]
+        ];
+        session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
+
+
         return redirect(route('004-configure.index'));
     }
 }

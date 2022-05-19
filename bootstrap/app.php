@@ -35,7 +35,7 @@ if (!function_exists('envNonEmpty')) {
     {
         $result = env($key, $default);
         if (is_string($result) && '' === $result) {
-            $result = $default;
+            return $default;
         }
 
         return $result;

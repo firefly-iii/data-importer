@@ -41,7 +41,6 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
-use App\Services\Spectre\Response\GetAccountsResponse;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
@@ -92,111 +91,113 @@ class ConfigurationController extends Controller
     public function index(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle = 'Configuration';
-        $subTitle  = 'Configure your import(s)';
-        $accounts  = [
-            self::ASSET_ACCOUNTS => [],
-            self::LIABILITIES    => [],
-        ];
-
-        $configurations = session()->get(Constants::CONFIG_FILE_PATHS);
-        $importables    = session()->get(Constants::IMPORT_FILE_PATHS);
-        $flow           = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
-        $count          = count($configurations);
-        $overruleSkip   = 'true' === $request->get('overruleskip');
-
-        if (0 === $count) {
-            $configurations = [null];
+        $mainTitle    = 'Configuration';
+        $overruleSkip = 'true' === $request->get('overruleskip');
+        $subTitle     = 'Configure your import(s)';
+        $ff3Accounts  = $this->getFF3Accounts();
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        if (!is_array($combinations)) {
+            die('Must be array');
+        }
+        if (count($combinations) < 1) {
+            die('Must be more than zero.');
         }
 
-        var_dump($configurations);
-        var_dump($importables);
-
-
-        // create configuration:
-        $configuration = $this->restoreConfiguration();
-
-        // if config says to skip it, skip it:
-        // FIXME must check for ALL.
-        if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
-            app('log')->debug('Skip configuration(s), go straight to the next step.');
-            // set config as complete.
-            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-                // at this point, nordigen is ready for data conversion.
-                session()->put(Constants::READY_FOR_CONVERSION, true);
-            }
-            // skipForm
-            return redirect()->route('005-roles.index');
+        $data = [];
+        /** @var array $entry */
+        foreach ($combinations as $entry) {
+            $data[] = $this->processCombination($entry, $ff3Accounts, $overruleSkip);
         }
 
-        // get list of asset accounts:
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
-        $fireflyAccounts = 0;
-
-        $request = new GetAccountsRequest($url, $token);
-        $request->setType(GetAccountsRequest::ASSET);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $response = $request->get();
-
-        /** @var Account $account */
-        foreach ($response as $account) {
-            $accounts[self::ASSET_ACCOUNTS][$account->id] = $account;
-            $fireflyAccounts++;
-        }
-
-        // also get liabilities
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetAccountsRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setType(GetAccountsRequest::LIABILITIES);
-        $response = $request->get();
-        /** @var Account $account */
-        foreach ($response as $account) {
-            $accounts[self::LIABILITIES][$account->id] = $account;
-            $fireflyAccounts++;
-        }
-
-        // possibilities for duplicate detection (unique columns)
-        $uniqueColumns = config('csv.unique_column_options');
-
-        // also get the nordigen / spectre accounts
-        $importerAccounts = [];
-        if ('nordigen' === $flow) {
-            $uniqueColumns = config('nordigen.unique_column_options');
-            $requisitions  = $configuration->getNordigenRequisitions();
-            $reference     = array_shift($requisitions);
-            // list all accounts in Nordigen:
-            //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
-            $importerAccounts = $this->getNordigenAccounts($reference);
-            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
-        }
-
-        if ('spectre' === $flow) {
-            $uniqueColumns           = config('spectre.unique_column_options');
-            $url                     = config('spectre.url');
-            $appId                   = SpectreSecretManager::getAppId();
-            $secret                  = SpectreSecretManager::getSecret();
-            $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
-            $spectreList->connection = $configuration->getConnection();
-            /** @var GetAccountsResponse $spectreAccounts */
-            $spectreAccounts  = $spectreList->get();
-            $importerAccounts = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
-        }
-
-        return view(
-            'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'fireflyAccounts', 'accounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns',
-                    'count','importables'
-            )
-        );
+        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'ff3Accounts', 'data'));
     }
 
     /**
+     * Each configuration/importable combination must be processed further.
+     * // TODO move to separate processor
+     * @param array $entry
+     * @param array $ff3Accounts
+     * @param bool  $overruleSkip
+     * @return array
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     */
+    private function processCombination(array $entry, array $ff3Accounts, bool $overruleSkip): array
+    {
+        $return                      = $entry;
+        $configuration               = $this->restoreConfigurationFromFile($entry['config_location']);
+        $flow                        = $configuration->getFlow();
+        $return['configuration']     = $configuration;
+        $return['flow']              = $flow;
+        $return['skip_form']         = true === $configuration->isSkipForm() && false === $overruleSkip;
+        $return['importer_accounts'] = [];
+        $return['firefly_iii_accounts'] = $ff3Accounts;
+        $return['unique_columns']    = config('csv.unique_column_options');
+
+        if ('nordigen' === $flow) {
+            $return['unique_columns']    = config('nordigen.unique_column_options');
+            $requisitions                = $configuration->getNordigenRequisitions();
+            $reference                   = array_shift($requisitions);
+            // TODO move to separate processor
+            $return['importer_accounts'] = $this->mergeNordigenAccountLists($this->getNordigenAccounts($reference), $ff3Accounts);
+        }
+
+        if ('spectre' === $flow) {
+            $return['unique_columns']    = config('spectre.unique_column_options');
+            $url                         = config('spectre.url');
+            $appId                       = SpectreSecretManager::getAppId();
+            $secret                      = SpectreSecretManager::getSecret();
+            $spectreList                 = new SpectreGetAccountsRequest($url, $appId, $secret);
+            $spectreList->connection     = $configuration->getConnection();
+            // TODO move to separate processor
+            $return['importer_accounts'] = $this->mergeSpectreAccountLists($spectreList->get(), $ff3Accounts);
+        }
+
+        return $return;
+
+
+        // if config says to skip it, skip it:
+        //  must check for ALL.
+//        if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
+//            app('log')->debug('Skip configuration(s), go straight to the next step.');
+//            // set config as complete.
+//            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
+//            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+//                // at this point, nordigen is ready for data conversion.
+//                session()->put(Constants::READY_FOR_CONVERSION, true);
+//            }
+//            // skipForm
+//            return redirect()->route('005-roles.index');
+//        }
+
+        //         // also get the nordigen / spectre accounts
+        //        $importerAccounts = [];
+        //        if ('nordigen' === $flow) {
+        //            $uniqueColumns = config('nordigen.unique_column_options');
+        //            $requisitions  = $configuration->getNordigenRequisitions();
+        //            $reference     = array_shift($requisitions);
+        //            // list all accounts in Nordigen:
+        //            //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
+        //            $importerAccounts = $this->getNordigenAccounts($reference);
+        //            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
+        //        }
+        //
+        //        if ('spectre' === $flow) {
+        //            $uniqueColumns           = config('spectre.unique_column_options');
+        //            $url                     = config('spectre.url');
+        //            $appId                   = SpectreSecretManager::getAppId();
+        //            $secret                  = SpectreSecretManager::getSecret();
+        //            $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
+        //            $spectreList->connection = $configuration->getConnection();
+        //            /** @var GetAccountsResponse $spectreAccounts */
+        //            $spectreAccounts  = $spectreList->get();
+        //            $importerAccounts = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
+        //        }
+    }
+
+    /**
+     * TODO move to helper.
+     *
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
      * @param string $identifier
      * @return array
@@ -313,6 +314,8 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * TODO move to some helper.
+     *
      * @param array  $firefly
      * @param string $currency
      * @return array
@@ -334,6 +337,8 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * TODO move to some helper.
+     *
      * @param SpectreGetAccountsResponse $spectre
      * @param array                      $firefly
      *
@@ -405,6 +410,8 @@ class ConfigurationController extends Controller
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
+        var_dump($request->all());
+        exit;
         app('log')->debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.
         $fromRequest   = $request->getAll();
@@ -446,6 +453,46 @@ class ConfigurationController extends Controller
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
+    }
+
+    /**
+     * TODO move to helper
+     * @return array
+     */
+    private function getFF3Accounts(): array
+    {
+        $accounts = [
+            self::ASSET_ACCOUNTS => [],
+            self::LIABILITIES    => [],
+        ];
+
+        // get list of asset accounts:
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetAccountsRequest($url, $token);
+        $request->setType(GetAccountsRequest::ASSET);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $response = $request->get();
+
+        /** @var Account $account */
+        foreach ($response as $account) {
+            $accounts[self::ASSET_ACCOUNTS][$account->id] = $account;
+        }
+
+        // also get liabilities
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetAccountsRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setType(GetAccountsRequest::LIABILITIES);
+        $response = $request->get();
+        /** @var Account $account */
+        foreach ($response as $account) {
+            $accounts[self::LIABILITIES][$account->id] = $account;
+        }
+        return $accounts;
     }
 
 
