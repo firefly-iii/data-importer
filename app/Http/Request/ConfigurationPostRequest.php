@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Request;
 
 
-use App\Services\Session\Constants;
+use Carbon\Carbon;
 use Illuminate\Validation\Validator;
 
 /**
@@ -48,54 +48,111 @@ class ConfigurationPostRequest extends Request
      */
     public function getAll(): array
     {
+        $count  = $this->integer('count');
         $result = [
-            'headers'                       => $this->convertBoolean($this->get('headers')),
-            'delimiter'                     => $this->convertString('delimiter'),
-            'date'                          => $this->convertString('date'),
-            'default_account'               => $this->integer('default_account'),
-            'rules'                         => $this->convertBoolean($this->get('rules')),
-            'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
-            'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
-            'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
-            'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
-            'specifics'                     => [],
-            'roles'                         => [],
-            'mapping'                       => [],
-            'do_mapping'                    => [],
-            'flow'                          => $this->convertString('flow'),
+            'count'          => $this->integer('count'),
+            'configurations' => [],
 
-            // duplicate detection:
-            'duplicate_detection_method'    => $this->convertString('duplicate_detection_method'),
-            'unique_column_index'           => $this->integer('unique_column_index'),
-            'unique_column_type'            => $this->convertString('unique_column_type'),
-
-            // spectre values:
-            'connection'                    => $this->convertString('connection'),
-            'identifier'                    => $this->convertString('identifier'),
-            'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
-
-            // nordigen:
-            'nordigen_country'              => $this->convertString('nordigen_country'),
-            'nordigen_bank'                 => $this->convertString('nordigen_bank'),
-            'nordigen_max_days'             => $this->convertString('nordigen_max_days'),
-            'nordigen_requisitions'         => json_decode($this->convertString('nordigen_requisitions'), true) ?? [],
-
-            // nordigen + spectre
-            'do_import'                     => $this->get('do_import') ?? [],
-            'accounts'                      => $this->get('accounts') ?? [],
-            'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),
-            'date_range'                    => $this->convertString('date_range'),
-            'date_range_number'             => $this->integer('date_range_number'),
-            'date_range_unit'               => $this->convertString('date_range_unit'),
-            'date_not_before'               => $this->getCarbonDate('date_not_before'),
-            'date_not_after'                => $this->getCarbonDate('date_not_after'),
-
-            // utf8 conversion
-            'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
         ];
+        for ($i = 0; $i < $count; $i++) {
+            $current = [
+                'headers'                       => $this->getBoolFromArray($i, 'headers'),
+                'delimiter'                     => $this->getStringFromArray($i, 'delimiter'),
+                'date'                          => $this->getStringFromArray($i, 'date'),
+                'default_account'               => $this->getIntegerFromArray($i, 'default_account'),
+                'rules'                         => $this->getBoolFromArray($i, 'rules'),
+                'ignore_duplicate_lines'        => $this->getBoolFromArray($i, 'ignore_duplicate_lines'),
+                'ignore_duplicate_transactions' => $this->getBoolFromArray($i, 'ignore_duplicate_transactions'),
+                'skip_form'                     => $this->getBoolFromArray($i, 'skip_form'),
+                'add_import_tag'                => $this->getBoolFromArray($i, 'add_import_tag'),
+                'flow'                          => $this->getStringFromArray($i, 'flow'),
+
+                // duplicate detection:
+
+                'duplicate_detection_method' => $this->getStringFromArray($i, 'duplicate_detection_method'),
+                'unique_column_index'        => $this->getIntegerFromArray($i, 'unique_column_index'),
+                'unique_column_type'         => $this->getStringFromArray($i, 'unique_column_type'),
+
+                // spectre values:
+                'connection'                 => $this->getStringFromArray($i, 'connection'),
+                'identifier'                 => $this->getStringFromArray($i, 'identifier'),
+                'ignore_spectre_categories'  => $this->getBoolFromArray($i, 'ignore_spectre_categories'),
+
+                // nordigen:
+                'nordigen_country'           => $this->getStringFromArray($i, 'nordigen_country'),
+                'nordigen_bank'              => $this->getStringFromArray($i, 'nordigen_bank'),
+                'nordigen_max_days'          => $this->getStringFromArray($i, 'nordigen_max_days'),
+                'nordigen_requisitions'      => json_decode($this->getStringFromArray($i, 'nordigen_requisitions'), true) ?? [],
+
+                // nordigen + spectre
+
+                'do_import'         => $this->getArrayFromArray($i, 'do_import'),
+                'accounts'          => $this->getArrayFromArray($i, 'accounts'),
+                'map_all_data'      => $this->getBoolFromArray($i, 'map_all_data'),
+                'date_range'        => $this->getStringFromArray($i, 'date_range'),
+                'date_range_number' => $this->getIntegerFromArray($i, 'date_range_number'),
+                'date_range_unit'   => $this->getStringFromArray($i, 'date_range_unit'),
+                'date_not_before'   => $this->getDateFromArray($i, 'date_not_before'),
+                'date_not_after'    => $this->getDateFromArray($i, 'date_not_after'),
+
+                // utf8 conversion
+                'conversion'        => $this->getBoolFromArray($i, 'conversion'),
+
+                // next
+                'specifics'         => [],
+                'roles'             => [],
+                'mapping'           => [],
+                'do_mapping'        => [],
+            ];
+
+
+            $result['configurations'][] = $current;
+        }
 
         return $result;
+    }
+
+    /**
+     * @param int    $index
+     * @param string $key
+     * @return bool
+     */
+    private function getBoolFromArray(int $index, string $key): bool
+    {
+        $res = $this->get($key);
+        if (is_array($res)) {
+            return '1' === ($res[$index] ?? '0');
+        }
+        return false;
+    }
+
+    /**
+     * @param int    $index
+     * @param string $key
+     * @return string
+     */
+    private function getStringFromArray(int $index, string $key): string
+    {
+        $res = $this->get($key);
+        if (is_array($res)) {
+            return (string) $res[$index];
+        }
+        return '';
+    }
+
+    /**
+     * @param int    $index
+     * @param string $key
+     * @return int
+     */
+    private function getIntegerFromArray(int $index, string $key): int
+    {
+        $res = $this->get($key);
+        if (is_array($res)) {
+            return (int) $res[$index];
+        }
+        return 0;
     }
 
     /**
@@ -104,24 +161,27 @@ class ConfigurationPostRequest extends Request
     public function rules(): array
     {
         $rules = [
-//            'headers'                       => 'numeric|between:0,1',
-//            'delimiter'                     => 'in:comma,semicolon,tab',
-//            'date'                          => 'between:1,25',
-//            'default_account'               => 'required|numeric|min:1|max:100000',
-//            'rules'                         => 'numeric|between:0,1',
-//            'ignore_duplicate_lines'        => 'numeric|between:0,1',
-//            'ignore_duplicate_transactions' => 'numeric|between:0,1',
-//            'skip_form'                     => 'numeric|between:0,1',
-//            'add_import_tag'                => 'numeric|between:0,1',
-//            'ignore_spectre_categories'     => 'numeric|between:0,1',
-//
-//            // duplicate detection:
-//            'duplicate_detection_method'    => 'in:cell,none,classic',
-//            'unique_column_index'           => 'numeric',
-//            'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
-//
-//            // conversion
-//            'conversion'                    => 'numeric|between:0,1',
+            'headers.*'                       => 'numeric|between:0,1',
+            'delimiter.*'                     => 'in:comma,semicolon,tab',
+            'date.*'                          => 'between:1,25',
+            'default_account.*'               => 'required|numeric|min:1|max:100000',
+            'rules.*'                         => 'numeric|between:0,1',
+            'ignore_duplicate_lines.*'        => 'numeric|between:0,1',
+            'ignore_duplicate_transactions.*' => 'numeric|between:0,1',
+            'skip_form.*'                     => 'numeric|between:0,1',
+            'add_import_tag.*'                => 'numeric|between:0,1',
+            'ignore_spectre_categories.*'     => 'numeric|between:0,1',
+            'duplicate_detection_method.*'    => 'in:cell,none,classic',
+            'unique_column_index.*'           => 'numeric',
+            'unique_column_type.*'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
+            'conversion.*'                    => 'numeric|between:0,1',
+            'flow.*'                          => 'in:file,nordigen,spectre',
+            'map_all_data.*'                  => 'numeric|between:0,1',
+            'date_range.*'                    => 'partial,all,range',
+            'date_range_number.*'             => 'numeric',
+            'date_range_unit.*'               => 'in:d,w,m,y',
+            'date_not_before.*'               => 'date',
+            'date_not_after.*'                => 'date',
         ];
 
         return $rules;
@@ -140,14 +200,48 @@ class ConfigurationPostRequest extends Request
         $validator->after(
             function (Validator $validator) {
                 // validate all account info
-                $flow     = request()->cookie(Constants::FLOW_COOKIE);
-                $data     = $validator->getData();
-                $doImport = $data['do_import'] ?? [];
-                if (0 === count($doImport) && 'file' !== $flow) {
-                    $validator->errors()->add('do_import', 'You must select at least one account to import from.');
+                $data = $validator->getData();
+                foreach ($data['flow'] as $index => $flow) {
+                    $data     = $validator->getData();
+                    $doImport = $data[$index]['do_import'] ?? [];
+                    if (0 === count($doImport) && 'file' !== $flow) {
+                        $validator->errors()->add(sprintf('do_import.%d', $index), 'You must select at least one account to import from.');
+                    }
                 }
             }
         );
+    }
+
+    /**
+     * @param int    $index
+     * @param string $key
+     * @return array
+     */
+    private function getArrayFromArray(int $index, string $key): array
+    {
+        $res = $this->get($key);
+        if (is_array($res)) {
+            return $res[$index];
+        }
+        return [];
+    }
+
+    /**
+     * @param int    $index
+     * @param string $key
+     * @return Carbon|null
+     */
+    private function getDateFromArray(int $index, string $key): ?Carbon
+    {
+        $res    = $this->get($key);
+        $string = '';
+        if (is_array($res)) {
+            $string = (string) $res[$index];
+        }
+        if ('' === $string) {
+            return null;
+        }
+        return Carbon::createFromFormat('Y-m-d', $string);
     }
 
 }

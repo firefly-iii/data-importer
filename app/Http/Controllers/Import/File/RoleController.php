@@ -1,7 +1,7 @@
 <?php
 /*
  * RoleController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2022 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import\CSV;
+namespace App\Http\Controllers\Import\File;
 
 
 use App\Http\Controllers\Controller;
@@ -42,6 +42,11 @@ use League\Csv\InvalidArgument;
 use League\Csv\UnableToProcessCsv;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use function app;
+use function config;
+use function redirect;
+use function session;
+use function view;
 
 /**
  * Class RoleController

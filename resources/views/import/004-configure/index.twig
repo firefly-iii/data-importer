@@ -116,6 +116,7 @@
                     <div class="tab-content" id="myTabContent">
                         {% for index, importable in data %}
                             <!-- hidden input fields for this index -->
+                            <input type="hidden" name="count" value="{{ data|length }}"/>
                             <input type="hidden" name="flow[{{ index }}]" value="{{ importable.flow }}"/>
                             <input type="hidden" name="identifier[{{ index }}]" value="{{ importable.configuration.getIdentifier }}"/>
                             <input type="hidden" name="connection[{{ index }}]" value="{{ importable.configuration.getConnection }}"/>

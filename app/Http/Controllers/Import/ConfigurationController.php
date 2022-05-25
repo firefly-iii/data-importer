@@ -55,6 +55,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
+use League\Flysystem\Config;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -410,49 +411,67 @@ class ConfigurationController extends Controller
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
-        var_dump($request->all());
-        exit;
-        app('log')->debug(sprintf('Now running %s', __METHOD__));
-        // store config on drive.
-        $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        $data = $request->getAll();
 
-        // TODO are all fields actually in the config?
+        // loop each entry.
+        if($data['count'] !== count($data['configurations'])) {
+            throw new ImporterErrorException('Unexpected miscount in configuration array.');
+        }
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        if (!is_array($combinations)) {
+            throw new ImporterErrorException('Combinations must be an array.');
+        }
+        if (count($combinations) < 1) {
+            throw new ImporterErrorException('Combinations must be more than zero.');
+        }
 
-        // loop accounts:
-        $accounts = [];
-        foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (isset($fromRequest['accounts'][$identifier])) {
-                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
+        if (count($combinations) !== $data['count']) {
+            throw new ImporterErrorException('Combinations must be count-validated.');
+        }
+        var_dump($combinations);
+        $configurations = [];
+        foreach($data['configurations'] as $index => $current) {
+            $object = Configuration::fromRequest($current);
+
+            // TODO are all fields actually in the config?
+
+            // loop accounts:
+            $accounts = [];
+            foreach (array_keys($current['do_import']) as $identifier) {
+                if (isset($current['accounts'][$identifier])) {
+                    $accounts[$identifier] = (int) $current['accounts'][$identifier];
+                }
+            }
+            $object->setAccounts($accounts);
+            $object->updateDateRange();
+
+            $json = '{}';
+            try {
+                $json = json_encode($object->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+            } catch (JsonException $e) {
+                app('log')->error($e->getMessage());
+                throw new ImporterErrorException($e->getMessage(), 0, $e);
+            }
+            ;
+            $combinations[$index]['config_location'] = StorageService::storeContent($json);
+            app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $object->getConnection()));
+
+            // set config as complete.
+            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
+
+            if ('nordigen' === $object->getFlow() || 'spectre' === $object->getFlow()) {
+                // at this point, nordigen is ready for data conversion.
+                session()->put(Constants::READY_FOR_CONVERSION, true);
             }
         }
-        $configuration->setAccounts($accounts);
-        $configuration->updateDateRange();
 
-
-        $json = '{}';
-        try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
-            app('log')->error($e->getMessage());
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        StorageService::storeContent($json);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-
-        app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
-        // set config as complete.
-        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-            // at this point, nordigen is ready for data conversion.
-            session()->put(Constants::READY_FOR_CONVERSION, true);
-        }
+        session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
+
+
     }
 
     /**

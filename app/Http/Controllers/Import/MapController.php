@@ -55,7 +55,7 @@ class MapController extends Controller
     protected const DISK_NAME = 'jobs';
 
     /**
-     * RoleController constructor.
+     * MapController     constructor.
      */
     public function __construct()
     {
