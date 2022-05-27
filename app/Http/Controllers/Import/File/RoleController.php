@@ -30,6 +30,7 @@ use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
 use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
@@ -78,38 +79,32 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         app('log')->debug('Now in role controller');
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
-        if ('file' !== $flow) {
-            die('redirect or something');
+        $mainTitle           = 'Role definition';
+        $subTitle            = 'Configure the role of each column in your file(s)';
+        $singleConfiguration = session()->get(Constants::SINGLE_CONFIGURATION_SESSION);
+
+        // could be multi import
+        // TODO this code must be in a helper:
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        if (!is_array($combinations)) {
+            die('Must be array');
         }
-        $mainTitle = 'Role definition';
-        $subTitle  = 'Configure the role of each column in your file';
-
-        // get configuration object.
-        // Read configuration from session, will miss some important keys:
-        $configuration = $this->restoreConfiguration();
-
-
-        // get columns from file
-        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
-        $columns  = RoleService::getColumns($content, $configuration);
-        $examples = RoleService::getExampleData($content, $configuration);
-
-        // submit mapping from config.
-        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+        if (count($combinations) < 1) {
+            die('Must be more than zero.');
+        }
+        $data = [];
+        app('log')->debug(sprintf('Array has %d configuration(s)', count($combinations)));
+        /** @var array $entry */
+        foreach ($combinations as $index => $entry) {
+            app('log')->debug(sprintf('[%d/%d] processing configuration.', ($index + 1), count($combinations)));
+            $data[] = $this->processCombination($entry);
+        }
 
         // roles
         $roles = config('csv.import_roles');
         ksort($roles);
 
-        // configuration (if it is set)
-        $configuredRoles     = $configuration->getRoles();
-        $configuredDoMapping = $configuration->getDoMapping();
-
-        return view(
-            'import.005-roles.index',
-            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
-        );
+        return view('import.005-roles.index', compact('mainTitle', 'subTitle', 'roles', 'data', 'singleConfiguration'));
     }
 
     /**
@@ -124,42 +119,55 @@ class RoleController extends Controller
     {
         $data = $request->getAll();
 
-        // get configuration object.
-        // Read configuration from session, may miss some important keys:
-        $configuration = $this->restoreConfiguration();
+        // TODO this code must be in a helper:
+        $combinations    = session()->get(Constants::UPLOADED_COMBINATIONS);
+        $newCombinations = [];
+        if (!is_array($combinations)) {
+            die('Must be array');
+        }
+        if (count($combinations) < 1) {
+            die('Must be more than zero.');
+        }
+        $needsMapping = false;
+        /**
+         * @var int   $index
+         * @var array $entry
+         */
+        foreach ($combinations as $index => $entry) {
+            $dataSet = $data['configurations'][$index];
+            // restore configuration (this time from array!)
+            $object       = Configuration::fromArray(json_decode(StorageService::getContent($entry['config_location']), true));
+            $needsMapping = true === $needsMapping || $this->needMapping($dataSet['do_mapping']);
+            $object->setRoles($dataSet['roles']);
+            $object->setDoMapping($dataSet['do_mapping']);
 
-        $needsMapping = $this->needMapping($data['do_mapping']);
-        $configuration->setRoles($data['roles']);
-        $configuration->setDoMapping($data['do_mapping']);
+            // then this is the new, full array:
+            $fullArray = $object->toArray();
 
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            // and it can be saved on disk:
+            $configFileName = StorageService::storeArray($fullArray);
+            app('log')->debug(sprintf('Old configuration was stored under key "%s".', $entry['config_location']));
+            app('log')->debug(sprintf('New configuration is stored under key "%s".', $configFileName));
+            // new
+            $entry['config_location'] = $configFileName;
+            $newCombinations[]        = $entry;
 
-        // then this is the new, full array:
-        $fullArray = $configuration->toArray();
-
-        // and it can be saved on disk:
-        $configFileName = StorageService::storeArray($fullArray);
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // this is a new config file name.
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
+        }
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
+        session()->put(Constants::UPLOADED_COMBINATIONS, $newCombinations);
 
-        // redirect to mapping thing.
         if (true === $needsMapping) {
             return redirect()->route('006-mapping.index');
         }
-        // otherwise, store empty mapping, and continue:
-        // set map config as complete.
+
         session()->put(Constants::READY_FOR_CONVERSION, true);
         return redirect()->route('007-convert.index');
     }
 
     /**
+     * TODO move to helper
+     *
      * Will tell you if any role needs mapping.
      *
      * @param array $array
@@ -176,5 +184,35 @@ class RoleController extends Controller
         }
 
         return $need;
+    }
+
+    /**
+     * TODO move to helper
+     * @param array $entry
+     * @return array
+     * @throws Exception
+     * @throws InvalidArgument
+     * @throws JsonException
+     * @throws UnableToProcessCsv
+     */
+    private function processCombination(array $entry): array
+    {
+        $return                  = $entry;
+        $configuration           = $this->restoreConfigurationFromFile($entry['config_location']);
+        $flow                    = $configuration->getFlow();
+        $return['configuration'] = $configuration;
+        $return['flow']          = $flow;
+
+        // get columns and examples from the uploaded file:
+        $content            = StorageService::getContent($entry['storage_location'], $configuration->isConversion());
+        $return['columns']  = RoleService::getColumns($content, $configuration);
+        $return['examples'] = RoleService::getExampleData($content, $configuration);
+
+        // get things from configuration ready:
+        $return['mapping']    = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+        $return['roles']      = $configuration->getRoles();
+        $return['do_mapping'] = $configuration->getDoMapping();
+
+        return $return;
     }
 }

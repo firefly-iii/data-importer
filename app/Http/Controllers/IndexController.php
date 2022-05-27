@@ -24,11 +24,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Artisan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  *
@@ -56,6 +56,16 @@ class IndexController extends Controller
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),
         ];
+
+        // also remove all uploads:
+        $disk = Storage::disk('uploads');
+        foreach ($disk->files() as $file) {
+            if ('.gitignore' !== $file) {
+                $disk->delete($file);
+            }
+        }
+
+
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
 

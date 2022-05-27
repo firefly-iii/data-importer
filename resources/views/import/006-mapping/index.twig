@@ -13,16 +13,16 @@
                         {{ subTitle }}
                     </div>
                     <div class="card-body">
-                        <p>Map data in your import to your Firefly III instance.</p>
+                        <p>Map data in your importable(s) to your Firefly III instance.</p>
                         <p>
-                            Entries in your import may already exist in another form in your own Firefly III
+                            Entries in your importable(s) may already exist in another form in your own Firefly III
                             instance. Be sure to <a target="_blank"
                                                     href="https://docs.firefly-iii.org/data-importer/usage/map/">
-                                check out the documentation</a>, because this is where
-                            the magic happens.
+                                check out the documentation</a>, because this is where the magic happens.
                         </p>
                         <p class="text-info">
-                            Account names with "lots&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;&nbsp;spaces" may seemingly lose
+                            Names and descriptions with "lots&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;&nbsp;spaces" may seemingly
+                            lose
                             those spaces. Fear not, those will be perfectly preserved.
                         </p>
                     </div>
@@ -47,71 +47,124 @@
                 </div>
             </div>
         {% endif %}
-        <div class="row mt-3">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        Form
-                    </div>
-                    <div class="card-body">
-                        <form method="post" action="{{ route('006-mapping.post') }}" accept-charset="UTF-8">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            {% for index, row in data %}
-                                <h3>{{ index }}: {{ trans('import.column_'~row.role) }}</h3>
-                                <table class="table">
-                                    <tr>
-                                        <th style="width:50%;">Field value</th>
-                                        <th style="width:50%;">Mapped to</th>
-                                    </tr>
-                                    {% set finalCount = 0 %}
-                                    {% for valueIndex, value in row.values %}
-                                        <tr>
-                                            <td>
-                                                <pre style="color:#e83e8c;">{{ value }}</pre>
-                                                <input type="hidden" name="values[{{ index }}][{{ loop.index0 }}]"
-                                                       value="{{ value }}"/>
-                                            </td>
-                                            <td>
-                                                <select name="mapping[{{ index }}][{{ loop.index0 }}]"
-                                                        class="form-control">
-                                                    <option value="0" label="(do not map / automap)">(do not map /
-                                                        automap)
-                                                    </option>
-                                                    {% for key, maps in row.mapping_data %}
-                                                        <!-- if is array go one level deeper -->
-                                                        {% if maps is iterable %}
-                                                            <optgroup label="{{ key }}">
-                                                                {% for singleId, singleEntry in maps %}
-                                                                    <option
-                                                                        {% if singleId == row.mapped[value] %}selected{% endif %}
-                                                                        label="{{ singleEntry }}"
-                                                                        value="{{ singleId }}">
-                                                                        {{ singleEntry }}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </optgroup>
-                                                        {% else %}
-                                                            <option {% if key == row.mapped[value] %}selected{% endif %}
-                                                                    label="{{ maps }}" value="{{ key }}">
-                                                                {{ maps }}
+        <form method="post" action="{{ route('006-mapping.post') }}" accept-charset="UTF-8">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="single_configuration"
+                   value="{% if true == singleConfiguration %}true{% endif %}{% if false == singleConfiguration %}false{% endif %}"/>
+            <input type="hidden" name="count" value="{{ data|length }}"/>
+
+
+            <div class="row mt-3">
+                <div class="col-lg-12">
+
+                    {# THIS IS THE LIST OF TABS #}
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        {% for index, importable in data %}
+                            {% if not (true == singleConfiguration and index > 0) %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {% if index == 0 %}active{% endif %}"
+                                            id="importable-{{ index }}-tab" data-bs-toggle="tab"
+                                            data-bs-target="#importable-{{ index }}" type="button" role="tab"
+                                            aria-controls="importable-{{ index }}" aria-selected="true">
+                                        {% if false == singleConfiguration %}
+                                            {{ importable.original_name }}
+                                        {% endif %}
+                                        {% if true == singleConfiguration %}
+                                            Roles
+                                        {% endif %}
+                                    </button>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+
+
+                    <div class="tab-content" id="myTabContent">
+                        {% for index, importable in data %}
+                        {% if not (true == singleConfiguration and index > 0) %}
+                        {#  Hidden fields for current tab #}
+                        <div class="tab-pane fade show {% if index == 0 %}active{% endif %}" id="importable-{{ index }}"
+                             role="tabpanel" aria-labelledby="importable-{{ index }}-tab">
+
+                            <div class="card">
+                                <div class="card-header">
+                                    {% if 'file' == importable.flow %}
+                                        Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
+                                    {% endif %}
+                                    {% if 'nordigen' == importable.flow %}
+                                        Form for Nordigen import.
+                                    {% endif %}
+                                    {% if 'spectre' == importable.flow %}
+                                        Form for Spectre / Salt Edge import.
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    {% if importable.info|length == 0 %}
+                                        <em>There is nothing to map for this file. Please check the other tabs.</em>
+                                    {% endif %}
+                                    {% for iindex, row in importable.info %}
+                                        <h3>{{ iindex }}: {{ trans('import.column_'~row.role) }}</h3>
+                                        <table class="table">
+                                            <tr>
+                                                <th style="width:50%;">Field value</th>
+                                                <th style="width:50%;">Mapped to</th>
+                                            </tr>
+                                            {% set finalCount = 0 %}
+                                            {% for valueIndex, value in row.values %}
+                                                <tr>
+                                                    <td>
+                                                        <pre style="color:#e83e8c;">{{ value }}</pre>
+                                                        <input type="hidden"
+                                                               name="values[{{ index }}][{{ iindex }}][{{ loop.index0 }}]"
+                                                               value="{{ value }}"/>
+                                                    </td>
+                                                    <td>
+                                                        <select name="mapping[{{ index }}][{{ iindex }}][{{ loop.index0 }}]"
+                                                                class="form-control">
+                                                            <option value="0" label="(do not map / automap)">(do not map
+                                                                /
+                                                                automap)
                                                             </option>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        {% set finalCount = loop.index0 + 1 %}
+                                                            {% for key, maps in row.mapping_data %}
+                                                                <!-- if is array go one level deeper -->
+                                                                {% if maps is iterable %}
+                                                                    <optgroup label="{{ key }}">
+                                                                        {% for singleId, singleEntry in maps %}
+                                                                            <option
+                                                                                {% if singleId == row.mapped[value] %}selected{% endif %}
+                                                                                label="{{ singleEntry }}"
+                                                                                value="{{ singleId }}">
+                                                                                {{ singleEntry }}
+                                                                            </option>
+                                                                        {% endfor %}
+                                                                    </optgroup>
+                                                                {% else %}
+                                                                    <option
+                                                                        {% if key == row.mapped[value] %}selected{% endif %}
+                                                                        label="{{ maps }}" value="{{ key }}">
+                                                                        {{ maps }}
+                                                                    </option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                {% set finalCount = loop.index0 + 1 %}
+                                                <!-- final count is {{ finalCount }} -->
+                                            {% endfor %}
+                                        </table>
                                         <!-- final count is {{ finalCount }} -->
                                     {% endfor %}
-                                </table>
-                                <!-- final count is {{ finalCount }} -->
-                            {% endfor %}
-                            <button type="submit" class="btn btn-primary float-end">Submit &rarr;</button>
-                        </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">

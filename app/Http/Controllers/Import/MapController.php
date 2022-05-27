@@ -72,40 +72,65 @@ class MapController extends Controller
     {
         app('log')->debug('Now in mapController index');
 
-        $mainTitle     = 'Map data';
-        $subTitle      = 'Map values in file to actual data in Firefly III';
-        $configuration = $this->restoreConfiguration();
-        $data          = [];
-        $roles         = [];
+        $mainTitle           = 'Map data';
+        $subTitle            = 'Map values in your file(s) to actual data in Firefly III';
+        $singleConfiguration = session()->get(Constants::SINGLE_CONFIGURATION_SESSION);
 
-        if ('file' === $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for importable file');
-            $roles = $configuration->getRoles();
-            $data  = $this->getCSVMapInformation();
+        // TODO this code must be in a helper:
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        $data         = [];
+        if (!is_array($combinations)) {
+            die('Must be array');
         }
+        if (count($combinations) < 1) {
+            die('Must be more than zero.');
+        }
+        $needRoles = false;
 
-        // nordigen, spectre and others:
-        if ('file' !== $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for nordigen and spectre');
-            $roles = [];
-            $data  = $this->getImporterMapInformation();
+        /**
+         * @var int   $index
+         * @var array $entry
+         */
+        foreach ($combinations as $index => $entry) {
+            $set = $entry;
+            // restore configuration (this time from array!)
+            $object = Configuration::fromArray(json_decode(StorageService::getContent($entry['config_location']), true));
+
+            $set['info']  = [];
+            $set['roles'] = [];
+
+            if ('file' === $object->getFlow()) {
+                app('log')->debug('Get mapping data for importable file');
+                $set['roles'] = $object->getRoles();
+                $set['info']  = $this->getCSVMapInformation($entry['config_location'], $entry['storage_location']);
+            }
+
+            // nordigen, spectre and others:
+            if ('file' !== $object->getFlow()) {
+                app('log')->debug('Get mapping data for nordigen and spectre');
+                $set['roles'] = [];
+                $set['info']  = $this->getImporterMapInformation($entry['storage_location']);
+            }
+            if (0 === count($set['info'])) {
+                $needRoles = true === $needRoles;
+                if ('file' === $object->getFlow()) {
+                    app('log')->debug('Its a file, also set ready for conversion.');
+                    session()->put(Constants::READY_FOR_CONVERSION, true);
+                }
+            }
+            if (0 !== count($set['info'])) {
+                $needRoles = true;
+            }
+            $data[] = $set;
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
-        if (0 === count($data)) {
-            // set map config as complete.
+        if (false === $needRoles) {
             session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-
-            // if file, now ready for conversion
-            if ('file' === $configuration->getFlow()) {
-                app('log')->debug('Its a file, also set ready for conversion.');
-                session()->put(Constants::READY_FOR_CONVERSION, true);
-            }
             return redirect()->route('007-convert.index');
         }
 
-
-        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'data', 'singleConfiguration'));
     }
 
     /**
@@ -113,14 +138,16 @@ class MapController extends Controller
      * TODO needs refactoring and proper splitting into helpers.
      * TODO needs renaming or specific CAMT counterpart.
      *
+     * @param string $configKey
+     * @param string $fileKey
      * @return array
      * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
      * @throws NotFoundExceptionInterface
      */
-    private function getCSVMapInformation(): array
+    private function getCSVMapInformation(string $configKey, string $fileKey): array
     {
-        $configuration   = $this->restoreConfiguration();
+        $configuration   = Configuration::fromArray(json_decode(StorageService::getContent($configKey), true));
         $roles           = $configuration->getRoles();
         $existingMapping = $configuration->getMapping();
         $doMapping       = $configuration->getDoMapping();
@@ -164,12 +191,13 @@ class MapController extends Controller
         }
 
         // get columns from file
-        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
+        $content   = StorageService::getContent($fileKey, $configuration->isConversion());
         $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
         return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
     }
 
     /**
+     * TODO move to helper.
      * Weird bunch of code to return info on Spectre and Nordigen.
      * @return array
      * @throws ContainerExceptionInterface
@@ -179,6 +207,7 @@ class MapController extends Controller
      */
     private function getImporterMapInformation(): array
     {
+        die('getImporterMapInformation does not work yet.');
         $data            = [];
         $configuration   = $this->restoreConfiguration();
         $existingMapping = $configuration->getMapping();
@@ -277,6 +306,7 @@ class MapController extends Controller
     }
 
     /**
+     * TODO move to helper.
      * @return array
      * @throws ContainerExceptionInterface
      * @throws FileNotFoundException
@@ -325,83 +355,75 @@ class MapController extends Controller
      */
     public function postIndex(Request $request): RedirectResponse
     {
-        $values  = $request->get('values') ?? [];
-        $mapping = $request->get('mapping') ?? [];
-        $values  = !is_array($values) ? [] : $values;
-        $mapping = !is_array($mapping) ? [] : $mapping;
-        $data    = [];
+        $data = $request->all();
 
-        $configuration = $this->restoreConfiguration();
+        // TODO this code must be in a helper:
+        $combinations    = session()->get(Constants::UPLOADED_COMBINATIONS);
+        $newCombinations = [];
+        if (!is_array($combinations)) {
+            die('Must be array');
+        }
+        if (count($combinations) < 1) {
+            die('Must be more than zero.');
+        }
+        foreach ($combinations as $index => $entry) {
+            // restore configuration (this time from array!)
+            $object = Configuration::fromArray(json_decode(StorageService::getContent($entry['config_location']), true));
 
-        /**
-         * Loop array with available columns.
-         *
-         * @var int   $index
-         * @var array $row
-         */
-        foreach ($values as $columnIndex => $column) {
+            $values  = $data['values'][$index] ?? [];
+            $mapping = $data['mapping'][$index] ?? [];
+            $values  = !is_array($values) ? [] : $values;
+            $mapping = !is_array($mapping) ? [] : $mapping;
+            // was $data
+            $current = [];
+
             /**
-             * Loop all values for this column
+             * Loop array with available columns.
              *
-             * @var int    $valueIndex
-             * @var string $value
+             * @var int   $index
+             * @var array $row
              */
-            foreach ($column as $valueIndex => $value) {
-                $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
-                if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
-                    $data[$columnIndex][$value] = (int) $mappedValue;
-                }
+            foreach ($values as $columnIndex => $column) {
+                /**
+                 * Loop all values for this column
+                 *
+                 * @var int    $valueIndex
+                 * @var string $value
+                 */
+                foreach ($column as $valueIndex => $value) {
+                    $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
+                    if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
+                        $current[$columnIndex][$value] = (int) $mappedValue;
+                    }
 
+                }
+            }
+
+            // at this point the $current array must be merged with the mapping as it is on the disk,
+            // and then saved to disk once again in a new config file.
+            $originalMapping = $object->getMapping();
+            // loop $current and save values:
+            $mergedMapping = $this->mergeMapping($originalMapping, $current);
+            $object->setMapping($mergedMapping);
+
+            // then save entire thing to a new disk file:
+            app('log')->debug(sprintf('Old configuration was stored under key "%s".', $entry['config_location']));
+            $entry['config_location'] = StorageService::storeArray($object->toArray());
+            app('log')->debug(sprintf('New configuration is stored under key "%s".', $entry['config_location']));
+            // set map config as complete.
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+            session()->put(Constants::READY_FOR_CONVERSION, true);
+            if ('nordigen' === $object->getFlow() || 'spectre' === $object->getFlow()) {
+                // if nordigen, now ready for submission!
+                session()->put(Constants::READY_FOR_SUBMISSION, true);
             }
         }
 
-        // at this point the $data array must be merged with the mapping as it is on the disk,
-        // and then saved to disk once again in a new config file.
-        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        $originalMapping = [];
-        $diskConfig      = null;
-        if (null !== $configFileName) {
-            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig      = Configuration::fromArray($diskArray);
-            $originalMapping = $diskConfig->getMapping();
-        }
-
-        // loop $data and save values:
-        $mergedMapping = $this->mergeMapping($originalMapping, $data);
-
-        $configuration->setMapping($mergedMapping);
-
-        // store mapping in config object ( + session)
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // since the configuration saved in the session will omit 'mapping', 'do_mapping' and 'roles'
-        // these must be set to the configuration file
-        // no need to do this sooner because toSessionArray would have dropped them anyway.
-        if (null !== $diskConfig) {
-            $configuration->setRoles($diskConfig->getRoles());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-        }
-
-        // then save entire thing to a new disk file:
-        // TODO write config needs helper too
-        $configFileName = StorageService::storeArray($configuration->toArray());
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set map config as complete.
-        session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-        session()->put(Constants::READY_FOR_CONVERSION, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-            // if nordigen, now ready for submission!
-            session()->put(Constants::READY_FOR_SUBMISSION, true);
-        }
         return redirect()->route('007-convert.index');
     }
 
     /**
+     * TODO move to helper.
      * @param array $original
      * @param array $new
      * @return array

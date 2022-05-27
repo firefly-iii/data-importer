@@ -14,18 +14,33 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            Set up the meaning of each column in your file.
+                            Set up the meaning of each column in your file(s).
                         </p>
                         <p>
-                            Each column in your importable file has a role, it contains a specific type of content.
+                            Each column in your importable file(s) has a role, it contains a specific type of content.
                             By configuring these roles here, you tell the importer how to approach and treat
                             the data in each column. <a target="_blank"
                                                         href="https://docs.firefly-iii.org/data-importer/usage/roles/">Read
-                                the documentation</a> to learn more
-                            about this process.
+                                the documentation</a> to learn more about this process.
                         </p>
                     </div>
                 </div>
+
+                {# MULTI FILE AND SINGLE CONFIG #}
+                {% if data|length > 1 and false == singleConfiguration %}
+                    <div class="alert alert-warning mt-3">
+                        You have uploaded multiple files that each require their own role configuration. Be sure to
+                        validate all tabs below are correct before you proceed.
+                    </div>
+                {% endif %}
+                {# MULTI FILE AND MULTI CONFIG #}
+                {% if data|length > 1 and true == singleConfiguration %}
+                    <div class="alert alert-warning mt-3">
+                        You have uploaded multiple files that share the same role configuration. Be sure to validate all
+                        settings below are correct before you proceed.
+                    </div>
+                {% endif %}
+
             </div>
         </div>
         {% if not errors.isEmpty %}
@@ -50,105 +65,134 @@
 
         <div class="row mt-3">
             <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        Role configuration
-                    </div>
-                    <div class="card-body">
-                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            <table class="table">
-                                <tr>
-                                    <th>Column</th>
-                                    <th>Example data</th>
-                                    <th>Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                {% for index, column in columns %}
-                                    <tr>
-                                        <td>{{ column }}
-                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                <br/>
-                                                <span class="text-muted small">This is the unique column</span>
-                                            {% endif %}</td>
-                                        <td>
-                                            {% if examples[index]|length > 0 %}
-                                                {% for example in examples[index] %}
-                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
-                                                {% endfor %}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                {#
-                                                User cannot select a role because its the unique column so it MUST be this role.
-                                                #}
-                                                <p class="form-text">
+                {# THIS IS THE LIST OF TABS #}
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    {% for index, importable in data %}
+                        {% if not (true == singleConfiguration and index > 0) %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {% if index == 0 %}active{% endif %}"
+                                        id="importable-{{ index }}-tab" data-bs-toggle="tab"
+                                        data-bs-target="#importable-{{ index }}" type="button" role="tab"
+                                        aria-controls="importable-{{ index }}" aria-selected="true">
+                                    {% if false == singleConfiguration %}
+                                        {{ importable.original_name }}
+                                    {% endif %}
+                                    {% if true == singleConfiguration %}
+                                        Roles
+                                    {% endif %}
+                                </button>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+                <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="single_configuration" value="{% if true == singleConfiguration %}true{% endif %}{% if false == singleConfiguration %}false{% endif %}"/>
+                    <input type="hidden" name="count" value="{{ data|length }}"/>
+
+                    <div class="tab-content" id="myTabContent">
+                        {% for index, importable in data %}
+                        {% if not (true == singleConfiguration and index > 0) %}
+                        {#  Hidden fields for current tab #}
+                        <div class="tab-pane fade show {% if index == 0 %}active{% endif %}" id="importable-{{ index }}"
+                             role="tabpanel" aria-labelledby="importable-{{ index }}-tab">
+                            <div class="card">
+                                <div class="card-header">
+                                    Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <table class="table">
+                                        <tr>
+                                            <th>Column</th>
+                                            <th>Example data</th>
+                                            <th>Role</th>
+                                            <th>Map data?</th>
+                                        </tr>
+                                        {% for iindex, column in importable.columns %}
+                                            <tr>
+                                                <td>{{ column }}
+                                                    {% if iindex == importable.configuration.getUniqueColumnIndex and 'cell' == importable.configuration.getDuplicateDetectionMethod %}
+                                                        <br/>
+                                                        <span class="text-muted small">This is the unique column</span>
+                                                    {% endif %}</td>
+                                                <td>
+                                                    {% if importable.examples[iindex]|length > 0 %}
+                                                        {% for example in importable.examples[iindex] %}
+                                                            <pre
+                                                                style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if iindex == importable.configuration.getUniqueColumnIndex and 'cell' == importable.configuration.getDuplicateDetectionMethod %}
+                                                        {#
+                                                        User cannot select a role because its the unique column so it MUST be this role.
+                                                        #}
+                                                        <p class="form-text">
                                                     <span class="text-muted small">
                                                         This column is your unique identifier, so it will be fixed to
                                                     </span>
-                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
-                                                </p>
-                                                {# smart users can overrule this of course. #}
-                                                <input type="hidden" name="roles[{{ index }}]"
-                                                       value="{{ configuration.getUniqueColumnType }}"/>
-                                            {% else %}
-                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
-                                                        class="form-control">
-                                                    {% for key, role in roles %}
-                                                        <option value="{{ key }}"
-                                                                {% if configuredRoles[index] == key %}selected{% endif %}
-                                                                label="{{ trans('import.column_'~key) }}">{{ trans('import.column_'~key) }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <label for="do_mapping_{{ index }}">
-                                                {# reverse if statement is pretty sloppy but OK. #}
-                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                    &nbsp;
-                                                {% else %}
-                                                    <input type="checkbox"
-                                                           {% if configuredDoMapping[index] %}checked{% endif %}
-                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
-                                                           value="1"/>
-                                                {% endif %}
-                                            </label>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span> Go back to configuration</a>
-                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
-                                    class="fas fa-redo-alt"></span> Start over</a>
+                                                            <code
+                                                                class="small">{{ importable.configuration.getUniqueColumnType }}</code>
+                                                        </p>
+                                                        {# smart users can overrule this of course. #}
+                                                        <input type="hidden" name="roles[{{ index }}][{{ iindex }}]"
+                                                               value="{{ importable.configuration.getUniqueColumnType }}"/>
+                                                    {% else %}
+                                                        <select name="roles[{{ index }}][{{ iindex }}]" id="roles_{{ iindex }}"
+                                                                class="form-control">
+                                                            {% for key, role in roles %}
+                                                                <option value="{{ key }}"
+                                                                        {% if importable.roles[iindex] == key %}selected{% endif %}
+                                                                        label="{{ trans('import.column_'~key) }}">{{ trans('import.column_'~key) }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <label for="do_mapping_{{ iindex }}">
+                                                        {# reverse if statement is pretty sloppy but OK. #}
+                                                        {% if iindex == importable.configuration.getUniqueColumnIndex and 'cell' == importable.configuration.getDuplicateDetectionMethod %}
+                                                            &nbsp;
+                                                        {% else %}
+                                                            <input type="checkbox"
+                                                                   {% if importable.do_mapping[iindex] %}checked{% endif %}
+                                                                   name="do_mapping[{{ index }}][{{ iindex }}]"
+                                                                   id="do_mapping_{{ iindex }}"
+                                                                   value="1"/>
+                                                        {% endif %}
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
                         </div>
+                        {% endif %} {# end of tab-if #}
+                        {% endfor %} {# end of tab #}
+                    </div>
+                    <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
+                                class="fas fa-arrow-left"></span> Go back to configuration</a>
+                        <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
+                                class="fas fa-redo-alt"></span> Start over</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!--
-    <div class="row">
-                                <div class="col-lg-6">
 
-    </div>
-    <div class="col-lg-6">
-
-    </div>
-    </div>
-    -->
 {% endblock %}
 

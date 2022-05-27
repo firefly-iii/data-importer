@@ -73,6 +73,6 @@ trait RestoresConfiguration
             return Configuration::make();
         }
         $content = json_decode(StorageService::getContent($file), true);
-        return Configuration::fromArray($content);
+        return Configuration::fromFile($content);
     }
 }

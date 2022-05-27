@@ -53,7 +53,8 @@
                         {{ subTitle }}
                     </div>
                     <div class="card-body">
-                        {% if data|length == 1 %}
+                        {# SINGLE FILE OR SINGLE CONFIG #}
+                        {% if data|length == 1 or true == singleConfiguration%}
                         <p>
                             Some of the most important settings for you import are below.
                             These settings apply to the whole import. If you would like some support, <a
@@ -61,7 +62,8 @@
                                 check out the documentation for this page.</a>
                         </p>
                         {% endif %}
-                        {% if data|length > 1 %}
+                        {# MULTI FILE #}
+                        {% if data|length > 1 and false == singleConfiguration %}
                             <p>
                                 Some of the most important settings for you import(s) are below.
                                 Each tab represents a file. You have to configure all {{ data|length }} imports individually.
@@ -72,10 +74,16 @@
                         {% endif %}
                     </div>
                 </div>
-
-                {% if data|length > 1 %}
+                {# MULTI FILE AND SINGLE CONFIG #}
+                {% if data|length > 1 and false == singleConfiguration %}
                     <div class="alert alert-warning mt-3">
                         You have uploaded multiple files that each require their own configuration. Be sure to validate all tabs below are correct before you proceed.
+                    </div>
+                {% endif %}
+                {# MULTI FILE AND MULTI CONFIG #}
+                {% if data|length > 1 and true == singleConfiguration %}
+                    <div class="alert alert-warning mt-3">
+                        You have uploaded multiple files that share the same settings. Be sure to validate all settings below are correct before you proceed.
                     </div>
                 {% endif %}
             </div>
@@ -103,20 +111,33 @@
 
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="single_configuration" value="{% if true == singleConfiguration %}true{% endif %}{% if false == singleConfiguration %}false{% endif %}"/>
+            <input type="hidden" name="count" value="{{ data|length }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
+                    {# THIS IS THE LIST OF TABS #}
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         {% for index, importable in data %}
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if index == 0 %}active{% endif %}" id="importable-{{ index }}-tab" data-bs-toggle="tab" data-bs-target="#importable-{{ index }}" type="button" role="tab" aria-controls="importable-{{ index }}" aria-selected="true">{{ importable.original_name }}</button>
-                        </li>
+                            {% if not (true == singleConfiguration and index > 0) %}
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {% if index == 0 %}active{% endif %}" id="importable-{{ index }}-tab" data-bs-toggle="tab" data-bs-target="#importable-{{ index }}" type="button" role="tab" aria-controls="importable-{{ index }}" aria-selected="true">
+                                        {% if false == singleConfiguration %}
+                                            {{ importable.original_name }}
+                                        {% endif %}
+                                        {% if true == singleConfiguration %}
+                                            Configuration
+                                        {% endif %}
+                                    </button>
+                                </li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
 
+                    {# THESE ARE THE TABS #}
                     <div class="tab-content" id="myTabContent">
                         {% for index, importable in data %}
+                            {% if not (true == singleConfiguration and index > 0) %}
                             <!-- hidden input fields for this index -->
-                            <input type="hidden" name="count" value="{{ data|length }}"/>
                             <input type="hidden" name="flow[{{ index }}]" value="{{ importable.flow }}"/>
                             <input type="hidden" name="identifier[{{ index }}]" value="{{ importable.configuration.getIdentifier }}"/>
                             <input type="hidden" name="connection[{{ index }}]" value="{{ importable.configuration.getConnection }}"/>
@@ -127,17 +148,19 @@
 
                             <div class="tab-pane fade show {% if index == 0 %}active{% endif %}" id="importable-{{ index }}" role="tabpanel" aria-labelledby="importable-{{ index }}-tab">
                                 <div class="card">
-                                    <div class="card-header">
-                                        {% if 'file' == importable.flow %}
-                                            Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
-                                        {% endif %}
-                                        {% if 'nordigen' == importable.flow %}
-                                            Form for Nordigen import.
-                                        {% endif %}
-                                        {% if 'spectre' == importable.flow %}
-                                            Form for Spectre / Salt Edge import.
-                                        {% endif %}
-                                    </div>
+                                    {% if false == singleConfiguration %}
+                                        <div class="card-header">
+                                            {% if 'file' == importable.flow %}
+                                                Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
+                                            {% endif %}
+                                            {% if 'nordigen' == importable.flow %}
+                                                Form for Nordigen import.
+                                            {% endif %}
+                                            {% if 'spectre' == importable.flow %}
+                                                Form for Spectre / Salt Edge import.
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
                                     <div class="card-body">
                                         {# TODO #}
                                         {% if 'nordigen' == importable.flow or 'spectre' == importable.flow %}
@@ -567,13 +590,14 @@
 
                                         <div class="row">
                                             <div class="col-lg-12">
-                                                <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        {% endfor %}
+                            {% endif %}
+                        {% endfor %} {# end of main loop #}
+                        <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
                     </div>
                 </div>
             </div>

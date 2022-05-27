@@ -350,7 +350,6 @@ class Configuration
             }
         }
         ksort($object->roles);
-
         // loop do mapping from classic file.
         $doMapping = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
@@ -367,7 +366,7 @@ class Configuration
         }
         ksort($object->mapping);
 
-        // set version to latest version and return.
+        // set version to the latest version and return.
         $object->version = self::VERSION;
 
         if('csv' === $object->flow) {

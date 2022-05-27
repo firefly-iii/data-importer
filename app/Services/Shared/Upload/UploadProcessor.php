@@ -458,7 +458,7 @@ class UploadProcessor
             $found           = $importableShort === $short ? true : $found;
         }
         if (false === $found && 'file' === $this->flow) {
-            $this->errors->add('config_file', sprintf('Config file "%s" needs an importable file called "%s.*"', $configName, $short));
+            $this->errors->add('config_file', sprintf('Importable file "%s" needs a config file called "%s.json"', $name, $short));
         }
     }
 

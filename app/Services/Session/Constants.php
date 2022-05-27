@@ -79,6 +79,12 @@ class Constants
     public const IMPORT_FILE_PATHS = 'upload_file_paths';
     public const CONFIG_FILE_PATHS = 'config_file_paths';
     public const UPLOADED_COMBINATIONS = 'uploaded_combinations';
+
+    // user has a single configuration (for multiple files)
+    public const SINGLE_CONFIGURATION_SESSION = 'single_config_session';
+
+
+
     //    /** @var string */
 //    /** @var string */
 //    public const JOB_STATUS = 'import_job_status';

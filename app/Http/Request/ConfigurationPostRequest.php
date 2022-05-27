@@ -48,56 +48,59 @@ class ConfigurationPostRequest extends Request
      */
     public function getAll(): array
     {
-        $count  = $this->integer('count');
-        $result = [
+        $count               = $this->integer('count');
+        $singleConfiguration = $this->boolean('single_configuration');
+        $result              = [
             'count'          => $this->integer('count'),
             'configurations' => [],
-
-
         ];
         for ($i = 0; $i < $count; $i++) {
+            $index = $i;
+            if ($singleConfiguration) {
+                $index = 0;
+            }
             $current = [
-                'headers'                       => $this->getBoolFromArray($i, 'headers'),
-                'delimiter'                     => $this->getStringFromArray($i, 'delimiter'),
-                'date'                          => $this->getStringFromArray($i, 'date'),
-                'default_account'               => $this->getIntegerFromArray($i, 'default_account'),
-                'rules'                         => $this->getBoolFromArray($i, 'rules'),
-                'ignore_duplicate_lines'        => $this->getBoolFromArray($i, 'ignore_duplicate_lines'),
-                'ignore_duplicate_transactions' => $this->getBoolFromArray($i, 'ignore_duplicate_transactions'),
-                'skip_form'                     => $this->getBoolFromArray($i, 'skip_form'),
-                'add_import_tag'                => $this->getBoolFromArray($i, 'add_import_tag'),
-                'flow'                          => $this->getStringFromArray($i, 'flow'),
+                'headers'                       => $this->getBoolFromArray($index, 'headers'),
+                'delimiter'                     => $this->getStringFromArray($index, 'delimiter'),
+                'date'                          => $this->getStringFromArray($index, 'date'),
+                'default_account'               => $this->getIntegerFromArray($index, 'default_account'),
+                'rules'                         => $this->getBoolFromArray($index, 'rules'),
+                'ignore_duplicate_lines'        => $this->getBoolFromArray($index, 'ignore_duplicate_lines'),
+                'ignore_duplicate_transactions' => $this->getBoolFromArray($index, 'ignore_duplicate_transactions'),
+                'skip_form'                     => $this->getBoolFromArray($index, 'skip_form'),
+                'add_import_tag'                => $this->getBoolFromArray($index, 'add_import_tag'),
+                'flow'                          => $this->getStringFromArray($index, 'flow'),
 
                 // duplicate detection:
 
-                'duplicate_detection_method' => $this->getStringFromArray($i, 'duplicate_detection_method'),
-                'unique_column_index'        => $this->getIntegerFromArray($i, 'unique_column_index'),
-                'unique_column_type'         => $this->getStringFromArray($i, 'unique_column_type'),
+                'duplicate_detection_method' => $this->getStringFromArray($index, 'duplicate_detection_method'),
+                'unique_column_index'        => $this->getIntegerFromArray($index, 'unique_column_index'),
+                'unique_column_type'         => $this->getStringFromArray($index, 'unique_column_type'),
 
                 // spectre values:
-                'connection'                 => $this->getStringFromArray($i, 'connection'),
-                'identifier'                 => $this->getStringFromArray($i, 'identifier'),
-                'ignore_spectre_categories'  => $this->getBoolFromArray($i, 'ignore_spectre_categories'),
+                'connection'                 => $this->getStringFromArray($index, 'connection'),
+                'identifier'                 => $this->getStringFromArray($index, 'identifier'),
+                'ignore_spectre_categories'  => $this->getBoolFromArray($index, 'ignore_spectre_categories'),
 
                 // nordigen:
-                'nordigen_country'           => $this->getStringFromArray($i, 'nordigen_country'),
-                'nordigen_bank'              => $this->getStringFromArray($i, 'nordigen_bank'),
-                'nordigen_max_days'          => $this->getStringFromArray($i, 'nordigen_max_days'),
-                'nordigen_requisitions'      => json_decode($this->getStringFromArray($i, 'nordigen_requisitions'), true) ?? [],
+                'nordigen_country'           => $this->getStringFromArray($index, 'nordigen_country'),
+                'nordigen_bank'              => $this->getStringFromArray($index, 'nordigen_bank'),
+                'nordigen_max_days'          => $this->getStringFromArray($index, 'nordigen_max_days'),
+                'nordigen_requisitions'      => json_decode($this->getStringFromArray($index, 'nordigen_requisitions'), true) ?? [],
 
                 // nordigen + spectre
 
-                'do_import'         => $this->getArrayFromArray($i, 'do_import'),
-                'accounts'          => $this->getArrayFromArray($i, 'accounts'),
-                'map_all_data'      => $this->getBoolFromArray($i, 'map_all_data'),
-                'date_range'        => $this->getStringFromArray($i, 'date_range'),
-                'date_range_number' => $this->getIntegerFromArray($i, 'date_range_number'),
-                'date_range_unit'   => $this->getStringFromArray($i, 'date_range_unit'),
-                'date_not_before'   => $this->getDateFromArray($i, 'date_not_before'),
-                'date_not_after'    => $this->getDateFromArray($i, 'date_not_after'),
+                'do_import'         => $this->getArrayFromArray($index, 'do_import'),
+                'accounts'          => $this->getArrayFromArray($index, 'accounts'),
+                'map_all_data'      => $this->getBoolFromArray($index, 'map_all_data'),
+                'date_range'        => $this->getStringFromArray($index, 'date_range'),
+                'date_range_number' => $this->getIntegerFromArray($index, 'date_range_number'),
+                'date_range_unit'   => $this->getStringFromArray($index, 'date_range_unit'),
+                'date_not_before'   => $this->getDateFromArray($index, 'date_not_before'),
+                'date_not_after'    => $this->getDateFromArray($index, 'date_not_after'),
 
                 // utf8 conversion
-                'conversion'        => $this->getBoolFromArray($i, 'conversion'),
+                'conversion'        => $this->getBoolFromArray($index, 'conversion'),
 
                 // next
                 'specifics'         => [],
@@ -114,11 +117,13 @@ class ConfigurationPostRequest extends Request
     }
 
     /**
+     * TODO needs to be in helper
+     *
      * @param int    $index
      * @param string $key
      * @return bool
      */
-    private function getBoolFromArray(int $index, string $key): bool
+    protected function getBoolFromArray(int $index, string $key): bool
     {
         $res = $this->get($key);
         if (is_array($res)) {
@@ -128,11 +133,13 @@ class ConfigurationPostRequest extends Request
     }
 
     /**
+     * TODO needs to be in helper
+     *
      * @param int    $index
      * @param string $key
      * @return string
      */
-    private function getStringFromArray(int $index, string $key): string
+    protected function getStringFromArray(int $index, string $key): string
     {
         $res = $this->get($key);
         if (is_array($res)) {
@@ -142,17 +149,41 @@ class ConfigurationPostRequest extends Request
     }
 
     /**
+     * TODO needs to be in helper
+     *
      * @param int    $index
      * @param string $key
      * @return int
      */
-    private function getIntegerFromArray(int $index, string $key): int
+    protected function getIntegerFromArray(int $index, string $key): int
     {
         $res = $this->get($key);
         if (is_array($res)) {
             return (int) $res[$index];
         }
         return 0;
+    }
+
+
+
+    /**
+     * TODO needs to be in helper
+     *
+     * @param int    $index
+     * @param string $key
+     * @return Carbon|null
+     */
+    protected function getDateFromArray(int $index, string $key): ?Carbon
+    {
+        $res    = $this->get($key);
+        $string = '';
+        if (is_array($res)) {
+            $string = (string) $res[$index];
+        }
+        if ('' === $string) {
+            return null;
+        }
+        return Carbon::createFromFormat('Y-m-d', $string);
     }
 
     /**
@@ -187,7 +218,6 @@ class ConfigurationPostRequest extends Request
         return $rules;
     }
 
-
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
      *
@@ -210,38 +240,6 @@ class ConfigurationPostRequest extends Request
                 }
             }
         );
-    }
-
-    /**
-     * @param int    $index
-     * @param string $key
-     * @return array
-     */
-    private function getArrayFromArray(int $index, string $key): array
-    {
-        $res = $this->get($key);
-        if (is_array($res)) {
-            return $res[$index];
-        }
-        return [];
-    }
-
-    /**
-     * @param int    $index
-     * @param string $key
-     * @return Carbon|null
-     */
-    private function getDateFromArray(int $index, string $key): ?Carbon
-    {
-        $res    = $this->get($key);
-        $string = '';
-        if (is_array($res)) {
-            $string = (string) $res[$index];
-        }
-        if ('' === $string) {
-            return null;
-        }
-        return Carbon::createFromFormat('Y-m-d', $string);
     }
 
 }

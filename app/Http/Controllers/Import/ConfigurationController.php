@@ -55,7 +55,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
-use League\Flysystem\Config;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -103,14 +102,16 @@ class ConfigurationController extends Controller
         if (count($combinations) < 1) {
             die('Must be more than zero.');
         }
-
-        $data = [];
+        $singleConfiguration = session()->get(Constants::SINGLE_CONFIGURATION_SESSION);
+        $data                = [];
+        app('log')->debug(sprintf('Array has %d configuration(s)', count($combinations)));
         /** @var array $entry */
-        foreach ($combinations as $entry) {
+        foreach ($combinations as $index => $entry) {
+            app('log')->debug(sprintf('[%d/%d] processing configuration.', ($index + 1), count($combinations)));
             $data[] = $this->processCombination($entry, $ff3Accounts, $overruleSkip);
         }
 
-        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'ff3Accounts', 'data'));
+        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'ff3Accounts', 'data', 'singleConfiguration'));
     }
 
     /**
@@ -125,34 +126,35 @@ class ConfigurationController extends Controller
      */
     private function processCombination(array $entry, array $ff3Accounts, bool $overruleSkip): array
     {
-        $return                      = $entry;
-        $configuration               = $this->restoreConfigurationFromFile($entry['config_location']);
-        $flow                        = $configuration->getFlow();
-        $return['configuration']     = $configuration;
-        $return['flow']              = $flow;
-        $return['skip_form']         = true === $configuration->isSkipForm() && false === $overruleSkip;
-        $return['importer_accounts'] = [];
+        $return                         = $entry;
+        $configuration                  = $this->restoreConfigurationFromFile($entry['config_location']);
+        $flow                           = $configuration->getFlow();
+        $return['configuration']        = $configuration;
+        $return['flow']                 = $flow;
+        $return['skip_form']            = true === $configuration->isSkipForm() && false === $overruleSkip;
+        $return['importer_accounts']    = [];
         $return['firefly_iii_accounts'] = $ff3Accounts;
-        $return['unique_columns']    = config('csv.unique_column_options');
+        $return['unique_columns']       = config('csv.unique_column_options');
 
         if ('nordigen' === $flow) {
-            $return['unique_columns']    = config('nordigen.unique_column_options');
-            $requisitions                = $configuration->getNordigenRequisitions();
-            $reference                   = array_shift($requisitions);
+            $return['unique_columns'] = config('nordigen.unique_column_options');
+            $requisitions             = $configuration->getNordigenRequisitions();
+            $reference                = array_shift($requisitions);
             // TODO move to separate processor
             $return['importer_accounts'] = $this->mergeNordigenAccountLists($this->getNordigenAccounts($reference), $ff3Accounts);
         }
 
         if ('spectre' === $flow) {
-            $return['unique_columns']    = config('spectre.unique_column_options');
-            $url                         = config('spectre.url');
-            $appId                       = SpectreSecretManager::getAppId();
-            $secret                      = SpectreSecretManager::getSecret();
-            $spectreList                 = new SpectreGetAccountsRequest($url, $appId, $secret);
-            $spectreList->connection     = $configuration->getConnection();
+            $return['unique_columns'] = config('spectre.unique_column_options');
+            $url                      = config('spectre.url');
+            $appId                    = SpectreSecretManager::getAppId();
+            $secret                   = SpectreSecretManager::getSecret();
+            $spectreList              = new SpectreGetAccountsRequest($url, $appId, $secret);
+            $spectreList->connection  = $configuration->getConnection();
             // TODO move to separate processor
             $return['importer_accounts'] = $this->mergeSpectreAccountLists($spectreList->get(), $ff3Accounts);
         }
+        app('log')->debug('Configuration is (session array):', $configuration->toSessionArray());
 
         return $return;
 
@@ -404,6 +406,8 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * TODO this post routine is too complex.
+     *
      * @param ConfigurationPostRequest $request
      *
      * @return RedirectResponse
@@ -415,7 +419,7 @@ class ConfigurationController extends Controller
         $data = $request->getAll();
 
         // loop each entry.
-        if($data['count'] !== count($data['configurations'])) {
+        if ($data['count'] !== count($data['configurations'])) {
             throw new ImporterErrorException('Unexpected miscount in configuration array.');
         }
         $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
@@ -429,9 +433,7 @@ class ConfigurationController extends Controller
         if (count($combinations) !== $data['count']) {
             throw new ImporterErrorException('Combinations must be count-validated.');
         }
-        var_dump($combinations);
-        $configurations = [];
-        foreach($data['configurations'] as $index => $current) {
+        foreach ($data['configurations'] as $index => $current) {
             $object = Configuration::fromRequest($current);
 
             // TODO are all fields actually in the config?
@@ -446,14 +448,21 @@ class ConfigurationController extends Controller
             $object->setAccounts($accounts);
             $object->updateDateRange();
 
-            $json = '{}';
+            // get the previous config and restore roles, do_mapping and mapping
+            // they were not submitted over
+            app('log')->debug(sprintf('Get configuration from old file "%s"', $combinations[$index]['config_location']));
+            $previous       = json_decode(StorageService::getContent($combinations[$index]['config_location']), true);
+            $previousConfig = Configuration::fromFile($previous);
+            $object->setRoles($previousConfig->getRoles());
+            $object->setDoMapping($previousConfig->getDoMapping());
+            $object->setMapping($previousConfig->getMapping());
+
             try {
                 $json = json_encode($object->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
             } catch (JsonException $e) {
                 app('log')->error($e->getMessage());
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
-            }
-            ;
+            };
             $combinations[$index]['config_location'] = StorageService::storeContent($json);
             app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $object->getConnection()));
 
@@ -513,6 +522,4 @@ class ConfigurationController extends Controller
         }
         return $accounts;
     }
-
-
 }

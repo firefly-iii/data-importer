@@ -140,6 +140,7 @@ class UploadController extends Controller
         }
         // for file processing:
         session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
+        session()->put(Constants::SINGLE_CONFIGURATION_SESSION, $oneConfig || 1 === count($combinations));
 
         return redirect(route('004-configure.index'));
     }

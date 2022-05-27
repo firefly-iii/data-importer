@@ -48,18 +48,30 @@ class RolesPostRequest extends Request
      */
     public function getAll(): array
     {
-        $data = [
-            'roles'      => $this->get('roles') ?? [],
-            'do_mapping' => $this->get('do_mapping') ?? [],
+        $count               = $this->integer('count');
+        $singleConfiguration = $this->boolean('single_configuration');
+        $result              = [
+            'count'          => $this->integer('count'),
+            'configurations' => [],
         ];
-        foreach (array_keys($data['roles']) as $index) {
 
-            $data['do_mapping'][$index] = $this->convertBoolean($data['do_mapping'][$index] ?? 'false');
+        for ($i = 0; $i < $count; $i++) {
+            $index = $i;
+            if ($singleConfiguration) {
+                $index = 0;
+            }
+            $current = [
+                'roles'      => $this->getArrayFromArray($index, 'roles'),
+                'do_mapping' => $this->getArrayFromArray($index, 'do_mapping'),
+            ];
+
+            foreach (array_keys($current['roles']) as $ii) {
+                $current['do_mapping'][$ii] = $this->convertBoolean($current['do_mapping'][$ii] ?? 'false');
+            }
+            $result['configurations'][] = $current;
         }
-
-        return $data;
+        return $result;
     }
-
 
     /**
      * @return array
@@ -69,8 +81,8 @@ class RolesPostRequest extends Request
         $keys = implode(',', array_keys(config('csv.import_roles')));
 
         return [
-            'roles.*'      => sprintf('required|in:%s', $keys),
-            'do_mapping.*' => 'numeric|between:0,1',
+            'roles.*.*'      => sprintf('required|in:%s', $keys),
+            'do_mapping.*.*' => 'numeric|between:0,1',
         ];
     }
 
@@ -98,15 +110,17 @@ class RolesPostRequest extends Request
     {
         $data  = $validator->getData();
         $roles = $data['roles'] ?? [];
-        $count = 0;
-        foreach ($roles as $role) {
-            if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
-                $count++;
+
+        foreach ($roles as $index => $set) {
+            $count = 0;
+            foreach ($set as $role) {
+                if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
+                    $count++;
+                }
+            }
+            if (0 === $count) {
+                $validator->errors()->add(sprintf('roles.%d.0', $index), 'The import will fail if no column is assigned an "Amount"-role.');
             }
         }
-        if (0 === $count) {
-            $validator->errors()->add('roles.0', 'The import will fail if no column is assigned an "Amount"-role.');
-        }
     }
-
 }
