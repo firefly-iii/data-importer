@@ -10,40 +10,40 @@
 
         {#  TODO relocate this if-statement:  #}
         {% if 0 == fireflyAccounts and ('nordigen' == importable.flow or 'spectre' == importable.flow ) %}
-        <div class="row mt-3">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="card">
-                    <div class="card-header">
-                        Error :(
-                    </div>
-                    <div class="card-body">
-                        <p>It looks like you have no Firefly III asset accounts yet. The importer will not create
-                            these for you. You must create them yourself.</p>
-                        <p>
-                            Please go to your Firefly III installation and create them, then refresh this page.
-                        </p>
-                        {% if 'nordigen' == importable.flow and importerAccounts|length > 0 %}
+            <div class="row mt-3">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card">
+                        <div class="card-header">
+                            Error :(
+                        </div>
+                        <div class="card-body">
+                            <p>It looks like you have no Firefly III asset accounts yet. The importer will not create
+                                these for you. You must create them yourself.</p>
                             <p>
-                                Feel free to use this information collected from Nordigen as inspiration:
+                                Please go to your Firefly III installation and create them, then refresh this page.
                             </p>
-                            <ul>
-                                {% for info in importerAccounts %}
-                                    <li>
-                                        Name: {{ info.import_service.name }}<br>
-                                        (Internal) identifier: {{ info.import_service.identifier }}<br>
-                                        Resource identifier: {{ info.import_service.resourceId }}<br>
-                                        BBAN: {{ info.import_service.bban }}<br>
-                                        BIC: {{ info.import_service.bic }}<br>
-                                        IBAN: {{ info.import_service.iban }}<br>
-                                        Owner name: {{ info.import_service.ownerName }}<br>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                            {% if 'nordigen' == importable.flow and importerAccounts|length > 0 %}
+                                <p>
+                                    Feel free to use this information collected from Nordigen as inspiration:
+                                </p>
+                                <ul>
+                                    {% for info in importerAccounts %}
+                                        <li>
+                                            Name: {{ info.import_service.name }}<br>
+                                            (Internal) identifier: {{ info.import_service.identifier }}<br>
+                                            Resource identifier: {{ info.import_service.resourceId }}<br>
+                                            BBAN: {{ info.import_service.bban }}<br>
+                                            BIC: {{ info.import_service.bic }}<br>
+                                            IBAN: {{ info.import_service.iban }}<br>
+                                            Owner name: {{ info.import_service.ownerName }}<br>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% endif %}
 
         <div class="row mt-3">
@@ -54,19 +54,20 @@
                     </div>
                     <div class="card-body">
                         {# SINGLE FILE OR SINGLE CONFIG #}
-                        {% if data|length == 1 or true == singleConfiguration%}
-                        <p>
-                            Some of the most important settings for you import are below.
-                            These settings apply to the whole import. If you would like some support, <a
-                                href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
-                                check out the documentation for this page.</a>
-                        </p>
+                        {% if data|length == 1 or true == singleConfiguration %}
+                            <p>
+                                Some of the most important settings for you import are below.
+                                These settings apply to the whole import. If you would like some support, <a
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
+                                    check out the documentation for this page.</a>
+                            </p>
                         {% endif %}
                         {# MULTI FILE #}
                         {% if data|length > 1 and false == singleConfiguration %}
                             <p>
                                 Some of the most important settings for you import(s) are below.
-                                Each tab represents a file. You have to configure all {{ data|length }} imports individually.
+                                Each tab represents a file. You have to configure all {{ data|length }} imports
+                                individually.
                                 If you would like some support, <a
                                     href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
                                     check out the documentation for this page.</a>
@@ -77,13 +78,15 @@
                 {# MULTI FILE AND SINGLE CONFIG #}
                 {% if data|length > 1 and false == singleConfiguration %}
                     <div class="alert alert-warning mt-3">
-                        You have uploaded multiple files that each require their own configuration. Be sure to validate all tabs below are correct before you proceed.
+                        You have uploaded multiple files that each require their own configuration. Be sure to validate
+                        all tabs below are correct before you proceed.
                     </div>
                 {% endif %}
                 {# MULTI FILE AND MULTI CONFIG #}
                 {% if data|length > 1 and true == singleConfiguration %}
                     <div class="alert alert-warning mt-3">
-                        You have uploaded multiple files that share the same settings. Be sure to validate all settings below are correct before you proceed.
+                        You have uploaded multiple files that share the same settings. Be sure to validate all settings
+                        below are correct before you proceed.
                     </div>
                 {% endif %}
             </div>
@@ -111,7 +114,8 @@
 
         <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-            <input type="hidden" name="single_configuration" value="{% if true == singleConfiguration %}true{% endif %}{% if false == singleConfiguration %}false{% endif %}"/>
+            <input type="hidden" name="single_configuration"
+                   value="{% if true == singleConfiguration %}true{% endif %}{% if false == singleConfiguration %}false{% endif %}"/>
             <input type="hidden" name="count" value="{{ data|length }}"/>
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
@@ -120,7 +124,10 @@
                         {% for index, importable in data %}
                             {% if not (true == singleConfiguration and index > 0) %}
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link {% if index == 0 %}active{% endif %}" id="importable-{{ index }}-tab" data-bs-toggle="tab" data-bs-target="#importable-{{ index }}" type="button" role="tab" aria-controls="importable-{{ index }}" aria-selected="true">
+                                    <button class="nav-link {% if index == 0 %}active{% endif %}"
+                                            id="importable-{{ index }}-tab" data-bs-toggle="tab"
+                                            data-bs-target="#importable-{{ index }}" type="button" role="tab"
+                                            aria-controls="importable-{{ index }}" aria-selected="true">
                                         {% if false == singleConfiguration %}
                                             {{ importable.original_name }}
                                         {% endif %}
@@ -137,464 +144,553 @@
                     <div class="tab-content" id="myTabContent">
                         {% for index, importable in data %}
                             {% if not (true == singleConfiguration and index > 0) %}
-                            <!-- hidden input fields for this index -->
-                            <input type="hidden" name="flow[{{ index }}]" value="{{ importable.flow }}"/>
-                            <input type="hidden" name="identifier[{{ index }}]" value="{{ importable.configuration.getIdentifier }}"/>
-                            <input type="hidden" name="connection[{{ index }}]" value="{{ importable.configuration.getConnection }}"/>
-                            <input type="hidden" name="nordigen_country[{{ index }}]" value="{{ importable.configuration.getNordigenCountry }}"/>
-                            <input type="hidden" name="nordigen_max_days[{{ index }}]" value="{{ importable.configuration.getNordigenMaxDays }}"/>
-                            <input type="hidden" name="nordigen_bank[{{ index }}]" value="{{ importable.configuration.getNordigenBank }}"/>
-                            <input type="hidden" name="nordigen_requisitions[{{ index }}]" value="{{ importable.configuration.getNordigenRequisitions|json_encode }}"/>
+                                <!-- hidden input fields for this index -->
+                                <input type="hidden" name="flow[{{ index }}]" value="{{ importable.flow }}"/>
+                                <input type="hidden" name="identifier[{{ index }}]"
+                                       value="{{ importable.configuration.getIdentifier }}"/>
+                                <input type="hidden" name="connection[{{ index }}]"
+                                       value="{{ importable.configuration.getConnection }}"/>
+                                <input type="hidden" name="nordigen_country[{{ index }}]"
+                                       value="{{ importable.configuration.getNordigenCountry }}"/>
+                                <input type="hidden" name="nordigen_max_days[{{ index }}]"
+                                       value="{{ importable.configuration.getNordigenMaxDays }}"/>
+                                <input type="hidden" name="nordigen_bank[{{ index }}]"
+                                       value="{{ importable.configuration.getNordigenBank }}"/>
+                                <input type="hidden" name="nordigen_requisitions[{{ index }}]"
+                                       value="{{ importable.configuration.getNordigenRequisitions|json_encode }}"/>
 
-                            <div class="tab-pane fade show {% if index == 0 %}active{% endif %}" id="importable-{{ index }}" role="tabpanel" aria-labelledby="importable-{{ index }}-tab">
-                                <div class="card">
-                                    {% if false == singleConfiguration %}
-                                        <div class="card-header">
-                                            {% if 'file' == importable.flow %}
-                                                Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
-                                            {% endif %}
-                                            {% if 'nordigen' == importable.flow %}
-                                                Form for Nordigen import.
-                                            {% endif %}
-                                            {% if 'spectre' == importable.flow %}
-                                                Form for Spectre / Salt Edge import.
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-                                    <div class="card-body">
-                                        {# TODO #}
-                                        {% if 'nordigen' == importable.flow or 'spectre' == importable.flow %}
-                                            <h4>{{ importable.flow|capitalize }} import options</h4>
-                                            <div class="form-group row mb-3">
-                                                <div class="col-sm-3">Accounts</div>
-                                                <div class="col-sm-9">
-                                                    {% set errorAccounts = 0 %}
-                                                    {% set warningAccounts = 0 %}
-                                                    <table class="table table-sm table-bordered table-striped">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>{{ importable.flow|capitalize }}</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>Firefly III</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% for information in importerAccounts %}
-                                                            {% include './import/004-configure/partials/account-row' with information %}
-                                                        {% endfor %}
-                                                        </tbody>
-                                                        <caption>Select the accounts you want to import into your Firefly III
-                                                            installation.
-                                                        </caption>
-                                                    </table>
-
-                                                    {# TODO rewrite so Nordigen and Spectre use the same account object #}
-                                                    {% if errorAccounts > 0 %}
-                                                        <span class="text-danger"><span class="fas fa-exclamation-triangle"></span></span>
-                                                        <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
-                                                    {% endif %}
-                                                    {% if warningAccounts > 0 %}
-                                                        <span class="text-warning"><span class="fas fa-exclamation-triangle"></span></span>
-                                                        <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
-                                                    {% endif %}
-                                                </div>
+                                <div class="tab-pane fade show {% if index == 0 %}active{% endif %}"
+                                     id="importable-{{ index }}" role="tabpanel"
+                                     aria-labelledby="importable-{{ index }}-tab">
+                                    <div class="card">
+                                        {% if false == singleConfiguration %}
+                                            <div class="card-header">
+                                                {% if 'file' == importable.flow %}
+                                                    Form for {{ importable.original_name }}{% if null != importable.config_name %}, configured by {{ importable.config_name }}{% endif %}
+                                                {% endif %}
+                                                {% if 'nordigen' == importable.flow %}
+                                                    Form for Nordigen import.
+                                                {% endif %}
+                                                {% if 'spectre' == importable.flow %}
+                                                    Form for Spectre / Salt Edge import.
+                                                {% endif %}
                                             </div>
+                                        {% endif %}
+                                        <div class="card-body">
                                             {# TODO #}
-                                            {% if 'spectre' == importable.flow %}
-                                                <div class="form-group row">
-                                                    <label for="X" class="col-sm-3 col-form-label">Ignore Spectre categories</label>
+                                            {% if 'nordigen' == importable.flow or 'spectre' == importable.flow %}
+                                                <h4>{{ importable.flow|capitalize }} import options</h4>
+                                                <div class="form-group row mb-3">
+                                                    <div class="col-sm-3">Accounts</div>
+                                                    <div class="col-sm-9">
+                                                        {% set errorAccounts = 0 %}
+                                                        {% set warningAccounts = 0 %}
+                                                        <table class="table table-sm table-bordered table-striped">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>{{ importable.flow|capitalize }}</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>Firefly III</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for information in importerAccounts %}
+                                                                {% include './import/004-configure/partials/account-row' with information %}
+                                                            {% endfor %}
+                                                            </tbody>
+                                                            <caption>Select the accounts you want to import into your
+                                                                Firefly III
+                                                                installation.
+                                                            </caption>
+                                                        </table>
+
+                                                        {# TODO rewrite so Nordigen and Spectre use the same account object #}
+                                                        {% if errorAccounts > 0 %}
+                                                            <span class="text-danger"><span
+                                                                    class="fas fa-exclamation-triangle"></span></span>
+                                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                                        {% endif %}
+                                                        {% if warningAccounts > 0 %}
+                                                            <span class="text-warning"><span
+                                                                    class="fas fa-exclamation-triangle"></span></span>
+                                                            <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                {# TODO #}
+                                                {% if 'spectre' == importable.flow %}
+                                                    <div class="form-group row">
+                                                        <label for="X" class="col-sm-3 col-form-label">Ignore Spectre
+                                                            categories</label>
+                                                        <div class="col-sm-9">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input"
+                                                                       {% if importable.configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %}
+                                                                       type="checkbox" value="1"
+                                                                       id="ignore_spectre_categories"
+                                                                       name="ignore_spectre_categories[{{ index }}]"
+                                                                       aria-describedby="duplicateSpectre">
+                                                                <label class="form-check-label"
+                                                                       for="ignore_spectre_categories">
+                                                                    Ignore Spectre's categories.
+                                                                </label>
+                                                            </div>
+
+                                                            <small class="form-text text-muted" id="duplicateSpectre">
+                                                                Spectre adds categories to each transaction. You can
+                                                                choose to ignore
+                                                                them.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+
+                                            {% endif %}
+
+
+                                            {% if 'file' == importable.flow %}
+                                                <h5>File options</h5>
+                                                <div class="form-group row mb-3">
+                                                    <div class="col-sm-3">Headers</div>
                                                     <div class="col-sm-9">
                                                         <div class="form-check">
                                                             <input class="form-check-input"
-                                                                   {% if importable.configuration.isIgnoreSpectreCategories or null == configuration %}checked{% endif %}
-                                                                   type="checkbox" value="1" id="ignore_spectre_categories"
-                                                                   name="ignore_spectre_categories[{{ index }}]"
-                                                                   aria-describedby="duplicateSpectre">
-                                                            <label class="form-check-label" for="ignore_spectre_categories">
-                                                                Ignore Spectre's categories.
-                                                            </label>
+                                                                   {% if importable.configuration.isHeaders %}checked{% endif %}
+                                                                   type="checkbox"
+                                                                   id="headers" name="headers[{{ index }}]" value="1"
+                                                                   aria-describedby="headersHelp">
+                                                            <label class="form-check-label" for="headers">
+                                                                Yes
+                                                            </label><br>
+                                                            <small id="headersHelp" class="form-text text-muted">
+                                                                Select this checkbox when your importable file is a
+                                                                CSV-like file and has headers on the first line of the
+                                                                file.
+                                                            </small>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row mb-3">
+                                                    <div class="col-sm-3">Convert to UTF-8</div>
+                                                    <div class="col-sm-9">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                   {% if importable.configuration.isConversion %}checked{% endif %}
+                                                                   type="checkbox"
+                                                                   id="conversion" name="conversion[{{ index }}]"
+                                                                   value="1"
+                                                                   aria-describedby="conversionHelp">
+                                                            <label class="form-check-label" for="conversion">
+                                                                Yes
+                                                            </label><br>
+                                                            <small id="conversionHelp" class="form-text text-muted">
+                                                                Try to convert your file to UTF-8. May lead to weird
+                                                                characters.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                        <small class="form-text text-muted" id="duplicateSpectre">
-                                                            Spectre adds categories to each transaction. You can choose to ignore
-                                                            them.
+                                                <div class="form-group row mb-3">
+                                                    <label for="delimiter" class="col-sm-3 col-form-label">CSV-file
+                                                        delimiter</label>
+                                                    <div class="col-sm-9">
+                                                        <select id="delimiter" name="delimiter[{{ index }}]"
+                                                                class="form-control"
+                                                                aria-describedby="delimiterHelp">
+                                                            <option value="comma"
+                                                                    {% if importable.configuration.getDelimiter == 'comma' %}selected{% endif %}
+                                                                    label="A comma (,)">A comma (,)
+                                                            </option>
+                                                            <option value="semicolon"
+                                                                    {% if importable.configuration.getDelimiter == 'semicolon' %}selected{% endif %}
+                                                                    label="A semicolon (;)">A semicolon (;)
+                                                            </option>
+                                                            <option value="tab"
+                                                                    {% if importable.configuration.getDelimiter == 'tab' %}selected{% endif %}
+                                                                    label="A tab (invisible)">A tab (invisible)
+                                                            </option>
+                                                        </select>
+                                                        <small id="delimiterHelp" class="form-text text-muted">
+                                                            If your file is a CSV file, select the field separator of
+                                                            the file. This is almost always a comma.
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row mb-3">
+                                                    <label for="date_{{ index }}" class="col-sm-3 col-form-label">Date
+                                                        format</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" name="date[{{ index }}]" class="form-control date-input"
+                                                               id="date_{{ index }}" data-index="{{ index }}"
+                                                               placeholder="Date format"
+                                                               value="{{ importable.configuration.getDate|default('Y-m-d') }}"
+                                                               aria-describedby="dateHelp">
+                                                        <small id="dateHelp" class="form-text text-muted">
+                                                            Use this box to set the date format as it can be found in
+                                                            your file. You can
+                                                            use
+                                                            the format as described
+                                                            <a href="https://www.php.net/manual/en/function.date.php">on
+                                                                this page</a>.
+                                                            Don't stop playing with this setting until <strong
+                                                                id="date_example_{{ index }}" class="date_example" data-index="{{ index }}">1984-09-17</strong> matches what you
+                                                            see in your
+                                                            importable file.
                                                         </small>
                                                     </div>
                                                 </div>
                                             {% endif %}
 
-                                        {% endif %}
 
-
-                                        {% if 'file' == importable.flow %}
-                                            <h5>File options</h5>
+                                            <h4>Import options</h4>
                                             <div class="form-group row mb-3">
-                                                <div class="col-sm-3">Headers</div>
+                                                <label for="default_account" class="col-sm-3 col-form-label">Default
+                                                    import
+                                                    account</label>
                                                 <div class="col-sm-9">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input"
-                                                               {% if importable.configuration.isHeaders %}checked{% endif %} type="checkbox"
-                                                               id="headers" name="headers[{{ index }}]" value="1" aria-describedby="headersHelp">
-                                                        <label class="form-check-label" for="headers">
-                                                            Yes
-                                                        </label><br>
-                                                        <small id="headersHelp" class="form-text text-muted">
-                                                            Select this checkbox when your importable file is a CSV-like file and has headers on the first line of the file.
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row mb-3">
-                                                <div class="col-sm-3">Convert to UTF-8</div>
-                                                <div class="col-sm-9">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input"
-                                                               {% if importable.configuration.isConversion %}checked{% endif %} type="checkbox"
-                                                               id="conversion" name="conversion[{{ index }}]" value="1"
-                                                               aria-describedby="conversionHelp">
-                                                        <label class="form-check-label" for="conversion">
-                                                            Yes
-                                                        </label><br>
-                                                        <small id="conversionHelp" class="form-text text-muted">
-                                                            Try to convert your file to UTF-8. May lead to weird characters.
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row mb-3">
-                                                <label for="delimiter" class="col-sm-3 col-form-label">CSV-file delimiter</label>
-                                                <div class="col-sm-9">
-                                                    <select id="delimiter" name="delimiter[{{ index }}]" class="form-control"
-                                                            aria-describedby="delimiterHelp">
-                                                        <option value="comma"
-                                                                {% if importable.configuration.getDelimiter == 'comma' %}selected{% endif %}
-                                                                label="A comma (,)">A comma (,)
-                                                        </option>
-                                                        <option value="semicolon"
-                                                                {% if importable.configuration.getDelimiter == 'semicolon' %}selected{% endif %}
-                                                                label="A semicolon (;)">A semicolon (;)
-                                                        </option>
-                                                        <option value="tab"
-                                                                {% if importable.configuration.getDelimiter == 'tab' %}selected{% endif %}
-                                                                label="A tab (invisible)">A tab (invisible)
-                                                        </option>
+                                                    <select id="default_account" name="default_account[{{ index }}]"
+                                                            class="form-control"
+                                                            aria-describedby="defaultAccountHelp">
+                                                        {% for accountGroup, accountList in importable.firefly_iii_accounts %}
+                                                            <optgroup label="{{ accountGroup }}">
+                                                                {% for account in accountList %}
+                                                                    <option
+                                                                        {% if importable.configuration.getDefaultAccount == account.id %}selected{% endif %}
+                                                                        value="{{ account.id }}"
+                                                                        label="{{ account.name }}">{{ account.name }}</option>
+                                                                {% endfor %}
+                                                            </optgroup>
+                                                        {% endfor %}
                                                     </select>
-                                                    <small id="delimiterHelp" class="form-text text-muted">
-                                                        If your file is a CSV file, select the field separator of the file. This is almost always a comma.
+                                                    <small id="defaultAccountHelp" class="form-text text-muted">
+                                                        Select the asset account you want to link transactions to, if
+                                                        your import
+                                                        doesn't have enough meta data to determine this.
                                                     </small>
                                                 </div>
                                             </div>
-
                                             <div class="form-group row mb-3">
-                                                <label for="date" class="col-sm-3 col-form-label">Date format</label>
-                                                <div class="col-sm-9">
-                                                    <input type="text" name="date[{{ index }}]" class="form-control" id="date"
-                                                           placeholder="Date format"
-                                                           value="{{ importable.configuration.getDate|default('Y-m-d') }}"
-                                                           aria-describedby="dateHelp">
-                                                    <small id="dateHelp" class="form-text text-muted">
-                                                        Use this box to set the date format as it can be found in your file. You can
-                                                        use
-                                                        the format as described
-                                                        <a href="https://www.php.net/manual/en/function.date.php">on this page</a>.
-                                                        Don't stop playing with this setting until <strong
-                                                            id="date_example">1984-09-17</strong> matches what you see in your
-                                                        importable file.
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-
-
-                                        <h4>Import options</h4>
-                                        <div class="form-group row mb-3">
-                                            <label for="default_account" class="col-sm-3 col-form-label">Default import
-                                                account</label>
-                                            <div class="col-sm-9">
-                                                <select id="default_account" name="default_account[{{ index }}]" class="form-control"
-                                                        aria-describedby="defaultAccountHelp">
-                                                    {% for accountGroup, accountList in importable.firefly_iii_accounts %}
-                                                        <optgroup label="{{ accountGroup }}">
-                                                            {% for account in accountList %}
-                                                                <option
-                                                                    {% if importable.configuration.getDefaultAccount == account.id %}selected{% endif %}
-                                                                    value="{{ account.id }}"
-                                                                    label="{{ account.name }}">{{ account.name }}</option>
-                                                            {% endfor %}
-                                                        </optgroup>
-                                                    {% endfor %}
-                                                </select>
-                                                <small id="defaultAccountHelp" class="form-text text-muted">
-                                                    Select the asset account you want to link transactions to, if your import
-                                                    doesn't have enough meta data to determine this.
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row mb-3">
-                                            <div class="col-sm-3">Rules</div>
-                                            <div class="col-sm-9">
-                                                <div class="form-check">
-                                                    <input class="form-check-input"
-                                                           {% if importable.configuration.isRules or null == configuration %}checked{% endif %}
-                                                           type="checkbox" id="rules" name="rules[{{ index }}]" value="1"
-                                                           aria-describedby="rulesHelp">
-                                                    <label class="form-check-label" for="rules">
-                                                        Yes
-                                                    </label>
-                                                    <small id="rulesHelp" class="form-text text-muted">
-                                                        <br>Select if you want Firefly III to apply your rules to the import.
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row mb-3">
-                                            <div class="col-sm-3">Import tag</div>
-                                            <div class="col-sm-9">
-                                                <div class="form-check">
-                                                    <input class="form-check-input"
-                                                           {% if importable.configuration.isAddImportTag or null == configuration %}checked{% endif %}
-                                                           type="checkbox" id="rules" name="add_import_tag[{{ index }}]" value="1"
-                                                           aria-describedby="add_import_tagHelp">
-                                                    <label class="form-check-label" for="rules">
-                                                        Yes
-                                                    </label>
-                                                    <small id="add_import_tagHelp" class="form-text text-muted">
-                                                        <br>When selected Firefly III will add a tag to each imported transaction
-                                                        denoting the import; this groups your import under a tag.
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row mb-3">
-                                            <div class="col-sm-3">Map data</div>
-                                            <div class="col-sm-9">
-                                                <div class="form-check">
-                                                    <input class="form-check-input"
-                                                           {% if importable.configuration.isMapAllData %}checked{% endif %} type="checkbox"
-                                                           id="map_all_data"
-                                                           name="map_all_data[{{ index }}]" value="1" aria-describedby="mapAllDataHelp">
-                                                    <label class="form-check-label" for="map_all_data">
-                                                        Yes
-                                                    </label>
-                                                    <small id="mapAllDataHelp" class="form-text text-muted">
-                                                        <br>You get the opportunity to link your data to existing Firefly III
-                                                        data, for a cleaner import.
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% if 'nordigen' == importable.flow or 'spectre' == importable.flow %}
-                                            <div class="form-group row mb-3">
-                                                <label for="default_account" class="col-sm-3 col-form-label">Date range</label>
-                                                <div class="col-sm-9">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input date-range-radio" id="date_range_all"
-                                                               type="radio" name="date_range[{{ index }}]" value="all"
-                                                               {% if importable.configuration.getDateRange == 'all' %}checked{% endif %}
-                                                               aria-describedby="rangeHelp"/>
-                                                        <label class="form-check-label" for="date_range_all">Import
-                                                            everything</label>
-                                                    </div>
-
-                                                    <div class="form-check">
-                                                        <input class="form-check-input date-range-radio" id="date_range_partial"
-                                                               type="radio" name="date_range[{{ index }}]"
-                                                               value="partial"
-                                                               {% if importable.configuration.getDateRange == 'partial' %}checked{% endif %}
-                                                               aria-describedby="rangeHelp"/>
-                                                        <label class="form-check-label" for="date_range_partial">Go back some
-                                                            time</label>
-                                                    </div>
-
-                                                    <div class="form-check">
-                                                        <input class="form-check-input date-range-radio" id="date_range_range"
-                                                               type="radio" name="date_range[{{ index }}]" value="range"
-                                                               {% if importable.configuration.getDateRange == 'range' %}checked{% endif %}
-                                                               aria-describedby="rangeHelp"/>
-                                                        <label class="form-check-label" for="date_range_range">Import a specific
-                                                            range</label>
-                                                        <small id="rangeHelp" class="form-text text-muted">
-                                                            <br>What range to grab from your bank through Nordigen?
-                                                        </small>
-                                                    </div>
-
-
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row mb-3 date_range_partial_settings" id="date_range_partial_settings_{{ index }}">
-                                                <div class="col-sm-3">
-                                                    Date range settings
-                                                </div>
-                                                <div class="col-sm-3">
-                                                    <input
-                                                        name="date_range_number[{{ index }}]"
-                                                        id="date_range_number"
-                                                        class="form-control" value="{{ importable.configuration.getDateRangeNumber }}"
-                                                        type="number" step="1" min="1" max="365">
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <select class="form-control"
-                                                            name="date_range_unit[{{ index }}]"
-                                                            id="date_range_unit">
-                                                        <option {% if 'd' == importable.configuration.getDateRangeUnit %}selected{% endif %}
-                                                                value="d" label="days">days
-                                                        </option>
-                                                        <option {% if 'w' == importable.configuration.getDateRangeUnit %}selected{% endif %}
-                                                                value="w" label="weeks">weeks
-                                                        </option>
-                                                        <option {% if 'm' == importable.configuration.getDateRangeUnit %}selected{% endif %}
-                                                                value="m" label="months">months
-                                                        </option>
-                                                        <option {% if 'y' == importable.configuration.getDateRangeUnit %}selected{% endif %}
-                                                                value="y" label="years">years
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group row mb-3 date_range_range_settings" id="date_range_range_settings_{{ index }}">
-                                                <div class="col-sm-3">
-                                                    Date range settings
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <input type="date" name="date_not_before[{{ index }}]" class="form-control"
-                                                           value="{{ importable.configuration.getDateNotBefore }}">
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <input type="date" name="date_not_after[{{ index }}]" class="form-control"
-                                                           value="{{ configuration.getDateNotAfter }}">
-                                                </div>
-                                            </div>
-
-                                        {% endif %}
-                                        <h4>Duplicate transaction detection</h4>
-                                        <div class="col-sm-9 offset-sm-3">
-                                            <p class="text-muted">
-                                                Firefly III can automatically detect duplicate transactions. This is pretty
-                                                foolproof. In some special cases however,
-                                                you want more control over this process. Read more about the options below in <a
-                                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/"
-                                                    target="_blank">the documentation</a>.
-                                            </p>
-                                        </div>
-
-                                        {% if 'file' == importable.flow %}
-                                            <div class="form-group row mb-3">
-                                                <label for="X" class="col-sm-3 col-form-label">General detection options</label>
+                                                <div class="col-sm-3">Rules</div>
                                                 <div class="col-sm-9">
                                                     <div class="form-check">
                                                         <input class="form-check-input"
-                                                               {% if importable.configuration.isIgnoreDuplicateLines or null == configuration %}checked{% endif %}
-                                                               type="checkbox" value="1" id="ignore_duplicate_lines"
-                                                               name="ignore_duplicate_lines[{{ index }}]" aria-describedby="duplicateHelp">
-                                                        <label class="form-check-label" for="ignore_duplicate_lines">
-                                                            Do not import duplicate lines or entries in the importable file.
+                                                               {% if importable.configuration.isRules or null == configuration %}checked{% endif %}
+                                                               type="checkbox" id="rules" name="rules[{{ index }}]"
+                                                               value="1"
+                                                               aria-describedby="rulesHelp">
+                                                        <label class="form-check-label" for="rules">
+                                                            Yes
                                                         </label>
-                                                        <br>
-                                                        <small class="form-text text-muted" id="duplicateHelp">
-                                                            Whatever method you choose ahead, it's smart to make the importer ignore
-                                                            any
-                                                            duplicated lines or entries in your importable file.
+                                                        <small id="rulesHelp" class="form-text text-muted">
+                                                            <br>Select if you want Firefly III to apply your rules to
+                                                            the import.
                                                         </small>
                                                     </div>
                                                 </div>
                                             </div>
-                                        {% endif %}
-
-                                        <div class="form-group row mb-3">
-                                            <label for="duplicate_detection_method" class="col-sm-3 col-form-label duplicate_detection_method">Detection
-                                                method</label>
-                                            <div class="col-sm-9">
-                                                <select id="duplicate_detection_method" name="duplicate_detection_method[{{ index }}]"
-                                                        class="form-control" aria-describedby="duplicate_detection_method_help">
-                                                    <option label="No duplicate detection"
-                                                            {% if importable.configuration.getDuplicateDetectionMethod == 'none' %}selected{% endif %}
-                                                            value="none">No duplicate detection
-                                                    </option>
-                                                    <option label="Content-based"
-                                                            {% if importable.configuration.getDuplicateDetectionMethod == 'classic' %}selected{% endif %}
-                                                            value="classic">Content-based detection
-                                                    </option>
-                                                    <option label="Identifier-based"
-                                                            {% if importable.configuration.getDuplicateDetectionMethod == 'cell' %}selected{% endif %}
-                                                            value="cell">Identifier-based detection
-                                                    </option>
-                                                </select>
-                                                <small id="duplicate_detection_method_help" class="form-text text-muted">
-                                                    For more details on these detection method see <a
-                                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/#duplicate-transaction-detection"
-                                                        target="_blank">the documentation</a>. If you're not sure, select
-                                                    "content-based" detection.
-                                                </small>
-                                            </div>
-                                        </div>
-                                        {% if 'file' == importable.flow %}
-                                            <div class="form-group row mb-3" id="unique_column_index_holder">
-                                                <label for="unique_column_index" class="col-sm-3 col-form-label">Unique column
-                                                    index</label>
+                                            <div class="form-group row mb-3">
+                                                <div class="col-sm-3">Import tag</div>
                                                 <div class="col-sm-9">
-                                                    <input type="number" step="1" name="unique_column_index[{{ index }}]" class="form-control"
-                                                           id="unique_column_index" placeholder="Column index"
-                                                           value="{{ importable.configuration.getUniqueColumnIndex }}"
-                                                           aria-describedby="unique_column_index_help">
-                                                    <small id="unique_column_index_help" class="form-text text-muted">
-                                                        This field is only relevant for the "identifier-based" detection option.
-                                                        Indicate which column / field contains the unique identifier. Start counting from
-                                                        zero!
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               {% if importable.configuration.isAddImportTag or null == configuration %}checked{% endif %}
+                                                               type="checkbox" id="rules"
+                                                               name="add_import_tag[{{ index }}]" value="1"
+                                                               aria-describedby="add_import_tagHelp">
+                                                        <label class="form-check-label" for="rules">
+                                                            Yes
+                                                        </label>
+                                                        <small id="add_import_tagHelp" class="form-text text-muted">
+                                                            <br>When selected Firefly III will add a tag to each
+                                                            imported transaction
+                                                            denoting the import; this groups your import under a tag.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mb-3">
+                                                <div class="col-sm-3">Map data</div>
+                                                <div class="col-sm-9">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               {% if importable.configuration.isMapAllData %}checked{% endif %}
+                                                               type="checkbox"
+                                                               id="map_all_data"
+                                                               name="map_all_data[{{ index }}]" value="1"
+                                                               aria-describedby="mapAllDataHelp">
+                                                        <label class="form-check-label" for="map_all_data">
+                                                            Yes
+                                                        </label>
+                                                        <small id="mapAllDataHelp" class="form-text text-muted">
+                                                            <br>You get the opportunity to link your data to existing
+                                                            Firefly III
+                                                            data, for a cleaner import.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% if 'nordigen' == importable.flow or 'spectre' == importable.flow %}
+                                                <div class="form-group row mb-3">
+                                                    <label for="default_account" class="col-sm-3 col-form-label">Date
+                                                        range</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input date-range-radio"
+                                                                   id="date_range_all_{{ index }}"
+                                                                   data-index="{{ index }}"
+                                                                   type="radio" name="date_range[{{ index }}]"
+                                                                   value="all"
+                                                                   {% if importable.configuration.getDateRange == 'all' %}checked{% endif %}
+                                                                   aria-describedby="rangeHelp"/>
+                                                            <label class="form-check-label" for="date_range_all">Import
+                                                                everything</label>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <input class="form-check-input date-range-radio"
+                                                                   id="date_range_partial_{{ index }}"
+                                                                   data-index="{{ index }}"
+                                                                   type="radio" name="date_range[{{ index }}]"
+                                                                   value="partial"
+                                                                   {% if importable.configuration.getDateRange == 'partial' %}checked{% endif %}
+                                                                   aria-describedby="rangeHelp"/>
+                                                            <label class="form-check-label" for="date_range_partial">Go
+                                                                back some
+                                                                time</label>
+                                                        </div>
+
+                                                        <div class="form-check">
+                                                            <input class="form-check-input date-range-radio"
+                                                                   id="date_range_range_{{ index }}"
+                                                                   data-index="{{ index }}"
+                                                                   type="radio" name="date_range[{{ index }}]"
+                                                                   value="range"
+                                                                   {% if importable.configuration.getDateRange == 'range' %}checked{% endif %}
+                                                                   aria-describedby="rangeHelp"/>
+                                                            <label class="form-check-label" for="date_range_range">Import
+                                                                a specific
+                                                                range</label>
+                                                            <small id="rangeHelp" class="form-text text-muted">
+                                                                <br>What range to grab from your bank through Nordigen?
+                                                            </small>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row mb-3 date_range_partial_settings"
+                                                     data-index="{{ index }}"
+                                                     id="date_range_partial_settings_{{ index }}">
+                                                    <div class="col-sm-3">
+                                                        Date range settings
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <input
+                                                            name="date_range_number[{{ index }}]"
+                                                            id="date_range_number"
+                                                            class="form-control"
+                                                            value="{{ importable.configuration.getDateRangeNumber }}"
+                                                            type="number" step="1" min="1" max="365">
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <select class="form-control"
+                                                                name="date_range_unit[{{ index }}]"
+                                                                id="date_range_unit">
+                                                            <option
+                                                                {% if 'd' == importable.configuration.getDateRangeUnit %}selected{% endif %}
+                                                                value="d" label="days">days
+                                                            </option>
+                                                            <option
+                                                                {% if 'w' == importable.configuration.getDateRangeUnit %}selected{% endif %}
+                                                                value="w" label="weeks">weeks
+                                                            </option>
+                                                            <option
+                                                                {% if 'm' == importable.configuration.getDateRangeUnit %}selected{% endif %}
+                                                                value="m" label="months">months
+                                                            </option>
+                                                            <option
+                                                                {% if 'y' == importable.configuration.getDateRangeUnit %}selected{% endif %}
+                                                                value="y" label="years">years
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row mb-3 date_range_range_settings"
+                                                     id="date_range_range_settings_{{ index }}" data-index="{{ index }}">
+                                                    <div class="col-sm-3">
+                                                        Date range settings
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <input type="date" name="date_not_before[{{ index }}]"
+                                                               class="form-control"
+                                                               value="{{ importable.configuration.getDateNotBefore }}">
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <input type="date" name="date_not_after[{{ index }}]"
+                                                               class="form-control"
+                                                               value="{{ configuration.getDateNotAfter }}">
+                                                    </div>
+                                                </div>
+
+                                            {% endif %}
+                                            <h4>Duplicate transaction detection</h4>
+                                            <div class="col-sm-9 offset-sm-3">
+                                                <p class="text-muted">
+                                                    Firefly III can automatically detect duplicate transactions. This is
+                                                    pretty
+                                                    foolproof. In some special cases however,
+                                                    you want more control over this process. Read more about the options
+                                                    below in <a
+                                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/"
+                                                        target="_blank">the documentation</a>.
+                                                </p>
+                                            </div>
+
+                                            {% if 'file' == importable.flow %}
+                                                <div class="form-group row mb-3">
+                                                    <label for="X" class="col-sm-3 col-form-label">General detection
+                                                        options</label>
+                                                    <div class="col-sm-9">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                   {% if importable.configuration.isIgnoreDuplicateLines or null == configuration %}checked{% endif %}
+                                                                   type="checkbox" value="1" id="ignore_duplicate_lines"
+                                                                   name="ignore_duplicate_lines[{{ index }}]"
+                                                                   aria-describedby="duplicateHelp">
+                                                            <label class="form-check-label"
+                                                                   for="ignore_duplicate_lines">
+                                                                Do not import duplicate lines or entries in the
+                                                                importable file.
+                                                            </label>
+                                                            <br>
+                                                            <small class="form-text text-muted" id="duplicateHelp">
+                                                                Whatever method you choose ahead, it's smart to make the
+                                                                importer ignore
+                                                                any
+                                                                duplicated lines or entries in your importable file.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="form-group row mb-3">
+                                                <label for="duplicate_detection_method"
+                                                       class="col-sm-3 col-form-label duplicate_detection_method">Detection
+                                                    method</label>
+                                                <div class="col-sm-9">
+                                                    <select id="duplicate_detection_method_{{ index }}"
+                                                            data-index="{{ index }}"
+                                                            name="duplicate_detection_method[{{ index }}]"
+                                                            class="duplicate_detection_method_select form-control"
+                                                            aria-describedby="duplicate_detection_method_help">
+                                                        <option label="No duplicate detection"
+                                                                {% if importable.configuration.getDuplicateDetectionMethod == 'none' %}selected{% endif %}
+                                                                value="none">No duplicate detection
+                                                        </option>
+                                                        <option label="Content-based"
+                                                                {% if importable.configuration.getDuplicateDetectionMethod == 'classic' %}selected{% endif %}
+                                                                value="classic">Content-based detection
+                                                        </option>
+                                                        <option label="Identifier-based"
+                                                                {% if importable.configuration.getDuplicateDetectionMethod == 'cell' %}selected{% endif %}
+                                                                value="cell">Identifier-based detection
+                                                        </option>
+                                                    </select>
+                                                    <small id="duplicate_detection_method_help"
+                                                           class="form-text text-muted">
+                                                        For more details on these detection method see <a
+                                                            href="https://docs.firefly-iii.org/data-importer/usage/configure/#duplicate-transaction-detection"
+                                                            target="_blank">the documentation</a>. If you're not sure,
+                                                        select
+                                                        "content-based" detection.
                                                     </small>
                                                 </div>
                                             </div>
-                                        {% endif %}
+                                            {% if 'file' == importable.flow %}
+                                                <div class="form-group row mb-3 unique_column_index_holder"
+                                                     id="unique_column_index_holder_{{ index }}"
+                                                     data-index="{{ index }}">
+                                                    <label for="unique_column_index" class="col-sm-3 col-form-label">Unique
+                                                        column
+                                                        index</label>
+                                                    <div class="col-sm-9">
+                                                        <input type="number" step="1"
+                                                               name="unique_column_index[{{ index }}]"
+                                                               class="form-control"
+                                                               id="unique_column_index" placeholder="Column index"
+                                                               value="{{ importable.configuration.getUniqueColumnIndex }}"
+                                                               aria-describedby="unique_column_index_help">
+                                                        <small id="unique_column_index_help"
+                                                               class="form-text text-muted">
+                                                            This field is only relevant for the "identifier-based"
+                                                            detection option.
+                                                            Indicate which column / field contains the unique
+                                                            identifier. Start counting from
+                                                            zero!
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
 
-                                        <div class="form-group row" id="unique_column_type_holder">
-                                            <label for="unique_column_type" class="col-sm-3 col-form-label">Unique column
-                                                type</label>
-                                            <div class="col-sm-9">
-                                                <select id="unique_column_type" name="unique_column_type[{{ index }}]" class="form-control"
-                                                        aria-describedby="unique_column_type_help">
-                                                    {% for columnType, columnName in uniqueColumns %}
-                                                        <option label="{{ columnName }}"
-                                                                {% if importable.configuration.getUniqueColumnType == columnType %}selected{% endif %}
-                                                                value="{{ columnType }}">{{ columnName }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                            <div class="form-group row unique_column_type_holder"
+                                                 id="unique_column_type_holder_{{ index }}" data-index="{{ index }}">
+                                                <label for="unique_column_type" class="col-sm-3 col-form-label">Unique
+                                                    column
+                                                    type</label>
+                                                <div class="col-sm-9">
+                                                    <select id="unique_column_type"
+                                                            name="unique_column_type[{{ index }}]" class="form-control"
+                                                            aria-describedby="unique_column_type_help">
+                                                        {% for columnType, columnName in uniqueColumns %}
+                                                            <option label="{{ columnName }}"
+                                                                    {% if importable.configuration.getUniqueColumnType == columnType %}selected{% endif %}
+                                                                    value="{{ columnType }}">{{ columnName }}</option>
+                                                        {% endfor %}
+                                                    </select>
 
-                                                <small id="unique_column_type_help" class="form-text text-muted">
-                                                    This field is only relevant for the "identifier-based" detection option.
-                                                    Select
-                                                    the type of value you expect in
-                                                    the unique identifier. What must Firefly III search for?
-                                                </small>
-                                            </div>
-                                        </div>
-
-                                        <h4>Other options</h4>
-                                        <div class="form-group row mb-3">
-                                            <div class="col-sm-3">Skip form</div>
-                                            <div class="col-sm-9">
-                                                <div class="form-check">
-                                                    <input class="form-check-input"
-                                                           {% if importable.configuration.isSkipForm %}checked{% endif %} type="checkbox"
-                                                           id="skip_form" name="skip_form[{{ index }}]" value="1" aria-describedby="skipHelp">
-                                                    <label class="form-check-label" for="skip_form">
-                                                        Yes
-                                                    </label>
-                                                    <small id="skipHelp" class="form-text text-muted">
-                                                        <br>Skip the options the next time you import and go straight to processing.
+                                                    <small id="unique_column_type_help" class="form-text text-muted">
+                                                        This field is only relevant for the "identifier-based" detection
+                                                        option.
+                                                        Select
+                                                        the type of value you expect in
+                                                        the unique identifier. What must Firefly III search for?
                                                     </small>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="row">
-                                            <div class="col-lg-12">
+                                            <h4>Other options</h4>
+                                            <div class="form-group row mb-3">
+                                                <div class="col-sm-3">Skip form</div>
+                                                <div class="col-sm-9">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               {% if importable.configuration.isSkipForm %}checked{% endif %}
+                                                               type="checkbox"
+                                                               id="skip_form" name="skip_form[{{ index }}]" value="1"
+                                                               aria-describedby="skipHelp">
+                                                        <label class="form-check-label" for="skip_form">
+                                                            Yes
+                                                        </label>
+                                                        <small id="skipHelp" class="form-text text-muted">
+                                                            <br>Skip the options the next time you import and go
+                                                            straight to processing.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                             {% endif %}
                         {% endfor %} {# end of main loop #}
                         <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
@@ -630,67 +726,104 @@
 
         var phpFormatRoute = '{{ route('004-configure.php_date') }}';
         $(document).ready(function () {
-            updateDateExample();
+            // date examples:
+            $('.date-input').on('change', function(e) {
+                let object = $(e.currentTarget);
+                updateDateExample(object);
+            });
             // trigger detection method change
-            $('.duplicate_detection_method').on('change', triggerDetectionMethod);
+            $('.duplicate_detection_method_select').on('change', function (e) {
+                let object = $(e.currentTarget);
+                triggerDetectionMethod(object);
+            });
 
             // date range
             $('.date_range_partial_settings').hide(); // hide all
-            $('.date_range_range_settings').hide();
-            $('.date-range-radio').on('change', updateRange);
+            $('.date_range_range_settings').hide(); // hide all
+            $('.date-range-radio').on('change', function (e) {
+                let object = $(e.currentTarget);
+                updateRange(object);
+            });
 
             triggerDetectionMethodAll();
             updateRangeAll();
+            updateDateExampleAll();
         });
 
-
-        function triggerDetectionMethod() {
-            var value = $('#duplicate_detection_method').val();
-            console.log('trigger change, value is')
-            console.log(value);
-            if ('none' === value) {
-                $('#unique_column_index_holder').hide();
-                $('#unique_column_type_holder').hide();
-            }
-            if ('classic' === value) {
-                $('#unique_column_index_holder').hide();
-                $('#unique_column_type_holder').hide();
-            }
-            if ('cell' === value) {
-                $('#unique_column_index_holder').show();
-                $('#unique_column_type_holder').show();
-            }
+        function updateDateExampleAll() {
+            $('.date-input').each(function(i,v) {
+                let object = $(v);
+                updateDateExample(object);
+            })
         }
 
-        function updateRange() {
-            var check = $('input[name="date_range"]:checked');
-            if ('partial' === check.val()) {
-                $('#date_range_partial_settings').show(); // TODO toggle just 1: add index
-                $('#date_range_range_settings').hide(); // TODO toggle just 1: add index
-            }
-
-            if ('range' === check.val()) {
-                $('#date_range_partial_settings').hide(); // TODO toggle just 1: add index
-                $('#date_range_range_settings').show(); // TODO toggle just 1: add index
-            }
-            if ('all' === check.val()) {
-                $('#date_range_partial_settings').hide(); // TODO toggle just 1: add index
-                $('#date_range_range_settings').hide(); // TODO toggle just 1: add index
-            }
-        }
-
-        ``
-
-        function updateDateExample() {
-            $('#date_example').text('...');
-            var format = $('#date').val();
-            $.getJSON(phpFormatRoute, {format: format}).done(function (data) {
-                $('#date_example').text(data.result); // TODO toggle just 1: add index
-            }).fail(function () {
-                $('#date_example').text(':('); // TODO toggle just 1: add index
+        function triggerDetectionMethodAll() {
+            // loop over each trigger detection thing and close them.
+            $('.duplicate_detection_method_select').each(function (i, v) {
+                let object = $(v);
+                triggerDetectionMethod(object);
             });
         }
 
-        $('#date').on('change', updateDateExample);
+        function updateRangeAll() {
+            // loop over each date range thing and set them correctly
+            $('.date-range-radio').each(function (i, v) {
+                let object = $(v);
+                updateRange(object);
+            });
+        }
+
+
+        function triggerDetectionMethod(object) {
+            let index = object.data('index');
+            let value = object.val();
+            console.log('In triggerDetectionMethod (index ' + index + ')');
+            console.log('trigger change, value is: ' + value);
+            if ('none' === value) {
+                $('.unique_column_index_holder[data-index="' + index + '"]').hide();
+                $('.unique_column_type_holder[data-index="' + index + '"]').hide();
+            }
+            if ('classic' === value) {
+                $('.unique_column_index_holder[data-index="' + index + '"]').hide();
+                $('.unique_column_type_holder[data-index="' + index + '"]').hide();
+            }
+            if ('cell' === value) {
+                $('.unique_column_index_holder[data-index="' + index + '"]').show();
+                $('.unique_column_type_holder[data-index="' + index + '"]').show();
+            }
+        }
+
+        function updateRange(object) {
+            let checkValue = object.val();
+            let index = object.data('index');
+            console.log('in updateRange(' + checkValue + ', ' + index + ')');
+            if ('partial' === checkValue) {
+                $('.date_range_partial_settings[data-index="' + index + '"]').show();
+                $('.date_range_range_settings[data-index="' + index + '"]').hide();
+            }
+
+            if ('range' === checkValue) {
+                $('.date_range_partial_settings[data-index="' + index + '"]').hide();
+                $('.date_range_range_settings[data-index="' + index + '"]').show();
+            }
+            if ('all' === checkValue) {
+                $('.date_range_partial_settings[data-index="' + index + '"]').hide();
+                $('.date_range_range_settings[data-index="' + index + '"]').hide();
+            }
+        }
+
+        function updateDateExample(object) {
+            let index = object.data('index');
+            $('.date_example[data-index="'+index+'"]').text('...');
+
+
+            var format = object.val();
+            $.getJSON(phpFormatRoute, {format: format}).done(function (data) {
+                $('.date_example[data-index="'+index+'"]').text(data.result);
+            }).fail(function () {
+                $('.date_example[data-index="'+index+'"]').text(':(');
+            });
+        }
+
     </script>
 {% endblock %}

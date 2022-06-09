@@ -422,6 +422,7 @@ class ConfigurationController extends Controller
         if ($data['count'] !== count($data['configurations'])) {
             throw new ImporterErrorException('Unexpected miscount in configuration array.');
         }
+        // TODO move to helper
         $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
         if (!is_array($combinations)) {
             throw new ImporterErrorException('Combinations must be an array.');

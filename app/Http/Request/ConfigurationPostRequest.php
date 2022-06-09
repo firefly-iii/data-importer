@@ -163,9 +163,6 @@ class ConfigurationPostRequest extends Request
         }
         return 0;
     }
-
-
-
     /**
      * TODO needs to be in helper
      *

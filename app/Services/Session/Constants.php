@@ -82,9 +82,6 @@ class Constants
 
     // user has a single configuration (for multiple files)
     public const SINGLE_CONFIGURATION_SESSION = 'single_config_session';
-
-
-
     //    /** @var string */
 //    /** @var string */
 //    public const JOB_STATUS = 'import_job_status';

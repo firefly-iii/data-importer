@@ -476,10 +476,11 @@ class UploadProcessor
             foreach ($this->processedImportables as $importable) {
                 $configuration = $this->findConfigForCombination($importable['original_name']);
                 $result[]      = [
-                    'original_name'    => $importable['original_name'],
-                    'storage_location' => $importable['storage_location'],
-                    'config_name'      => null === $configuration ? null : $configuration['original_name'],
-                    'config_location'  => null === $configuration ? null : $configuration['storage_location'],
+                    'original_name'         => $importable['original_name'],
+                    'storage_location'      => $importable['storage_location'],
+                    'config_name'           => null === $configuration ? null : $configuration['original_name'],
+                    'config_location'       => null === $configuration ? null : $configuration['storage_location'],
+                    'conversion_identifier' => null,
                 ];
             }
 
@@ -490,10 +491,11 @@ class UploadProcessor
         $array              = $this->processedConfigs;
         $configuration      = array_shift($array);
         $result[]           = [
-            'original_name'    => null,
-            'storage_location' => null,
-            'config_name'      => $configuration['original_name'] ?? null,
-            'config_location'  => $configuration['storage_location'] ?? null,
+            'original_name'         => null,
+            'storage_location'      => null,
+            'config_name'           => $configuration['original_name'] ?? null,
+            'config_location'       => $configuration['storage_location'] ?? null,
+            'conversion_identifier' => null,
         ];
         $this->combinations = $result;
     }

@@ -23,7 +23,7 @@
                             <a class="btn btn-info text-white btn-sm" href="{{ route('004-configure.download') }}"
                                data-bs-toggle="tooltip" data-bs-placement="top"
                                title="You can download a configuration file of your import, so you can make a quick start the next time you import.">
-                                <span class="fas fa-download"></span> Download configuration file
+                                <span class="fas fa-download"></span> Download configuration file TODO
                             </a>
                         </div>
                     </div>
@@ -40,13 +40,14 @@
                 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                     return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
-                var flow = '{{ flow }}';
                 var importStartUrl = '{{ nextUrl }}';
-                var jobStatusUrl = '{{ route('007-convert.status') }}?identifier={{ identifier }}';
-                var jobStartUrl = '{{ route('007-convert.start') }}?identifier={{ identifier }}';
+                var jobStatusUrl = '{{ route('007-convert.status') }}';
+                var jobStartUrl = '{{ route('007-convert.start') }}';
                 var jobBackUrl = '{{ jobBackUrl }}';
-                var configDownloadUrl = '{{ route('004-configure.download') }}?identifier={{ identifier }}';
+                var configDownloadUrl = '{{ route('004-configure.download') }}';
                 var flushUrl = '{{ route('flush') }}';
+                var combinations = {{ combinations|json_encode|raw }};
+                var combiCount = {{ combinations|length }};
             </script>
             <script src="{{ asset('js/convert.js') }}?version={{ version }}"></script>
         {% endblock %}
