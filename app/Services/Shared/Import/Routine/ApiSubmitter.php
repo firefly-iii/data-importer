@@ -359,6 +359,9 @@ class ApiSubmitter
                         app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
+                if (empty(trim($transaction['description']))){
+                    $transaction['description'] = '(no description)';
+                }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
             }
         }
