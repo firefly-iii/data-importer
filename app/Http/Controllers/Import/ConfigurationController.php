@@ -43,7 +43,10 @@ use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
+use App\Support\Http\GetsRemoteData;
+use App\Support\Http\ProcessesConfigurations;
 use App\Support\Http\RestoresConfiguration;
+use App\Support\Http\ValidatesCombinations;
 use Cache;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
@@ -64,10 +67,7 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ConfigurationController extends Controller
 {
-    protected const ASSET_ACCOUNTS = 'assets';
-    protected const LIABILITIES    = 'liabilities';
-
-    use RestoresConfiguration;
+    use RestoresConfiguration, GetsRemoteData, ValidatesCombinations, ProcessesConfigurations;
 
     /**
      * StartController constructor.
@@ -81,312 +81,34 @@ class ConfigurationController extends Controller
 
     /**
      * @param Request $request
-     * @return Factory|RedirectResponse|View
+     * @return mixed
      * @throws ImporterErrorException
      * @throws ImporterHttpException
      * @throws ApiHttpException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function index(Request $request)
+    public function index(Request $request): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle    = 'Configuration';
-        $overruleSkip = 'true' === $request->get('overruleskip');
-        $subTitle     = 'Configure your import(s)';
-        $ff3Accounts  = $this->getFF3Accounts();
-        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
-        if (!is_array($combinations)) {
-            die('Must be array');
-        }
-        if (count($combinations) < 1) {
-            die('Must be more than zero.');
-        }
+        $this->validatesCombinations();
+
+        $mainTitle           = 'Configuration';
+        $overruleSkip        = 'true' === $request->get('overruleskip');
+        $subTitle            = 'Configure your import(s)';
+        $ff3Accounts         = $this->getFF3Accounts();
+        $combinations        = session()->get(Constants::UPLOADED_COMBINATIONS);
         $singleConfiguration = session()->get(Constants::SINGLE_CONFIGURATION_SESSION);
         $data                = [];
+
         app('log')->debug(sprintf('Array has %d configuration(s)', count($combinations)));
         /** @var array $entry */
         foreach ($combinations as $index => $entry) {
             app('log')->debug(sprintf('[%d/%d] processing configuration.', ($index + 1), count($combinations)));
-            $data[] = $this->processCombination($entry, $ff3Accounts, $overruleSkip);
+            $data[] = $this->preProcessConfiguration($entry, $ff3Accounts, $overruleSkip);
         }
 
         return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'ff3Accounts', 'data', 'singleConfiguration'));
-    }
-
-    /**
-     * Each configuration/importable combination must be processed further.
-     * // TODO move to separate processor
-     * @param array $entry
-     * @param array $ff3Accounts
-     * @param bool  $overruleSkip
-     * @return array
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     */
-    private function processCombination(array $entry, array $ff3Accounts, bool $overruleSkip): array
-    {
-        $return                         = $entry;
-        $configuration                  = $this->restoreConfigurationFromFile($entry['config_location']);
-        $flow                           = $configuration->getFlow();
-        $return['configuration']        = $configuration;
-        $return['flow']                 = $flow;
-        $return['skip_form']            = true === $configuration->isSkipForm() && false === $overruleSkip;
-        $return['importer_accounts']    = [];
-        $return['firefly_iii_accounts'] = $ff3Accounts;
-        $return['unique_columns']       = config('csv.unique_column_options');
-
-        if ('nordigen' === $flow) {
-            $return['unique_columns'] = config('nordigen.unique_column_options');
-            $requisitions             = $configuration->getNordigenRequisitions();
-            $reference                = array_shift($requisitions);
-            // TODO move to separate processor
-            $return['importer_accounts'] = $this->mergeNordigenAccountLists($this->getNordigenAccounts($reference), $ff3Accounts);
-        }
-
-        if ('spectre' === $flow) {
-            $return['unique_columns'] = config('spectre.unique_column_options');
-            $url                      = config('spectre.url');
-            $appId                    = SpectreSecretManager::getAppId();
-            $secret                   = SpectreSecretManager::getSecret();
-            $spectreList              = new SpectreGetAccountsRequest($url, $appId, $secret);
-            $spectreList->connection  = $configuration->getConnection();
-            // TODO move to separate processor
-            $return['importer_accounts'] = $this->mergeSpectreAccountLists($spectreList->get(), $ff3Accounts);
-        }
-        app('log')->debug('Configuration is (session array):', $configuration->toSessionArray());
-
-        return $return;
-
-
-        // if config says to skip it, skip it:
-        //  must check for ALL.
-//        if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
-//            app('log')->debug('Skip configuration(s), go straight to the next step.');
-//            // set config as complete.
-//            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-//            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-//                // at this point, nordigen is ready for data conversion.
-//                session()->put(Constants::READY_FOR_CONVERSION, true);
-//            }
-//            // skipForm
-//            return redirect()->route('005-roles.index');
-//        }
-
-        //         // also get the nordigen / spectre accounts
-        //        $importerAccounts = [];
-        //        if ('nordigen' === $flow) {
-        //            $uniqueColumns = config('nordigen.unique_column_options');
-        //            $requisitions  = $configuration->getNordigenRequisitions();
-        //            $reference     = array_shift($requisitions);
-        //            // list all accounts in Nordigen:
-        //            //$reference        = $configuration->getRequisition(session()->get(Constants::REQUISITION_REFERENCE));
-        //            $importerAccounts = $this->getNordigenAccounts($reference);
-        //            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $accounts);
-        //        }
-        //
-        //        if ('spectre' === $flow) {
-        //            $uniqueColumns           = config('spectre.unique_column_options');
-        //            $url                     = config('spectre.url');
-        //            $appId                   = SpectreSecretManager::getAppId();
-        //            $secret                  = SpectreSecretManager::getSecret();
-        //            $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
-        //            $spectreList->connection = $configuration->getConnection();
-        //            /** @var GetAccountsResponse $spectreAccounts */
-        //            $spectreAccounts  = $spectreList->get();
-        //            $importerAccounts = $this->mergeSpectreAccountLists($spectreAccounts, $accounts);
-        //        }
-    }
-
-    /**
-     * TODO move to helper.
-     *
-     * List Nordigen accounts with account details, balances, and 2 transactions (if present)
-     * @param string $identifier
-     * @return array
-     * @throws ImporterErrorException
-     */
-    private function getNordigenAccounts(string $identifier): array
-    {
-        if (Cache::has($identifier) && config('importer.use_cache')) {
-            $result = Cache::get($identifier);
-            $return = [];
-            foreach ($result as $arr) {
-                $return[] = NordigenAccount::fromLocalArray($arr);
-            }
-            app('log')->debug('Grab accounts from cache', $result);
-            return $return;
-        }
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
-        // get banks and countries
-        $accessToken = TokenManager::getAccessToken();
-        $url         = config('nordigen.url');
-        $request     = new ListAccountsRequest($url, $identifier, $accessToken);
-        $request->setTimeOut(config('importer.connection.timeout'));
-        /** @var ListAccountsResponse $response */
-        try {
-            $response = $request->get();
-        } catch (ImporterErrorException|ImporterHttpException $e) {
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        $total  = count($response);
-        $return = [];
-        $cache  = [];
-        app('log')->debug(sprintf('Found %d accounts.', $total));
-
-        /** @var Account $account */
-        foreach ($response as $index => $account) {
-            app('log')->debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
-            $account  = AccountInformationCollector::collectInformation($account);
-            $return[] = $account;
-            $cache[]  = $account->toLocalArray();
-        }
-        Cache::put($identifier, $cache, 1800); // half an hour
-        return $return;
-    }
-
-    /**
-     * @param array $nordigen
-     * @param array $firefly
-     * @return array
-     *
-     * TODO move to some helper.
-     */
-    private function mergeNordigenAccountLists(array $nordigen, array $firefly): array
-    {
-        app('log')->debug('Now creating Nordigen account lists.');
-        $return = [];
-        /** @var NordigenAccount $nordigenAccount */
-        foreach ($nordigen as $nordigenAccount) {
-            app('log')->debug(sprintf('Now working on account "%s": "%s"', $nordigenAccount->getName(), $nordigenAccount->getIdentifier()));
-            $iban     = $nordigenAccount->getIban();
-            $currency = $nordigenAccount->getCurrency();
-            $entry    = [
-                'import_service' => $nordigenAccount,
-                'firefly'        => [],
-            ];
-
-            // only iban?
-            $filteredByIban = $this->filterByIban($firefly, $iban);
-
-            if (1 === count($filteredByIban)) {
-                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
-                $entry['firefly'] = $filteredByIban;
-                $return[]         = $entry;
-                continue;
-            }
-            app('log')->debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
-
-            // only currency?
-            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
-
-            if (count($filteredByCurrency) > 0) {
-                app('log')->debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
-                $entry['firefly'] = $filteredByCurrency;
-                $return[]         = $entry;
-                continue;
-            }
-            app('log')->debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
-            $return[]         = $entry;
-        }
-        return $return;
-    }
-
-    /**
-     * TODO move to some helper.
-     *
-     * @param array  $firefly
-     * @param string $iban
-     * @return array
-     */
-    private function filterByIban(array $firefly, string $iban): array
-    {
-        if ('' === $iban) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($firefly[self::ASSET_ACCOUNTS] ?? [], $firefly[self::LIABILITIES] ?? []);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($iban === $account->iban) {
-                $result[] = $account;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * TODO move to some helper.
-     *
-     * @param array  $firefly
-     * @param string $currency
-     * @return array
-     */
-    private function filterByCurrency(array $firefly, string $currency): array
-    {
-        if ('' === $currency) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($firefly[self::ASSET_ACCOUNTS] ?? [], $firefly[self::LIABILITIES] ?? []);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($currency === $account->currencyCode) {
-                $result[] = $account;
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * TODO move to some helper.
-     *
-     * @param SpectreGetAccountsResponse $spectre
-     * @param array                      $firefly
-     *
-     * TODO should be a helper
-     * @return array
-     */
-    private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
-    {
-        $return = [];
-        app('log')->debug('Now creating Spectre account lists.');
-
-        foreach ($spectre as $spectreAccount) {
-            app('log')->debug(sprintf('Now working on Spectre account "%s": "%s"', $spectreAccount->name, $spectreAccount->id));
-            $iban     = $spectreAccount->iban;
-            $currency = $spectreAccount->currencyCode;
-            $entry    = [
-                'import_service' => $spectreAccount,
-                'firefly'        => [],
-            ];
-
-            // only iban?
-            $filteredByIban = $this->filterByIban($firefly, $iban);
-
-            if (1 === count($filteredByIban)) {
-                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
-                $entry['firefly'] = $filteredByIban;
-                $return[]         = $entry;
-                continue;
-            }
-            app('log')->debug(sprintf('Found %d accounts with the same IBAN ("%s")', count($filteredByIban), $iban));
-
-            // only currency?
-            $filteredByCurrency = $this->filterByCurrency($firefly, $currency);
-
-            if (count($filteredByCurrency) > 0) {
-                app('log')->debug(sprintf('This account (%s) has some Firefly III counter parts with the same currency so will only use those.', $currency));
-                $entry['firefly'] = $filteredByCurrency;
-                $return[]         = $entry;
-                continue;
-            }
-            app('log')->debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
-            $return[]         = $entry;
-        }
-        return $return;
     }
 
     /**
@@ -416,111 +138,36 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $data = $request->getAll();
+        $this->validatesCombinations();
 
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        $data         = $request->getAll();
         // loop each entry.
         if ($data['count'] !== count($data['configurations'])) {
             throw new ImporterErrorException('Unexpected miscount in configuration array.');
         }
-        // TODO move to helper
-        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
-        if (!is_array($combinations)) {
-            throw new ImporterErrorException('Combinations must be an array.');
-        }
-        if (count($combinations) < 1) {
-            throw new ImporterErrorException('Combinations must be more than zero.');
-        }
 
-        if (count($combinations) !== $data['count']) {
-            throw new ImporterErrorException('Combinations must be count-validated.');
-        }
+        /**
+         * @var int   $index
+         * @var array $current
+         */
         foreach ($data['configurations'] as $index => $current) {
-            $object = Configuration::fromRequest($current);
-
-            // TODO are all fields actually in the config?
-
-            // loop accounts:
-            $accounts = [];
-            foreach (array_keys($current['do_import']) as $identifier) {
-                if (isset($current['accounts'][$identifier])) {
-                    $accounts[$identifier] = (int) $current['accounts'][$identifier];
-                }
-            }
-            $object->setAccounts($accounts);
-            $object->updateDateRange();
-
-            // get the previous config and restore roles, do_mapping and mapping
-            // they were not submitted over
-            app('log')->debug(sprintf('Get configuration from old file "%s"', $combinations[$index]['config_location']));
-            $previous       = json_decode(StorageService::getContent($combinations[$index]['config_location']), true);
-            $previousConfig = Configuration::fromFile($previous);
-            $object->setRoles($previousConfig->getRoles());
-            $object->setDoMapping($previousConfig->getDoMapping());
-            $object->setMapping($previousConfig->getMapping());
-
-            try {
-                $json = json_encode($object->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-            } catch (JsonException $e) {
-                app('log')->error($e->getMessage());
-                throw new ImporterErrorException($e->getMessage(), 0, $e);
-            };
-            $combinations[$index]['config_location'] = StorageService::storeContent($json);
-            app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $object->getConnection()));
-
-            // set config as complete.
-            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-
-            if ('nordigen' === $object->getFlow() || 'spectre' === $object->getFlow()) {
-                // at this point, nordigen is ready for data conversion.
-                session()->put(Constants::READY_FOR_CONVERSION, true);
-            }
+            $combinations[$index]['config_location'] = $this->postProcessConfiguration($current, $combinations[$index]['config_location'] ?? null);
         }
 
+        // set config as complete.
+        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
+
+        // at this point, nordigen is ready for data conversion.
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+
+        // store the combinations:
         session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
+
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
 
 
-    }
-
-    /**
-     * TODO move to helper
-     * @return array
-     */
-    private function getFF3Accounts(): array
-    {
-        $accounts = [
-            self::ASSET_ACCOUNTS => [],
-            self::LIABILITIES    => [],
-        ];
-
-        // get list of asset accounts:
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetAccountsRequest($url, $token);
-        $request->setType(GetAccountsRequest::ASSET);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $response = $request->get();
-
-        /** @var Account $account */
-        foreach ($response as $account) {
-            $accounts[self::ASSET_ACCOUNTS][$account->id] = $account;
-        }
-
-        // also get liabilities
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetAccountsRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setType(GetAccountsRequest::LIABILITIES);
-        $response = $request->get();
-        /** @var Account $account */
-        foreach ($response as $account) {
-            $accounts[self::LIABILITIES][$account->id] = $account;
-        }
-        return $accounts;
     }
 }

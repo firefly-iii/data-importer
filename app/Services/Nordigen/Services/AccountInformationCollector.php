@@ -46,7 +46,6 @@ class AccountInformationCollector
     /**
      * @param Account $account
      * @return Account
-     * @throws AgreementExpiredException
      */
     public static function collectInformation(Account $account): Account
     {
@@ -56,7 +55,7 @@ class AccountInformationCollector
         $detailedAccount = $account;
         try {
             $detailedAccount = self::getAccountDetails($account);
-        } catch (ImporterHttpException|ImporterErrorException $e) {
+        } catch (AgreementExpiredException|ImporterHttpException|ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $detailedAccount->setStatus('no-info');
@@ -104,7 +103,7 @@ class AccountInformationCollector
             app('log')->error('Missing account array', $response->data);
             throw new ImporterHttpException('No account array, exit.');
         }
-        
+
         $information = $response->data['account'];
 
         app('log')->debug('getAccountDetails: Collected information for account', $information);

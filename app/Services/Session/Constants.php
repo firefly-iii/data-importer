@@ -91,4 +91,8 @@ class Constants
 
 //    /** @var string */
 
+// constants used in the configurationcontroller
+    public const ASSET_ACCOUNTS = 'assets';
+    public const LIABILITIES    = 'liabilities';
+
 }
