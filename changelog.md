@@ -2,11 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.9.10 - 2021-05-03
+## 0.9.11 - 2022-07-16
+
+### Fixed
+- Issue where config files with empty strings would break the date selection.
+- [Issue 6146](https://github.com/firefly-iii/firefly-iii/issues/6146) Fix issue where missing Nordigen data would break the import.
+- [Issue 6233](https://github.com/firefly-iii/firefly-iii/issues/6233) Fix issue where mapping an expense account to a revenue spot would break the import.
+- Fix issue where the importer would not detect empty descriptions. Thanks @BerghsJelmer
+
+## 0.9.10 - 2022-05-03
+
 ### Changed
 - Require the most recent version of Firefly III
 
-## 0.9.9 - 2021-05-03
+## 0.9.9 - 2022-05-03
 
 ### Changed
 - Made the texts more generic to accommodate future changes
