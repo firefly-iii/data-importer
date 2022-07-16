@@ -73,7 +73,7 @@ class Accounts extends AbstractTask
          * Try to find the source and destination accounts in the transaction.
          *
          * The source account will default back to the user's submitted default account.
-         * So when everything fails, the transaction will be a deposit for amount X.
+         * So when everything fails, the transaction will be a expense for amount X.
          */
         $sourceArray = $this->getSourceArray($transaction);
         $destArray   = $this->getDestinationArray($transaction);
@@ -130,6 +130,22 @@ class Accounts extends AbstractTask
          */
         if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             app('log')->debug('Transaction is a deposit, and amount is positive. Will not change account types.');
+        }
+
+        /*
+         * If deposit and amount is positive, but the source is not a revenue, fall back to
+         * some "original-field-name" values (if they exist) and hope for the best.
+         */
+        if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type']) {
+            app('log')->warning('Transaction is a deposit, and amount is positive, but source is not a revenue. Will fall back to original field names.');
+            $newSource   = [
+                'id'     => null,
+                'name'   => $transaction['original-opposing-name'] ?? '(no name)',
+                'iban'   => $transaction['original-opposing-iban'] ?? null,
+                'number' => $transaction['original-opposing-number'] ?? null,
+                'bic'    => null,
+            ];
+            $transaction = $this->setSource($transaction, $newSource);
         }
 
         /*

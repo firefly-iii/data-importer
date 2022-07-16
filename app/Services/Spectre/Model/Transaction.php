@@ -114,8 +114,7 @@ class Transaction
         if (null !== $additional) {
             $description = trim(sprintf('%s %s', $description, app('steam')->cleanString($additional)));
         }
-
-        return $description;
+        return trim($description);
     }
 
     /**
