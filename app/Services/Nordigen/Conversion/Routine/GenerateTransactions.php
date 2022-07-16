@@ -220,7 +220,7 @@ class GenerateTransactions
             'date'               => $entry->getDate()->format('Y-m-d'),
             'datetime'           => $entry->getDate()->toW3cString(),
             'amount'             => $entry->transactionAmount,
-            'description'        => '' !== trim((string)($entry->getDescription() ?? '')) ? $entry->getDescription() : '(no description)',
+            'description'        => $entry->getDescription(),
             'payment_date'       => is_null($valueDate) ? '' : $valueDate->format('Y-m-d'),
             'order'              => 0,
             'currency_code'      => $entry->currencyCode,
