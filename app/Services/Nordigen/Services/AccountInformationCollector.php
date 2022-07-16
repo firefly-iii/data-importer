@@ -98,13 +98,13 @@ class AccountInformationCollector
         $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         /** @var ArrayResponse $response */
 
-        $response    = $request->get();
+        $response = $request->get();
 
-        if(!array_key_exists('account', $response->data)) {
+        if (!array_key_exists('account', $response->data)) {
             app('log')->error('Missing account array', $response->data);
             throw new ImporterHttpException('No account array, exit.');
         }
-        
+
         $information = $response->data['account'];
 
         app('log')->debug('getAccountDetails: Collected information for account', $information);
@@ -157,10 +157,11 @@ class AccountInformationCollector
         $request->setTimeOut(config('importer.connection.timeout'));
         /** @var ArrayResponse $response */
         $response = $request->get();
-
-        foreach ($response->data['balances'] as $array) {
-            app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
-            $account->addBalance(Balance::createFromArray($array));
+        if (array_key_exists('balances', $response->data)) {
+            foreach ($response->data['balances'] as $array) {
+                app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
+                $account->addBalance(Balance::createFromArray($array));
+            }
         }
         return $account;
     }

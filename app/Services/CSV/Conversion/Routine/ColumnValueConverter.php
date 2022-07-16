@@ -154,6 +154,12 @@ class ColumnValueConverter
                 app('log')->debug(sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField));
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
             }
+            // if this is an account field, AND the column is mapped, store the original value just in case.
+            $saveRoles = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
+            if (0 !== $value->getMappedValue() && in_array($value->getOriginalRole(), $saveRoles, true)) {
+                app('log')->debug(sprintf('The original value ("%s") in column "%s" (originally stored in "%s") was saved just in case.', $value->getValue(), $value->getRole(), $value->getOriginalRole()));
+                $transaction['transactions'][0][sprintf('original-%s', $value->getOriginalRole())] = $value->getValue();
+            }
         }
         app('log')->debug('Almost final transaction', $transaction);
 

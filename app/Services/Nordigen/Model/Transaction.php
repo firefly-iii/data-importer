@@ -285,6 +285,7 @@ class Transaction
             app('log')->debug('Description is now remittanceInformationStructured');
             $description = $this->remittanceInformationStructured;
         }
+        $description = trim($description);
 
         if ('' === $description) {
             app('log')->warning(sprintf('Transaction "%s" has no description.', $this->transactionId));

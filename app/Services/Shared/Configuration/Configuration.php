@@ -952,14 +952,14 @@ class Configuration
                 app('log')->debug('Range is "range", both will be created from a string.');
                 $before = $this->dateNotBefore; // string
                 $after  = $this->dateNotAfter;  // string
-                if (null !== $before) {
+                if ('' !== $before) {
                     $before = Carbon::createFromFormat('Y-m-d', $before);
                 }
-                if (null !== $after) {
+                if ('' !== $after) {
                     $after = Carbon::createFromFormat('Y-m-d', $after);
                 }
 
-                if (null !== $before && null !== $after && $before > $after) {
+                if ('' !== $before && '' !== $after && $before > $after) {
                     [$before, $after] = [$after, $before];
                 }
 

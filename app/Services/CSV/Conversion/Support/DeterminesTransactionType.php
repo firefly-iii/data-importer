@@ -64,10 +64,17 @@ trait DeterminesTransactionType
         }
 
 
-        // if destination is asset and source is NULL, its a deposit
+        // if destination is asset and source is NULL, it's a deposit
         if (null === $sourceType && 'asset' === $destinationType) {
             app('log')->debug('Return deposit, destination is asset');
 
+            return 'deposit';
+        }
+
+        // if the source is an expense account and the destination is an asset
+        // it could be a bad mapping. We return "deposit"
+        if('expense' === $sourceType && 'asset' === $destinationType) {
+            app('log')->warning('Return "deposit" but the source type is not correct.');
             return 'deposit';
         }
 
