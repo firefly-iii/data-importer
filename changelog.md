@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.12 - 2022-07-16
+
+### Fixed
+- Make sure packages match PHP 8.0
+
 ## 0.9.11 - 2022-07-16
 
 ### Fixed

@@ -98,6 +98,9 @@
         "roave/security-advisories": "dev-master"
     },
     "config": {
+        "platform": {
+            "php": "8.0.21"
+        },
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
