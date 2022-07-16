@@ -94,7 +94,7 @@ class TokenController extends Controller
         ];
         try {
             $response = (new Client($opts))->post($finalURL, $params);
-        } catch (ClientException | RequestException $e) {
+        } catch (ClientException|RequestException $e) {
             $body = $e->getMessage();
             if ($e->hasResponse()) {
                 $body = (string) $e->getResponse()->getBody();

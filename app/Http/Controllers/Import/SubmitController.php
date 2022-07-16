@@ -29,10 +29,13 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
+use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use App\Support\Http\ValidatesCombinations;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -49,7 +52,7 @@ use Storage;
  */
 class SubmitController extends Controller
 {
-    use RestoresConfiguration;
+    use RestoresConfiguration, ValidatesCombinations;
 
     protected const DISK_NAME = 'jobs';
 
@@ -74,27 +77,27 @@ class SubmitController extends Controller
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $mainTitle = 'Submit the data';
+        $this->validatesCombinations();
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        $jobBackUrl   = route('back.conversion');
 
-        // get configuration object.
-        $configuration = $this->restoreConfiguration();
-        $jobBackUrl    = route('back.conversion');
+        // this routine recycles the conversion identifier.
 
-        // job ID may be in session:
-        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $flow       = $configuration->getFlow();
+        /**
+         * @var int   $index
+         * @var array $combination
+         */
+        foreach ($combinations as $index => $combination) {
+            // create configuration:
+            $configuration = Configuration::fromArray(json_decode(StorageService::getContent($combination['config_location']), true));
+            $flow          = $configuration->getFlow();
 
-        // validate flow
-        if (!in_array($flow, config('importer.flows'), true)) {
-            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+            // validate flow
+            if (!in_array($flow, config('importer.flows'), true)) {
+                throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+            }
         }
-
-        app('log')->debug(sprintf('Submit (import) routine manager identifier is "%s"', $identifier));
-
-        // store identifier in session so the status can get it.
-        session()->put(Constants::IMPORT_JOB_IDENTIFIER, $identifier);
-        app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::IMPORT_JOB_IDENTIFIER));
-
-        return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
+        return view('import.008-submit.index', compact('mainTitle', 'combinations', 'jobBackUrl'));
     }
 
     /**
@@ -105,10 +108,10 @@ class SubmitController extends Controller
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier      = $request->get('identifier');
-        if(null === $identifier) {
+        $identifier = $request->get('identifier');
+        if (null === $identifier) {
             app('log')->error('Identifier is NULL');
-            $status = new SubmissionStatus;
+            $status         = new SubmissionStatus;
             $status->status = SubmissionStatus::SUBMISSION_ERRORED;
             return response()->json($status->toArray());
         }
@@ -121,7 +124,7 @@ class SubmitController extends Controller
         // get files from disk:
         if (!$disk->has($fileName)) {
             // TODO error in logs
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $identifier);
             return response()->json($importJobStatus->toArray());
         }
 
@@ -129,15 +132,15 @@ class SubmitController extends Controller
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             // TODO error in logs
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $identifier);
             return response()->json($importJobStatus->toArray());
         }
 
         $routine->setTransactions($transactions);
 
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING);
+        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING, $identifier);
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
@@ -145,33 +148,15 @@ class SubmitController extends Controller
             $routine->start();
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $identifier);
             return response()->json($importJobStatus->toArray());
         }
 
         // set done:
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE);
+        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $identifier);
 
         // set config as complete.
         session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
-
-
-//            // if configured, send report!
-//            // TODO make event handler.
-//            $log
-//                = [
-//                'messages' => $routine->getAllMessages(),
-//                'warnings' => $routine->getAllWarnings(),
-//                'errors'   => $routine->getAllErrors(),
-//            ];
-//
-//            $send = config('mail.enable_mail_report');
-//            app('log')->debug('Log log', $log);
-//            if (true === $send) {
-//                app('log')->debug('SEND MAIL');
-//                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//            }
-
 
         return response()->json($importJobStatus->toArray());
     }

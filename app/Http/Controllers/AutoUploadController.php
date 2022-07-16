@@ -40,14 +40,6 @@ class AutoUploadController extends Controller
     use HaveAccess, AutoImports, VerifyJSON;
 
     /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        $this->line($string);
-    }
-
-    /**
      *
      */
     public function index(AutoUploadRequest $request)
@@ -67,7 +59,7 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
         }
 
-        $json    = $request->file('json');
+        $json = $request->file('json');
         // TODO update documentation to document rename of importable file variable.
         $importable     = $request->file('importable');
         $importablePath = $importable?->getPathname();
@@ -80,6 +72,14 @@ class AutoUploadController extends Controller
         }
 
         return ' ';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        $this->line($string);
     }
 
     public function line(string $string)

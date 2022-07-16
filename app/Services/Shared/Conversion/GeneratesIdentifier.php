@@ -53,7 +53,7 @@ trait GeneratesIdentifier
         $disk  = Storage::disk($this->diskName);
         $count = 0;
         do {
-            $generatedId = sprintf('conv-%s', Str::random(12));
+            $generatedId = sprintf('ff3-%s', Str::random(12));
             $count++;
             app('log')->debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
         } while ($count < 30 && $disk->exists($generatedId));

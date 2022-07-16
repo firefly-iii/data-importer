@@ -72,10 +72,8 @@ trait ProcessesConfigurations
          * Assuming of course, the user even uploaded anything.
          */
         if (null !== $configLocation) {
-            die('old config location found!');
             app('log')->debug(sprintf('Get configuration from old file "%s"', $configLocation));
-            exit;
-            $previous       = json_decode(StorageService::getContent($combinations[$index]['config_location']), true);
+            $previous       = json_decode(StorageService::getContent($configLocation), true);
             $previousConfig = Configuration::fromFile($previous);
             $object->setRoles($previousConfig->getRoles());
             $object->setDoMapping($previousConfig->getDoMapping());

@@ -26,40 +26,57 @@ namespace App\Http\Controllers\Import;
 
 
 use App\Http\Controllers\Controller;
+use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
+use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use App\Support\Http\ValidatesCombinations;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Class DownloadController
  */
 class DownloadController extends Controller
 {
-    use RestoresConfiguration;
+    use RestoresConfiguration, ValidatesCombinations;
 
     /**
      * @return Application|ResponseFactory|Response
      */
-    public function download(): Response|Application|ResponseFactory
+    public function download(Request $request): Response|Application|ResponseFactory
     {
+        $this->validatesCombinations();
+        $identifier = $request->get('identifier');
+
+        $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
+        foreach ($combinations as $combi) {
+            if ($identifier === $combi['conversion_identifier']) {
+                $configuration = Configuration::fromArray(json_decode(StorageService::getContent($combi['config_location']), true));
+                $array         = $configuration->toArray();
+                $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
+
+                $response = response($result);
+                $name     = sprintf('import_config_%s.json', date('Y-m-d'));
+                $response->header('Content-disposition', 'attachment; filename=' . $name)
+                         ->header('Content-Type', 'application/json')
+                         ->header('Content-Description', 'File Transfer')
+                         ->header('Connection', 'Keep-Alive')
+                         ->header('Expires', '0')
+                         ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
+                         ->header('Pragma', 'public')
+                         ->header('Content-Length', strlen($result));
+
+                return $response;
+            }
+        }
+        throw new NotFoundHttpException('Could not find configuration');
+
         // do something
-        $configuration = $this->restoreConfiguration();
-        $array         = $configuration->toArray();
-        $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
 
-        $response = response($result);
-        $name     = sprintf('import_config_%s.json', date('Y-m-d'));
-        $response->header('Content-disposition', 'attachment; filename=' . $name)
-                 ->header('Content-Type', 'application/json')
-                 ->header('Content-Description', 'File Transfer')
-                 ->header('Connection', 'Keep-Alive')
-                 ->header('Expires', '0')
-                 ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
-                 ->header('Pragma', 'public')
-                 ->header('Content-Length', strlen($result));
-
-        return $response;
     }
 
 }

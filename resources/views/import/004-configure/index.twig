@@ -417,7 +417,7 @@
                                                         <input class="form-check-input"
                                                                {% if importable.configuration.isMapAllData %}checked{% endif %}
                                                                type="checkbox"
-                                                               id="map_all_data"
+                                                               id="map_all_data_{{ index }}"
                                                                name="map_all_data[{{ index }}]" value="1"
                                                                aria-describedby="mapAllDataHelp">
                                                         <label class="form-check-label" for="map_all_data">
@@ -427,6 +427,26 @@
                                                             <br>You get the opportunity to link your data to existing
                                                             Firefly III
                                                             data, for a cleaner import.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row mb-3">
+                                                <div class="col-sm-3">Fire webhooks</div>
+                                                <div class="col-sm-9">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                               {% if importable.configuration.isWebhooks %}checked{% endif %}
+                                                               type="checkbox"
+                                                               id="webhooks_{{ index }}"
+                                                               name="webhooks[{{ index }}]" value="1"
+                                                               aria-describedby="webhooksHelp_{{ index }}">
+                                                        <label class="form-check-label" for="map_all_data_{{ index }}">
+                                                            Yes
+                                                        </label>
+                                                        <small id="webhooksHelp_{{ index }}" class="form-text text-muted">
+                                                            <br>Firefly III will fire your webhooks for each imported transaction.
+                                                            This may slow down the import.
                                                         </small>
                                                     </div>
                                                 </div>

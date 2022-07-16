@@ -41,11 +41,14 @@
                     return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
 
-                var jobStatusUrl = '{{ route('008-submit.status') }}?identifier={{ identifier }}';
-                var jobStartUrl = '{{ route('008-submit.start') }}?identifier={{ identifier }}';
+                var jobStatusUrl = '{{ route('008-submit.status') }}';
+                var jobStartUrl = '{{ route('008-submit.start') }}';
                 var jobBackUrl = '{{ jobBackUrl }}';
-                var configDownloadUrl = '{{ route('004-configure.download') }}?identifier={{ identifier }}';
+                var configDownloadUrl = '{{ route('004-configure.download') }}';
                 var flushUrl = '{{ route('flush') }}';
+
+                var combinations = {{ combinations|json_encode|raw }};
+                var combiCount = {{ combinations|length }};
             </script>
             <script src="{{ asset('js/submit.js') }}?version={{ version }}"></script>
         {% endblock %}

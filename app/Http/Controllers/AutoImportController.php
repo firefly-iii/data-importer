@@ -43,19 +43,6 @@ class AutoImportController extends Controller
     private string $directory;
 
     /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        $this->line($string);
-    }
-
-    public function line(string $string)
-    {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
-    }
-
-    /**
      *
      */
     public function index(Request $request): Response
@@ -72,7 +59,7 @@ class AutoImportController extends Controller
 
         $argument  = (string) ($request->get('directory') ?? './');
         $directory = realpath($argument);
-        if(false === $directory) {
+        if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
 
@@ -107,6 +94,19 @@ class AutoImportController extends Controller
      * @param null $verbosity
      */
     public function info($string, $verbosity = null)
+    {
+        $this->line($string);
+    }
+
+    public function line(string $string)
+    {
+        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
     {
         $this->line($string);
     }

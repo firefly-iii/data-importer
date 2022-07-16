@@ -194,7 +194,7 @@ class ConnectionController extends Controller
                 'storage_location' => null,
                 'config_name'      => 'spectre.json',
                 'config_location'  => $location,
-            ]
+            ],
         ];
         session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
 

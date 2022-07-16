@@ -108,6 +108,36 @@ class RoleController extends Controller
     }
 
     /**
+     * TODO move to helper
+     * @param array $entry
+     * @return array
+     * @throws Exception
+     * @throws InvalidArgument
+     * @throws JsonException
+     * @throws UnableToProcessCsv
+     */
+    private function processCombination(array $entry): array
+    {
+        $return                  = $entry;
+        $configuration           = $this->restoreConfigurationFromFile($entry['config_location']);
+        $flow                    = $configuration->getFlow();
+        $return['configuration'] = $configuration;
+        $return['flow']          = $flow;
+
+        // get columns and examples from the uploaded file:
+        $content            = StorageService::getContent($entry['storage_location'], $configuration->isConversion());
+        $return['columns']  = RoleService::getColumns($content, $configuration);
+        $return['examples'] = RoleService::getExampleData($content, $configuration);
+
+        // get things from configuration ready:
+        $return['mapping']    = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+        $return['roles']      = $configuration->getRoles();
+        $return['do_mapping'] = $configuration->getDoMapping();
+
+        return $return;
+    }
+
+    /**
      * @param RolesPostRequest $request
      *
      * @return RedirectResponse
@@ -184,35 +214,5 @@ class RoleController extends Controller
         }
 
         return $need;
-    }
-
-    /**
-     * TODO move to helper
-     * @param array $entry
-     * @return array
-     * @throws Exception
-     * @throws InvalidArgument
-     * @throws JsonException
-     * @throws UnableToProcessCsv
-     */
-    private function processCombination(array $entry): array
-    {
-        $return                  = $entry;
-        $configuration           = $this->restoreConfigurationFromFile($entry['config_location']);
-        $flow                    = $configuration->getFlow();
-        $return['configuration'] = $configuration;
-        $return['flow']          = $flow;
-
-        // get columns and examples from the uploaded file:
-        $content            = StorageService::getContent($entry['storage_location'], $configuration->isConversion());
-        $return['columns']  = RoleService::getColumns($content, $configuration);
-        $return['examples'] = RoleService::getExampleData($content, $configuration);
-
-        // get things from configuration ready:
-        $return['mapping']    = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-        $return['roles']      = $configuration->getRoles();
-        $return['do_mapping'] = $configuration->getDoMapping();
-
-        return $return;
     }
 }

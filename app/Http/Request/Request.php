@@ -169,6 +169,22 @@ class Request extends FormRequest
     }
 
     /**
+     * TODO needs to be in helper
+     *
+     * @param int    $index
+     * @param string $key
+     * @return array
+     */
+    protected function getArrayFromArray(int $index, string $key): array
+    {
+        $res = $this->get($key);
+        if (is_array($res)) {
+            return $res[$index] ?? [];
+        }
+        return [];
+    }
+
+    /**
      * Return date or NULL.
      *
      * @param string $field
@@ -185,21 +201,5 @@ class Request extends FormRequest
         }
 
         return $result;
-    }
-
-    /**
-     * TODO needs to be in helper
-     *
-     * @param int    $index
-     * @param string $key
-     * @return array
-     */
-    protected function getArrayFromArray(int $index, string $key): array
-    {
-        $res = $this->get($key);
-        if (is_array($res)) {
-            return $res[$index] ?? [];
-        }
-        return [];
     }
 }

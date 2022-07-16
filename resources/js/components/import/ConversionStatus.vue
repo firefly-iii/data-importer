@@ -24,7 +24,7 @@
         <div class="col-lg-10 offset-lg-1">
             <div class="card" v-if="!triedAnyStart">
                 <div class="card-header">Data conversion ({{ combiCount }} conversion<span
-                    v-if="combiCount != 1">(s)</span>)
+                    v-if="combiCount !== 1">(s)</span>)
                 </div>
                 <div class="card-body">
                     <p>
@@ -39,26 +39,40 @@
                         </li>
                     </ol>
                     <p>
-                        Please press <strong>Start job<span v-if="combiCount != 1">s</span></strong> to start.
-                    </p>
-                    <p>
-                        <button class="btn btn-success float-end" type="button" v-on:click="callAllStart">Start job<span
-                            v-if="combiCount != 1">s</span>
+                        Please press
+                        <button class="btn btn-success" type="button" v-on:click="callAllStart">Start job<span
+                            v-if="combiCount !== 1">s</span>
                             &rarr;
                         </button>
+                        to start.
                     </p>
+                    <p>
+
+                    </p>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Before the jobs are started, you can download the configuration file for each job.
+                    </p>
+                    <ul>
+                        <li v-for="(item, index) in computedStatusTwo" :key="index">
+                            Configuration file for
+                            <a
+                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="You can download a configuration file of your import, so you can make a quick start the next time you import."
+                                :href="configDownloadUrl + '?identifier=' + item.identifier">
+                                job #{{ index + 1 }}</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="card" v-if="triedAnyStart">
                 <div class="card-header">Data conversion ({{ combiCount }} conversion<span
-                    v-if="combiCount != 1">(s)</span>)
+                    v-if="combiCount !== 1">(s)</span>)
                 </div>
                 <div class="card-body">
-                    <div v-for="(item, index) in computedStatus">
+                    <div v-for="(item, index) in computedStatusTwo" :key="index">
                         <h4>Import job #{{ index + 1 }}</h4>
-                        <p>
-                            {{ item.identifier }} {{ item.status }}
-                        </p>
                         <div v-if="'waiting_to_start' === item.status">
                             <p>Waiting for the job to start..</p>
                         </div>
@@ -91,8 +105,10 @@
                         </div>
                         <div v-if="'conv_done' === item.status">
                             <p>
-                                The conversion routine has finished 🎉. Please wait to be redirected!
-                                <span class="fas fa-sync fa-spin"></span>
+                                The conversion routine has finished 🎉.
+                                <span v-if="finishedAll">
+                                Please wait to be redirected! <span class="fas fa-sync fa-spin"></span>
+                                    </span>
                             </p>
                             <conversion-messages
                                 :errors="errors[item.identifier]"
@@ -123,50 +139,47 @@ export default {
             downloadUrl: window.configDownloadUrl,
             jobBackUrl: window.jobBackUrl,
             flushUrl: window.flushUrl,
+            configDownloadUrl: window.configDownloadUrl,
             combinations: {},
             combiCount: 0,
             triedAnyStart: false,
+            computedStatusTwo: [],
+            finishedAll: false,
         };
     },
-    computed: {
-        computedStatus() {
-            let stat = [];
-            for(let key in this.status) {
-                if(this.status.hasOwnProperty(key)) {
-                    let current = this.status[key];
-                    stat.push({identifier: key, status: current});
-                }
-            }
-            return stat;
-        }
-    },
-    props: [],
     mounted() {
         this.combinations = window.combinations;
         this.combiCount = window.combiCount;
 
+        // create array of statuses.
+        let index = 0;
         for (let item in this.combinations) {
             if (this.combinations.hasOwnProperty(item)) {
                 let current = this.combinations[item];
+
+                // set in computed status two:
+                Vue.set(this.computedStatusTwo, index, {
+                    identifier: current.conversion_identifier,
+                    status: 'waiting_to_start',
+                    triedToStart: false
+                })
+
                 this.status[current.conversion_identifier] = 'waiting_to_start';
                 this.triedToStart[current.conversion_identifier] = false;
-                this.getJobStatus(current.conversion_identifier);
-                console.log(this.status);
+                this.getJobStatus(index, current.conversion_identifier);
+                index++;
             }
         }
-
-        //this.getJobStatus();
     },
     methods: {
-        getJobStatus: function (identifier) {
-            console.log('getJobStatus(' + identifier + ')');
+        getJobStatus: function (index, identifier) {
             let url = jobStatusUrl + '?identifier=' + identifier;
             axios.get(url).then((response) => {
-                this.parseJobStatus(identifier, response.data);
+                this.parseJobStatus(index, identifier, response.data);
             });
         },
-        parseJobStatus: function (identifier, response) {
-            console.log(`Returned status of ${identifier} is ${response.status}. Current state is "${this.status[identifier]}"`);
+        parseJobStatus: function (index, identifier, response) {
+            console.log(`Returned status [${index}] of ${identifier} is ${response.status}. Current state is "${this.status[identifier]}"`);
             this.errors[identifier] = response.errors;
             this.warnings[identifier] = response.warnings;
             this.messages[identifier] = response.messages;
@@ -176,10 +189,14 @@ export default {
                 console.error('Job ' + identifier + ' already failed :(');
                 return;
             }
+            // update status
+            Vue.set(this.computedStatusTwo, index, {
+                identifier: identifier,
+                status: response.status,
+                triedToStart: this.triedToStart[identifier]
+            })
 
             this.status[identifier] = response.status;
-            console.log(this.status);
-            console.log(this.computedStatus);
 
             // job has not started yet.
             if (false === this.triedToStart[identifier] && 'waiting_to_start' === response.status) {
@@ -212,64 +229,54 @@ export default {
             }
             let random = 1000 + Math.floor(Math.random() * 501);
             setTimeout(function () {
-                console.log('Fired on setTimeout of ' + identifier + ' with a break of ' + random + 'ms.');
-
-                this.getJobStatus(identifier);
+                this.getJobStatus(index, identifier);
             }.bind(this), random); // about every second and a half.
         },
         redirectToImport: function () {
-            //window.location = importStartUrl;
+            window.location = importStartUrl;
         },
         conditionalRedirect: function () {
             let redirect = true;
-            for(let key in this.status) {
-                if(this.status.hasOwnProperty(key)) {
+            for (let key in this.status) {
+                if (this.status.hasOwnProperty(key)) {
                     let current = this.status[key];
-                    console.log('Job ' + key + ' is ' + current);
-                    if(current !== 'conv_done') {
+                    if (current !== 'conv_done') {
                         redirect = false;
                     }
                 }
             }
-            if(true === redirect) {
-                        setTimeout(function () {
-                            console.log('Do redirect!')
-                            this.redirectToImport();
-                        }.bind(this), 3000);
+            if (true === redirect) {
+                this.finishedAll = true;
+                setTimeout(function () {
+                    this.redirectToImport();
+                }.bind(this), 3000);
             }
-            //console.log('Redirect if all are done (TODO)');
         },
         callAllStart: function () {
             this.triedAnyStart = true;
+            let index = 0;
             for (let item in this.combinations) {
                 if (this.combinations.hasOwnProperty(item)) {
                     let current = this.combinations[item];
-                    this.callStart(current.conversion_identifier);
+                    this.callStart(index, current.conversion_identifier);
+                    index++;
                 }
             }
         },
-        callStart: function (identifier) {
+        callStart: function (index, identifier) {
             let url = jobStartUrl + '?identifier=' + identifier;
-            console.log('Call job start URL: ' + url);
             this.triedToStart[identifier] = true;
             axios.post(url).then((response) => {
                 //console.log('POST was OK');
-                //this.getJobStatus(identifier);
+                this.getJobStatus(index, identifier);
             }).catch((error) => {
                 console.error('JOB HAS FAILED :(');
                 this.status[identifier] = 'conv_errored';
-                this.getJobStatus(identifier);
+                this.getJobStatus(index, identifier);
             });
-            console.log('POST was OK');
-            this.getJobStatus(identifier);
+            // this.getJobStatus(index, identifier);
         },
     },
-    renderTracked(event) {
-        debugger
-    },
-    renderTriggered(event) {
-        debugger
-    }
 }
 
 </script>

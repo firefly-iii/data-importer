@@ -38,6 +38,7 @@ use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use App\Support\Http\ValidatesCombinations;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +49,7 @@ use JsonException;
  */
 class ConversionController extends Controller
 {
-    use RestoresConfiguration;
+    use RestoresConfiguration, ValidatesCombinations;
 
     protected const DISK_NAME = 'jobs'; // TODO stored in several places
 
@@ -72,16 +73,8 @@ class ConversionController extends Controller
         $jobBackUrl        = route('back.mapping');
         $nextUrl           = route('008-submit.index');
         $hasExternalImport = false;
-
-        // grab configs from session
-        // TODO move to helper
+        $this->validatesCombinations();
         $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
-        if (!is_array($combinations)) {
-            throw new ImporterErrorException('Combinations must be an array.');
-        }
-        if (count($combinations) < 1) {
-            throw new ImporterErrorException('Combinations must be more than zero.');
-        }
         /**
          * @var int   $index
          * @var array $combination
@@ -140,6 +133,7 @@ class ConversionController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier = $request->get('identifier');
+        sleep(random_int(1, 5));
 
         // find configuration among session details:
         // TODO move to helper
@@ -164,14 +158,16 @@ class ConversionController extends Controller
         // from array this time.
         $object = Configuration::fromArray(json_decode(StorageService::getContent($set['config_location']), true));
         $flow   = $object->getFlow();
+        sleep(random_int(1, 5));
 
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-            $disk = Storage::disk('uploads');
+            $disk    = Storage::disk('uploads');
             $routine = new CSVRoutineManager($identifier);
+            sleep(random_int(1, 5));
             $routine->setContent($disk->get($set['storage_location']));
         }
         if ('nordigen' === $flow) {
@@ -180,15 +176,16 @@ class ConversionController extends Controller
         if ('spectre' === $flow) {
             $routine = new SpectreRoutineManager($identifier);
         }
-
+        sleep(random_int(1, 5));
         $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
 
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_RUNNING, $identifier);
-        sleep(10);
+        sleep(random_int(1, 5));
         // then push stuff into the routine:
         $routine->setConfiguration($object);
         try {
             $transactions = $routine->start();
+            sleep(random_int(1, 5));
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $identifier);
@@ -211,10 +208,11 @@ class ConversionController extends Controller
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
-
+        sleep(random_int(1, 5));
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $identifier);
+        sleep(random_int(1, 5));
 
         // set config as complete.
         session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);

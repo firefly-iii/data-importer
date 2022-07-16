@@ -32,7 +32,6 @@ use App\Http\Middleware\LinkControllerMiddleware;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewUserAgreement;
-use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
@@ -106,7 +105,7 @@ class LinkController extends Controller
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
         $agreementResponse = $agreementRequest->post();
 
-        $request     = new PostNewRequisitionRequest($url, $accessToken);
+        $request = new PostNewRequisitionRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
@@ -149,7 +148,7 @@ class LinkController extends Controller
         // create a new config thing
         $configuration = $this->restoreConfiguration();
         $configuration->setFlow('nordigen');
-        $requisition   = $configuration->getRequisition($reference);
+        $requisition = $configuration->getRequisition($reference);
         if (null === $requisition) {
             throw new ImporterErrorException('No such requisition.');
         }
@@ -160,12 +159,12 @@ class LinkController extends Controller
 
         // save configuration as new 1.0 configuration thing:
         $combinations = [
-             [
+            [
                 'original_name'    => 'nordigen',
                 'storage_location' => null,
                 'config_name'      => 'nordigen.json',
                 'config_location'  => $location,
-            ]
+            ],
         ];
         session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
 

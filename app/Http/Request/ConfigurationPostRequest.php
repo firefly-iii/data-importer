@@ -102,6 +102,9 @@ class ConfigurationPostRequest extends Request
                 // utf8 conversion
                 'conversion'        => $this->getBoolFromArray($index, 'conversion'),
 
+                // webhooks
+                'webhooks'          => $this->getBoolFromArray($index, 'webhooks'),
+
                 // next
                 'specifics'         => [],
                 'roles'             => [],
@@ -163,6 +166,7 @@ class ConfigurationPostRequest extends Request
         }
         return 0;
     }
+
     /**
      * TODO needs to be in helper
      *
@@ -203,6 +207,7 @@ class ConfigurationPostRequest extends Request
             'unique_column_index.*'           => 'numeric',
             'unique_column_type.*'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
             'conversion.*'                    => 'numeric|between:0,1',
+            'webhooks.*'                      => 'numeric|between:0,1',
             'flow.*'                          => 'in:file,nordigen,spectre',
             'map_all_data.*'                  => 'numeric|between:0,1',
             'date_range.*'                    => 'partial,all,range',
