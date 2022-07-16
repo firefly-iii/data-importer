@@ -233,7 +233,7 @@ class ApiSubmitter
      */
     private function processTransaction(int $index, array $line): array
     {
-        $line    = $this->replaceMappings($line);
+        $line    = $this->cleanupLine($line);
         $return  = [];
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
@@ -329,7 +329,7 @@ class ApiSubmitter
      * @param array $line
      * @return array
      */
-    private function replaceMappings(array $line): array
+    private function cleanupLine(array $line): array
     {
         app('log')->debug('Going to map data for this line.');
         if (array_key_exists(0, $this->mapping)) {
@@ -358,6 +358,9 @@ class ApiSubmitter
                         $transaction['source_id'] = $this->mapping[0][$source];
                         app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
+                }
+                if ('' === trim((string) $transaction['description'] ?? '')) {
+                    $transaction['description'] = '(no description)';
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
             }
