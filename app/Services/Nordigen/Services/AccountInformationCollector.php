@@ -97,9 +97,9 @@ class AccountInformationCollector
         $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         /** @var ArrayResponse $response */
 
-        $response    = $request->get();
+        $response = $request->get();
 
-        if(!array_key_exists('account', $response->data)) {
+        if (!array_key_exists('account', $response->data)) {
             app('log')->error('Missing account array', $response->data);
             throw new ImporterHttpException('No account array, exit.');
         }

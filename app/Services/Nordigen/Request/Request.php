@@ -43,9 +43,9 @@ abstract class Request
     private string $base;
     private array  $body;
     private array  $parameters;
+    private float  $timeOut = 3.14;
     /** @var string */
     private string $token;
-    private float  $timeOut = 3.14;
     private string $url;
 
     /**

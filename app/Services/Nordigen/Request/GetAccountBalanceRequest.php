@@ -51,6 +51,16 @@ class GetAccountBalanceRequest extends Request
     }
 
     /**
+     * @inheritDoc
+     * @throws ImporterErrorException
+     */
+    public function get(): Response
+    {
+        $array = $this->authenticatedGet();
+        return new ArrayResponse($array);
+    }
+
+    /**
      * @return string
      */
     public function getIdentifier(): string
@@ -64,16 +74,6 @@ class GetAccountBalanceRequest extends Request
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
-    }
-
-    /**
-     * @inheritDoc
-     * @throws ImporterErrorException
-     */
-    public function get(): Response
-    {
-        $array = $this->authenticatedGet();
-        return new ArrayResponse($array);
     }
 
     /**

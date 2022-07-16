@@ -48,7 +48,7 @@ class TokenManager
         self::validateAllTokens();
         try {
             $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         return $token;

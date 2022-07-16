@@ -35,8 +35,8 @@ use InvalidArgumentException;
 class Date implements ConverterInterface
 {
     private string $dateFormat;
-    private string $dateLocale;
     private string $dateFormatPattern;
+    private string $dateLocale;
 
     /**
      * Date constructor.
@@ -74,7 +74,7 @@ class Date implements ConverterInterface
             app('log')->debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
-            } catch (InvalidArgumentException | Exception $e) {
+            } catch (InvalidArgumentException|Exception $e) {
                 app('log')->error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
 
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');

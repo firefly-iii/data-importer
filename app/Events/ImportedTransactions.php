@@ -35,9 +35,9 @@ class ImportedTransactions
 {
     use SerializesModels;
 
+    public array $errors;
     public array $messages;
     public array $warnings;
-    public array $errors;
 
     /**
      * @param array $messages

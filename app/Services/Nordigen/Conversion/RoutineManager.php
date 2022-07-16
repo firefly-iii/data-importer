@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Conversion;
 
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
@@ -41,15 +40,15 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    private array $allErrors;
     private array $allMessages;
     private array $allWarnings;
-    private array $allErrors;
     use IsRunningCli, GeneratesIdentifier;
 
     private Configuration        $configuration;
-    private TransactionProcessor $transactionProcessor;
-    private GenerateTransactions $transactionGenerator;
     private FilterTransactions   $transactionFilter;
+    private GenerateTransactions $transactionGenerator;
+    private TransactionProcessor $transactionProcessor;
 
     /**
      *
@@ -70,6 +69,30 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionProcessor = new TransactionProcessor;
         $this->transactionGenerator = new GenerateTransactions;
         $this->transactionFilter    = new FilterTransactions;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
     }
 
     /**
@@ -102,7 +125,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
-            $nordigen = $this->transactionProcessor->download();
+        $nordigen = $this->transactionProcessor->download();
 
         // collect errors from transactionProcessor.
         $this->mergeMessages($this->transactionProcessor->getMessages());
@@ -141,31 +164,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->mergeErrors($this->transactionFilter->getErrors());
 
         return $filtered;
-    }
-
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
     }
 
     /**

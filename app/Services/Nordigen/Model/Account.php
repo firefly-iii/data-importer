@@ -29,7 +29,7 @@ namespace App\Services\Nordigen\Model;
  */
 class Account
 {
-    private string $identifier;
+    private array  $balances = [];
     private string $bban;
     private string $bic;
     private string $cashAccountType;
@@ -37,6 +37,7 @@ class Account
     private string $details;
     private string $displayName;
     private string $iban;
+    private string $identifier;
     private string $linkedAccounts;
     private string $msisdn;
     private string $name;
@@ -46,7 +47,6 @@ class Account
     private string $resourceId;
     private string $status;
     private string $usage;
-    private array  $balances = [];
 
     /**
      * Make sure all fields have an (empty) value
@@ -118,22 +118,6 @@ class Account
     public function addBalance(Balance $balance): void
     {
         $this->balances[] = $balance;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**
@@ -214,38 +198,6 @@ class Account
     public function setDetails(string $details): void
     {
         $this->details = $details;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLinkedAccounts(): string
-    {
-        return $this->linkedAccounts;
-    }
-
-    /**
-     * @param string $linkedAccounts
-     */
-    public function setLinkedAccounts(string $linkedAccounts): void
-    {
-        $this->linkedAccounts = $linkedAccounts;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMsisdn(): string
-    {
-        return $this->msisdn;
-    }
-
-    /**
-     * @param string $msisdn
-     */
-    public function setMsisdn(string $msisdn): void
-    {
-        $this->msisdn = $msisdn;
     }
 
     /**
@@ -343,6 +295,54 @@ class Account
     public function setIban(string $iban): void
     {
         $this->iban = $iban;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLinkedAccounts(): string
+    {
+        return $this->linkedAccounts;
+    }
+
+    /**
+     * @param string $linkedAccounts
+     */
+    public function setLinkedAccounts(string $linkedAccounts): void
+    {
+        $this->linkedAccounts = $linkedAccounts;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMsisdn(): string
+    {
+        return $this->msisdn;
+    }
+
+    /**
+     * @param string $msisdn
+     */
+    public function setMsisdn(string $msisdn): void
+    {
+        $this->msisdn = $msisdn;
     }
 
     /**

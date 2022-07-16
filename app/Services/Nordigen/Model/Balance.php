@@ -31,9 +31,9 @@ class Balance
 {
     public string $amount;
     public string $currency;
-    public string $type;
     public string $date;
     public string $lastChangeDateTime;
+    public string $type;
 
     /**
      * @param array $data

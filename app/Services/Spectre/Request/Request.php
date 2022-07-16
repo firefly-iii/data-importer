@@ -137,7 +137,7 @@ abstract class Request
                 app('log')->error('Could not decode error.');
             }
 
-            throw new ImporterErrorException('Transfer exception leads to error.',0,$e);
+            throw new ImporterErrorException('Transfer exception leads to error.', 0, $e);
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this
@@ -271,7 +271,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
-        } catch (GuzzleException | Exception $e) {
+        } catch (GuzzleException|Exception $e) {
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
@@ -346,7 +346,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
-        } catch (GuzzleException | Exception $e) {
+        } catch (GuzzleException|Exception $e) {
             app('log')->error($e->getMessage());
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
@@ -403,7 +403,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('PUT', $fullUrl, $opts);
-        } catch (RequestException | GuzzleException $e) {
+        } catch (RequestException|GuzzleException $e) {
             // get response.
             $response = $e->getResponse();
             if (null !== $response && 406 === $response->getStatusCode()) {

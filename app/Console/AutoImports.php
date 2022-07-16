@@ -44,13 +44,13 @@ use Storage;
  */
 trait AutoImports
 {
+    protected array  $conversionErrors   = [];
     protected array  $conversionMessages = [];
     protected array  $conversionWarnings = [];
-    protected array  $conversionErrors   = [];
+    protected string $identifier;
+    protected array  $importErrors       = [];
     protected array  $importMessages     = [];
     protected array  $importWarnings     = [];
-    protected array  $importErrors       = [];
-    protected string $identifier;
 
     /**
      * @param string $directory
@@ -167,8 +167,8 @@ trait AutoImports
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile  = sprintf('%s/%s', $directory, $file);
-        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $importableFile = sprintf('%s/%s', $directory, $file);
+        $jsonFile       = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
 
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.

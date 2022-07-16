@@ -35,64 +35,6 @@ use UnexpectedValueException;
 class StorageService
 {
     /**
-     * @param string $content
-     *
-     * @return string
-     * @throws ImporterErrorException
-     */
-    public static function storeContent(string $content): string
-    {
-        $fileName = hash('sha256', $content);
-        $disk     = Storage::disk('uploads');
-        if ('{}' === $content) {
-            throw new ImporterErrorException('Content is {}');
-        }
-
-        if ($disk->has($fileName)) {
-            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
-        }
-
-        $disk->put($fileName, $content);
-        app('log')->debug(sprintf('storeContent: Stored %d bytes in file "%s"', strlen($content), $fileName));
-
-        return $fileName;
-    }
-
-    /**
-     * @param array $array
-     * @return string
-     * @throws JsonException
-     */
-    public static function storeArray(array $array): string
-    {
-        $disk     = Storage::disk('uploads');
-        $json     = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 256);
-        $fileName = hash('sha256', $json);
-
-        if ($disk->has($fileName)) {
-            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
-        }
-
-        $disk->put($fileName, $json);
-        app('log')->debug(sprintf('storeArray: Stored %d bytes in file "%s"', strlen($json), $fileName));
-
-        return $fileName;
-    }
-
-    /**
-     * @param string $file
-     * @return string
-     */
-    public static function hash(string $file): string {
-        $disk     = Storage::disk('uploads');
-        if ($disk->has($file)) {
-            $content = $disk->get($file);
-            return hash('sha256', $content);
-        }
-        return 'thanks-for-all-the-fish';
-    }
-
-    /**
      * @param string $name
      * @param bool   $convert
      * @return string
@@ -124,6 +66,65 @@ class StorageService
         app('log')->warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
         return mb_convert_encoding($content, 'UTF-8', $encoding);
 
+    }
+
+    /**
+     * @param string $file
+     * @return string
+     */
+    public static function hash(string $file): string
+    {
+        $disk = Storage::disk('uploads');
+        if ($disk->has($file)) {
+            $content = $disk->get($file);
+            return hash('sha256', $content);
+        }
+        return 'thanks-for-all-the-fish';
+    }
+
+    /**
+     * @param array $array
+     * @return string
+     * @throws JsonException
+     */
+    public static function storeArray(array $array): string
+    {
+        $disk     = Storage::disk('uploads');
+        $json     = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 256);
+        $fileName = hash('sha256', $json);
+
+        if ($disk->has($fileName)) {
+            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
+        }
+
+        $disk->put($fileName, $json);
+        app('log')->debug(sprintf('storeArray: Stored %d bytes in file "%s"', strlen($json), $fileName));
+
+        return $fileName;
+    }
+
+    /**
+     * @param string $content
+     *
+     * @return string
+     * @throws ImporterErrorException
+     */
+    public static function storeContent(string $content): string
+    {
+        $fileName = hash('sha256', $content);
+        $disk     = Storage::disk('uploads');
+        if ('{}' === $content) {
+            throw new ImporterErrorException('Content is {}');
+        }
+
+        if ($disk->has($fileName)) {
+            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
+        }
+
+        $disk->put($fileName, $content);
+        app('log')->debug(sprintf('storeContent: Stored %d bytes in file "%s"', strlen($content), $fileName));
+
+        return $fileName;
     }
 
 }

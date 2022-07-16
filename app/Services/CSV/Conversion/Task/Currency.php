@@ -64,16 +64,6 @@ class Currency extends AbstractTask
     }
 
     /**
-     * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return true;
-    }
-
-    /**
      * Returns true if the task requires the default account.
      *
      * @return bool
@@ -81,5 +71,15 @@ class Currency extends AbstractTask
     public function requiresDefaultAccount(): bool
     {
         return false;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     *
+     * @return bool
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return true;
     }
 }

@@ -33,9 +33,9 @@ use App\Services\Shared\Response\Response;
  */
 class PostNewUserAgreement extends Request
 {
+    private string $accessValidForDays;
     private string $bank;
     private string $maxHistoricalDays;
-    private string $accessValidForDays;
 
     public function __construct(string $url, string $token)
     {
@@ -46,30 +46,6 @@ class PostNewUserAgreement extends Request
         $this->maxHistoricalDays  = '';
         $this->accessValidForDays = '';
         $this->bank               = '';
-    }
-
-    /**
-     * @param string $bank
-     */
-    public function setBank(string $bank): void
-    {
-        $this->bank = $bank;
-    }
-
-    /**
-     * @param string $maxHistoricalDays
-     */
-    public function setMaxHistoricalDays(string $maxHistoricalDays): void
-    {
-        $this->maxHistoricalDays = $maxHistoricalDays;
-    }
-
-    /**
-     * @param string $accessValidForDays
-     */
-    public function setAccessValidForDays(string $accessValidForDays): void
-    {
-        $this->accessValidForDays = $accessValidForDays;
     }
 
     /**
@@ -104,5 +80,29 @@ class PostNewUserAgreement extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param string $accessValidForDays
+     */
+    public function setAccessValidForDays(string $accessValidForDays): void
+    {
+        $this->accessValidForDays = $accessValidForDays;
+    }
+
+    /**
+     * @param string $bank
+     */
+    public function setBank(string $bank): void
+    {
+        $this->bank = $bank;
+    }
+
+    /**
+     * @param string $maxHistoricalDays
+     */
+    public function setMaxHistoricalDays(string $maxHistoricalDays): void
+    {
+        $this->maxHistoricalDays = $maxHistoricalDays;
     }
 }

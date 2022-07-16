@@ -70,10 +70,10 @@ class TransactionProcessor
         foreach ($accounts as $account) {
             $account = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
-            $url                   = config('spectre.url');
-            $appId                 = SpectreSecretManager::getAppId();
-            $secret                = SpectreSecretManager::getSecret();
-            $request               = new GetTransactionsRequest($url, $appId, $secret);
+            $url     = config('spectre.url');
+            $appId   = SpectreSecretManager::getAppId();
+            $secret  = SpectreSecretManager::getSecret();
+            $request = new GetTransactionsRequest($url, $appId, $secret);
             $request->setTimeOut(config('importer.connection.timeout'));
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
@@ -133,8 +133,8 @@ class TransactionProcessor
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
                 app('log')->debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT),
-                        $this->notBefore->format(self::DATE_TIME_FORMAT)
-                    )
+                                          $this->notBefore->format(self::DATE_TIME_FORMAT)
+                                  )
                 );
                 continue;
             }

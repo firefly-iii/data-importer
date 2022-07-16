@@ -40,11 +40,11 @@ class LineProcessor
 {
     use ProgressInformation;
 
+    private string $dateFormat;
     private array  $doMapping;
     private array  $mappedValues;
     private array  $mapping;
     private array  $roles;
-    private string $dateFormat;
 
     /**
      * LineProcessor constructor.

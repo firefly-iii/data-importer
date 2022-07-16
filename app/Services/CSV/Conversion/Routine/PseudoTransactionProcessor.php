@@ -45,9 +45,9 @@ class PseudoTransactionProcessor
 {
     use ProgressInformation;
 
-    private array               $tasks;
     private Account             $defaultAccount;
     private TransactionCurrency $defaultCurrency;
+    private array               $tasks;
 
     /**
      * PseudoTransactionProcessor constructor.

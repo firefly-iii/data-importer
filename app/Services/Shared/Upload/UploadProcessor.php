@@ -38,12 +38,12 @@ class UploadProcessor
     private array      $combinations;
     private MessageBag $errors;
     private string     $existingConfiguration;
+    private string     $flow;
     private array      $processedConfigs;
     private array      $processedImportables;
     private bool       $singleConfiguration;
     private array      $uploadedConfigs;
     private array      $uploadedImportables;
-    private string     $flow;
 
     // original file names
 
@@ -58,14 +58,6 @@ class UploadProcessor
         $this->flow                  = 'file';
         $this->singleConfiguration   = false;
         $this->errors                = new MessageBag;
-    }
-
-    /**
-     * @param string $flow
-     */
-    public function setFlow(string $flow): void
-    {
-        $this->flow = $flow;
     }
 
     /**
@@ -550,6 +542,14 @@ class UploadProcessor
     public function setExistingConfiguration(string $existingConfiguration): void
     {
         $this->existingConfiguration = $existingConfiguration;
+    }
+
+    /**
+     * @param string $flow
+     */
+    public function setFlow(string $flow): void
+    {
+        $this->flow = $flow;
     }
 
     /**

@@ -32,10 +32,10 @@ use App\Services\Shared\Response\Response;
  */
 class TokenSetResponse extends Response
 {
-    public string $accessToken;
-    public string $refreshToken;
     public int    $accessExpires;
+    public string $accessToken;
     public int    $refreshExpires;
+    public string $refreshToken;
 
     /**
      * @inheritDoc

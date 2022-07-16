@@ -80,25 +80,36 @@ class Transaction
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function toArray(): array
+    public function getAccountId(): string
     {
-        return [
-            'id'            => (string) $this->id,
-            'account_id'    => $this->accountId,
-            'made_on'       => $this->madeOn ? $this->madeOn->toW3cString() : '',
-            'created_at'    => $this->createdAt ? $this->createdAt->toW3cString() : '',
-            'updated_at'    => $this->updatedAt ? $this->updatedAt->toW3cString() : '',
-            'mode'          => $this->mode,
-            'status'        => $this->status,
-            'amount'        => $this->amount,
-            'currency_code' => $this->currencyCode,
-            'description'   => (string) $this->description,
-            'category'      => $this->category,
-            'duplicated'    => $this->duplicated,
-            'extra'         => $this->extra->toArray(),
-        ];
+        app('log')->debug(sprintf('Get getAccountId(): "%s"', $this->accountId));
+        return $this->accountId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAmount(): string
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCategory(): string
+    {
+        return $this->category;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrencyCode(): string
+    {
+        return $this->currencyCode;
     }
 
     /**
@@ -120,10 +131,9 @@ class Transaction
     /**
      * @return string
      */
-    public function getAccountId(): string
+    public function getId(): string
     {
-        app('log')->debug(sprintf('Get getAccountId(): "%s"', $this->accountId));
-        return $this->accountId;
+        return $this->id;
     }
 
     /**
@@ -137,49 +147,9 @@ class Transaction
     /**
      * @return string
      */
-    public function getCurrencyCode(): string
-    {
-        return $this->currencyCode;
-    }
-
-    /**
-     * @return string
-     */
     public function getMode(): string
     {
         return $this->mode;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCategory(): string
-    {
-        return $this->category;
-    }
-
-    /**
-     * @return string
-     */
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAmount(): string
-    {
-        return $this->amount;
     }
 
     /**
@@ -199,5 +169,35 @@ class Transaction
             app('log')->debug(sprintf('Payee is "%s" (empty fallback)', $value));
         }
         return $value;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id'            => (string) $this->id,
+            'account_id'    => $this->accountId,
+            'made_on'       => $this->madeOn ? $this->madeOn->toW3cString() : '',
+            'created_at'    => $this->createdAt ? $this->createdAt->toW3cString() : '',
+            'updated_at'    => $this->updatedAt ? $this->updatedAt->toW3cString() : '',
+            'mode'          => $this->mode,
+            'status'        => $this->status,
+            'amount'        => $this->amount,
+            'currency_code' => $this->currencyCode,
+            'description'   => (string) $this->description,
+            'category'      => $this->category,
+            'duplicated'    => $this->duplicated,
+            'extra'         => $this->extra->toArray(),
+        ];
     }
 }

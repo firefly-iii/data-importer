@@ -52,6 +52,18 @@ class GetAccountInformationRequest extends Request
     }
 
     /**
+     * @inheritDoc
+     * @throws ImporterErrorException
+     * @throws AgreementExpiredException
+     */
+    public function get(): Response
+    {
+
+        $array = $this->authenticatedGet();
+        return new ArrayResponse($array);
+    }
+
+    /**
      * @return string
      */
     public function getIdentifier(): string
@@ -65,18 +77,6 @@ class GetAccountInformationRequest extends Request
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
-    }
-
-    /**
-     * @inheritDoc
-     * @throws ImporterErrorException
-     * @throws AgreementExpiredException
-     */
-    public function get(): Response
-    {
-
-        $array = $this->authenticatedGet();
-        return new ArrayResponse($array);
     }
 
     /**

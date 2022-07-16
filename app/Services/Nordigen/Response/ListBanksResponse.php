@@ -38,8 +38,8 @@ use Iterator;
 class ListBanksResponse extends Response implements Iterator, Countable
 {
     private Collection $collection;
-    private int        $position = 0;
     private array      $countries;
+    private int        $position = 0;
 
     /**
      * @inheritDoc

@@ -50,14 +50,14 @@ class ApiSubmitter
 {
     use ProgressInformation;
 
+    private array         $accountInfo;
+    private bool          $addTag;
+    private Configuration $configuration;
+    private bool          $createdTag;
+    private array         $mapping;
     private string        $tag;
     private string        $tagDate;
-    private bool          $addTag;
     private string        $vanityURL;
-    private Configuration $configuration;
-    private array         $mapping;
-    private bool          $createdTag;
-    private array         $accountInfo;
 
     /**
      * @param array $lines
@@ -95,48 +95,6 @@ class ApiSubmitter
 
 
         app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
-    }
-
-    /**
-     *
-     */
-    private function createTag(): void
-    {
-        if (false === $this->addTag) {
-            app('log')->debug('Not instructed to add a tag, so will not create one.');
-
-            return;
-        }
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new PostTagRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $body = [
-            'tag'  => $this->tag,
-            'date' => $this->tagDate,
-        ];
-        $request->setBody($body);
-
-        try {
-            /** @var PostTagResponse $response */
-            $response = $request->post();
-        } catch (ApiHttpException $e) {
-            $message = sprintf('Could not create tag. %s', $e->getMessage());
-            app('log')->error($message);
-//            app('log')->error($e->getTraceAsString());
-            $this->addError(0, $message);
-
-            return;
-        }
-        if ($response instanceof ValidationErrorResponse) {
-            app('log')->error(json_encode($response->errors->toArray()));
-
-            return;
-        }
-        if (null !== $response->getTag()) {
-            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
-        }
     }
 
     /**
@@ -369,6 +327,28 @@ class ApiSubmitter
     }
 
     /**
+     * @param array $transaction
+     * @return array
+     */
+    private function updateTransactionType(array $transaction): array
+    {
+        if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
+            app('log')->debug('Transaction has source_id/destination_id');
+            $sourceId        = (int) $transaction['source_id'];
+            $destinationId   = (int) $transaction['destination_id'];
+            $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
+            $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
+            $combi           = sprintf('%s-%s', $sourceType, $destinationType);
+            app('log')->debug(sprintf('Account type combination is "%s"', $combi));
+            if ('asset-asset' === $combi) {
+                app('log')->debug('Both accounts are assets, so this transaction is a transfer.');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        return $transaction;
+    }
+
+    /**
      * @param string $key
      * @param array  $transaction
      *
@@ -386,6 +366,21 @@ class ApiSubmitter
         $index = (int) $parts[1];
 
         return (string) ($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
+    }
+
+    /**
+     * @param string $key
+     * @param string $error
+     * @return bool
+     */
+    private function isDuplicationError(string $key, string $error): bool
+    {
+        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
+            app('log')->debug('This is a duplicate transaction error');
+            return true;
+        }
+        app('log')->debug('This is not a duplicate transaction error');
+        return false;
     }
 
     /**
@@ -481,6 +476,56 @@ class ApiSubmitter
     }
 
     /**
+     *
+     */
+    private function createTag(): void
+    {
+        if (false === $this->addTag) {
+            app('log')->debug('Not instructed to add a tag, so will not create one.');
+
+            return;
+        }
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new PostTagRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $body = [
+            'tag'  => $this->tag,
+            'date' => $this->tagDate,
+        ];
+        $request->setBody($body);
+
+        try {
+            /** @var PostTagResponse $response */
+            $response = $request->post();
+        } catch (ApiHttpException $e) {
+            $message = sprintf('Could not create tag. %s', $e->getMessage());
+            app('log')->error($message);
+//            app('log')->error($e->getTraceAsString());
+            $this->addError(0, $message);
+
+            return;
+        }
+        if ($response instanceof ValidationErrorResponse) {
+            app('log')->error(json_encode($response->errors->toArray()));
+
+            return;
+        }
+        if (null !== $response->getTag()) {
+            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
+        }
+    }
+
+    /**
+     * @param array $accountInfo
+     */
+    public function setAccountInfo(array $accountInfo): void
+    {
+        $this->accountInfo = $accountInfo;
+    }
+
+    /**
      * @param Configuration $configuration
      */
     public function setConfiguration(Configuration $configuration): void
@@ -504,50 +549,5 @@ class ApiSubmitter
     public function setMapping(array $mapping): void
     {
         $this->mapping = $mapping;
-    }
-
-    /**
-     * @param string $key
-     * @param string $error
-     * @return bool
-     */
-    private function isDuplicationError(string $key, string $error): bool
-    {
-        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
-            app('log')->debug('This is a duplicate transaction error');
-            return true;
-        }
-        app('log')->debug('This is not a duplicate transaction error');
-        return false;
-    }
-
-    /**
-     * @param array $accountInfo
-     */
-    public function setAccountInfo(array $accountInfo): void
-    {
-        $this->accountInfo = $accountInfo;
-    }
-
-    /**
-     * @param array $transaction
-     * @return array
-     */
-    private function updateTransactionType(array $transaction): array
-    {
-        if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
-            app('log')->debug('Transaction has source_id/destination_id');
-            $sourceId        = (int) $transaction['source_id'];
-            $destinationId   = (int) $transaction['destination_id'];
-            $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
-            $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
-            $combi           = sprintf('%s-%s', $sourceType, $destinationType);
-            app('log')->debug(sprintf('Account type combination is "%s"', $combi));
-            if ('asset-asset' === $combi) {
-                app('log')->debug('Both accounts are assets, so this transaction is a transfer.');
-                $transaction['type'] = 'transfer';
-            }
-        }
-        return $transaction;
     }
 }

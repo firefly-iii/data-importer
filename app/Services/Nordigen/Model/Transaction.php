@@ -37,55 +37,55 @@ use Validator;
  */
 class Transaction
 {
+    public string  $accountIdentifier;
     public string  $additionalInformation;
     public string  $additionalInformationStructured;
     public Balance $balanceAfterTransaction;
     public string  $bankTransactionCode;
     public ?Carbon $bookingDate;
     public string  $checkId;
-    public string  $creditorAgent;
-    public string  $creditorId;
-    public string  $creditorName;
-    public array   $currencyExchange; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
+    public string  $creditorAccountBban;
+    public string  $creditorAccountCurrency;
+    public string  $creditorAccountIban; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
     // TODO use currency exchange info in notes
-    public string  $debtorAgent;
-    public string  $debtorName;
-    public string  $entryReference;
-    public string  $key;
-    public string  $mandateId;
-    public string  $proprietaryBank;
-    public string  $purposeCode;
-    public string  $remittanceInformationStructured;
-    public array   $remittanceInformationStructuredArray;
-    public string  $remittanceInformationUnstructured;
-    public array   $remittanceInformationUnstructuredArray;
-    public string  $transactionId;
-    public string  $ultimateCreditor;
-    public string  $ultimateDebtor;
-    public ?Carbon $valueDate;
+    public string $creditorAgent;
+    public string $creditorId;
+    public string $creditorName;
+    public string $currencyCode;
+    public array  $currencyExchange;
+    public string $debtorAccountBban;
+    public string $debtorAccountCurrency;
+    public string $debtorAccountIban;
+    public string $debtorAgent;
+    public string $debtorName;
+    public string $endToEndId;
+    public string $entryReference;
+    public string $key;
+    public string $mandateId;
+    public string $proprietaryBank;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
-    public string $debtorAccountIban;
-    public string $debtorAccountBban;
-    public string $debtorAccountCurrency;
+    public string $purposeCode;
+    public string $remittanceInformationStructured;
+    public array  $remittanceInformationStructuredArray;
 
     // creditorAccount is an array, but saved as strings:
     // iban, currency
-    public string $creditorAccountIban;
-    public string $creditorAccountBban;
-    public string $creditorAccountCurrency;
+    public string $remittanceInformationUnstructured;
+    public array  $remittanceInformationUnstructuredArray;
+    public string $transactionAmount;
 
     // transactionAmount is an array, but is saved as strings
     // amount, currency
-    public string $transactionAmount;
-    public string $currencyCode;
+    public string $transactionId;
+    public string $ultimateCreditor;
 
     // my own custom fields
-    public string $accountIdentifier;
+    public string $ultimateDebtor;
 
     // undocumented fields
-    public string $endToEndId;
+    public ?Carbon $valueDate;
 
     /**
      * Creates a transaction from a downloaded array.
@@ -252,19 +252,6 @@ class Transaction
     }
 
     /**
-     * @return Carbon|null
-     */
-    public function getValueDate(): ?Carbon
-    {
-        if (null !== $this->valueDate) {
-            app('log')->debug('Returning value date for getValueDate');
-            return $this->valueDate;
-        }
-        app('log')->warning('Transaction has no valueDate, return NULL.');
-        return null;
-    }
-
-    /**
      * Return transaction description, which depends on the values in the object:
      * @return string
      */
@@ -295,22 +282,6 @@ class Transaction
     }
 
     /**
-     * Return name of the destination account
-     *
-     * @return string|null
-     */
-    public function getDestinationName(): ?string
-    {
-        app('log')->debug(__METHOD__);
-        if ('' !== $this->creditorName) {
-            app('log')->debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
-            return $this->creditorName;
-        }
-        app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
-        return null;
-    }
-
-    /**
      * Return IBAN of the destination account
      *
      * @return string|null
@@ -336,6 +307,22 @@ class Transaction
     }
 
     /**
+     * Return name of the destination account
+     *
+     * @return string|null
+     */
+    public function getDestinationName(): ?string
+    {
+        app('log')->debug(__METHOD__);
+        if ('' !== $this->creditorName) {
+            app('log')->debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
+            return $this->creditorName;
+        }
+        app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
+        return null;
+    }
+
+    /**
      * Return IBAN of the destination account
      *
      * @return string|null
@@ -352,19 +339,18 @@ class Transaction
     }
 
     /**
-     * Return name of the source account.
-     *
-     * @return string|null
+     * Returns notes based on info in the transaction.
+     * @return string
      */
-    public function getSourceName(): ?string
+    public function getNotes(): string
     {
-        app('log')->debug(__METHOD__);
-        if ('' !== $this->debtorName) {
-            app('log')->debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
-            return $this->debtorName;
+        $notes = '';
+        if ('' !== $this->additionalInformation) {
+            $notes = $this->additionalInformation;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source account name information.', $this->transactionId));
-        return null;
+        // room for other fields
+
+        return $notes;
     }
 
     /**
@@ -392,18 +378,19 @@ class Transaction
     }
 
     /**
-     * Returns notes based on info in the transaction.
-     * @return string
+     * Return name of the source account.
+     *
+     * @return string|null
      */
-    public function getNotes(): string
+    public function getSourceName(): ?string
     {
-        $notes = '';
-        if ('' !== $this->additionalInformation) {
-            $notes = $this->additionalInformation;
+        app('log')->debug(__METHOD__);
+        if ('' !== $this->debtorName) {
+            app('log')->debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
+            return $this->debtorName;
         }
-        // room for other fields
-
-        return $notes;
+        app('log')->warning(sprintf('Transaction "%s" has no source account name information.', $this->transactionId));
+        return null;
     }
 
     /**
@@ -419,6 +406,19 @@ class Transaction
             return $this->debtorAccountBban;
         }
         app('log')->warning(sprintf('Transaction "%s" has no source BBAN information.', $this->transactionId));
+        return null;
+    }
+
+    /**
+     * @return Carbon|null
+     */
+    public function getValueDate(): ?Carbon
+    {
+        if (null !== $this->valueDate) {
+            app('log')->debug('Returning value date for getValueDate');
+            return $this->valueDate;
+        }
+        app('log')->warning('Transaction has no valueDate, return NULL.');
         return null;
     }
 

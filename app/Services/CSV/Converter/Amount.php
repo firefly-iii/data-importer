@@ -33,9 +33,9 @@ class Amount implements ConverterInterface
      *
      * @return string
      */
-    public static function positive(string $amount): string
+    public static function negative(string $amount): string
     {
-        if (-1 === bccomp($amount, '0')) {
+        if (1 === bccomp($amount, '0')) {
             $amount = bcmul($amount, '-1');
         }
 
@@ -47,9 +47,9 @@ class Amount implements ConverterInterface
      *
      * @return string
      */
-    public static function negative(string $amount): string
+    public static function positive(string $amount): string
     {
-        if (1 === bccomp($amount, '0')) {
+        if (-1 === bccomp($amount, '0')) {
             $amount = bcmul($amount, '-1');
         }
 

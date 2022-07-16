@@ -111,6 +111,14 @@ class TransactionProcessor
     }
 
     /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
      * @param GetTransactionsResponse $transactions
      * @return array
      */
@@ -162,14 +170,6 @@ class TransactionProcessor
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
 }

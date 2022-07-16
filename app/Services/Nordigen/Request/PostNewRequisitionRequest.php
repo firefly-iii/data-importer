@@ -33,9 +33,9 @@ use App\Services\Shared\Response\Response;
  */
 class PostNewRequisitionRequest extends Request
 {
+    private string $agreement;
     private string $bank;
     private string $reference;
-    private string $agreement;
 
     public function __construct(string $url, string $token)
     {
@@ -45,30 +45,6 @@ class PostNewRequisitionRequest extends Request
         $this->setUrl('api/v2/requisitions/');
         $this->reference = '';
         $this->agreement = '';
-    }
-
-    /**
-     * @param string $bank
-     */
-    public function setBank(string $bank): void
-    {
-        $this->bank = $bank;
-    }
-
-    /**
-     * @param string $reference
-     */
-    public function setReference(string $reference): void
-    {
-        $this->reference = $reference;
-    }
-
-    /**
-     * @param string $agreement
-     */
-    public function setAgreement(string $agreement): void
-    {
-        $this->agreement = $agreement;
     }
 
     /**
@@ -104,5 +80,29 @@ class PostNewRequisitionRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param string $agreement
+     */
+    public function setAgreement(string $agreement): void
+    {
+        $this->agreement = $agreement;
+    }
+
+    /**
+     * @param string $bank
+     */
+    public function setBank(string $bank): void
+    {
+        $this->bank = $bank;
+    }
+
+    /**
+     * @param string $reference
+     */
+    public function setReference(string $reference): void
+    {
+        $this->reference = $reference;
     }
 }

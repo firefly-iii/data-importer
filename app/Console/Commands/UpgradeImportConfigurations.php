@@ -34,18 +34,17 @@ use SplFileInfo;
 class UpgradeImportConfigurations extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'importer:upgrade-import-configurations {directory}';
-
-    /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Pointed to a directory, will parse and OVERWRITE all JSON files found there according to the latest JSON configuration file standards.';
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'importer:upgrade-import-configurations {directory}';
 
     /**
      * Create a new command instance.

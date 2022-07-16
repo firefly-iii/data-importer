@@ -40,10 +40,10 @@ class CSVFileProcessor
 {
     use ProgressInformation;
 
+    private Configuration $configuration;
+    private string        $delimiter;
     private bool          $hasHeaders;
     private Reader        $reader;
-    private string        $delimiter;
-    private Configuration $configuration;
 
     /**
      * CSVFileProcessor constructor.
@@ -53,21 +53,6 @@ class CSVFileProcessor
     public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
-    }
-
-
-    /**
-     * @param string $delimiter
-     */
-    public function setDelimiter(string $delimiter): void
-    {
-        $map = [
-            'tab'       => "\t",
-            'semicolon' => ';',
-            'comma'     => ',',
-        ];
-
-        $this->delimiter = $map[$delimiter] ?? ',';
     }
 
     /**
@@ -111,6 +96,20 @@ class CSVFileProcessor
             $this->addError(0, $message);
             return [];
         }
+    }
+
+    /**
+     * @param string $delimiter
+     */
+    public function setDelimiter(string $delimiter): void
+    {
+        $map = [
+            'tab'       => "\t",
+            'semicolon' => ';',
+            'comma'     => ',',
+        ];
+
+        $this->delimiter = $map[$delimiter] ?? ',';
     }
 
     /**

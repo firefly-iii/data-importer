@@ -34,7 +34,6 @@ use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -45,16 +44,16 @@ class RoutineManager implements RoutineManagerInterface
 {
     use IsRunningCli, GeneratesIdentifier;
 
-    private Configuration              $configuration;
-    private CSVFileProcessor           $csvFileProcessor;
-    private LineProcessor              $lineProcessor;
-    private ColumnValueConverter       $columnValueConverter;
-    private PseudoTransactionProcessor $pseudoTransactionProcessor;
+    private array                      $allErrors;
     private array                      $allMessages;
     private array                      $allWarnings;
-    private array                      $allErrors;
+    private ColumnValueConverter       $columnValueConverter;
+    private Configuration              $configuration;
     private string                     $content;
+    private CSVFileProcessor           $csvFileProcessor;
     private bool                       $forceCli = false;
+    private LineProcessor              $lineProcessor;
+    private PseudoTransactionProcessor $pseudoTransactionProcessor;
 
     /**
      *
@@ -72,6 +71,30 @@ class RoutineManager implements RoutineManagerInterface
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
     }
 
     /**
@@ -97,6 +120,22 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
+     * @param string $content
+     */
+    public function setContent(string $content): void
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * @param bool $forceCli
+     */
+    public function setForceCli(bool $forceCli): void
+    {
+        $this->forceCli = $forceCli;
+    }
+
+    /**
      * @inheritDoc
      * @throws ImporterErrorException
      */
@@ -115,7 +154,7 @@ class RoutineManager implements RoutineManagerInterface
         if ('' === $this->content) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }
@@ -202,47 +241,6 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         $this->allErrors = $total;
-    }
-
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
-    }
-
-    /**
-     * @param string $content
-     */
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
-    }
-
-    /**
-     * @param bool $forceCli
-     */
-    public function setForceCli(bool $forceCli): void
-    {
-        $this->forceCli = $forceCli;
     }
 
 

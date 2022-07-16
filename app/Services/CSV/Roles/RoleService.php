@@ -29,8 +29,10 @@ use App\Services\CSV\Specifics\SpecificService;
 use App\Services\Shared\Configuration\Configuration;
 use InvalidArgumentException;
 use League\Csv\Exception;
+use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use League\Csv\UnableToProcessCsv;
 
 /**
  * Class RoleService
@@ -45,8 +47,8 @@ class RoleService
      * @param Configuration $configuration
      *
      * @return array
-     * @throws \League\Csv\InvalidArgument
-     * @throws \League\Csv\UnableToProcessCsv
+     * @throws InvalidArgument
+     * @throws UnableToProcessCsv
      */
     public static function getColumns(string $content, Configuration $configuration): array
     {

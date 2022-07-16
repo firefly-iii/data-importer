@@ -32,6 +32,16 @@ use Illuminate\Contracts\Validation\Rule;
 class Iban implements Rule
 {
     /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message(): string
+    {
+        return 'The :attribute is not a valid IBAN.';
+    }
+
+    /**
      * Determine if the given value is a valid IBAN.
      *
      * @param string $attribute
@@ -41,15 +51,5 @@ class Iban implements Rule
     public function passes($attribute, $value): bool
     {
         return IbanConverter::isValidIban((string) $value);
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message(): string
-    {
-        return 'The :attribute is not a valid IBAN.';
     }
 }

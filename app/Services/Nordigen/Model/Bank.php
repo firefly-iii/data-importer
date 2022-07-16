@@ -31,9 +31,9 @@ namespace App\Services\Nordigen\Model;
 class Bank
 {
     public string $id;
+    public string $logo;
     public string $name;
     public int    $transactionTotalDays;
-    public string $logo;
 
     /**
      * @param array $array

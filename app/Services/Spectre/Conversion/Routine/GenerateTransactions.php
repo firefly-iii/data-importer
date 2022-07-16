@@ -121,7 +121,7 @@ class GenerateTransactions
         $amount           = $entry->getAmount();
 
         // extra information from the "extra" array. May be NULL.
-        $notes = trim(sprintf('%s %s',$entry->extra->getInformation(), $entry->extra->getAdditional()));
+        $notes = trim(sprintf('%s %s', $entry->extra->getInformation(), $entry->extra->getAdditional()));
 
         $transaction = [
             'type'              => 'withdrawal', // reverse
@@ -171,15 +171,6 @@ class GenerateTransactions
     }
 
     /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
-    }
-
-    /**
      * @param Transaction $entry
      * @param array       $transaction
      * @param string      $amount
@@ -223,5 +214,14 @@ class GenerateTransactions
 
         app('log')->debug(sprintf('source_id = %d, destination_name = "%s"', $transaction['source_id'], $transaction['destination_name']));
         return $transaction;
+    }
+
+    /**
+     * @param Configuration $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
     }
 }

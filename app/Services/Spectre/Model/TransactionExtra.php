@@ -110,6 +110,38 @@ class TransactionExtra
     }
 
     /**
+     * @return string|null
+     */
+    public function getAdditional(): ?string
+    {
+        return $this->additional;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getInformation(): ?string
+    {
+        return $this->information;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayee(): ?string
+    {
+        return $this->payee;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayeeInformation(): ?string
+    {
+        return $this->payeeInformation;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -143,37 +175,5 @@ class TransactionExtra
             'account_balance_snapshot'  => $this->accountBalanceSnapshot,
             'categorization_confidence' => $this->categorizationConfidence,
         ];
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getAdditional(): ?string
-    {
-        return $this->additional;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getInformation(): ?string
-    {
-        return $this->information;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getPayee(): ?string
-    {
-        return $this->payee;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getPayeeInformation(): ?string
-    {
-        return $this->payeeInformation;
     }
 }

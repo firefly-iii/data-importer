@@ -24,24 +24,17 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class Handler
  */
 class Handler extends ExceptionHandler
 {
-    /**
-     * A list of the exception types that are not reported.
-     *
-     * @var array
-     */
-    protected $dontReport = [
-        //
-    ];
-
-
     /**
      * A list of the inputs that are never flashed for validation exceptions.
      *
@@ -51,18 +44,26 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
+    /**
+     * A list of the exception types that are not reported.
+     *
+     * @var array
+     */
+    protected $dontReport = [
+        //
+    ];
 
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param Throwable                $e
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response
-     * @throws \Throwable
+     * @return JsonResponse|\Illuminate\Http\Response|Response
+     * @throws Throwable
      */
     public function render($request, Throwable $e)
     {
         //if($e instanceof ImporterErrorException || $e instanceof ImporterHttpException) {
-            $isDebug = config('app.debug');
-            return response()->view('errors.exception', ['exception' => $e, 'debug' => $isDebug], 500);
+        $isDebug = config('app.debug');
+        return response()->view('errors.exception', ['exception' => $e, 'debug' => $isDebug], 500);
         //}
         //return parent::render($request, $e);
     }
