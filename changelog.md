@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.13 - 2022-07-19
+
+### Fixed
+- Fixed an issue where the importer would break when importing mapped transactions.
+
 ## 0.9.12 - 2022-07-16
 
 ### Fixed
