@@ -136,8 +136,13 @@ class Accounts extends AbstractTask
          * If deposit and amount is positive, but the source is not a revenue, fall back to
          * some "original-field-name" values (if they exist) and hope for the best.
          */
-        if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type']) {
-            app('log')->warning('Transaction is a deposit, and amount is positive, but source is not a revenue. Will fall back to original field names.');
+        if (
+            'deposit' === $transaction['type'] &&
+            1 === bccomp($amount, '0') &&
+            'revenue' !== $source['type'] &&
+            '' !== (string) $source['type']
+        ) {
+            app('log')->warning(sprintf('Transaction is a deposit, and amount is positive, but source is not a revenue ("%s"). Will fall back to original field names.', $source['type']));
             $newSource   = [
                 'id'     => null,
                 'name'   => $transaction['original-opposing-name'] ?? '(no name)',
@@ -548,7 +553,7 @@ class Accounts extends AbstractTask
             throw new ImporterErrorException($e->getMessage());
         }
         if (0 === count($response)) {
-            app('log')->debug('Found NOTHING in findbyna,e.');
+            app('log')->debug('Found NOTHING in findbyname.');
 
             return null;
         }

@@ -100,7 +100,7 @@ class TransactionExtra
         $model->payeeInformation         = $data['payee_information'] ?? null;
         $model->type                     = $data['type'] ?? null;
         $model->checkNumber              = $data['check_number'] ?? null;
-        $model->units                    = $data['units'] ?? null;
+        $model->units                    = $data['units'] ? (string) $data['units'] : null;
         $model->additional               = $data['additional'] ?? null;
         $model->unitPrice                = $data['unit_price'] ?? null;
         $model->accountBalanceSnapshot   = isset($data['account_balance_snapshot']) ? (string) $data['account_balance_snapshot'] : null;
