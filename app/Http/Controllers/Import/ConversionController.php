@@ -36,6 +36,7 @@ use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
+use App\Services\XML\Dummy\Conversion\RoutineManager as DummyXMLRoutineManager;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\ValidatesCombinations;
@@ -138,12 +139,7 @@ class ConversionController extends Controller
         // find configuration among session details:
         // TODO move to helper
         $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
-        if (!is_array($combinations)) {
-            throw new ImporterErrorException('Combinations must be an array.');
-        }
-        if (count($combinations) < 1) {
-            throw new ImporterErrorException('Combinations must be more than zero.');
-        }
+        $this->validatesCombinations();
         app('log')->debug('Combinations', $combinations);
         $set = null;
         foreach ($combinations as $combination) {
@@ -165,10 +161,21 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-            $disk    = Storage::disk('uploads');
-            $routine = new CSVRoutineManager($identifier);
-            sleep(random_int(1, 5));
-            $routine->setContent($disk->get($set['storage_location']));
+
+
+            // switch to CSV or XML
+            switch($set['type']) {
+                case 'csv':
+                    $disk    = Storage::disk('uploads');
+                    $routine = new CSVRoutineManager($identifier);
+                    sleep(random_int(1, 5));
+                    $routine->setContent($disk->get($set['storage_location']));
+                    break;
+                    case 'xml':
+                        $routine = new DummyXMLRoutineManager($identifier);
+                        break;
+            }
+
         }
         if ('nordigen' === $flow) {
             $routine = new NordigenRoutineManager($identifier);

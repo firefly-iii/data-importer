@@ -148,6 +148,8 @@
                                 <input type="hidden" name="flow[{{ index }}]" value="{{ importable.flow }}"/>
                                 <input type="hidden" name="identifier[{{ index }}]"
                                        value="{{ importable.configuration.getIdentifier }}"/>
+                                <input type="hidden" name="type[{{ index }}]"
+                                       value="{{ importable.type }}"/>
                                 <input type="hidden" name="connection[{{ index }}]"
                                        value="{{ importable.configuration.getConnection }}"/>
                                 <input type="hidden" name="nordigen_country[{{ index }}]"
@@ -250,6 +252,7 @@
 
                                             {% if 'file' == importable.flow %}
                                                 <h5>File options</h5>
+                                                {% if 'csv' == importable.type %}
                                                 <div class="form-group row mb-3">
                                                     <div class="col-sm-3">Headers</div>
                                                     <div class="col-sm-9">
@@ -270,6 +273,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {% endif %}
                                                 <div class="form-group row mb-3">
                                                     <div class="col-sm-3">Convert to UTF-8</div>
                                                     <div class="col-sm-9">
@@ -290,7 +294,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
+                                                {% if 'csv' == importable.type %}
                                                 <div class="form-group row mb-3">
                                                     <label for="delimiter" class="col-sm-3 col-form-label">CSV-file
                                                         delimiter</label>
@@ -317,7 +321,9 @@
                                                         </small>
                                                     </div>
                                                 </div>
+                                                {% endif %}
 
+                                                {% if 'csv' == importable.type %}
                                                 <div class="form-group row mb-3">
                                                     <label for="date_{{ index }}" class="col-sm-3 col-form-label">Date
                                                         format</label>
@@ -341,6 +347,7 @@
                                                         </small>
                                                     </div>
                                                 </div>
+                                                {% endif %}
                                             {% endif %}
 
 

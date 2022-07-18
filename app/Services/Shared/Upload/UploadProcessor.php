@@ -176,10 +176,12 @@ class UploadProcessor
                 $this->processJsonFile($path, $name);
                 break;
             // can later be extended to split between XML, CAMT, etc.
-            case 'text':
             case 'xml':
-                $this->processImportableFile($path, $name);
+            case 'text':
+                $this->processImportableFile($path, $name, $type);
                 break;
+            //case 'xml':
+            //    throw new ImporterErrorException('Right now, the importer does not support XML files. Sorry.');
         }
     }
 
@@ -280,13 +282,14 @@ class UploadProcessor
      * @return void
      * @throws ImporterErrorException
      */
-    private function processImportableFile(string $path, string $name): void
+    private function processImportableFile(string $path, string $name, string $type): void
     {
         app('log')->debug(sprintf('Now in %s("%s", "%s")', __METHOD__, $path, $name));
         $result                       = StorageService::storeContent(file_get_contents($path));
         $this->processedImportables[] = [
             'original_name'    => $name,
             'storage_location' => $result,
+            'type'             => $type,
         ];
     }
 
@@ -433,6 +436,7 @@ class UploadProcessor
 
     /**
      * Will check if the configuration has an importable counterpart. This is mandatory.
+     *
      * @param array $configuration
      * @return void
      */
@@ -450,7 +454,7 @@ class UploadProcessor
             $found           = $importableShort === $short ? true : $found;
         }
         if (false === $found && 'file' === $this->flow) {
-            $this->errors->add('config_file', sprintf('Importable file "%s" needs a config file called "%s.json"', $name, $short));
+            $this->errors->add('config_file', sprintf('Configuration file "%s" needs a importable file called "%s.csv" or "%s.xml"', $name, $short, $short));
         }
     }
 
@@ -470,6 +474,7 @@ class UploadProcessor
                 $result[]      = [
                     'original_name'         => $importable['original_name'],
                     'storage_location'      => $importable['storage_location'],
+                    'type'                  => $importable['type'],
                     'config_name'           => null === $configuration ? null : $configuration['original_name'],
                     'config_location'       => null === $configuration ? null : $configuration['storage_location'],
                     'conversion_identifier' => null,
@@ -485,6 +490,7 @@ class UploadProcessor
         $result[]           = [
             'original_name'         => null,
             'storage_location'      => null,
+            'type'                  => 'unknown2',
             'config_name'           => $configuration['original_name'] ?? null,
             'config_location'       => $configuration['storage_location'] ?? null,
             'conversion_identifier' => null,

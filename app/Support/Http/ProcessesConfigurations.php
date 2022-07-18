@@ -104,6 +104,7 @@ trait ProcessesConfigurations
         $flow                           = $configuration->getFlow();
         $return['configuration']        = $configuration;
         $return['flow']                 = $flow;
+        $return['type']                 = $entry['type'];
         $return['skip_form']            = true === $configuration->isSkipForm() && false === $overruleSkip;
         $return['importer_accounts']    = [];
         $return['firefly_iii_accounts'] = $ff3Accounts;

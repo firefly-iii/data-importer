@@ -33,6 +33,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
+use App\Support\Http\ValidatesCombinations;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +55,7 @@ use function view;
  */
 class RoleController extends Controller
 {
-    use RestoresConfiguration;
+    use RestoresConfiguration, ValidatesCombinations;
 
     /**
      * RoleController constructor.
@@ -86,12 +87,7 @@ class RoleController extends Controller
         // could be multi import
         // TODO this code must be in a helper:
         $combinations = session()->get(Constants::UPLOADED_COMBINATIONS);
-        if (!is_array($combinations)) {
-            die('Must be array');
-        }
-        if (count($combinations) < 1) {
-            die('Must be more than zero.');
-        }
+        $this->validatesCombinations();
         $data = [];
         app('log')->debug(sprintf('Array has %d configuration(s)', count($combinations)));
         /** @var array $entry */
@@ -123,17 +119,29 @@ class RoleController extends Controller
         $flow                    = $configuration->getFlow();
         $return['configuration'] = $configuration;
         $return['flow']          = $flow;
+        $return['type']          = $entry['type'];
 
-        // get columns and examples from the uploaded file:
-        $content            = StorageService::getContent($entry['storage_location'], $configuration->isConversion());
-        $return['columns']  = RoleService::getColumns($content, $configuration);
-        $return['examples'] = RoleService::getExampleData($content, $configuration);
+        switch ($return['type']) {
+            case 'csv':
+                // get columns and examples from the uploaded file:
+                $content            = StorageService::getContent($entry['storage_location'], $configuration->isConversion());
+                $return['columns']  = RoleService::getColumns($content, $configuration);
+                $return['examples'] = RoleService::getExampleData($content, $configuration);
 
-        // get things from configuration ready:
-        $return['mapping']    = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-        $return['roles']      = $configuration->getRoles();
-        $return['do_mapping'] = $configuration->getDoMapping();
-
+                // get things from configuration ready:
+                $return['mapping']    = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+                $return['roles']      = $configuration->getRoles();
+                $return['do_mapping'] = $configuration->getDoMapping();
+                break;
+            case 'xml':
+                // this type may need further processing.
+                $return['columns']    = [];
+                $return['examples']   = [];
+                $return['mapping']    = [];
+                $return['roles']      = [];
+                $return['do_mapping'] = [];
+                break;
+        }
         return $return;
     }
 

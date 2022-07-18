@@ -265,6 +265,7 @@ export default {
         },
         callStart: function (index, identifier) {
             let url = jobStartUrl + '?identifier=' + identifier;
+            console.log('Callstart: ' + url);
             this.triedToStart[identifier] = true;
             axios.post(url).then((response) => {
                 //console.log('POST was OK');
