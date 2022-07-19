@@ -950,8 +950,8 @@ class Configuration
                 break;
             case 'range':
                 app('log')->debug('Range is "range", both will be created from a string.');
-                $before = $this->dateNotBefore; // string
-                $after  = $this->dateNotAfter;  // string
+                $before = trim($this->dateNotBefore); // string
+                $after  = trim($this->dateNotAfter);  // string
                 if ('' !== $before) {
                     $before = Carbon::createFromFormat('Y-m-d', $before);
                 }
@@ -963,8 +963,8 @@ class Configuration
                     [$before, $after] = [$after, $before];
                 }
 
-                $this->dateNotBefore = null === $before ? '' : $before->format('Y-m-d');
-                $this->dateNotAfter  = null === $after ? '' : $after->format('Y-m-d');
+                $this->dateNotBefore = '' === $before ? '' : $before->format('Y-m-d');
+                $this->dateNotAfter  = '' === $after ? '' : $after->format('Y-m-d');
                 app('log')->debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
     }
