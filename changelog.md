@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.14 - 2022-07-21
+
+### Added
+- Fallback to additional information field if description is empty, thanks @martinslota
+
+### Fixed
+- [Issue 6242](https://github.com/firefly-iii/firefly-iii/issues/6242) Bad string conversion when dates are empty.
+- [Issue 6244](https://github.com/firefly-iii/firefly-iii/issues/6244) Rename field from 'uri' to 'url'.
+- Fix missing field data check for spectre imports.
+
 ## 0.9.13 - 2022-07-19
 
 ### Fixed
