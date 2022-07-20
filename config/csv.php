@@ -547,7 +547,7 @@ return [
         'rabo-debit-credit'     => 'amount_modifier',
         'generic-debit-credit'  => 'amount_modifier',
         'external-id'           => 'external_id',
-        'external-url'          => 'external_uri',
+        'external-url'          => 'external_url',
         'internal_reference'    => 'internal_reference',
         'original-source'       => 'original_source',
         'tags-comma'            => 'tags_comma',
