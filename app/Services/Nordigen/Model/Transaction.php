@@ -285,6 +285,10 @@ class Transaction
             app('log')->debug('Description is now remittanceInformationStructured');
             $description = $this->remittanceInformationStructured;
         }
+        if ('' === $description) {
+            app('log')->debug('Description is now additionalInformation');
+            $description = $this->additionalInformation;
+        }
         $description = trim($description);
 
         if ('' === $description) {
