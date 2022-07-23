@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.15 - 2022-07-25
+
+### Fixed
+- [Issue 6259](https://github.com/firefly-iii/firefly-iii/issues/6259) Fixed an issue where deposits would not be given a source account.
+
 ## 0.9.14 - 2022-07-21
 
 ### Added
