@@ -112,6 +112,9 @@ class Accounts extends AbstractTask
             $transaction['type'] = $this->determineType($destination['type'], $source['type']);
             app('log')->debug('Source is now:', $destination); // yes this is correct.
             app('log')->debug('Destination is now:', $source); // yes this is correct.
+
+            // switch variables because processing further ahead will otherwise be messed up:
+            [$source, $destination] = [$destination, $source];
         }
 
         /*

@@ -54,30 +54,13 @@ class Request extends FormRequest
     }
 
     /**
-     * Return floating value.
-     *
-     * @param string $field
-     *
-     * @return float|null
-     */
-    public function float(string $field): ?float
-    {
-        $res = $this->get($field);
-        if (null === $res) {
-            return null;
-        }
-
-        return (float) $res;
-    }
-
-    /**
      * Return integer value.
      *
      * @param string $field
      *
      * @return int
      */
-    public function integer(string $field): int
+    public function convertToInteger(string $field): int
     {
         return (int) $this->get($field);
     }
@@ -145,7 +128,7 @@ class Request extends FormRequest
      *
      * @return string
      */
-    public function string(string $field): string
+    public function convertToString(string $field): string
     {
         return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
     }
