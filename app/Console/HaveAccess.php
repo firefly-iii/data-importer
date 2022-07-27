@@ -47,7 +47,7 @@ trait HaveAccess
         try {
             $request->get();
         } catch (ApiHttpException $e) {
-            $this->error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
+            $this->error(sprintf('Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
 
             return false;
         }
