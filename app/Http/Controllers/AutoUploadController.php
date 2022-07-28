@@ -44,6 +44,7 @@ class AutoUploadController extends Controller
      */
     public function error($string, $verbosity = null)
     {
+        app('log')->error($string);
         $this->line($string);
     }
 
