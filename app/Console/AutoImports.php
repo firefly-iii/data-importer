@@ -34,6 +34,7 @@ use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
+use App\Services\Shared\Upload\DetectsFileType;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
@@ -44,6 +45,8 @@ use Storage;
  */
 trait AutoImports
 {
+    use DetectsFileType;
+
     protected array  $conversionErrors   = [];
     protected array  $conversionMessages = [];
     protected array  $conversionWarnings = [];
@@ -54,9 +57,13 @@ trait AutoImports
 
     /**
      * @param string $directory
+     * @param bool   $singleConfig
      * @return array
+     *
+     * TODO may also need to be able to detect other file types. Or: detect any file with accompanying json file
+     * TODO must detect json files without accompanying camt/csv/whatever file.
      */
-    protected function getFiles(string $directory): array
+    protected function getFiles(string $directory, bool $singleConfig): array
     {
         $ignore = ['.', '..'];
 
@@ -74,14 +81,28 @@ trait AutoImports
         $files  = array_diff($array, $ignore);
         $return = [];
         foreach ($files as $file) {
-            // import importable file with JSON companion
-            // TODO may also need to be able to detect other file types. Or: detect any file with accompanying json file
-            if ('csv' === $this->getExtension($file) && $this->hasJsonConfiguration($directory, $file)) {
+            $type = $this->detectFileType(sprintf('%s/%s', $directory, $file));
+
+            // importable file with JSON companion
+            if ('text' === $type && $this->hasJsonConfiguration($directory, $file) && false === $singleConfig) {
+                $return[] = [
+                    'original_name'         => $file,
+                    'storage_location'      => sprintf('%s/%s', $directory, $file),
+                    'type'                  => $type,
+                    'config_name'           => 'a',
+                    'config_location'       => 'b',
+                    'conversion_identifier' => null,
+                ];
+            }
+
+            // importable file without JSON companion, but this is allowed.
+            if ('text' === $type && !$this->hasJsonConfiguration($directory, $file) && true === $singleConfig) {
                 $return[] = $file;
             }
+
             // import JSON with no importable file.
-            // TODO must detect json files without accompanying camt/csv/whatever file.
-            if ('json' === $this->getExtension($file) && !$this->hasCsvFile($directory, $file)) {
+            //
+            if ('json' === $this->getExtension($file) && !$this->hasImportableFile($directory, $file) && false === $singleConfig) {
                 $return[] = $file;
             }
         }
@@ -112,11 +133,13 @@ trait AutoImports
      */
     private function hasJsonConfiguration(string $directory, string $file): bool
     {
-        $short    = substr($file, 0, -4);
+        $parts = explode('.', $file);
+        array_pop($parts);
+        $short    = join('.', $parts);
         $jsonFile = sprintf('%s.json', $short);
         $fullJson = sprintf('%s/%s', $directory, $jsonFile);
         if (!file_exists($fullJson)) {
-            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with CSV file "%s". CSV file will be ignored.', $fullJson, $file));
+            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with file "%s".', $fullJson, $file));
 
             return false;
         }
@@ -132,7 +155,7 @@ trait AutoImports
      *
      * @return bool
      */
-    private function hasCsvFile(string $directory, string $file): bool
+    private function hasImportableFile(string $directory, string $file): bool
     {
         $short    = substr($file, 0, -5);
         $csvFile  = sprintf('%s.csv', $short);

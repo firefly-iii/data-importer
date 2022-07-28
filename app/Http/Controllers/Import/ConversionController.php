@@ -161,8 +161,6 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-
-
             // switch to CSV or XML
             switch($set['type']) {
                 case 'csv':

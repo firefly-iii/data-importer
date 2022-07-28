@@ -35,6 +35,8 @@ use ZipArchive;
  */
 class UploadProcessor
 {
+    use DetectsFileType;
+
     private array      $combinations;
     private MessageBag $errors;
     private string     $existingConfiguration;
@@ -92,6 +94,7 @@ class UploadProcessor
         foreach ($this->uploadedConfigs as $file) {
             $this->processUploadedConfig($file);
         }
+
         // also process pre-selected config, if any:
         $this->processExistingConfig();
 
@@ -183,40 +186,6 @@ class UploadProcessor
             //case 'xml':
             //    throw new ImporterErrorException('Right now, the importer does not support XML files. Sorry.');
         }
-    }
-
-    /**
-     * This method detects the file type of the uploaded file.
-     *
-     * @param string $path
-     * @return string
-     */
-    private function detectFileType(string $path): string
-    {
-        app('log')->debug(sprintf('Now in %s("%s")', __METHOD__, $path));
-        $fileType   = mime_content_type($path);
-        $returnType = 'unknown';
-        switch ($fileType) {
-            case 'application/csv':
-            case 'text/csv':
-            case 'text/plain':
-                // here we can always dive into the exact file content to make sure it's CSV.
-                $returnType = 'text';
-                break;
-            case 'application/json':
-                $returnType = 'json';
-                break;
-            case 'application/zip':
-                $returnType = 'zip';
-                break;
-            case 'text/xml':
-                // here we can always dive into the exact file content.
-                $returnType = 'xml';
-                break;
-        }
-        app('log')->debug(sprintf('Mime seems to be "%s", so return "%s".', $fileType, $returnType));
-
-        return $returnType;
     }
 
     /**
@@ -484,18 +453,21 @@ class UploadProcessor
             $this->combinations = $result;
             return;
         }
+
         // if flow is not 'file', returning the first config file is enough:
-        $array              = $this->processedConfigs;
-        $configuration      = array_shift($array);
-        $result[]           = [
-            'original_name'         => null,
-            'storage_location'      => null,
-            'type'                  => 'unknown2',
-            'config_name'           => $configuration['original_name'] ?? null,
-            'config_location'       => $configuration['storage_location'] ?? null,
-            'conversion_identifier' => null,
-        ];
-        $this->combinations = $result;
+        $array = $this->processedConfigs;
+        if (count($array) > 0) {
+            $configuration      = array_shift($array);
+            $result[]           = [
+                'original_name'         => null,
+                'storage_location'      => null,
+                'type'                  => 'unknown2',
+                'config_name'           => $configuration['original_name'] ?? null,
+                'config_location'       => $configuration['storage_location'] ?? null,
+                'conversion_identifier' => null,
+            ];
+            $this->combinations = $result;
+        }
     }
 
     /**

@@ -104,7 +104,6 @@ class UploadController extends Controller
         $oneConfig       = '1' === $request->get('one_config');
         $flow            = $request->cookie(Constants::FLOW_COOKIE);
 
-
         /** @var UploadProcessor $processor */
         $processor = app(UploadProcessor::class);
         $processor->setContent($importableFiles, $configFiles);

@@ -28,6 +28,7 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Upload\UploadProcessor;
 use Illuminate\Console\Command;
 
 /**
@@ -48,15 +49,19 @@ class AutoImport extends Command
      *
      * @var string
      */
-    protected $signature = 'importer:auto-import {directory : The directory from which to import automatically.}';
+    protected $signature = 'importer:auto-import' .
+                           ' {directory : The directory from which to import automatically.}' .
+                           '{--singleConfig} Use a single JSON configuration file for all found importable files.';
 
     /**
      * Execute the console command.
      *
      * @return int
+     * @throws ImporterErrorException
      */
     public function handle(): int
     {
+        $singleConfig = $this->option('singleConfig');
         $access = $this->haveAccess();
         if (false === $access) {
             $this->error('Could not connect to your local Firefly III instance.');
@@ -72,7 +77,14 @@ class AutoImport extends Command
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files = $this->getFiles($directory);
+        // process things.
+        $importableFiles = [
+
+        ];
+        $configFiles = []; // leave empty
+
+
+        $files = $this->getFiles($directory, $singleConfig);
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
@@ -81,6 +93,24 @@ class AutoImport extends Command
             return 1;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+
+        /** @var UploadProcessor $processor */
+        $processor = app(UploadProcessor::class);
+        $processor->setContent($importableFiles, $configFiles);
+        $processor->setSingleConfiguration($singleConfig);
+        $processor->setFlow('cli');
+        $processor->setExistingConfiguration('');
+        $processor->process();
+
+        // collect array with upload info:
+        $combinations = $processor->getCombinations();
+        $errors       = $processor->getErrors();
+        var_dump($files);
+        var_dump($combinations);
+        var_dump($errors);
+        exit;
+
+
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {

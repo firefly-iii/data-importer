@@ -83,7 +83,16 @@ trait HaveAccess
             $this->warn($error);
             return false;
         }
-
-        return in_array($path, $paths, true);
+        // basic check: either the path must be allowed entirely or the
+        // $path must start with any value in $paths.
+        $listed     = in_array($path, $paths, true);
+        $startsWith = false;
+        foreach ($paths as $p) {
+            if (str_starts_with($path, $p)) {
+                $startsWith = true;
+                break;
+            }
+        }
+        return $listed || $startsWith;
     }
 }
