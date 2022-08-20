@@ -42,19 +42,18 @@ class UploadProcessor
     private string     $existingConfiguration;
     private string     $flow;
     private array      $processedConfigs;
-    private array      $processedImportables;
     private bool       $singleConfiguration;
-    private array      $uploadedConfigs;
-    private array      $uploadedImportables;
+    private array      $uploadedFiles;        // hold array for uploaded files.
+    private array      $processedImportables; // array of processed importable file.
 
-    // original file names
-
+    /**
+     *
+     */
     public function __construct()
     {
-        $this->uploadedConfigs       = [];
-        $this->uploadedImportables   = [];
-        $this->processedConfigs      = [];
         $this->processedImportables  = [];
+        $this->uploadedFiles         = [];
+        $this->processedConfigs      = [];
         $this->combinations          = [];
         $this->existingConfiguration = '';
         $this->flow                  = 'file';
@@ -86,18 +85,18 @@ class UploadProcessor
     public function process(): void
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
+
         /** @var UploadedFile $file */
-        foreach ($this->uploadedImportables as $file) {
-            $this->processUploadedFile($file);
+        foreach ($this->uploadedFiles as $file) {
+            if (null !== $file) {
+                $this->processUploadedFile($file);
+            }
         }
-        /** @var UploadedFile $file */
-        foreach ($this->uploadedConfigs as $file) {
-            $this->processUploadedConfig($file);
-        }
+
+        // TODO process local stored files (import from a directory)
 
         // also process pre-selected config, if any:
         $this->processExistingConfig();
-
 
         // here we mix and match into a new array:
         $this->validateUploads();
@@ -120,13 +119,12 @@ class UploadProcessor
         $errorNumber  = $file->getError();
         $errorMessage = $this->getErrorMessage($errorNumber);
         if (0 !== $errorNumber) {
-            app('log')->error(sprintf(sprintf('Detected error #%d (%s) with file upload.', $errorNumber, $errorMessage)));
+            app('log')->error(sprintf('Detected error #%d (%s) with file upload.', $errorNumber, $errorMessage));
             $this->errors->add('importable_file', $errorMessage);
             return;
         }
         $name = $file->getClientOriginalName();
         $path = $file->getPathname();
-
         $this->includeForSelection($path, $name);
     }
 
@@ -436,36 +434,20 @@ class UploadProcessor
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $result = [];
-        if ('file' === $this->flow) {
-            /** @var array $importable */
-            foreach ($this->processedImportables as $importable) {
-                $configuration = $this->findConfigForCombination($importable['original_name']);
-                $result[]      = [
-                    'original_name'         => $importable['original_name'],
-                    'storage_location'      => $importable['storage_location'],
-                    'type'                  => $importable['type'],
-                    'config_name'           => null === $configuration ? null : $configuration['original_name'],
-                    'config_location'       => null === $configuration ? null : $configuration['storage_location'],
-                    'conversion_identifier' => null,
-                ];
-            }
 
-            $this->combinations = $result;
-            return;
-        }
 
-        // if flow is not 'file', returning the first config file is enough:
-        $array = $this->processedConfigs;
-        if (count($array) > 0) {
-            $configuration      = array_shift($array);
-            $result[]           = [
-                'original_name'         => null,
-                'storage_location'      => null,
-                'type'                  => 'unknown2',
-                'config_name'           => $configuration['original_name'] ?? null,
-                'config_location'       => $configuration['storage_location'] ?? null,
+        /** @var array $importable */
+        foreach ($this->processedImportables as $importable) {
+            $configuration = $this->findConfigForCombination($importable['original_name']);
+            $result[]      = [
+                'original_name'         => $importable['original_name'],
+                'storage_location'      => $importable['storage_location'],
+                'type'                  => $importable['type'],
+                'config_name'           => null === $configuration ? null : $configuration['original_name'],
+                'config_location'       => null === $configuration ? null : $configuration['storage_location'],
                 'conversion_identifier' => null,
             ];
+
             $this->combinations = $result;
         }
     }
@@ -499,19 +481,13 @@ class UploadProcessor
     /**
      * This method sets the uploaded files to be processed.
      *
-     * @param array|null $importableFiles
-     * @param array|null $configFiles
+     * @param array $files
      * @return void
      */
-    public function setContent(?array $importableFiles, ?array $configFiles): void
+    public function setUploadedFiles(array $files): void
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        if (is_array($importableFiles)) {
-            $this->uploadedImportables = $importableFiles;
-        }
-        if (is_array($configFiles)) {
-            $this->uploadedConfigs = $configFiles;
-        }
+        $this->uploadedFiles = $files;
     }
 
     /**

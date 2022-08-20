@@ -30,12 +30,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
 use App\Http\Request\UploadRequest;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\GetsConfigFromCombination;
+use App\Services\Shared\Upload\GetsLocalConfigurations;
+use App\Services\Shared\Upload\GetsUploadedFiles;
 use App\Services\Shared\Upload\UploadProcessor;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -43,6 +45,7 @@ use Illuminate\View\View;
  */
 class UploadController extends Controller
 {
+    use GetsLocalConfigurations, GetsUploadedFiles, GetsConfigFromCombination;
 
     /**
      * UploadController constructor.
@@ -62,31 +65,9 @@ class UploadController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Upload your file(s)';
         $subTitle  = 'Start page and instructions';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $list      = $this->getLocalConfigs();
 
-
-        // get existing configs.
-        $disk = Storage::disk('configurations');
-        app('log')->debug(
-            sprintf(
-                'Going to check directory for config files: %s',
-                config('filesystems.disks.configurations.root'),
-            )
-        );
-        $all = $disk->files();
-
-        // remove files from list
-        $list    = [];
-        $ignored = config('importer.ignored_files');
-        foreach ($all as $entry) {
-            if (!in_array($entry, $ignored, true)) {
-                $list[] = $entry;
-            }
-        }
-
-        app('log')->debug('List of files:', $list);
-
-        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow'));
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list'));
     }
 
     /**
@@ -99,20 +80,20 @@ class UploadController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
 
-        $importableFiles = $request->file('importable_file');
-        $configFiles     = $request->file('config_file');
-        $oneConfig       = '1' === $request->get('one_config');
-        $flow            = $request->cookie(Constants::FLOW_COOKIE);
+        $files          = $this->getFilesFromUpload($request);
+        $singleConfig   = '1' === $request->get('one_config');
+        $existingConfig = (string) $request->get('existing_config');
+
 
         /** @var UploadProcessor $processor */
         $processor = app(UploadProcessor::class);
-        $processor->setContent($importableFiles, $configFiles);
-        $processor->setSingleConfiguration($oneConfig);
-        $processor->setFlow($flow);
-        $processor->setExistingConfiguration((string) $request->get('existing_config'));
+        $processor->setUploadedFiles($files);
+        $processor->setSingleConfiguration($singleConfig);
+        $processor->setExistingConfiguration($existingConfig);
         $processor->process();
 
-        // collect array with upload info:
+
+        // collect array with upload information:
         $combinations = $processor->getCombinations();
         $errors       = $processor->getErrors();
 
@@ -120,28 +101,33 @@ class UploadController extends Controller
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
 
-        if ('nordigen' === $flow) {
-            if (1 === count($combinations)) {
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $combinations[0]['config_name']);
-            }
-            // redirect to country + bank selector
-            session()->put(Constants::HAS_UPLOAD, true);
-            return redirect(route('009-selection.index'));
-        }
-
-        if ('spectre' === $flow) {
-            if (1 === count($combinations)) {
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $combinations[0]['config_name']);
-            }
-            // redirect to spectre
-            session()->put(Constants::HAS_UPLOAD, true);
-            return redirect(route('011-connections.index'));
-        }
-        // for file processing:
+        // it depends on the config file what the next step is, but we haven't seen
+        // the config up close yet. we may not want to risk parsing it in this step
+        // (way too much complications)
         session()->put(Constants::UPLOADED_COMBINATIONS, $combinations);
-        session()->put(Constants::SINGLE_CONFIGURATION_SESSION, $oneConfig || 1 === count($combinations));
+        session()->put(Constants::SINGLE_CONFIGURATION_SESSION, $singleConfig || 1 === count($combinations));
 
+        if(1 === count($combinations)) {
+            // a single upload is easy to process.
+            $configuration = $this->getConfigFromCombination($combinations[0]);
+            $flow = $configuration->getFlow();
+
+            if ('nordigen' === $flow) {
+                // redirect to country + bank selector
+                session()->put(Constants::HAS_UPLOAD, true);
+                return redirect(route('009-selection.index'));
+            }
+
+            if ('spectre' === $flow) {
+                // redirect to spectre
+                session()->put(Constants::HAS_UPLOAD, true);
+                return redirect(route('011-connections.index'));
+            }
+        }
+
+        // if multiple configurations, always go to configure.
         return redirect(route('004-configure.index'));
     }
+
 
 }
