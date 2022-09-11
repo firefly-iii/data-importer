@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.16 - 2022-09-12
+
+### Added
+- Ability to recognize 'Charge' as a debit transaction.
+- Expand error messages with URL.
+- Log more errors.
+
+### Fixed
+- [Issue 6354](https://github.com/firefly-iii/firefly-iii/issues/6354) Path fix for subdirectory installations.
+- [Issue 6377](https://github.com/firefly-iii/firefly-iii/issues/6377) Switch issue were transaction amounts were reversed (and thus also the types)
+- [Issue 6412](https://github.com/firefly-iii/firefly-iii/issues/6412) Update for command line import.
+- [Issue 6419](https://github.com/firefly-iii/firefly-iii/issues/6419) Time out and SSL check wasn't consistent.
+
+### Security
+- Update packages
+
 ## 0.9.15 - 2022-07-25
 
 ### Fixed
