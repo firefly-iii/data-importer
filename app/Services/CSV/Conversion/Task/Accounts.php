@@ -100,11 +100,10 @@ class Accounts extends AbstractTask
         /*
          * If the amount is positive, the transaction is a deposit. We switch Source
          * and Destination and see if we can still handle the transaction, but only if the transaction
-         * isn't already a deposit.
-         *
+         * isn't already a deposit (it has to be a withdrawal).
          *
          */
-        if ('deposit' !== $transaction['type'] && 1 === bccomp($amount, '0')) {
+        if ('withdrawal' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
             app('log')->debug(sprintf('%s is positive and type is "%s", switch source/destination', $amount, $transaction['type']));
             $transaction         = $this->setSource($transaction, $destination);

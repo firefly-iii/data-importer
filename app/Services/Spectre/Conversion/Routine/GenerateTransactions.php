@@ -66,6 +66,10 @@ class GenerateTransactions
         $token   = SecretManager::getAccessToken();
         $url     = SecretManager::getBaseUrl();
         $request = new GetAccountsRequest($url, $token);
+
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+
         /** @var GetAccountsResponse $result */
         $result = $request->get();
         $return = [];

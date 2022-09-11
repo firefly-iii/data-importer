@@ -65,7 +65,7 @@ class Import extends Command
     {
         $access = $this->haveAccess();
         if (false === $access) {
-            $this->error('Could not connect to your local Firefly III instance.');
+            $this->error(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
 
             return 1;
         }
@@ -115,6 +115,8 @@ class Import extends Command
 
             return 1;
         }
+
+        $configuration->updateDateRange();
 
         $this->line('The import routine is about to start.');
         $this->line('This is invisible and may take quite some time.');

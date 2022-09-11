@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <form action="{{ route('index.post') }}" method="post">
+        <form action="{{ route('index.post') }}/" method="post">
             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
             <div class="row" style="margin-top:1em;" id="importers">
                 <div class="col-lg-10 offset-lg-1">

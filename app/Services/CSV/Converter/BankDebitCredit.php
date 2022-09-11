@@ -51,6 +51,7 @@ class BankDebitCredit implements ConverterInterface
             'Debit', // ING (EN), thx Quibus!
             'S', // Volksbank (DE), Short for "Soll"
             'DBIT', // https://subsembly.com/index.html (Banking4 App)
+            'Charge', // not sure which bank but it's insane.
         ];
         if (in_array(trim($value), $negative, true)) {
             return -1;

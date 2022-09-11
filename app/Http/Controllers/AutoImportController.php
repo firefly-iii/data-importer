@@ -47,6 +47,7 @@ class AutoImportController extends Controller
      */
     public function error($string, $verbosity = null)
     {
+        app('log')->error($string);
         $this->line($string);
     }
 
@@ -82,7 +83,7 @@ class AutoImportController extends Controller
 
         $access = $this->haveAccess();
         if (false === $access) {
-            throw new ImporterErrorException('Could not connect to your local Firefly III instance.');
+            throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
         }
 
         // take code from auto importer.
