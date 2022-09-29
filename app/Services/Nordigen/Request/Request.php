@@ -119,8 +119,9 @@ abstract class Request
                      ]
             );
         } catch (TransferException|GuzzleException $e) {
-
+            $response = $e->getResponse();
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
+            app('log')->error(sprintf('%s', $response->getBody()->getContents()));
 
             // if no response, parse as normal error response
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
