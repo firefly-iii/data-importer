@@ -487,8 +487,12 @@ class GenerateTransactions
         $numberSearch = sprintf('%s.', $number);
 
         // IBAN is also an ID, so use that!
-        if ('' !== (string)$iban && array_key_exists((string)$iban, $this->targetAccounts)) {
-            app('log')->debug(sprintf('Recognized %s (IBAN) as a Firefly III asset account so this is a transfer.', $iban));
+        $accountType = $this->targetTypes[$iban] ?? 'unknown';
+        // IBAN can also point to a liability, in that case it's not a transfer.
+        if ('liabilities' !== $accountType &&
+            '' !== (string)$iban && array_key_exists((string)$iban, $this->targetAccounts)) {
+            app('log')->debug(sprintf('Recognized "%s" (IBAN) as a Firefly III asset account so this is a transfer.', $iban));
+            app('log')->debug(sprintf('Type of "%s" (IBAN) is a "%s".', $iban, $this->targetTypes[$iban]));
             $transaction[$idKey] = $this->targetAccounts[$iban];
             $transaction['type'] = 'transfer';
         }
