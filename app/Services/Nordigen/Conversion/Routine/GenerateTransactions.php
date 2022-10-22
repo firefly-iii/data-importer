@@ -461,7 +461,9 @@ class GenerateTransactions
      */
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
     {
-        app('log')->debug(sprintf('Now in %s(transaction, entry, "%s")', __METHOD__, $direction));
+        app('log')->debug(sprintf('Now in %s($transaction, $entry, "%s")', __METHOD__, $direction));
+
+        // these are the values we're going to use:
         switch ($direction) {
             default:
                 die(sprintf('Cannot handle direction "%s"', $direction));
@@ -484,11 +486,13 @@ class GenerateTransactions
                 $numberKey = 'destination_number';
                 break;
         }
-        $numberSearch = sprintf('%s.', $number);
+        app('log')->debug('Done collecting account numbers and names');
 
-        // IBAN is also an ID, so use that!
+        // FIDI determines the account type based on the IBAN.
         $accountType = $this->targetTypes[$iban] ?? 'unknown';
-        // IBAN can also point to a liability, in that case it's not a transfer.
+
+        // If the IBAN is a known target account, but it's not a liability, FIDI knows for sure this is a transfer.
+        // it will save the ID and nothing else.
         if ('liabilities' !== $accountType &&
             '' !== (string)$iban && array_key_exists((string)$iban, $this->targetAccounts)) {
             app('log')->debug(sprintf('Recognized "%s" (IBAN) as a Firefly III asset account so this is a transfer.', $iban));
@@ -497,39 +501,50 @@ class GenerateTransactions
             $transaction['type'] = 'transfer';
         }
 
-        // IBAN is not an ID, so just submit it as a field.
+        // If the IBAN is not set in the transaction, or the IBAN is not in the array of asset accounts
         if ('' === (string)$iban || !array_key_exists((string)$iban, $this->targetAccounts)) {
             app('log')->debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account so submitted as-is.', $iban));
-            // source is the other side:
+            app('log')->debug(sprintf('IBAN is "%s", so leave field "%s" empty.', $iban, $ibanKey));
+            // FIDI will set the name as it exists in the transaction:
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
-            if ('' !== (string)$iban) {
-                app('log')->debug(sprintf('Set field "%s" to "%s".', $ibanKey, $iban));
-                $transaction[$ibanKey] = $iban;
-            }
-            if ('' === (string)$iban) {
-                app('log')->debug(sprintf('IBAN is "%s", so leave field "%s" empty.', $iban, $ibanKey));
-            }
+
+            app('log')->debug(sprintf('Field "%s" will  be set to "%s".', $nameKey, $transaction[$nameKey]));
+
         }
 
-        // source is also an ID, so use it!
-        if ('' !== (string)$number && '.' !== $numberSearch && array_key_exists($numberSearch, $this->targetAccounts)) {
+        // if the IBAN is set, the IBAN will be put into the array as well.
+        if ('' !== (string)$iban) {
+            app('log')->debug(sprintf('Set field "%s" to "%s".', $ibanKey, $iban));
+            $transaction[$ibanKey] = $iban;
+        }
+
+        // If the account number is a known target account, but it's not a liability, FIDI knows for sure this is a transfer.
+        // it will save the ID and nothing else.
+        $accountType = $this->targetTypes[$number] ?? 'unknown';
+        $numberSearch = sprintf('%s.', $number);
+        if (
+            'liabilities' !== $accountType &&
+            '' !== (string)$number && '.' !== $numberSearch && array_key_exists($numberSearch, $this->targetAccounts)) {
             app('log')->debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$numberSearch];
             $transaction['type'] = 'transfer';
         }
 
+        // if the account number is empty, then it's submitted as is:
         if ('' === (string)$number || '.' === $numberSearch || !array_key_exists($numberSearch, $this->targetAccounts)) {
             app('log')->debug(sprintf('"%s" is not a valid account nr OR not recognized as Firefly III asset account so submitted as-is.', $number));
-            // source is the other side:
+            app('log')->debug(sprintf('Account number is "%s", so leave field "%s" empty.', $number, $numberKey));
+            // FIDI will set the name in the transaction
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
-            if ('' !== (string)$number) {
-                app('log')->debug(sprintf('Set field "%s" to "%s".', $numberKey, $number));
-                $transaction[$numberKey] = $number;
-            }
-            if ('' === (string)$number) {
-                app('log')->debug(sprintf('Account number is "%s", so leave field "%s" empty.', $number, $numberKey));
-            }
+
+            app('log')->debug(sprintf('Field "%s" will  be set to "%s".', $nameKey, $transaction[$nameKey]));
         }
+
+        if ('' !== (string)$number) {
+            app('log')->debug(sprintf('Set field "%s" to "%s".', $numberKey, $number));
+            $transaction[$numberKey] = $number;
+        }
+
         app('log')->debug(sprintf('End of %s', __METHOD__));
 
         return $transaction;
