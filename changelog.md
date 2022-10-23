@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.17 - 2021-10-24
+
+⚠️ This release WILL create duplicate transactions. Don't import large batches!
+
+### Added
+- Better error handling.
+
+### Fixed
+- Fix [issue 6548](https://github.com/firefly-iii/firefly-iii/issues/6548)
+- Fix $6525
+
 ## 0.9.16 - 2022-09-12
 
 ### Added

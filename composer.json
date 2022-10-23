@@ -92,7 +92,7 @@
         "ergebnis/phpstan-rules": "^1.0",
         "fakerphp/faker": "^1.4",
         "filp/whoops": "^2.0",
-        "laravel/ui": "^3.0",
+        "laravel/ui": "^4.0",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^6.1",
         "nunomaduro/larastan": "^2.0",
