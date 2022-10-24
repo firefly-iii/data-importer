@@ -125,6 +125,11 @@ class Transaction
         // undocumented values
         $object->endToEndId = $array['endToEndId'] ?? ''; // from Rabobank NL
 
+        // overrule transaction id when empty using the internal ID:
+        if('' === $object->transactionId) {
+            $object->transactionId = $array['internalTransactionId'] ?? '';
+        }
+
         // models:
         if (array_key_exists('balanceAfterTransaction', $array) && is_array($array['balanceAfterTransaction'])) {
             $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction'] ?? []);
@@ -152,9 +157,6 @@ class Transaction
 
         // other fields:
         $object->accountIdentifier = '';
-
-        // unset internal transaction ID to prevent unnecessary duplicates:
-        $array['internalTransactionId'] = '';
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
