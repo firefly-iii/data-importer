@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix [issue 6548](https://github.com/firefly-iii/firefly-iii/issues/6548)
-- Fix $6525
+- Fix [issue 6525](https://github.com/firefly-iii/firefly-iii/issues/6525)
 
 ## 0.9.16 - 2022-09-12
 
