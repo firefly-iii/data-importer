@@ -161,7 +161,7 @@ class Transaction
             $hash = hash('sha256', (string) microtime());
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-                app('log')->warn('Generated random transaction ID from array!');
+                app('log')->warning('Generated random transaction ID from array!');
             } catch (JsonException $e) {
                 app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
