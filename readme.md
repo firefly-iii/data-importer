@@ -49,7 +49,7 @@ If you need support using Firefly III or the associated tools, come find us!
 - [GitHub Discussions for questions and support](https://github.com/firefly-iii/firefly-iii/discussions/)
 - [Gitter.im for a good chat and a quick answer](https://gitter.im/firefly-iii/firefly-iii)
 - [GitHub Issues for bugs and issues](https://github.com/firefly-iii/firefly-iii/issues)
-- [Follow me around for news and updates on Twitter](https://twitter.com/Firefly_iii)
+- [Follow me around for news and updates on Mastodon](https://fosstodon.org/@ff3)
 
 <!-- END OF HELP TEXT -->
 
@@ -72,7 +72,7 @@ Many more features are listed in the [documentation](https://docs.firefly-iii.or
 
 ## Contributing
 
-You can contact me at [james@firefly-iii.org](mailto:james@firefly-iii.org), you may open an issue in the [main repository](https://github.com/firefly-iii/firefly-iii) or contact me through [gitter](https://gitter.im/firefly-iii/firefly-iii) and [Twitter](https://twitter.com/Firefly_III).
+You can contact me at [james@firefly-iii.org](mailto:james@firefly-iii.org), you may open an issue in the [main repository](https://github.com/firefly-iii/firefly-iii) or contact me through [gitter](https://gitter.im/firefly-iii/firefly-iii) and [Mastodon](https://fosstodon.org/@ff3).
 
 Of course, there are some [contributing guidelines](https://github.com/firefly-iii/data-importer/blob/main/.github/contributing.md) and a [code of conduct](https://github.com/firefly-iii/data-importer/blob/main/.github/code_of_conduct.md), which I invite you to check out.
 
@@ -101,7 +101,7 @@ You can contact me at [james@firefly-iii.org](mailto:james@firefly-iii.org), you
 - [GitHub Discussions for questions and support](https://github.com/firefly-iii/firefly-iii/discussions/)
 - [Gitter.im for a good chat and a quick answer](https://gitter.im/firefly-iii/firefly-iii)
 - [GitHub Issues for bugs and issues](https://github.com/firefly-iii/firefly-iii/issues)
-- [Follow me around for news and updates on Twitter](https://twitter.com/Firefly_iii)
+- [Follow me around for news and updates on Mastodon](https://fosstodon.org/@ff3)
 
 ## Acknowledgements
 
