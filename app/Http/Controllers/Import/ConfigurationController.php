@@ -359,8 +359,8 @@ class ConfigurationController extends Controller
                 $return[]         = $entry;
                 continue;
             }
-            app('log')->debug('No special filtering on the Firefly III account list.');
-            $entry['firefly'] = $firefly;
+            app('log')->debug(sprintf('No special filtering on the Firefly III account list (add all %d accounts).', count($firefly)));
+            $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
             $return[]         = $entry;
         }
         return $return;
