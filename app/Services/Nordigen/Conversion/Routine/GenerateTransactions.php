@@ -237,11 +237,15 @@ class GenerateTransactions
         ];
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
-            app('log')->debug('Amount is positive: assume transfer or deposit.');
-            $transaction = $this->appendPositiveAmountInfo($accountId, $transaction, $entry);
-        }
-
-        if (-1 === bccomp($entry->transactionAmount, '0')) {
+            if ($entry->debtorAccountIban === $this->nordigenAccountInfo[$accountId]['iban']) {
+                app('log')->debug('Amount is positive but debtor matches the account IBAN: assume transfer or withdrawal.');
+                $entry->transactionAmount = bcmul($entry->transactionAmount, '-1');
+                $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
+            } else {
+                app('log')->debug('Amount is positive: assume transfer or deposit.');
+                $transaction = $this->appendPositiveAmountInfo($accountId, $transaction, $entry);
+            }
+        } else if (-1 === bccomp($entry->transactionAmount, '0')) {
             app('log')->debug('Amount is negative: assume transfer or withdrawal.');
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
