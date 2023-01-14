@@ -28,6 +28,7 @@ use Exception;
 
 /**
  * Class SpectreHttpException
+ *
  * @deprecated
  */
 class SpectreHttpException extends Exception

@@ -34,6 +34,7 @@ class BankDebitCredit implements ConverterInterface
      * Convert a value.
      *
      * @param $value
+     *
      * @return mixed
      *
      */

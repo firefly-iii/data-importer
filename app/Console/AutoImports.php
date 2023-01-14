@@ -44,16 +44,17 @@ use Storage;
  */
 trait AutoImports
 {
+    protected array  $conversionErrors   = [];
     protected array  $conversionMessages = [];
     protected array  $conversionWarnings = [];
-    protected array  $conversionErrors   = [];
+    protected string $identifier;
+    protected array  $importErrors       = [];
     protected array  $importMessages     = [];
     protected array  $importWarnings     = [];
-    protected array  $importErrors       = [];
-    protected string $identifier;
 
     /**
      * @param string $directory
+     *
      * @return array
      */
     protected function getFiles(string $directory): array
@@ -161,14 +162,15 @@ trait AutoImports
     /**
      * @param string $file
      * @param string $directory
+     *
      * @throws ImporterErrorException
      */
     private function importFile(string $directory, string $file): void
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile  = sprintf('%s/%s', $directory, $file);
-        $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $importableFile = sprintf('%s/%s', $directory, $file);
+        $jsonFile       = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
 
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.
@@ -192,6 +194,7 @@ trait AutoImports
         // sanity check. If the importableFile is a .json file and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
+
             return;
         }
 
@@ -209,10 +212,10 @@ trait AutoImports
         $this->line('Done!');
         event(
             new ImportedTransactions(
-            array_merge($this->conversionMessages, $this->importMessages),
-            array_merge($this->conversionWarnings, $this->importWarnings),
-            array_merge($this->conversionErrors, $this->importErrors)
-        )
+                array_merge($this->conversionMessages, $this->importMessages),
+                array_merge($this->conversionWarnings, $this->importWarnings),
+                array_merge($this->conversionErrors, $this->importErrors)
+            )
         );
     }
 
@@ -221,6 +224,7 @@ trait AutoImports
      * @param Configuration $configuration
      *
      * @param string|null   $importableFile
+     *
      * @throws ImporterErrorException
      */
     private function startConversion(Configuration $configuration, ?string $importableFile): void
@@ -343,6 +347,7 @@ trait AutoImports
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
+
             return;
         }
 
@@ -359,6 +364,7 @@ trait AutoImports
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
+
             return;
         }
         if (0 === count($transactions)) {
@@ -367,6 +373,7 @@ trait AutoImports
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
+
             return;
         }
 
@@ -385,6 +392,7 @@ trait AutoImports
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
+
             return;
         }
 
@@ -424,6 +432,7 @@ trait AutoImports
     /**
      * @param string      $jsonFile
      * @param null|string $importableFile
+     *
      * @throws ImporterErrorException
      */
     private function importUpload(string $jsonFile, ?string $importableFile): void
@@ -452,10 +461,10 @@ trait AutoImports
         $this->line('Done!');
         event(
             new ImportedTransactions(
-            array_merge($this->conversionMessages, $this->importMessages),
-            array_merge($this->conversionWarnings, $this->importWarnings),
-            array_merge($this->conversionErrors, $this->importErrors)
-        )
+                array_merge($this->conversionMessages, $this->importMessages),
+                array_merge($this->conversionWarnings, $this->importWarnings),
+                array_merge($this->conversionErrors, $this->importErrors)
+            )
         );
     }
 }

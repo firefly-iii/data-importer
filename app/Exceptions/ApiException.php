@@ -28,6 +28,7 @@ use Exception;
 
 /**
  * Class ApiException
+ *
  * @deprecated
  */
 class ApiException extends Exception

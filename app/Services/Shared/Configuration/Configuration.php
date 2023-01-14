@@ -35,57 +35,57 @@ use UnexpectedValueException;
 class Configuration
 {
     public const VERSION = 3;
-    private string $date;
-    private int    $defaultAccount;
-    private string $delimiter;
-    private bool   $headers;
-    private bool   $rules;
-    private bool   $skipForm;
-    private array  $specifics;
-    private array  $roles;
-    private int    $version;
-    private array  $doMapping;
-    private bool   $mapAllData;
-    private bool   $addImportTag;
-
-    // nordigen configuration
-    private string $nordigenCountry;
-    private string $nordigenBank;
-    private array  $nordigenRequisitions;
-    private string $nordigenMaxDays;
-
-    // spectre + nordigen configuration
     private array $accounts;
-
-    // spectre configuration
-    private string $identifier;
+    private bool   $addImportTag;
     private string $connection;
-    private bool   $ignoreSpectreCategories;
-
-    // date range settings
+    private bool $conversion;
+    private string $date;
+    private string $dateNotAfter;
+    private string $dateNotBefore;
     private string $dateRange;
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
-    private string $dateNotBefore;
-    private string $dateNotAfter;
+    private int    $defaultAccount;
+    private string $delimiter;
+
+    // nordigen configuration
+    private array  $doMapping;
+    private string $duplicateDetectionMethod;
+    private string $flow;
+    private bool   $headers;
+
+    // spectre + nordigen configuration
+    private string $identifier;
+
+    // spectre configuration
+    private bool   $ignoreDuplicateLines;
+    private bool   $ignoreDuplicateTransactions;
+    private bool   $ignoreSpectreCategories;
+
+    // date range settings
+    private bool   $mapAllData;
+    private array $mapping;
+    private string $nordigenBank;
+    private string $nordigenCountry;
+    private string $nordigenMaxDays;
 
     // what type of import?
-    private string $flow;
+    private array  $nordigenRequisitions;
 
     // how to do double transaction detection?
-    private array $mapping; // 'classic' or 'cell'
+    private array  $roles; // 'classic' or 'cell'
 
     // configuration for "classic" method:
-    private string $duplicateDetectionMethod;
-    private bool   $ignoreDuplicateTransactions;
+    private bool   $rules;
+    private bool   $skipForm;
 
     // configuration for "cell" method:
-    private bool   $ignoreDuplicateLines;
+    private array  $specifics;
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
 
     // configuration for utf-8
-    private bool $conversion;
+    private int    $version;
 
     /**
      * Configuration constructor.
@@ -144,98 +144,6 @@ class Configuration
         $this->conversion = false;
 
         $this->version = self::VERSION;
-    }
-
-    /**
-     * Create a standard empty configuration.
-     *
-     * @return Configuration
-     */
-    public static function make(): self
-    {
-        return new self();
-    }
-
-    /**
-     * @param array $array
-     *
-     * @return $this
-     */
-    public static function fromRequest(array $array): self
-    {
-        $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self();
-        $object->version        = self::VERSION;
-        $object->headers        = $array['headers'] ?? false;
-        $object->date           = $array['date'];
-        $object->defaultAccount = $array['default_account'];
-        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
-        $object->rules          = $array['rules'];
-        $object->skipForm       = $array['skip_form'];
-        $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->roles          = $array['roles'] ?? [];
-        $object->mapping        = $array['mapping'] ?? [];
-        $object->doMapping      = $array['do_mapping'] ?? [];
-
-        // mapping for spectre + nordigen
-        $object->mapAllData = $array['map_all_data'] ?? false;
-
-        // spectre
-        $object->identifier              = $array['identifier'] ?? '0';
-        $object->connection              = $array['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
-
-        // nordigen:
-        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
-        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
-
-        // spectre + nordigen
-        $object->accounts = $array['accounts'] ?? [];
-
-        // date range settings
-        $object->dateRange       = $array['date_range'] ?? 'all';
-        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
-
-        // null or Carbon because fromRequest will give Carbon object.
-        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
-        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
-
-        // duplicate transaction detection
-        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
-
-        // config for "classic":
-        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
-        $object->ignoreDuplicateTransactions = true;
-
-        // config for "cell":
-        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
-        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
-
-        // utf8 conversion
-        $object->conversion = $array['conversion'] ?? false;
-
-        // flow
-        $object->flow = $array['flow'] ?? 'file';
-
-        // overrule a setting:
-        if ('none' === $object->duplicateDetectionMethod) {
-            $object->ignoreDuplicateTransactions = false;
-        }
-
-        $object->specifics = [];
-        foreach ($array['specifics'] as $key => $enabled) {
-            if (true === $enabled) {
-                $object->specifics[] = $key;
-            }
-        }
-        if ('csv' === $object->flow) {
-            $object->flow = 'file';
-        }
-
-        return $object;
     }
 
     /**
@@ -353,7 +261,7 @@ class Configuration
         // loop do mapping from classic file.
         $doMapping = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
-            $index                     = (int) $index;
+            $index                     = (int)$index;
             $object->doMapping[$index] = $map;
         }
         ksort($object->doMapping);
@@ -361,7 +269,7 @@ class Configuration
         // loop mapping from classic file.
         $mapping = $data['column-mapping-config'] ?? [];
         foreach ($mapping as $index => $map) {
-            $index                   = (int) $index;
+            $index                   = (int)$index;
             $object->mapping[$index] = $map;
         }
         ksort($object->mapping);
@@ -478,179 +386,125 @@ class Configuration
     {
         $object            = self::fromArray($data);
         $object->specifics = [];
+
         return $object;
     }
 
     /**
-     * @return bool
-     */
-    public function isSkipForm(): bool
-    {
-        return $this->skipForm;
-    }
-
-    /**
-     * @param string $name
+     * @param array $array
      *
-     * @return bool
+     * @return $this
      */
-    public function hasSpecific(string $name): bool
+    public static function fromRequest(array $array): self
     {
-        return in_array($name, $this->specifics, true);
-    }
+        $delimiters             = config('csv.delimiters_reversed');
+        $object                 = new self();
+        $object->version        = self::VERSION;
+        $object->headers        = $array['headers'] ?? false;
+        $object->date           = $array['date'];
+        $object->defaultAccount = $array['default_account'];
+        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
+        $object->rules          = $array['rules'];
+        $object->skipForm       = $array['skip_form'];
+        $object->addImportTag   = $array['add_import_tag'] ?? true;
+        $object->roles          = $array['roles'] ?? [];
+        $object->mapping        = $array['mapping'] ?? [];
+        $object->doMapping      = $array['do_mapping'] ?? [];
 
-    /**
-     * @return bool
-     */
-    public function isAddImportTag(): bool
-    {
-        return $this->addImportTag;
-    }
+        // mapping for spectre + nordigen
+        $object->mapAllData = $array['map_all_data'] ?? false;
 
-    /**
-     * @return array
-     */
-    public function getRoles(): array
-    {
-        return $this->roles ?? [];
-    }
+        // spectre
+        $object->identifier              = $array['identifier'] ?? '0';
+        $object->connection              = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
 
-    /**
-     * @param array $roles
-     */
-    public function setRoles(array $roles): void
-    {
-        $this->roles = $roles;
-    }
+        // nordigen:
+        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
+        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
 
-    /**
-     * @return bool
-     */
-    public function isIgnoreDuplicateLines(): bool
-    {
-        return $this->ignoreDuplicateLines;
-    }
+        // spectre + nordigen
+        $object->accounts = $array['accounts'] ?? [];
 
-    /**
-     * @return bool
-     */
-    public function isIgnoreDuplicateTransactions(): bool
-    {
-        return $this->ignoreDuplicateTransactions;
-    }
+        // date range settings
+        $object->dateRange       = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
 
-    /**
-     * Return the array but drop some potentially massive arrays.
-     * @return array
-     */
-    public function toSessionArray(): array
-    {
-        $array = $this->toArray();
-        unset($array['mapping'], $array['do_mapping'], $array['roles']);
-        return $array;
-    }
+        // null or Carbon because fromRequest will give Carbon object.
+        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        $array = [
-            'version'                       => $this->version,
-            'source'                        => sprintf('fidi-%s', config('importer.version')),
-            'created_at'                    => date(DateTimeInterface::W3C),
-            'date'                          => $this->date,
-            'default_account'               => $this->defaultAccount,
-            'delimiter'                     => $this->delimiter,
-            'headers'                       => $this->headers,
-            'rules'                         => $this->rules,
-            'skip_form'                     => $this->skipForm,
-            'add_import_tag'                => $this->addImportTag,
-            'roles'                         => $this->roles,
-            'do_mapping'                    => $this->doMapping,
-            'mapping'                       => $this->mapping,
-            'duplicate_detection_method'    => $this->duplicateDetectionMethod,
-            'ignore_duplicate_lines'        => $this->ignoreDuplicateLines,
-            'unique_column_index'           => $this->uniqueColumnIndex,
-            'unique_column_type'            => $this->uniqueColumnType,
-            'flow'                          => $this->flow,
+        // duplicate transaction detection
+        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
 
-            // spectre
-            'identifier'                    => $this->identifier,
-            'connection'                    => $this->connection,
-            'ignore_spectre_categories'     => $this->ignoreSpectreCategories,
+        // config for "classic":
+        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
+        $object->ignoreDuplicateTransactions = true;
 
-            // mapping for spectre + nordigen
-            'map_all_data'                  => $this->mapAllData,
+        // config for "cell":
+        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
+        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
 
-            // settings for spectre + nordigen
-            'accounts'                      => $this->accounts,
+        // utf8 conversion
+        $object->conversion = $array['conversion'] ?? false;
 
-            // date range settings:
-            'date_range'                    => $this->dateRange,
-            'date_range_number'             => $this->dateRangeNumber,
-            'date_range_unit'               => $this->dateRangeUnit,
-            'date_not_before'               => $this->dateNotBefore,
-            'date_not_after'                => $this->dateNotAfter,
+        // flow
+        $object->flow = $array['flow'] ?? 'file';
 
-            // nordigen information:
-            'nordigen_country'              => $this->nordigenCountry,
-            'nordigen_bank'                 => $this->nordigenBank,
-            'nordigen_requisitions'         => $this->nordigenRequisitions,
-            'nordigen_max_days'             => $this->nordigenMaxDays,
-
-            // utf8
-            'conversion'                    => $this->conversion,
-        ];
-
-        // make sure that "ignore duplicate transactions" is turned off
-        // to deliver a consistent file.
-        $array['ignore_duplicate_transactions'] = false;
-        if ('classic' === $this->duplicateDetectionMethod) {
-            $array['ignore_duplicate_transactions'] = true;
+        // overrule a setting:
+        if ('none' === $object->duplicateDetectionMethod) {
+            $object->ignoreDuplicateTransactions = false;
         }
 
-        return $array;
+        $object->specifics = [];
+        foreach ($array['specifics'] as $key => $enabled) {
+            if (true === $enabled) {
+                $object->specifics[] = $key;
+            }
+        }
+        if ('csv' === $object->flow) {
+            $object->flow = 'file';
+        }
+
+        return $object;
     }
 
     /**
-     * @return bool
+     * Create a standard empty configuration.
+     *
+     * @return Configuration
      */
-    public function isIgnoreSpectreCategories(): bool
+    public static function make(): self
     {
-        return $this->ignoreSpectreCategories;
+        return new self();
     }
 
     /**
-     * @return string
+     * @param string $key
+     * @param string $identifier
      */
-    public function getDate(): string
+    public function addRequisition(string $key, string $identifier)
     {
-        return $this->date;
+        $this->nordigenRequisitions[$key] = $identifier;
     }
 
     /**
-     * @return int|null
+     * @return array
      */
-    public function getDefaultAccount(): ?int
+    public function getAccounts(): array
     {
-        return $this->defaultAccount;
+        return $this->accounts;
     }
 
     /**
-     * @return string
+     * @param array $accounts
      */
-    public function getDelimiter(): string
+    public function setAccounts(array $accounts): void
     {
-        return $this->delimiter;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isHeaders(): bool
-    {
-        return $this->headers;
+        $this->accounts = $accounts;
     }
 
     /**
@@ -672,201 +526,25 @@ class Configuration
     /**
      * @return string
      */
-    public function getIdentifier(): string
+    public function getDate(): string
     {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRules(): bool
-    {
-        return $this->rules;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDoMapping(): array
-    {
-        return $this->doMapping ?? [];
-    }
-
-    /**
-     * @param array $doMapping
-     */
-    public function setDoMapping(array $doMapping): void
-    {
-        $this->doMapping = $doMapping;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMapAllData(): bool
-    {
-        return $this->mapAllData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getMapping(): array
-    {
-        return $this->mapping ?? [];
-    }
-
-    /**
-     * @param array $mapping
-     */
-    public function setMapping(array $mapping): void
-    {
-        $newMap = [];
-        foreach ($mapping as $column => $map) {
-            ksort($map);
-            $newMap[$column] = $map;
-        }
-        $this->mapping = $newMap;
-    }
-
-    /**
-     * @return array
-     */
-    public function getSpecifics(): array
-    {
-        return $this->specifics;
+        return $this->date;
     }
 
     /**
      * @return string
      */
-    public function getDuplicateDetectionMethod(): string
+    public function getDateNotAfter(): string
     {
-        return $this->duplicateDetectionMethod;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUniqueColumnIndex(): int
-    {
-        return $this->uniqueColumnIndex;
+        return $this->dateNotAfter;
     }
 
     /**
      * @return string
      */
-    public function getUniqueColumnType(): string
+    public function getDateNotBefore(): string
     {
-        return $this->uniqueColumnType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFlow(): string
-    {
-        return $this->flow;
-    }
-
-    /**
-     * @param string $flow
-     */
-    public function setFlow(string $flow): void
-    {
-        $this->flow = $flow;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNordigenCountry(): string
-    {
-        return $this->nordigenCountry;
-    }
-
-    /**
-     * @param string $nordigenCountry
-     */
-    public function setNordigenCountry(string $nordigenCountry): void
-    {
-        $this->nordigenCountry = $nordigenCountry;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isConversion(): bool
-    {
-        return $this->conversion;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNordigenBank(): string
-    {
-        return $this->nordigenBank;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getNordigenMaxDays(): string
-    {
-        return $this->nordigenMaxDays;
-    }
-
-    /**
-     * @param string $nordigenBank
-     */
-    public function setNordigenMaxDays(string $nordigenMaxDays): void
-    {
-        $this->nordigenMaxDays = $nordigenMaxDays;
-    }
-
-    /**
-     * @param string $nordigenBank
-     */
-    public function setNordigenBank(string $nordigenBank): void
-    {
-        $this->nordigenBank = $nordigenBank;
-    }
-
-    /**
-     * @param string $key
-     * @param string $identifier
-     */
-    public function addRequisition(string $key, string $identifier)
-    {
-        $this->nordigenRequisitions[$key] = $identifier;
-    }
-
-    /**
-     * @param string $key
-     * @return string|null
-     */
-    public function getRequisition(string $key): ?string
-    {
-        return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
-    }
-
-    /**
-     * @return array
-     */
-    public function getNordigenRequisitions(): array
-    {
-        return $this->nordigenRequisitions;
+        return $this->dateNotBefore;
     }
 
     /**
@@ -894,35 +572,360 @@ class Configuration
     }
 
     /**
-     * @return string
+     * @return int|null
      */
-    public function getDateNotBefore(): string
+    public function getDefaultAccount(): ?int
     {
-        return $this->dateNotBefore;
+        return $this->defaultAccount;
     }
 
     /**
      * @return string
      */
-    public function getDateNotAfter(): string
+    public function getDelimiter(): string
     {
-        return $this->dateNotAfter;
+        return $this->delimiter;
     }
 
     /**
      * @return array
      */
-    public function getAccounts(): array
+    public function getDoMapping(): array
     {
-        return $this->accounts;
+        return $this->doMapping ?? [];
     }
 
     /**
-     * @param array $accounts
+     * @param array $doMapping
      */
-    public function setAccounts(array $accounts): void
+    public function setDoMapping(array $doMapping): void
     {
-        $this->accounts = $accounts;
+        $this->doMapping = $doMapping;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDuplicateDetectionMethod(): string
+    {
+        return $this->duplicateDetectionMethod;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlow(): string
+    {
+        return $this->flow;
+    }
+
+    /**
+     * @param string $flow
+     */
+    public function setFlow(string $flow): void
+    {
+        $this->flow = $flow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMapping(): array
+    {
+        return $this->mapping ?? [];
+    }
+
+    /**
+     * @param array $mapping
+     */
+    public function setMapping(array $mapping): void
+    {
+        $newMap = [];
+        foreach ($mapping as $column => $map) {
+            ksort($map);
+            $newMap[$column] = $map;
+        }
+        $this->mapping = $newMap;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNordigenBank(): string
+    {
+        return $this->nordigenBank;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenBank(string $nordigenBank): void
+    {
+        $this->nordigenBank = $nordigenBank;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNordigenCountry(): string
+    {
+        return $this->nordigenCountry;
+    }
+
+    /**
+     * @param string $nordigenCountry
+     */
+    public function setNordigenCountry(string $nordigenCountry): void
+    {
+        $this->nordigenCountry = $nordigenCountry;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNordigenMaxDays(): string
+    {
+        return $this->nordigenMaxDays;
+    }
+
+    /**
+     * @param string $nordigenBank
+     */
+    public function setNordigenMaxDays(string $nordigenMaxDays): void
+    {
+        $this->nordigenMaxDays = $nordigenMaxDays;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNordigenRequisitions(): array
+    {
+        return $this->nordigenRequisitions;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return string|null
+     */
+    public function getRequisition(string $key): ?string
+    {
+        return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles(): array
+    {
+        return $this->roles ?? [];
+    }
+
+    /**
+     * @param array $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSpecifics(): array
+    {
+        return $this->specifics;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUniqueColumnIndex(): int
+    {
+        return $this->uniqueColumnIndex;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUniqueColumnType(): string
+    {
+        return $this->uniqueColumnType;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasSpecific(string $name): bool
+    {
+        return in_array($name, $this->specifics, true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAddImportTag(): bool
+    {
+        return $this->addImportTag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isConversion(): bool
+    {
+        return $this->conversion;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHeaders(): bool
+    {
+        return $this->headers;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreDuplicateLines(): bool
+    {
+        return $this->ignoreDuplicateLines;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreDuplicateTransactions(): bool
+    {
+        return $this->ignoreDuplicateTransactions;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreSpectreCategories(): bool
+    {
+        return $this->ignoreSpectreCategories;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMapAllData(): bool
+    {
+        return $this->mapAllData;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRules(): bool
+    {
+        return $this->rules;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkipForm(): bool
+    {
+        return $this->skipForm;
+    }
+
+    /**
+     * Return the array but drop some potentially massive arrays.
+     *
+     * @return array
+     */
+    public function toSessionArray(): array
+    {
+        $array = $this->toArray();
+        unset($array['mapping'], $array['do_mapping'], $array['roles']);
+
+        return $array;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        $array = [
+            'version'                    => $this->version,
+            'source'                     => sprintf('fidi-%s', config('importer.version')),
+            'created_at'                 => date(DateTimeInterface::W3C),
+            'date'                       => $this->date,
+            'default_account'            => $this->defaultAccount,
+            'delimiter'                  => $this->delimiter,
+            'headers'                    => $this->headers,
+            'rules'                      => $this->rules,
+            'skip_form'                  => $this->skipForm,
+            'add_import_tag'             => $this->addImportTag,
+            'roles'                      => $this->roles,
+            'do_mapping'                 => $this->doMapping,
+            'mapping'                    => $this->mapping,
+            'duplicate_detection_method' => $this->duplicateDetectionMethod,
+            'ignore_duplicate_lines'     => $this->ignoreDuplicateLines,
+            'unique_column_index'        => $this->uniqueColumnIndex,
+            'unique_column_type'         => $this->uniqueColumnType,
+            'flow'                       => $this->flow,
+
+            // spectre
+            'identifier'                 => $this->identifier,
+            'connection'                 => $this->connection,
+            'ignore_spectre_categories'  => $this->ignoreSpectreCategories,
+
+            // mapping for spectre + nordigen
+            'map_all_data'               => $this->mapAllData,
+
+            // settings for spectre + nordigen
+            'accounts'                   => $this->accounts,
+
+            // date range settings:
+            'date_range'                 => $this->dateRange,
+            'date_range_number'          => $this->dateRangeNumber,
+            'date_range_unit'            => $this->dateRangeUnit,
+            'date_not_before'            => $this->dateNotBefore,
+            'date_not_after'             => $this->dateNotAfter,
+
+            // nordigen information:
+            'nordigen_country'           => $this->nordigenCountry,
+            'nordigen_bank'              => $this->nordigenBank,
+            'nordigen_requisitions'      => $this->nordigenRequisitions,
+            'nordigen_max_days'          => $this->nordigenMaxDays,
+
+            // utf8
+            'conversion'                 => $this->conversion,
+        ];
+
+        // make sure that "ignore duplicate transactions" is turned off
+        // to deliver a consistent file.
+        $array['ignore_duplicate_transactions'] = false;
+        if ('classic' === $this->duplicateDetectionMethod) {
+            $array['ignore_duplicate_transactions'] = true;
+        }
+
+        return $array;
     }
 
     /**

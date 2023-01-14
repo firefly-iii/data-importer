@@ -71,8 +71,9 @@ class PostNewTokenRequest extends Request
                 ],
             ]
         );
-        $body = (string) $res->getBody();
+        $body = (string)$res->getBody();
         $json = json_decode($body, true, JSON_THROW_ON_ERROR);
+
         return new TokenSetResponse($json);
     }
 

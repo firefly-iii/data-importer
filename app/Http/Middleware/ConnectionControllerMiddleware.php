@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class ConnectionControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'select-connection';
 }

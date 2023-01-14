@@ -40,7 +40,7 @@ class CleanId implements ConverterInterface
     public function convert($value)
     {
         app('log')->debug(sprintf('Now applying CleanId converter on "%s"', $value));
-        $value = (int) $value;
+        $value = (int)$value;
 
         return 0 === $value ? null : $value;
     }

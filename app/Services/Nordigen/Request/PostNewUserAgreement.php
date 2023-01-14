@@ -32,9 +32,9 @@ use App\Services\Shared\Response\Response;
  */
 class PostNewUserAgreement extends Request
 {
+    private string $accessValidForDays;
     private string $bank;
     private string $maxHistoricalDays;
-    private string $accessValidForDays;
 
     public function __construct(string $url, string $token)
     {
@@ -45,30 +45,6 @@ class PostNewUserAgreement extends Request
         $this->maxHistoricalDays  = '';
         $this->accessValidForDays = '';
         $this->bank               = '';
-    }
-
-    /**
-     * @param string $bank
-     */
-    public function setBank(string $bank): void
-    {
-        $this->bank = $bank;
-    }
-
-    /**
-     * @param string $maxHistoricalDays
-     */
-    public function setMaxHistoricalDays(string $maxHistoricalDays): void
-    {
-        $this->maxHistoricalDays = $maxHistoricalDays;
-    }
-
-    /**
-     * @param string $accessValidForDays
-     */
-    public function setAccessValidForDays(string $accessValidForDays): void
-    {
-        $this->accessValidForDays = $accessValidForDays;
     }
 
     /**
@@ -85,15 +61,16 @@ class PostNewUserAgreement extends Request
     public function post(): Response
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $array =
-            [
-                'institution_id'        => $this->bank,
-                'max_historical_days'   => $this->maxHistoricalDays,
-                'access_valid_for_days' => $this->accessValidForDays,
-            ];
+        $array
+            = [
+            'institution_id'        => $this->bank,
+            'max_historical_days'   => $this->maxHistoricalDays,
+            'access_valid_for_days' => $this->accessValidForDays,
+        ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
+
         return new NewUserAgreementResponse($result);
     }
 
@@ -103,5 +80,29 @@ class PostNewUserAgreement extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param string $accessValidForDays
+     */
+    public function setAccessValidForDays(string $accessValidForDays): void
+    {
+        $this->accessValidForDays = $accessValidForDays;
+    }
+
+    /**
+     * @param string $bank
+     */
+    public function setBank(string $bank): void
+    {
+        $this->bank = $bank;
+    }
+
+    /**
+     * @param string $maxHistoricalDays
+     */
+    public function setMaxHistoricalDays(string $maxHistoricalDays): void
+    {
+        $this->maxHistoricalDays = $maxHistoricalDays;
     }
 }

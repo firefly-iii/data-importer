@@ -43,20 +43,6 @@ class AutoImportController extends Controller
     private string $directory;
 
     /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        app('log')->error($string);
-        $this->line($string);
-    }
-
-    public function line(string $string)
-    {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
-    }
-
-    /**
      *
      */
     public function index(Request $request): Response
@@ -65,13 +51,13 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret       = (string) ($request->get('secret') ?? '');
-        $systemSecret = (string) config('importer.auto_import_secret');
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $argument  = (string) ($request->get('directory') ?? './');
+        $argument  = (string)($request->get('directory') ?? './');
         $directory = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
@@ -100,6 +86,7 @@ class AutoImportController extends Controller
             app('log')->error($e->getMessage());
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
+
         return response('');
     }
 
@@ -109,6 +96,20 @@ class AutoImportController extends Controller
      */
     public function info($string, $verbosity = null)
     {
+        $this->line($string);
+    }
+
+    public function line(string $string)
+    {
+        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        app('log')->error($string);
         $this->line($string);
     }
 

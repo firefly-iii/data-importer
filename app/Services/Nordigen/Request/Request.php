@@ -42,9 +42,9 @@ abstract class Request
     private string $base;
     private array  $body;
     private array  $parameters;
+    private float  $timeOut = 3.14;
     /** @var string */
     private string $token;
-    private float  $timeOut = 3.14;
     private string $url;
 
     /**
@@ -111,13 +111,13 @@ abstract class Request
                 'GET',
                 $fullUrl,
                 [
-                         'headers' => [
-                             'Accept'        => 'application/json',
-                             'Content-Type'  => 'application/json',
-                             'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                             'user-agent'    => sprintf('Firefly III Nordigen importer / %s / %s', config('importer.version'), config('auth.line_b')),
-                         ],
-                     ]
+                    'headers' => [
+                        'Accept'        => 'application/json',
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                        'user-agent'    => sprintf('Firefly III Nordigen importer / %s / %s', config('importer.version'), config('auth.line_b')),
+                    ],
+                ]
             );
         } catch (TransferException|GuzzleException $e) {
             $response = $e->getResponse();
@@ -132,7 +132,7 @@ abstract class Request
 
             $json = [];
             if (method_exists($e, 'getResponse')) {
-                $body = (string) $e->getResponse()->getBody();
+                $body = (string)$e->getResponse()->getBody();
                 $json = json_decode($body, true, 512) ?? [];
             }
             if (array_key_exists('summary', $json) and str_ends_with($json['summary'], 'has expired')) {
@@ -151,9 +151,9 @@ abstract class Request
             // return body, class must handle this
             app('log')->error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
-            $body = (string) $res->getBody();
+            $body = (string)$res->getBody();
         }
-        $body = $body ?? (string) $res->getBody();
+        $body = $body ?? (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -241,6 +241,7 @@ abstract class Request
 
     /**
      * @param array $json
+     *
      * @return array
      * @throws GuzzleException
      * @throws ImporterHttpException
@@ -260,19 +261,19 @@ abstract class Request
                 'POST',
                 $fullUrl,
                 [
-                          'json'    => $json,
-                          'headers' => [
-                              'Accept'        => 'application/json',
-                              'Content-Type'  => 'application/json',
-                              'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                          ],
-                      ]
+                    'json'    => $json,
+                    'headers' => [
+                        'Accept'        => 'application/json',
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                    ],
+                ]
             );
         } catch (ClientException $e) {
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string) $res->getBody();
+        $body = (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -280,6 +281,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }
+
         return $json;
     }
 }

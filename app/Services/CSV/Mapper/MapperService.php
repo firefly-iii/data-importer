@@ -57,7 +57,7 @@ class MapperService
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 
@@ -100,17 +100,17 @@ class MapperService
              * The original mapping (saved on disk) will be merged with the new mapping (submitted by the user)
             */
 
-//            $mappedValues  = array_keys($columnInfo['mapped'] ?? []);
-//            $foundValues   = $columnInfo['values'] ?? [];
-//            $missingValues = array_diff($mappedValues, $foundValues);
-//            // get them from mapped.
-//            $missingMap = [];
-//            foreach ($missingValues as $missingValue) {
-//                if (array_key_exists($missingValue, $columnInfo['mapped'])) {
-//                    $missingMap[$missingValue] = $columnInfo['mapped'][$missingValue];
-//                }
-//            }
-//            $data[$index]['missing_map'] = $missingMap;
+            //            $mappedValues  = array_keys($columnInfo['mapped'] ?? []);
+            //            $foundValues   = $columnInfo['values'] ?? [];
+            //            $missingValues = array_diff($mappedValues, $foundValues);
+            //            // get them from mapped.
+            //            $missingMap = [];
+            //            foreach ($missingValues as $missingValue) {
+            //                if (array_key_exists($missingValue, $columnInfo['mapped'])) {
+            //                    $missingMap[$missingValue] = $columnInfo['mapped'][$missingValue];
+            //                }
+            //            }
+            //            $data[$index]['missing_map'] = $missingMap;
         }
 
         return $data;

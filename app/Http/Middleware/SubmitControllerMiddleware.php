@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class SubmitControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'submit';
 }

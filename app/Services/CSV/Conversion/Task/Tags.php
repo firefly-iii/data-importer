@@ -44,18 +44,13 @@ class Tags extends AbstractTask
     }
 
     /**
-     * Do something with the collected tags.
+     * Returns true if the task requires the default account.
      *
-     * @param array $transaction
-     *
-     * @return array
+     * @return bool
      */
-    private function processTags(array $transaction): array
+    public function requiresDefaultAccount(): bool
     {
-        $transaction['tags'] = array_unique(array_merge(array_values($transaction['tags_space']), array_values($transaction['tags_comma'])));
-        unset($transaction['tags_comma'], $transaction['tags_space']);
-
-        return $transaction;
+        return false;
     }
 
     /**
@@ -69,12 +64,17 @@ class Tags extends AbstractTask
     }
 
     /**
-     * Returns true if the task requires the default account.
+     * Do something with the collected tags.
      *
-     * @return bool
+     * @param array $transaction
+     *
+     * @return array
      */
-    public function requiresDefaultAccount(): bool
+    private function processTags(array $transaction): array
     {
-        return false;
+        $transaction['tags'] = array_unique(array_merge(array_values($transaction['tags_space']), array_values($transaction['tags_comma'])));
+        unset($transaction['tags_comma'], $transaction['tags_space']);
+
+        return $transaction;
     }
 }

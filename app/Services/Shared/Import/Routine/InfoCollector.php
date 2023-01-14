@@ -62,6 +62,7 @@ class InfoCollector
             $count++;
         }
         app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
+
         return $return;
     }
 }

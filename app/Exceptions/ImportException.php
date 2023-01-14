@@ -28,6 +28,7 @@ use Exception;
 
 /**
  * Class ImportException
+ *
  * @deprecated
  */
 class ImportException extends Exception

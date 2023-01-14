@@ -44,6 +44,26 @@ class Amount extends AbstractTask
     }
 
     /**
+     * Returns true if the task requires the default account.
+     *
+     * @return bool
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     *
+     * @return bool
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
+    }
+
+    /**
      * @param array $transaction
      *
      * @return array
@@ -52,36 +72,41 @@ class Amount extends AbstractTask
     {
         app('log')->debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
         $amount = null;
-        if (null === $amount && $this->validAmount((string) $transaction['amount'])) {
+        if (null === $amount && $this->validAmount((string)$transaction['amount'])) {
             app('log')->debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_debit'])) {
+        if (null === $amount && $this->validAmount((string)$transaction['amount_debit'])) {
             app('log')->debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
             $amount = $transaction['amount_debit'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_credit'])) {
-            app('log')->debug(sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit']));
+        if (null === $amount && $this->validAmount((string)$transaction['amount_credit'])) {
+            app('log')->debug(
+                sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit'])
+            );
             $amount = $transaction['amount_credit'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_negated'])) {
-            app('log')->debug(sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated']));
+        if (null === $amount && $this->validAmount((string)$transaction['amount_negated'])) {
+            app('log')->debug(
+                sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated'])
+            );
             $amount = $transaction['amount_negated'];
         }
 
         if (array_key_exists('amount_modifier', $transaction)) {
-            $transaction['amount_modifier'] = (string) $transaction['amount_modifier'];
+            $transaction['amount_modifier'] = (string)$transaction['amount_modifier'];
         }
         if (array_key_exists('foreign_amount', $transaction)) {
-            $transaction['foreign_amount'] = (string) $transaction['foreign_amount'];
+            $transaction['foreign_amount'] = (string)$transaction['foreign_amount'];
         }
-        $amount = (string) $amount;
+        $amount = (string)$amount;
         if ('' === $amount) {
             app('log')->error('Amount is EMPTY. This will give problems further ahead.', $transaction);
             unset($transaction['amount_modifier']);
+
             return $transaction;
         }
         // modify amount:
@@ -109,6 +134,7 @@ class Amount extends AbstractTask
             $transaction['type'] = 'deposit';
         }
         unset($transaction['amount_modifier']);
+
         return $transaction;
     }
 
@@ -130,25 +156,5 @@ class Amount extends AbstractTask
         }
 
         return true;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return false;
-    }
-
-    /**
-     * Returns true if the task requires the default account.
-     *
-     * @return bool
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return false;
     }
 }

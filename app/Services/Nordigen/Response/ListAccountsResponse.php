@@ -35,9 +35,9 @@ use Iterator;
  */
 class ListAccountsResponse extends Response implements Iterator, Countable
 {
+    private array      $accounts;
     private Collection $collection;
     private int        $position = 0;
-    private array      $accounts;
 
     /**
      * @inheritDoc

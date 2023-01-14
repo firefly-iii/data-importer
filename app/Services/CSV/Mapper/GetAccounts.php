@@ -59,7 +59,7 @@ trait GetAccounts
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
 
@@ -113,7 +113,7 @@ trait GetAccounts
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
         }
 
@@ -136,7 +136,7 @@ trait GetAccounts
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
         }
 

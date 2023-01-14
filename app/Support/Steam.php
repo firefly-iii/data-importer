@@ -51,7 +51,7 @@ class Steam
      */
     public function cleanString($value): string
     {
-        $value  = (string) $value;
+        $value  = (string)$value;
         $search = [
             "\u{0001}", // start of heading
             "\u{0002}", // start of text
@@ -108,6 +108,7 @@ class Steam
 
     /**
      * @param string $iban
+     *
      * @return string
      */
     public function filterAllSpaces(string $iban): string
@@ -160,6 +161,7 @@ class Steam
             "\u{FEFF}", // zero width no -break space
             "\x20", // plain old normal space
         ];
+
         return trim(str_replace($search, '', $iban));
     }
 }

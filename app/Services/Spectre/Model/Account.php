@@ -61,13 +61,13 @@ class Account
     {
         $model                = new self();
         $model->matched       = false;
-        $model->id            = (string) $data['id'];
+        $model->id            = (string)$data['id'];
         $model->accountName   = $data['extra']['account_name'] ?? '';
         $model->accountNumber = $data['extra']['account_number'] ?? '';
         $model->balance       = $data['balance'] ?? 0;
         $model->cardType      = $data['extra']['card_type'] ?? '';
         $model->clientName    = $data['extra']['client_name'] ?? '';
-        $model->connectionId  = (string) $data['connection_id'];
+        $model->connectionId  = (string)$data['connection_id'];
         $model->currencyCode  = $data['currency_code'];
         $model->iban          = $data['extra']['iban'] ?? '';
         $model->name          = $data['name'];

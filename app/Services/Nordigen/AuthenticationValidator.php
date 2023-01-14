@@ -67,6 +67,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         } catch (ImporterHttpException $e) {
             return AuthenticationStatus::error();
         }
+
         return AuthenticationStatus::authenticated();
     }
 }

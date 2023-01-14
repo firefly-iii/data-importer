@@ -33,13 +33,13 @@ use App\Services\Shared\Configuration\Configuration;
  */
 class RoutineManager
 {
-    private InfoCollector $infoCollector;
-    private ApiSubmitter  $apiSubmitter;
-    private array         $transactions;
-    private string        $identifier;
+    private array         $allErrors;
     private array         $allMessages;
     private array         $allWarnings;
-    private array         $allErrors;
+    private ApiSubmitter  $apiSubmitter;
+    private string        $identifier;
+    private InfoCollector $infoCollector;
+    private array         $transactions;
 
     /**
      * @param string $identifier
@@ -50,16 +50,31 @@ class RoutineManager
         $this->transactions = [];
         $this->allMessages  = [];
         $this->allWarnings  = [];
-        $this->allErrors  = [];
+        $this->allErrors    = [];
     }
 
     /**
-     * @param array $transactions
+     * @return array
      */
-    public function setTransactions(array $transactions): void
+    public function getAllErrors(): array
     {
-        $this->transactions = $transactions;
-        app('log')->debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
+        return $this->allErrors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
     }
 
     /**
@@ -73,6 +88,15 @@ class RoutineManager
         $this->apiSubmitter->setConfiguration($configuration);
 
         app('log')->debug('Created APISubmitter in RoutineManager');
+    }
+
+    /**
+     * @param array $transactions
+     */
+    public function setTransactions(array $transactions): void
+    {
+        $this->transactions = $transactions;
+        app('log')->debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
     }
 
     /**
@@ -93,29 +117,5 @@ class RoutineManager
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
         $this->allErrors   = $this->apiSubmitter->getErrors();
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
     }
 }

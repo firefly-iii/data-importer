@@ -65,6 +65,7 @@ use Psr\Container\NotFoundExceptionInterface;
 class ConfigurationController extends Controller
 {
     use RestoresConfiguration;
+
     protected const ASSET_ACCOUNTS = 'assets';
     protected const LIABILITIES    = 'liabilities';
 
@@ -80,6 +81,7 @@ class ConfigurationController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -111,6 +113,7 @@ class ConfigurationController extends Controller
                 // at this point, nordigen is ready for data conversion.
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
+
             // skipForm
             return redirect()->route('005-roles.index');
         }
@@ -181,7 +184,9 @@ class ConfigurationController extends Controller
 
     /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
+     *
      * @param string $identifier
+     *
      * @return array
      * @throws ImporterErrorException
      */
@@ -194,6 +199,7 @@ class ConfigurationController extends Controller
                 $return[] = NordigenAccount::fromLocalArray($arr);
             }
             app('log')->debug('Grab accounts from cache', $result);
+
             return $return;
         }
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -205,7 +211,7 @@ class ConfigurationController extends Controller
         /** @var ListAccountsResponse $response */
         try {
             $response = $request->get();
-        } catch (ImporterErrorException | ImporterHttpException $e) {
+        } catch (ImporterErrorException|ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         $total  = count($response);
@@ -215,18 +221,23 @@ class ConfigurationController extends Controller
 
         /** @var Account $account */
         foreach ($response as $index => $account) {
-            app('log')->debug(sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()), $account->toLocalArray());
+            app('log')->debug(
+                sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()),
+                $account->toLocalArray()
+            );
             $account  = AccountInformationCollector::collectInformation($account);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();
         }
         Cache::put($identifier, $cache, 1800); // half an hour
+
         return $return;
     }
 
     /**
      * @param array $nordigen
      * @param array $firefly
+     *
      * @return array
      *
      * TODO move to some helper.
@@ -249,7 +260,14 @@ class ConfigurationController extends Controller
             $filteredByIban = $this->filterByIban($firefly, $iban);
 
             if (1 === count($filteredByIban)) {
-                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                app('log')->debug(
+                    sprintf(
+                        'This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.',
+                        $iban,
+                        $filteredByIban[0]->id,
+                        $filteredByIban[0]->name
+                    )
+                );
                 $entry['firefly'] = $filteredByIban;
                 $return[]         = $entry;
                 continue;
@@ -269,6 +287,7 @@ class ConfigurationController extends Controller
             $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
             $return[]         = $entry;
         }
+
         return $return;
     }
 
@@ -277,6 +296,7 @@ class ConfigurationController extends Controller
      *
      * @param array  $firefly
      * @param string $iban
+     *
      * @return array
      */
     private function filterByIban(array $firefly, string $iban): array
@@ -292,12 +312,14 @@ class ConfigurationController extends Controller
                 $result[] = $account;
             }
         }
+
         return $result;
     }
 
     /**
      * @param array  $firefly
      * @param string $currency
+     *
      * @return array
      */
     private function filterByCurrency(array $firefly, string $currency): array
@@ -313,6 +335,7 @@ class ConfigurationController extends Controller
                 $result[] = $account;
             }
         }
+
         return $result;
     }
 
@@ -321,6 +344,7 @@ class ConfigurationController extends Controller
      * @param array                      $firefly
      *
      * TODO should be a helper
+     *
      * @return array
      */
     private function mergeSpectreAccountLists(SpectreGetAccountsResponse $spectre, array $firefly): array
@@ -341,7 +365,14 @@ class ConfigurationController extends Controller
             $filteredByIban = $this->filterByIban($firefly, $iban);
 
             if (1 === count($filteredByIban)) {
-                app('log')->debug(sprintf('This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.', $iban, $filteredByIban[0]->id, $filteredByIban[0]->name));
+                app('log')->debug(
+                    sprintf(
+                        'This account (%s) has a single Firefly III counter part (#%d, "%s", same IBAN), so will use that one.',
+                        $iban,
+                        $filteredByIban[0]->id,
+                        $filteredByIban[0]->name
+                    )
+                );
                 $entry['firefly'] = $filteredByIban;
                 $return[]         = $entry;
                 continue;
@@ -361,6 +392,7 @@ class ConfigurationController extends Controller
             $entry['firefly'] = array_merge($firefly[self::ASSET_ACCOUNTS], $firefly[self::LIABILITIES]);
             $return[]         = $entry;
         }
+
         return $return;
     }
 
@@ -374,7 +406,7 @@ class ConfigurationController extends Controller
         app('log')->debug(sprintf('Method %s', __METHOD__));
 
         $dateObj = new Date();
-        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
+        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
         $date = Carbon::make('1984-09-17')->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
@@ -400,7 +432,7 @@ class ConfigurationController extends Controller
         $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (isset($fromRequest['accounts'][$identifier])) {
-                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
+                $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
             }
         }
         $configuration->setAccounts($accounts);

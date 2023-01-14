@@ -31,12 +31,12 @@ use App\Services\CSV\Converter\ConverterService;
  */
 class ColumnValue
 {
+    private bool    $appendValue;
+    private ?string $configuration;
     private int     $mappedValue;
     private string  $originalRole;
     private string  $role;
     private string  $value;
-    private ?string $configuration;
-    private bool    $appendValue;
 
     /**
      * ColumnValue constructor.
@@ -45,22 +45,6 @@ class ColumnValue
     {
         $this->mappedValue   = 0;
         $this->configuration = null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAppendValue(): bool
-    {
-        return $this->appendValue;
-    }
-
-    /**
-     * @param bool $appendValue
-     */
-    public function setAppendValue(bool $appendValue): void
-    {
-        $this->appendValue = $appendValue;
     }
 
     /**
@@ -77,14 +61,6 @@ class ColumnValue
     public function setMappedValue(int $mappedValue): void
     {
         $this->mappedValue = $mappedValue;
-    }
-
-    /**
-     * @param string $configuration
-     */
-    public function setConfiguration(string $configuration): void
-    {
-        $this->configuration = $configuration;
     }
 
     /**
@@ -110,12 +86,13 @@ class ColumnValue
     {
         if (0 !== $this->mappedValue) {
             /** @noinspection UnnecessaryCastingInspection */
-            return (int) $this->mappedValue;
+            return (int)$this->mappedValue;
         }
 
         // run converter on data:
-        $converterClass = (string) config(sprintf('csv.import_roles.%s.converter', $this->role));
+        $converterClass = (string)config(sprintf('csv.import_roles.%s.converter', $this->role));
         app('log')->debug(sprintf('getParsedValue will run "%s"', $converterClass));
+
         return ConverterService::convert($converterClass, $this->value, $this->configuration);
     }
 
@@ -149,5 +126,29 @@ class ColumnValue
     public function setValue(string $value): void
     {
         $this->value = $value;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAppendValue(): bool
+    {
+        return $this->appendValue;
+    }
+
+    /**
+     * @param bool $appendValue
+     */
+    public function setAppendValue(bool $appendValue): void
+    {
+        $this->appendValue = $appendValue;
+    }
+
+    /**
+     * @param string $configuration
+     */
+    public function setConfiguration(string $configuration): void
+    {
+        $this->configuration = $configuration;
     }
 }

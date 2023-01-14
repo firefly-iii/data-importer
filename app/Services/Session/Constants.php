@@ -79,11 +79,11 @@ class Constants
     public const IMPORT_FILE_PATHS = 'upload_file_paths';
     public const CONFIG_FILE_PATHS = 'config_file_paths';
     //    /** @var string */
-//    /** @var string */
-//    public const JOB_STATUS = 'import_job_status';
-//    /** @var string */
-//    /** @var string string */
-//    /** @var string */
+    //    /** @var string */
+    //    public const JOB_STATUS = 'import_job_status';
+    //    /** @var string */
+    //    /** @var string string */
+    //    /** @var string */
 
-//    /** @var string */
+    //    /** @var string */
 }

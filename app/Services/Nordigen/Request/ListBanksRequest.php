@@ -62,6 +62,7 @@ class ListBanksRequest extends Request
                     'message' => $e->getMessage(),
                 ],
             ];
+
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
             return new ErrorResponse($e->json ?? []);

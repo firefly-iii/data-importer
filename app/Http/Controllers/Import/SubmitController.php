@@ -105,11 +105,12 @@ class SubmitController extends Controller
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier      = $request->get('identifier');
+        $identifier = $request->get('identifier');
         if (null === $identifier) {
             app('log')->error('Identifier is NULL');
-            $status = new SubmissionStatus();
+            $status         = new SubmissionStatus();
             $status->status = SubmissionStatus::SUBMISSION_ERRORED;
+
             return response()->json($status->toArray());
         }
         $configuration   = $this->restoreConfiguration();
@@ -122,6 +123,7 @@ class SubmitController extends Controller
         if (!$disk->has($fileName)) {
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
 
@@ -129,9 +131,10 @@ class SubmitController extends Controller
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
 
@@ -146,6 +149,7 @@ class SubmitController extends Controller
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
 
@@ -156,21 +160,21 @@ class SubmitController extends Controller
         session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
 
 
-//            // if configured, send report!
-//            // TODO make event handler.
-//            $log
-//                = [
-//                'messages' => $routine->getAllMessages(),
-//                'warnings' => $routine->getAllWarnings(),
-//                'errors'   => $routine->getAllErrors(),
-//            ];
-//
-//            $send = config('mail.enable_mail_report');
-//            app('log')->debug('Log log', $log);
-//            if (true === $send) {
-//                app('log')->debug('SEND MAIL');
-//                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-//            }
+        //            // if configured, send report!
+        //            // TODO make event handler.
+        //            $log
+        //                = [
+        //                'messages' => $routine->getAllMessages(),
+        //                'warnings' => $routine->getAllWarnings(),
+        //                'errors'   => $routine->getAllErrors(),
+        //            ];
+        //
+        //            $send = config('mail.enable_mail_report');
+        //            app('log')->debug('Log log', $log);
+        //            if (true === $send) {
+        //                app('log')->debug('SEND MAIL');
+        //                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
+        //            }
 
 
         return response()->json($importJobStatus->toArray());

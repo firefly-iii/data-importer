@@ -74,6 +74,7 @@ trait DeterminesTransactionType
         // it could be a bad mapping. We return "deposit"
         if ('expense' === $sourceType && 'asset' === $destinationType) {
             app('log')->warning('Return "deposit" but the source type is not correct.');
+
             return 'deposit';
         }
 

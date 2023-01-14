@@ -46,8 +46,10 @@ class SecretManager
     {
         if (!self::hasAppId()) {
             app('log')->debug('No Spectre App ID in hasAppId(), will return config variable.');
-            return (string) config('spectre.app_id');
+
+            return (string)config('spectre.app_id');
         }
+
         return request()->cookie(self::APP_ID);
     }
 
@@ -59,7 +61,7 @@ class SecretManager
      */
     private static function hasAppId(): bool
     {
-        return '' !== (string) request()->cookie(self::APP_ID);
+        return '' !== (string)request()->cookie(self::APP_ID);
     }
 
     /**
@@ -72,8 +74,10 @@ class SecretManager
     {
         if (!self::hasSecret()) {
             app('log')->debug('No Spectre secret in hasSecret(), will return config variable.');
-            return (string) config('spectre.secret');
+
+            return (string)config('spectre.secret');
         }
+
         return request()->cookie(self::SECRET);
     }
 
@@ -85,7 +89,7 @@ class SecretManager
      */
     private static function hasSecret(): bool
     {
-        return '' !== (string) request()->cookie(self::SECRET);
+        return '' !== (string)request()->cookie(self::SECRET);
     }
 
 
@@ -94,6 +98,7 @@ class SecretManager
      * TODO is a cookie the best place?
      *
      * @param string $appId
+     *
      * @return Cookie
      */
     public static function saveAppId(string $appId): Cookie
@@ -106,6 +111,7 @@ class SecretManager
      * TODO is a cookie the best place?
      *
      * @param string $secret
+     *
      * @return Cookie
      */
     public static function saveSecret(string $secret): Cookie

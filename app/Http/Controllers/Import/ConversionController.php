@@ -168,12 +168,14 @@ class ConversionController extends Controller
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
             app('log')->error('Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
@@ -184,6 +186,7 @@ class ConversionController extends Controller
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));

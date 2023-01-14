@@ -31,12 +31,13 @@ class Balance
 {
     public string $amount;
     public string $currency;
-    public string $type;
     public string $date;
     public string $lastChangeDateTime;
+    public string $type;
 
     /**
      * @param array $data
+     *
      * @return static
      */
     public static function createFromArray(array $data): self
@@ -48,6 +49,7 @@ class Balance
         $self->type               = trim($data['balanceType'] ?? '');
         $self->date               = trim($data['referenceDate'] ?? '');
         $self->lastChangeDateTime = trim($data['lastChangeDateTime'] ?? '');
+
         return $self;
     }
 
@@ -62,6 +64,7 @@ class Balance
         $object->type               = $array['type'];
         $object->date               = $array['date'];
         $object->lastChangeDateTime = $array['last_change_date_time'];
+
         return $object;
     }
 

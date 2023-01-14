@@ -40,10 +40,10 @@ class CSVFileProcessor
 {
     use ProgressInformation;
 
+    private Configuration $configuration;
+    private string        $delimiter;
     private bool          $hasHeaders;
     private Reader        $reader;
-    private string        $delimiter;
-    private Configuration $configuration;
 
     /**
      * CSVFileProcessor constructor.
@@ -53,21 +53,6 @@ class CSVFileProcessor
     public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
-    }
-
-
-    /**
-     * @param string $delimiter
-     */
-    public function setDelimiter(string $delimiter): void
-    {
-        $map = [
-            'tab'       => "\t",
-            'semicolon' => ';',
-            'comma'     => ',',
-        ];
-
-        $this->delimiter = $map[$delimiter] ?? ',';
     }
 
     /**
@@ -88,6 +73,7 @@ class CSVFileProcessor
             //app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
+
             return [];
         }
         app('log')->debug(sprintf('Offset is %d', $offset));
@@ -96,9 +82,10 @@ class CSVFileProcessor
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not read CSV: %s', $e->getMessage());
             $this->addError(0, $message);
+
             return [];
         }
 
@@ -106,11 +93,26 @@ class CSVFileProcessor
             return $this->processCSVLines($records);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not parse CSV: %s', $e->getMessage());
             $this->addError(0, $message);
+
             return [];
         }
+    }
+
+    /**
+     * @param string $delimiter
+     */
+    public function setDelimiter(string $delimiter): void
+    {
+        $map = [
+            'tab'       => "\t",
+            'semicolon' => ';',
+            'comma'     => ',',
+        ];
+
+        $this->delimiter = $map[$delimiter] ?? ',';
     }
 
     /**
@@ -157,7 +159,7 @@ class CSVFileProcessor
         array_walk(
             $lineValues,
             static function ($element) {
-                return trim(str_replace('&nbsp;', ' ', (string) $element));
+                return trim(str_replace('&nbsp;', ' ', (string)$element));
             }
         );
 
@@ -179,7 +181,7 @@ class CSVFileProcessor
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
                 app('log')->error($e->getMessage());
-//                app('log')->error($e->getTraceAsString());
+                //                app('log')->error($e->getTraceAsString());
                 throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
             }
             if (in_array($hash, $hashes, true)) {

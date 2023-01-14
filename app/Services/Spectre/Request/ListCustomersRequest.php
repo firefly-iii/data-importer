@@ -61,8 +61,9 @@ class ListCustomersRequest extends Request
     {
         try {
             $response = $this->authenticatedGet();
-        } catch (GuzzleException | ImporterHttpException | ImporterErrorException $e) {
+        } catch (GuzzleException|ImporterHttpException|ImporterErrorException $e) {
             app('log')->error($e->getMessage());
+
             // JSON thing.
             return new ErrorResponse($e->json ?? []);
         }

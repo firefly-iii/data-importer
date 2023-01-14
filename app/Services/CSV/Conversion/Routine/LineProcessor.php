@@ -39,11 +39,11 @@ class LineProcessor
 {
     use ProgressInformation;
 
+    private string $dateFormat;
     private array  $doMapping;
     private array  $mappedValues;
     private array  $mapping;
     private array  $roles;
-    private string $dateFormat;
 
     /**
      * LineProcessor constructor.
@@ -79,7 +79,7 @@ class LineProcessor
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
                 app('log')->error($e->getMessage());
-//                app('log')->error($e->getTraceAsString());
+                //                app('log')->error($e->getTraceAsString());
                 $this->addError(0, $e->getMessage());
             }
         }

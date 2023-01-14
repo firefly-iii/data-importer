@@ -45,6 +45,7 @@ class AmountDebit implements ConverterInterface
         $converter = app(Amount::class);
         $result    = $converter->convert($value);
         $result    = Amount::positive($result);
+
         return bcmul($result, '-1');
     }
 

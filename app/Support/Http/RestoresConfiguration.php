@@ -28,6 +28,8 @@ namespace App\Support\Http;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 trait RestoresConfiguration
 {
@@ -35,8 +37,8 @@ trait RestoresConfiguration
      * Restore configuration from session and drive.
      *
      * @return Configuration
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function restoreConfiguration(): Configuration
     {
@@ -55,6 +57,7 @@ trait RestoresConfiguration
             $configuration->setDoMapping($diskConfig->getDoMapping());
             $configuration->setRoles($diskConfig->getRoles());
         }
+
         return $configuration;
     }
 }

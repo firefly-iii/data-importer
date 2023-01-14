@@ -31,5 +31,6 @@ namespace App\Http\Middleware;
 class ConversionControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'conversion';
 }

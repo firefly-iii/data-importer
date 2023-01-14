@@ -41,13 +41,14 @@ class TagsSpace implements ConverterInterface
     {
         $string = app('steam')->cleanStringAndNewlines($value);
         $tags   = explode(' ', $string);
+
         return array_map('trim', $tags);
     }
 
     /**
      * Add extra configuration parameters.
      *
-     * @param  string  $configuration
+     * @param string $configuration
      */
     public function setConfiguration(string $configuration): void
     {

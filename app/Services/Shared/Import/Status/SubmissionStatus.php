@@ -31,10 +31,10 @@ class SubmissionStatus
     public const SUBMISSION_ERRORED = 'submission_errored';
     public const SUBMISSION_RUNNING = 'submission_running';
     public const SUBMISSION_WAITING = 'waiting_to_start';
-    public string $status;
     public array  $errors;
-    public array  $warnings;
     public array  $messages;
+    public string $status;
+    public array  $warnings;
 
     /**
      * ImportJobStatus constructor.

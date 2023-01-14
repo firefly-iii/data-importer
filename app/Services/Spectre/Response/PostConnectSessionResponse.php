@@ -39,6 +39,6 @@ class PostConnectSessionResponse extends Response
      */
     public function __construct(array $data)
     {
-        $this->connect_url = (string) $data['connect_url'];
+        $this->connect_url = (string)$data['connect_url'];
     }
 }

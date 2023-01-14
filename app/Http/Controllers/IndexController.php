@@ -45,24 +45,8 @@ class IndexController extends Controller
     }
 
     /**
-     * @return mixed
-     */
-    public function flush(): mixed
-    {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
-        session()->flush();
-        $cookies = [
-            cookie(Constants::FLOW_COOKIE, ''),
-        ];
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
-
-        return redirect(route('index'))->withCookies($cookies);
-    }
-
-    /**
      * @param Request $request
+     *
      * @return mixed
      */
     public function index(Request $request): mixed
@@ -75,14 +59,15 @@ class IndexController extends Controller
         $validInfo = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             app('log')->debug('No valid secrets, redirect to token.index');
+
             return redirect(route('token.index'));
         }
 
         // display to user the method of authentication
-        $clientId = (string) config('importer.client_id');
-        $url      = (string) config('importer.url');
+        $clientId = (string)config('importer.client_id');
+        $url      = (string)config('importer.url');
         $pat      = false;
-        if ('' !== (string) config('importer.access_token')) {
+        if ('' !== (string)config('importer.access_token')) {
             $pat = true;
         }
         $clientIdWithURL = false;
@@ -90,7 +75,7 @@ class IndexController extends Controller
             $clientIdWithURL = true;
         }
         $URLonly = false;
-        if ('' !== $url && '' === $clientId && '' === (string) config('importer.access_token')
+        if ('' !== $url && '' === $clientId && '' === (string)config('importer.access_token')
         ) {
             $URLonly = true;
         }
@@ -104,6 +89,7 @@ class IndexController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return mixed
      */
     public function postIndex(Request $request): mixed
@@ -116,9 +102,11 @@ class IndexController extends Controller
             $cookies = [
                 cookie(Constants::FLOW_COOKIE, $flow),
             ];
+
             return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
         app('log')->debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
+
         return redirect(route('index'));
     }
 
@@ -138,6 +126,23 @@ class IndexController extends Controller
             SecretManager::saveRefreshToken(''),
             cookie(Constants::FLOW_COOKIE, ''),
         ];
+
+        return redirect(route('index'))->withCookies($cookies);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function flush(): mixed
+    {
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->flush();
+        $cookies = [
+            cookie(Constants::FLOW_COOKIE, ''),
+        ];
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
 
         return redirect(route('index'))->withCookies($cookies);
     }

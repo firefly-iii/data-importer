@@ -40,7 +40,8 @@ class TagsComma implements ConverterInterface
     public function convert($value)
     {
         $string = app('steam')->cleanStringAndNewlines($value);
-        $tags = explode(',', $string);
+        $tags   = explode(',', $string);
+
         return array_map('trim', $tags);
     }
 

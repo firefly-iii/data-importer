@@ -40,13 +40,6 @@ interface TaskInterface
     public function process(array $group): array;
 
     /**
-     * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
-     */
-    public function requiresTransactionCurrency(): bool;
-
-    /**
      * Returns true if the task requires the default account.
      *
      * @return bool
@@ -54,12 +47,19 @@ interface TaskInterface
     public function requiresDefaultAccount(): bool;
 
     /**
-     * @param TransactionCurrency $transactionCurrency
+     * Returns true if the task requires the default currency of the user.
+     *
+     * @return bool
      */
-    public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void;
+    public function requiresTransactionCurrency(): bool;
 
     /**
      * @param Account $account
      */
     public function setAccount(Account $account): void;
+
+    /**
+     * @param TransactionCurrency $transactionCurrency
+     */
+    public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void;
 }

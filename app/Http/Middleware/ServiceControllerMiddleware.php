@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class ServiceControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'service-validation';
 }

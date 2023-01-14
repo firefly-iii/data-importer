@@ -61,14 +61,14 @@ class TokenController extends Controller
     public function callback(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $state        = (string) session()->pull('state');
-        $codeVerifier = (string) $request->session()->pull('code_verifier');
-        $clientId     = (int) $request->session()->pull('form_client_id');
-        $baseURL      = (string) $request->session()->pull('form_base_url');
-        $vanityURL    = (string) $request->session()->pull('form_vanity_url');
+        $state        = (string)session()->pull('state');
+        $codeVerifier = (string)$request->session()->pull('code_verifier');
+        $clientId     = (int)$request->session()->pull('form_client_id');
+        $baseURL      = (string)$request->session()->pull('form_base_url');
+        $vanityURL    = (string)$request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        if ($state !== (string) $request->state) {
+        if ($state !== (string)$request->state) {
             app('log')->error(sprintf('State according to session: "%s"', $state));
             app('log')->error(sprintf('State returned in request : "%s"', $request->state));
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
@@ -94,10 +94,10 @@ class TokenController extends Controller
         ];
         try {
             $response = (new Client($opts))->post($finalURL, $params);
-        } catch (ClientException | RequestException $e) {
+        } catch (ClientException|RequestException $e) {
             $body = $e->getMessage();
             if ($e->hasResponse()) {
-                $body = (string) $e->getResponse()->getBody();
+                $body = (string)$e->getResponse()->getBody();
                 app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
                 app('log')->error(sprintf('Response from server: "%s"', $body));
                 //app('log')->error($e->getTraceAsString());
@@ -107,10 +107,10 @@ class TokenController extends Controller
         }
 
         try {
-            $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
-            app('log')->error(sprintf('Response from server: "%s"', (string) $response->getBody()));
+            app('log')->error(sprintf('Response from server: "%s"', (string)$response->getBody()));
             //app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
@@ -118,10 +118,10 @@ class TokenController extends Controller
 
         // set cookies.
         $cookies = [
-            SecretManager::saveAccessToken((string) $data['access_token']),
+            SecretManager::saveAccessToken((string)$data['access_token']),
             SecretManager::saveBaseUrl($baseURL),
             SecretManager::saveVanityUrl($vanityURL),
-            SecretManager::saveRefreshToken((string) $data['refresh_token']),
+            SecretManager::saveRefreshToken((string)$data['refresh_token']),
         ];
         app('log')->debug(sprintf('Return redirect with cookies to "%s"', route('index')));
 
@@ -158,7 +158,7 @@ class TokenController extends Controller
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum = (string) config('importer.minimum_version');
+        $minimum = (string)config('importer.minimum_version');
         $compare = version_compare($minimum, $result->version);
         if (1 === $compare) {
             $errorMessage = sprintf(
@@ -297,7 +297,7 @@ class TokenController extends Controller
             return redirect(route('token.index'));
         }
 
-        $data['client_id'] = (int) $data['client_id'];
+        $data['client_id'] = (int)$data['client_id'];
 
         // grab base URL from config first, otherwise from submitted data:
         $baseURL = config('importer.url');
@@ -307,7 +307,7 @@ class TokenController extends Controller
         app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
 
         // if the config has a vanity URL it will always overrule.
-        if ('' !== (string) config('importer.vanity_url')) {
+        if ('' !== (string)config('importer.vanity_url')) {
             $vanityURL = config('importer.vanity_url');
             app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
         }
@@ -317,7 +317,7 @@ class TokenController extends Controller
             $baseURL = $data['base_url'];
             app('log')->debug(sprintf('Base URL is now "%s"', $baseURL));
         }
-        if ('' === (string) $vanityURL) {
+        if ('' === (string)$vanityURL) {
             $vanityURL = $baseURL;
             app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
         }

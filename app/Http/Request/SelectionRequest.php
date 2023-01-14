@@ -38,6 +38,7 @@ class SelectionRequest extends Request
     {
         $country = $this->get('country');
         $days    = $this->get('days');
+
         return [
             'country' => $country,
             'bank'    => $this->get(sprintf('bank_%s', $country)),

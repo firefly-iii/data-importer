@@ -36,6 +36,7 @@ class Authenticate extends Middleware
      * Get the path the user should be redirected to when they are not authenticated.
      *
      * @param Request $request
+     *
      * @return string|null
      */
     protected function redirectTo($request)
@@ -43,6 +44,7 @@ class Authenticate extends Middleware
         if (!$request->expectsJson()) {
             return route('login');
         }
+
         return null;
     }
 }

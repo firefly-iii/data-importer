@@ -57,6 +57,7 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
@@ -100,6 +101,7 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
@@ -113,8 +115,8 @@ class AuthenticateController extends Controller
 
         // set cookies and redirect, validator will pick it up.
         if ('spectre' === $flow) {
-            $appId  = (string) $request->get('spectre_app_id');
-            $secret = (string) $request->get('spectre_secret');
+            $appId  = (string)$request->get('spectre_app_id');
+            $secret = (string)$request->get('spectre_secret');
             if ('' === $appId || '' === $secret) {
                 return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
             }

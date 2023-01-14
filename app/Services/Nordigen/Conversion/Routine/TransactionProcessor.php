@@ -72,7 +72,7 @@ class TransactionProcessor
         $return = [];
         app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
-            $account = (string) $account;
+            $account = (string)$account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             app('log')->debug('Will also download information on the account for debug purposes.');
             $object = new Account();
@@ -80,11 +80,14 @@ class TransactionProcessor
             try {
                 AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
-                $this->addError(0, 'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.');
-                if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
+                $this->addError(
+                    0,
+                    'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
+                );
+                if (array_key_exists('summary', $e->json) && '' !== (string)$e->json['summary']) {
                     $this->addError(0, $e->json['summary']);
                 }
-                if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
+                if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
                     $this->addError(0, $e->json['detail']);
                 }
 
@@ -111,7 +114,16 @@ class TransactionProcessor
     }
 
     /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
      * @param GetTransactionsResponse $transactions
+     *
      * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
@@ -162,13 +174,5 @@ class TransactionProcessor
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 }

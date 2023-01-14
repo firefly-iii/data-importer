@@ -65,7 +65,7 @@ class DebugController extends Controller
         $userAgent      = $request->header('user-agent');
         $trustedProxies = config('importer.trusted_proxies');
         $displayErrors  = ini_get('display_errors');
-        $errorReporting = $this->errorReporting((int) ini_get('error_reporting'));
+        $errorReporting = $this->errorReporting((int)ini_get('error_reporting'));
         $appEnv         = config('app.env');
         $appDebug       = var_export(config('app.debug'), true);
         $logChannel     = config('logging.default');
@@ -151,6 +151,6 @@ class DebugController extends Controller
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 
-        return $array[$value] ?? (string) $value;
+        return $array[$value] ?? (string)$value;
     }
 }

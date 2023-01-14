@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class LinkControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'nordigen-link';
 }

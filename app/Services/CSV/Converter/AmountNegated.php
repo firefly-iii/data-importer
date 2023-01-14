@@ -40,6 +40,7 @@ class AmountNegated implements ConverterInterface
         /** @var ConverterInterface $converter */
         $converter = app(Amount::class);
         $result    = $converter->convert($value);
+
         return bcmul($result, '-1');
     }
 

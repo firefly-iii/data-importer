@@ -68,6 +68,7 @@ class ServiceController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function validateSpectre(Request $request): JsonResponse

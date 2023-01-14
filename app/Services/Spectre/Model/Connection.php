@@ -59,7 +59,7 @@ class Connection
     public static function fromArray(array $data): self
     {
         $model                        = new self();
-        $model->id                    = (string) $data['id'];
+        $model->id                    = (string)$data['id'];
         $model->categorization        = $data['categorization'];
         $model->countryCode           = $data['country_code'];
         $model->customerId            = $data['customer_id'];

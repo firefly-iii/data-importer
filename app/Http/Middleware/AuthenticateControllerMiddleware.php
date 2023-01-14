@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class AuthenticateControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'authenticate';
 }

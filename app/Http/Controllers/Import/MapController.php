@@ -100,6 +100,7 @@ class MapController extends Controller
                 app('log')->debug('Its a file, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
+
             return redirect()->route('007-convert.index');
         }
 
@@ -164,12 +165,14 @@ class MapController extends Controller
 
         // get columns from file
         $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
-        $delimiter = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+        $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+
         return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
     }
 
     /**
      * Weird bunch of code to return info on Spectre and Nordigen.
+     *
      * @return array
      * @throws ContainerExceptionInterface
      * @throws FileNotFoundException
@@ -228,6 +231,7 @@ class MapController extends Controller
             $category['mapped']       = $existingMapping[$index] ?? [];
             $data[]                   = $category;
         }
+
         return $data;
     }
 
@@ -258,8 +262,8 @@ class MapController extends Controller
             app('log')->debug(sprintf('[%s/%s] Parsing transaction (1)', ($index + 1), $total));
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
-                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
+                $opposing[] = (string)array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
+                $opposing[] = (string)array_key_exists('source_name', $row) ? $row['source_name'] : '';
             }
         }
         $filtered = array_filter(
@@ -297,13 +301,13 @@ class MapController extends Controller
             app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', ($index + 1), $total));
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';
+                $categories[] = (string)array_key_exists('category_name', $row) ? $row['category_name'] : '';
             }
         }
         $filtered = array_filter(
             $categories,
             static function (?string $value) {
-                return '' !== (string) $value;
+                return '' !== (string)$value;
             }
         );
 
@@ -344,7 +348,7 @@ class MapController extends Controller
             foreach ($column as $valueIndex => $value) {
                 $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
                 if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
-                    $data[$columnIndex][$value] = (int) $mappedValue;
+                    $data[$columnIndex][$value] = (int)$mappedValue;
                 }
             }
         }
@@ -392,12 +396,14 @@ class MapController extends Controller
             // if nordigen, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
         }
+
         return redirect()->route('007-convert.index');
     }
 
     /**
      * @param array $original
      * @param array $new
+     *
      * @return array
      */
     private function mergeMapping(array $original, array $new): array
@@ -416,6 +422,7 @@ class MapController extends Controller
                 $original[$column] = $mappedValues;
             }
         }
+
         // original has been updated:
         return $original;
     }

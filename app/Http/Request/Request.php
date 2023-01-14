@@ -62,7 +62,19 @@ class Request extends FormRequest
      */
     public function convertToInteger(string $field): int
     {
-        return (int) $this->get($field);
+        return (int)$this->get($field);
+    }
+
+    /**
+     * Return string value.
+     *
+     * @param string $field
+     *
+     * @return string
+     */
+    public function convertToString(string $field): string
+    {
+        return app('steam')->cleanStringAndNewlines((string)($this->get($field) ?? ''));
     }
 
     /**
@@ -81,7 +93,7 @@ class Request extends FormRequest
             return null;
         }
 
-        return (int) $string;
+        return (int)$string;
     }
 
     /**
@@ -97,12 +109,12 @@ class Request extends FormRequest
             return null;
         }
 
-        $value = (string) $this->get($field);
+        $value = (string)$this->get($field);
         if ('' === $value) {
             return null;
         }
 
-        return (int) $value;
+        return (int)$value;
     }
 
     /**
@@ -118,19 +130,7 @@ class Request extends FormRequest
             return null;
         }
 
-        return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
-    }
-
-    /**
-     * Return string value.
-     *
-     * @param string $field
-     *
-     * @return string
-     */
-    public function convertToString(string $field): string
-    {
-        return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
+        return app('steam')->cleanStringAndNewlines((string)($this->get($field) ?? ''));
     }
 
     /**

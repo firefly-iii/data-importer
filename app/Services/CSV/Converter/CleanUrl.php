@@ -46,6 +46,7 @@ class CleanUrl implements ConverterInterface
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
+
         return null;
     }
 

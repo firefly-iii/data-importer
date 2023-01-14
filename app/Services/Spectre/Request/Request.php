@@ -114,13 +114,13 @@ abstract class Request
                 'GET',
                 $fullUrl,
                 [
-                         'headers' => [
-                             'Accept'       => 'application/json',
-                             'Content-Type' => 'application/json',
-                             'App-id'       => $this->getAppId(),
-                             'Secret'       => $this->getSecret(),
-                         ],
-                     ]
+                    'headers' => [
+                        'Accept'       => 'application/json',
+                        'Content-Type' => 'application/json',
+                        'App-id'       => $this->getAppId(),
+                        'Secret'       => $this->getSecret(),
+                    ],
+                ]
             );
         } catch (TransferException $e) {
             app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
@@ -129,7 +129,7 @@ abstract class Request
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
 
-            $body = (string) $e->getResponse()->getBody();
+            $body = (string)$e->getResponse()->getBody();
             $json = [];
             try {
                 $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -143,9 +143,9 @@ abstract class Request
             // return body, class must handle this
             app('log')->error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
-            $body = (string) $res->getBody();
+            $body = (string)$res->getBody();
         }
-        $body = $body ?? (string) $res->getBody();
+        $body = $body ?? (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -271,7 +271,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
-        } catch (GuzzleException | Exception $e) {
+        } catch (GuzzleException|Exception $e) {
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
@@ -338,7 +338,7 @@ abstract class Request
         } catch (JsonException $e) {
             app('log')->error($e->getMessage());
         }
-        if ('{}' !== (string) $body) {
+        if ('{}' !== (string)$body) {
             $opts['body'] = $body;
         }
 
@@ -346,7 +346,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
-        } catch (GuzzleException | Exception $e) {
+        } catch (GuzzleException|Exception $e) {
             app('log')->error($e->getMessage());
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
@@ -396,14 +396,14 @@ abstract class Request
         } catch (JsonException $e) {
             app('log')->error($e->getMessage());
         }
-        if ('{}' !== (string) $body) {
+        if ('{}' !== (string)$body) {
             $opts['body'] = $body;
         }
         //app('log')->debug('Final body + headers for spectre UNsigned PUT request:', $opts);
         try {
             $client = $this->getClient();
             $res    = $client->request('PUT', $fullUrl, $opts);
-        } catch (RequestException | GuzzleException $e) {
+        } catch (RequestException|GuzzleException $e) {
             // get response.
             $response = $e->getResponse();
             if (null !== $response && 406 === $response->getStatusCode()) {
@@ -412,7 +412,7 @@ abstract class Request
                 $responseHeaders = $response->getHeaders();
                 $json            = [];
                 try {
-                    $json = json_decode((string) $e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
+                    $json = json_decode((string)$e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
                 } catch (JsonException $e) {
                     app('log')->error($e->getMessage());
                 }
@@ -423,7 +423,7 @@ abstract class Request
             }
             app('log')->error($e->getMessage());
             if (null !== $response) {
-                app('log')->error((string) $e->getResponse()->getBody());
+                app('log')->error((string)$e->getResponse()->getBody());
             }
             throw new ImporterHttpException(sprintf('Request Exception: %s', $e->getMessage()));
         }

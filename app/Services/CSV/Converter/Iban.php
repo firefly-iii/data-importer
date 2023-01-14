@@ -54,6 +54,15 @@ class Iban implements ConverterInterface
     }
 
     /**
+     * Add extra configuration parameters.
+     *
+     * @param string $configuration
+     */
+    public function setConfiguration(string $configuration): void
+    {
+    }
+
+    /**
      * @param string $value
      *
      * @return bool
@@ -79,15 +88,6 @@ class Iban implements ConverterInterface
             $checksum = 2;
         }
 
-        return 1 === (int) $checksum;
-    }
-
-    /**
-     * Add extra configuration parameters.
-     *
-     * @param string $configuration
-     */
-    public function setConfiguration(string $configuration): void
-    {
+        return 1 === (int)$checksum;
     }
 }

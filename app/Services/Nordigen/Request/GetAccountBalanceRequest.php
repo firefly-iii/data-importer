@@ -50,28 +50,13 @@ class GetAccountBalanceRequest extends Request
     }
 
     /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
-    /**
      * @inheritDoc
      * @throws ImporterErrorException
      */
     public function get(): Response
     {
         $array = $this->authenticatedGet();
+
         return new ArrayResponse($array);
     }
 
@@ -89,5 +74,21 @@ class GetAccountBalanceRequest extends Request
     public function put(): Response
     {
         // TODO: Implement put() method.
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 }

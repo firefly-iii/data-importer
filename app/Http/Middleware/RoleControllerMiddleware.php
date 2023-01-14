@@ -28,5 +28,6 @@ namespace App\Http\Middleware;
 class RoleControllerMiddleware
 {
     use IsReadyForStep;
+
     protected const STEP = 'define-roles';
 }

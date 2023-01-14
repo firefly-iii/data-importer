@@ -31,10 +31,10 @@ use App\Services\Shared\Response\Response;
  */
 class NewUserAgreementResponse extends Response
 {
-    public string $id;
     public string $created;
-    public int    $maxHistoricalDays;
+    public string $id;
     public string $institutionId;
+    public int    $maxHistoricalDays;
 
     /**
      * @inheritDoc
@@ -44,6 +44,6 @@ class NewUserAgreementResponse extends Response
         $this->id                = $data['id'];
         $this->created           = $data['created'];
         $this->maxHistoricalDays = $data['max_historical_days'];
-        $this->institutionId    = $data['institution_id'];
+        $this->institutionId     = $data['institution_id'];
     }
 }
