@@ -70,17 +70,17 @@ class TransactionProcessor
         $accounts = array_keys($this->configuration->getAccounts());
 
         $return = [];
+        app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
             $account = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
-
-            app('log')->debug(sprintf('Will also download information on the account for debug purposes.'));
+            app('log')->debug('Will also download information on the account for debug purposes.');
             $object = new Account();
             $object->setIdentifier($account);
             try {
                 AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
-                $this->addError(0, 'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III user interface. See the other error messages for more information.');
+                $this->addError(0, 'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.');
                 if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
                     $this->addError(0, $e->json['summary']);
                 }
