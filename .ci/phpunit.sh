@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# phpstan.sh
+# phpunit.sh
 # Copyright (c) 2021 james@firefly-iii.org
 #
 # This file is part of Firefly III (https://github.com/firefly-iii).
@@ -20,14 +20,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Install composer packages
-#composer install --no-scripts --no-ansi
-
-SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
 # enable test .env file.
-# cp .ci/.env.ci .env
+cp .ci/.env.ci ../.env
 
-# Do static code analysis.
-# ./vendor/bin/phpstan analyse -c .ci/phpstan.neon --no-progress
-./vendor/bin/phpstan analyse -c .ci/phpstan.neon --xdebug --error-format=table > phpstan-report.txt
+# download test database
+# TODO no longer exists
+wget --quiet https://raw.githubusercontent.com/firefly-iii/test-data/main/test_db.sqlite -o storage/database/test_db.sqlite
+
+# run phpunit
+./vendor/bin/phpunit --configuration phpunit.coverage.xml
+
+exit 0

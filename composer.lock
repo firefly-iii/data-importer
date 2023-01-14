@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21d7488703dcfe21614441f0d4247e5d",
+    "content-hash": "831074d15d038dd4a31a186530ce574c",
     "packages": [
         {
             "name": "brick/math",
@@ -9734,6 +9734,61 @@
                 }
             ],
             "time": "2020-09-28T06:39:44+00:00"
+        },
+        {
+            "name": "thecodingmachine/phpstan-strict-rules",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thecodingmachine/phpstan-strict-rules.git",
+                "reference": "2ba8fa8b328c45f3b149c05def5bf96793c594b6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thecodingmachine/phpstan-strict-rules/zipball/2ba8fa8b328c45f3b149c05def5bf96793c594b6",
+                "reference": "2ba8fa8b328c45f3b149c05def5bf96793c594b6",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1|^8.0",
+                "phpstan/phpstan": "^1.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": "^7.1"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                },
+                "phpstan": {
+                    "includes": [
+                        "phpstan-strict-rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TheCodingMachine\\PHPStan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "David Négrier",
+                    "email": "d.negrier@thecodingmachine.com"
+                }
+            ],
+            "description": "A set of additional rules for PHPStan based on best practices followed at TheCodingMachine",
+            "support": {
+                "issues": "https://github.com/thecodingmachine/phpstan-strict-rules/issues",
+                "source": "https://github.com/thecodingmachine/phpstan-strict-rules/tree/v1.0.0"
+            },
+            "time": "2021-11-08T09:10:49+00:00"
         },
         {
             "name": "theseer/tokenizer",
