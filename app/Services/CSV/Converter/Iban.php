@@ -47,7 +47,7 @@ class Iban implements ConverterInterface
             $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
             app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
 
-            return $result;
+            return trim($result);
         }
         app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
 

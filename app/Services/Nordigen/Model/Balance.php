@@ -43,11 +43,11 @@ class Balance
     {
         app('log')->debug('Create Balance from array', $data);
         $self                     = new self;
-        $self->amount             = $data['balanceAmount']['amount'] ?? '0';
-        $self->currency           = $data['balanceAmount']['currency'] ?? '';
-        $self->type               = $data['balanceType'] ?? '';
-        $self->date               = $data['referenceDate'] ?? '';
-        $self->lastChangeDateTime = $data['lastChangeDateTime'] ?? '';
+        $self->amount             = trim($data['balanceAmount']['amount'] ?? '0');
+        $self->currency           = trim($data['balanceAmount']['currency'] ?? '');
+        $self->type               = trim($data['balanceType'] ?? '');
+        $self->date               = trim($data['referenceDate'] ?? '');
+        $self->lastChangeDateTime = trim($data['lastChangeDateTime'] ?? '');
         return $self;
     }
 

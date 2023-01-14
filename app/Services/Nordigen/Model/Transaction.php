@@ -97,37 +97,37 @@ class Transaction
         app('log')->debug('Nordigen transaction from array', $array);
         $object = new self;
 
-        $object->additionalInformation                  = $array['additionalInformation'] ?? '';
-        $object->additionalInformationStructured        = $array['additionalInformationStructured'] ?? '';
-        $object->bankTransactionCode                    = $array['bankTransactionCode'] ?? '';
+        $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
+        $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
+        $object->bankTransactionCode                    = trim($array['bankTransactionCode'] ?? '');
         $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['bookingDate'], config('app.timezone')) : null;
-        $object->key                                    = $array['key'] ?? '';
-        $object->checkId                                = $array['checkId'] ?? '';
-        $object->creditorAgent                          = $array['creditorAgent'] ?? '';
-        $object->creditorId                             = $array['creditorId'] ?? '';
-        $object->creditorName                           = $array['creditorName'] ?? '';
+        $object->key                                    = trim($array['key'] ?? '');
+        $object->checkId                                = trim($array['checkId'] ?? '');
+        $object->creditorAgent                          = trim($array['creditorAgent'] ?? '');
+        $object->creditorId                             = trim($array['creditorId'] ?? '');
+        $object->creditorName                           = trim($array['creditorName'] ?? '');
         $object->currencyExchange                       = $array['currencyExchange'] ?? [];
-        $object->debtorAgent                            = $array['debtorAgent'] ?? '';
-        $object->debtorName                             = $array['debtorName'] ?? '';
-        $object->entryReference                         = $array['entryReference'] ?? '';
-        $object->mandateId                              = $array['mandateId'] ?? '';
-        $object->proprietaryBank                        = $array['proprietaryBank'] ?? '';
-        $object->purposeCode                            = $array['purposeCode'] ?? '';
-        $object->remittanceInformationStructured        = $array['remittanceInformationStructured'] ?? '';
+        $object->debtorAgent                            = trim($array['debtorAgent'] ?? '');
+        $object->debtorName                             = trim($array['debtorName'] ?? '');
+        $object->entryReference                         = trim($array['entryReference'] ?? '');
+        $object->mandateId                              = trim($array['mandateId'] ?? '');
+        $object->proprietaryBank                        = trim($array['proprietaryBank'] ?? '');
+        $object->purposeCode                            = trim($array['purposeCode'] ?? '');
+        $object->remittanceInformationStructured        = trim($array['remittanceInformationStructured'] ?? '');
         $object->remittanceInformationStructuredArray   = $array['remittanceInformationStructuredArray'] ?? [];
-        $object->remittanceInformationUnstructured      = $array['remittanceInformationUnstructured'] ?? '';
+        $object->remittanceInformationUnstructured      = trim($array['remittanceInformationUnstructured'] ?? '');
         $object->remittanceInformationUnstructuredArray = $array['remittanceInformationUnstructuredArray'] ?? [];
-        $object->transactionId                          = $array['transactionId'] ?? '';
-        $object->ultimateCreditor                       = $array['ultimateCreditor'] ?? '';
-        $object->ultimateDebtor                         = $array['ultimateDebtor'] ?? '';
+        $object->transactionId                          = trim($array['transactionId'] ?? '');
+        $object->ultimateCreditor                       = trim($array['ultimateCreditor'] ?? '');
+        $object->ultimateDebtor                         = trim($array['ultimateDebtor'] ?? '');
         $object->valueDate                              = array_key_exists('valueDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['valueDate'], config('app.timezone')) : null;
 
         // undocumented values
-        $object->endToEndId = $array['endToEndId'] ?? ''; // from Rabobank NL
+        $object->endToEndId = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
         if('' === $object->transactionId) {
-            $object->transactionId = $array['internalTransactionId'] ?? '';
+            $object->transactionId = trim($array['internalTransactionId'] ?? '');
         }
 
         // models:
@@ -144,16 +144,16 @@ class Transaction
 
 
         // array values:
-        $object->creditorAccountIban     = $array['creditorAccount']['iban'] ?? '';
-        $object->creditorAccountBban     = $array['creditorAccount']['bban'] ?? '';
-        $object->creditorAccountCurrency = $array['creditorAccount']['currency'] ?? '';
+        $object->creditorAccountIban     = trim($array['creditorAccount']['iban'] ?? '');
+        $object->creditorAccountBban     = trim($array['creditorAccount']['bban'] ?? '');
+        $object->creditorAccountCurrency = trim($array['creditorAccount']['currency'] ?? '');
 
-        $object->debtorAccountIban     = $array['debtorAccount']['iban'] ?? '';
-        $object->debtorAccountBban     = $array['debtorAccount']['bban'] ?? '';
-        $object->debtorAccountCurrency = $array['debtorAccount']['currency'] ?? '';
+        $object->debtorAccountIban     = trim($array['debtorAccount']['iban'] ?? '');
+        $object->debtorAccountBban     = trim($array['debtorAccount']['bban'] ?? '');
+        $object->debtorAccountCurrency = trim($array['debtorAccount']['currency'] ?? '');
 
-        $object->transactionAmount = $array['transactionAmount']['amount'] ?? '';
-        $object->currencyCode      = $array['transactionAmount']['currency'] ?? '';
+        $object->transactionAmount = trim($array['transactionAmount']['amount'] ?? '');
+        $object->currencyCode      = trim($array['transactionAmount']['currency'] ?? '');
 
         // other fields:
         $object->accountIdentifier = '';
