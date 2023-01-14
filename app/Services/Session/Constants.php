@@ -82,5 +82,4 @@ class Constants
     // other variables
     public const ASSET_ACCOUNTS = 'assets';
     public const LIABILITIES    = 'liabilities';
-
 }

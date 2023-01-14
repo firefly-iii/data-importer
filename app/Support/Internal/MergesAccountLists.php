@@ -29,7 +29,6 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 
 trait MergesAccountLists
 {
-
     /**
      * @param array $nordigen
      * @param array $fireflyIII
@@ -138,7 +137,10 @@ trait MergesAccountLists
             if (1 === count($filteredByNumber)) {
                 app('log')->debug(
                     sprintf(
-                        'Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")', $iban, $number, $filteredByNumber[0]->id,
+                        'Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")',
+                        $iban,
+                        $number,
+                        $filteredByNumber[0]->id,
                         $filteredByNumber[0]->name
                     )
                 );
@@ -164,5 +166,4 @@ trait MergesAccountLists
 
         return $return;
     }
-
 }

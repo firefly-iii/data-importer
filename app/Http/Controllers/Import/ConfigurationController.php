@@ -199,5 +199,4 @@ class ConfigurationController extends Controller
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
     }
-
 }

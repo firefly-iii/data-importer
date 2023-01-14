@@ -157,5 +157,4 @@ trait CollectsAccounts
 
         return $return;
     }
-
 }
