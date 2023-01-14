@@ -68,7 +68,7 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         app('log')->debug('Create generic account from', $array);
-        $account               = new self;
+        $account               = new self();
         $account->id           = $array['id'];
         $account->name         = $array['name'];
         $account->iban         = $array['iban'];
@@ -103,5 +103,4 @@ class ImportServiceAccount
 
         return $return;
     }
-
 }
