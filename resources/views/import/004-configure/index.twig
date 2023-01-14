@@ -7,7 +7,7 @@
             </div>
         </div>
 
-        {% if 0 == fireflyAccounts and ('nordigen' == flow or 'spectre' == flow ) %}
+        {% if 0 == fireflyIIIaccounts and ('nordigen' == flow or 'spectre' == flow ) %}
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -27,13 +27,13 @@
                                 <ul>
                                     {% for info in importerAccounts %}
                                         <li>
-                                            Name: {{ info.import_service.name }}<br>
-                                            (Internal) identifier: {{ info.import_service.identifier }}<br>
-                                            Resource identifier: {{ info.import_service.resourceId }}<br>
-                                            BBAN: {{ info.import_service.bban }}<br>
-                                            BIC: {{ info.import_service.bic }}<br>
-                                            IBAN: {{ info.import_service.iban }}<br>
-                                            Owner name: {{ info.import_service.ownerName }}<br>
+                                            Name: {{ info.import_account.name }}<br>
+                                            (Internal) identifier: {{ info.import_account.identifier }}<br>
+                                            Resource identifier: {{ info.import_account.resourceId }}<br>
+                                            BBAN: {{ info.import_account.bban }}<br>
+                                            BIC: {{ info.import_account.bic }}<br>
+                                            IBAN: {{ info.import_account.iban }}<br>
+                                            Owner name: {{ info.import_account.ownerName }}<br>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -134,7 +134,6 @@
                                                 </caption>
                                             </table>
 
-                                            {# TODO rewrite so Nordigen and Spectre use the same account object #}
                                             {% if errorAccounts > 0 %}
                                                 <span class="text-danger"><span class="fas fa-exclamation-triangle"></span></span>
                                                 <span class="text-muted">The importer could not download information on some of your accounts. This does not have to be an issue, but it may lead to import errors.</span>
@@ -261,7 +260,7 @@
                                     <div class="col-sm-9">
                                         <select id="default_account" name="default_account" class="form-control"
                                                 aria-describedby="defaultAccountHelp">
-                                            {% for accountGroup, accountList in accounts %}
+                                            {% for accountGroup, accountList in fireflyIIIaccounts %}
                                                 <optgroup label="{{ accountGroup }}">
                                                     {% for account in accountList %}
                                                         <option
