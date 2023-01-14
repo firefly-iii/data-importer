@@ -81,13 +81,13 @@ trait IsReadyForStep
         }
         if ('nordigen' === $flow) {
             $result = $this->isReadyForNordigenStep();
-            app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
+            //app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
 
             return $result;
         }
         if ('spectre' === $flow) {
             $result = $this->isReadyForSpectreStep();
-            app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
+            //app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
 
             return $result;
         }
@@ -162,7 +162,7 @@ trait IsReadyForStep
      */
     private function isReadyForNordigenStep(): bool
     {
-        app('log')->debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
+        //app('log')->debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
@@ -178,7 +178,7 @@ trait IsReadyForStep
 
                 return true;
             case 'nordigen-selection':
-                // must have upload, thats it
+                // must have upload, that's it
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return true;
                 }

@@ -1,9 +1,9 @@
 <select style="width:100%;"
         class="custom-select custom-select-sm form-control"
-        name="accounts[{{ information.import_service.id }}]">
-    {% for ff3Account in information.firefly %}
+        name="accounts[{{ information.import_account.id }}]">
+    {% for ff3Account in information.firefly_iii_accounts %}
         <option value="{{ ff3Account.id }}"
-                {% if ff3Account.id == configuration.getAccounts[information.import_service.id] %}selected{% endif %}
+                {% if ff3Account.id == configuration.getAccounts[information.import_account.id] %}selected{% endif %}
                 label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
             {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
         </option>
