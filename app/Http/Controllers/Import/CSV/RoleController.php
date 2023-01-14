@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\CSV;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
@@ -62,6 +61,7 @@ class RoleController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Factory|View
      * @throws JsonException
      * @throws Exception
@@ -151,6 +151,7 @@ class RoleController extends Controller
         // otherwise, store empty mapping, and continue:
         // set map config as complete.
         session()->put(Constants::READY_FOR_CONVERSION, true);
+
         return redirect()->route('007-convert.index');
     }
 

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Model;
 
 use Illuminate\Support\Collection;
@@ -38,7 +37,6 @@ class Country
      */
     public function __construct(public string $code, public Collection $banks)
     {
-
     }
 
     /**

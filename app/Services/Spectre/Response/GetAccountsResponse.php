@@ -45,7 +45,7 @@ class GetAccountsResponse extends Response implements Iterator, Countable
      */
     public function __construct(array $data)
     {
-        $this->collection = new Collection;
+        $this->collection = new Collection();
         foreach ($data as $entry) {
             $model = Account::fromArray($entry);
             $this->collection->push($model);

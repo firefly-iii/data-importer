@@ -73,11 +73,12 @@ class TransactionExtra
      * TransactionExtra constructor.
      *
      * @param array $data
+     *
      * @return TransactionExtra
      */
     public static function fromArray(array $data): self
     {
-        $model                           = new self;
+        $model                           = new self();
         $model->id                       = $data['id'] ?? null;
         $model->recordNumber             = $data['record_number'] ?? null;
         $model->information              = $data['information'] ?? null;
@@ -85,7 +86,7 @@ class TransactionExtra
         $model->postingDate              = isset($data['posting_date']) ? new Carbon($data['posting_date']) : null;
         $model->postingTime              = isset($data['posting_time']) ? new Carbon($data['posting_time']) : null;
         $model->accountNumber            = $data['account_number'] ?? null;
-        $model->originalAmount           = isset($data['original_amount']) ? (string) $data['original_amount'] : null;
+        $model->originalAmount           = isset($data['original_amount']) ? (string)$data['original_amount'] : null;
         $model->originalCurrencyCode     = $data['original_currency_code'] ?? null;
         $model->assetCode                = $data['asset_code'] ?? null;
         $model->assetAmount              = $data['asset_amount'] ?? null;
@@ -100,13 +101,45 @@ class TransactionExtra
         $model->payeeInformation         = $data['payee_information'] ?? null;
         $model->type                     = $data['type'] ?? null;
         $model->checkNumber              = $data['check_number'] ?? null;
-        $model->units                    = array_key_exists('units', $data) ? (string) $data['units'] : null;
+        $model->units                    = array_key_exists('units', $data) ? (string)$data['units'] : null;
         $model->additional               = $data['additional'] ?? null;
         $model->unitPrice                = $data['unit_price'] ?? null;
-        $model->accountBalanceSnapshot   = isset($data['account_balance_snapshot']) ? (string) $data['account_balance_snapshot'] : null;
-        $model->categorizationConfidence = isset($data['categorization_confidence']) ? (string) $data['categorization_confidence'] : null;
+        $model->accountBalanceSnapshot   = isset($data['account_balance_snapshot']) ? (string)$data['account_balance_snapshot'] : null;
+        $model->categorizationConfidence = isset($data['categorization_confidence']) ? (string)$data['categorization_confidence'] : null;
 
         return $model;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAdditional(): ?string
+    {
+        return $this->additional;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getInformation(): ?string
+    {
+        return $this->information;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayee(): ?string
+    {
+        return $this->payee;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayeeInformation(): ?string
+    {
+        return $this->payeeInformation;
     }
 
     /**
@@ -143,37 +176,5 @@ class TransactionExtra
             'account_balance_snapshot'  => $this->accountBalanceSnapshot,
             'categorization_confidence' => $this->categorizationConfidence,
         ];
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getAdditional(): ?string
-    {
-        return $this->additional;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getInformation(): ?string
-    {
-        return $this->information;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getPayee(): ?string
-    {
-        return $this->payee;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getPayeeInformation(): ?string
-    {
-        return $this->payeeInformation;
     }
 }

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Converter;
 
 use UnexpectedValueException;
@@ -78,5 +77,4 @@ class ConverterService
     {
         return sprintf('App\\Services\\CSV\\Converter\\%s', $class);
     }
-
 }

@@ -22,9 +22,7 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers;
-
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
@@ -37,16 +35,9 @@ use App\Http\Request\AutoUploadRequest;
  */
 class AutoUploadController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON;
-
-    /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        app('log')->error($string);
-        $this->line($string);
-    }
+    use HaveAccess;
+    use AutoImports;
+    use VerifyJSON;
 
     /**
      *
@@ -57,8 +48,8 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret       = (string) ($request->get('secret') ?? '');
-        $systemSecret = (string) config('importer.auto_import_secret');
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
@@ -68,7 +59,7 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
         }
 
-        $json    = $request->file('json');
+        $json = $request->file('json');
         // TODO update documentation to document rename of importable file variable.
         $importable     = $request->file('importable');
         $importablePath = $importable?->getPathname();
@@ -81,6 +72,15 @@ class AutoUploadController extends Controller
         }
 
         return ' ';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        app('log')->error($string);
+        $this->line($string);
     }
 
     public function line(string $string)

@@ -33,9 +33,9 @@ class Amount implements ConverterInterface
      *
      * @return string
      */
-    public static function positive(string $amount): string
+    public static function negative(string $amount): string
     {
-        if (-1 === bccomp($amount, '0')) {
+        if (1 === bccomp($amount, '0')) {
             $amount = bcmul($amount, '-1');
         }
 
@@ -47,9 +47,9 @@ class Amount implements ConverterInterface
      *
      * @return string
      */
-    public static function negative(string $amount): string
+    public static function positive(string $amount): string
     {
-        if (1 === bccomp($amount, '0')) {
+        if (-1 === bccomp($amount, '0')) {
             $amount = bcmul($amount, '-1');
         }
 
@@ -72,7 +72,7 @@ class Amount implements ConverterInterface
 
         app('log')->debug(sprintf('Start with amount "%s"', $value));
         $original = $value;
-        $value    = $this->stripAmount((string) $value);
+        $value    = $this->stripAmount((string)$value);
         $decimal  = null;
 
         if ($this->decimalIsDot($value)) {
@@ -126,6 +126,15 @@ class Amount implements ConverterInterface
     }
 
     /**
+     * Add extra configuration parameters.
+     *
+     * @param string $configuration
+     */
+    public function setConfiguration(string $configuration): void
+    {
+    }
+
+    /**
      * Strip amount from weird characters.
      *
      * @param string $value
@@ -140,7 +149,7 @@ class Amount implements ConverterInterface
         // have to strip the € because apparently the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
         // 2020-12-01 added "EUR" because another German bank doesn't know what a data format is.
         // This way of stripping exceptions is unsustainable.
-        $value = trim((string) str_replace(['€', 'EUR'], '', $value));
+        $value = trim((string)str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen($str);
         if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
@@ -188,6 +197,7 @@ class Amount implements ConverterInterface
         if (1 === substr_count($value, ',') && str_starts_with($value, '0,')) {
             return true;
         }
+
         return false;
     }
 
@@ -221,7 +231,6 @@ class Amount implements ConverterInterface
         $altPosition = $length - 2;
 
         return $value[$altPosition];
-
     }
 
     /**
@@ -264,15 +273,5 @@ class Amount implements ConverterInterface
 
         /** @noinspection CascadeStringReplacementInspection */
         return str_replace(',', '.', $value);
-    }
-
-    /**
-     * Add extra configuration parameters.
-     *
-     * @param string $configuration
-     */
-    public function setConfiguration(string $configuration): void
-    {
-
     }
 }

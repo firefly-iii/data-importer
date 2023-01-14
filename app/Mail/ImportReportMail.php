@@ -33,13 +33,14 @@ use Illuminate\Queue\SerializesModels;
  */
 class ImportReportMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
-    public string $time;
     public array  $errors;
-    public array  $warnings;
     public array  $messages;
+    public string $time;
     public string $url;
+    public array  $warnings;
 
     /**
      * Create a new message instance.
@@ -62,8 +63,8 @@ class ImportReportMail extends Mailable
      */
     public function build()
     {
-        $address = (string) config('mail.from.address');
-        $name    = (string) config('mail.from.name');
+        $address = (string)config('mail.from.address');
+        $name    = (string)config('mail.from.name');
 
         return $this->from($address, $name)->markdown('emails.import.report');
     }

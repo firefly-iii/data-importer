@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Nordigen\Model\Account;
@@ -36,9 +35,9 @@ use Iterator;
  */
 class ListAccountsResponse extends Response implements Iterator, Countable
 {
+    private array      $accounts;
     private Collection $collection;
     private int        $position = 0;
-    private array      $accounts;
 
     /**
      * @inheritDoc
@@ -132,5 +131,4 @@ class ListAccountsResponse extends Response implements Iterator, Countable
     {
         return $this->collection->has($this->position);
     }
-
 }

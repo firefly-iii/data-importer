@@ -29,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class CleanUrl implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -47,6 +46,7 @@ class CleanUrl implements ConverterInterface
         if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
+
         return null;
     }
 
@@ -57,6 +57,5 @@ class CleanUrl implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

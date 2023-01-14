@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Conversion;
 
 use App\Services\Shared\Configuration\Configuration;
@@ -34,6 +33,11 @@ use App\Services\Shared\Configuration\Configuration;
 interface RoutineManagerInterface
 {
     /**
+     * @return string
+     */
+    public function getIdentifier(): string;
+
+    /**
      * @param Configuration $configuration
      */
     public function setConfiguration(Configuration $configuration): void;
@@ -42,10 +46,4 @@ interface RoutineManagerInterface
      *
      */
     public function start(): array;
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string;
-
 }

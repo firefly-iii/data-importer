@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Shared\Response\Response;
@@ -32,12 +31,11 @@ use App\Services\Shared\Response\Response;
  */
 class NewRequisitionResponse extends Response
 {
-
     public string $id;
-    public string $redirect;
-    public string $status;
-    public string $reference;
     public string $link;
+    public string $redirect;
+    public string $reference;
+    public string $status;
 
     /**
      * @inheritDoc

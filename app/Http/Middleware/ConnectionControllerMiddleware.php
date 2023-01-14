@@ -23,11 +23,11 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Middleware;
 
 class ConnectionControllerMiddleware
 {
-    protected const STEP = 'select-connection';
     use IsReadyForStep;
+
+    protected const STEP = 'select-connection';
 }

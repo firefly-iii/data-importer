@@ -36,7 +36,6 @@ use Illuminate\Http\Request;
  */
 class ServiceController extends Controller
 {
-
     /**
      * StartController constructor.
      */
@@ -52,7 +51,7 @@ class ServiceController extends Controller
      */
     public function validateNordigen(): JsonResponse
     {
-        $validator = new NordigenValidator;
+        $validator = new NordigenValidator();
         $result    = $validator->validate();
 
         if ($result->equals(AuthenticationStatus::error())) {
@@ -69,11 +68,12 @@ class ServiceController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function validateSpectre(Request $request): JsonResponse
     {
-        $validator = new SpectreValidator;
+        $validator = new SpectreValidator();
         $result    = $validator->validate();
 
         if ($result->equals(AuthenticationStatus::error())) {

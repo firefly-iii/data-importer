@@ -119,5 +119,3 @@ Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 //
 //// download config:
 //
-
-

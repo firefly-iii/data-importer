@@ -60,5 +60,4 @@ trait GeneratesIdentifier
         $this->identifier = $generatedId;
         app('log')->info(sprintf('Job identifier is "%s"', $generatedId));
     }
-
 }

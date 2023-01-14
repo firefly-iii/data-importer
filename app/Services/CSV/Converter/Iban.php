@@ -31,7 +31,6 @@ use ValueError;
  */
 class Iban implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -52,6 +51,15 @@ class Iban implements ConverterInterface
         app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
 
         return '';
+    }
+
+    /**
+     * Add extra configuration parameters.
+     *
+     * @param string $configuration
+     */
+    public function setConfiguration(string $configuration): void
+    {
     }
 
     /**
@@ -80,16 +88,6 @@ class Iban implements ConverterInterface
             $checksum = 2;
         }
 
-        return 1 === (int) $checksum;
-    }
-
-    /**
-     * Add extra configuration parameters.
-     *
-     * @param string $configuration
-     */
-    public function setConfiguration(string $configuration): void
-    {
-
+        return 1 === (int)$checksum;
     }
 }

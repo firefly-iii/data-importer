@@ -30,6 +30,7 @@ namespace App\Http\Middleware;
  */
 class ConfigurationControllerMiddleware
 {
-    protected const STEP = 'configuration';
     use IsReadyForStep;
+
+    protected const STEP = 'configuration';
 }

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Response;
 
 use App\Services\Shared\Response\Response;
@@ -44,7 +43,7 @@ class ListConnectionsResponse extends Response implements Iterator, Countable
      */
     public function __construct(array $data)
     {
-        $this->collection = new Collection;
+        $this->collection = new Collection();
         /** @var array $row */
         foreach ($data as $row) {
             $model = Connection::fromArray($row);

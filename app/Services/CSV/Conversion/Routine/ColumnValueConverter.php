@@ -130,16 +130,28 @@ class ColumnValueConverter
                 continue;
             }
             app('log')->debug(
-                sprintf('Stored column #%d with value "%s" and role "%s" in field "%s"', $columnIndex + 1, $this->toString($parsedValue), $role, $transactionField)
+                sprintf(
+                    'Stored column #%d with value "%s" and role "%s" in field "%s"',
+                    $columnIndex + 1,
+                    $this->toString($parsedValue),
+                    $role,
+                    $transactionField
+                )
             );
 
             // if append, append.
             if (true === $value->isAppendValue()) {
-                app('log')->debug(sprintf('Column #%d with role "%s" (in field "%s") must be appended to the previous value.', $columnIndex + 1, $role, $transactionField), [$parsedValue]);
+                app('log')->debug(
+                    sprintf('Column #%d with role "%s" (in field "%s") must be appended to the previous value.', $columnIndex + 1, $role, $transactionField),
+                    [$parsedValue]
+                );
                 if (is_array($parsedValue)) {
                     $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? [];
                     $transaction['transactions'][0][$transactionField] = array_merge($transaction['transactions'][0][$transactionField], $parsedValue);
-                    app('log')->debug(sprintf('Value for [transactions][#0][%s] is now ', $transactionField), $transaction['transactions'][0][$transactionField]);
+                    app('log')->debug(
+                        sprintf('Value for [transactions][#0][%s] is now ', $transactionField),
+                        $transaction['transactions'][0][$transactionField]
+                    );
                 }
                 if (!is_array($parsedValue)) {
                     $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? '';
@@ -147,17 +159,25 @@ class ColumnValueConverter
                         sprintf('%s %s', $transaction['transactions'][0][$transactionField], $parsedValue)
                     );
                 }
-
             }
             // if not, not.
             if (false === $value->isAppendValue()) {
-                app('log')->debug(sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField));
+                app('log')->debug(
+                    sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField)
+                );
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
             }
             // if this is an account field, AND the column is mapped, store the original value just in case.
             $saveRoles = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
             if (0 !== $value->getMappedValue() && in_array($value->getOriginalRole(), $saveRoles, true)) {
-                app('log')->debug(sprintf('The original value ("%s") in column "%s" (originally stored in "%s") was saved just in case.', $value->getValue(), $value->getRole(), $value->getOriginalRole()));
+                app('log')->debug(
+                    sprintf(
+                        'The original value ("%s") in column "%s" (originally stored in "%s") was saved just in case.',
+                        $value->getValue(),
+                        $value->getRole(),
+                        $value->getOriginalRole()
+                    )
+                );
                 $transaction['transactions'][0][sprintf('original-%s', $value->getOriginalRole())] = $value->getValue();
             }
         }
@@ -182,7 +202,6 @@ class ColumnValueConverter
             }
         }
 
-        return (string) $value;
+        return (string)$value;
     }
-
 }

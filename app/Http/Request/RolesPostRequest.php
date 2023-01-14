@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-
 use Illuminate\Validation\Validator;
 
 /**
@@ -32,7 +31,6 @@ use Illuminate\Validation\Validator;
  */
 class RolesPostRequest extends Request
 {
-
     /**
      * Verify the request.
      *
@@ -53,7 +51,6 @@ class RolesPostRequest extends Request
             'do_mapping' => $this->get('do_mapping') ?? [],
         ];
         foreach (array_keys($data['roles']) as $index) {
-
             $data['do_mapping'][$index] = $this->convertBoolean($data['do_mapping'][$index] ?? 'false');
         }
 
@@ -108,5 +105,4 @@ class RolesPostRequest extends Request
             $validator->errors()->add('roles.0', 'The import will fail if no column is assigned an "Amount"-role.');
         }
     }
-
 }

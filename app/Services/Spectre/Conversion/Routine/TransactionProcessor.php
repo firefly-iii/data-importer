@@ -55,11 +55,11 @@ class TransactionProcessor
         $this->refreshConnection();
         $this->notBefore = null;
         $this->notAfter  = null;
-        if ('' !== (string) $this->configuration->getDateNotBefore()) {
+        if ('' !== (string)$this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
-        if ('' !== (string) $this->configuration->getDateNotAfter()) {
+        if ('' !== (string)$this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
@@ -68,12 +68,12 @@ class TransactionProcessor
         app('log')->debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return = [];
         foreach ($accounts as $account) {
-            $account = (string) $account;
+            $account = (string)$account;
             app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
-            $url                   = config('spectre.url');
-            $appId                 = SpectreSecretManager::getAppId();
-            $secret                = SpectreSecretManager::getSecret();
-            $request               = new GetTransactionsRequest($url, $appId, $secret);
+            $url     = config('spectre.url');
+            $appId   = SpectreSecretManager::getAppId();
+            $secret  = SpectreSecretManager::getSecret();
+            $request = new GetTransactionsRequest($url, $appId, $secret);
             $request->setTimeOut(config('importer.connection.timeout'));
             $request->accountId    = $account;
             $request->connectionId = $this->configuration->getConnection();
@@ -115,6 +115,7 @@ class TransactionProcessor
 
     /**
      * @param GetTransactionsResponse $transactions
+     *
      * @return array
      */
     private function filterTransactions(GetTransactionsResponse $transactions): array
@@ -132,7 +133,10 @@ class TransactionProcessor
             $madeOn = $transaction->madeOn;
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT),
+                app('log')->debug(
+                    sprintf(
+                        'Skip transaction because "%s" is before "%s".',
+                        $madeOn->format(self::DATE_TIME_FORMAT),
                         $this->notBefore->format(self::DATE_TIME_FORMAT)
                     )
                 );
@@ -149,7 +153,7 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT), ));
             $return[] = $transaction;
         }
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
@@ -172,5 +176,4 @@ class TransactionProcessor
     {
         $this->downloadIdentifier = $downloadIdentifier;
     }
-
 }

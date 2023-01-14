@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -103,7 +102,7 @@ class UploadController extends Controller
         $csvFile    = $request->file('importable_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
-        $errors     = new MessageBag;
+        $errors     = new MessageBag();
 
         // process uploaded file (if present)
         // TODO needs to be file agnostic.
@@ -113,7 +112,7 @@ class UploadController extends Controller
         $errors = $this->processConfigFile($errors, $configFile);
 
         // process pre-selected file (if present):
-        $errors = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
+        $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
 
         if ($errors->count() > 0) {
@@ -123,11 +122,13 @@ class UploadController extends Controller
         if ('nordigen' === $flow) {
             // redirect to country + bank selector
             session()->put(Constants::HAS_UPLOAD, true);
+
             return redirect(route('009-selection.index'));
         }
         if ('spectre' === $flow) {
             // redirect to spectre
             session()->put(Constants::HAS_UPLOAD, true);
+
             return redirect(route('011-connections.index'));
         }
 
@@ -136,12 +137,14 @@ class UploadController extends Controller
 
     /**
      * TODO method needs to be file agnostic.
+     *
      * @return MessageBag
      */
     private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
     {
         if (null === $file && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
+
             return $errors;
         }
         if ('file' === $flow) {
@@ -169,6 +172,7 @@ class UploadController extends Controller
                 session()->put(Constants::HAS_UPLOAD, true);
             }
         }
+
         return $errors;
     }
 
@@ -225,6 +229,7 @@ class UploadController extends Controller
     /**
      * @param MessageBag        $errors
      * @param UploadedFile|null $file
+     *
      * @return MessageBag
      * @throws ImporterErrorException
      */
@@ -260,8 +265,8 @@ class UploadController extends Controller
                 $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             }
-
         }
+
         return $errors;
     }
 
@@ -269,6 +274,7 @@ class UploadController extends Controller
      * @param MessageBag        $errors
      * @param string            $selection
      * @param UploadedFile|null $file
+     *
      * @return MessageBag
      * @throws ImporterErrorException
      * @throws FileNotFoundException
@@ -290,7 +296,7 @@ class UploadController extends Controller
                 $errors->add('config_file', $e->getMessage());
             }
         }
+
         return $errors;
     }
-
 }

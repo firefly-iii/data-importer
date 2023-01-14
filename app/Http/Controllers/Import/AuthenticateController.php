@@ -57,6 +57,7 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
@@ -70,10 +71,9 @@ class AuthenticateController extends Controller
         $error     = Session::get('error');
 
         if ('spectre' === $flow) {
-            $validator = new SpectreValidator;
+            $validator = new SpectreValidator();
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
-
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
@@ -83,10 +83,9 @@ class AuthenticateController extends Controller
         }
 
         if ('nordigen' === $flow) {
-            $validator = new NordigenValidator;
+            $validator = new NordigenValidator();
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
-
                 $key        = NordigenSecretManager::getKey();
                 $identifier = NordigenSecretManager::getId();
 
@@ -102,6 +101,7 @@ class AuthenticateController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
@@ -115,8 +115,8 @@ class AuthenticateController extends Controller
 
         // set cookies and redirect, validator will pick it up.
         if ('spectre' === $flow) {
-            $appId  = (string) $request->get('spectre_app_id');
-            $secret = (string) $request->get('spectre_secret');
+            $appId  = (string)$request->get('spectre_app_id');
+            $secret = (string)$request->get('spectre_secret');
             if ('' === $appId || '' === $secret) {
                 return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
             }
@@ -143,5 +143,4 @@ class AuthenticateController extends Controller
 
         throw new ImporterErrorException('Impossible flow exception.');
     }
-
 }

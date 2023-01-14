@@ -38,6 +38,4 @@ class HealthcheckController extends Controller
     {
         return response('OK', 200);
     }
-
 }
-

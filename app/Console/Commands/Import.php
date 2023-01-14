@@ -37,7 +37,9 @@ use Illuminate\Console\Command;
  */
 class Import extends Command
 {
-    use HaveAccess, VerifyJSON, AutoImports;
+    use HaveAccess;
+    use VerifyJSON;
+    use AutoImports;
 
     /**
      * The console command description.
@@ -72,14 +74,15 @@ class Import extends Command
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $file   = (string) $this->argument('file');
-        $config = (string) $this->argument('config');
+        $file   = (string)$this->argument('file');
+        $config = (string)$this->argument('config');
 
         // validate config path:
         if ('' !== $config) {
             $directory = dirname($config);
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+
                 return 1;
             }
         }
@@ -87,6 +90,7 @@ class Import extends Command
             $directory = dirname($file);
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+
                 return 1;
             }
         }
@@ -134,12 +138,14 @@ class Import extends Command
 
         $this->line('Done!');
 
-        event(new ImportedTransactions(
-                  array_merge($this->importMessages, $this->conversionMessages),
-                  array_merge($this->importWarnings, $this->conversionWarnings),
-                  array_merge($this->importErrors, $this->conversionErrors)
-              ));
-        return 0;
+        event(
+            new ImportedTransactions(
+                array_merge($this->importMessages, $this->conversionMessages),
+                array_merge($this->importWarnings, $this->conversionWarnings),
+                array_merge($this->importErrors, $this->conversionErrors)
+            )
+        );
 
+        return 0;
     }
 }

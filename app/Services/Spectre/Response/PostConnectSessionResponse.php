@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Response;
 
-
 use App\Services\Shared\Response\Response;
 
 /**
@@ -32,7 +31,6 @@ use App\Services\Shared\Response\Response;
  */
 class PostConnectSessionResponse extends Response
 {
-
     /** @var string */
     public string $connect_url;
 
@@ -41,6 +39,6 @@ class PostConnectSessionResponse extends Response
      */
     public function __construct(array $data)
     {
-        $this->connect_url = (string) $data['connect_url'];
+        $this->connect_url = (string)$data['connect_url'];
     }
 }

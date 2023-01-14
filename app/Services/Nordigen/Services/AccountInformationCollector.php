@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Services;
 
 use App\Exceptions\AgreementExpiredException;
@@ -45,6 +44,7 @@ class AccountInformationCollector
 {
     /**
      * @param Account $account
+     *
      * @return Account
      * @throws AgreementExpiredException
      */
@@ -84,6 +84,7 @@ class AccountInformationCollector
 
     /**
      * @param Account $account
+     *
      * @return Account
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -143,6 +144,7 @@ class AccountInformationCollector
 
     /**
      * @param Account $account
+     *
      * @return Account
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -163,6 +165,7 @@ class AccountInformationCollector
                 $account->addBalance(Balance::createFromArray($array));
             }
         }
+
         return $account;
     }
 
@@ -190,5 +193,4 @@ class AccountInformationCollector
 
         return $account;
     }
-
 }

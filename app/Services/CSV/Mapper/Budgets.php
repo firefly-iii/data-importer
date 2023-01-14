@@ -35,7 +35,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetBudgetsRequest;
  */
 class Budgets implements MapperInterface
 {
-
     /**
      * Get map of objects.
      *
@@ -56,7 +55,7 @@ class Budgets implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download budgets: %s', $e->getMessage()));
         }
 

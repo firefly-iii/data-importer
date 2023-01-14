@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Authentication;
 
 use Symfony\Component\HttpFoundation\Cookie;
@@ -46,9 +45,10 @@ class SecretManager
     {
         if (!self::hasId()) {
             app('log')->debug('No Nordigen ID in hasId(), will return config variable.');
-            return (string) config('nordigen.id');
 
+            return (string)config('nordigen.id');
         }
+
         return request()->cookie(self::NORDIGEN_ID);
     }
 
@@ -60,7 +60,7 @@ class SecretManager
      */
     private static function hasId(): bool
     {
-        return '' !== (string) request()->cookie(self::NORDIGEN_ID);
+        return '' !== (string)request()->cookie(self::NORDIGEN_ID);
     }
 
     /**
@@ -72,9 +72,10 @@ class SecretManager
     {
         if (!self::hasKey()) {
             app('log')->debug('No Nordigen key in hasKey(), will return config variable.');
-            return (string) config('nordigen.key');
 
+            return (string)config('nordigen.key');
         }
+
         return request()->cookie(self::NORDIGEN_KEY);
     }
 
@@ -86,7 +87,7 @@ class SecretManager
      */
     private static function hasKey(): bool
     {
-        return '' !== (string) request()->cookie(self::NORDIGEN_KEY);
+        return '' !== (string)request()->cookie(self::NORDIGEN_KEY);
     }
 
     /**
@@ -94,6 +95,7 @@ class SecretManager
      * TODO is a cookie the best place?
      *
      * @param string $identifier
+     *
      * @return Cookie
      */
     public static function saveId(string $identifier): Cookie
@@ -106,11 +108,11 @@ class SecretManager
      * TODO is a cookie the best place?
      *
      * @param string $key
+     *
      * @return Cookie
      */
     public static function saveKey(string $key): Cookie
     {
         return cookie(self::NORDIGEN_KEY, $key);
     }
-
 }

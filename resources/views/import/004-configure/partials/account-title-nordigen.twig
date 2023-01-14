@@ -11,9 +11,9 @@
     {% if(information.firefly|length==0) %}disabled="disabled"{% endif %}
 />
 <label class="form-check-label"
-          {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
-          for="do_import_{{ information.import_service.identifier }}">
-Account "{{ information.import_service.getFullName }}"
+       {% if '' != information.import_service.iban %}title="IBAN: {{ information.import_service.iban }}"{% endif %}
+       for="do_import_{{ information.import_service.identifier }}">
+    Account "{{ information.import_service.getFullName }}"
 </label>
 {% if 'disabled' != information.import_service.status and '' != information.import_service.iban %}
     <br><small>

@@ -35,7 +35,9 @@ use Illuminate\Console\Command;
  */
 class AutoImport extends Command
 {
-    use HaveAccess, VerifyJSON, AutoImports;
+    use HaveAccess;
+    use VerifyJSON;
+    use AutoImports;
 
     /**
      * The console command description.
@@ -64,10 +66,11 @@ class AutoImport extends Command
             return 1;
         }
 
-        $argument  = (string) ($this->argument('directory') ?? './');
+        $argument  = (string)($this->argument('directory') ?? './');
         $directory = realpath($argument);
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+
             return 1;
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));

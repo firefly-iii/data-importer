@@ -27,6 +27,7 @@ namespace App\Http\Middleware;
 
 class MapControllerMiddleware
 {
-    protected const STEP = 'map';
     use IsReadyForStep;
+
+    protected const STEP = 'map';
 }

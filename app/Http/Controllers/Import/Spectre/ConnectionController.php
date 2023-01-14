@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers\Import\Spectre;
 
 use App\Exceptions\ImporterErrorException;
@@ -131,7 +130,7 @@ class ConnectionController extends Controller
 
         app('log')->debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
-        $request->customer = (string) $identifier;
+        $request->customer = (string)$identifier;
         $list              = $request->get();
 
         if ($list instanceof ErrorResponse) {
@@ -143,6 +142,7 @@ class ConnectionController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -190,7 +190,5 @@ class ConnectionController extends Controller
 
         // redirect to job configuration
         return redirect(route('004-configure.index'));
-
     }
-
 }

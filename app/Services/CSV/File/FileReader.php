@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\File;
 
-
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use League\Csv\Reader;
@@ -37,24 +36,9 @@ use Psr\Container\NotFoundExceptionInterface;
 class FileReader
 {
     /**
-     * Get a CSV file reader and fill it with data from CSV file.
-     *
-     * @param bool $convert
-     * @return Reader
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public static function getReaderFromSession(bool $convert = false): Reader
-    {
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $convert);
-
-        // room for config
-        return Reader::createFromString($content);
-    }
-
-    /**
      * @param string $content
      * @param bool   $convert
+     *
      * @return Reader
      */
     public static function getReaderFromContent(string $content, bool $convert = false): Reader
@@ -66,7 +50,24 @@ class FileReader
                 $content = mb_convert_encoding($content, 'UTF-8', $encoding);
             }
         }
+
         return Reader::createFromString($content);
     }
 
+    /**
+     * Get a CSV file reader and fill it with data from CSV file.
+     *
+     * @param bool $convert
+     *
+     * @return Reader
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public static function getReaderFromSession(bool $convert = false): Reader
+    {
+        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $convert);
+
+        // room for config
+        return Reader::createFromString($content);
+    }
 }

@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Import\Status;
 
 use App\Services\Session\Constants;
@@ -32,7 +31,6 @@ use JsonException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Storage;
-
 
 /**
  * Class SubmissionStatusManager
@@ -56,7 +54,7 @@ class SubmissionStatusManager
                 try {
                     $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
                 $status->errors[$index]   = $status->errors[$index] ?? [];
                 $status->errors[$index][] = $error;
@@ -86,33 +84,6 @@ class SubmissionStatusManager
     /**
      * @param string $identifier
      * @param int    $index
-     * @param string $warning
-     *
-     */
-    public static function addWarning(string $identifier, int $index, string $warning): void
-    {
-        $lineNo = $index + 1;
-        app('log')->debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
-        $disk = Storage::disk(self::DISK_NAME);
-        try {
-            if ($disk->exists($identifier)) {
-                try {
-                    $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
-                }
-                $status->warnings[$index]   = $status->warnings[$index] ?? [];
-                $status->warnings[$index][] = $warning;
-                self::storeSubmissionStatus($identifier, $status);
-            }
-        } catch (FileNotFoundException $e) {
-            app('log')->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $identifier
-     * @param int    $index
      * @param string $message
      *
      */
@@ -127,7 +98,7 @@ class SubmissionStatusManager
                 try {
                     $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
                 $status->messages[$index]   = $status->messages[$index] ?? [];
                 $status->messages[$index][] = $message;
@@ -138,10 +109,37 @@ class SubmissionStatusManager
         }
     }
 
+    /**
+     * @param string $identifier
+     * @param int    $index
+     * @param string $warning
+     *
+     */
+    public static function addWarning(string $identifier, int $index, string $warning): void
+    {
+        $lineNo = $index + 1;
+        app('log')->debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
+        $disk = Storage::disk(self::DISK_NAME);
+        try {
+            if ($disk->exists($identifier)) {
+                try {
+                    $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                } catch (JsonException $e) {
+                    $status = new SubmissionStatus();
+                }
+                $status->warnings[$index]   = $status->warnings[$index] ?? [];
+                $status->warnings[$index][] = $warning;
+                self::storeSubmissionStatus($identifier, $status);
+            }
+        } catch (FileNotFoundException $e) {
+            app('log')->error($e->getMessage());
+        }
+    }
 
     /**
      * @param string      $status
      * @param string|null $identifier
+     *
      * @return SubmissionStatus
      */
     public static function setSubmissionStatus(string $status, ?string $identifier = null): SubmissionStatus
@@ -149,7 +147,7 @@ class SubmissionStatusManager
         if (null === $identifier) {
             try {
                 $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
                 app('log')->error($e->getMessage());
                 $identifier = 'error-setSubmissionStatus';
             }
@@ -181,20 +179,19 @@ class SubmissionStatusManager
                 try {
                     $array  = json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                     $status = SubmissionStatus::fromArray($array);
-                } catch (FileNotFoundException | JsonException $e) {
+                } catch (FileNotFoundException|JsonException $e) {
                     app('log')->error($e->getMessage());
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
 
                 return $status;
-
             }
         } catch (FileNotFoundException $e) {
             app('log')->error('Could not find file, write a new one.');
             app('log')->error($e->getMessage());
         }
         app('log')->debug('File does not exist or error, create a new one.');
-        $status = new SubmissionStatus;
+        $status = new SubmissionStatus();
         try {
             $json = json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {

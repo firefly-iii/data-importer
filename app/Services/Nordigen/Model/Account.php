@@ -29,7 +29,7 @@ namespace App\Services\Nordigen\Model;
  */
 class Account
 {
-    private string $identifier;
+    private array  $balances = [];
     private string $bban;
     private string $bic;
     private string $cashAccountType;
@@ -37,6 +37,7 @@ class Account
     private string $details;
     private string $displayName;
     private string $iban;
+    private string $identifier;
     private string $linkedAccounts;
     private string $msisdn;
     private string $name;
@@ -46,7 +47,6 @@ class Account
     private string $resourceId;
     private string $status;
     private string $usage;
-    private array  $balances = [];
 
     /**
      * Make sure all fields have an (empty) value
@@ -76,18 +76,20 @@ class Account
 
     public static function createFromIdentifier(string $identifier): self
     {
-        $self = new self;
+        $self = new self();
         $self->setIdentifier($identifier);
+
         return $self;
     }
 
     /**
      * @param array $array
+     *
      * @return static
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                           = new self;
+        $object                           = new self();
         $object->identifier               = $array['identifier'];
         $object->bban                     = $array['bban'];
         $object->bic                      = $array['bic'];
@@ -109,6 +111,7 @@ class Account
         foreach ($array['balances'] as $arr) {
             $object->balances[] = Balance::fromLocalArray($arr);
         }
+
         return $object;
     }
 
@@ -118,22 +121,6 @@ class Account
     public function addBalance(Balance $balance): void
     {
         $this->balances[] = $balance;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**
@@ -219,38 +206,6 @@ class Account
     /**
      * @return string
      */
-    public function getLinkedAccounts(): string
-    {
-        return $this->linkedAccounts;
-    }
-
-    /**
-     * @param string $linkedAccounts
-     */
-    public function setLinkedAccounts(string $linkedAccounts): void
-    {
-        $this->linkedAccounts = $linkedAccounts;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMsisdn(): string
-    {
-        return $this->msisdn;
-    }
-
-    /**
-     * @param string $msisdn
-     */
-    public function setMsisdn(string $msisdn): void
-    {
-        $this->msisdn = $msisdn;
-    }
-
-    /**
-     * @return string
-     */
     public function getFullName(): string
     {
         app('log')->debug('Account::getFullName()');
@@ -278,7 +233,6 @@ class Account
         app('log')->warning('Account::getFullName(): no field with name, return "(no name)"');
 
         return '(no name)';
-
     }
 
     /**
@@ -343,6 +297,54 @@ class Account
     public function setIban(string $iban): void
     {
         $this->iban = $iban;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLinkedAccounts(): string
+    {
+        return $this->linkedAccounts;
+    }
+
+    /**
+     * @param string $linkedAccounts
+     */
+    public function setLinkedAccounts(string $linkedAccounts): void
+    {
+        $this->linkedAccounts = $linkedAccounts;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMsisdn(): string
+    {
+        return $this->msisdn;
+    }
+
+    /**
+     * @param string $msisdn
+     */
+    public function setMsisdn(string $msisdn): void
+    {
+        $this->msisdn = $msisdn;
     }
 
     /**
@@ -458,6 +460,4 @@ class Account
 
         return $array;
     }
-
-
 }

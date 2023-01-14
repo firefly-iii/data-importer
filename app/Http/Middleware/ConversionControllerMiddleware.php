@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Middleware;
 
 /**
@@ -31,6 +30,7 @@ namespace App\Http\Middleware;
  */
 class ConversionControllerMiddleware
 {
-    protected const STEP = 'conversion';
     use IsReadyForStep;
+
+    protected const STEP = 'conversion';
 }

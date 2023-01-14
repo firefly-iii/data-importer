@@ -54,6 +54,5 @@ class AmountCredit implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

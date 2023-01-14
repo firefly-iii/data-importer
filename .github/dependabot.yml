@@ -5,7 +5,7 @@ updates:
   - package-ecosystem: "composer"
     directory: "/"
     target-branch: develop
-    labels: ["bug"]
+    labels: [ "bug" ]
     schedule:
       interval: "weekly"
 
@@ -13,6 +13,6 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     target-branch: develop
-    labels: ["bug"]
+    labels: [ "bug" ]
     schedule:
       interval: "weekly"

@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Conversion;
 
 use App\Services\Shared\Configuration\Configuration;
@@ -40,14 +39,13 @@ class RoutineManager implements RoutineManagerInterface
 {
     use GeneratesIdentifier;
 
+    private array $allErrors;
     private array $allMessages;
     private array $allWarnings;
-    private array $allErrors;
-
     private Configuration        $configuration;
-    private TransactionProcessor $transactionProcessor;
-    private GenerateTransactions $transactionGenerator;
     private FilterTransactions   $transactionFilter;
+    private GenerateTransactions $transactionGenerator;
+    private TransactionProcessor $transactionProcessor;
 
     /**
      *
@@ -59,15 +57,39 @@ class RoutineManager implements RoutineManagerInterface
         $this->allWarnings = [];
         $this->allMessages = [];
 
-        $this->transactionProcessor = new TransactionProcessor;
-        $this->transactionGenerator = new GenerateTransactions;
-        $this->transactionFilter    = new FilterTransactions;
+        $this->transactionProcessor = new TransactionProcessor();
+        $this->transactionGenerator = new GenerateTransactions();
+        $this->transactionFilter    = new FilterTransactions();
         if (null === $identifier) {
             $this->generateIdentifier();
         }
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
     }
 
     /**
@@ -103,30 +125,5 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         return $filtered;
-    }
-
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
     }
 }

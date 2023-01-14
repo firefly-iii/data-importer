@@ -48,20 +48,22 @@ class NavController extends Controller
     /**
      * @return Application|RedirectResponse|Redirector
      */
-    public function toRoles()
+    public function toConversion()
     {
         app('log')->debug(__METHOD__);
-        session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
+        session()->forget(Constants::CONVERSION_COMPLETE_INDICATOR);
+
         return redirect(route('005-roles.index'));
     }
 
     /**
      * @return Application|RedirectResponse|Redirector
      */
-    public function toConversion()
+    public function toRoles()
     {
         app('log')->debug(__METHOD__);
-        session()->forget(Constants::CONVERSION_COMPLETE_INDICATOR);
+        session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
+
         return redirect(route('005-roles.index'));
     }
 
@@ -71,6 +73,7 @@ class NavController extends Controller
     public function toStart()
     {
         app('log')->debug(__METHOD__);
+
         return redirect(route('index'));
     }
 
@@ -84,5 +87,4 @@ class NavController extends Controller
 
         return redirect(route('003-upload.index'));
     }
-
 }

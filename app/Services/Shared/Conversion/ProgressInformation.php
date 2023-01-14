@@ -30,17 +30,9 @@ namespace App\Services\Shared\Conversion;
 trait ProgressInformation
 {
     protected array  $errors;
+    protected string $identifier;
     protected array  $messages;
     protected array  $warnings;
-    protected string $identifier;
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
 
     /**
      * @return array
@@ -64,6 +56,14 @@ trait ProgressInformation
     public function getWarnings(): array
     {
         return $this->warnings ?? [];
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 
     /**
@@ -107,6 +107,4 @@ trait ProgressInformation
         // write warning
         RoutineStatusManager::addWarning($this->identifier, $index, $warning);
     }
-
-
 }

@@ -44,7 +44,7 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
      */
     public function __construct(array $data)
     {
-        $this->collection = new Collection;
+        $this->collection = new Collection();
         foreach ($data as $array) {
             $model = Transaction::fromArray($array);
             $this->collection->push($model);

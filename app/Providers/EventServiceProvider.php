@@ -39,13 +39,13 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $listen = [
-        Registered::class           => [
-            SendEmailVerificationNotification::class,
-        ],
-        ImportedTransactions::class => [
-            'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
-        ],
-    ];
-
+    protected $listen
+        = [
+            Registered::class           => [
+                SendEmailVerificationNotification::class,
+            ],
+            ImportedTransactions::class => [
+                'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
+            ],
+        ];
 }

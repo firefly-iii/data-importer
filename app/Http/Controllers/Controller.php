@@ -34,7 +34,9 @@ use Illuminate\Routing\Controller as BaseController;
  */
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use AuthorizesRequests;
+    use DispatchesJobs;
+    use ValidatesRequests;
 
     /**
      * Controller constructor.
@@ -42,10 +44,10 @@ class Controller extends BaseController
     public function __construct()
     {
         // validate some env vars (skip over config)
-        $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
-        $clientId    = (string) env('FIREFLY_III_CLIENT_ID', '');
-        $baseUrl     = (string) env('FIREFLY_III_URL', '');
-        $vanityUrl   = (string) env('VANITY_URL', '');
+        $accessToken = (string)env('FIREFLY_III_ACCESS_TOKEN', '');
+        $clientId    = (string)env('FIREFLY_III_CLIENT_ID', '');
+        $baseUrl     = (string)env('FIREFLY_III_URL', '');
+        $vanityUrl   = (string)env('VANITY_URL', '');
 
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && $clientId !== '') {
