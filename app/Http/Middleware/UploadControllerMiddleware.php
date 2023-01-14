@@ -30,6 +30,6 @@ namespace App\Http\Middleware;
  */
 class UploadControllerMiddleware
 {
-    protected const STEP = 'upload-files';
     use IsReadyForStep;
+    protected const STEP = 'upload-files';
 }

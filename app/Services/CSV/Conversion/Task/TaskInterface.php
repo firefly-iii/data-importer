@@ -62,5 +62,4 @@ interface TaskInterface
      * @param Account $account
      */
     public function setAccount(Account $account): void;
-
 }

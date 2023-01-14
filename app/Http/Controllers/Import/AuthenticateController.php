@@ -70,10 +70,9 @@ class AuthenticateController extends Controller
         $error     = Session::get('error');
 
         if ('spectre' === $flow) {
-            $validator = new SpectreValidator;
+            $validator = new SpectreValidator();
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
-
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
@@ -83,10 +82,9 @@ class AuthenticateController extends Controller
         }
 
         if ('nordigen' === $flow) {
-            $validator = new NordigenValidator;
+            $validator = new NordigenValidator();
             $result    = $validator->validate();
             if ($result->equals(AuthenticationStatus::nodata())) {
-
                 $key        = NordigenSecretManager::getKey();
                 $identifier = NordigenSecretManager::getId();
 
@@ -143,5 +141,4 @@ class AuthenticateController extends Controller
 
         throw new ImporterErrorException('Impossible flow exception.');
     }
-
 }

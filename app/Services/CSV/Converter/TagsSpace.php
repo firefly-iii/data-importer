@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Converter;
 
 /**
@@ -30,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class TagsSpace implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *

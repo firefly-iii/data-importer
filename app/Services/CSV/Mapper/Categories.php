@@ -35,7 +35,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetCategoriesRequest;
  */
 class Categories implements MapperInterface
 {
-
     /**
      * Get map of objects.
      *

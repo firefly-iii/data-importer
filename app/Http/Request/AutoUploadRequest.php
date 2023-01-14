@@ -22,9 +22,7 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Request;
-
 
 class AutoUploadRequest extends Request
 {
@@ -48,6 +46,5 @@ class AutoUploadRequest extends Request
             'importable' => 'file',
             'json'       => 'required|file',
         ];
-
     }
 }

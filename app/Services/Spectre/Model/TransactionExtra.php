@@ -77,7 +77,7 @@ class TransactionExtra
      */
     public static function fromArray(array $data): self
     {
-        $model                           = new self;
+        $model                           = new self();
         $model->id                       = $data['id'] ?? null;
         $model->recordNumber             = $data['record_number'] ?? null;
         $model->information              = $data['information'] ?? null;

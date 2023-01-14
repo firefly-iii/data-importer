@@ -47,7 +47,6 @@ class SecretManager
         if (!self::hasAppId()) {
             app('log')->debug('No Spectre App ID in hasAppId(), will return config variable.');
             return (string) config('spectre.app_id');
-
         }
         return request()->cookie(self::APP_ID);
     }
@@ -74,7 +73,6 @@ class SecretManager
         if (!self::hasSecret()) {
             app('log')->debug('No Spectre secret in hasSecret(), will return config variable.');
             return (string) config('spectre.secret');
-
         }
         return request()->cookie(self::SECRET);
     }

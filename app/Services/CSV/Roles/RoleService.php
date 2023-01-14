@@ -70,7 +70,7 @@ class RoleService
         $headers = [];
         if (true === $configuration->isHeaders()) {
             try {
-                $stmt    = (new Statement)->limit(1)->offset(0);
+                $stmt    = (new Statement())->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $headers = $records->fetchOne();
                 // @codeCoverageIgnoreStart
@@ -84,7 +84,7 @@ class RoleService
         if (false === $configuration->isHeaders()) {
             app('log')->debug('Role service: file has no headers');
             try {
-                $stmt    = (new Statement)->limit(1)->offset(0);
+                $stmt    = (new Statement())->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $count   = count($records->fetchOne());
                 app('log')->debug(sprintf('Role service: first row has %d columns', $count));
@@ -144,7 +144,7 @@ class RoleService
         $examples = [];
         // make statement.
         try {
-            $stmt = (new Statement)->limit(self::EXAMPLE_COUNT)->offset($offset);
+            $stmt = (new Statement())->limit(self::EXAMPLE_COUNT)->offset($offset);
             // @codeCoverageIgnoreStart
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
@@ -173,5 +173,4 @@ class RoleService
 
         return $examples;
     }
-
 }

@@ -29,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class CleanId implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -53,6 +52,5 @@ class CleanId implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

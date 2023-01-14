@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\NewRequisitionResponse;

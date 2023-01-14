@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Model;
 
 use App\Rules\Iban;
@@ -95,7 +94,7 @@ class Transaction
     public static function fromArray($array): self
     {
         app('log')->debug('Nordigen transaction from array', $array);
-        $object = new self;
+        $object = new self();
 
         $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
         $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
@@ -126,7 +125,7 @@ class Transaction
         $object->endToEndId = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
-        if('' === $object->transactionId) {
+        if ('' === $object->transactionId) {
             $object->transactionId = trim($array['internalTransactionId'] ?? '');
         }
 
@@ -180,7 +179,7 @@ class Transaction
      */
     public static function fromLocalArray(array $array): self
     {
-        $object = new self;
+        $object = new self();
 
         $object->additionalInformation                  = $array['additional_information'];
         $object->additionalInformationStructured        = $array['additional_information_structured'];
@@ -329,9 +328,8 @@ class Transaction
     {
         app('log')->debug(__METHOD__);
         if ('' !== $this->creditorAccountIban) {
-
             $data      = ['iban' => $this->creditorAccountIban];
-            $rules     = ['iban' => ['required', new Iban]];
+            $rules     = ['iban' => ['required', new Iban()]];
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
                 app('log')->warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
@@ -387,7 +385,7 @@ class Transaction
         app('log')->debug(__METHOD__);
         if ('' !== $this->debtorAccountIban) {
             $data      = ['iban' => $this->debtorAccountIban];
-            $rules     = ['iban' => ['required', new Iban]];
+            $rules     = ['iban' => ['required', new Iban()]];
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
                 app('log')->warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));

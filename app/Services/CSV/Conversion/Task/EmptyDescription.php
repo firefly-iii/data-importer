@@ -29,7 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class EmptyDescription extends AbstractTask
 {
-
     /**
      * @param array $group
      *

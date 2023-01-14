@@ -36,7 +36,6 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
  */
 trait GetAccounts
 {
-
     /**
      * Returns a combined list of asset accounts and all liability accounts.
      *
@@ -202,7 +201,6 @@ trait GetAccounts
         $invalidTypes = ['initial-balance', 'reconciliation'];
         /** @var Account $account */
         foreach ($accounts as $account) {
-
             // remove some types:
             if (in_array($account->type, $invalidTypes, true)) {
                 continue;
@@ -210,8 +208,6 @@ trait GetAccounts
 
             // only merge if IBAN is not null.
             if (null !== $account->iban) {
-
-
                 $name = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
                 $group                        = trans(sprintf('import.account_types_%s', $account->type));

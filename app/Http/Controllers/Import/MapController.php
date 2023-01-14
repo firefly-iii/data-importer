@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
@@ -188,7 +187,6 @@ class MapController extends Controller
          * - opposing account names (this is preordained).
          */
         if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-
             // TODO should be in a helper or something generic.
             // index 0, opposing account name:
             $index                  = 0;
@@ -210,7 +208,6 @@ class MapController extends Controller
             $data[]                       = $opposingName;
         }
         if ('spectre' === $configuration->getFlow()) {
-
             // index 1: category (TODO)
             // index 0, category name:
             $index              = 1;
@@ -264,7 +261,6 @@ class MapController extends Controller
                 $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
                 $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
             }
-
         }
         $filtered = array_filter(
             $opposing,
@@ -303,7 +299,6 @@ class MapController extends Controller
             foreach ($transaction['transactions'] as $row) {
                 $categories[] = (string) array_key_exists('category_name', $row) ? $row['category_name'] : '';
             }
-
         }
         $filtered = array_filter(
             $categories,
@@ -351,7 +346,6 @@ class MapController extends Controller
                 if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
                     $data[$columnIndex][$value] = (int) $mappedValue;
                 }
-
             }
         }
 

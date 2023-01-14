@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Exceptions\ImporterErrorException;
@@ -72,7 +71,6 @@ class GetAccountBasicRequest extends Request
      */
     public function get(): Response
     {
-
         $array = $this->authenticatedGet();
         return new ArrayResponse($array);
     }

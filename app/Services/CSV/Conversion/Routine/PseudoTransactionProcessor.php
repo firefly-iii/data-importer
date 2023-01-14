@@ -144,7 +144,6 @@ class PseudoTransactionProcessor
         app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
 
         return $processed;
-
     }
 
     /**
@@ -173,5 +172,4 @@ class PseudoTransactionProcessor
 
         return $line;
     }
-
 }

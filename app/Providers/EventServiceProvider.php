@@ -47,5 +47,4 @@ class EventServiceProvider extends ServiceProvider
             'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
         ],
     ];
-
 }

@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Response;
 
-
 use App\Services\Shared\Response\Response;
 
 /**
@@ -32,7 +31,6 @@ use App\Services\Shared\Response\Response;
  */
 class PostConnectSessionResponse extends Response
 {
-
     /** @var string */
     public string $connect_url;
 

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Model;
 
 /**
@@ -41,7 +40,7 @@ class Bank
      */
     public static function fromArray(array $array): self
     {
-        $bank                       = new self;
+        $bank                       = new self();
         $bank->id                   = $array['id'];
         $bank->name                 = $array['name'];
         $bank->transactionTotalDays = (int) $array['transaction_total_days'];

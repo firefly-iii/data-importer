@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Conversion;
 
 use App\Exceptions\AgreementExpiredException;
@@ -41,10 +40,11 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    use IsRunningCli;
+    use GeneratesIdentifier;
     private array $allMessages;
     private array $allWarnings;
     private array $allErrors;
-    use IsRunningCli, GeneratesIdentifier;
 
     private Configuration        $configuration;
     private TransactionProcessor $transactionProcessor;
@@ -67,9 +67,9 @@ class RoutineManager implements RoutineManagerInterface
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
-        $this->transactionProcessor = new TransactionProcessor;
-        $this->transactionGenerator = new GenerateTransactions;
-        $this->transactionFilter    = new FilterTransactions;
+        $this->transactionProcessor = new TransactionProcessor();
+        $this->transactionGenerator = new GenerateTransactions();
+        $this->transactionFilter    = new FilterTransactions();
     }
 
     /**
@@ -89,7 +89,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionProcessor->setIdentifier($this->identifier);
         $this->transactionGenerator->setIdentifier($this->identifier);
         $this->transactionFilter->setIdentifier($this->identifier);
-
     }
 
     /**
@@ -102,7 +101,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
-            $nordigen = $this->transactionProcessor->download();
+        $nordigen = $this->transactionProcessor->download();
 
         // collect errors from transactionProcessor.
         $this->mergeMessages($this->transactionProcessor->getMessages());
@@ -218,5 +217,4 @@ class RoutineManager implements RoutineManagerInterface
             }
         }
     }
-
 }

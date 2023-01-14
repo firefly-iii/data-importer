@@ -415,7 +415,6 @@ class GenerateTransactions
      */
     private function appendNegativeAmountInfo(string $accountId, array $transaction, Transaction $entry): array
     {
-
         $transaction['amount']    = bcmul($entry->transactionAmount, '-1');
         $transaction['source_id'] = (int)$this->accounts[$accountId]; // TODO entry may not exist, then what?
 
@@ -509,7 +508,6 @@ class GenerateTransactions
             $transaction[$nameKey] = $name ?? sprintf('(unknown %s account)', $direction);
 
             app('log')->debug(sprintf('Field "%s" will  be set to "%s".', $nameKey, $transaction[$nameKey]));
-
         }
 
         // if the IBAN is set, the IBAN will be put into the array as well.

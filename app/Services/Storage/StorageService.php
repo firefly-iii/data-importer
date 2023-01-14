@@ -104,7 +104,5 @@ class StorageService
         }
         app('log')->warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
         return mb_convert_encoding($content, 'UTF-8', $encoding);
-
     }
-
 }

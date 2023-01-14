@@ -84,5 +84,4 @@ class NavController extends Controller
 
         return redirect(route('003-upload.index'));
     }
-
 }

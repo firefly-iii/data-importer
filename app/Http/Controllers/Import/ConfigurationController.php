@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
@@ -65,10 +64,9 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ConfigurationController extends Controller
 {
+    use RestoresConfiguration;
     protected const ASSET_ACCOUNTS = 'assets';
     protected const LIABILITIES    = 'liabilities';
-
-    use RestoresConfiguration;
 
     /**
      * StartController constructor.
@@ -375,7 +373,7 @@ class ConfigurationController extends Controller
     {
         app('log')->debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj = new Date;
+        $dateObj = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
         $date = Carbon::make('1984-09-17')->locale($locale);
 
@@ -432,6 +430,4 @@ class ConfigurationController extends Controller
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));
     }
-
-
 }

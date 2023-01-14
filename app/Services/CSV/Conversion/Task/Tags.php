@@ -22,16 +22,13 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
-
 
 /**
  * Class Tags
  */
 class Tags extends AbstractTask
 {
-
     /**
      * @param array $group
      *

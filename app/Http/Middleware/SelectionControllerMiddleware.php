@@ -27,6 +27,6 @@ namespace App\Http\Middleware;
 
 class SelectionControllerMiddleware
 {
-    protected const STEP = 'nordigen-selection';
     use IsReadyForStep;
+    protected const STEP = 'nordigen-selection';
 }

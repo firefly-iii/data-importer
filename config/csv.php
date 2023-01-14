@@ -30,7 +30,6 @@ use App\Services\CSV\Conversion\Task\EmptyDescription;
 use App\Services\CSV\Conversion\Task\PositiveAmount;
 use App\Services\CSV\Conversion\Task\Tags;
 
-
 return [
     'delimiters'            => [
         'comma'     => ',',

@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Model;
 
-
 use Carbon\Carbon;
 
 /**
@@ -61,7 +60,7 @@ class Transaction
      */
     public static function fromArray(array $data): self
     {
-        $model               = new self;
+        $model               = new self();
         $model->id           = (string) $data['id'];
         $model->mode         = $data['mode'];
         $model->status       = $data['status'];

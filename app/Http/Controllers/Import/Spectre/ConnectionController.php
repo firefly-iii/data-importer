@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers\Import\Spectre;
 
 use App\Exceptions\ImporterErrorException;
@@ -190,7 +189,5 @@ class ConnectionController extends Controller
 
         // redirect to job configuration
         return redirect(route('004-configure.index'));
-
     }
-
 }

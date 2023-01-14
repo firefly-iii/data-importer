@@ -148,7 +148,7 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT), ));
             $return[] = $transaction;
         }
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
@@ -171,5 +171,4 @@ class TransactionProcessor
     {
         $this->identifier = $identifier;
     }
-
 }

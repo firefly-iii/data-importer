@@ -59,7 +59,7 @@ class Account
      */
     public static function fromArray(array $data): self
     {
-        $model                = new self;
+        $model                = new self();
         $model->matched       = false;
         $model->id            = (string) $data['id'];
         $model->accountName   = $data['extra']['account_name'] ?? '';

@@ -76,7 +76,7 @@ class Account
 
     public static function createFromIdentifier(string $identifier): self
     {
-        $self = new self;
+        $self = new self();
         $self->setIdentifier($identifier);
         return $self;
     }
@@ -87,7 +87,7 @@ class Account
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                           = new self;
+        $object                           = new self();
         $object->identifier               = $array['identifier'];
         $object->bban                     = $array['bban'];
         $object->bic                      = $array['bic'];
@@ -278,7 +278,6 @@ class Account
         app('log')->warning('Account::getFullName(): no field with name, return "(no name)"');
 
         return '(no name)';
-
     }
 
     /**
@@ -458,6 +457,4 @@ class Account
 
         return $array;
     }
-
-
 }

@@ -31,7 +31,6 @@ use App\Services\Storage\StorageService;
 
 trait RestoresConfiguration
 {
-
     /**
      * Restore configuration from session and drive.
      *

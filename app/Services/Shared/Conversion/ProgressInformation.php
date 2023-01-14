@@ -107,6 +107,4 @@ trait ProgressInformation
         // write warning
         RoutineStatusManager::addWarning($this->identifier, $index, $warning);
     }
-
-
 }

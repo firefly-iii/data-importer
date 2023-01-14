@@ -29,7 +29,6 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use UnexpectedValueException;
 
-
 /**
  * Class Configuration
  */
@@ -154,7 +153,7 @@ class Configuration
      */
     public static function make(): self
     {
-        return new self;
+        return new self();
     }
 
     /**
@@ -165,7 +164,7 @@ class Configuration
     public static function fromRequest(array $array): self
     {
         $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self;
+        $object                 = new self();
         $object->version        = self::VERSION;
         $object->headers        = $array['headers'] ?? false;
         $object->date           = $array['date'];
@@ -232,7 +231,7 @@ class Configuration
                 $object->specifics[] = $key;
             }
         }
-        if('csv' === $object->flow) {
+        if ('csv' === $object->flow) {
             $object->flow = 'file';
         }
 
@@ -276,7 +275,7 @@ class Configuration
     {
         $delimiters             = config('csv.delimiters_reversed');
         $classicRoleNames       = config('csv.classic_roles');
-        $object                 = new self;
+        $object                 = new self();
         $object->headers        = $data['has-headers'] ?? false;
         $object->date           = $data['date-format'] ?? $object->date;
         $object->delimiter      = $delimiters[$data['delimiter']] ?? 'comma';
@@ -370,7 +369,7 @@ class Configuration
         // set version to latest version and return.
         $object->version = self::VERSION;
 
-        if('csv' === $object->flow) {
+        if ('csv' === $object->flow) {
             $object->flow = 'file';
         }
 
@@ -395,7 +394,7 @@ class Configuration
     public static function fromArray(array $array): self
     {
         $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self;
+        $object                 = new self();
         $object->headers        = $array['headers'] ?? false;
         $object->date           = $array['date'] ?? '';
         $object->defaultAccount = $array['default_account'] ?? 0;
@@ -463,7 +462,7 @@ class Configuration
         // utf8
         $object->conversion = $array['conversion'] ?? false;
 
-        if('csv' === $object->flow) {
+        if ('csv' === $object->flow) {
             $object->flow = 'file';
         }
 

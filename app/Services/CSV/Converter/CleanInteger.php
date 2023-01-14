@@ -24,13 +24,11 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-
 /**
  * Class CleanInteger
  */
 class CleanInteger implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -51,6 +49,5 @@ class CleanInteger implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

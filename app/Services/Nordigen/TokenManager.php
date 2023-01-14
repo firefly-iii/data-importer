@@ -162,5 +162,4 @@ class TokenManager
         session()->put(Constants::NORDIGEN_ACCESS_EXPIRY_TIME, $result->accessExpires);
         session()->put(Constants::NORDIGEN_REFRESH_EXPIRY_TIME, $result->refreshExpires);
     }
-
 }

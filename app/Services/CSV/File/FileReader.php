@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\File;
 
-
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use League\Csv\Reader;
@@ -68,5 +67,4 @@ class FileReader
         }
         return Reader::createFromString($content);
     }
-
 }

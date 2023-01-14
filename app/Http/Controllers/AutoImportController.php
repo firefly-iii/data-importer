@@ -22,9 +22,7 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers;
-
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
@@ -38,7 +36,9 @@ use Illuminate\Http\Response;
  */
 class AutoImportController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON;
+    use HaveAccess;
+    use AutoImports;
+    use VerifyJSON;
 
     private string $directory;
 
@@ -73,7 +73,7 @@ class AutoImportController extends Controller
 
         $argument  = (string) ($request->get('directory') ?? './');
         $directory = realpath($argument);
-        if(false === $directory) {
+        if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
 

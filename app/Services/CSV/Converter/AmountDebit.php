@@ -55,6 +55,5 @@ class AmountDebit implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

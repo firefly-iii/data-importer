@@ -56,7 +56,7 @@ class RoutineStatusManager
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
                     app('log')->error($e->getMessage());
-                    $status = new ConversionStatus;
+                    $status = new ConversionStatus();
                 }
                 $status->errors[$index]   = $status->errors[$index] ?? [];
                 $status->errors[$index][] = $error;
@@ -101,7 +101,7 @@ class RoutineStatusManager
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
                     app('log')->error($e->getMessage());
-                    $status = new ConversionStatus;
+                    $status = new ConversionStatus();
                 }
                 $status->warnings[$index]   = $status->warnings[$index] ?? [];
                 $status->warnings[$index][] = $warning;
@@ -130,7 +130,7 @@ class RoutineStatusManager
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
                     app('log')->error($e->getMessage());
-                    $status = new ConversionStatus;
+                    $status = new ConversionStatus();
                 }
                 $status->messages[$index]   = $status->messages[$index] ?? [];
                 $status->messages[$index][] = $message;
@@ -185,15 +185,14 @@ class RoutineStatusManager
                 $status = ConversionStatus::fromArray($array);
             } catch (FileNotFoundException | JsonException $e) {
                 app('log')->error($e->getMessage());
-                $status = new ConversionStatus;
+                $status = new ConversionStatus();
             }
             app('log')->debug(sprintf('Conversion status is "%s"', $status->status));
 
             return $status;
-
         }
         app('log')->debug('File does not exist or error, create a new one.');
-        $status = new ConversionStatus;
+        $status = new ConversionStatus();
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
         } catch (JsonException $e) {

@@ -221,7 +221,6 @@ class Amount implements ConverterInterface
         $altPosition = $length - 2;
 
         return $value[$altPosition];
-
     }
 
     /**
@@ -273,6 +272,5 @@ class Amount implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

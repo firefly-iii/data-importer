@@ -106,9 +106,9 @@ class SubmitController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
-        if(null === $identifier) {
+        if (null === $identifier) {
             app('log')->error('Identifier is NULL');
-            $status = new SubmissionStatus;
+            $status = new SubmissionStatus();
             $status->status = SubmissionStatus::SUBMISSION_ERRORED;
             return response()->json($status->toArray());
         }
@@ -183,14 +183,13 @@ class SubmitController extends Controller
      */
     public function status(Request $request): JsonResponse
     {
-
         $identifier = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             app('log')->warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
-            $fakeStatus = new SubmissionStatus;
+            $fakeStatus = new SubmissionStatus();
 
             return response()->json($fakeStatus->toArray());
         }
@@ -198,5 +197,4 @@ class SubmitController extends Controller
 
         return response()->json($importJobStatus->toArray());
     }
-
 }

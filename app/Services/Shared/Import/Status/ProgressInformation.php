@@ -107,6 +107,4 @@ trait ProgressInformation
         // write warning
         SubmissionStatusManager::addWarning($this->identifier, $index, $warning);
     }
-
-
 }

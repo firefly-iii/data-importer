@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterErrorException;
@@ -112,7 +111,9 @@ abstract class Request
         $json   = null;
         try {
             $res = $client->request(
-                'GET', $fullUrl, [
+                'GET',
+                $fullUrl,
+                [
                          'headers' => [
                              'Accept'       => 'application/json',
                              'Content-Type' => 'application/json',
@@ -121,7 +122,6 @@ abstract class Request
                          ],
                      ]
             );
-
         } catch (TransferException $e) {
             app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response.re
@@ -137,7 +137,7 @@ abstract class Request
                 app('log')->error('Could not decode error.');
             }
 
-            throw new ImporterErrorException('Transfer exception leads to error.',0,$e);
+            throw new ImporterErrorException('Transfer exception leads to error.', 0, $e);
         }
         if (null !== $res && 200 !== $res->getStatusCode()) {
             // return body, class must handle this

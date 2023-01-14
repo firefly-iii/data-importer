@@ -132,9 +132,12 @@ class TransactionProcessor
             $madeOn = $transaction->madeOn;
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT),
-                        $this->notBefore->format(self::DATE_TIME_FORMAT)
-                    )
+                app('log')->debug(
+                    sprintf(
+                    'Skip transaction because "%s" is before "%s".',
+                    $madeOn->format(self::DATE_TIME_FORMAT),
+                    $this->notBefore->format(self::DATE_TIME_FORMAT)
+                )
                 );
                 continue;
             }
@@ -149,7 +152,7 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT), ));
             $return[] = $transaction;
         }
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
@@ -172,5 +175,4 @@ class TransactionProcessor
     {
         $this->downloadIdentifier = $downloadIdentifier;
     }
-
 }

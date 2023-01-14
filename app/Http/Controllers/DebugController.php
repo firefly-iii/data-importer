@@ -32,7 +32,6 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 
-
 class DebugController extends Controller
 {
     /**
@@ -44,8 +43,6 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
-
-
         app('log')->emergency('I am a EMERGENCY message.');
         app('log')->alert('I am a ALERT message.');
         app('log')->critical('I am a CRITICAL message.');
@@ -95,11 +92,9 @@ class DebugController extends Controller
                 if (null !== $logFile) {
                     try {
                         $logContent = file_get_contents($logFile);
-
                     } catch (Exception $e) { // @phpstan-ignore-line
                         // @ignoreException
                     }
-
                 }
             }
         }
@@ -107,7 +102,7 @@ class DebugController extends Controller
             // last few lines
             $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
         }
-        if(true === config('importer.is_external')) {
+        if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
         }
 

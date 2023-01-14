@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             'steam',
             static function () {
-                return new Steam;
+                return new Steam();
             }
         );
     }

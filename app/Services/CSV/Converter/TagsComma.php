@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Converter;
 
 /**
@@ -30,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class TagsComma implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -53,6 +51,5 @@ class TagsComma implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

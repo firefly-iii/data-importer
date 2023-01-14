@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Nordigen\Model\Transaction;
@@ -44,12 +43,11 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
      */
     public function __construct(array $data)
     {
-        $this->collection = new Collection;
+        $this->collection = new Collection();
         /** @var array $array */
         foreach ($data as $index => $array) {
             $this->collection->push(Transaction::fromArray($array));
         }
-
     }
 
     /**

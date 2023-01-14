@@ -43,7 +43,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use IsRunningCli, GeneratesIdentifier;
+    use IsRunningCli;
+    use GeneratesIdentifier;
 
     private Configuration              $configuration;
     private CSVFileProcessor           $csvFileProcessor;
@@ -244,6 +245,4 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->forceCli = $forceCli;
     }
-
-
 }

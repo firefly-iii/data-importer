@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Conversion;
 
 use App\Services\Shared\Configuration\Configuration;
@@ -47,5 +46,4 @@ interface RoutineManagerInterface
      * @return string
      */
     public function getIdentifier(): string;
-
 }

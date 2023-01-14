@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Mapper;
 
-
 use App\Exceptions\ImporterErrorException;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -35,7 +34,6 @@ use League\Csv\Statement;
  */
 class MapperService
 {
-
     /**
      * Appends the given array with data from the CSV file in the config.
      *
@@ -68,7 +66,7 @@ class MapperService
             $offset = 1;
         }
         try {
-            $stmt    = (new Statement)->offset($offset);
+            $stmt    = (new Statement())->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
@@ -117,5 +115,4 @@ class MapperService
 
         return $data;
     }
-
 }

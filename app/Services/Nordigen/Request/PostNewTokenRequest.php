@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\TokenSetResponse;
@@ -56,20 +55,21 @@ class PostNewTokenRequest extends Request
     public function post(): Response
     {
         $url    = sprintf('%s/%s', config('nordigen.url'), 'api/v2/token/new/');
-        $client = new Client;
+        $client = new Client();
 
-        $res  = $client->post($url,
-                              [
-                                  'json'    => [
-                                      'secret_id'  => $this->identifier,
-                                      'secret_key' => $this->key,
-                                  ],
-                                  'headers' => [
-                                      'accept'       => 'application/json',
-                                      'content-type' => 'application/json',
-                                      'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
-                                  ],
-                              ]
+        $res  = $client->post(
+            $url,
+            [
+                'json'    => [
+                    'secret_id'  => $this->identifier,
+                    'secret_key' => $this->key,
+                ],
+                'headers' => [
+                    'accept'       => 'application/json',
+                    'content-type' => 'application/json',
+                    'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
+                ],
+            ]
         );
         $body = (string) $res->getBody();
         $json = json_decode($body, true, JSON_THROW_ON_ERROR);

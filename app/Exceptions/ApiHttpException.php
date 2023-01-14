@@ -26,12 +26,10 @@ namespace App\Exceptions;
 
 use Exception;
 
-
 /**
  * Class ApiHttpException
  * @deprecated
  */
 class ApiHttpException extends Exception
 {
-
 }

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Nordigen\Model\Bank;
@@ -71,7 +70,7 @@ class ListBanksResponse extends Response implements Iterator, Countable
     {
         foreach ($bank['countries'] as $code) {
             if (!isset($this->countries[$code])) {
-                $this->countries[$code] = new Country($code, new Collection);
+                $this->countries[$code] = new Country($code, new Collection());
             }
         }
     }
@@ -163,5 +162,4 @@ class ListBanksResponse extends Response implements Iterator, Countable
     {
         return $this->collection->has($this->position);
     }
-
 }

@@ -42,7 +42,7 @@ class Balance
     public static function createFromArray(array $data): self
     {
         app('log')->debug('Create Balance from array', $data);
-        $self                     = new self;
+        $self                     = new self();
         $self->amount             = trim($data['balanceAmount']['amount'] ?? '0');
         $self->currency           = trim($data['balanceAmount']['currency'] ?? '');
         $self->type               = trim($data['balanceType'] ?? '');
@@ -56,7 +56,7 @@ class Balance
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                     = new self;
+        $object                     = new self();
         $object->amount             = $array['amount'];
         $object->currency           = $array['currency'];
         $object->type               = $array['type'];

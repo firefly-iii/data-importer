@@ -83,5 +83,4 @@ class Token
         }
         return (string) $value;
     }
-
 }

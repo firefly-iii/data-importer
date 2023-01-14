@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Middleware;
 
 use App\Exceptions\ImporterErrorException;
@@ -33,7 +32,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-
 
 /**
  * Trait IsReadyForStep
@@ -435,7 +433,6 @@ trait IsReadyForStep
                 $route = route('007-convert.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
                 return redirect($route);
-
         }
     }
 
@@ -484,7 +481,6 @@ trait IsReadyForStep
                     return redirect($route);
                 }
         }
-
     }
 
     /**
@@ -498,7 +494,5 @@ trait IsReadyForStep
             default:
                 throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));
         }
-
     }
-
 }

@@ -67,8 +67,8 @@ class RoutineManager
      */
     public function setConfiguration(Configuration $configuration): void
     {
-        $this->infoCollector = new InfoCollector;
-        $this->apiSubmitter  = new ApiSubmitter;
+        $this->infoCollector = new InfoCollector();
+        $this->apiSubmitter  = new ApiSubmitter();
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
 

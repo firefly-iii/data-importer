@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
 
 use App\Exceptions\ImporterErrorException;
@@ -431,7 +430,9 @@ class Accounts extends AbstractTask
                 app('log')->debug(
                     sprintf(
                         'Out of cheese error (IBAN). Found Found %s account #%d based on IBAN "%s". But not going to use expense/deposit combi.',
-                        $account->type, $account->id, $iban
+                        $account->type,
+                        $account->id,
+                        $iban
                     )
                 );
                 app('log')->debug('Firefly III will have to make the correct decision.');
@@ -502,7 +503,9 @@ class Accounts extends AbstractTask
                 app('log')->debug(
                     sprintf(
                         'Out of cheese error (account number). Found Found %s account #%d based on account number "%s". But not going to use expense/deposit combi.',
-                        $account->type, $account->id, $accountNumber
+                        $account->type,
+                        $account->id,
+                        $accountNumber
                     )
                 );
                 app('log')->debug('Firefly III will have to make the correct decision.');
@@ -632,6 +635,4 @@ class Accounts extends AbstractTask
     {
         return false;
     }
-
-
 }

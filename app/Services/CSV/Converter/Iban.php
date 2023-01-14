@@ -31,7 +31,6 @@ use ValueError;
  */
 class Iban implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -90,6 +89,5 @@ class Iban implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

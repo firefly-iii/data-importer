@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Exceptions\AgreementExpiredException;
@@ -109,7 +108,9 @@ abstract class Request
         $body   = null;
         try {
             $res = $client->request(
-                'GET', $fullUrl, [
+                'GET',
+                $fullUrl,
+                [
                          'headers' => [
                              'Accept'        => 'application/json',
                              'Content-Type'  => 'application/json',
@@ -256,7 +257,9 @@ abstract class Request
         $client = $this->getClient();
         try {
             $res = $client->request(
-                'POST', $fullUrl, [
+                'POST',
+                $fullUrl,
+                [
                           'json'    => $json,
                           'headers' => [
                               'Accept'        => 'application/json',
@@ -279,6 +282,4 @@ abstract class Request
         }
         return $json;
     }
-
-
 }

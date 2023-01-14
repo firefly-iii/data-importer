@@ -34,7 +34,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
  */
 class InfoCollector
 {
-
     /**
      * Collect various accounts from Firefly III and save the account type.
      *

@@ -22,9 +22,7 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Controllers;
-
 
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
@@ -37,7 +35,9 @@ use App\Http\Request\AutoUploadRequest;
  */
 class AutoUploadController extends Controller
 {
-    use HaveAccess, AutoImports, VerifyJSON;
+    use HaveAccess;
+    use AutoImports;
+    use VerifyJSON;
 
     /**
      * @inheritDoc

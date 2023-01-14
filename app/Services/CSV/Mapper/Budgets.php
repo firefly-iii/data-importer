@@ -35,7 +35,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetBudgetsRequest;
  */
 class Budgets implements MapperInterface
 {
-
     /**
      * Get map of objects.
      *

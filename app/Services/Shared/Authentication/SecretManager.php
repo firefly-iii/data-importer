@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Authentication;
 
-
 use Symfony\Component\HttpFoundation\Cookie;
-
 
 /**
  * Class SecretManager
@@ -221,5 +219,4 @@ class SecretManager
     {
         return cookie(self::VANITY_URL, $url);
     }
-
 }

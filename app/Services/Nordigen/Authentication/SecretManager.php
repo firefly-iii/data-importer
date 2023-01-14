@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Authentication;
 
 use Symfony\Component\HttpFoundation\Cookie;
@@ -47,7 +46,6 @@ class SecretManager
         if (!self::hasId()) {
             app('log')->debug('No Nordigen ID in hasId(), will return config variable.');
             return (string) config('nordigen.id');
-
         }
         return request()->cookie(self::NORDIGEN_ID);
     }
@@ -73,7 +71,6 @@ class SecretManager
         if (!self::hasKey()) {
             app('log')->debug('No Nordigen key in hasKey(), will return config variable.');
             return (string) config('nordigen.key');
-
         }
         return request()->cookie(self::NORDIGEN_KEY);
     }
@@ -112,5 +109,4 @@ class SecretManager
     {
         return cookie(self::NORDIGEN_KEY, $key);
     }
-
 }

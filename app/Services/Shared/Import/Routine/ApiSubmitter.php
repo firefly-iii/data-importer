@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
@@ -167,7 +166,9 @@ class ApiSubmitter
             if ('' === $value) {
                 app('log')->debug(
                     sprintf(
-                        'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).', $field, $index,
+                        'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
+                        $field,
+                        $index,
                         $transactionIndex
                     )
                 );
@@ -252,7 +253,6 @@ class ApiSubmitter
             // before we complain, first check what the error is:
             if (is_array($json) && array_key_exists('message', $json)) {
                 if (str_contains($json['message'], '200032')) {
-
                     $isDeleted = true;
                 }
             }
@@ -407,7 +407,9 @@ class ApiSubmitter
                     $lineIndex,
                     sprintf(
                         'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex, $line['transactions'][$index]['currency_id'], (int) $transaction->currencyId
+                        $lineIndex,
+                        $line['transactions'][$index]['currency_id'],
+                        (int) $transaction->currencyId
                     )
                 );
             }
@@ -420,11 +422,12 @@ class ApiSubmitter
                     $lineIndex,
                     sprintf(
                         'Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex, $line['transactions'][$index]['currency_code'], $transaction->currencyCode
+                        $lineIndex,
+                        $line['transactions'][$index]['currency_code'],
+                        $transaction->currencyCode
                     )
                 );
             }
-
         }
     }
 

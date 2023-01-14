@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Enums;
 
 use Spatie\Enum\Enum;
@@ -36,5 +35,4 @@ use Spatie\Enum\Enum;
  */
 class AuthenticationStatus extends Enum
 {
-
 }

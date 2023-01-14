@@ -29,7 +29,6 @@ namespace App\Services\CSV\Conversion\Support;
  */
 trait DeterminesTransactionType
 {
-
     /**
      * @param string|null $sourceType
      * @param string|null $destinationType
@@ -73,7 +72,7 @@ trait DeterminesTransactionType
 
         // if the source is an expense account and the destination is an asset
         // it could be a bad mapping. We return "deposit"
-        if('expense' === $sourceType && 'asset' === $destinationType) {
+        if ('expense' === $sourceType && 'asset' === $destinationType) {
             app('log')->warning('Return "deposit" but the source type is not correct.');
             return 'deposit';
         }

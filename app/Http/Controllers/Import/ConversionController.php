@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
@@ -214,7 +213,7 @@ class ConversionController extends Controller
             app('log')->warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
-            $fakeStatus = new ConversionStatus;
+            $fakeStatus = new ConversionStatus();
 
             return response()->json($fakeStatus->toArray());
         }

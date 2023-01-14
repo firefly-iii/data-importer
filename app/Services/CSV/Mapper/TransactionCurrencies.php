@@ -35,7 +35,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;
  */
 class TransactionCurrencies implements MapperInterface
 {
-
     /**
      * Get map of objects.
      *

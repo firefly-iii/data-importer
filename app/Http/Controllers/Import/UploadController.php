@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -103,7 +102,7 @@ class UploadController extends Controller
         $csvFile    = $request->file('importable_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
-        $errors     = new MessageBag;
+        $errors     = new MessageBag();
 
         // process uploaded file (if present)
         // TODO needs to be file agnostic.
@@ -260,7 +259,6 @@ class UploadController extends Controller
                 $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             }
-
         }
         return $errors;
     }
@@ -292,5 +290,4 @@ class UploadController extends Controller
         }
         return $errors;
     }
-
 }

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
 
 /**
@@ -30,7 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class Currency extends AbstractTask
 {
-
     /**
      * @param array $group
      *

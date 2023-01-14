@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Import\Status;
 
 use App\Services\Session\Constants;
@@ -32,7 +31,6 @@ use JsonException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Storage;
-
 
 /**
  * Class SubmissionStatusManager
@@ -56,7 +54,7 @@ class SubmissionStatusManager
                 try {
                     $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
                 $status->errors[$index]   = $status->errors[$index] ?? [];
                 $status->errors[$index][] = $error;
@@ -99,7 +97,7 @@ class SubmissionStatusManager
                 try {
                     $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
                 $status->warnings[$index]   = $status->warnings[$index] ?? [];
                 $status->warnings[$index][] = $warning;
@@ -127,7 +125,7 @@ class SubmissionStatusManager
                 try {
                     $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
                 $status->messages[$index]   = $status->messages[$index] ?? [];
                 $status->messages[$index][] = $message;
@@ -183,18 +181,17 @@ class SubmissionStatusManager
                     $status = SubmissionStatus::fromArray($array);
                 } catch (FileNotFoundException | JsonException $e) {
                     app('log')->error($e->getMessage());
-                    $status = new SubmissionStatus;
+                    $status = new SubmissionStatus();
                 }
 
                 return $status;
-
             }
         } catch (FileNotFoundException $e) {
             app('log')->error('Could not find file, write a new one.');
             app('log')->error($e->getMessage());
         }
         app('log')->debug('File does not exist or error, create a new one.');
-        $status = new SubmissionStatus;
+        $status = new SubmissionStatus();
         try {
             $json = json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {

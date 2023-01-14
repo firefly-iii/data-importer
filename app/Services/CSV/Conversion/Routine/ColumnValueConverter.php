@@ -147,7 +147,6 @@ class ColumnValueConverter
                         sprintf('%s %s', $transaction['transactions'][0][$transactionField], $parsedValue)
                     );
                 }
-
             }
             // if not, not.
             if (false === $value->isAppendValue()) {
@@ -184,5 +183,4 @@ class ColumnValueConverter
 
         return (string) $value;
     }
-
 }

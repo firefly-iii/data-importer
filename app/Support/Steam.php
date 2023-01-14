@@ -162,5 +162,4 @@ class Steam
         ];
         return trim(str_replace($search, '', $iban));
     }
-
 }

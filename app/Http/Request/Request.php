@@ -148,7 +148,6 @@ class Request extends FormRequest
         $result = app('steam')->cleanStringAndNewlines($string);
 
         return '' === $result ? null : $result;
-
     }
 
     /**

@@ -150,6 +150,4 @@ class ColumnValue
     {
         $this->value = $value;
     }
-
-
 }

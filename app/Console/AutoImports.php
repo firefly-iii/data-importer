@@ -207,13 +207,13 @@ trait AutoImports
         $this->reportImport();
 
         $this->line('Done!');
-        event(new ImportedTransactions(
-                  array_merge($this->conversionMessages, $this->importMessages),
-                  array_merge($this->conversionWarnings, $this->importWarnings),
-                  array_merge($this->conversionErrors, $this->importErrors)
-              )
+        event(
+            new ImportedTransactions(
+            array_merge($this->conversionMessages, $this->importMessages),
+            array_merge($this->conversionWarnings, $this->importWarnings),
+            array_merge($this->conversionErrors, $this->importErrors)
+        )
         );
-
     }
 
 
@@ -274,7 +274,6 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
-
         }
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk = Storage::disk('jobs');
@@ -451,11 +450,12 @@ trait AutoImports
         $this->reportImport();
 
         $this->line('Done!');
-        event(new ImportedTransactions(
-                  array_merge($this->conversionMessages, $this->importMessages),
-                  array_merge($this->conversionWarnings, $this->importWarnings),
-                  array_merge($this->conversionErrors, $this->importErrors)
-              )
+        event(
+            new ImportedTransactions(
+            array_merge($this->conversionMessages, $this->importMessages),
+            array_merge($this->conversionWarnings, $this->importWarnings),
+            array_merge($this->conversionErrors, $this->importErrors)
+        )
         );
     }
 }

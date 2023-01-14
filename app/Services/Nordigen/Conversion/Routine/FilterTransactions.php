@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Conversion\Routine;
 
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -52,7 +51,6 @@ class FilterTransactions
         $return = [];
         /** @var array $transaction */
         foreach ($transactions as $transaction) {
-
             // TODO no real filtering takes place yet.
             unset($transaction['transactions'][0]['datetime']);
 
@@ -63,5 +61,4 @@ class FilterTransactions
 
         return $return;
     }
-
 }

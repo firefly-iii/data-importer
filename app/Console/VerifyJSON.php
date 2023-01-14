@@ -48,10 +48,8 @@ trait VerifyJSON
             app('log')->error($message);
 
             return false;
-
         }
 
         return true;
     }
-
 }

@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Conversion;
 
 use App\Services\Shared\Configuration\Configuration;
@@ -59,9 +58,9 @@ class RoutineManager implements RoutineManagerInterface
         $this->allWarnings = [];
         $this->allMessages = [];
 
-        $this->transactionProcessor = new TransactionProcessor;
-        $this->transactionGenerator = new GenerateTransactions;
-        $this->transactionFilter    = new FilterTransactions;
+        $this->transactionProcessor = new TransactionProcessor();
+        $this->transactionGenerator = new GenerateTransactions();
+        $this->transactionFilter    = new FilterTransactions();
         if (null === $identifier) {
             $this->generateIdentifier();
         }

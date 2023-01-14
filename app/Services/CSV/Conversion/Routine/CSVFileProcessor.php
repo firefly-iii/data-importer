@@ -92,7 +92,7 @@ class CSVFileProcessor
         }
         app('log')->debug(sprintf('Offset is %d', $offset));
         try {
-            $stmt    = (new Statement)->offset($offset);
+            $stmt    = (new Statement())->offset($offset);
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
@@ -132,7 +132,6 @@ class CSVFileProcessor
             app('log')->debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
             $updatedRecords[] = $line;
             $currentIndex++;
-
         }
         app('log')->info(sprintf('Parsed all %d lines.', $count));
 
@@ -156,9 +155,10 @@ class CSVFileProcessor
     {
         $lineValues = array_values($line);
         array_walk(
-            $lineValues, static function ($element) {
-            return trim(str_replace('&nbsp;', ' ', (string) $element));
-        }
+            $lineValues,
+            static function ($element) {
+                return trim(str_replace('&nbsp;', ' ', (string) $element));
+            }
         );
 
         return $lineValues;
@@ -212,5 +212,4 @@ class CSVFileProcessor
     {
         $this->reader = $reader;
     }
-
 }

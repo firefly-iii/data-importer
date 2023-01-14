@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Nordigen\Model\Account;
@@ -132,5 +131,4 @@ class ListAccountsResponse extends Response implements Iterator, Countable
     {
         return $this->collection->has($this->position);
     }
-
 }

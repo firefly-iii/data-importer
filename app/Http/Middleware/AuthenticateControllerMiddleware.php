@@ -23,11 +23,10 @@
 
 declare(strict_types=1);
 
-
 namespace App\Http\Middleware;
 
 class AuthenticateControllerMiddleware
 {
-    protected const STEP = 'authenticate';
     use IsReadyForStep;
+    protected const STEP = 'authenticate';
 }

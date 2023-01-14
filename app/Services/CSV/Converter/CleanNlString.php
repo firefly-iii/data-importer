@@ -29,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class CleanNlString implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -50,6 +49,5 @@ class CleanNlString implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

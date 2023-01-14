@@ -163,7 +163,8 @@ class TokenController extends Controller
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',
-                $result->version, $minimum
+                $result->version,
+                $minimum
             );
             app('log')->error(sprintf('Could not link to Firefly III: %s', $errorMessage));
             $response = ['result' => 'NOK', 'message' => $errorMessage];

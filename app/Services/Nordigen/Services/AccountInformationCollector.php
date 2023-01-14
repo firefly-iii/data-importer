@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Services;
 
 use App\Exceptions\AgreementExpiredException;
@@ -190,5 +189,4 @@ class AccountInformationCollector
 
         return $account;
     }
-
 }

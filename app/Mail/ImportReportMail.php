@@ -33,7 +33,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class ImportReportMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public string $time;
     public array  $errors;

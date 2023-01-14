@@ -60,7 +60,7 @@ class ConversionStatus
      */
     public static function fromArray(array $array): self
     {
-        $config           = new self;
+        $config           = new self();
         $config->status   = $array['status'];
         $config->errors   = $array['errors'] ?? [];
         $config->warnings = $array['warnings'] ?? [];

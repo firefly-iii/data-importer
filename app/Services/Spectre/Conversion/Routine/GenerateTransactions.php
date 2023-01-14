@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
-
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -125,7 +124,7 @@ class GenerateTransactions
         $amount           = $entry->getAmount();
 
         // extra information from the "extra" array. May be NULL.
-        $notes = trim(sprintf('%s %s',$entry->extra->getInformation(), $entry->extra->getAdditional()));
+        $notes = trim(sprintf('%s %s', $entry->extra->getInformation(), $entry->extra->getAdditional()));
 
         $transaction = [
             'type'              => 'withdrawal', // reverse
@@ -192,7 +191,6 @@ class GenerateTransactions
      */
     private function processPositiveTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
     {
-
         // amount is positive: deposit or transfer. Spectre account is destination
         $transaction['type']   = 'deposit';
         $transaction['amount'] = $amount;
