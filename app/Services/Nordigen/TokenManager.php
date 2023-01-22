@@ -44,13 +44,14 @@ class TokenManager
      */
     public static function getAccessToken(): string
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // app('log')->debug(sprintf('Now at %s', __METHOD__));
         self::validateAllTokens();
         try {
             $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
+
         return $token;
     }
 
@@ -59,7 +60,7 @@ class TokenManager
      */
     public static function validateAllTokens(): void
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // app('log')->debug(sprintf('Now at %s', __METHOD__));
         // is there a valid access and refresh token?
         if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
             return;
@@ -87,13 +88,15 @@ class TokenManager
      */
     public static function hasValidRefreshToken(): bool
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
+            app('log')->debug(sprintf('Now at %s', __METHOD__));
             app('log')->debug('No Nordigen refresh token, so return false.');
+
             return false;
         }
         $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
+
         return time() < $tokenValidity;
     }
 
@@ -104,20 +107,23 @@ class TokenManager
      */
     public static function hasValidAccessToken(): bool
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
         if (false === $hasAccessToken) {
+            app('log')->debug(sprintf('Now at %s', __METHOD__));
             app('log')->debug('No Nordigen token is present, so no valid access token');
+
             return false;
         }
         $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
-        app('log')->debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
+        //app('log')->debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
         $result = time() < $tokenValidity;
         if (false === $result) {
             app('log')->debug('Nordigen token is no longer valid');
+
             return false;
         }
-        app('log')->debug('Nordigen token is valid.');
+        //app('log')->debug('Nordigen token is valid.');
+
         return true;
     }
 
@@ -126,10 +132,11 @@ class TokenManager
      */
     public static function hasExpiredRefreshToken(): bool
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        //app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
             app('log')->debug('No refresh token, so return false.');
+
             return false;
         }
         die(__METHOD__);
@@ -145,6 +152,7 @@ class TokenManager
 
     /**
      * get new token set and store in session
+     *
      * @throws ImporterHttpException
      */
     public static function getNewTokenSet(string $identifier, string $key): void
@@ -162,5 +170,4 @@ class TokenManager
         session()->put(Constants::NORDIGEN_ACCESS_EXPIRY_TIME, $result->accessExpires);
         session()->put(Constants::NORDIGEN_REFRESH_EXPIRY_TIME, $result->refreshExpires);
     }
-
 }

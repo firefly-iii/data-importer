@@ -50,6 +50,4 @@ abstract class AbstractTask implements TaskInterface
     {
         $this->transactionCurrency = $transactionCurrency;
     }
-
-
 }

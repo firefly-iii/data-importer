@@ -23,7 +23,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Response;
 
 use App\Services\Shared\Response\Response;
@@ -33,8 +32,8 @@ use App\Services\Shared\Response\Response;
  */
 class GetRequisitionResponse extends Response
 {
-    public string $id;
     public array  $accounts;
+    public string $id;
 
     /**
      * @inheritDoc

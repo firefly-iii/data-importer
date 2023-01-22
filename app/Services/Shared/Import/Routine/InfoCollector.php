@@ -34,7 +34,6 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
  */
 class InfoCollector
 {
-
     /**
      * Collect various accounts from Firefly III and save the account type.
      *
@@ -63,6 +62,7 @@ class InfoCollector
             $count++;
         }
         app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
+
         return $return;
     }
 }

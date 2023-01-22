@@ -52,8 +52,8 @@ Vue.component('submission-status', SubmissionStatus);
  */
 let props = {};
 new Vue({
-    el: "#app",
-    render: (createElement) => {
-        return createElement(SubmissionStatus, {props: props})
-    },
-});
+            el: "#app",
+            render: (createElement) => {
+                return createElement(SubmissionStatus, {props: props})
+            },
+        });

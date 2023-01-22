@@ -34,18 +34,17 @@ use SplFileInfo;
 class UpgradeImportConfigurations extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'importer:upgrade-import-configurations {directory}';
-
-    /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Pointed to a directory, will parse and OVERWRITE all JSON files found there according to the latest JSON configuration file standards.';
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'importer:upgrade-import-configurations {directory}';
 
     /**
      * Create a new command instance.
@@ -64,18 +63,21 @@ class UpgradeImportConfigurations extends Command
      */
     public function handle(): int
     {
-        $directory = (string) $this->argument('directory');
+        $directory = (string)$this->argument('directory');
 
         if (!file_exists($directory)) {
             $this->error(sprintf('"%s" does not exist.', $directory));
+
             return 1;
         }
         if (!is_dir($directory)) {
             $this->error(sprintf('"%s" is not a directory.', $directory));
+
             return 1;
         }
 
         $this->processRoot($directory);
+
         return 0;
     }
 
@@ -104,9 +106,10 @@ class UpgradeImportConfigurations extends Command
             return;
         }
         $this->line(sprintf('Now processing "%s" ...', $name));
-        $content = (string) file_get_contents($name);
+        $content = (string)file_get_contents($name);
         if (!$this->isValidJson($content)) {
             $this->error('File does not contain valid JSON. Skipped.');
+
             return;
         }
         $configuration              = Configuration::fromFile(json_decode($content, true));
@@ -118,6 +121,7 @@ class UpgradeImportConfigurations extends Command
 
     /**
      * @param string $name
+     *
      * @return string
      */
     private function getExtension(string $name): string
@@ -129,6 +133,7 @@ class UpgradeImportConfigurations extends Command
 
     /**
      * @param string $content
+     *
      * @return bool
      */
     private function isValidJson(string $content): bool
@@ -140,6 +145,7 @@ class UpgradeImportConfigurations extends Command
         if (false === $json) {
             return false;
         }
+
         return true;
     }
 }

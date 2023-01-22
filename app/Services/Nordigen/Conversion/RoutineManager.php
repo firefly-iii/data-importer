@@ -23,10 +23,8 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Conversion;
 
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
@@ -41,15 +39,16 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    use IsRunningCli;
+    use GeneratesIdentifier;
+
+    private array $allErrors;
     private array $allMessages;
     private array $allWarnings;
-    private array $allErrors;
-    use IsRunningCli, GeneratesIdentifier;
-
     private Configuration        $configuration;
-    private TransactionProcessor $transactionProcessor;
-    private GenerateTransactions $transactionGenerator;
     private FilterTransactions   $transactionFilter;
+    private GenerateTransactions $transactionGenerator;
+    private TransactionProcessor $transactionProcessor;
 
     /**
      *
@@ -67,9 +66,33 @@ class RoutineManager implements RoutineManagerInterface
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
-        $this->transactionProcessor = new TransactionProcessor;
-        $this->transactionGenerator = new GenerateTransactions;
-        $this->transactionFilter    = new FilterTransactions;
+        $this->transactionProcessor = new TransactionProcessor();
+        $this->transactionGenerator = new GenerateTransactions();
+        $this->transactionFilter    = new FilterTransactions();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllErrors(): array
+    {
+        return $this->allErrors;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllMessages(): array
+    {
+        return $this->allMessages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWarnings(): array
+    {
+        return $this->allWarnings;
     }
 
     /**
@@ -89,7 +112,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionProcessor->setIdentifier($this->identifier);
         $this->transactionGenerator->setIdentifier($this->identifier);
         $this->transactionFilter->setIdentifier($this->identifier);
-
     }
 
     /**
@@ -102,7 +124,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
-            $nordigen = $this->transactionProcessor->download();
+        $nordigen = $this->transactionProcessor->download();
 
         // collect errors from transactionProcessor.
         $this->mergeMessages($this->transactionProcessor->getMessages());
@@ -111,6 +133,7 @@ class RoutineManager implements RoutineManagerInterface
 
         if (0 === count($nordigen)) {
             app('log')->warning('Downloaded nothing, will return nothing.');
+
             return $nordigen;
         }
         // generate Firefly III ready transactions:
@@ -143,33 +166,9 @@ class RoutineManager implements RoutineManagerInterface
         return $filtered;
     }
 
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
-    }
-
     /**
      * @param array $messages
+     *
      * @return void
      */
     private function mergeMessages(array $messages): void
@@ -187,6 +186,7 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * @param array $warnings
+     *
      * @return void
      */
     private function mergeWarnings(array $warnings): void
@@ -204,6 +204,7 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * @param array $errors
+     *
      * @return void
      */
     private function mergeErrors(array $errors): void
@@ -218,5 +219,4 @@ class RoutineManager implements RoutineManagerInterface
             }
         }
     }
-
 }

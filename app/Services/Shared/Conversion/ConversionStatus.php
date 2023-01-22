@@ -37,10 +37,10 @@ class ConversionStatus
     public const CONVERSION_RUNNING = 'conv_running';
     /** @var string */
     public const CONVERSION_WAITING = 'waiting_to_start';
-    public string $status;
     public array  $errors;
-    public array  $warnings;
     public array  $messages;
+    public string $status;
+    public array  $warnings;
 
     /**
      * ConversionStatus constructor.
@@ -60,7 +60,7 @@ class ConversionStatus
      */
     public static function fromArray(array $array): self
     {
-        $config           = new self;
+        $config           = new self();
         $config->status   = $array['status'];
         $config->errors   = $array['errors'] ?? [];
         $config->warnings = $array['warnings'] ?? [];

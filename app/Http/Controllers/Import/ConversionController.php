@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
@@ -169,12 +168,14 @@ class ConversionController extends Controller
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
             app('log')->error('Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
@@ -185,6 +186,7 @@ class ConversionController extends Controller
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
@@ -214,7 +216,7 @@ class ConversionController extends Controller
             app('log')->warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
-            $fakeStatus = new ConversionStatus;
+            $fakeStatus = new ConversionStatus();
 
             return response()->json($fakeStatus->toArray());
         }

@@ -44,4 +44,3 @@ class OpposingAccounts implements MapperInterface
         return $this->mergeAll($this->getAllAccounts());
     }
 }
-

@@ -29,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class CleanId implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -41,7 +40,7 @@ class CleanId implements ConverterInterface
     public function convert($value)
     {
         app('log')->debug(sprintf('Now applying CleanId converter on "%s"', $value));
-        $value = (int) $value;
+        $value = (int)$value;
 
         return 0 === $value ? null : $value;
     }
@@ -53,6 +52,5 @@ class CleanId implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

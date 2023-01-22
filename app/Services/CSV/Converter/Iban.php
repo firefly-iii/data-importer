@@ -31,7 +31,6 @@ use ValueError;
  */
 class Iban implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -47,11 +46,20 @@ class Iban implements ConverterInterface
             $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
             app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
 
-            return $result;
+            return trim($result);
         }
         app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
 
         return '';
+    }
+
+    /**
+     * Add extra configuration parameters.
+     *
+     * @param string $configuration
+     */
+    public function setConfiguration(string $configuration): void
+    {
     }
 
     /**
@@ -80,16 +88,6 @@ class Iban implements ConverterInterface
             $checksum = 2;
         }
 
-        return 1 === (int) $checksum;
-    }
-
-    /**
-     * Add extra configuration parameters.
-     *
-     * @param string $configuration
-     */
-    public function setConfiguration(string $configuration): void
-    {
-
+        return 1 === (int)$checksum;
     }
 }

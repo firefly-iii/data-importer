@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Model;
 
 use Carbon\Carbon;
@@ -59,8 +58,8 @@ class Connection
      */
     public static function fromArray(array $data): self
     {
-        $model                        = new self;
-        $model->id                    = (string) $data['id'];
+        $model                        = new self();
+        $model->id                    = (string)$data['id'];
         $model->categorization        = $data['categorization'];
         $model->countryCode           = $data['country_code'];
         $model->customerId            = $data['customer_id'];
@@ -74,5 +73,4 @@ class Connection
 
         return $model;
     }
-
 }

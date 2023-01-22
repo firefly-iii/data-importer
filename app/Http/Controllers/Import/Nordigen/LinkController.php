@@ -32,7 +32,6 @@ use App\Http\Middleware\LinkControllerMiddleware;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewUserAgreement;
-use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\TokenManager;
@@ -91,10 +90,11 @@ class LinkController extends Controller
             $configuration->setAccounts($result->accounts);
 
             session()->put(Constants::REQUISITION_REFERENCE, $reference);
+
             return redirect(route('004-configure.index'));
         }
 
-        $uuid        = (string) Uuid::uuid4()->toString();
+        $uuid        = (string)Uuid::uuid4()->toString();
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
 
@@ -105,7 +105,7 @@ class LinkController extends Controller
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
         $agreementResponse = $agreementRequest->post();
 
-        $request     = new PostNewRequisitionRequest($url, $accessToken);
+        $request = new PostNewRequisitionRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
@@ -129,6 +129,7 @@ class LinkController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -137,7 +138,7 @@ class LinkController extends Controller
      */
     public function callback(Request $request)
     {
-        $reference = (string) $request->get('ref');
+        $reference = (string)$request->get('ref');
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         app('log')->debug(sprintf('Reference is "%s"', $reference));
 
@@ -153,6 +154,7 @@ class LinkController extends Controller
         }
         // continue!
         session()->put(Constants::REQUISITION_REFERENCE, $reference);
+
         return redirect(route('004-configure.index'));
     }
 }

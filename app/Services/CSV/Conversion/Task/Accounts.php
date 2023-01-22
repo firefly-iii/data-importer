@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
 
 use App\Exceptions\ImporterErrorException;
@@ -60,6 +59,26 @@ class Accounts extends AbstractTask
     }
 
     /**
+     * Returns true if the task requires the default account.
+     *
+     * @return bool
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     *
+     * @return bool
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
+    }
+
+    /**
      * @param array $transaction
      *
      * @return array
@@ -90,7 +109,7 @@ class Accounts extends AbstractTask
         app('log')->debug('Source is now:', $source);
         app('log')->debug('Destination is now:', $destination);
 
-        $amount = (string) $transaction['amount'];
+        $amount = (string)$transaction['amount'];
         $amount = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
@@ -139,12 +158,14 @@ class Accounts extends AbstractTask
          * some "original-field-name" values (if they exist) and hope for the best.
          */
         if (
-            'deposit' === $transaction['type'] &&
-            1 === bccomp($amount, '0') &&
-            'revenue' !== $source['type'] &&
-            '' !== (string) $source['type']
+            'deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type'] && '' !== (string)$source['type']
         ) {
-            app('log')->warning(sprintf('Transaction is a deposit, and amount is positive, but source is not a revenue ("%s"). Will fall back to original field names.', $source['type']));
+            app('log')->warning(
+                sprintf(
+                    'Transaction is a deposit, and amount is positive, but source is not a revenue ("%s"). Will fall back to original field names.',
+                    $source['type']
+                )
+            );
             $newSource   = [
                 'id'     => null,
                 'name'   => $transaction['original-opposing-name'] ?? '(no name)',
@@ -268,7 +289,7 @@ class Accounts extends AbstractTask
         // if the ID is set, at least search for the ID.
         if (is_int($array['id']) && $array['id'] > 0) {
             app('log')->debug('Find by ID field.');
-            $result = $this->findById((string) $array['id']);
+            $result = $this->findById((string)$array['id']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -278,10 +299,10 @@ class Accounts extends AbstractTask
         }
 
         // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string) $array['iban']) {
+        if (isset($array['iban']) && '' !== (string)$array['iban']) {
             app('log')->debug('Find by IBAN.');
-            $transactionType = (string) ($array['transaction_type'] ?? null);
-            $result          = $this->findByIban((string) $array['iban'], $transactionType);
+            $transactionType = (string)($array['transaction_type'] ?? null);
+            $result          = $this->findByIban((string)$array['iban'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -293,10 +314,10 @@ class Accounts extends AbstractTask
         // data importer will return an array with the IBAN (and optionally the name).
 
         // if the account number is set, search for the account number.
-        if (isset($array['number']) && '' !== (string) $array['number']) {
+        if (isset($array['number']) && '' !== (string)$array['number']) {
             app('log')->debug('Find by account number.');
-            $transactionType = (string) ($array['transaction_type'] ?? null);
-            $result          = $this->findByNumber((string) $array['number'], $transactionType);
+            $transactionType = (string)($array['transaction_type'] ?? null);
+            $result          = $this->findByNumber((string)$array['number'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -307,9 +328,9 @@ class Accounts extends AbstractTask
 
 
         // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string) $array['name']) {
+        if (isset($array['name']) && '' !== (string)$array['name']) {
             app('log')->debug('Find by name.');
-            $result = $this->findByName((string) $array['name']);
+            $result = $this->findByName((string)$array['name']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -325,14 +346,14 @@ class Accounts extends AbstractTask
         $array['bic']  = $array['bic'] ?? null;
 
         // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string) $array['name']) {
+        if (null !== $array['id'] || '' !== (string)$array['name']) {
             app('log')->debug('Array with account has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
-        if ('' !== (string) $array['iban']) {
+        if ('' !== (string)$array['iban']) {
             app('log')->debug('Array with account has some IBAN info, return that.', $array);
 
             return $array;
@@ -431,7 +452,9 @@ class Accounts extends AbstractTask
                 app('log')->debug(
                     sprintf(
                         'Out of cheese error (IBAN). Found Found %s account #%d based on IBAN "%s". But not going to use expense/deposit combi.',
-                        $account->type, $account->id, $iban
+                        $account->type,
+                        $account->id,
+                        $iban
                     )
                 );
                 app('log')->debug('Firefly III will have to make the correct decision.');
@@ -502,7 +525,9 @@ class Accounts extends AbstractTask
                 app('log')->debug(
                     sprintf(
                         'Out of cheese error (account number). Found Found %s account #%d based on account number "%s". But not going to use expense/deposit combi.',
-                        $account->type, $account->id, $accountNumber
+                        $account->type,
+                        $account->id,
+                        $accountNumber
                     )
                 );
                 app('log')->debug('Firefly III will have to make the correct decision.');
@@ -568,7 +593,9 @@ class Accounts extends AbstractTask
                 return $account;
             }
         }
-        app('log')->debug(sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name));
+        app('log')->debug(
+            sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name)
+        );
 
         return null;
     }
@@ -612,26 +639,4 @@ class Accounts extends AbstractTask
     {
         return $this->setTransactionAccount('destination', $transaction, $source);
     }
-
-    /**
-     * Returns true if the task requires the default account.
-     *
-     * @return bool
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return false;
-    }
-
-
 }

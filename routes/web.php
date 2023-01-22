@@ -26,6 +26,7 @@ declare(strict_types=1);
 Route::get('/', 'IndexController@index')->name('index');
 Route::post('/', 'IndexController@postIndex')->name('index.post');
 Route::get('/debug', 'DebugController@index')->name('debug');
+Route::get('/health', 'HealthcheckController@check')->name('health');
 
 // validate access token:
 Route::get('/token', 'TokenController@index')->name('token.index');
@@ -118,5 +119,3 @@ Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 //
 //// download config:
 //
-
-

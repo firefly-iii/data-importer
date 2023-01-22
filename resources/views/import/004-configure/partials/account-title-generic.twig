@@ -1,0 +1,22 @@
+<input
+    id="do_import_{{ information.import_account.id }}"
+    type="checkbox"
+    name="do_import[{{ information.import_account.id }}]"
+    value="1"
+    {% if 'disabled' == information.import_account.status %}
+        disabled="disabled"
+    {% endif %}
+    {% if 0 != configuration.getAccounts[information.import_account.id] %}checked="checked"{% endif %}
+    aria-describedby="accountsHelp"
+/> <label class="form-check-label"
+          {% if '' != information.import_account.iban %}title="IBAN: {{ information.import_account.iban }}"{% endif %}
+          for="do_import_{{ information.import_account.id }}">
+    Account "{{ information.import_account.name }}"
+</label>
+{% if '' != information.import_account.iban %}
+    <br><small>
+    IBAN: {{ information.import_account.iban }}</small>
+{% endif %}
+{% if 'disabled' == information.import_account.status %}<br>
+    <small class="text-danger">(this account is
+        disabled)</small>{% endif %}

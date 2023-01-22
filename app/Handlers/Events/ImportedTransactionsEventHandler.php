@@ -42,14 +42,17 @@ class ImportedTransactionsEventHandler
         $receiver = config('mail.destination');
         if ('' === $mailer) {
             app('log')->info('No mailer configured, will not mail.');
+
             return;
         }
         if ('' === $receiver) {
             app('log')->info('No mail receiver configured, will not mail.');
+
             return;
         }
-        if(false === config('mail.enable_mail_report')) {
+        if (false === config('mail.enable_mail_report')) {
             app('log')->info('Configuration does not allow mail, will not mail.');
+
             return;
         }
 
@@ -71,5 +74,4 @@ class ImportedTransactionsEventHandler
             app('log')->info('There is nothing to report, will not send a message.');
         }
     }
-
 }

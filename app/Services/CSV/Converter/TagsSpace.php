@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Converter;
 
 /**
@@ -30,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class TagsSpace implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -42,8 +40,9 @@ class TagsSpace implements ConverterInterface
     public function convert($value)
     {
         $string = app('steam')->cleanStringAndNewlines($value);
+        $tags   = explode(' ', $string);
 
-        return explode(' ', $string);
+        return array_map('trim', $tags);
     }
 
     /**
@@ -53,6 +52,5 @@ class TagsSpace implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

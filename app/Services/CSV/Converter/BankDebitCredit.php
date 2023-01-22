@@ -24,18 +24,17 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-
 /**
  *
  * Class BankDebitCredit
  */
 class BankDebitCredit implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
      * @param $value
+     *
      * @return mixed
      *
      */
@@ -67,6 +66,5 @@ class BankDebitCredit implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

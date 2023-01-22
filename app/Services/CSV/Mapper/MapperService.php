@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Mapper;
 
-
 use App\Exceptions\ImporterErrorException;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -35,7 +34,6 @@ use League\Csv\Statement;
  */
 class MapperService
 {
-
     /**
      * Appends the given array with data from the CSV file in the config.
      *
@@ -59,7 +57,7 @@ class MapperService
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-//            app('log')->error($e->getTraceAsString());
+            //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 
@@ -68,7 +66,7 @@ class MapperService
             $offset = 1;
         }
         try {
-            $stmt    = (new Statement)->offset($offset);
+            $stmt    = (new Statement())->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
@@ -102,20 +100,19 @@ class MapperService
              * The original mapping (saved on disk) will be merged with the new mapping (submitted by the user)
             */
 
-//            $mappedValues  = array_keys($columnInfo['mapped'] ?? []);
-//            $foundValues   = $columnInfo['values'] ?? [];
-//            $missingValues = array_diff($mappedValues, $foundValues);
-//            // get them from mapped.
-//            $missingMap = [];
-//            foreach ($missingValues as $missingValue) {
-//                if (array_key_exists($missingValue, $columnInfo['mapped'])) {
-//                    $missingMap[$missingValue] = $columnInfo['mapped'][$missingValue];
-//                }
-//            }
-//            $data[$index]['missing_map'] = $missingMap;
+            //            $mappedValues  = array_keys($columnInfo['mapped'] ?? []);
+            //            $foundValues   = $columnInfo['values'] ?? [];
+            //            $missingValues = array_diff($mappedValues, $foundValues);
+            //            // get them from mapped.
+            //            $missingMap = [];
+            //            foreach ($missingValues as $missingValue) {
+            //                if (array_key_exists($missingValue, $columnInfo['mapped'])) {
+            //                    $missingMap[$missingValue] = $columnInfo['mapped'][$missingValue];
+            //                }
+            //            }
+            //            $data[$index]['missing_map'] = $missingMap;
         }
 
         return $data;
     }
-
 }

@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Exceptions\ImporterErrorException;
@@ -63,6 +62,7 @@ class ListBanksRequest extends Request
                     'message' => $e->getMessage(),
                 ],
             ];
+
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
             return new ErrorResponse($e->json ?? []);

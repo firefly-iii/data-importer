@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\NewRequisitionResponse;
@@ -33,9 +32,9 @@ use App\Services\Shared\Response\Response;
  */
 class PostNewRequisitionRequest extends Request
 {
+    private string $agreement;
     private string $bank;
     private string $reference;
-    private string $agreement;
 
     public function __construct(string $url, string $token)
     {
@@ -45,30 +44,6 @@ class PostNewRequisitionRequest extends Request
         $this->setUrl('api/v2/requisitions/');
         $this->reference = '';
         $this->agreement = '';
-    }
-
-    /**
-     * @param string $bank
-     */
-    public function setBank(string $bank): void
-    {
-        $this->bank = $bank;
-    }
-
-    /**
-     * @param string $reference
-     */
-    public function setReference(string $reference): void
-    {
-        $this->reference = $reference;
-    }
-
-    /**
-     * @param string $agreement
-     */
-    public function setAgreement(string $agreement): void
-    {
-        $this->agreement = $agreement;
     }
 
     /**
@@ -85,16 +60,17 @@ class PostNewRequisitionRequest extends Request
     public function post(): Response
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $array =
-            [
-                'redirect'       => route('010-build-link.callback'),
-                'institution_id' => $this->bank,
-                'reference'      => $this->reference,
-                'agreement'      => $this->agreement,
-            ];
+        $array
+            = [
+            'redirect'       => route('010-build-link.callback'),
+            'institution_id' => $this->bank,
+            'reference'      => $this->reference,
+            'agreement'      => $this->agreement,
+        ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
+
         return new NewRequisitionResponse($result);
     }
 
@@ -104,5 +80,29 @@ class PostNewRequisitionRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param string $agreement
+     */
+    public function setAgreement(string $agreement): void
+    {
+        $this->agreement = $agreement;
+    }
+
+    /**
+     * @param string $bank
+     */
+    public function setBank(string $bank): void
+    {
+        $this->bank = $bank;
+    }
+
+    /**
+     * @param string $reference
+     */
+    public function setReference(string $reference): void
+    {
+        $this->reference = $reference;
     }
 }

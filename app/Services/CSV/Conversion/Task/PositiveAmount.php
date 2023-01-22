@@ -22,18 +22,15 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
 
 use App\Services\CSV\Converter\Amount as AmountConverter;
-
 
 /**
  * Class PositiveAmount
  */
 class PositiveAmount extends AbstractTask
 {
-
     /**
      * Make sure amount is always positive when submitting.
      *

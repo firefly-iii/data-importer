@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-
 use App\Services\Session\Constants;
 use Illuminate\Validation\Validator;
 
@@ -149,5 +148,4 @@ class ConfigurationPostRequest extends Request
             }
         );
     }
-
 }

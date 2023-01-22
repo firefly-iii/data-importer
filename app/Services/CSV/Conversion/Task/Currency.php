@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Task;
 
 /**
@@ -30,7 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class Currency extends AbstractTask
 {
-
     /**
      * @param array $group
      *
@@ -43,6 +41,26 @@ class Currency extends AbstractTask
         }
 
         return $group;
+    }
+
+    /**
+     * Returns true if the task requires the default account.
+     *
+     * @return bool
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     *
+     * @return bool
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return true;
     }
 
     /**
@@ -61,25 +79,5 @@ class Currency extends AbstractTask
         }
 
         return $transaction;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Returns true if the task requires the default account.
-     *
-     * @return bool
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return false;
     }
 }

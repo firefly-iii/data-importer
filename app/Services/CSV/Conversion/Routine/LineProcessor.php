@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
@@ -40,11 +39,11 @@ class LineProcessor
 {
     use ProgressInformation;
 
+    private string $dateFormat;
     private array  $doMapping;
     private array  $mappedValues;
     private array  $mapping;
     private array  $roles;
-    private string $dateFormat;
 
     /**
      * LineProcessor constructor.
@@ -80,7 +79,7 @@ class LineProcessor
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
                 app('log')->error($e->getMessage());
-//                app('log')->error($e->getTraceAsString());
+                //                app('log')->error($e->getTraceAsString());
                 $this->addError(0, $e->getMessage());
             }
         }
@@ -133,7 +132,7 @@ class LineProcessor
 
             //app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
-            $columnValue = new ColumnValue;
+            $columnValue = new ColumnValue();
             $columnValue->setValue($value);
             $columnValue->setRole($role);
             $columnValue->setAppendValue($appendValue);
@@ -149,7 +148,7 @@ class LineProcessor
             $return[] = $columnValue;
         }
         // add a special column value for the "source"
-        $columnValue = new ColumnValue;
+        $columnValue = new ColumnValue();
         $columnValue->setValue(sprintf('jc5-data-import-v%s', config('importer.version')));
         $columnValue->setMappedValue(0);
         $columnValue->setAppendValue(false);
@@ -182,7 +181,6 @@ class LineProcessor
             return $role;
         }
         if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
-
             // if the mapping has been filled in already by a role with a higher priority,
             // ignore the mapping.
             app('log')->debug(sprintf('Column #%d ("%s") has something already.', $column, $role));

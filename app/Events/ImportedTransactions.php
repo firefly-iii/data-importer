@@ -27,7 +27,6 @@ namespace App\Events;
 
 use Illuminate\Queue\SerializesModels;
 
-
 /**
  * Class ImportedTransactions
  */
@@ -35,9 +34,9 @@ class ImportedTransactions
 {
     use SerializesModels;
 
+    public array $errors;
     public array $messages;
     public array $warnings;
-    public array $errors;
 
     /**
      * @param array $messages
@@ -56,6 +55,7 @@ class ImportedTransactions
 
     /**
      * @param array $collection
+     *
      * @return array
      */
     private function filterArray(array $collection): array
@@ -65,7 +65,7 @@ class ImportedTransactions
         foreach ($collection as $index => $set) {
             $newSet = [];
             foreach ($set as $line) {
-                $line = (string) $line;
+                $line = (string)$line;
                 if ('' !== $line) {
                     $newSet[] = $line;
                     $count++;
@@ -76,6 +76,7 @@ class ImportedTransactions
             }
         }
         app('log')->debug(sprintf('Array contains %d line(s)', $count));
+
         return $newCollection;
     }
 }

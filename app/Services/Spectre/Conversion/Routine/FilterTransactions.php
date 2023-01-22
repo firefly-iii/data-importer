@@ -22,9 +22,7 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Conversion\Routine;
-
 
 use App\Services\Shared\Conversion\ProgressInformation;
 
@@ -53,10 +51,9 @@ class FilterTransactions
         $return = [];
         /** @var array $transaction */
         foreach ($transactions as $transaction) {
-
             unset($transaction['transactions'][0]['datetime']);
 
-            if (0 === (int) ($transaction['transactions'][0]['category_id'] ?? 0)) {
+            if (0 === (int)($transaction['transactions'][0]['category_id'] ?? 0)) {
                 //app('log')->debug('IS NULL');
                 unset($transaction['transactions'][0]['category_id']);
             }
@@ -68,5 +65,4 @@ class FilterTransactions
 
         return $return;
     }
-
 }

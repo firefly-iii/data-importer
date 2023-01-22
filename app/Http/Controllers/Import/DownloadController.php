@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-
 use App\Http\Controllers\Controller;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
@@ -61,5 +60,4 @@ class DownloadController extends Controller
 
         return $response;
     }
-
 }

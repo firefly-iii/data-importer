@@ -45,9 +45,9 @@ class PseudoTransactionProcessor
 {
     use ProgressInformation;
 
-    private array               $tasks;
     private Account             $defaultAccount;
     private TransactionCurrency $defaultCurrency;
+    private array               $tasks;
 
     /**
      * PseudoTransactionProcessor constructor.
@@ -144,7 +144,6 @@ class PseudoTransactionProcessor
         app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
 
         return $processed;
-
     }
 
     /**
@@ -173,5 +172,4 @@ class PseudoTransactionProcessor
 
         return $line;
     }
-
 }

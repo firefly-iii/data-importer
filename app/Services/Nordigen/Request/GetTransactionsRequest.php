@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\GetTransactionsResponse;
@@ -70,11 +69,13 @@ class GetTransactionsRequest extends Request
                 $set    = $response['transactions'][$key];
                 $set    = array_map(function (array $value) use ($key) {
                     $value['key'] = $key;
+
                     return $value;
                 }, $set);
                 $return = $return + $set;
             }
         }
+
         return new GetTransactionsResponse($return);
     }
 

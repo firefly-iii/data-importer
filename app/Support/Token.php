@@ -40,12 +40,13 @@ class Token
         $value = request()->cookie('access_token');
         if (null === $value) {
             // fall back to config:
-            $value = (string) config('importer.access_token');
+            $value = (string)config('importer.access_token');
         }
-        if ('' === (string) $value) {
+        if ('' === (string)$value) {
             throw new ImporterErrorException('No valid access token value.');
         }
-        return (string) $value;
+
+        return (string)$value;
     }
 
     /**
@@ -61,10 +62,11 @@ class Token
         if (null === $value) {
             $value = self::getURL();
         }
-        if ('' === (string) $value) {
+        if ('' === (string)$value) {
             throw new ImporterErrorException('No valid URL value.');
         }
-        return (string) $value;
+
+        return (string)$value;
     }
 
     /**
@@ -76,12 +78,12 @@ class Token
         $value = request()->cookie('base_url');
         if (null === $value) {
             // fall back to config:
-            $value = (string) config('importer.url');
+            $value = (string)config('importer.url');
         }
-        if ('' === (string) $value) {
+        if ('' === (string)$value) {
             throw new ImporterErrorException('No valid URL value.');
         }
-        return (string) $value;
-    }
 
+        return (string)$value;
+    }
 }

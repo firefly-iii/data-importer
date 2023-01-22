@@ -89,5 +89,4 @@ class PutRefreshConnectionRequest extends Request
     {
         $this->connection = $connection;
     }
-
 }

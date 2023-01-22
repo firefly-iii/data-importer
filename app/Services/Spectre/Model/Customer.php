@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Spectre\Model;
 
 /**
@@ -51,12 +50,11 @@ class Customer
      */
     public static function fromArray(array $data): self
     {
-        $model             = new self;
-        $model->id         = (string) $data['id'];
+        $model             = new self();
+        $model->id         = (string)$data['id'];
         $model->identifier = $data['identifier'];
         $model->secret     = $data['secret'];
 
         return $model;
     }
-
 }

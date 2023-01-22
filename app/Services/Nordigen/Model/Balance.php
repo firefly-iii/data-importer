@@ -31,23 +31,25 @@ class Balance
 {
     public string $amount;
     public string $currency;
-    public string $type;
     public string $date;
     public string $lastChangeDateTime;
+    public string $type;
 
     /**
      * @param array $data
+     *
      * @return static
      */
     public static function createFromArray(array $data): self
     {
         app('log')->debug('Create Balance from array', $data);
-        $self                     = new self;
-        $self->amount             = $data['balanceAmount']['amount'] ?? '0';
-        $self->currency           = $data['balanceAmount']['currency'] ?? '';
-        $self->type               = $data['balanceType'] ?? '';
-        $self->date               = $data['referenceDate'] ?? '';
-        $self->lastChangeDateTime = $data['lastChangeDateTime'] ?? '';
+        $self                     = new self();
+        $self->amount             = trim($data['balanceAmount']['amount'] ?? '0');
+        $self->currency           = trim($data['balanceAmount']['currency'] ?? '');
+        $self->type               = trim($data['balanceType'] ?? '');
+        $self->date               = trim($data['referenceDate'] ?? '');
+        $self->lastChangeDateTime = trim($data['lastChangeDateTime'] ?? '');
+
         return $self;
     }
 
@@ -56,12 +58,13 @@ class Balance
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                     = new self;
+        $object                     = new self();
         $object->amount             = $array['amount'];
         $object->currency           = $array['currency'];
         $object->type               = $array['type'];
         $object->date               = $array['date'];
         $object->lastChangeDateTime = $array['last_change_date_time'];
+
         return $object;
     }
 

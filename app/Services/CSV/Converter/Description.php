@@ -29,7 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class Description implements ConverterInterface
 {
-
     /**
      * Convert a value.
      *
@@ -40,7 +39,7 @@ class Description implements ConverterInterface
      */
     public function convert($value)
     {
-        return $value;
+        return trim($value);
     }
 
     /**
@@ -50,6 +49,5 @@ class Description implements ConverterInterface
      */
     public function setConfiguration(string $configuration): void
     {
-
     }
 }

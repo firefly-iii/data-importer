@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-
 use Illuminate\Validation\Validator;
 
 /**
@@ -39,6 +38,7 @@ class SelectionRequest extends Request
     {
         $country = $this->get('country');
         $days    = $this->get('days');
+
         return [
             'country' => $country,
             'bank'    => $this->get(sprintf('bank_%s', $country)),

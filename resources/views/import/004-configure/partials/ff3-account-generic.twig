@@ -1,0 +1,19 @@
+{% if 'disabled' != information.import_account.status %}
+    <select style="width:100%;"
+            class="custom-select custom-select-sm form-control"
+            name="accounts[{{ information.import_account.id }}]">
+        {# loop all Firefly III accounts #}
+        {% for ff3Account in information.firefly_iii_accounts %}
+            <option value="{{ ff3Account.id }}"
+                {# loop configuration #}
+                {% for key, preConfig in configuration.getAccounts %}
+                    {# if this account matches, pre-select dropdown. #}
+                    {% if key == information.import_account.id and preConfig == ff3Account.id %}selected="selected"{% endif %}
+                {% endfor %}
+                    label="{{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}">
+            {{ ff3Account.id }}:
+                {{ ff3Account.name }}{% if ff3Account.iban %} ({{ ff3Account.iban }}){% endif %}
+            </option>
+        {% endfor %}
+    </select>
+{% endif %}

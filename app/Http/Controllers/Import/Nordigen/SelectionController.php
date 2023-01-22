@@ -61,6 +61,7 @@ class SelectionController extends Controller
 
     /**
      * Step 9, select a country + bank.
+     *
      * @return Factory|View
      * @throws ImporterErrorException
      */
@@ -97,13 +98,15 @@ class SelectionController extends Controller
         }
 
         if ($response instanceof ErrorResponse) {
-            throw new ImporterErrorException((string) $response->message);
+            throw new ImporterErrorException((string)$response->message);
         }
+
         return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries', 'configuration'));
     }
 
     /**
      * @param SelectionRequest $request
+     *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */

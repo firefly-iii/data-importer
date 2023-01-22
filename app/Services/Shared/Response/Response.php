@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Shared\Response;
 
 /**
@@ -36,5 +35,4 @@ abstract class Response
      * @param array $data
      */
     abstract public function __construct(array $data);
-
 }

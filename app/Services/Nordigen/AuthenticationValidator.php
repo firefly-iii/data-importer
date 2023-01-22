@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Services\Nordigen;
 
 use App\Exceptions\ImporterHttpException;
@@ -36,7 +35,6 @@ use App\Services\Shared\Authentication\IsRunningCli;
  */
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-
     use IsRunningCli;
 
     /**
@@ -69,6 +67,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         } catch (ImporterHttpException $e) {
             return AuthenticationStatus::error();
         }
+
         return AuthenticationStatus::authenticated();
     }
 }

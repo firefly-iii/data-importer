@@ -1,41 +1,33 @@
 {# update a variable #}
-{% if 'disabled' == information.import_service.status %}
+
+{% if 'disabled' == information.import_account.status %}
     {% set errorAccounts = errorAccounts+1 %}
 {% endif %}
-{% if 'no-info' == information.import_service.status %}
+{% if 'no-info' == information.import_account.status %}
     {% set warningAccounts = errorAccounts+1 %}
 {% endif %}
-{% if 'nothing' == information.import_service.status %}
+{% if 'nothing' == information.import_account.status %}
     {% set warningAccounts = errorAccounts+1 %}
 {% endif %}
-{% if 'no-balance' == information.import_service.status %}
+{% if 'no-balance' == information.import_account.status %}
     {% set warningAccounts = errorAccounts+1 %}
 {% endif %}
 <tr>
     <td>
-        {% if 'nordigen' == flow %}
-            {% include './import/004-configure/partials/account-title-nordigen' with information %}
-        {% endif %}
-        {% if 'spectre' == flow %}
-            {% include './import/004-configure/partials/account-title-spectre' with information %}
+        {% include './import/004-configure/partials/account-title-generic' with information %}
+    </td>
+    <td>
+        {% if 'disabled' != information.import_account.status %}
+            {% if(information.firefly_iii_accounts|length!=0) %}&rarr;{% endif %}
         {% endif %}
     </td>
     <td>
-        {% if 'disabled' != information.import_service.status %}
-            {% if(information.firefly|length!=0) %}&rarr;{% endif %}
-        {% endif %}
-    </td>
-    <td>
-        {% if(information.firefly|length==0) %}
+        {# TODO this is one of those things to merge into one generic type #}
+        {% if(information.firefly_iii_accounts|length==0) %}
             <span class="text-danger">Cannot be imported</span>
         {% endif %}
-        {% if(information.firefly|length>0) %}
-            {% if 'nordigen' == flow %}
-                {% include './import/004-configure/partials/ff3-account-nordigen' with information %}
-            {% endif %}
-            {% if 'spectre' == flow %}
-                {% include './import/004-configure/partials/ff3-account-spectre' with information %}
-            {% endif %}
+        {% if(information.firefly_iii_accounts|length>0) %}
+            {% include './import/004-configure/partials/ff3-account-generic' with information %}
         {% endif %}
     </td>
 </tr>
