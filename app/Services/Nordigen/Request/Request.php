@@ -120,16 +120,20 @@ abstract class Request
                 ]
             );
         } catch (TransferException|GuzzleException $e) {
-            $response = $e->getResponse();
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
-            app('log')->error(sprintf('%s', $response->getBody()->getContents()));
+
+            // crash but there is a response, log it.
+            if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
+                $response = $e->getResponse();
+                app('log')->error(sprintf('%s', $response->getBody()->getContents()));
+            }
 
             // if no response, parse as normal error response
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
-                die('here we are A');
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
             }
 
+            // if can get response, parse it.
             $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string)$e->getResponse()->getBody();
@@ -141,13 +145,12 @@ abstract class Request
                 throw $exception;
             }
 
-
             // if status code is 503, the account does not exist.
             $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
             $exception->json = $json;
             throw $exception;
         }
-        if (null !== $res && 200 !== $res->getStatusCode()) {
+        if (200 !== $res->getStatusCode()) {
             // return body, class must handle this
             app('log')->error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
