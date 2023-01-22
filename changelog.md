@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.0 - 2022-01-23
+
+- ⚠️ This release requires PHP 8.2.
+- ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### Added
+- The data importer has a health checkpoint, thanks @davidschlachter!
+
+### Changed
+- ⚠️ Use Nordigen's internal transaction ID as the transaction ID.
+- Switch to Mastodon in the readme.
+- Fix the link to the PHP docs, thanks @sa7mon!
+- Small fixes to the `.env.example` file, thanks @axelsimon!
+
+### Fixed
+- [Issue 6518](https://github.com/firefly-iii/firefly-iii/issues/6518) Issue with bad account listings
+- Fix bad method call
+- Make sure CSV import values are trimmed (prevents account names like `PAYPAL    `)
+
 ## 0.9.17 - 2021-10-24
 
 ⚠️ This release WILL create duplicate transactions. Don't import large batches!

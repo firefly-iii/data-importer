@@ -38,6 +38,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 trait IsReadyForStep
 {
+    public const TEST = 'test';
+
     /**
      * @param Request $request
      * @param Closure $next
