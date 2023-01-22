@@ -113,10 +113,10 @@ class ConfigurationController extends Controller
 
         // also get the nordigen / spectre accounts
         $importerAccounts = [];
-        $uniqueColumns    = [];
+        $uniqueColumns    = config('csv.unique_column_options');
         if ('nordigen' === $flow) {
             $importerAccounts = $this->getNordigenAccounts($configuration);
-            $uniqueColumns    = config('csv.unique_column_options');
+            $uniqueColumns    = config('nordigen.unique_column_options');
             $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
