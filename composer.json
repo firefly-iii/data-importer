@@ -72,7 +72,7 @@
         }
     ],
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.2",
         "ext-bcmath": "*",
         "ext-json": "*",
         "doctrine/dbal": "^3.0",
@@ -105,7 +105,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.0.21"
+            "php": "8.2"
         },
         "optimize-autoloader": true,
         "preferred-install": "dist",
