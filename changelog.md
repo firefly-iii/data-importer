@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.1 - 2022-01-26
+
+### Fixed
+- Fixed missing options when importing CSV file.
+- Remove `APP_KEY` generation since the data importer doesn't use one.
+
 ## 1.0.0 - 2022-01-23
 
 - ⚠️ This release requires PHP 8.2.

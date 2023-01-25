@@ -43,7 +43,7 @@
         "management"
     ],
     "license": "AGPL-3.0-or-later",
-    "homepage": "https://github.com/firefly-iii/universal-importer",
+    "homepage": "https://github.com/firefly-iii/data-importer",
     "type": "project",
     "readme": "readme.md",
     "authors": [
@@ -58,7 +58,7 @@
         "email": "james@firefly-iii.org",
         "issues": "https://github.com/firefly-iii/firefly-iii/issues",
         "forum": "https://gitter.im/firefly-iii/firefly-iii",
-        "source": "https://github.com/firefly-iii/universal-importer",
+        "source": "https://github.com/firefly-iii/data-importer",
         "docs": "https://docs.firefly-iii.org/"
     },
     "funding": [
@@ -142,9 +142,6 @@
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
         ]
     }
 }
