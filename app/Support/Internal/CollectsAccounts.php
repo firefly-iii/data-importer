@@ -24,7 +24,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Support\Internal;
 
 use App\Exceptions\AgreementExpiredException;
@@ -54,9 +53,12 @@ trait CollectsAccounts
      */
     protected function getFireflyIIIAccounts(): array
     {
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
-        $accounts        = [];
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
+        $accounts = [
+            Constants::ASSET_ACCOUNTS => [],
+            Constants::LIABILITIES    => [],
+        ];
 
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
