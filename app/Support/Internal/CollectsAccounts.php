@@ -56,7 +56,10 @@ trait CollectsAccounts
     {
         $url             = SecretManager::getBaseUrl();
         $token           = SecretManager::getAccessToken();
-        $accounts        = [];
+        $accounts        = [
+            Constants::ASSET_ACCOUNTS => [],
+            Constants::LIABILITIES => [],
+        ];
 
         $request = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
