@@ -65,7 +65,6 @@ class UploadController extends Controller
         $subTitle  = 'Start page and instructions';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
-
         // get existing configs.
         $disk = Storage::disk('configurations');
         app('log')->debug(
@@ -95,18 +94,27 @@ class UploadController extends Controller
      *
      * @return RedirectResponse|Redirector
      * @throws ImporterErrorException
+     * @throws FileNotFoundException
      */
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $csvFile    = $request->file('importable_file');
-        $configFile = $request->file('config_file');
-        $flow       = $request->cookie(Constants::FLOW_COOKIE);
-        $errors     = new MessageBag();
+
+        $uploads         = $request->file('importable_file');
+        $configFile      = $request->file('config_file');
+        $flow            = $request->cookie(Constants::FLOW_COOKIE);
+        $errors          = new MessageBag();
+        $importableFiles = [];
+
+        if ($uploads instanceof UploadedFile) {
+            $importableFiles = [$uploads];
+        }
+        if (is_array($uploads)) {
+            $importableFiles = $uploads;
+        }
 
         // process uploaded file (if present)
-        // TODO needs to be file agnostic.
-        $errors = $this->processCsvFile($flow, $errors, $csvFile);
+        $errors = $this->processImportableUpload($flow, $errors, $importableFiles);
 
         // process config file (if present)
         $errors = $this->processConfigFile($errors, $configFile);
@@ -140,37 +148,43 @@ class UploadController extends Controller
      *
      * @return MessageBag
      */
-    private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
+    private function processImportableUpload(string $flow, MessageBag $errors, array $uploadedFiles): MessageBag
     {
-        if (null === $file && 'file' === $flow) {
-            $errors->add('importable_file', 'No file was uploaded.');
+        $files = [];
+        foreach($uploadedFiles as $file) {
+            if (null === $file && 'file' === $flow) {
+                $errors->add('importable_file', 'No file was uploaded.');
 
-            return $errors;
-        }
-        if ('file' === $flow) {
-            $errorNumber = $file->getError();
-            if (0 !== $errorNumber) {
-                $errors->add('importable_file', $this->getError($errorNumber));
+                return $errors;
             }
-
-
-            // upload the file to a temp directory and use it from there.
-            if (0 === $errorNumber) {
-                $content = file_get_contents($file->getPathname());
-
-                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                // This one is for you: 🤦‍♀️
-                $eol = $this->detectEOL($content);
-                if ("\r" === $eol) {
-                    app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
-                    $content = str_replace("\r", "\n", $content);
+            if ('file' === $flow) {
+                $errorNumber = $file->getError();
+                if (0 !== $errorNumber) {
+                    $errors->add('importable_file', $this->getError($errorNumber));
                 }
 
-                $fileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $fileName);
-                session()->put(Constants::HAS_UPLOAD, true);
+
+                // upload the file to a temp directory and use it from there.
+                if (0 === $errorNumber) {
+                    $content = file_get_contents($file->getPathname());
+
+                    // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                    // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                    // This one is for you: 🤦‍♀️
+                    $eol = $this->detectEOL($content);
+                    if ("\r" === $eol) {
+                        app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
+                        $content = str_replace("\r", "\n", $content);
+                    }
+
+                    $files[] = StorageService::storeContent($content);
+
+                }
             }
+        }
+        if(0 !== count($files)) {
+            session()->put(Constants::UPLOADED_IMPORTS, $files);
+            session()->put(Constants::HAS_UPLOAD, true);
         }
 
         return $errors;

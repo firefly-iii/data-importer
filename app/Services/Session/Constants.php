@@ -75,6 +75,8 @@ class Constants
     public const UPLOAD_CONFIG_FILE = 'config_file_path';
     public const UPLOAD_CSV_FILE    = 'csv_file_path'; // TODO this variable must be renamed.
 
+    public const UPLOADED_IMPORTS = 'uploaded_imports';
+
     // specific variables for the ability to upload multiple (config) files at once
     public const IMPORT_FILE_PATHS = 'upload_file_paths';
     public const CONFIG_FILE_PATHS = 'config_file_paths';
