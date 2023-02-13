@@ -94,7 +94,7 @@
         "filp/whoops": "^2.0",
         "laravel/ui": "^4.0",
         "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^6.1",
+        "nunomaduro/collision": "^7.0",
         "nunomaduro/larastan": "^2.0",
         "phpstan/phpstan": "^1.8",
         "phpstan/phpstan-deprecation-rules": "^1.0",
