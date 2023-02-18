@@ -30,7 +30,7 @@ return [
         'nordigen' => 'Nordigen',
         'spectre'  => 'Spectre',
     ],
-    'import_dir_whitelist'    => explode(',', env('IMPORT_DIR_WHITELIST', '')),
+    'import_dir_allowlist'    => explode(',', env('IMPORT_DIR_ALLOWLIST', '')),
     'auto_import_secret'      => env('AUTO_IMPORT_SECRET', ''),
     'can_post_autoimport'     => env('CAN_POST_AUTOIMPORT', false),
     'can_post_files'          => env('CAN_POST_FILES', false),
