@@ -151,7 +151,8 @@ class UploadController extends Controller
     private function processImportableUpload(string $flow, MessageBag $errors, array $uploadedFiles): MessageBag
     {
         $files = [];
-        foreach($uploadedFiles as $file) {
+        /** @var UploadedFile $file */
+        foreach ($uploadedFiles as $file) {
             if (null === $file && 'file' === $flow) {
                 $errors->add('importable_file', 'No file was uploaded.');
 
@@ -176,13 +177,13 @@ class UploadController extends Controller
                         app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
                         $content = str_replace("\r", "\n", $content);
                     }
-
-                    $files[] = StorageService::storeContent($content);
+                    $originalName         = app('steam')->cleanStringAndNewlines($file->getClientOriginalName());
+                    $files[$originalName] = StorageService::storeContent($content);
 
                 }
             }
         }
-        if(0 !== count($files)) {
+        if (0 !== count($files)) {
             session()->put(Constants::UPLOADED_IMPORTS, $files);
             session()->put(Constants::HAS_UPLOAD, true);
         }

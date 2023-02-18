@@ -59,6 +59,13 @@
                                         href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
                                         check out the documentation for this page.</a>
                                 </p>
+                                <p>
+                                    {% if 1 == countUploads %}
+                                        Your configuration will apply to the file you uploaded.
+                                    {% else %}
+                                        Your configuration will apply to the {{ countUploads }} files you uploaded.
+                                    {% endif %}
+                                </p>
                             {% endif %}
                             {% if 'nordigen' == flow or 'spectre' == flow %}
                                 <p>

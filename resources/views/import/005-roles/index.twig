@@ -47,84 +47,93 @@
                 </div>
             </div>
         {% endif %}
+        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            {% for fileIndex, file in files %}
+                <div class="row mt-3">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                Role configuration for file <code>{{ file.originalName }}</code>
+                            </div>
+                            <div class="card-body">
 
-        <div class="row mt-3">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        Role configuration
-                    </div>
-                    <div class="card-body">
-                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            <table class="table">
-                                <tr>
-                                    <th>Column</th>
-                                    <th>Example data</th>
-                                    <th>Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                {% for index, column in columns %}
+                                <table class="table">
                                     <tr>
-                                        <td>{{ column }}
-                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                <br/>
-                                                <span class="text-muted small">This is the unique column</span>
-                                            {% endif %}</td>
-                                        <td>
-                                            {% if examples[index]|length > 0 %}
-                                                {% for example in examples[index] %}
-                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
-                                                {% endfor %}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                {#
-                                                User cannot select a role because its the unique column so it MUST be this role.
-                                                #}
-                                                <p class="form-text">
+                                        <th>Column</th>
+                                        <th>Example data</th>
+                                        <th>Role</th>
+                                        <th>Map data?</th>
+                                    </tr>
+                                    {% for index, column in file.columns %}
+                                        <tr>
+                                            <td>{{ column }}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    <br/>
+                                                    <span class="text-muted small">This is the unique column</span>
+                                                {% endif %}</td>
+                                            <td>
+                                                {% if file.examples[index]|length > 0 %}
+                                                    {% for example in file.examples[index] %}
+                                                        <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    {# User cannot select a role because its the unique column so it MUST be this role. #}
+                                                    <p class="form-text">
                                                     <span class="text-muted small">
                                                         This column is your unique identifier, so it will be fixed to
                                                     </span>
-                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
-                                                </p>
-                                                {# smart users can overrule this of course. #}
-                                                <input type="hidden" name="roles[{{ index }}]"
-                                                       value="{{ configuration.getUniqueColumnType }}"/>
-                                            {% else %}
-                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
-                                                        class="form-control">
-                                                    {% for key, role in roles %}
-                                                        <option value="{{ key }}"
-                                                                {% if configuredRoles[index] == key %}selected{% endif %}
-                                                                label="{{ trans('import.column_'~key) }}">{{ trans('import.column_'~key) }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <label for="do_mapping_{{ index }}">
-                                                {# reverse if statement is pretty sloppy but OK. #}
-                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
-                                                    &nbsp;
+                                                        <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                    </p>
+                                                    {# smart users can overrule this of course. #}
+                                                    <input type="hidden" name="roles[{{ fileIndex }}][{{ index }}]"
+                                                           value="{{ configuration.getUniqueColumnType }}"/>
                                                 {% else %}
-                                                    <input type="checkbox"
-                                                           {% if configuredDoMapping[index] %}checked{% endif %}
-                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
-                                                           value="1"/>
+                                                    <select name="roles[{{ fileIndex }}][{{ index }}]" id="roles_{{ index }}"
+                                                            class="form-control">
+                                                        {% for key, role in roles %}
+                                                            <option value="{{ key }}"
+                                                                    {% if configuredRoles[index] == key %}selected{% endif %}
+                                                                    label="{{ trans('import.column_'~key) }}">{{ trans('import.column_'~key) }}</option>
+                                                        {% endfor %}
+                                                    </select>
                                                 {% endif %}
-                                            </label>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
+                                            </td>
+                                            <td>
+                                                <label for="do_mapping_{{ index }}">
+                                                    {# reverse if statement is pretty sloppy but OK. #}
+                                                    {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                        &nbsp;
+                                                    {% else %}
+                                                        <input type="checkbox"
+                                                               {% if configuredDoMapping[index] %}checked{% endif %}
+                                                               name="do_mapping[{{ fileIndex }}][{{ index }}]" id="do_mapping_{{ index }}"
+                                                               value="1"/>
+                                                    {% endif %}
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="row mt-1">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
                             <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </form>
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">

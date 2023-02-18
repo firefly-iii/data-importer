@@ -84,14 +84,36 @@ class RoleController extends Controller
         // Read configuration from session, will miss some important keys:
         $configuration = $this->restoreConfiguration();
 
-
-        // get columns from file
-        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
-        $columns  = RoleService::getColumns($content, $configuration);
-        $examples = RoleService::getExampleData($content, $configuration);
+        // read all files, collect columns and make examples.
+        $files   = [];
+        $uploads = session()->get(Constants::UPLOADED_IMPORTS);
+        if (!is_array($uploads)) {
+            die('expected array, sorry.');
+        }
 
         // submit mapping from config.
         $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+
+        /**
+         * @var string $originalName
+         * @var string $upload
+         */
+        foreach ($uploads as $originalName => $upload) {
+            // get columns from file
+            $content  = StorageService::getContent($upload, $configuration->isConversion());
+            $columns  = RoleService::getColumns($content, $configuration);
+            $examples = RoleService::getExampleData($content, $configuration);
+            $current  = [
+                'originalName' => $originalName,
+                'content'      => $content,
+                'columns'      => $columns,
+                'examples'     => $examples,
+                'mapping'      => $mapping,
+            ];
+
+            $files[] = $current;
+            unset($current, $content, $columns, $examples);
+        }
 
         // roles
         $roles = config('csv.import_roles');
@@ -103,7 +125,7 @@ class RoleController extends Controller
 
         return view(
             'import.005-roles.index',
-            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
+            compact('mainTitle', 'configuration', 'files', 'subTitle', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
         );
     }
 
@@ -118,6 +140,8 @@ class RoleController extends Controller
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
         $data = $request->getAll();
+        var_dump($data);
+        exit;
 
         // get configuration object.
         // Read configuration from session, may miss some important keys:

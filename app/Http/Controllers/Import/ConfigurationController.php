@@ -31,17 +31,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Converter\Date;
-use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -90,6 +87,7 @@ class ConfigurationController extends Controller
         $subTitle      = 'Configure your import';
         $flow          = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
         $configuration = $this->restoreConfiguration();
+        $countUploads  = count(session()->get(Constants::UPLOADED_IMPORTS));
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
@@ -128,7 +126,10 @@ class ConfigurationController extends Controller
 
         return view(
             'import.004-configure.index',
-            compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
+            compact(
+                'mainTitle', 'subTitle', 'countUploads',
+                'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns'
+            )
         );
     }
 

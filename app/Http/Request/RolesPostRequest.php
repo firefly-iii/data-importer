@@ -50,9 +50,12 @@ class RolesPostRequest extends Request
             'roles'      => $this->get('roles') ?? [],
             'do_mapping' => $this->get('do_mapping') ?? [],
         ];
-        foreach (array_keys($data['roles']) as $index) {
-            $data['do_mapping'][$index] = $this->convertBoolean($data['do_mapping'][$index] ?? 'false');
+        foreach($data['roles'] as $fileIndex => $file) {
+            foreach (array_keys($file) as $index) {
+                $data['do_mapping'][$fileIndex][$index] = $this->convertBoolean($data['do_mapping'][$fileIndex][$index] ?? 'false');
+            }
         }
+
 
         return $data;
     }
@@ -66,8 +69,8 @@ class RolesPostRequest extends Request
         $keys = implode(',', array_keys(config('csv.import_roles')));
 
         return [
-            'roles.*'      => sprintf('required|in:%s', $keys),
-            'do_mapping.*' => 'numeric|between:0,1',
+            'roles.*.*'      => sprintf('required|in:%s', $keys),
+            'do_mapping.*.*' => 'numeric|between:0,1',
         ];
     }
 
@@ -96,9 +99,11 @@ class RolesPostRequest extends Request
         $data  = $validator->getData();
         $roles = $data['roles'] ?? [];
         $count = 0;
-        foreach ($roles as $role) {
-            if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
-                $count++;
+        foreach ($roles as $file) {
+            foreach ($file as $role) {
+                if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
+                    $count++;
+                }
             }
         }
         if (0 === $count) {
