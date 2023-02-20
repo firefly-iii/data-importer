@@ -84,7 +84,9 @@
         "laravel/tinker": "^2.0",
         "league/csv": "9.*",
         "rcrowe/twigbridge": "^0.14.0",
-        "spatie/enum": "^3.10"
+        "spatie/enum": "^3.10",
+        "symfony/http-client": "^6.2",
+        "symfony/mailgun-mailer": "^6.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
