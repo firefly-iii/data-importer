@@ -71,7 +71,7 @@ trait HaveAccess
     private function isAllowedPath(string $path): bool
     {
         $error = 'No valid paths in IMPORT_DIR_ALLOWLIST, cannot continue.';
-        $paths = config('importer.IMPORT_DIR_ALLOWLIST');
+        $paths = config('importer.import_dir_allowlist');
         if (null === $paths) {
             $this->warn($error);
 
