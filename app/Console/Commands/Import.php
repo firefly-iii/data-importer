@@ -81,7 +81,7 @@ class Import extends Command
         if ('' !== $config) {
             $directory = dirname($config);
             if (!$this->isAllowedPath($directory)) {
-                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
                 return 1;
             }
@@ -89,7 +89,7 @@ class Import extends Command
         if ('' !== $file) {
             $directory = dirname($file);
             if (!$this->isAllowedPath($directory)) {
-                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_WHITELIST).', $directory));
+                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
                 return 1;
             }
