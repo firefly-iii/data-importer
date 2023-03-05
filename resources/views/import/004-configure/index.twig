@@ -64,6 +64,7 @@
                                         Your configuration will apply to the file you uploaded.
                                     {% else %}
                                         Your configuration will apply to the {{ countUploads }} files you uploaded.
+                                        Both files should have the same structure.
                                     {% endif %}
                                 </p>
                             {% endif %}
@@ -319,25 +320,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row mb-3">
-                                    <div class="col-sm-3">Map data</div>
-                                    <div class="col-sm-9">
-                                        <div class="form-check">
-                                            <input class="form-check-input"
-                                                   {% if configuration.isMapAllData %}checked{% endif %} type="checkbox"
-                                                   id="map_all_data"
-                                                   name="map_all_data" value="1" aria-describedby="mapAllDataHelp">
-                                            <label class="form-check-label" for="map_all_data">
-                                                Yes
-                                            </label>
-                                            <small id="mapAllDataHelp" class="form-text text-muted">
-                                                <br>You get the opportunity to link your data to existing Firefly III
-                                                data, for a cleaner import.
-                                            </small>
+                                {% if 'nordigen' == flow or 'spectre' == flow %}
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">Map data</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       {% if configuration.isMapAllData %}checked{% endif %} type="checkbox"
+                                                       id="map_all_data"
+                                                       name="map_all_data" value="1" aria-describedby="mapAllDataHelp">
+                                                <label class="form-check-label" for="map_all_data">
+                                                    Yes
+                                                </label>
+                                                <small id="mapAllDataHelp" class="form-text text-muted">
+                                                    <br>You get the opportunity to link your data to existing Firefly III
+                                                    data, for a cleaner import.
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                {% if 'nordigen' == flow or 'spectre' == flow %}
                                     <div class="form-group row mb-3">
                                         <label for="default_account" class="col-sm-3 col-form-label">Date range</label>
                                         <div class="col-sm-9">

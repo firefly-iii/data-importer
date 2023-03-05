@@ -77,6 +77,12 @@ class MapController extends Controller
         $data          = [];
         $roles         = [];
 
+        // validate uploaded files:
+        $uploads = session()->get(Constants::UPLOADED_IMPORTS);
+        if (!is_array($uploads)) {
+            die('expected array, sorry.');
+        }
+
         if ('file' === $configuration->getFlow()) {
             app('log')->debug('Get mapping data for importable file');
             $roles = $configuration->getRoles();
@@ -95,7 +101,7 @@ class MapController extends Controller
             // set map config as complete.
             session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
-            // if file, now ready for conversion
+            // if it's file, now ready for conversion
             if ('file' === $configuration->getFlow()) {
                 app('log')->debug('Its a file, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
@@ -105,7 +111,7 @@ class MapController extends Controller
         }
 
 
-        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+        return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data', 'uploads'));
     }
 
     /**
@@ -121,53 +127,69 @@ class MapController extends Controller
     private function getCSVMapInformation(): array
     {
         $configuration   = $this->restoreConfiguration();
-        $roles           = $configuration->getRoles();
+        $allRoles        = $configuration->getRoles();
         $existingMapping = $configuration->getMapping();
-        $doMapping       = $configuration->getDoMapping();
+        $allDoMapping    = $configuration->getDoMapping();
+        $count           = count($allRoles);
         $data            = [];
 
-        foreach ($roles as $index => $role) {
-            $info     = config('csv.import_roles')[$role] ?? null;
-            $mappable = $info['mappable'] ?? false;
-            if (null === $info) {
-                continue;
+        for ($set = 0; $set < $count; $set++) {
+            $roles     = $allRoles[$set] ?? [];
+            $doMapping = $allDoMapping[$set] ?? [];
+
+            foreach ($roles as $index => $role) {
+                $info     = config('csv.import_roles')[$role] ?? null;
+                $mappable = $info['mappable'] ?? false;
+                if (null === $info) {
+                    continue;
+                }
+                if (false === $mappable) {
+                    continue;
+                }
+                $mapColumn = $doMapping[$index] ?? false;
+                if (false === $mapColumn) {
+                    continue;
+                }
+                app('log')->debug(sprintf('Mappable role is "%s"', $role));
+
+                $info['role']   = $role;
+                $info['values'] = [];
+
+
+                // create the "mapper" class which will get data from Firefly III.
+                $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+                if (!class_exists($class)) {
+                    throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                }
+                app('log')->debug(sprintf('Associated class is %s', $class));
+
+
+                /** @var MapperInterface $object */
+                $object               = app($class);
+                $info['mapping_data'] = $object->getMap();
+                $info['mapped']       = $existingMapping[$index] ?? [];
+
+                app('log')->debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+
+                $data[$set][$index] = $info;
             }
-            if (false === $mappable) {
-                continue;
-            }
-            $mapColumn = $doMapping[$index] ?? false;
-            if (false === $mapColumn) {
-                continue;
-            }
-            app('log')->debug(sprintf('Mappable role is "%s"', $role));
-
-            $info['role']   = $role;
-            $info['values'] = [];
-
-
-            // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
-            if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
-            }
-            app('log')->debug(sprintf('Associated class is %s', $class));
-
-
-            /** @var MapperInterface $object */
-            $object               = app($class);
-            $info['mapping_data'] = $object->getMap();
-            $info['mapped']       = $existingMapping[$index] ?? [];
-
-            app('log')->debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
-
-            $data[$index] = $info;
         }
 
-        // get columns from file
-        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
-        $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+        $uploads = session()->get(Constants::UPLOADED_IMPORTS);
+        if (!is_array($uploads)) {
+            die('expected array, sorry.');
+        }
+        $mapData = [];
+        $index   = 0;
+        foreach ($uploads as $upload) {
+            // get columns from file
+            $content   = StorageService::getContent($upload, $configuration->isConversion());
+            $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+            $mapData[] = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data[$index]);
+            $index++;
+        }
 
-        return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+        return $mapData;
     }
 
     /**
@@ -324,34 +346,50 @@ class MapController extends Controller
      */
     public function postIndex(Request $request): RedirectResponse
     {
-        $values  = $request->get('values') ?? [];
-        $mapping = $request->get('mapping') ?? [];
-        $values  = !is_array($values) ? [] : $values;
-        $mapping = !is_array($mapping) ? [] : $mapping;
-        $data    = [];
-
+        // validate uploaded files:
+        $uploads = session()->get(Constants::UPLOADED_IMPORTS);
+        if (!is_array($uploads)) {
+            die('expected array, sorry.');
+        }
         $configuration = $this->restoreConfiguration();
+        $allValues     = $request->get('values') ?? [];
+        $allMapping    = $request->get('mapping') ?? [];
+        $allValues     = !is_array($allValues) ? [] : $allValues;
+        $allMapping    = !is_array($allMapping) ? [] : $allMapping;
+        $allData       = [];
+        $index         = 0;
+        foreach ($uploads as $fileName => $upload) {
+            $data    = [];
+            $values  = $allValues[$index] ?? [];
+            $mapping = $allMapping[$index] ?? [];
 
-        /**
-         * Loop array with available columns.
-         *
-         * @var int   $index
-         * @var array $row
-         */
-        foreach ($values as $columnIndex => $column) {
             /**
-             * Loop all values for this column
+             * Loop array with available columns.
              *
-             * @var int    $valueIndex
-             * @var string $value
+             * @var int   $index
+             * @var array $row
              */
-            foreach ($column as $valueIndex => $value) {
-                $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
-                if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
-                    $data[$columnIndex][$value] = (int)$mappedValue;
+            foreach ($values as $columnIndex => $column) {
+                /**
+                 * Loop all values for this column
+                 *
+                 * @var int    $valueIndex
+                 * @var string $value
+                 */
+                foreach ($column as $valueIndex => $value) {
+                    $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
+                    if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
+                        $data[$columnIndex][$value] = (int)$mappedValue;
+                    }
                 }
             }
+
+
+            // end of per file loop.
+            $allData[] = $data;
+            $index++;
         }
+
 
         // at this point the $data array must be merged with the mapping as it is on the disk,
         // and then saved to disk once again in a new config file.
@@ -364,6 +402,8 @@ class MapController extends Controller
             $originalMapping = $diskConfig->getMapping();
         }
 
+        var_dump($originalMapping);
+        exit;
         // loop $data and save values:
         $mergedMapping = $this->mergeMapping($originalMapping, $data);
 

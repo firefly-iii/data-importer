@@ -179,7 +179,6 @@ class UploadController extends Controller
                     }
                     $originalName         = app('steam')->cleanStringAndNewlines($file->getClientOriginalName());
                     $files[$originalName] = StorageService::storeContent($content);
-
                 }
             }
         }

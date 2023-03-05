@@ -91,7 +91,7 @@ class RoleController extends Controller
             die('expected array, sorry.');
         }
 
-        // submit mapping from config.
+        // submitted mapping from config.
         $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
 
         /**
@@ -140,16 +140,30 @@ class RoleController extends Controller
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
         $data = $request->getAll();
-        var_dump($data);
-        exit;
 
         // get configuration object.
         // Read configuration from session, may miss some important keys:
         $configuration = $this->restoreConfiguration();
 
-        $needsMapping = $this->needMapping($data['do_mapping']);
-        $configuration->setRoles($data['roles']);
-        $configuration->setDoMapping($data['do_mapping']);
+        // validate uploaded files:
+        $uploads = session()->get(Constants::UPLOADED_IMPORTS);
+        if (!is_array($uploads)) {
+            die('expected array, sorry.');
+        }
+        $index        = 0;
+        $allRoles     = [];
+        $allDoMapping = [];
+        $needsMapping = false; // necessary for multiple viewpoints.
+        // assume this all remains in the same order.
+        foreach ($uploads as $upload) {
+            $needsMapping   = $needsMapping || $this->needMapping($data['do_mapping'][$index]);
+            $allRoles[]     = $data['roles'][$index] ?? [];
+            $allDoMapping[] = $data['do_mapping'][$index] ?? [];
+            $index++;
+        }
+        $configuration->setRoles($allRoles);
+        $configuration->setDoMapping($allDoMapping);
+
 
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 

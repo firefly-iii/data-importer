@@ -47,71 +47,75 @@
                 </div>
             </div>
         {% endif %}
-        <div class="row mt-3">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        Form
-                    </div>
-                    <div class="card-body">
-                        <form method="post" action="{{ route('006-mapping.post') }}" accept-charset="UTF-8">
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            {% for index, row in data %}
-                                <h3>{{ index }}: {{ trans('import.column_'~row.role) }}</h3>
-                                <table class="table">
-                                    <tr>
-                                        <th style="width:50%;">Field value</th>
-                                        <th style="width:50%;">Mapped to</th>
-                                    </tr>
-                                    {% set finalCount = 0 %}
-                                    {% for valueIndex, value in row.values %}
+        <form method="post" action="{{ route('006-mapping.post') }}" accept-charset="UTF-8">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+            {% for fileIndex, file in uploads %}
+                {% set currentFile = loop.index0 %}
+                <div class="row mt-3">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                Mapping for file <code>{{ fileIndex }}</code>
+                            </div>
+                            <div class="card-body">
+
+                                {% for index, row in data[currentFile] %}
+                                    <h3>{{ index }}: {{ trans('import.column_'~row.role) }}</h3>
+                                    <table class="table">
                                         <tr>
-                                            <td>
-                                                <pre style="color:#e83e8c;">{{ value }}</pre>
-                                                <input type="hidden" name="values[{{ index }}][{{ loop.index0 }}]"
-                                                       value="{{ value }}"/>
-                                            </td>
-                                            <td>
-                                                <select name="mapping[{{ index }}][{{ loop.index0 }}]"
-                                                        class="form-control">
-                                                    <option value="0" label="(do not map / automap)">(do not map /
-                                                        automap)
-                                                    </option>
-                                                    {% for key, maps in row.mapping_data %}
-                                                        <!-- if is array go one level deeper -->
-                                                        {% if maps is iterable %}
-                                                            <optgroup label="{{ key }}">
-                                                                {% for singleId, singleEntry in maps %}
-                                                                    <option
-                                                                        {% if singleId == row.mapped[value] %}selected{% endif %}
-                                                                        label="{{ singleEntry }}"
-                                                                        value="{{ singleId }}">
-                                                                        {{ singleEntry }}
-                                                                    </option>
-                                                                {% endfor %}
-                                                            </optgroup>
-                                                        {% else %}
-                                                            <option {% if key == row.mapped[value] %}selected{% endif %}
-                                                                    label="{{ maps }}" value="{{ key }}">
-                                                                {{ maps }}
-                                                            </option>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
+                                            <th style="width:50%;">Field value</th>
+                                            <th style="width:50%;">Mapped to</th>
                                         </tr>
-                                        {% set finalCount = loop.index0 + 1 %}
-                                        <!-- final count is {{ finalCount }} -->
-                                    {% endfor %}
-                                </table>
-                                <!-- final count is {{ finalCount }} -->
-                            {% endfor %}
-                            <button type="submit" class="btn btn-primary float-end">Submit &rarr;</button>
-                        </form>
+                                        {% set finalCount = 0 %}
+                                        {% for valueIndex, value in row.values %}
+                                            <tr>
+                                                <td>
+                                                    <pre style="color:#e83e8c;">{{ value }}</pre>
+                                                    <input type="hidden" name="values[{{ currentFile }}][{{ index }}][{{ loop.index0 }}]"
+                                                           value="{{ value }}"/>
+                                                </td>
+                                                <td>
+                                                    <select name="mapping[{{ currentFile }}][{{ index }}][{{ loop.index0 }}]"
+                                                            class="form-control">
+                                                        <option value="0" label="(do not map / automap)">(do not map /
+                                                            automap)
+                                                        </option>
+                                                        {% for key, maps in row.mapping_data %}
+                                                            <!-- if is array go one level deeper -->
+                                                            {% if maps is iterable %}
+                                                                <optgroup label="{{ key }}">
+                                                                    {% for singleId, singleEntry in maps %}
+                                                                        <option
+                                                                            {% if singleId == row.mapped[value] %}selected{% endif %}
+                                                                            label="{{ singleEntry }}"
+                                                                            value="{{ singleId }}">
+                                                                            {{ singleEntry }}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </optgroup>
+                                                            {% else %}
+                                                                <option {% if key == row.mapped[value] %}selected{% endif %}
+                                                                        label="{{ maps }}" value="{{ key }}">
+                                                                    {{ maps }}
+                                                                </option>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            {% set finalCount = loop.index0 + 1 %}
+                                            <!-- final count is {{ finalCount }} -->
+                                        {% endfor %}
+                                    </table>
+                                    <!-- final count is {{ finalCount }} -->
+                                {% endfor %}
+                                <button type="submit" class="btn btn-primary float-end">Submit &rarr;</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            {% endfor %}
+        </form>
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">

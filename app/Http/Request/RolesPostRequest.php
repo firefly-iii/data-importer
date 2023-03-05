@@ -50,7 +50,7 @@ class RolesPostRequest extends Request
             'roles'      => $this->get('roles') ?? [],
             'do_mapping' => $this->get('do_mapping') ?? [],
         ];
-        foreach($data['roles'] as $fileIndex => $file) {
+        foreach ($data['roles'] as $fileIndex => $file) {
             foreach (array_keys($file) as $index) {
                 $data['do_mapping'][$fileIndex][$index] = $this->convertBoolean($data['do_mapping'][$fileIndex][$index] ?? 'false');
             }

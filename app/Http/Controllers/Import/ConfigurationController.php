@@ -85,8 +85,8 @@ class ConfigurationController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle     = 'Configuration';
         $subTitle      = 'Configure your import';
-        $flow          = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
         $configuration = $this->restoreConfiguration();
+        $flow          = $configuration->getFlow();
         $countUploads  = count(session()->get(Constants::UPLOADED_IMPORTS));
 
         // if config says to skip it, skip it:
@@ -127,8 +127,14 @@ class ConfigurationController extends Controller
         return view(
             'import.004-configure.index',
             compact(
-                'mainTitle', 'subTitle', 'countUploads',
-                'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns'
+                'mainTitle',
+                'subTitle',
+                'countUploads',
+                'fireflyIIIaccounts',
+                'configuration',
+                'flow',
+                'importerAccounts',
+                'uniqueColumns'
             )
         );
     }
@@ -162,7 +168,7 @@ class ConfigurationController extends Controller
         // store config on drive.
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
+        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE)); // TODO is this not already known in the config itself?
 
         // TODO are all fields actually in the config?
 
