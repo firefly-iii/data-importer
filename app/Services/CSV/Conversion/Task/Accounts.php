@@ -92,7 +92,7 @@ class Accounts extends AbstractTask
          * Try to find the source and destination accounts in the transaction.
          *
          * The source account will default back to the user's submitted default account.
-         * So when everything fails, the transaction will be a expense for amount X.
+         * So when everything fails, the transaction will be an expense for amount X.
          */
         $sourceArray = $this->getSourceArray($transaction);
         $destArray   = $this->getDestinationArray($transaction);
@@ -226,6 +226,41 @@ class Accounts extends AbstractTask
             $transaction['destination_name']   = null;
             $transaction['destination_iban']   = null;
             $transaction['destination_number'] = null;
+        }
+        if ($this->hasAllCurrencies($transaction)) {
+            app('log')->debug('Final validation of foreign amount and or normal transaction amount');
+            // withdrawal
+            if ('withdrawal' === $transaction['type']) {
+                // currency info must match $source
+                // so if we can switch them around we will.
+                if ($transaction['currency_code'] !== $source['currency_code']
+                    && $transaction['foreign_currency_code'] === $source['currency_code']) {
+                    app('log')->debug('Source account accepts %s, so foreign / native numbers are switched now.');
+                    $amount                               = $transaction['amount'];
+                    $currency                             = $transaction['currency_code'];
+                    $transaction['amount']                = $transaction['foreign_amount'];
+                    $transaction['currency_code']         = $transaction['foreign_currency_code'];
+                    $transaction['foreign_amount']        = $amount;
+                    $transaction['foreign_currency_code'] = $currency;
+                }
+            }
+            // deposit
+            if ('deposit' === $transaction['type']) {
+                // currency info must match $destination,
+                // so if we can switch them around we will.
+                if ($transaction['currency_code'] !== $destination['currency_code']
+                    && $transaction['foreign_currency_code'] === $destination['currency_code']) {
+                    app('log')->debug('Destination account accepts %s, so foreign / native numbers are switched now.');
+                    $amount                               = $transaction['amount'];
+                    $currency                             = $transaction['currency_code'];
+                    $transaction['amount']                = $transaction['foreign_amount'];
+                    $transaction['currency_code']         = $transaction['foreign_currency_code'];
+                    $transaction['foreign_amount']        = $amount;
+                    $transaction['foreign_currency_code'] = $currency;
+                }
+            }
+
+            app('log')->debug('Final validation of foreign amount and or normal transaction amount finished.');
         }
 
         return $transaction;
@@ -638,5 +673,17 @@ class Accounts extends AbstractTask
     private function setDestination(array $transaction, array $source): array
     {
         return $this->setTransactionAccount('destination', $transaction, $source);
+    }
+
+    /**
+     * @param array $transaction
+     *
+     * @return bool
+     */
+    private function hasAllCurrencies(array $transaction): bool
+    {
+        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
+               && '' !== (string)$transaction['amount']
+               && '' !== (string)$transaction['foreign_amount'];
     }
 }
