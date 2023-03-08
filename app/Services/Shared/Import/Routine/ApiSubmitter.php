@@ -83,16 +83,19 @@ class ApiSubmitter
             app('log')->debug(sprintf('Now submitting transaction %d/%d', ($index + 1), $count));
             // first do local duplicate transaction check (the "cell" method):
             $unique = $this->uniqueTransaction($index, $line);
+            if (null === $unique) {
+                app('log')->debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
+            }
             if (true === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is unique.', $index + 1));
-                $groupInfo = $this->processTransaction($index, $line);
-                $this->addTagToGroups($groupInfo);
             }
             if (false === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
+                continue;
             }
+            $groupInfo = $this->processTransaction($index, $line);
+            $this->addTagToGroups($groupInfo);
         }
-
 
         app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
     }
@@ -104,16 +107,16 @@ class ApiSubmitter
      * @param int   $index
      * @param array $line
      *
-     * @return bool
+     * @return bool|null
      */
-    private function uniqueTransaction(int $index, array $line): bool
+    private function uniqueTransaction(int $index, array $line): ?bool
     {
         if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
             app('log')->debug(
                 sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod())
             );
 
-            return true;
+            return null;
         }
         // do a search for the value and the field:
         $transactions = $line['transactions'] ?? [];
@@ -282,7 +285,7 @@ class ApiSubmitter
                     $group->id,
                     e($transaction->description),
                     $transaction->currencyCode,
-                    round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces)
+                    round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces) // float but only for display purposes
                 );
                 // plus 1 to keep the count.
                 $this->addMessage($index, $message);
