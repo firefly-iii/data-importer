@@ -185,7 +185,7 @@ class MapController extends Controller
             // get columns from file
             $content   = StorageService::getContent($upload, $configuration->isConversion());
             $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
-            $mapData[] = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data[$index]);
+            $mapData[] = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data[$index] ?? []);
             $index++;
         }
 
@@ -358,7 +358,19 @@ class MapController extends Controller
         $allMapping    = !is_array($allMapping) ? [] : $allMapping;
         $allData       = [];
         $index         = 0;
-        foreach ($uploads as $fileName => $upload) {
+
+        // grab the original mapping from the drive
+        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        $originalMapping = [];
+        $diskConfig      = null;
+        if (null !== $configFileName) {
+            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig      = Configuration::fromArray($diskArray);
+            $originalMapping = $diskConfig->getMapping();
+        }
+
+
+        foreach ($uploads as $upload) {
             $data    = [];
             $values  = $allValues[$index] ?? [];
             $mapping = $allMapping[$index] ?? [];
@@ -384,30 +396,13 @@ class MapController extends Controller
                 }
             }
 
-
+            $mergedMapping = $this->mergeMapping($originalMapping, $data);
             // end of per file loop.
-            $allData[] = $data;
+            $allData[] = $mergedMapping;
             $index++;
         }
 
-
-        // at this point the $data array must be merged with the mapping as it is on the disk,
-        // and then saved to disk once again in a new config file.
-        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        $originalMapping = [];
-        $diskConfig      = null;
-        if (null !== $configFileName) {
-            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig      = Configuration::fromArray($diskArray);
-            $originalMapping = $diskConfig->getMapping();
-        }
-
-        var_dump($originalMapping);
-        exit;
-        // loop $data and save values:
-        $mergedMapping = $this->mergeMapping($originalMapping, $data);
-
-        $configuration->setMapping($mergedMapping);
+        $configuration->setMapping($allData);
 
         // store mapping in config object ( + session)
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
@@ -419,6 +414,8 @@ class MapController extends Controller
             $configuration->setRoles($diskConfig->getRoles());
             $configuration->setDoMapping($diskConfig->getDoMapping());
         }
+
+        // must remember that the "setRoles" and "setDoMapping" information may not be ready for multiple files.
 
         // then save entire thing to a new disk file:
         // TODO write config needs helper too

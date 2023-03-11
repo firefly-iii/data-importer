@@ -58,7 +58,9 @@
                                 Mapping for file <code>{{ fileIndex }}</code>
                             </div>
                             <div class="card-body">
-
+                                {% if data[currentFile].length == 0 %}
+                                    <p>No mapping necessary</p>
+                                {% endif %}
                                 {% for index, row in data[currentFile] %}
                                     <h3>{{ index }}: {{ trans('import.column_'~row.role) }}</h3>
                                     <table class="table">
@@ -109,12 +111,20 @@
                                     </table>
                                     <!-- final count is {{ finalCount }} -->
                                 {% endfor %}
-                                <button type="submit" class="btn btn-primary float-end">Submit &rarr;</button>
                             </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
+            <div class="row mt-3">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card">
+                        <div class="card-body">
+            <button type="submit" class="btn btn-primary float-end">Submit &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
