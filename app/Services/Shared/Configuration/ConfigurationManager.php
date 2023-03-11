@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ConfigurationManager.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -24,5 +26,4 @@ namespace App\Services\Shared\Configuration;
 
 class ConfigurationManager
 {
-
 }

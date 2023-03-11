@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.0 - 2023-03-12
+
+### Added
+- Warnings when you use bad configuration values.
+- `IMPORT_DIR_WHITELIST` is now `IMPORT_DIR_ALLOWLIST` 
+
+### Changed
+- Improve logging when reporting on possible duplicates.
+
 ## 1.0.2 - 2022-01-27
 
 ### Fixed
