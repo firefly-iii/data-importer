@@ -10,7 +10,7 @@
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
-                        Firefly III Data Import Tool, v{{ version }}
+                        Firefly III Universal Data Import Tool, v{{ version }}
                     </div>
                     <div class="card-body">
                         <p class="card-text">
@@ -23,26 +23,22 @@
                         </p>
                         {% if pat %}
                             <p id="firefly_expl">
-                                You're using a Personal Access Token to <span
-                                    class="text-info">authenticate</span> to Firefly III.
+                                You're using a Personal Access Token to <span class="text-info">authenticate</span> to Firefly III.
                             </p>
                         {% endif %}
                         {% if clientIdWithURL %}
                             <p id="firefly_expl">
-                                You're using a fixed Client ID and a fixed Firefly III URL to <span
-                                    class="text-info">authenticate</span> to Firefly III.
+                                You're using a fixed Client ID and a fixed Firefly III URL to <span class="text-info">authenticate</span> to Firefly III.
                             </p>
                         {% endif %}
                         {% if URLonly %}
                             <p id="firefly_expl">
-                                You're using a Client ID and a fixed Firefly III URL to <span
-                                    class="text-info">authenticate</span> to Firefly III.
+                                You're using a Client ID and a fixed Firefly III URL to <span class="text-info">authenticate</span> to Firefly III.
                             </p>
                         {% endif %}
                         {% if flexible %}
                             <p id="firefly_expl">
-                                You're using a self-submitted Client ID and Firefly III URL to <span
-                                    class="text-info">authenticate</span> to Firefly III.
+                                You're using a self-submitted Client ID and Firefly III URL to <span class="text-info">authenticate</span> to Firefly III.
                             </p>
                         {% endif %}
                     </div>
@@ -58,7 +54,7 @@
                     <div class="card-body">
                         <p>The importer could not connect to Firefly III.
                             Please remedy the error below first, and check out the <a
-                                href="https://docs.firefly-iii.org/" target="_blank">
+                                href="https://docs.firefly-iii.org/data-importer/faq/connection-errors/" target="_blank">
                                 documentation</a> if necessary.</p>
                         <p id="error_txt" class="text-danger"></p>
                     </div>
@@ -74,7 +70,7 @@
                         <div class="col-lg-4">
                             <div class="card">
                                 <div class="card-header">
-                                    Import from file
+                                    Import a file
                                 </div>
                                 <div class="card-body">
                                     <button class="btn btn-info disabled" value="file" name="flow" disabled="disabled"
