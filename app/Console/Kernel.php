@@ -49,6 +49,21 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
+        $accessToken = (string)env('FIREFLY_III_ACCESS_TOKEN', '');
+        $clientId    = (string)env('FIREFLY_III_CLIENT_ID', '');
+        $baseUrl     = (string)env('FIREFLY_III_URL', '');
+        $vanityUrl   = (string)env('VANITY_URL', '');
+        // access token AND client ID cannot be set together
+        if ('' !== $accessToken && $clientId !== '') {
+            echo 'You can\'t set FIREFLY_III_ACCESS_TOKEN together with FIREFLY_III_CLIENT_ID. One must remain empty.' . PHP_EOL;
+            exit;
+        }
+        // if vanity URL is not empty, Firefly III url must also be set.
+        if ('' !== $vanityUrl && '' === $baseUrl) {
+            echo 'If you set VANITY_URL you must also set FIREFLY_III_URL' . PHP_EOL;
+            exit;
+        }
+
         $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
