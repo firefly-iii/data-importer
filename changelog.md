@@ -2,10 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.1.1 - 2023-03-13
+## 1.2.0 - 2023-03-13
 
 ### Fixed
-- #7207 Missing key validation
+- [Issue 7207](https://github.com/firefly-iii/firefly-iii/issues/7207) Missing key validation
+
+### Changed
+- This release will only work with Firefly III v6.0.3
 
 ## 1.1.0 - 2023-03-12
 
