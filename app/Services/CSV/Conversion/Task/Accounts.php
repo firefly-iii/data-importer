@@ -144,6 +144,13 @@ class Accounts extends AbstractTask
             $transaction = $this->setDestination($transaction, $source);
             app('log')->debug('Source is now:', $destination); // yes this is correct!
             app('log')->debug('Destination is now:', $source); // yes this is correct!
+
+            // also switch amount and foreign currency amount, if both are present.
+            // if this data is missing, Firefly III will break later either way.
+            if ($this->hasAllAmountInformation($transaction)) {
+                app('log')->debug('This transfer has all necessary (foreign) currency + amount information, so swap these too.');
+                $transaction = $this->swapCurrencyInformation($transaction);
+            }
         }
 
         /*
@@ -690,5 +697,55 @@ class Accounts extends AbstractTask
         return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
                && '' !== (string)$transaction['amount']
                && '' !== (string)$transaction['foreign_amount'];
+    }
+
+    /**
+     * Basic check for currency info.
+     *
+     * @param array $transaction
+     *
+     * @return bool
+     */
+    private function hasAllAmountInformation(array $transaction): bool
+    {
+        return
+            array_key_exists('amount', $transaction)
+            && array_key_exists('foreign_amount', $transaction)
+            && (array_key_exists('foreign_currency_code', $transaction) || array_key_exists('foreign_currency_id', $transaction))
+            && (array_key_exists('currency_code', $transaction) || array_key_exists('currency_id', $transaction));
+    }
+
+    /**
+     * @param array $transaction
+     *
+     * @return array
+     */
+    private function swapCurrencyInformation(array $transaction): array
+    {
+        // swap amount and foreign amount:
+        $amount                        = $transaction['amount'];
+        $transaction['amount']         = $transaction['foreign_amount'];
+        $transaction['foreign_amount'] = $amount;
+        app('log')->debug(sprintf('Amount is now %s', $transaction['amount']));
+        app('log')->debug(sprintf('Foreign is now %s', $transaction['foreign_amount']));
+
+        // swap currency ID and foreign currency ID, if both exist:
+        if (array_key_exists('currency_id', $transaction) && array_key_exists('foreign_currency_id', $transaction)) {
+            $currencyId                         = $transaction['currency_id'];
+            $transaction['currency_id']         = $transaction['foreign_currency_id'];
+            $transaction['foreign_currency_id'] = $currencyId;
+            app('log')->debug(sprintf('Currency ID is now %d', $transaction['currency_id']));
+            app('log')->debug(sprintf('Foreign currency ID is now %d', $transaction['foreign_currency_id']));
+        }
+        // swap currency code and foreign currency code, if both exist:
+        if (array_key_exists('currency_code', $transaction) && array_key_exists('foreign_currency_code', $transaction)) {
+            $currencyCode                         = $transaction['currency_code'];
+            $transaction['currency_code']         = $transaction['foreign_currency_code'];
+            $transaction['foreign_currency_code'] = $currencyCode;
+            app('log')->debug(sprintf('Currency code is now %s', $transaction['currency_code']));
+            app('log')->debug(sprintf('Foreign currency code is now %s', $transaction['foreign_currency_code']));
+        }
+
+        return $transaction;
     }
 }
