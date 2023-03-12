@@ -87,16 +87,16 @@ trait HaveAccess
 
             return false;
         }
-        foreach($paths as $current) {
-            if($current === $path) {
+        foreach ($paths as $current) {
+            if ($current === $path) {
                 return true;
             }
-            if(str_starts_with($path, $current)) {
+            if (str_starts_with($path, $current)) {
                 app('log')->debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
                 return true;
             }
         }
-        app('log')->error(sprintf('"%s" is not in the allowed paths.', $path),$paths);
+        app('log')->error(sprintf('"%s" is not in the allowed paths.', $path), $paths);
         return false;
     }
 }
