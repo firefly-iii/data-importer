@@ -5,6 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.2.0 - 2023-03-13
 
 ### Fixed
+- [Issue 7214](https://github.com/firefly-iii/firefly-iii/issues/7214) Previous issue with account currency matching needed a Data Importer fix as well.
+
+### Changed
+- This release will only work with Firefly III v6.0.4
+
+## 1.2.0 - 2023-03-13
+
+### Fixed
 - [Issue 7207](https://github.com/firefly-iii/firefly-iii/issues/7207) Missing key validation
 
 ### Changed
