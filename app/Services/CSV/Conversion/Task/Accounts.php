@@ -236,10 +236,10 @@ class Accounts extends AbstractTask
                 if ($transaction['currency_code'] !== $source['currency_code']
                     && $transaction['foreign_currency_code'] === $source['currency_code']) {
                     app('log')->debug('Source account accepts %s, so foreign / native numbers are switched now.');
-                    $amount                               = $transaction['amount'];
-                    $currency                             = $transaction['currency_code'];
-                    $transaction['amount']                = $transaction['foreign_amount'];
-                    $transaction['currency_code']         = $transaction['foreign_currency_code'];
+                    $amount                               = $transaction['amount'] ?? '0';
+                    $currency                             = $transaction['currency_code'] ?? '';
+                    $transaction['amount']                = $transaction['foreign_amount'] ?? '0';
+                    $transaction['currency_code']         = $transaction['foreign_currency_code'] ?? '';
                     $transaction['foreign_amount']        = $amount;
                     $transaction['foreign_currency_code'] = $currency;
                 }
@@ -251,10 +251,10 @@ class Accounts extends AbstractTask
                 if ($transaction['currency_code'] !== $destination['currency_code']
                     && $transaction['foreign_currency_code'] === $destination['currency_code']) {
                     app('log')->debug('Destination account accepts %s, so foreign / native numbers are switched now.');
-                    $amount                               = $transaction['amount'];
-                    $currency                             = $transaction['currency_code'];
-                    $transaction['amount']                = $transaction['foreign_amount'];
-                    $transaction['currency_code']         = $transaction['foreign_currency_code'];
+                    $amount                               = $transaction['amount'] ?? '0';
+                    $currency                             = $transaction['currency_code'] ?? '';
+                    $transaction['amount']                = $transaction['foreign_amount'] ?? '0';
+                    $transaction['currency_code']         = $transaction['foreign_currency_code'] ?? '';
                     $transaction['foreign_amount']        = $amount;
                     $transaction['foreign_currency_code'] = $currency;
                 }
@@ -682,6 +682,11 @@ class Accounts extends AbstractTask
      */
     private function hasAllCurrencies(array $transaction): bool
     {
+        $transaction['foreign_currency_code'] = $transaction['foreign_currency_code'] ?? '';
+        $transaction['currency_code']         = $transaction['currency_code'] ?? '';
+        $transaction['amount']                = $transaction['amount'] ?? '';
+        $transaction['foreign_amount']        = $transaction['foreign_amount'] ?? '';
+
         return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
                && '' !== (string)$transaction['amount']
                && '' !== (string)$transaction['foreign_amount'];
