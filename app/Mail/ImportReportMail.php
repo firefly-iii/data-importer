@@ -50,9 +50,9 @@ class ImportReportMail extends Mailable
     public function __construct(array $log)
     {
         $this->time     = date('Y-m-d \@ H:i:s');
-        $this->url      = config('importer.url');
-        if ('' !== config('importer.vanity_url')) {
-            $this->url = config('importer.vanity_url');
+        $this->url      = (string) config('importer.url');
+        if ('' !== (string) config('importer.vanity_url')) {
+            $this->url = (string) config('importer.vanity_url');
         }
         $this->errors   = $log['errors'] ?? [];
         $this->warnings = $log['warnings'] ?? [];
