@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.2 - 2021-03-19
+
+- ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### Changed
+- Drop accuracy to 12 decimals. This fixes a lot of rounding issues.
+
+### Fixed
+- [Issue 7225](https://github.com/firefly-iii/firefly-iii/issues/7225) Fix email error when no vanity url is set
+
 ## 1.2.1 - 2023-03-13
 
 ### Fixed
