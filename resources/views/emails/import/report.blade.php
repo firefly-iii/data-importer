@@ -40,10 +40,11 @@
 *No messages, warnings or errors: nothing to report*
 
 @endif
-
+@if('' !== $url)
 @component('mail::button', ['url' => $url])
 Go to Firefly III
 @endcomponent
+@endif
 
 Enjoy!<br>
 Firefly III Data Importer, v{{ config('importer.version')  }}
