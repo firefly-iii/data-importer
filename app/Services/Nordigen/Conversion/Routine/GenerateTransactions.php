@@ -62,7 +62,7 @@ class GenerateTransactions
         $this->targetAccounts      = [];
         $this->targetTypes         = [];
         $this->nordigenAccountInfo = [];
-        bcscale(16);
+        bcscale(12);
     }
 
     /**
