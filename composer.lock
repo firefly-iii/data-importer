@@ -4139,16 +4139,16 @@
         },
         {
             "name": "symfony/http-client",
-            "version": "v6.2.7",
+            "version": "v6.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-client.git",
-                "reference": "0a5be6cbc570ae23b51b49d67341f378629d78e4"
+                "reference": "66391ba3a8862c560e1d9134c96d9bd2a619b477"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-client/zipball/0a5be6cbc570ae23b51b49d67341f378629d78e4",
-                "reference": "0a5be6cbc570ae23b51b49d67341f378629d78e4",
+                "url": "https://api.github.com/repos/symfony/http-client/zipball/66391ba3a8862c560e1d9134c96d9bd2a619b477",
+                "reference": "66391ba3a8862c560e1d9134c96d9bd2a619b477",
                 "shasum": ""
             },
             "require": {
@@ -4203,8 +4203,11 @@
             ],
             "description": "Provides powerful methods to fetch HTTP resources synchronously or asynchronously",
             "homepage": "https://symfony.com",
+            "keywords": [
+                "http"
+            ],
             "support": {
-                "source": "https://github.com/symfony/http-client/tree/v6.2.7"
+                "source": "https://github.com/symfony/http-client/tree/v6.2.8"
             },
             "funding": [
                 {
@@ -4220,7 +4223,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-21T10:54:55+00:00"
+            "time": "2023-03-31T09:14:44+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
