@@ -31,17 +31,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Converter\Date;
-use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -124,6 +122,13 @@ class ConfigurationController extends Controller
             $importerAccounts = $this->getSpectreAccounts($configuration);
             $uniqueColumns    = config('spectre.unique_column_options');
             $importerAccounts = $this->mergeSpectreAccountLists($importerAccounts, $fireflyIIIaccounts);
+        }
+
+        if ('file' === $flow) {
+            // detect content type and save to config object.
+            $detector = new FileContentSherlock();
+            $fileType = $detector->detectContentType(session()->get(Constants::UPLOAD_CSV_FILE));
+            $configuration->setContentType($fileType);
         }
 
         return view(
