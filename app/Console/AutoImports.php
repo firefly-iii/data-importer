@@ -31,6 +31,7 @@ use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
@@ -177,6 +178,10 @@ trait AutoImports
         if ('csv' === $this->getExtension($file)) {
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
+        // same for XML files.
+        if ('xml' === $this->getExtension($file)) {
+            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        }
 
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
@@ -191,7 +196,7 @@ trait AutoImports
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
-        // sanity check. If the importableFile is a .json file and it parses as valid json, don't import it:
+        // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
 
@@ -240,12 +245,27 @@ trait AutoImports
                 $this->error(sprintf('There is no support for flow "%s"', $configuration->getFlow()));
                 exit();
             case 'file':
-                // create importer
-                // TODO detect file type / content here.
-                // TODO or perhaps create "FileRoutineManager"
-                $manager          = new CSVRoutineManager(null);
-                $this->identifier = $manager->getIdentifier();
-                $manager->setContent(file_get_contents($importableFile));
+                $contentType = $configuration->getContentType();
+                if('unknown' === $contentType) {
+                    app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
+                    $detector = new FileContentSherlock;
+                    $contentType = $detector->detectContentType($importableFile);
+                }
+                switch($contentType) {
+                    default:
+                    case 'unknown':
+                    case 'csv':
+                        $manager          = new CSVRoutineManager(null);
+                        $this->identifier = $manager->getIdentifier();
+                        $manager->setContent(file_get_contents($importableFile));
+                        break;
+                    case 'camt':
+                        $manager          = new NotExistingCamtManager(null);
+                        $this->identifier = $manager->getIdentifier();
+                        $manager->setContent(file_get_contents($importableFile));
+                        break;
+                }
+
                 break;
             case 'nordigen':
                 $manager          = new NordigenRoutineManager(null);
