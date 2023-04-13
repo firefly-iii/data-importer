@@ -62,6 +62,7 @@ class ConfigurationPostRequest extends Request
             'mapping'                       => [],
             'do_mapping'                    => [],
             'flow'                          => $this->convertToString('flow'),
+            'content_type'                          => $this->convertToString('content_type'),
 
             // duplicate detection:
             'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),

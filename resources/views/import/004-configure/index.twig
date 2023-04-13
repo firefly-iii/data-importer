@@ -93,6 +93,7 @@
             <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="flow" value="{{ flow }}"/>
+                <input type="hidden" name="content_type" value="{{ configuration.getContentType }}"/>
 
                 <!-- these values are used by Spectre + Nordigen and must be preserved -->
                 <input type="hidden" name="identifier" value="{{ configuration.getIdentifier }}"/>

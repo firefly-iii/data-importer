@@ -29,6 +29,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
@@ -105,8 +106,7 @@ class UploadController extends Controller
         $errors     = new MessageBag();
 
         // process uploaded file (if present)
-        // TODO needs to be file agnostic.
-        $errors = $this->processCsvFile($flow, $errors, $csvFile);
+        $errors = $this->processUploadedFile($flow, $errors, $csvFile);
 
         // process config file (if present)
         $errors = $this->processConfigFile($errors, $configFile);
@@ -136,11 +136,10 @@ class UploadController extends Controller
     }
 
     /**
-     * TODO method needs to be file agnostic.
      *
      * @return MessageBag
      */
-    private function processCsvFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
+    private function processUploadedFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
     {
         if (null === $file && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
@@ -156,20 +155,25 @@ class UploadController extends Controller
 
             // upload the file to a temp directory and use it from there.
             if (0 === $errorNumber) {
-                $content = file_get_contents($file->getPathname());
+                $detector = new FileContentSherlock();
+                $fileType = $detector->detectContentType($file->getPathname());
+                if ('csv' === $fileType) {
+                    $content = file_get_contents($file->getPathname());
 
-                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                // This one is for you: 🤦‍♀️
-                $eol = $this->detectEOL($content);
-                if ("\r" === $eol) {
-                    app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
-                    $content = str_replace("\r", "\n", $content);
+                    // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                    // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                    // This one is for you: 🤦‍♀️
+                    $eol = $this->detectEOL($content);
+                    if ("\r" === $eol) {
+                        app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
+                        $content = str_replace("\r", "\n", $content);
+                    }
                 }
 
                 $fileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $fileName);
+                session()->put(Constants::UPLOAD_CSV_FILE, $fileName); // TODO rename this in the future.
                 session()->put(Constants::HAS_UPLOAD, true);
+
             }
         }
 
