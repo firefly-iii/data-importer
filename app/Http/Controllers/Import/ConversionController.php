@@ -33,6 +33,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
@@ -100,9 +101,20 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-            // TODO needs a file check here
-            app('log')->debug('Create CSV routine manager.');
-            $routine = new CSVRoutineManager($identifier);
+
+            $contentType = $configuration->getContentType();
+            switch($contentType) {
+                default:
+                case 'unknown':
+                case 'csv':
+                    app('log')->debug('Create CSV routine manager.');
+                    $routine = new CSVRoutineManager($identifier);
+                    break;
+                case 'camt':
+                    app('log')->debug('Create CAMT routine manager.');
+                    $routine = new CAMTRoutineManager($identifier);
+                    break;
+            }
         }
         if ('nordigen' === $flow) {
             app('log')->debug('Create Nordigen routine manager.');
