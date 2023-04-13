@@ -34,11 +34,11 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const VERSION = 3;
-    private array $accounts;
+    public const VERSION = 4;
+    private array  $accounts;
     private bool   $addImportTag;
     private string $connection;
-    private bool $conversion;
+    private bool   $conversion;
     private string $date;
     private string $dateNotAfter;
     private string $dateNotBefore;
@@ -51,33 +51,38 @@ class Configuration
     // nordigen configuration
     private array  $doMapping;
     private string $duplicateDetectionMethod;
+
+    // flow and file type
     private string $flow;
-    private bool   $headers;
+    private string $contentType;
+
+    // csv config
+    private bool $headers;
 
     // spectre + nordigen configuration
     private string $identifier;
 
     // spectre configuration
-    private bool   $ignoreDuplicateLines;
-    private bool   $ignoreDuplicateTransactions;
-    private bool   $ignoreSpectreCategories;
+    private bool $ignoreDuplicateLines;
+    private bool $ignoreDuplicateTransactions;
+    private bool $ignoreSpectreCategories;
 
     // date range settings
     private bool   $mapAllData;
-    private array $mapping;
+    private array  $mapping;
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
 
     // what type of import?
-    private array  $nordigenRequisitions;
+    private array $nordigenRequisitions;
 
     // how to do double transaction detection?
-    private array  $roles; // 'classic' or 'cell'
+    private array $roles; // 'classic' or 'cell'
 
     // configuration for "classic" method:
-    private bool   $rules;
-    private bool   $skipForm;
+    private bool $rules;
+    private bool $skipForm;
 
     // configuration for "cell" method:
     private array  $specifics;
@@ -85,7 +90,7 @@ class Configuration
     private string $uniqueColumnType;
 
     // configuration for utf-8
-    private int    $version;
+    private int $version;
 
     /**
      * Configuration constructor.
@@ -104,6 +109,7 @@ class Configuration
         $this->mapping        = [];
         $this->doMapping      = [];
         $this->flow           = 'file';
+        $this->contentType    = 'unknown';
 
         // date range settings
         $this->dateRange       = 'all';
@@ -190,6 +196,7 @@ class Configuration
         $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'file';
+        $object->contentType    = $data['content_type'] ?? 'unknown';
 
         // other settings (are not in v1 anyway)
         $object->dateRange       = $data['date_range'] ?? 'all';
@@ -315,6 +322,7 @@ class Configuration
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->version        = self::VERSION;
         $object->flow           = $array['flow'] ?? 'file';
+        $object->contentType    = $array['content_type'] ?? 'unknown';
 
         // sort
         ksort($object->doMapping);
@@ -371,7 +379,8 @@ class Configuration
         $object->conversion = $array['conversion'] ?? false;
 
         if ('csv' === $object->flow) {
-            $object->flow = 'file';
+            $object->flow        = 'file';
+            $object->contentType = 'csv';
         }
 
         return $object;
@@ -410,6 +419,7 @@ class Configuration
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
+        $object->contentType    = $array['content_type'] ?? 'unknown';
 
         // mapping for spectre + nordigen
         $object->mapAllData = $array['map_all_data'] ?? false;
@@ -466,7 +476,8 @@ class Configuration
             }
         }
         if ('csv' === $object->flow) {
-            $object->flow = 'file';
+            $object->flow        = 'file';
+            $object->contentType = 'csv';
         }
 
         return $object;
@@ -889,6 +900,7 @@ class Configuration
             'unique_column_index'        => $this->uniqueColumnIndex,
             'unique_column_type'         => $this->uniqueColumnType,
             'flow'                       => $this->flow,
+            'content_type'               => $this->contentType,
 
             // spectre
             'identifier'                 => $this->identifier,
@@ -996,4 +1008,21 @@ class Configuration
 
         return null;
     }
+
+    /**
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param string $contentType
+     */
+    public function setContentType(string $contentType): void
+    {
+        $this->contentType = $contentType;
+    }
+
 }
