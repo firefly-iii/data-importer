@@ -42,4 +42,19 @@ class FileContentSherlock
 
         return 'csv';
     }
+
+    public function detectContentTypeFromContent(?string $content): string
+    {
+        if (null === $content) {
+            return 'unknown';
+        }
+        // some pseudo code below:
+        /*
+         * if($this->isCamtFile($content)) {
+         * return 'camt';
+         * }
+         */
+
+        return 'csv';
+    }
 }
