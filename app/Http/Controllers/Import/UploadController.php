@@ -170,8 +170,11 @@ class UploadController extends Controller
                     }
                 }
 
+                if ('camt' === $fileType) {
+                    $content = file_get_contents($file->getPathname());
+                }
                 $fileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_DATA_FILE, $fileName); // TODO rename this in the future.
+                session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
 
             }
