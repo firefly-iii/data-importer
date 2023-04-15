@@ -127,7 +127,8 @@ class ConfigurationController extends Controller
         if ('file' === $flow) {
             // detect content type and save to config object.
             $detector = new FileContentSherlock();
-            $fileType = $detector->detectContentType(session()->get(Constants::UPLOAD_DATA_FILE));
+            $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+            $fileType = $detector->detectContentTypeFromContent($content);
             $configuration->setContentType($fileType);
         }
 
