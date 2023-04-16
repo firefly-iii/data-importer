@@ -116,7 +116,7 @@ class IndexController extends Controller
     public function reset(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
         session()->flush();
         Artisan::call('cache:clear');
 
@@ -136,7 +136,7 @@ class IndexController extends Controller
     public function flush(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
         session()->flush();
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),

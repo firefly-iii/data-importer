@@ -100,13 +100,13 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $csvFile    = $request->file('importable_file');
+        $importedFile    = $request->file('importable_file');
         $configFile = $request->file('config_file');
         $flow       = $request->cookie(Constants::FLOW_COOKIE);
         $errors     = new MessageBag();
 
         // process uploaded file (if present)
-        $errors = $this->processUploadedFile($flow, $errors, $csvFile);
+        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         $errors = $this->processConfigFile($errors, $configFile);
@@ -170,8 +170,11 @@ class UploadController extends Controller
                     }
                 }
 
+                if ('camt' === $fileType) {
+                    $content = file_get_contents($file->getPathname());
+                }
                 $fileName = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_CSV_FILE, $fileName); // TODO rename this in the future.
+                session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
 
             }
