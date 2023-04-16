@@ -22,13 +22,15 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Import\CSV;
+namespace App\Http\Controllers\Import\File;
 
+use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
 use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
@@ -69,42 +71,28 @@ class RoleController extends Controller
      * @throws UnableToProcessCsv
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws ImporterErrorException
      */
     public function index(Request $request)
     {
-        app('log')->debug('Now in role controller');
+        app('log')->debug('Now in Role controller');
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if ('file' !== $flow) {
             die('redirect or something');
         }
-        $mainTitle = 'Role definition';
-        $subTitle  = 'Configure the role of each column in your file';
-
         // get configuration object.
-        // Read configuration from session, will miss some important keys:
         $configuration = $this->restoreConfiguration();
+        $contentType   = $configuration->getContentType();
 
+        switch ($contentType) {
+            default:
+                throw new ImporterErrorException(sprintf('Cannot handle file type "%s"', $contentType));
+            case 'csv':
+                return $this->csvIndex($request, $configuration);
+            case 'camt':
+                return $this->camtIndex($request, $configuration);
 
-        // get columns from file
-        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-        $columns  = RoleService::getColumns($content, $configuration);
-        $examples = RoleService::getExampleData($content, $configuration);
-
-        // submit mapping from config.
-        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-
-        // roles
-        $roles = config('csv.import_roles');
-        ksort($roles);
-
-        // configuration (if it is set)
-        $configuredRoles     = $configuration->getRoles();
-        $configuredDoMapping = $configuration->getDoMapping();
-
-        return view(
-            'import.005-roles.index',
-            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
-        );
+        }
     }
 
     /**
@@ -117,12 +105,33 @@ class RoleController extends Controller
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
-        $data = $request->getAll();
-
-        // get configuration object.
-        // Read configuration from session, may miss some important keys:
+        // the request object must be able to handle all file types.
         $configuration = $this->restoreConfiguration();
+        $contentType   = $configuration->getContentType();
 
+        switch ($contentType) {
+            default:
+                throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
+            case 'csv':
+                return $this->csvPostIndex($request, $configuration);
+            case 'camt':
+                return $this->camtPostIndex($request, $configuration);
+
+        }
+    }
+
+    /**
+     * @param RolesPostRequest $request
+     * @param Configuration    $configuration
+     *
+     * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
+     */
+    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    {
+        $data         = $request->getAllForCSV();
         $needsMapping = $this->needMapping($data['do_mapping']);
         $configuration->setRoles($data['roles']);
         $configuration->setDoMapping($data['do_mapping']);
@@ -172,5 +181,66 @@ class RoleController extends Controller
         }
 
         return $need;
+    }
+
+    /**
+     * @param Request       $request
+     * @param Configuration $configuration
+     *
+     * @return View
+     * @throws ContainerExceptionInterface
+     * @throws Exception
+     * @throws InvalidArgument
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
+     * @throws UnableToProcessCsv
+     */
+    private function csvIndex(Request $request, Configuration $configuration): View
+    {
+        $mainTitle = 'Role definition';
+        $subTitle  = 'Configure the role of each column in your file';
+
+        // get columns from file
+        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
+        $columns  = RoleService::getColumns($content, $configuration);
+        $examples = RoleService::getExampleData($content, $configuration);
+
+        // submit mapping from config.
+        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+
+        // roles
+        $roles = config('csv.import_roles');
+        ksort($roles);
+
+        // configuration (if it is set)
+        $configuredRoles     = $configuration->getRoles();
+        $configuredDoMapping = $configuration->getDoMapping();
+
+        return view(
+            'import.005-roles.index-csv',
+            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
+        );
+    }
+
+    /**
+     * @param Request       $request
+     * @param Configuration $configuration
+     *
+     * @return View
+     */
+    private function camtIndex(Request $request, Configuration $configuration): View
+    {
+        return view('import.0005-roles.index-camt');
+    }
+
+    /**
+     * @param RolesPostRequest $request
+     * @param Configuration    $configuration
+     *
+     * @return void
+     */
+    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration)
+    {
+        die('not yet implemented.');
     }
 }
