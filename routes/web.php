@@ -59,10 +59,10 @@ Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@post
 Route::get('/import/configure/download', ['uses' => 'Import\DownloadController@download', 'as' => '004-configure.download']);
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
 
-// step 5: Set column roles (CSV)
+// step 5: Set column roles (CSV or other file types)
 // check : must be CSV and not config complete otherwise redirect to mapping.
-Route::get('/import/roles', ['uses' => 'Import\CSV\RoleController@index', 'as' => '005-roles.index']);
-Route::post('/import/roles', ['uses' => 'Import\CSV\RoleController@postIndex', 'as' => '005-roles.post']);
+Route::get('/import/roles', ['uses' => 'Import\File\RoleController@index', 'as' => '005-roles.index']);
+Route::post('/import/roles', ['uses' => 'Import\File\RoleController@postIndex', 'as' => '005-roles.post']);
 
 // step 6: mapping
 // check: must be [CSV and roles complete] or [not csv and conversion complete] or go to conversion?
