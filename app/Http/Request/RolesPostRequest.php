@@ -44,7 +44,7 @@ class RolesPostRequest extends Request
     /**
      * @return array
      */
-    public function getAll(): array
+    public function getAllForCSV(): array
     {
         $data = [
             'roles'      => $this->get('roles') ?? [],

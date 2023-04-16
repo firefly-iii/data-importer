@@ -248,7 +248,7 @@ trait AutoImports
                 $contentType = $configuration->getContentType();
                 if('unknown' === $contentType) {
                     app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
-                    $detector = new FileContentSherlock;
+                    $detector = new FileContentSherlock();
                     $contentType = $detector->detectContentType($importableFile);
                 }
                 switch($contentType) {
