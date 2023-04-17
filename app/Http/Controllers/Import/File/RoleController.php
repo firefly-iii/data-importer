@@ -201,7 +201,7 @@ class RoleController extends Controller
         $subTitle  = 'Configure the role of each column in your file';
 
         // get columns from file
-        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
+        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
         $columns  = RoleService::getColumns($content, $configuration);
         $examples = RoleService::getExampleData($content, $configuration);
 
