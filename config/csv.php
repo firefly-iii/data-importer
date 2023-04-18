@@ -101,7 +101,7 @@ return [
      * I don't believe this value is used any more, but I am not sure.
      *
      * 'converter'
-     * The converter is a class in app/Import/Converter that converts the given value into an object Firefly understands.
+     * The converter is a class in app/Service/CSV/Converter that converts the given value into an object Firefly understands.
      * The CategoryName converter can convert a category name into an actual category. This converter will take a mapping
      * into account: if you mapped "Groceries" to category "Groceries" the converter will simply return "Groceries" instead of
      * trying to make a new category also named Groceries.
