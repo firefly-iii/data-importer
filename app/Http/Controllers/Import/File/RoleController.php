@@ -131,7 +131,7 @@ class RoleController extends Controller
      */
     private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
-        $data         = $request->getAllForCSV();
+        $data         = $request->getAllForFile();
         $needsMapping = $this->needMapping($data['do_mapping']);
         $configuration->setRoles($data['roles']);
         $configuration->setDoMapping($data['do_mapping']);
