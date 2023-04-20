@@ -1,0 +1,7 @@
+{% macro options(roles, selection) %}
+    {% for key, role in roles %}
+    <option value="{{ key }}" label="{{ trans('import.column_'~key) }}"{% if selection == key %} selected{% endif %}>
+        {{ trans('import.column_'~key) }}
+    </option>
+    {% endfor %}
+{% endmacro %}
