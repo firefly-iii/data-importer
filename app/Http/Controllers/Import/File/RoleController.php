@@ -29,6 +29,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
 use App\Services\CSV\Roles\RoleService;
+use App\Services\Camt053\Converter;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -230,7 +231,15 @@ class RoleController extends Controller
      */
     private function camtIndex(Request $request, Configuration $configuration): View
     {
-        return view('import.0005-roles.index-camt');
+        $mainTitle = 'Role definition';
+        $subTitle  = 'Configure the role of each field in your camt.053 file';
+        // TODO read some example data from the camt.053 file
+        $roles = config('camt.import_roles'); // TODO maybe split up to different DataType -> Columns for Dates, Numbers, Strings -> AND OR create other roles for camt // list is imfported from csv.import_roles, without modification
+
+        return view(
+            'import.005-roles.index-camt',
+            compact('mainTitle','subTitle','roles'
+        );
     }
 
     /**
