@@ -53,12 +53,20 @@
                         </div>
                         <div class="card-body">
                             {% if 'file' == flow %}
-                                <p>
-                                    Importable files come in many shapes and forms. Some of the most important settings are below.
-                                    They apply to all lines in the file. If you would like some support, <a
-                                        href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
-                                        check out the documentation for this page.</a>
-                                </p>
+                            <p>
+                            {% if 'camt' == configuration.getContentType %}
+                                Even if camt.053 is a defined standard, you might want to customize. Some of the most important settings are below.
+                                They apply to all records in the uploaded files. If you would like some support, you won't find anything at <a
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
+                                    this page.</a> right now.
+                            {% endif %}
+                            {% if 'csv' == configuration.getContentType %}
+                                Importable files come in many shapes and forms. Some of the most important settings are below.
+                                They apply to all lines in the file. If you would like some support, <a
+                                    href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
+                                    check out the documentation for this page.</a>
+                            {% endif %}
+                            </p>
                             {% endif %}
                             {% if 'nordigen' == flow or 'spectre' == flow %}
                                 <p>
@@ -173,84 +181,124 @@
 
 
                                 {% if 'file' == flow %}
-                                    <h5>File options</h5>
-                                    <div class="form-group row mb-3">
-                                        <div class="col-sm-3">Headers</div>
-                                        <div class="col-sm-9">
-                                            <div class="form-check">
-                                                <input class="form-check-input"
-                                                       {% if configuration.isHeaders %}checked{% endif %} type="checkbox"
-                                                       id="headers" name="headers" value="1" aria-describedby="headersHelp">
-                                                <label class="form-check-label" for="headers">
-                                                    Yes
-                                                </label><br>
-                                                <small id="headersHelp" class="form-text text-muted">
-                                                    Select this checkbox when your importable file is a CSV-like file and has headers on the first line of the
-                                                    file.
+                                    {% if 'camt' == configuration.getContentType %}
+                                        <h4>CAMT.053 options</h4>
+                                        <div class="form-group row mb-3">
+                                            <div class="col-sm-3">Use split transaction</div>
+                                            <div class="col-sm-9">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           {% if configuration.useSplit or null == configuration %}checked{% endif %}
+                                                           type="checkbox" id="usesplit" name="usesplit" value="1"
+                                                           aria-describedby="usesplitHelp">
+                                                    <label class="form-check-label" for="usesplit">
+                                                        Yes
+                                                    </label>
+                                                    <small id="usesplitHelp" class="form-text text-muted">
+                                                        <br>Select if you want Firefly III to create Split transactions for grouped bookings (e.g. if a Level-C Entry contains multiple Level-D Entries)
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row mb-3">
+                                            <div class="col-sm-3">Opposing part: use entire address</div>
+                                            <div class="col-sm-9">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           {% if configuration.useEntireOpposingAddress or null == configuration %}checked{% endif %}
+                                                           type="checkbox" id="useEntireOpposingAddress" name="useEntireOpposingAddress" value="1"
+                                                           aria-describedby="useEntireOpposingAddressHelp">
+                                                    <label class="form-check-label" for="useEntireOpposingAddress">
+                                                        Yes
+                                                    </label>
+                                                    <small id="useEntireOpposingAddressHelp" class="form-text text-muted">
+                                                        <br>By default, only the "name" is used. If not available, then only the address.<br>Select, if you want to use both values (if available in Level-D)
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if 'csv' == configuration.getContentType %}
+                                        <h5>File options</h5>
+                                        <div class="form-group row mb-3">
+                                            <div class="col-sm-3">Headers</div>
+                                            <div class="col-sm-9">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           {% if configuration.isHeaders %}checked{% endif %} type="checkbox"
+                                                           id="headers" name="headers" value="1" aria-describedby="headersHelp">
+                                                    <label class="form-check-label" for="headers">
+                                                        Yes
+                                                    </label><br>
+                                                    <small id="headersHelp" class="form-text text-muted">
+                                                        Select this checkbox when your importable file is a CSV-like file and has headers on the first line of the
+                                                        file.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row mb-3">
+                                            <div class="col-sm-3">Convert to UTF-8</div>
+                                            <div class="col-sm-9">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           {% if configuration.isConversion %}checked{% endif %} type="checkbox"
+                                                           id="conversion" name="conversion" value="1"
+                                                           aria-describedby="conversionHelp">
+                                                    <label class="form-check-label" for="conversion">
+                                                        Yes
+                                                    </label><br>
+                                                    <small id="conversionHelp" class="form-text text-muted">
+                                                        Try to convert your file to UTF-8. May lead to weird characters.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label for="delimiter" class="col-sm-3 col-form-label">CSV-file delimiter</label>
+                                            <div class="col-sm-9">
+                                                <select id="delimiter" name="delimiter" class="form-control"
+                                                        aria-describedby="delimiterHelp">
+                                                    <option value="comma"
+                                                            {% if configuration.getDelimiter == 'comma' %}selected{% endif %}
+                                                            label="A comma (,)">A comma (,)
+                                                    </option>
+                                                    <option value="semicolon"
+                                                            {% if configuration.getDelimiter == 'semicolon' %}selected{% endif %}
+                                                            label="A semicolon (;)">A semicolon (;)
+                                                    </option>
+                                                    <option value="tab"
+                                                            {% if configuration.getDelimiter == 'tab' %}selected{% endif %}
+                                                            label="A tab (invisible)">A tab (invisible)
+                                                    </option>
+                                                </select>
+                                                <small id="delimiterHelp" class="form-text text-muted">
+                                                    If your file is a CSV file, select the field separator of the file. This is almost always a comma.
                                                 </small>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="form-group row mb-3">
-                                        <div class="col-sm-3">Convert to UTF-8</div>
-                                        <div class="col-sm-9">
-                                            <div class="form-check">
-                                                <input class="form-check-input"
-                                                       {% if configuration.isConversion %}checked{% endif %} type="checkbox"
-                                                       id="conversion" name="conversion" value="1"
-                                                       aria-describedby="conversionHelp">
-                                                <label class="form-check-label" for="conversion">
-                                                    Yes
-                                                </label><br>
-                                                <small id="conversionHelp" class="form-text text-muted">
-                                                    Try to convert your file to UTF-8. May lead to weird characters.
+
+                                        <div class="form-group row mb-3">
+                                            <label for="date" class="col-sm-3 col-form-label">Date format</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" name="date" class="form-control" id="date"
+                                                       placeholder="Date format"
+                                                       value="{{ configuration.getDate|default('Y-m-d') }}"
+                                                       aria-describedby="dateHelp">
+                                                <small id="dateHelp" class="form-text text-muted">
+                                                    Use this box to set the date format as it can be found in your file. You can
+                                                    use
+                                                    the format as described
+                                                    <a href="https://www.php.net/manual/en/datetime.format.php">on this page</a>.
+                                                    Don't stop playing with this setting until <strong
+                                                        id="date_example">1984-09-17</strong> matches what you see in your
+                                                    importable file.
                                                 </small>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="form-group row mb-3">
-                                        <label for="delimiter" class="col-sm-3 col-form-label">CSV-file delimiter</label>
-                                        <div class="col-sm-9">
-                                            <select id="delimiter" name="delimiter" class="form-control"
-                                                    aria-describedby="delimiterHelp">
-                                                <option value="comma"
-                                                        {% if configuration.getDelimiter == 'comma' %}selected{% endif %}
-                                                        label="A comma (,)">A comma (,)
-                                                </option>
-                                                <option value="semicolon"
-                                                        {% if configuration.getDelimiter == 'semicolon' %}selected{% endif %}
-                                                        label="A semicolon (;)">A semicolon (;)
-                                                </option>
-                                                <option value="tab"
-                                                        {% if configuration.getDelimiter == 'tab' %}selected{% endif %}
-                                                        label="A tab (invisible)">A tab (invisible)
-                                                </option>
-                                            </select>
-                                            <small id="delimiterHelp" class="form-text text-muted">
-                                                If your file is a CSV file, select the field separator of the file. This is almost always a comma.
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row mb-3">
-                                        <label for="date" class="col-sm-3 col-form-label">Date format</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" name="date" class="form-control" id="date"
-                                                   placeholder="Date format"
-                                                   value="{{ configuration.getDate|default('Y-m-d') }}"
-                                                   aria-describedby="dateHelp">
-                                            <small id="dateHelp" class="form-text text-muted">
-                                                Use this box to set the date format as it can be found in your file. You can
-                                                use
-                                                the format as described
-                                                <a href="https://www.php.net/manual/en/datetime.format.php">on this page</a>.
-                                                Don't stop playing with this setting until <strong
-                                                    id="date_example">1984-09-17</strong> matches what you see in your
-                                                importable file.
-                                            </small>
-                                        </div>
-                                    </div>
+                                    {% endif %}
                                 {% endif %}
 
 
