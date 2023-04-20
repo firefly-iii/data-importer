@@ -1,0 +1,1831 @@
+{% extends "./layout/default" %}
+{% import "roles-macros.twig" as roleasssistant %}
+{% block content %}
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <h1>{{ mainTitle }}</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        {{ subTitle }}
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            As there are different implementation-standards, some fields used may vary.
+                        </p>
+                        <!--<p>
+                            Each field in your importable file has a role, it contains a specific type of content.
+                            By configuring these roles here, you tell the importer how to approach and treat
+                            the data in each field. <a target="_blank"
+                                                        href="https://docs.firefly-iii.org/data-importer/usage/roles/">Read
+                                the documentation</a> to learn more
+                            about this process.
+                        </p>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if not errors.isEmpty %}
+            <div class="row mt-3">
+                <div class="col-lg-10 offset-lg-1">
+                    <div class="card">
+                        <div class="card-header">
+                            Errors :(
+                        </div>
+                        <div class="card-body">
+                            <p class="text-danger">Some error(s) occurred:</p>
+                            <ul>
+                                {% for error in errors.all %}
+                                    <li class="text-danger">{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        Role configuration
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+                            <h4>Level A (Group Header)</h4>
+                            <p>
+                                <b>Message-Layer</b>: Global information for all transactions in this camt.053 file.
+                                <span class="text-muted small">Those data aren't used by an average user.</span>
+                            </p>
+                            <table class="table">
+                                <tr>
+                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
+                                    <th width="200">Example Data</th>
+                                    <th width="300">Role</th>
+                                    <th>Map data?</th>
+                                </tr>
+                                    <tr>
+                                        <td>Message ID<td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[messageId"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Creation Date<td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Page Number<td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                            </table>
+                            <h4>Level B (Statement)</h4>
+                            <p>
+                                <b>Account-Layer</b>: Informations about the banking account concerned (The amount of possible "Statements" in a file depends on the implementation-standard used. Some banks only allow one statement per file).
+                            </p>
+                            <table class="table">
+                                <tr>
+                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
+                                    <th width="200">Example Data</th>
+                                    <th width="300">Role</th>
+                                    <th>Map data?</th>
+                                </tr>
+                                    <tr>
+                                        <td>Statement ID
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Creation Date
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Account IBAN
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}
+                                            <br>
+                                                <span class="text-muted small">
+                                                    Normaly used to dected the account concerned.
+                                                </span></td>
+                                            
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                            </table>
+                            <h4>Level C (Entry)</h4>
+                            <p>
+                                <b>Amount-Level</b>: Informations about the booking itself. Take note, that a booking might be a grop of several transactions.
+                            </p>
+                            TBD: ⚠️ You have chosen not to split grouped bookings, so fields of "Level D (Entry Details" can't be assigned to a role. If this is a mistake, correct your setting on the previous page.
+                            <p>
+                            </p>
+                            <table class="table">
+                                <tr>
+                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
+                                    <th width="200">Example Data</th>
+                                    <th width="300">Role</th>
+                                    <th>Map data?</th>
+                                </tr>
+                                    <tr>
+                                        <td>Entry Reference
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Booking Date
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Value Date
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Account Service Reference
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>A Service Reference
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Asset Account</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Account Number
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Account IBAN
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Opposing Account</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Account Number
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Account IBAN
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Account Name
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Transaction</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Currency Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                        {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Foreign Currency Amount
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Foreign Currency Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Banking Transaction Code (BTC)</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Domain Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Domain Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Family Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Family Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SubFamily Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SubFamily Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                            </table>
+                            <h4>Level D (Entry Details)</h4>
+                            <p>
+                                <b>Amount-Details</b>: Detailed informations about the transaction/s within a Entry. There might be one record with details to the Entry or multiple transactions.<br>These fields can't be assigned if "Use split transaction" is disabled.
+                            </p>
+                            <table class="table">
+                                <tr>
+                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
+                                    <th width="200">Example Data</th>
+                                    <th width="300">Role</th>
+                                    <th>Map data?</th>
+                                </tr>
+                                <tr>
+                                        <td>Account Service Reference
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Banking Transaction Code (BTC)</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Domain Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Domain Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Family Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Family Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SubFamily Code
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>SubFamily Description
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                <br/>
+                                                <span class="text-muted small">This is the unique column</span>
+                                            {% endif %}</td>
+                                        <td>
+                                            {% if examples[index]|length > 0 %}
+                                                {% for example in examples[index] %}
+                                                    <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                {#
+                                                User cannot select a role because its the unique column so it MUST be this role.
+                                                #}
+                                                <p class="form-text">
+                                                    <span class="text-muted small">
+                                                        This column is your unique identifier, so it will be fixed to
+                                                    </span>
+                                                    <code class="small">{{ configuration.getUniqueColumnType }}</code>
+                                                </p>
+                                                {# smart users can overrule this of course. #}
+                                                <input type="hidden" name="roles[{{ index }}]"
+                                                       value="{{ configuration.getUniqueColumnType }}"/>
+                                            {% else %}
+                                                <select name="roles[{{ index }}]" id="roles_{{ index }}"
+                                                        class="form-control">
+                                                    {{ roleasssistant.options(roles) }}
+                                                </select>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <label for="do_mapping_{{ index }}">
+                                                {# reverse if statement is pretty sloppy but OK. #}
+                                                {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
+                                                    &nbsp;
+                                                {% else %}
+                                                    <input type="checkbox"
+                                                           {% if configuredDoMapping[index] %}checked{% endif %}
+                                                           name="do_mapping[{{ index }}]" id="do_mapping_{{ index }}"
+                                                           value="1"/>
+                                                {% endif %}
+                                            </label>
+                                        </td>
+                                    </tr>
+                            </table>
+                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
+                                    class="fas fa-arrow-left"></span> Go back to configuration</a>
+                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
+                                    class="fas fa-redo-alt"></span> Start over</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--
+    <div class="row">
+                                <div class="col-lg-6">
+
+    </div>
+    <div class="col-lg-6">
+
+    </div>
+    </div>
+    -->
+{% endblock %}
+

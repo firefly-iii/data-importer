@@ -1,6 +1,6 @@
 <?php
 /*
- * csv.php
+ * camt.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -29,24 +29,8 @@ use App\Services\CSV\Conversion\Task\EmptyAccounts;
 use App\Services\CSV\Conversion\Task\EmptyDescription;
 use App\Services\CSV\Conversion\Task\PositiveAmount;
 use App\Services\CSV\Conversion\Task\Tags;
-
+// TODO -> clean up, remove CSV parts... add missing parts
 return [
-    'delimiters'            => [
-        'comma'     => ',',
-        'semicolon' => ';',
-        'tab'       => "\t",
-        ','         => ',',
-        ';'         => ';',
-        "\t"        => "\t",
-    ],
-    'delimiters_reversed'   => [
-        'comma'     => 'comma',
-        'semicolon' => 'semicolon',
-        'tab'       => 'tab',
-        ','         => 'comma',
-        ';'         => 'semicolon',
-        "\t"        => 'tab',
-    ],
     // csv config
     'classic_roles'         => [
         'original-source'    => 'original_source',
@@ -101,7 +85,7 @@ return [
      * I don't believe this value is used any more, but I am not sure.
      *
      * 'converter'
-     * The converter is a class in app/Service/CSV/Converter that converts the given value into an object Firefly understands.
+     * The converter is a class in app/Service/Camt/Converter that converts the given value into an object Firefly understands.
      * The CategoryName converter can convert a category name into an actual category. This converter will take a mapping
      * into account: if you mapped "Groceries" to category "Groceries" the converter will simply return "Groceries" instead of
      * trying to make a new category also named Groceries.
@@ -114,7 +98,7 @@ return [
      *
      *
      */
-    'import_roles'          => [
+    'import_roles'          => [ // TODO add group of roles here
         '_ignore'               => [
             'mappable'        => false,
             'pre-process-map' => false,
