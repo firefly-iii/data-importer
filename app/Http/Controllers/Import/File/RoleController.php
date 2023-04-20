@@ -238,7 +238,7 @@ class RoleController extends Controller
 
         return view(
             'import.005-roles.index-camt',
-            compact('mainTitle','subTitle','roles'
+            compact('mainTitle','subTitle','roles')
         );
     }
 
