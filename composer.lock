@@ -1428,16 +1428,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v10.7.1",
+            "version": "v10.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "ddbbb2b50388721fe63312bb4469cae13163fd36"
+                "reference": "317d7ccaeb1bbf4ac3035efe225ef2746c45f3a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/ddbbb2b50388721fe63312bb4469cae13163fd36",
-                "reference": "ddbbb2b50388721fe63312bb4469cae13163fd36",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/317d7ccaeb1bbf4ac3035efe225ef2746c45f3a8",
+                "reference": "317d7ccaeb1bbf4ac3035efe225ef2746c45f3a8",
                 "shasum": ""
             },
             "require": {
@@ -1624,7 +1624,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2023-04-11T14:11:49+00:00"
+            "time": "2023-04-18T13:45:33+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -7382,16 +7382,16 @@
         },
         {
             "name": "nunomaduro/larastan",
-            "version": "2.5.1",
+            "version": "v2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nunomaduro/larastan.git",
-                "reference": "072e2c9566ae000bf66c92384fc933b81885244b"
+                "reference": "ccac5b25949576807862cf32ba1fce1769c06c42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nunomaduro/larastan/zipball/072e2c9566ae000bf66c92384fc933b81885244b",
-                "reference": "072e2c9566ae000bf66c92384fc933b81885244b",
+                "url": "https://api.github.com/repos/nunomaduro/larastan/zipball/ccac5b25949576807862cf32ba1fce1769c06c42",
+                "reference": "ccac5b25949576807862cf32ba1fce1769c06c42",
                 "shasum": ""
             },
             "require": {
@@ -7405,7 +7405,7 @@
                 "illuminate/support": "^9.47.0 || ^10.0.0",
                 "php": "^8.0.2",
                 "phpmyadmin/sql-parser": "^5.6.0",
-                "phpstan/phpstan": "~1.10.3"
+                "phpstan/phpstan": "~1.10.6"
             },
             "require-dev": {
                 "nikic/php-parser": "^4.15.2",
@@ -7454,7 +7454,7 @@
             ],
             "support": {
                 "issues": "https://github.com/nunomaduro/larastan/issues",
-                "source": "https://github.com/nunomaduro/larastan/tree/2.5.1"
+                "source": "https://github.com/nunomaduro/larastan/tree/v2.6.0"
             },
             "funding": [
                 {
@@ -7474,7 +7474,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2023-03-04T23:46:40+00:00"
+            "time": "2023-04-20T12:40:01+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -7787,16 +7787,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "1.18.1",
+            "version": "1.20.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "22dcdfd725ddf99583bfe398fc624ad6c5004a0f"
+                "reference": "90490bd8fd8530a272043c4950c180b6d0cf5f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/22dcdfd725ddf99583bfe398fc624ad6c5004a0f",
-                "reference": "22dcdfd725ddf99583bfe398fc624ad6c5004a0f",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/90490bd8fd8530a272043c4950c180b6d0cf5f81",
+                "reference": "90490bd8fd8530a272043c4950c180b6d0cf5f81",
                 "shasum": ""
             },
             "require": {
@@ -7826,9 +7826,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.18.1"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.20.2"
             },
-            "time": "2023-04-07T11:51:11+00:00"
+            "time": "2023-04-22T12:59:35+00:00"
         },
         {
             "name": "phpstan/phpstan",
