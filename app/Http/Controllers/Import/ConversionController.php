@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
+use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
@@ -160,7 +161,17 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-            $routine = new CSVRoutineManager($identifier);
+            $contentType = $configuration->getContentType();
+            switch($contentType) {
+                default:
+                case 'unknown':
+                case 'csv':
+                    $routine = new CSVRoutineManager($identifier);
+                    break;
+                case 'camt':
+                    $routine = new CAMTRoutineManager($identifier); // why do we need this one?
+                    break;
+            }
         }
         if ('nordigen' === $flow) {
             $routine = new NordigenRoutineManager($identifier);
