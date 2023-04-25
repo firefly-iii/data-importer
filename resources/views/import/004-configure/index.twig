@@ -184,9 +184,24 @@
                                     {% if 'camt' == configuration.getContentType %}
                                         <h4>CAMT.053 options</h4>
                                         <div class="form-group row mb-3">
-                                            <div class="col-sm-3">Use split transaction</div>
+                                            <div class="col-sm-3">How to handle Level-D data</div>
                                             <div class="col-sm-9">
-                                                <div class="form-check">
+                                            <select id="grouped_transaction_handling" name="grouped_transaction_handling"
+                                                class="form-control" aria-describedby="grouped_transaction_handling_help">
+                                            <option label="Create a single booking for each transaction"
+                                                    {% if configuration.grouped_transaction_handling == 'single' %}selected{% endif %}
+                                                    value="single">Create maultiple single bookings, for each Level-D record a single entry
+                                            </option>
+                                            <option label="Create one splitted booking with all transactions"
+                                                    {% if configuration.grouped_transaction_handling == 'split' %}selected{% endif %}
+                                                    value="split">Create a Split-Booking which contains all Level-D records
+                                            </option>
+                                            <option label="Group-Booking only (loss of details)"
+                                                    {% if configuration.grouped_transaction_handling == 'group' %}selected{% endif %}
+                                                    value="group">Drop the Level-D Data and take the sum of all amounts (loss of details, not recommended)
+                                            </option>
+                                        </select>
+                                                <!--<div class="form-check">
                                                     <input class="form-check-input"
                                                            {% if configuration.useSplit or null == configuration %}checked{% endif %}
                                                            type="checkbox" id="usesplit" name="usesplit" value="1"
@@ -195,9 +210,9 @@
                                                         Yes
                                                     </label>
                                                     <small id="usesplitHelp" class="form-text text-muted">
-                                                        <br>Select if you want Firefly III to create Split transactions for grouped bookings (e.g. if a Level-C Entry contains multiple Level-D Entries)
+                                                        <br>Choose how you want Firefly III to create handle grouped bookings (e.g. if a Level-C Entry contains multiple Level-D Entries)
                                                     </small>
-                                                </div>
+                                                </div>-->
                                             </div>
                                         </div>
                                         <div class="form-group row mb-3">
@@ -205,13 +220,13 @@
                                             <div class="col-sm-9">
                                                 <div class="form-check">
                                                     <input class="form-check-input"
-                                                           {% if configuration.useEntireOpposingAddress or null == configuration %}checked{% endif %}
-                                                           type="checkbox" id="useEntireOpposingAddress" name="useEntireOpposingAddress" value="1"
+                                                           {% if configuration.use_entire_opposing_address or null == configuration %}checked{% endif %}
+                                                           type="checkbox" id="use_entire_opposing_address" name="use_entire_opposing_address" value="1"
                                                            aria-describedby="useEntireOpposingAddressHelp">
-                                                    <label class="form-check-label" for="useEntireOpposingAddress">
+                                                    <label class="form-check-label" for="use_entire_opposing_address">
                                                         Yes
                                                     </label>
-                                                    <small id="useEntireOpposingAddressHelp" class="form-text text-muted">
+                                                    <small id="use_entire_opposing_address_help" class="form-text text-muted">
                                                         <br>By default, only the "name" is used. If not available, then only the address.<br>Select, if you want to use both values (if available in Level-D)
                                                     </small>
                                                 </div>
