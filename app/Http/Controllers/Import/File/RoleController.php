@@ -116,7 +116,8 @@ class RoleController extends Controller
             case 'csv':
                 return $this->csvPostIndex($request, $configuration);
             case 'camt':
-                return $this->camtPostIndex($request, $configuration);
+                return $this->csvPostIndex($request, $configuration);
+                //return $this->camtPostIndex($request, $configuration);
 
         }
     }
@@ -238,7 +239,7 @@ class RoleController extends Controller
 
         return view(
             'import.005-roles.index-camt',
-            compact('mainTitle','subTitle','roles')
+            compact('mainTitle','configuration','subTitle','roles')
         );
     }
 
@@ -250,6 +251,6 @@ class RoleController extends Controller
      */
     private function camtPostIndex(RolesPostRequest $request, Configuration $configuration)
     {
-        die('not yet implemented.');
+        die('not yet implemented.'); // csvPostIndex is used
     }
 }
