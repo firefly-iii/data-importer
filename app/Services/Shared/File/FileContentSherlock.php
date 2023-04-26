@@ -30,11 +30,11 @@ use Genkgo\Camt\Reader;
  */
 class FileContentSherlock
 {
-    public $camtReader;
+    public Reader $camtReader;
 
     public function __construct()
     {
-        $this->camtReader = new \Genkgo\Camt\Reader(\Genkgo\Camt\Config::getDefault());
+        $this->camtReader = new Reader(Config::getDefault());
     }
 
     public function detectContentType(?string $file): string
@@ -51,13 +51,6 @@ class FileContentSherlock
             app('log')->debug('CAMT.053 Check on file: negative');
             //app('log')->debug($e->getMessage());
         }
-        // some pseudo code below:
-        /*
-         * $content= file_get_contents($file);
-         * if($this->isCamtFile($content)) {
-         * return 'camt';
-         * }
-         */
 
         return 'csv';
     }
@@ -75,12 +68,6 @@ class FileContentSherlock
             app('log')->debug('CAMT.053 Check of content: negative');
             //app('log')->debug($e->getMessage());
         }
-        // some pseudo code below:
-        /*
-         * if($this->isCamtFile($content)) {
-         * return 'camt';
-         * }
-         */
 
         return 'csv';
     }

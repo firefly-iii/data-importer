@@ -62,7 +62,11 @@ class ConfigurationPostRequest extends Request
             'mapping'                       => [],
             'do_mapping'                    => [],
             'flow'                          => $this->convertToString('flow'),
-            'content_type'                          => $this->convertToString('content_type'),
+            'content_type'                  => $this->convertToString('content_type'),
+
+            // camt options
+            'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
+            'use_entire_opposing_address'   => $this->convertBoolean('use_entire_opposing_address'),
 
             // duplicate detection:
             'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),
@@ -114,6 +118,10 @@ class ConfigurationPostRequest extends Request
             'skip_form'                     => 'numeric|between:0,1',
             'add_import_tag'                => 'numeric|between:0,1',
             'ignore_spectre_categories'     => 'numeric|between:0,1',
+
+            // camt options, if present:
+            'use_entire_opposing_address'   => 'numeric|between:0,1',
+            'grouped_transaction_handling'  => 'in:single,split,group',
 
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',

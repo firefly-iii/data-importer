@@ -67,6 +67,10 @@ class Configuration
     private bool $ignoreDuplicateTransactions;
     private bool $ignoreSpectreCategories;
 
+    // camt configuration
+    private string $groupedTransactionHandling;
+    private bool   $useEntireOpposingAddress;
+
     // date range settings
     private bool   $mapAllData;
     private array  $mapping;
@@ -117,6 +121,10 @@ class Configuration
         $this->dateRangeUnit   = 'd';
         $this->dateNotBefore   = '';
         $this->dateNotAfter    = '';
+
+        // camt settings
+        $this->groupedTransactionHandling = 'single';
+        $this->useEntireOpposingAddress   = false;
 
         // nordigen configuration
         $this->nordigenCountry      = '';
@@ -197,6 +205,10 @@ class Configuration
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'file';
         $object->contentType    = $data['content_type'] ?? 'unknown';
+
+        // camt settings
+        $object->groupedTransactionHandling = $data['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $data['use_entire_opposing_address'] ?? false;
 
         // other settings (are not in v1 anyway)
         $object->dateRange       = $data['date_range'] ?? 'all';
@@ -346,6 +358,9 @@ class Configuration
         $object->dateNotBefore   = $array['date_not_before'] ?? '';
         $object->dateNotAfter    = $array['date_not_after'] ?? '';
 
+        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
+
         // nordigen information:
         $object->nordigenCountry      = $array['nordigen_country'] ?? '';
         $object->nordigenBank         = $array['nordigen_bank'] ?? '';
@@ -434,6 +449,9 @@ class Configuration
         $object->nordigenBank         = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
         $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
+
+        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
 
         // spectre + nordigen
         $object->accounts = $array['accounts'] ?? [];
@@ -1024,5 +1042,23 @@ class Configuration
     {
         $this->contentType = $contentType;
     }
+
+    /**
+     * @return string
+     */
+    public function getGroupedTransactionHandling(): string
+    {
+        return $this->groupedTransactionHandling;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUseEntireOpposingAddress(): bool
+    {
+        return $this->useEntireOpposingAddress;
+    }
+
+
 
 }

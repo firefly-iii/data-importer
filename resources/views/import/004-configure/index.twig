@@ -55,7 +55,7 @@
                             {% if 'file' == flow %}
                             <p>
                             {% if 'camt' == configuration.getContentType %}
-                                Even if camt.053 is a defined standard, you might want to customize. Some of the most important settings are below.
+                                Even though camt.053 is a defined standard, you might want to customize. Some of the most important settings are below.
                                 They apply to all records in the uploaded files. If you would like some support, you won't find anything at <a
                                     href="https://docs.firefly-iii.org/data-importer/usage/configure/" target="_blank">
                                     this page.</a> right now.
@@ -201,18 +201,6 @@
                                                     value="group">Drop the Level-D Data and take the sum of all amounts (loss of details, not recommended)
                                             </option>
                                         </select>
-                                                <!--<div class="form-check">
-                                                    <input class="form-check-input"
-                                                           {% if configuration.useSplit or null == configuration %}checked{% endif %}
-                                                           type="checkbox" id="usesplit" name="usesplit" value="1"
-                                                           aria-describedby="usesplitHelp">
-                                                    <label class="form-check-label" for="usesplit">
-                                                        Yes
-                                                    </label>
-                                                    <small id="usesplitHelp" class="form-text text-muted">
-                                                        <br>Choose how you want Firefly III to create handle grouped bookings (e.g. if a Level-C Entry contains multiple Level-D Entries)
-                                                    </small>
-                                                </div>-->
                                             </div>
                                         </div>
                                         <div class="form-group row mb-3">
