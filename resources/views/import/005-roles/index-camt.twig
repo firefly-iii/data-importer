@@ -83,11 +83,13 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    {% if 0 == field.examples|length %}
+                                                    {% if 0 == field.example_data|length %}
                                                         <small class="text-muted"><em>(no example data)</em></small>
                                                     {% endif %}
-                                                    {% if 0 != field.examples|length %}
-                                                        TODO examples
+                                                    {% if 0 != field.example_data|length %}
+                                                        {% for example in field.example_data %}
+                                                            <code>{{ example }}</code><br>
+                                                        {% endfor %}
                                                     {% endif %}
                                                 </td>
                                                 <td>
@@ -98,7 +100,7 @@
                                                         <select name="roles[{{ field.title }}]" id="roles_{{ field.title }}" class="form-control">
                                                             {% for roleKey, role in field.roles %}
                                                                 <option value="{{ roleKey }}" label="{{ trans('import.column_'~roleKey) }}"
-                                                                {% if field.selected_role == roleKey %}selected="selected"{% endif %}>
+                                                                        {% if field.selected_role == roleKey %}selected="selected"{% endif %}>
                                                                     {{ trans('import.column_'~roleKey) }}
                                                                 </option>
                                                             {% endfor %}

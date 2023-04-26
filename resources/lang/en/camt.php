@@ -40,7 +40,7 @@ return [
     // field description for camt.053 import:
     'field_messageId'                                                                      => 'Message ID',
     'field_messageCreationDate'                                                            => 'Creation Date',
-    'field_messagePageNr'                                                                  => 'Page Number',
+    //'field_messagePageNr'                                                                  => 'Page Number',
     'field_statementId'                                                                    => 'Statement ID',
     'field_statementAccountIban'                                                           => 'Statement Account IBAN',
     'field_statementAccountNumber'                                                         => 'Statement Account Number',

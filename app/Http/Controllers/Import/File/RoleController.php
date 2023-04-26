@@ -235,6 +235,10 @@ class RoleController extends Controller
         $mainTitle = 'Role definition';
         $subTitle  = 'Configure the role of each field in your camt.053 file';
 
+        // get example data from file.
+        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $examples = RoleService::getExampleDataFromCamt($content, $configuration);
+
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
 
@@ -250,7 +254,7 @@ class RoleController extends Controller
                         'roles'         => config('camt.roles.level_a'),
                         'mappable'      => false,
                         'selected_role' => 'note', // todo from config
-                        'example_data'  => [], // TODO make example data.
+                        'example_data'  => $examples['messageId']
                     ],
                 ],
             ],
@@ -264,7 +268,7 @@ class RoleController extends Controller
                         'roles'         => config('camt.roles.dates'),
                         'mappable'      => false,
                         'selected_role' => 'date_process',
-                        'example_data'  => [],
+                        'example_data'  => $examples['statementCreationDate'],
                     ],
                     [
                         'section'       => false,
@@ -272,7 +276,7 @@ class RoleController extends Controller
                         'selected_role' => 'account-iban',
                         'roles'         => config('camt.roles.iban'),
                         'mappable'      => true,
-                        'example_data'  => [],
+                        'example_data'  => $examples['statementAccountIban'],
                     ],
                     [
                         'section'       => false,
@@ -280,7 +284,7 @@ class RoleController extends Controller
                         'selected_role' => 'account-number',
                         'roles'         => config('camt.roles.account_number'),
                         'mappable'      => true,
-                        'example_data'  => [],
+                        'example_data'  => $examples['statementAccountNumber'],
                     ],
                 ],
             ],
@@ -294,6 +298,7 @@ class RoleController extends Controller
                         'selected_role' => 'date_transaction',
                         'roles'         => config('camt.roles.dates'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryDate'],
                     ],
                     [
                         'section'       => false,
@@ -301,6 +306,7 @@ class RoleController extends Controller
                         'selected_role' => 'external-id',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryAccountServicerReference'],
                     ],
                     [
                         'section'       => false,
@@ -308,6 +314,7 @@ class RoleController extends Controller
                         'selected_role' => 'internal_reference',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryReference'],
                     ],
                     [
                         'section'       => false,
@@ -315,6 +322,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryAdditionalInfo'],
                     ],
                     //
                     [
@@ -328,6 +336,7 @@ class RoleController extends Controller
                         'selected_role' => 'amount',
                         'roles'         => config('camt.roles.amount'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryAmount'],
                     ],
                     // entryAmountCurrency
                     [
@@ -336,6 +345,7 @@ class RoleController extends Controller
                         'selected_role' => 'currency-code',
                         'roles'         => config('camt.roles.currency'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryAmountCurrency'],
                     ],
                     // entryValueDate
                     [
@@ -344,6 +354,7 @@ class RoleController extends Controller
                         'selected_role' => 'date_payment',
                         'roles'         => config('camt.roles.dates'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryValueDate'],
                     ],
                     // entryBookingDate
                     [
@@ -352,6 +363,7 @@ class RoleController extends Controller
                         'selected_role' => 'date_book',
                         'roles'         => config('camt.roles.dates'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBookingDate'],
                     ],
                     [
                         'section' => true,
@@ -364,6 +376,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcDomainCode'],
                     ],
                     // entryBtcFamilyCode
                     [
@@ -372,6 +385,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcFamilyCode'],
                     ],
                     // entryBtcSubFamilyCode
                     [
@@ -380,6 +394,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcSubFamilyCode'],
                     ],
                     [
                         'section' => true,
@@ -392,6 +407,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-iban',
                         'roles'         => config('camt.roles.iban'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingAccountIban'],
                     ],
                     // entryDetailOpposingAccountNumber
                     [
@@ -400,6 +416,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-number',
                         'roles'         => config('camt.roles.account_number'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingAccountNumber'],
                     ],
                     // entryDetailOpposingName
                     [
@@ -408,6 +425,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-name',
                         'roles'         => config('camt.roles.account_name'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingName'],
                     ],
 
 
@@ -424,6 +442,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryDetailAccountServicerReference'],
                     ],
                     // entryDetailRemittanceInformationUnstructuredBlockMessage
                     [
@@ -432,6 +451,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryDetailRemittanceInformationUnstructuredBlockMessage'],
                     ],
                     // entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation
                     [
@@ -440,6 +460,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'],
                     ],
 
                     // section_transaction
@@ -454,6 +475,7 @@ class RoleController extends Controller
                         'selected_role' => 'amount',
                         'roles'         => config('camt.roles.amount'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryDetailAmount'],
                     ],
                     // entryDetailAmountCurrency
                     [
@@ -462,6 +484,7 @@ class RoleController extends Controller
                         'selected_role' => 'currency-code',
                         'roles'         => config('camt.roles.currency'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailAmountCurrency'],
                     ],
 
                     // section_Btc
@@ -476,6 +499,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcDomainCode'],
                     ],
                     // entryBtcFamilyCode
                     [
@@ -484,6 +508,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcFamilyCode'],
                     ],
                     // entryBtcSubFamilyCode
                     [
@@ -492,6 +517,7 @@ class RoleController extends Controller
                         'selected_role' => 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
+                        'example_data'  => $examples['entryBtcSubFamilyCode'],
                     ],
 
                     // section_opposingPart
@@ -506,6 +532,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-iban',
                         'roles'         => config('camt.roles.iban'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingAccountIban'],
                     ],
                     // entryDetailOpposingAccountNumber
                     [
@@ -514,6 +541,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-number',
                         'roles'         => config('camt.roles.account_number'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingAccountNumber'],
                     ],
                     // entryDetailOpposingName
                     [
@@ -522,6 +550,7 @@ class RoleController extends Controller
                         'selected_role' => 'opposing-name',
                         'roles'         => config('camt.roles.account_name'),
                         'mappable'      => true,
+                        'example_data'  => $examples['entryDetailOpposingName'],
                     ],
                 ],
             ],
@@ -534,6 +563,8 @@ class RoleController extends Controller
     }
 
     /**
+     * TODO is basically the same as the CSV processor.
+     *
      * @param RolesPostRequest $request
      * @param Configuration    $configuration
      *
