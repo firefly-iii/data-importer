@@ -188,7 +188,7 @@ class MapperService
         }
         // unset entries with zero values.
         foreach ($data as $title => $info) {
-            if(0 === count($info['values'])) {
+            if (0 === count($info['values'])) {
                 unset($data[$title]);
             }
         }

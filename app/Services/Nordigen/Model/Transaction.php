@@ -36,52 +36,52 @@ use Validator;
  */
 class Transaction
 {
-    public string $accountIdentifier;
+    public string  $accountIdentifier;
     public string  $additionalInformation;
     public string  $additionalInformationStructured;
     public Balance $balanceAfterTransaction;
     public string  $bankTransactionCode;
     public ?Carbon $bookingDate;
     public string  $checkId;
-    public string $creditorAccountBban;
-    public string $creditorAccountCurrency;
-    public string $creditorAccountIban; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
+    public string  $creditorAccountBban;
+    public string  $creditorAccountCurrency;
+    public string  $creditorAccountIban; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
     // TODO use currency exchange info in notes
-    public string  $creditorAgent;
-    public string  $creditorId;
-    public string  $creditorName;
+    public string $creditorAgent;
+    public string $creditorId;
+    public string $creditorName;
     public string $currencyCode;
-    public array   $currencyExchange;
+    public array  $currencyExchange;
     public string $debtorAccountBban;
     public string $debtorAccountCurrency;
     public string $debtorAccountIban;
-    public string  $debtorAgent;
-    public string  $debtorName;
+    public string $debtorAgent;
+    public string $debtorName;
     public string $endToEndId;
-    public string  $entryReference;
-    public string  $key;
-    public string  $mandateId;
-    public string  $proprietaryBank;
+    public string $entryReference;
+    public string $key;
+    public string $mandateId;
+    public string $proprietaryBank;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
-    public string  $purposeCode;
-    public string  $remittanceInformationStructured;
-    public array   $remittanceInformationStructuredArray;
+    public string $purposeCode;
+    public string $remittanceInformationStructured;
+    public array  $remittanceInformationStructuredArray;
 
     // creditorAccount is an array, but saved as strings:
     // iban, currency
-    public string  $remittanceInformationUnstructured;
-    public array   $remittanceInformationUnstructuredArray;
+    public string $remittanceInformationUnstructured;
+    public array  $remittanceInformationUnstructuredArray;
     public string $transactionAmount;
 
     // transactionAmount is an array, but is saved as strings
     // amount, currency
-    public string  $transactionId;
-    public string  $ultimateCreditor;
+    public string $transactionId;
+    public string $ultimateCreditor;
 
     // my own custom fields
-    public string  $ultimateDebtor;
+    public string $ultimateDebtor;
 
     // undocumented fields
     public ?Carbon $valueDate;

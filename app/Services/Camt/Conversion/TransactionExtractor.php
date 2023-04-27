@@ -35,10 +35,10 @@ class TransactionExtractor
                 }
                 if (0 !== $count) {
                     $handling = $this->configuration->getGroupedTransactionHandling();
-                    if('split' === $handling) {
+                    if ('split' === $handling) {
                         $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
                     }
-                    if('single' === $handling) {
+                    if ('single' === $handling) {
                         foreach ($entry->getTransactionDetails() as $detail) {
                             $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, [$detail]);
                         }

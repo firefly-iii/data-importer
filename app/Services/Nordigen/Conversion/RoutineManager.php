@@ -42,9 +42,9 @@ class RoutineManager implements RoutineManagerInterface
     use IsRunningCli;
     use GeneratesIdentifier;
 
-    private array $allErrors;
-    private array $allMessages;
-    private array $allWarnings;
+    private array                $allErrors;
+    private array                $allMessages;
+    private array                $allWarnings;
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
     private GenerateTransactions $transactionGenerator;

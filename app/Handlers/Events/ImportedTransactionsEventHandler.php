@@ -70,7 +70,7 @@ class ImportedTransactionsEventHandler
             app('log')->debug('If no error below this line, mail was sent!');
             try {
                 Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
-            } catch(TransportException $e) {
+            } catch (TransportException $e) {
                 app('log')->error('Could not send mail. See error below');
                 app('log')->error($e->getMessage());
             }

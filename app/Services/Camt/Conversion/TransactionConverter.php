@@ -17,27 +17,39 @@ class TransactionConverter
         $this->configuration = $configuration;
     }
 
-    public function convert(array $transactions): array {
+    /**
+     * @param array $transactions
+     *
+     * @return array
+     */
+    public function convert(array $transactions): array
+    {
         $result = [];
         /** @var Transaction $transaction */
-        foreach($transactions as $transaction) {
+        foreach ($transactions as $transaction) {
             $result[] = $this->convertSingle($transaction);
         }
+
         return $result;
     }
 
+    /**
+     * @param Transaction $transaction
+     *
+     * @return array
+     */
     private function convertSingle(Transaction $transaction): array
     {
         $result = [
             'group_title'             => null,
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions' => [],
+            'transactions'            => [],
         ];
-        $count = $transaction->countSplits();
-        $count = 0 === $count ? 1 : $count; // add at least one transaction:
-        for($i=0;$i<$count;$i++) {
+        $count  = $transaction->countSplits();
+        $count  = 0 === $count ? 1 : $count; // add at least one transaction:
+        for ($i = 0; $i < $count; $i++) {
             // add a transaction:
-            $current = [
+            $current                  = [
                 'type'             => 'unknown',
                 'date'             => $transaction->getDate($i),
                 'currency_code'    => $transaction->getCurrencyCode($i),
@@ -53,6 +65,7 @@ class TransactionConverter
             ];
             $result['transactions'][] = $current;
         }
+
         return $result;
     }
 

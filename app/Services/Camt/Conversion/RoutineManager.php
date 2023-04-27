@@ -25,17 +25,17 @@ declare(strict_types=1);
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Camt\Transaction;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Storage\StorageService;
-use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Reader;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoutineManager
@@ -51,9 +51,9 @@ class RoutineManager implements RoutineManagerInterface
     private Configuration $configuration;
     private string        $content;
     private bool          $forceCli = false;
-
-    private TransactionExtractor $transactionExtractor;
     private TransactionConverter $transactionConverter;
+    private TransactionExtractor $transactionExtractor;
+
     /**
      *
      */
@@ -138,7 +138,7 @@ class RoutineManager implements RoutineManagerInterface
         $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
 
         // get intermediate result (still needs processing like mapping etc)
-        $pseudoTransactions =$this->transactionConverter->convert($rawTransactions);
+        $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
 
 
         // TODO -> hier muss alles ausgelesen werden
@@ -172,6 +172,27 @@ class RoutineManager implements RoutineManagerInterface
         file_put_contents('file_put_contents.txt', $transactions);
 
         return $transactions;
+    }
+
+    /**
+     * @return Message|null
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    private function getCamtMessage(): ?Message
+    {
+        $camtReader  = new Reader(Config::getDefault());
+        $camtMessage = null;
+        // check if CLI or not and read as appropriate:
+        if ('' !== $this->content) {
+            // seems the CLI part
+            $camtMessage = $camtReader->readString($this->content); // -> Level A
+        }
+        if ('' === $this->content) {
+            $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        }
+
+        return $camtMessage;
     }
 
     /**
@@ -253,26 +274,5 @@ class RoutineManager implements RoutineManagerInterface
     public function setForceCli(bool $forceCli): void
     {
         $this->forceCli = $forceCli;
-    }
-
-    /**
-     * @return Message|null
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     */
-    private function getCamtMessage(): ?Message
-    {
-        $camtReader  = new Reader(Config::getDefault());
-        $camtMessage = null;
-        // check if CLI or not and read as appropriate:
-        if ('' !== $this->content) {
-            // seems the CLI part
-            $camtMessage = $camtReader->readString($this->content); // -> Level A
-        }
-        if ('' === $this->content) {
-            $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
-        }
-
-        return $camtMessage;
     }
 }

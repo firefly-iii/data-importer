@@ -683,23 +683,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param array $transaction
-     *
-     * @return bool
-     */
-    private function hasAllCurrencies(array $transaction): bool
-    {
-        $transaction['foreign_currency_code'] = $transaction['foreign_currency_code'] ?? '';
-        $transaction['currency_code']         = $transaction['currency_code'] ?? '';
-        $transaction['amount']                = $transaction['amount'] ?? '';
-        $transaction['foreign_amount']        = $transaction['foreign_amount'] ?? '';
-
-        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
-               && '' !== (string)$transaction['amount']
-               && '' !== (string)$transaction['foreign_amount'];
-    }
-
-    /**
      * Basic check for currency info.
      *
      * @param array $transaction
@@ -747,5 +730,22 @@ class Accounts extends AbstractTask
         }
 
         return $transaction;
+    }
+
+    /**
+     * @param array $transaction
+     *
+     * @return bool
+     */
+    private function hasAllCurrencies(array $transaction): bool
+    {
+        $transaction['foreign_currency_code'] = $transaction['foreign_currency_code'] ?? '';
+        $transaction['currency_code']         = $transaction['currency_code'] ?? '';
+        $transaction['amount']                = $transaction['amount'] ?? '';
+        $transaction['foreign_amount']        = $transaction['foreign_amount'] ?? '';
+
+        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
+               && '' !== (string)$transaction['amount']
+               && '' !== (string)$transaction['foreign_amount'];
     }
 }

@@ -97,95 +97,6 @@ class RoleController extends Controller
     }
 
     /**
-     * @param RolesPostRequest $request
-     *
-     * @return RedirectResponse
-     * @throws JsonException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function postIndex(RolesPostRequest $request): RedirectResponse
-    {
-        // the request object must be able to handle all file types.
-        $configuration = $this->restoreConfiguration();
-        $contentType   = $configuration->getContentType();
-
-        switch ($contentType) {
-            default:
-                throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
-            case 'csv':
-                return $this->csvPostIndex($request, $configuration);
-            case 'camt':
-                return $this->camtPostIndex($request, $configuration);
-            //return $this->camtPostIndex($request, $configuration);
-
-        }
-    }
-
-    /**
-     * @param RolesPostRequest $request
-     * @param Configuration    $configuration
-     *
-     * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
-     */
-    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
-    {
-        $data         = $request->getAllForFile();
-        $needsMapping = $this->needMapping($data['do_mapping']);
-        $configuration->setRoles($data['roles']);
-        $configuration->setDoMapping($data['do_mapping']);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // then this is the new, full array:
-        $fullArray = $configuration->toArray();
-
-        // and it can be saved on disk:
-        $configFileName = StorageService::storeArray($fullArray);
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // this is a new config file name.
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set role config as complete.
-        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-
-        // redirect to mapping thing.
-        if (true === $needsMapping) {
-            return redirect()->route('006-mapping.index');
-        }
-        // otherwise, store empty mapping, and continue:
-        // set map config as complete.
-        session()->put(Constants::READY_FOR_CONVERSION, true);
-
-        return redirect()->route('007-convert.index');
-    }
-
-    /**
-     * Will tell you if any role needs mapping.
-     *
-     * @param array $array
-     *
-     * @return bool
-     */
-    private function needMapping(array $array): bool
-    {
-        $need = false;
-        foreach ($array as $value) {
-            if (true === $value) {
-                $need = true;
-            }
-        }
-
-        return $need;
-    }
-
-    /**
      * @param Request       $request
      * @param Configuration $configuration
      *
@@ -311,6 +222,113 @@ class RoleController extends Controller
     }
 
     /**
+     * @param string $level
+     *
+     * @return array
+     */
+    private function getFieldsForLevel(string $level): array
+    {
+        $allFields = config('camt.fields');
+        $return    = [];
+        foreach ($allFields as $title => $field) {
+            if ($level === $field['level']) {
+                $return[$title] = $field;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param RolesPostRequest $request
+     *
+     * @return RedirectResponse
+     * @throws JsonException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function postIndex(RolesPostRequest $request): RedirectResponse
+    {
+        // the request object must be able to handle all file types.
+        $configuration = $this->restoreConfiguration();
+        $contentType   = $configuration->getContentType();
+
+        switch ($contentType) {
+            default:
+                throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
+            case 'csv':
+                return $this->csvPostIndex($request, $configuration);
+            case 'camt':
+                return $this->camtPostIndex($request, $configuration);
+                //return $this->camtPostIndex($request, $configuration);
+
+        }
+    }
+
+    /**
+     * @param RolesPostRequest $request
+     * @param Configuration    $configuration
+     *
+     * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
+     */
+    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    {
+        $data         = $request->getAllForFile();
+        $needsMapping = $this->needMapping($data['do_mapping']);
+        $configuration->setRoles($data['roles']);
+        $configuration->setDoMapping($data['do_mapping']);
+
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+        // then this is the new, full array:
+        $fullArray = $configuration->toArray();
+
+        // and it can be saved on disk:
+        $configFileName = StorageService::storeArray($fullArray);
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // this is a new config file name.
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // set role config as complete.
+        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
+
+        // redirect to mapping thing.
+        if (true === $needsMapping) {
+            return redirect()->route('006-mapping.index');
+        }
+        // otherwise, store empty mapping, and continue:
+        // set map config as complete.
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+
+        return redirect()->route('007-convert.index');
+    }
+
+    /**
+     * Will tell you if any role needs mapping.
+     *
+     * @param array $array
+     *
+     * @return bool
+     */
+    private function needMapping(array $array): bool
+    {
+        $need = false;
+        foreach ($array as $value) {
+            if (true === $value) {
+                $need = true;
+            }
+        }
+
+        return $need;
+    }
+
+    /**
      * TODO is basically the same as the CSV processor.
      *
      * @param RolesPostRequest $request
@@ -351,23 +369,5 @@ class RoleController extends Controller
         session()->put(Constants::READY_FOR_CONVERSION, true);
 
         return redirect()->route('007-convert.index');
-    }
-
-    /**
-     * @param string $level
-     *
-     * @return array
-     */
-    private function getFieldsForLevel(string $level): array
-    {
-        $allFields = config('camt.fields');
-        $return    = [];
-        foreach ($allFields as $title => $field) {
-            if ($level === $field['level']) {
-                $return[$title] = $field;
-            }
-        }
-
-        return $return;
     }
 }

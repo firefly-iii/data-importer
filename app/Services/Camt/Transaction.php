@@ -7,6 +7,7 @@ namespace App\Services\Camt;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
+use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
@@ -39,7 +40,11 @@ class Transaction
      * @param array         $levelD
      */
     public function __construct(
-        Configuration $configuration, Message $levelA, Statement $levelB, Entry $levelC, array $levelD
+        Configuration $configuration,
+        Message $levelA,
+        Statement $levelB,
+        Entry $levelC,
+        array $levelD
     ) {
         $this->relatedOppositeParty = null;
         $this->configuration        = $configuration;
@@ -48,6 +53,43 @@ class Transaction
         $this->levelC               = $levelC;
         $this->levelD               = $levelD;
     }
+
+    /**
+     * @return int
+     */
+    public function countSplits(): int
+    {
+        return count($this->levelD);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getCurrencyCode(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getDate(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+    }
+
+    /*public function setBTC(\Genkgo\Camt\DTO\BankTransactionCode $btc) {
+        $this->btcDomainCode = $btc->getDomain()->getCode();
+        $this->btcFamilyCode = $btc->getDomain()->getFamily()->getCode();
+        $this->btcSubFamilyCode = $btc->getDomain()->getFamily()->getSubFamilyCode();
+        // TODO get reals Description of Codes
+    }*/
 
     /**
      * @param string|null $fieldName
@@ -144,7 +186,7 @@ class Transaction
             case 'entryDetailOpposingName':
                 return '';
                 // TODO this code doesnt work yet.
-                if (empty ($this->relatedOppositeParty)) {
+                if (empty($this->relatedOppositeParty)) {
                     $ret = $this->getOpposingName();
                 }
 
@@ -178,122 +220,168 @@ class Transaction
                 return $ret;
                 break;
 
-            //            case 'entryBookingDate':
-            //                $ret = $this->levelC->getBookingDate();
-            //
-            //                return $ret;
-            //                break;
-            //            /*case 'entryTransactionDate': // same as entryBookingDate
-            //                $ret = $this->getField($entryBookingDate);
-            //                return $ret;
-            //                break;*/
-            //            case 'entryBtcDomainCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryBtcFamilyCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryBtcSubFamilyCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailAccountServicerReference': // external ID
-            //                $ret = $this->levelD->getAccountServicerReference();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailRemittanceInformationUnstructuredBlockMessage': // unstructured description
-            //                if ($remittanceInformation = $this->levelD->getRemittanceInformation()) {
-            //                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-            //                        $ret = $unstructuredRemittanceInformation->getMessage();
-            //                    }
-            //                }
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation': // structured description
-            //                if ($remittanceInformation = $this->levelD->getRemittanceInformation()) {
-            //                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-            //                        $ret = $unstructuredRemittanceInformation->getMessage();
-            //                    }
-            //                }
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailAmount':
-            //                $ret = $this->getDecimalAmount($this->levelD->getAmount());;
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailAmountCurrency':
-            //                $ret = $this->levelD->getAmount()->getCurrency()->getCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailOpposingAccountIban':
-            //                if ($account = $this->relatedParty->getAccount()) {
-            //                    if (get_class($account) === 'Genkgo\Camt\DTO\IbanAccount') {
-            //                        $ret = $account->getIdentification();
-            //                    }
-            //                }
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailOpposingAccountNumber':
-            //                if ($account = $this->relatedParty->getAccount()) {
-            //                    switch (get_class($account)) {
-            //                        case 'Genkgo\Camt\DTO\OtherAccount':
-            //                        case 'Genkgo\Camt\DTO\ProprietaryAccount':
-            //                        case 'Genkgo\Camt\DTO\UPICAccount':
-            //                        case 'Genkgo\Camt\DTO\BBANAccount':
-            //                            $ret = $account->getIdentification();
-            //                            break;
-            //                    }
-            //                }
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailOpposingName':
-            //                if (empty ($this->relatedOppositeParty)) {
-            //                    $ret = $this->getOpposingName();
-            //                }
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailBtcDomainCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailBtcFamilyCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
-            //
-            //                return $ret;
-            //                break;
-            //            case 'entryDetailBtcSubFamilyCode':
-            //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-            //
-            //                return $ret;
-            //                break;
-            /**
-             * Unused entries:
-             */
+                //            case 'entryBookingDate':
+                //                $ret = $this->levelC->getBookingDate();
+                //
+                //                return $ret;
+                //                break;
+                //            /*case 'entryTransactionDate': // same as entryBookingDate
+                //                $ret = $this->getField($entryBookingDate);
+                //                return $ret;
+                //                break;*/
+                //            case 'entryBtcDomainCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryBtcFamilyCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryBtcSubFamilyCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailAccountServicerReference': // external ID
+                //                $ret = $this->levelD->getAccountServicerReference();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailRemittanceInformationUnstructuredBlockMessage': // unstructured description
+                //                if ($remittanceInformation = $this->levelD->getRemittanceInformation()) {
+                //                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
+                //                        $ret = $unstructuredRemittanceInformation->getMessage();
+                //                    }
+                //                }
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation': // structured description
+                //                if ($remittanceInformation = $this->levelD->getRemittanceInformation()) {
+                //                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
+                //                        $ret = $unstructuredRemittanceInformation->getMessage();
+                //                    }
+                //                }
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailAmount':
+                //                $ret = $this->getDecimalAmount($this->levelD->getAmount());;
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailAmountCurrency':
+                //                $ret = $this->levelD->getAmount()->getCurrency()->getCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailOpposingAccountIban':
+                //                if ($account = $this->relatedParty->getAccount()) {
+                //                    if (get_class($account) === 'Genkgo\Camt\DTO\IbanAccount') {
+                //                        $ret = $account->getIdentification();
+                //                    }
+                //                }
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailOpposingAccountNumber':
+                //                if ($account = $this->relatedParty->getAccount()) {
+                //                    switch (get_class($account)) {
+                //                        case 'Genkgo\Camt\DTO\OtherAccount':
+                //                        case 'Genkgo\Camt\DTO\ProprietaryAccount':
+                //                        case 'Genkgo\Camt\DTO\UPICAccount':
+                //                        case 'Genkgo\Camt\DTO\BBANAccount':
+                //                            $ret = $account->getIdentification();
+                //                            break;
+                //                    }
+                //                }
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailOpposingName':
+                //                if (empty ($this->relatedOppositeParty)) {
+                //                    $ret = $this->getOpposingName();
+                //                }
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailBtcDomainCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailBtcFamilyCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                //
+                //                return $ret;
+                //                break;
+                //            case 'entryDetailBtcSubFamilyCode':
+                //                $ret = $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                //
+                //                return $ret;
+                //                break;
+                /**
+                 * Unused entries:
+                 */
 
-            //                 break;
-            //            /*            case 'entryForeignAmount':
-            //                            $ret = $this->getDecimalAmount($this->levelC->getAmount());;
-            //                            return $ret;
-            //                            break;
-            //                        case 'entryForeignAmountCurrency':
-            //                            $ret = $this->levelC->getAmount()->getCurrency()->getCode();
-            //                            return $ret;
-            //                            break;*/
+                //                 break;
+                //            /*            case 'entryForeignAmount':
+                //                            $ret = $this->getDecimalAmount($this->levelC->getAmount());;
+                //                            return $ret;
+                //                            break;
+                //                        case 'entryForeignAmountCurrency':
+                //                            $ret = $this->levelC->getAmount()->getCurrency()->getCode();
+                //                            return $ret;
+                //                            break;*/
         }
+    }
+
+    private function getDecimalAmount(?Money $money): string
+    {
+        if (null === $money) {
+            return '';
+        }
+        $currencies            = new ISOCurrencies();
+        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
+
+        return $moneyDecimalFormatter->format($money);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getAmount(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
+    }
+
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false)
+    { // TODO make depend on configuration
+        if (empty($relatedParty->getRelatedPartyType()->getName())) {
+            // there is no "name", so use the address instead
+            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
+        } else {
+            // there is a name
+            $opposingName = $relatedParty->getRelatedPartyType()->getName();
+            // but maybe you want also the entire address
+            if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+                $opposingName .= ', ' . $addressLine;
+            }
+        }
+
+        return $opposingName;
+    }
+
+    private function generateAddressLine(Address $address = null)
+    {
+        $addressLines = implode(", ", $address->getAddressLines());
+
+        return $addressLines;
     }
 
     /**
@@ -314,87 +402,5 @@ class Transaction
                 $this->relatedOppositeParty = $relatedParty;
             }
         }
-    }
-
-    private function getDecimalAmount(?Money $money): string
-    {
-        if (null === $money) {
-            return '';
-        }
-        $currencies            = new ISOCurrencies();
-        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
-
-        return $moneyDecimalFormatter->format($money);
-    }
-
-    /*public function setBTC(\Genkgo\Camt\DTO\BankTransactionCode $btc) {
-        $this->btcDomainCode = $btc->getDomain()->getCode();
-        $this->btcFamilyCode = $btc->getDomain()->getFamily()->getCode();
-        $this->btcSubFamilyCode = $btc->getDomain()->getFamily()->getSubFamilyCode();
-        // TODO get reals Description of Codes
-    }*/
-
-    private function getOpposingName(\Genkgo\Camt\DTO\RelatedParty $relatedParty, bool $useEntireAddress = false)
-    { // TODO make depend on configuration
-        if (empty($relatedParty->getRelatedPartyType()->getName())) {
-            // there is no "name", so use the address instead
-            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
-        } else {
-            // there is a name
-            $opposingName = $relatedParty->getRelatedPartyType()->getName();
-            // but maybe you want also the entire address
-            if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', ' . $addressLine;
-            }
-        }
-
-        return $opposingName;
-    }
-
-    private function generateAddressLine(\Genkgo\Camt\DTO\Address $address = null)
-    {
-        $addressLines = implode(", ", $address->getAddressLines());
-
-        return $addressLines;
-    }
-
-    /**
-     * @return int
-     */
-    public function countSplits(): int
-    {
-        return count($this->levelD);
-    }
-
-    /**
-     * @param int $index
-     *
-     * @return string
-     */
-    public function getDate(int $index): string
-    {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
-    }
-
-    /**
-     * @param int $index
-     *
-     * @return string
-     */
-    public function getCurrencyCode(int $index): string
-    {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
-    }
-    /**
-     * @param int $index
-     *
-     * @return string
-     */
-    public function getAmount(int $index): string
-    {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
 }

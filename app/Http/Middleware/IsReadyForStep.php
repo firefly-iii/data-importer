@@ -83,12 +83,14 @@ trait IsReadyForStep
         }
         if ('nordigen' === $flow) {
             $result = $this->isReadyForNordigenStep();
+
             //app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
 
             return $result;
         }
         if ('spectre' === $flow) {
             $result = $this->isReadyForSpectreStep();
+
             //app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
 
             return $result;

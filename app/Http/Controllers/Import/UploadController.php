@@ -100,10 +100,10 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $importedFile    = $request->file('importable_file');
-        $configFile = $request->file('config_file');
-        $flow       = $request->cookie(Constants::FLOW_COOKIE);
-        $errors     = new MessageBag();
+        $importedFile = $request->file('importable_file');
+        $configFile   = $request->file('config_file');
+        $flow         = $request->cookie(Constants::FLOW_COOKIE);
+        $errors       = new MessageBag();
 
         // process uploaded file (if present)
         $errors = $this->processUploadedFile($flow, $errors, $importedFile);

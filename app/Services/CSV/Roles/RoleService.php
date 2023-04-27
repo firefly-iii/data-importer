@@ -32,7 +32,6 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
-use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\Reader as CamtReader;
 use InvalidArgumentException;
 use League\Csv\Exception;
@@ -129,64 +128,6 @@ class RoleService
      * @param Configuration $configuration
      *
      * @return array
-     */
-    public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
-    {
-        $camtReader   = new CamtReader(Config::getDefault());
-        $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
-        $transactions = [];
-        $fieldNames   = array_keys(config('camt.fields'));
-        foreach ($fieldNames as $name) {
-            $examples[$name] = [];
-        }
-        /**
-         * This code creates separate Transaction objects for transaction details,
-         * even when the user indicates these details should be splits or ignored entirely.
-         * This is because we still need to extract possible example data from these transaction details.
-         */
-        $statements = $camtMessage->getRecords();
-        /** @var CamtStatement $statement */
-        foreach ($statements as $statement) { // -> Level B
-            $entries = $statement->getEntries();
-            foreach ($entries as $entry) { // -> Level C
-                $count = count($entry->getTransactionDetails()); // count level D entries.
-                if (0 === $count) {
-                    // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry);
-                }
-                if (0 !== $count) {
-                    foreach ($entry->getTransactionDetails() as $detail) {
-                        $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, $detail);
-                    }
-                }
-            }
-        }
-        $count = 0;
-        /** @var Transaction $transaction */
-        foreach ($transactions as $transaction) {
-            if (5 === $count) {
-                break;
-            }
-            foreach ($fieldNames as $name) {
-                $examples[$name][] = $transaction->getField($name);
-            }
-            $count++;
-        }
-        foreach ($examples as $key => $list) {
-            $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], function (string $value) {
-                return '' !== $value;
-            });
-        }
-
-        return $examples;
-    }
-
-    /**
-     * @param string        $content
-     * @param Configuration $configuration
-     *
-     * @return array
      * @throws Exception
      */
     public static function getExampleData(string $content, Configuration $configuration): array
@@ -237,6 +178,64 @@ class RoleService
         foreach ($examples as $line => $entries) {
             asort($entries);
             $examples[$line] = $entries;
+        }
+
+        return $examples;
+    }
+
+    /**
+     * @param string        $content
+     * @param Configuration $configuration
+     *
+     * @return array
+     */
+    public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
+    {
+        $camtReader   = new CamtReader(Config::getDefault());
+        $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        $transactions = [];
+        $fieldNames   = array_keys(config('camt.fields'));
+        foreach ($fieldNames as $name) {
+            $examples[$name] = [];
+        }
+        /**
+         * This code creates separate Transaction objects for transaction details,
+         * even when the user indicates these details should be splits or ignored entirely.
+         * This is because we still need to extract possible example data from these transaction details.
+         */
+        $statements = $camtMessage->getRecords();
+        /** @var CamtStatement $statement */
+        foreach ($statements as $statement) { // -> Level B
+            $entries = $statement->getEntries();
+            foreach ($entries as $entry) { // -> Level C
+                $count = count($entry->getTransactionDetails()); // count level D entries.
+                if (0 === $count) {
+                    // TODO Create a single transaction, I guess?
+                    $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry);
+                }
+                if (0 !== $count) {
+                    foreach ($entry->getTransactionDetails() as $detail) {
+                        $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, $detail);
+                    }
+                }
+            }
+        }
+        $count = 0;
+        /** @var Transaction $transaction */
+        foreach ($transactions as $transaction) {
+            if (5 === $count) {
+                break;
+            }
+            foreach ($fieldNames as $name) {
+                $examples[$name][] = $transaction->getField($name);
+            }
+            $count++;
+        }
+        foreach ($examples as $key => $list) {
+            $examples[$key] = array_unique($list);
+            $examples[$key] = array_filter($examples[$key], function (string $value) {
+                return '' !== $value;
+            });
         }
 
         return $examples;
