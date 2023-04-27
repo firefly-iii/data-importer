@@ -28,8 +28,8 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
-use App\Services\CSV\Roles\RoleService;
 use App\Services\Camt053\Converter;
+use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -116,8 +116,8 @@ class RoleController extends Controller
             case 'csv':
                 return $this->csvPostIndex($request, $configuration);
             case 'camt':
-                return $this->csvPostIndex($request, $configuration);
-                //return $this->camtPostIndex($request, $configuration);
+                return $this->camtPostIndex($request, $configuration);
+            //return $this->camtPostIndex($request, $configuration);
 
         }
     }
@@ -234,23 +234,390 @@ class RoleController extends Controller
     {
         $mainTitle = 'Role definition';
         $subTitle  = 'Configure the role of each field in your camt.053 file';
-        // TODO read some example data from the camt.053 file
-        $roles = config('camt.import_roles'); // TODO maybe split up to different DataType -> Columns for Dates, Numbers, Strings -> AND OR create other roles for camt // list is imfported from csv.import_roles, without modification
+
+        // get example data from file.
+        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $examples  = RoleService::getExampleDataFromCamt($content, $configuration);
+        $roles     = $configuration->getRoles();
+        $doMapping = $configuration->getDoMapping();
+        // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
+        // available fields and information.
+
+        // TODO should not be a big array right here maybe.
+        $levels = [
+            'A' => [
+                'title'       => trans('camt.level_A'),
+                'explanation' => trans('camt.explain_A'),
+                'fields'      => [
+                    // TODO replace me with info from config.
+                    [
+                        'section'       => false,
+                        'title'         => 'messageId',
+                        'roles'         => config('camt.roles.level_a'),
+                        'mappable'      => false,
+                        'selected_role' => $roles['messageId'] ?? 'note', // todo from config
+                        'example_data'  => $examples['messageId'],
+                    ],
+                ],
+            ],
+            'B' => [
+                'title'       => trans('camt.level_B'),
+                'explanation' => trans('camt.explain_B'),
+                'fields'      => [
+                    // TODO replace me with info from config.
+                    [
+                        'section'       => false,
+                        'title'         => 'statementCreationDate',
+                        'roles'         => config('camt.roles.dates'),
+                        'mappable'      => false,
+                        'selected_role' => $roles['statementCreationDate'] ?? 'date_process',
+                        'example_data'  => $examples['statementCreationDate'],
+                    ],
+                    [
+                        'section'       => false,
+                        'title'         => 'statementAccountIban',
+                        'selected_role' => $roles['statementAccountIban'] ?? 'account-iban',
+                        'roles'         => config('camt.roles.iban'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['statementAccountIban'] ?? false,
+                        'example_data'  => $examples['statementAccountIban'],
+                    ],
+                    [
+                        'section'       => false,
+                        'title'         => 'statementAccountNumber',
+                        'selected_role' => $roles['statementAccountNumber'] ?? 'account-number',
+                        'roles'         => config('camt.roles.account_number'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['statementAccountNumber'] ?? false,
+                        'example_data'  => $examples['statementAccountNumber'],
+                    ],
+                ],
+            ],
+            'C' => [
+                'title'       => trans('camt.level_C'),
+                'explanation' => trans('camt.explain_C'),
+                'fields'      => [
+                    // TODO replace me with info from config.
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDate',
+                        'selected_role' => $roles['entryDate'] ?? 'date_transaction',
+                        'roles'         => config('camt.roles.dates'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDate'],
+                    ],
+                    [
+                        'section'       => false,
+                        'title'         => 'entryAccountServicerReference',
+                        'selected_role' => $roles['entryAccountServicerReference'] ?? 'external-id',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryAccountServicerReference'],
+                    ],
+                    [
+                        'section'       => false,
+                        'title'         => 'entryReference',
+                        'selected_role' => $roles['entryReference'] ?? 'internal_reference',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryReference'],
+                    ],
+                    [
+                        'section'       => false,
+                        'title'         => 'entryAdditionalInfo',
+                        'selected_role' => $roles['entryAdditionalInfo'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryAdditionalInfo'],
+                    ],
+                    //
+                    [
+                        'section' => true,
+                        'title'   => 'transaction',
+                    ],
+                    // entryAmount
+                    // TODO replace me with info from config.
+                    [
+                        'section'       => false,
+                        'title'         => 'entryAmount',
+                        'selected_role' => $roles['entryAmount'] ?? 'amount',
+                        'roles'         => config('camt.roles.amount'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryAmount'],
+                    ],
+                    // entryAmountCurrency
+                    [
+                        'section'       => false,
+                        'title'         => 'entryAmountCurrency',
+                        'selected_role' => $roles['entryAmountCurrency'] ?? 'currency-code',
+                        'roles'         => config('camt.roles.currency'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryAmountCurrency'] ?? false,
+                        'example_data'  => $examples['entryAmountCurrency'],
+                    ],
+                    // entryValueDate
+                    [
+                        'section'       => false,
+                        'title'         => 'entryValueDate',
+                        'selected_role' => $roles['entryValueDate'] ?? 'date_payment',
+                        'roles'         => config('camt.roles.dates'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryValueDate'],
+                    ],
+                    // entryBookingDate
+                    [
+                        'section'       => false,
+                        'title'         => 'entryBookingDate',
+                        'selected_role' => $roles['entryBookingDate'] ?? 'date_book',
+                        'roles'         => config('camt.roles.dates'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryBookingDate'],
+                    ],
+                    [
+                        'section' => true,
+                        'title'   => 'Btc',
+                    ],
+                    // entryBtcDomainCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryBtcDomainCode',
+                        'selected_role' => $roles['entryBtcDomainCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryBtcDomainCode'],
+                    ],
+                    // entryBtcFamilyCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryBtcFamilyCode',
+                        'selected_role' => $roles['entryBtcFamilyCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryBtcFamilyCode'],
+                    ],
+                    // entryBtcSubFamilyCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryBtcSubFamilyCode',
+                        'selected_role' => $roles['entryBtcSubFamilyCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryBtcSubFamilyCode'],
+                    ],
+                    [
+                        'section' => true,
+                        'title'   => 'opposingPart',
+                    ],
+                    // entryDetailOpposingAccountIban
+                    [
+                        'section'       => false,
+                        'title'         => 'entryOpposingAccountIban',
+                        'selected_role' => $roles['entryOpposingAccountIban'] ?? 'opposing-iban',
+                        'roles'         => config('camt.roles.iban'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryOpposingAccountIban'] ?? false,
+                        'example_data'  => $examples['entryDetailOpposingAccountIban'],
+                    ],
+                    // entryDetailOpposingAccountNumber
+                    [
+                        'section'       => false,
+                        'title'         => 'entryOpposingAccountNumber',
+                        'selected_role' => $roles['entryOpposingAccountNumber'] ?? 'opposing-number',
+                        'roles'         => config('camt.roles.account_number'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryOpposingAccountNumber'] ?? false,
+                        'example_data'  => $examples['entryOpposingAccountNumber'],
+                    ],
+                    // entryDetailOpposingName
+                    [
+                        'section'       => false,
+                        'title'         => 'entryOpposingName',
+                        'selected_role' => $roles['entryOpposingName'] ?? 'opposing-name',
+                        'roles'         => config('camt.roles.account_name'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryOpposingName'] ?? false,
+                        'example_data'  => $examples['entryOpposingName'],
+                    ],
+
+
+                ],
+            ],
+            'D' => [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D'),
+                'fields'      => [
+                    // TODO replace me with info from config.
+                    // entryDetailAccountServicerReference
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailAccountServicerReference',
+                        'selected_role' => $roles['entryDetailAccountServicerReference'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailAccountServicerReference'],
+                    ],
+                    // entryDetailRemittanceInformationUnstructuredBlockMessage
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
+                        'selected_role' => $roles['entryDetailRemittanceInformationUnstructuredBlockMessage'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailRemittanceInformationUnstructuredBlockMessage'],
+                    ],
+                    // entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation',
+                        'selected_role' => $roles['entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'],
+                    ],
+
+                    // section_transaction
+                    [
+                        'section' => true,
+                        'title'   => 'transaction',
+                    ],
+                    // entryDetailAmount
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailAmount',
+                        'selected_role' => $roles['entryDetailAmount'] ?? 'amount',
+                        'roles'         => config('camt.roles.amount'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailAmount'],
+                    ],
+                    // entryDetailAmountCurrency
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailAmountCurrency',
+                        'selected_role' => $roles['entryDetailAmountCurrency'] ?? 'currency-code',
+                        'roles'         => config('camt.roles.currency'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryDetailAmountCurrency'] ?? false,
+                        'example_data'  => $examples['entryDetailAmountCurrency'],
+                    ],
+
+                    // section_Btc
+                    [
+                        'section' => true,
+                        'title'   => 'Btc',
+                    ],
+                    // entryDetailBtcDomainCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailBtcDomainCode',
+                        'selected_role' => $roles['entryDetailBtcDomainCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailBtcDomainCode'],
+                    ],
+                    // entryDetailBtcFamilyCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailBtcFamilyCode',
+                        'selected_role' => $roles['entryDetailBtcFamilyCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailBtcFamilyCode'],
+                    ],
+                    // entryDetailBtcSubFamilyCode
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailBtcSubFamilyCode',
+                        'selected_role' => $roles['entryDetailBtcSubFamilyCode'] ?? 'note',
+                        'roles'         => config('camt.roles.meta'),
+                        'mappable'      => false,
+                        'example_data'  => $examples['entryDetailBtcSubFamilyCode'],
+                    ],
+
+                    // section_opposingPart
+                    [
+                        'section' => true,
+                        'title'   => 'opposingPart',
+                    ],
+                    // entryDetailOpposingAccountIban
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailOpposingAccountIban',
+                        'selected_role' => $roles['entryDetailOpposingAccountIban'] ?? 'opposing-iban',
+                        'roles'         => config('camt.roles.iban'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryDetailOpposingAccountIban'] ?? false,
+                        'example_data'  => $examples['entryDetailOpposingAccountIban'],
+                    ],
+                    // entryDetailOpposingAccountNumber
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailOpposingAccountNumber',
+                        'selected_role' => $roles['entryDetailOpposingAccountNumber'] ?? 'opposing-number',
+                        'roles'         => config('camt.roles.account_number'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryDetailOpposingAccountNumber'] ?? false,
+                        'example_data'  => $examples['entryDetailOpposingAccountNumber'],
+                    ],
+                    // entryDetailOpposingName
+                    [
+                        'section'       => false,
+                        'title'         => 'entryDetailOpposingName',
+                        'selected_role' => $roles['entryDetailOpposingName'] ?? 'opposing-name',
+                        'roles'         => config('camt.roles.account_name'),
+                        'mappable'      => true,
+                        'do_mapping'    => $doMapping['entryDetailOpposingName'] ?? false,
+                        'example_data'  => $examples['entryDetailOpposingName'],
+                    ],
+                ],
+            ],
+        ];
 
         return view(
             'import.005-roles.index-camt',
-            compact('mainTitle','configuration','subTitle','roles')
+            compact('mainTitle', 'configuration', 'subTitle', 'levels')
         );
     }
 
     /**
+     * TODO is basically the same as the CSV processor.
+     *
      * @param RolesPostRequest $request
      * @param Configuration    $configuration
      *
-     * @return void
+     * @return RedirectResponse
      */
-    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration)
+    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
-        die('not yet implemented.'); // csvPostIndex is used
+        $data         = $request->getAllForFile();
+        $needsMapping = $this->needMapping($data['do_mapping']);
+        $configuration->setRoles($data['roles']);
+        $configuration->setDoMapping($data['do_mapping']);
+
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+        // then this is the new, full array:
+        $fullArray = $configuration->toArray();
+
+        // and it can be saved on disk:
+        $configFileName = StorageService::storeArray($fullArray);
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // this is a new config file name.
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // set role config as complete.
+        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
+
+        // redirect to mapping thing.
+        if (true === $needsMapping) {
+            return redirect()->route('006-mapping.index');
+        }
+        // otherwise, store empty mapping, and continue:
+        // set map config as complete.
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+
+        return redirect()->route('007-convert.index');
     }
 }

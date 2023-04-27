@@ -27,14 +27,13 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
-use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
+use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
-use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
@@ -85,10 +84,12 @@ class ConversionController extends Controller
             app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
-        if (true === $configuration->isMapAllData()) {
-            app('log')->debug('Pressing "back" will send you to mapping.');
-            $jobBackUrl = route('back.mapping');
-        }
+        // TODO option is not used atm.
+
+        //        if (true === $configuration->isMapAllData()) {
+        //            app('log')->debug('Pressing "back" will send you to mapping.');
+        //            $jobBackUrl = route('back.mapping');
+        //        }
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -104,7 +105,7 @@ class ConversionController extends Controller
         if ('file' === $flow) {
 
             $contentType = $configuration->getContentType();
-            switch($contentType) {
+            switch ($contentType) {
                 default:
                 case 'unknown':
                 case 'csv':
@@ -162,7 +163,7 @@ class ConversionController extends Controller
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
-            switch($contentType) {
+            switch ($contentType) {
                 default:
                 case 'unknown':
                 case 'csv':

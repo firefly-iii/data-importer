@@ -59,7 +59,7 @@ class RoutineManager implements RoutineManagerInterface
     private Configuration              $configuration;
     private string                     $content;
     private CSVFileProcessor           $csvFileProcessor;
-    
+
     private bool                       $forceCli = false;
     private LineProcessor              $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
@@ -135,7 +135,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         $camtReader;
         $camtMessage;
-        
+
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // convert CSV file into raw lines (arrays)
@@ -150,24 +150,24 @@ class RoutineManager implements RoutineManagerInterface
         if ('' === $this->content) {
             // used for the WebBased Import
             // TODO read data with GENKGO / CAMT
-            $camtReader = new \Genkgo\Camt\Reader(\Genkgo\Camt\Config::getDefault());
+            $camtReader = new Reader(Config::getDefault());
             //$camtMessage = $camtReader->readString(FileReader::getReaderFromSession($this->configuration->isConversion()));
             $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
-            
-            $statements = $camtMessage->getRecords(); 
+
+            $statements = $camtMessage->getRecords();
             foreach($statements as $currentStatement) { // -> Level B
-                $entries = $currentStatement->getEntries(); 
+                $entries = $currentStatement->getEntries();
                 foreach($entries as $currentEntry) { // -> Level C
                     $transActionDetailCount = count($currentEntry->getTransactionDetails()); // hat es Level D Daten?
                      // TODO Übergeben an Objekt und Rollen auslesen, Felder vertauschen
                      $transaction = new Transaction($camtMessage, $currentStatement, $currentEntry);
                 }
             }
-            
-            
-            
+
+
+
             // TODO -> hier muss alles ausgelesen werden
-            
+
             // TODO -> CALL CAMT EXTRACTOR
             //try {
                 //$this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
@@ -180,10 +180,10 @@ class RoutineManager implements RoutineManagerInterface
 
         // convert raw lines into arrays with individual ColumnValues
         //$valueArrays = $this->lineProcessor->processCSVLines($CSVLines);
-        
+
         // convert value arrays into (pseudo) transactions.
         //$pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
-        
+
         // TODO call my extractor here -> create PSEUDO
 
         // convert pseudo transactions into actual transactions.

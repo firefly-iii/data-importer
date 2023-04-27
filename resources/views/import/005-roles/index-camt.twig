@@ -15,16 +15,11 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            As there are different implementation-standards, some fields used may vary.
+                            CAMT files come in a few "layers" each with their own content.
+                            Your options per field may be limited. Firefly III will not be able to
+                            store all content of a CAMT file. If you feel your choices are limited, please
+                            open an issue.
                         </p>
-                        <!--<p>
-                            Each field in your importable file has a role, it contains a specific type of content.
-                            By configuring these roles here, you tell the importer how to approach and treat
-                            the data in each field. <a target="_blank"
-                                                        href="https://docs.firefly-iii.org/data-importer/usage/roles/">Read
-                                the documentation</a> to learn more
-                            about this process.
-                        </p>-->
                     </div>
                 </div>
             </div>
@@ -57,34 +52,109 @@
                     <div class="card-body">
                         <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            <h4>Level A (Group Header)</h4>
-                            <p>
-                                <b>Message-Layer</b>: Global information for all transactions in this camt.053 file.
-                                <br><span class="text-muted small">Those data aren't used by an average user.</span>
-                            </p>
-                            <table class="table">
-                                <tr>
-                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
-                                    <th width="200">Example Data</th>
-                                    <th width="300">Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        {{ helper.field("messageId") }}
-                                        {{ helper.description("messageId") }}
-                                    </td>
-                                    <td>
-                                        {{ helper.examples() }}
-                                    </td>
-                                    <td>
-                                        {{ helper.roleselection(roles, messageId) }}
-                                    </td>
-                                    <td>
-                                        {{ helper.domapping("messageId") }}
-                                    </td>
-                                </tr>
-                                <!--<tr>
+
+                            {% for key, level in levels %}
+                                <h4>Level {{ key }}: {{ level.title }}</h4>
+                                <p>
+                                    {{ level.title }}: {{ level.explanation }}
+                                </p>
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:30%;">Field<br><!--<span class="text-muted small">XML path</span>--></th>
+                                        <th style="width:30%;">Example data</th>
+                                        <th>Firefly III role</th>
+                                        <th style="width:10%">Map data?</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for field in level.fields %}
+                                        {% if true == field.section %}
+                                            <tr>
+                                                <th colspan="4">{{ trans('camt.section_' ~ field.title) }}</th>
+                                            </tr>
+                                        {% endif %}
+                                        {% if false == field.section %}
+                                            <tr>
+                                                <td>
+                                                    {{ trans('camt.field_'~field.title) }}
+                                                    {% if trans('camt.field_'~field.title~'_description') != 'camt.field_'~field.title~'_description' %}
+                                                        <br><span class="text-muted small">{{ trans('camt.field_'~field.title~'_description') }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if 0 == field.example_data|length %}
+                                                        <small class="text-muted"><em>(no example data)</em></small>
+                                                    {% endif %}
+                                                    {% if 0 != field.example_data|length %}
+                                                        {% for example in field.example_data %}
+                                                            <code>{{ example }}</code><br>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if 0 == field.roles|length %}
+                                                        <small class="text-muted"><em>(no roles available)</em></small>
+                                                    {% endif %}
+                                                    {% if 0 != field.roles|length %}
+                                                        <select name="roles[{{ field.title }}]" id="roles_{{ field.title }}" class="form-control">
+                                                            {% for roleKey, role in field.roles %}
+                                                                <option value="{{ roleKey }}" label="{{ trans('import.column_'~roleKey) }}"
+                                                                        {% if field.selected_role == roleKey %}selected="selected"{% endif %}>
+                                                                    {{ trans('import.column_'~roleKey) }}
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if true == field.mappable %}
+                                                        <label for="do_mapping_{{ field.title }}">
+                                                            <input type="checkbox" name="do_mapping[{{ field.title }}]" id="do_mapping_{{ field.title }}"
+                                                                   {% if field.do_mapping %}checked="checked"{% endif %}
+                                                                   value="1"/>
+                                                        </label>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endfor %}
+                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
+                                    class="fas fa-arrow-left"></span> Go back to configuration</a>
+                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
+                                    class="fas fa-redo-alt"></span> Start over</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--
+    <div class="row">
+    <div class="col-lg-6">
+
+    </div>
+    <div class="col-lg-6">
+
+    </div>
+    </div>
+    -->
+
+    <!--<tr>
                                     {{ helper.field("field_messageCreationDate") }}
                                         {% if examples[index]|length > 0 %}
                                             {% for example in examples[index] %}
@@ -95,8 +165,8 @@
                                     <td>
                                         {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
                                             {#
-                                            User cannot select a role because its the unique column so it MUST be this role.
-                                            #}
+    User cannot select a role because its the unique column so it MUST be this role.
+    #}
                                             <p class="form-text">
                                                 <span class="text-muted small">
                                                     This column is your unique identifier, so it will be fixed to
@@ -138,8 +208,8 @@
                                     <td>
                                         {% if index == configuration.getUniqueColumnIndex and 'cell' == configuration.getDuplicateDetectionMethod %}
                                             {#
-                                            User cannot select a role because its the unique column so it MUST be this role.
-                                            #}
+    User cannot select a role because its the unique column so it MUST be this role.
+    #}
                                             <p class="form-text">
                                                 <span class="text-muted small">
                                                     This column is your unique identifier, so it will be fixed to
@@ -170,517 +240,5 @@
                                         </label>
                                     </td>
                                 </tr>-->
-                            </table>
-                            <h4>Level B (Statement)</h4>
-                            <p>
-                                <b>Account-Layer</b>: Informations about the banking account concerned<br>
-                                <span class="text-muted small">The amount of possible "Statements" in a file depends on the implementation-standard used. Some banks only allow one statement per file</span>.
-                            </p>
-                            <table class="table">
-                                <tr>
-                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
-                                    <th width="200">Example Data</th>
-                                    <th width="300">Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                        <tr>
-                                        <td>
-                                            {{ helper.field("statementCreationDate") }}
-                                            {{ helper.description("statementCreationDate") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "statementCreationDate") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("statementCreationDate") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("statementAccountIban") }}
-                                            {{ helper.description("statementAccountIban") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "statementAccountIban") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("statementAccountIban") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("statementAccountNumber") }}
-                                            {{ helper.description("statementAccountIban") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "statementAccountNumber") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("statementAccountNumber") }}
-                                        </td>
-                                    </tr>
-                            </table>
-                            <h4>Level C (Entry)</h4>
-                            <p>
-                                <b>Amount-Level</b>: Informations about the booking itself. Take note, that a booking might be a grop of several transactions.
-                            </p>
-                            TBD: ⚠️ You have chosen not to split grouped bookings, so fields of "Level D (Entry Details" can't be assigned to a role. If this is a mistake, correct your setting on the previous page.
-                            <p>
-                            </p>
-                            <table class="table">
-                                <tr>
-                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
-                                    <th width="200">Example Data</th>
-                                    <th width="300">Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDate") }}
-                                            {{ helper.description("entryDate") }}<br>
-                                            if multiple records, behavior DEPENDS ON CONFIG
-                                        </td>
-                                        <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDate") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDate") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryAccountServicerReference") }}
-                                            {{ helper.description("entryAccountServicerReference") }}<br>
-                                            if multiple records, behavior DEPENDS ON CONFIG
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryAccountServicerReference") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryAccountServicerReference") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryReference") }}
-                                            {{ helper.description("entryReference") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryReference") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryReference") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryAdditionalInfo") }}
-                                            {{ helper.description("entryAdditionalInfo") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryAdditionalInfo") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryAdditionalInfo") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_transaction') }}</th>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryAmount") }}
-                                            {{ helper.description("entryAmount") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryAmount") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryAmount") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryAmountCurrency") }}
-                                            {{ helper.description("entryAmountCurrency") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryAmountCurrency") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryAmountCurrency") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryValueDate") }}
-                                            {{ helper.description("entryValueDate") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryValueDate") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryValueDate") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryBookingDate") }}
-                                            {{ helper.description("entryBookingDate") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBookingDate") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBookingDate") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_Btc') }}</th>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryBtcDomainCode") }}
-                                            {{ helper.description("entryBtcDomainCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcDomainCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcDomainCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryBtcFamilyCode") }}
-                                            {{ helper.description("entryBtcFamilyCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcFamilyCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcFamilyCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                         <td>
-                                            {{ helper.field("entryBtcSubFamilyCode") }}
-                                            {{ helper.description("entryBtcSubFamilyCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcSubFamilyCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcSubFamilyCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_opposingPart') }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingAccountIban") }}
-                                            {{ helper.description("entryDetailOpposingAccountIban") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingAccountIban") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingAccountIban") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingAccountNumber") }}
-                                            {{ helper.description("entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingName") }}
-                                            {{ helper.description("entryDetailOpposingName") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingName") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingName") }}
-                                        </td>
-                                    </tr>
-                            </table>
-                            <h4>Level D (Entry Details)</h4>
-                            <p>
-                                <b>Amount-Details</b>: Detailed informations about the transaction/s within a Entry. There might be one record with details to the Entry or multiple transactions.<br>These fields can't be assigned if "Use split transaction" is disabled.
-                            </p>
-                            <table class="table">
-                                <tr>
-                                    <th width="400">Field Name<br><!--<span class="text-muted small">XML path</span>--></th>
-                                    <th width="200">Example Data</th>
-                                    <th width="300">Role</th>
-                                    <th>Map data?</th>
-                                </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailAccountServicerReference") }}
-                                            {{ helper.description("entryDetailAccountServicerReference") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailAccountServicerReference") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailAccountServicerReference") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailRemittanceInformationUnstructuredBlockMessage") }}
-                                            {{ helper.description("entryDetailRemittanceInformationUnstructuredBlockMessage") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailRemittanceInformationUnstructuredBlockMessage") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailRemittanceInformationUnstructuredBlockMessage") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation") }}
-                                            {{ helper.description("entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_transaction') }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailAmount") }}
-                                            {{ helper.description("entryDetailAmount") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailAmount") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailAmount") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailAmountCurrency") }}
-                                            {{ helper.description("entryDetailAmountCurrency") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailAmountCurrency") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailAmountCurrency") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_Btc') }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryBtcDomainCode") }}
-                                            {{ helper.description("entryBtcDomainCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcDomainCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcDomainCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryBtcFamilyCode") }}
-                                            {{ helper.description("entryBtcFamilyCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcFamilyCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcFamilyCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryBtcSubFamilyCode") }}
-                                            {{ helper.description("entryBtcSubFamilyCode") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryBtcSubFamilyCode") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryBtcSubFamilyCode") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="4">{{ trans('camt.section_opposingPart') }}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingAccountIban") }}
-                                            {{ helper.description("entryDetailOpposingAccountIban") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingAccountIban") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingAccountIban") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingAccountNumber") }}
-                                            {{ helper.description("entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingAccountNumber") }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            {{ helper.field("entryDetailOpposingName") }}
-                                            {{ helper.description("entryDetailOpposingName") }}
-                                        </td>
-                                         <td>
-                                            {{ helper.examples() }}
-                                        </td>
-                                        <td>
-                                            {{ helper.roleselection(roles, "entryDetailOpposingName") }}
-                                        </td>
-                                        <td>
-                                            {{ helper.domapping("entryDetailOpposingName") }}
-                                        </td>
-                                    </tr>
-                            </table>
-                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span> Go back to configuration</a>
-                            <a href="{{ route('flush') }}" class="btn btn-danger btn-sm"><span
-                                    class="fas fa-redo-alt"></span> Start over</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--
-    <div class="row">
-    <div class="col-lg-6">
-
-    </div>
-    <div class="col-lg-6">
-
-    </div>
-    </div>
-    -->
 {% endblock %}
 

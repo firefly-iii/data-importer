@@ -22,83 +22,545 @@
 
 declare(strict_types=1);
 
-use App\Services\CSV\Conversion\Task\Accounts;
-use App\Services\CSV\Conversion\Task\Amount;
-use App\Services\CSV\Conversion\Task\Currency;
-use App\Services\CSV\Conversion\Task\EmptyAccounts;
-use App\Services\CSV\Conversion\Task\EmptyDescription;
-use App\Services\CSV\Conversion\Task\PositiveAmount;
-use App\Services\CSV\Conversion\Task\Tags;
-// TODO -> clean up, remove CSV parts... add missing parts
+// all roles available for all CAMT data fields.
+$availableRoles = [
+    '_ignore'               => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'field'           => 'ignored',
+        'converter'       => 'Ignore',
+        'mapper'          => null,
+        'append_value'    => false,
+    ],
+    'note'                  => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'field'           => 'note',
+        'converter'       => 'CleanNlString',
+        'append_value'    => true,
+    ],
+    'date_transaction'      => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date',
+        'append_value'    => false,
+    ],
+    'date_interest'         => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-interest',
+        'append_value'    => false,
+    ],
+    'date_book'             => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-book',
+        'append_value'    => false,
+    ],
+    'date_process'          => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-process',
+        'append_value'    => false,
+    ],
+    'date_due'              => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-due',
+        'append_value'    => false,
+    ],
+    'date_payment'          => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-payment',
+        'append_value'    => false,
+    ],
+    'date_invoice'          => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Date',
+        'field'           => 'date-invoice',
+        'append_value'    => false,
+    ],
+    'account-iban'          => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'asset-account-iban',
+        'converter'       => 'Iban',
+        'mapper'          => 'AssetAccounts',
+        'append_value'    => false,
+    ],
+    'opposing-iban'         => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'opposing-account-iban',
+        'converter'       => 'Iban',
+        'mapper'          => 'OpposingAccounts',
+        'append_value'    => false,
+    ],
+    'account-number'        => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'asset-account-number',
+        'converter'       => 'CleanString',
+        'mapper'          => 'AssetAccounts',
+        'append_value'    => false,
+    ],
+    'opposing-number'       => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'opposing-account-number',
+        'converter'       => 'CleanString',
+        'mapper'          => 'OpposingAccounts',
+        'append_value'    => false,
+    ],
+    'external-id'           => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'external-id',
+        'append_value'    => false,
+    ],
+    'external-url'          => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'CleanUrl',
+        'field'           => 'external-url',
+        'append_value'    => false,
+    ],
+    'internal_reference'    => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Description',
+        'field'           => 'internal_reference',
+        'append_value'    => true,
+    ],
+    'amount'                => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Amount',
+        'field'           => 'amount',
+        'append_value'    => false,
+    ],
+    'amount_debit'          => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'AmountDebit',
+        'field'           => 'amount_debit',
+        'append_value'    => false,
+    ],
+    'amount_credit'         => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'AmountCredit',
+        'field'           => 'amount_credit',
+        'append_value'    => false,
+    ],
+    'amount_negated'        => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'AmountNegated',
+        'field'           => 'amount_negated',
+        'append_value'    => false,
+    ],
+    'amount_foreign'        => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'Amount',
+        'field'           => 'amount_foreign',
+        'append_value'    => false,
+    ],
+    'currency-id'           => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'currency',
+        'converter'       => 'CleanId',
+        'mapper'          => 'TransactionCurrencies',
+        'append_value'    => false,
+    ],
+    'currency-name'         => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'currency',
+        'mapper'          => 'TransactionCurrencies',
+        'append_value'    => false,
+    ],
+    'currency-code'         => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'currency',
+        'mapper'          => 'TransactionCurrencies',
+        'append_value'    => false,
+    ],
+    'foreign-currency-code' => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'foreign_currency',
+        'mapper'          => 'TransactionCurrencies',
+        'append_value'    => false,
+    ],
+    'currency-symbol'       => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'currency',
+        'mapper'          => 'TransactionCurrencies',
+        'append_value'    => false,
+    ],
+    'account-name'          => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'asset-account-name',
+        'converter'       => 'CleanString',
+        'mapper'          => 'AssetAccounts',
+        'append_value'    => false,
+    ],
+    'opposing-name'         => [
+        'mappable'        => true,
+        'pre-process-map' => false,
+        'field'           => 'opposing-account-name',
+        'converter'       => 'CleanString',
+        'mapper'          => 'OpposingAccounts',
+        'append_value'    => false,
+    ],
+];
+
+
 return [
-    // csv config
-    'classic_roles'         => [
-        'original-source'    => 'original_source',
-        'sepa-cc'            => 'sepa_cc',
-        'sepa-ct-op'         => 'sepa_ct_op',
-        'sepa-ct-id'         => 'sepa_ct_id',
-        'sepa-db'            => 'sepa_db',
-        'sepa-country'       => 'sepa_country',
-        'sepa-ep'            => 'sepa_ep',
-        'sepa-ci'            => 'sepa_ci',
-        'sepa-batch-id'      => 'sepa_batch_id',
-        'internal-reference' => 'internal_reference',
-        'date-interest'      => 'date_interest',
-        'date-invoice'       => 'date_invoice',
-        'date-book'          => 'date_book',
-        'date-payment'       => 'date_payment',
-        'date-process'       => 'date_process',
-        'date-due'           => 'date_due',
-        'date-transaction'   => 'date_transaction',
+    /*
+     * Roles are divided into a number of groups,
+     * i.e. the "level_a" group and the "dates" group etc.
+     *
+     * For each field in the CAMT file, it has been specified which of these groups apply.
+     * This particular config can be found further ahead.
+     *
+     * Extra groups of roles can be created here, or existing groups extended.
+     * For example, if you wish extract a field called "due date" from the CAMT file,
+     * you could use existing group "dates" but you are free to make a new group called "due_date" with only one option.
+     *
+     * Make sure all groups also have the _ignore role as first option.
+     */
+    'roles'                 => [
+        'level_a'        => [
+            '_ignore' => $availableRoles['_ignore'],
+            'note'    => $availableRoles['note'],
+        ],
+        // roles for any date field
+        'dates'          => [
+            '_ignore'          => $availableRoles['_ignore'],
+            'date_transaction' => $availableRoles['date_transaction'],
+            'date_interest'    => $availableRoles['date_interest'],
+            'date_book'        => $availableRoles['date_book'],
+            'date_process'     => $availableRoles['date_process'],
+            'date_due'         => $availableRoles['date_due'],
+            'date_payment'     => $availableRoles['date_payment'],
+            'date_invoice'     => $availableRoles['date_invoice'],
+        ],
+        // roles for IBAN fields
+        'iban'           => [
+            '_ignore'       => $availableRoles['_ignore'],
+            'account-iban'  => $availableRoles['account-iban'],
+            'opposing-iban' => $availableRoles['opposing-iban'],
+        ],
+        // account number field roles
+        'account_number' => [
+            '_ignore'         => $availableRoles['_ignore'],
+            'account-number'  => $availableRoles['account-number'],
+            'opposing-number' => $availableRoles['opposing-number'],
+        ],
+        'account_name'   => [
+            '_ignore'       => $availableRoles['_ignore'],
+            'account-name'  => $availableRoles['account-name'],
+            'opposing-name' => $availableRoles['opposing-name'],
+        ],
+        // roles for meta data
+        'meta'           => [
+            '_ignore'            => $availableRoles['_ignore'],
+            'note'               => $availableRoles['note'],
+            'external-id'        => $availableRoles['external-id'],
+            'external-url'       => $availableRoles['external-url'],
+            'internal_reference' => $availableRoles['internal_reference'],
+        ],
+        'amount'         => [
+            '_ignore'        => $availableRoles['_ignore'],
+            'amount'         => $availableRoles['amount'],
+            'amount_debit'   => $availableRoles['amount_debit'],
+            'amount_credit'  => $availableRoles['amount_credit'],
+            'amount_negated' => $availableRoles['amount_negated'],
+            'amount_foreign' => $availableRoles['amount_foreign'],
+        ],
+        'currency'       => [
+            '_ignore'               => $availableRoles['_ignore'],
+            'currency-id'           => $availableRoles['currency-id'],
+            'currency-name'         => $availableRoles['currency-name'],
+            'currency-symbol'       => $availableRoles['currency-symbol'],
+            'currency-code'         => $availableRoles['currency-code'],
+            'foreign-currency-code' => $availableRoles['foreign-currency-code'],
+        ],
     ],
-    'transaction_tasks'     => [
-        Amount::class,
-        Tags::class,
-        Currency::class,
-        Accounts::class,
-        PositiveAmount::class,
-        EmptyDescription::class,
-        EmptyAccounts::class,
-    ],
+    /*
+     * This particular config variable holds all possible roles.
+     */
+    'all_roles'             => $availableRoles,
 
     /*
-     * Configuration for possible column roles.
-     *
-     * The key is the short name for the column role. There are five values, which mean this:
-     *
-     * 'mappable'
-     * Whether or not the value in the CSV column can be linked to an existing value in your
-     * Firefly database. For example: account names can be linked to existing account names you have already
-     * so double entries cannot occur. This process is called "mapping". You have to make each unique value in your
-     * CSV file to an existing entry in your database. For example, map all account names in your CSV file to existing
-     * accounts. If you have an entry that does not exist in your database, you can set Firefly to ignore it, and it will
-     * create it.
-     *
-     * 'pre-process-map'
-     * In the case of tags, there are multiple values in one csv column (for example: "expense groceries snack" in one column).
-     * This means the content of the column must be "pre processed" aka split in parts so the importer can work with the data.
-     *
-     * 'pre-process-mapper'
-     * This is the class that will actually do the pre-processing.
-     *
-     * 'field'
-     * I don't believe this value is used any more, but I am not sure.
-     *
-     * 'converter'
-     * The converter is a class in app/Service/Camt/Converter that converts the given value into an object Firefly understands.
-     * The CategoryName converter can convert a category name into an actual category. This converter will take a mapping
-     * into account: if you mapped "Groceries" to category "Groceries" the converter will simply return "Groceries" instead of
-     * trying to make a new category also named Groceries.
-     *
-     * 'mapper'
-     * When you map data (see "mappable") you need a list of stuff you can map to. If you say a certain column is mappable
-     * and the column contains "category names", the mapper will be "Category" and it will give you a list of possible categories.
-     * This way the importer always presents you with a valid list of things to map to.
-     *
-     *
-     *
+     * This array denotes all fields that can be extracted from a CAMT file and the necessary
+     * configuration:
+     * TODO this array needs to be expanded based on the content of RoleController.php:247
      */
-    'import_roles'          => [ // TODO add group of roles here
+    'fields'                => [
+        // level A
+        'messageId'                                                                      => [
+            'title'        => 'messageId',
+            'roles'        => 'level_a', // this is a reference to the role groups above.
+            'mappable'     => false,
+            'default_role' => 'note',
+            'level'        => 'A',
+        ],
+        // level B, Statement
+        'statementCreationDate'                                                          => [
+            'title'        => 'statementCreationDate',
+            'roles'        => 'dates',
+            'mappable'     => false,
+            'default_role' => 'date_process',
+            'level'        => 'B',
+        ],
+        'statementAccountIban'                                                           => [
+            'title'        => 'statementAccountIban',
+            'roles'        => 'iban',
+            'mappable'     => true,
+            'default_role' => 'account-iban',
+            'level'        => 'B',
+        ],
+        'statementAccountNumber'                                                         => [
+            'title'        => 'statementAccountNumber',
+            'roles'        => 'account_number',
+            'mappable'     => true,
+            'default_role' => 'account-number',
+            'level'        => 'B',
+        ],
+        'entryDate'                                                                      => [
+            'section'      => false,
+            'title'        => 'entryDate',
+            'default_role' => 'date_transaction',
+            'roles'        => 'dates',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        // level C, Entry
+        'entryAccountServicerReference'                                                  => [
+            'section'      => false,
+            'title'        => 'entryAccountServicerReference',
+            'default_role' => 'external-id',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryReference'                                                                 => [
+            'section'      => false,
+            'title'        => 'entryReference',
+            'default_role' => 'internal_reference',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryAdditionalInfo'                                                            => [
+            'section'      => false,
+            'title'        => 'entryAdditionalInfo',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryAmount'                                                                    => [
+            'section'      => false,
+            'title'        => 'entryAmount',
+            'default_role' => 'amount',
+            'roles'        => 'amount',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryAmountCurrency'                                                            =>
+            [
+                'title'        => 'entryAmountCurrency',
+                'default_role' => 'currency-code',
+                'roles'        => 'currency',
+                'mappable'     => true,
+                'level'        => 'C',
+            ],
+        'entryValueDate'                                                                 =>
+            [
+                'title'        => 'entryValueDate',
+                'default_role' => 'date_payment',
+                'roles'        => 'dates',
+                'mappable'     => false,
+                'level'        => 'C',
+            ],
+        'entryBookingDate'                                                               =>
+            [
+                'title'        => 'entryBookingDate',
+                'default_role' => 'date_book',
+                'roles'        => 'dates',
+                'mappable'     => false,
+                'level'        => 'C',
+            ],
+        'entryBtcDomainCode'                                                             =>
+            [
+                'title'        => 'entryBtcDomainCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'C',
+            ],
+        'entryBtcFamilyCode'                                                             =>
+            [
+                'title'        => 'entryBtcFamilyCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'C',
+            ],
+        'entryBtcSubFamilyCode'                                                          =>
+            [
+                'title'        => 'entryBtcSubFamilyCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'C',
+            ],
+        'entryOpposingAccountIban'                                                       =>
+            [
+                'title'        => 'entryDetailOpposingAccountIban',
+                'default_role' => 'opposing-iban',
+                'roles'        => 'iban',
+                'mappable'     => true,
+                'level'        => 'C',
+            ],
+        'entryOpposingAccountNumber'                                                     =>
+            [
+                'title'        => 'entryDetailOpposingAccountNumber',
+                'default_role' => 'opposing-number',
+                'roles'        => 'account_number',
+                'mappable'     => true,
+                'level'        => 'C',
+            ],
+        'entryOpposingName'                                                              =>
+            [
+                'title'        => 'entryDetailOpposingName',
+                'default_role' => 'opposing-name',
+                'roles'        => 'account_name',
+                'mappable'     => true,
+                'level'        => 'C',
+            ],
+
+        // level D, entry detail
+        'entryDetailAccountServicerReference'                                            =>
+            [
+                'title'        => 'entryDetailAccountServicerReference',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+        'entryDetailRemittanceInformationUnstructuredBlockMessage'                       =>
+            [
+                'title'        => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+        'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' =>
+            [
+                'title'        => 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+
+        'entryDetailAmount'         =>
+            [
+                'title'        => 'entryDetailAmount',
+                'default_role' => 'amount',
+                'roles'        => 'amount',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+        'entryDetailAmountCurrency' =>
+            [
+                'title'        => 'entryDetailAmountCurrency',
+                'default_role' => 'currency-code',
+                'roles'        => 'currency',
+                'mappable'     => true,
+                'level'        => 'D',
+            ],
+
+        'entryDetailBtcDomainCode'    =>
+            [
+                'title'        => 'entryBtcDomainCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+        'entryDetailBtcFamilyCode'    =>
+            [
+                'title'        => 'entryDetailBtcFamilyCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+        'entryDetailBtcSubFamilyCode' =>
+            [
+                'title'        => 'entryDetailBtcSubFamilyCode',
+                'default_role' => 'note',
+                'roles'        => 'meta',
+                'mappable'     => false,
+                'level'        => 'D',
+            ],
+
+        'entryDetailOpposingAccountIban'   =>
+            [
+                'title'        => 'entryDetailOpposingAccountIban',
+                'default_role' => 'opposing-iban',
+                'roles'        => 'iban',
+                'mappable'     => true,
+                'level'        => 'D',
+            ],
+        'entryDetailOpposingAccountNumber' =>
+            [
+                'title'        => 'entryDetailOpposingAccountNumber',
+                'default_role' => 'opposing-number',
+                'roles'        => 'account_number',
+                'mappable'     => true,
+                'level'        => 'D',
+            ],
+        'entryDetailOpposingName'          =>
+            [
+                'title'        => 'entryDetailOpposingName',
+                'default_role' => 'opposing-name',
+                'roles'        => 'account_name',
+                'mappable'     => true,
+                'level'        => 'D',
+            ],
+
+
+    ],
+
+
+    // TODO remove me
+    'import_roles'          => [
         '_ignore'               => [
             'mappable'        => false,
             'pre-process-map' => false,

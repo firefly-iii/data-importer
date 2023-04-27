@@ -77,10 +77,15 @@ class MapController extends Controller
         $data          = [];
         $roles         = [];
 
-        if ('file' === $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for importable file');
+        if ('file' === $configuration->getFlow() && 'csv' === $configuration->getContentType()) {
+            app('log')->debug('Get mapping data for CSV file');
             $roles = $configuration->getRoles();
             $data  = $this->getCSVMapInformation();
+        }
+        if ('file' === $configuration->getFlow() && 'camt' === $configuration->getContentType()) {
+            app('log')->debug('Get mapping data for CAMT file');
+            $roles = $configuration->getRoles();
+            $data  = $this->getCamtMapInformation();
         }
 
         // nordigen, spectre and others:
@@ -168,6 +173,69 @@ class MapController extends Controller
         $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
 
         return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+    }
+
+    /**
+     * Return the map data necessary for the importable file mapping based on some weird helpers.
+     * TODO needs refactoring and proper splitting into helpers.
+     *
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     */
+    private function getCamtMapInformation(): array
+    {
+        $configuration   = $this->restoreConfiguration();
+        $roles           = $configuration->getRoles();
+        $existingMapping = $configuration->getMapping();
+        $doMapping       = $configuration->getDoMapping();
+        $data            = [];
+
+        foreach ($roles as $index => $role) {
+            $info     = config('camt.all_roles')[$role] ?? null;
+            $mappable = $info['mappable'] ?? false;
+            if (null === $info) {
+                app('log')->warning(sprintf('Role "%s" does not exist.', $role));
+                continue;
+            }
+            if (false === $mappable) {
+                app('log')->warning(sprintf('Role "%s" cannot be mapped.', $role));
+                continue;
+            }
+            $mapColumn = $doMapping[$index] ?? false;
+            if (false === $mapColumn) {
+                app('log')->warning(sprintf('Role "%s" does not have to be mapped.', $role));
+                continue;
+            }
+            app('log')->debug(sprintf('Mappable role is "%s"', $role));
+
+            $info['role']   = $role;
+            $info['values'] = [];
+
+
+            // create the "mapper" class which will get data from Firefly III.
+            $class = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+            if (!class_exists($class)) {
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+            }
+            app('log')->debug(sprintf('Associated class is %s', $class));
+
+
+            /** @var MapperInterface $object */
+            $object               = app($class);
+            $info['mapping_data'] = $object->getMap();
+            $info['mapped']       = $existingMapping[$index] ?? [];
+
+            app('log')->debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+
+            $data[$index] = $info;
+        }
+
+        // get columns from file
+        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+
+        return MapperService::getMapDataForCamt($configuration, $content, $data);
     }
 
     /**
