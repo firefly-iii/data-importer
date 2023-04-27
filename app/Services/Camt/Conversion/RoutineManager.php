@@ -25,23 +25,16 @@ declare(strict_types=1);
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\CSV\Conversion\Routine\ColumnValueConverter;
-use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
-use App\Services\CSV\Conversion\Routine\LineProcessor;
-use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
-use App\Services\CSV\File\FileReader;
+use App\Services\Camt\Transaction;
+use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
-
 use App\Services\Storage\StorageService;
-use App\Services\Session\Constants;
-use App\Services\Camt\Transaction;
-
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
+use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Reader;
 
 /**
@@ -52,18 +45,15 @@ class RoutineManager implements RoutineManagerInterface
     use IsRunningCli;
     use GeneratesIdentifier;
 
-    private array                      $allErrors;
-    private array                      $allMessages;
-    private array                      $allWarnings;
-    private ColumnValueConverter       $columnValueConverter;
-    private Configuration              $configuration;
-    private string                     $content;
-    private CSVFileProcessor           $csvFileProcessor;
+    private array         $allErrors;
+    private array         $allMessages;
+    private array         $allWarnings;
+    private Configuration $configuration;
+    private string        $content;
+    private bool          $forceCli = false;
 
-    private bool                       $forceCli = false;
-    private LineProcessor              $lineProcessor;
-    private PseudoTransactionProcessor $pseudoTransactionProcessor;
-
+    private TransactionExtractor $transactionExtractor;
+    private TransactionConverter $transactionConverter;
     /**
      *
      */
@@ -115,6 +105,10 @@ class RoutineManager implements RoutineManagerInterface
         // save config
         $this->configuration = $configuration;
 
+        // make objects
+        $this->transactionExtractor = new TransactionExtractor($this->configuration);
+        $this->transactionConverter = new TransactionConverter($this->configuration);
+
         // share config
         //$this->columnValueConverter       = new ColumnValueConverter($this->configuration);
         //$this->pseudoTransactionProcessor = new PseudoTransactionProcessor($this->configuration->getDefaultAccount()); use from data
@@ -133,48 +127,29 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        $camtReader;
-        $camtMessage;
-
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
-        // convert CSV file into raw lines (arrays)
-        //$this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());
-        //$this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
-
-        // check if CLI or not and read as appropriate:
-        if ('' !== $this->content) {
-            // seems the CLI part
-            //$this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->content, $this->configuration->isConversion()));
+        // get XML file
+        $camtMessage = $this->getCamtMessage();
+        if (null === $camtMessage) {
+            die('CAMT is null');
         }
-        if ('' === $this->content) {
-            // used for the WebBased Import
-            // TODO read data with GENKGO / CAMT
-            $camtReader = new Reader(Config::getDefault());
-            //$camtMessage = $camtReader->readString(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        // get raw messages
+        $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
 
-            $statements = $camtMessage->getRecords();
-            foreach($statements as $currentStatement) { // -> Level B
-                $entries = $currentStatement->getEntries();
-                foreach($entries as $currentEntry) { // -> Level C
-                    $transActionDetailCount = count($currentEntry->getTransactionDetails()); // hat es Level D Daten?
-                     // TODO Übergeben an Objekt und Rollen auslesen, Felder vertauschen
-                     $transaction = new Transaction($camtMessage, $currentStatement, $currentEntry);
-                }
-            }
+        // get intermediate result (still needs processing like mapping etc)
+        $pseudoTransactions =$this->transactionConverter->convert($rawTransactions);
 
 
+        // TODO -> hier muss alles ausgelesen werden
 
-            // TODO -> hier muss alles ausgelesen werden
-
-            // TODO -> CALL CAMT EXTRACTOR
-            //try {
-                //$this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            //} catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-            //    throw new ImporterErrorException($e->getMessage(), 0, $e);
-            //}
-        }
+        // TODO -> CALL CAMT EXTRACTOR
+        //try {
+        //$this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
+        //} catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        //    throw new ImporterErrorException($e->getMessage(), 0, $e);
+        //}
+        //}
 
         //$CSVLines = $this->csvFileProcessor->processCSVFile();
 
@@ -194,7 +169,8 @@ class RoutineManager implements RoutineManagerInterface
         $this->mergeWarnings($count);
         $this->mergeErrors($count);
 
-        file_put_contents('file_put_contents.txt',$transactions);
+        file_put_contents('file_put_contents.txt', $transactions);
+
         return $transactions;
     }
 
@@ -277,5 +253,26 @@ class RoutineManager implements RoutineManagerInterface
     public function setForceCli(bool $forceCli): void
     {
         $this->forceCli = $forceCli;
+    }
+
+    /**
+     * @return Message|null
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    private function getCamtMessage(): ?Message
+    {
+        $camtReader  = new Reader(Config::getDefault());
+        $camtMessage = null;
+        // check if CLI or not and read as appropriate:
+        if ('' !== $this->content) {
+            // seems the CLI part
+            $camtMessage = $camtReader->readString($this->content); // -> Level A
+        }
+        if ('' === $this->content) {
+            $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        }
+
+        return $camtMessage;
     }
 }

@@ -37,6 +37,7 @@ use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use JsonException;
 use Storage;
 
@@ -260,7 +261,7 @@ trait AutoImports
                         $manager->setContent(file_get_contents($importableFile));
                         break;
                     case 'camt':
-                        $manager          = new NotExistingCamtManager(null);
+                        $manager          = new CamtRoutineManager(null);
                         $this->identifier = $manager->getIdentifier();
                         $manager->setContent(file_get_contents($importableFile));
                         break;

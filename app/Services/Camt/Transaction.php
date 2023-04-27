@@ -24,34 +24,39 @@ class Transaction
 {
     public const TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
-
-    private Message $levelA;
-
-    private Statement $levelB;
-
-    private Statement|Entry|EntryTransactionDetail $levelC;
-
-    private ?EntryTransactionDetail $levelD;
+    private Message       $levelA;
+    private Statement     $levelB;
+    private Entry         $levelC;
+    private array         $levelD;
     private ?RelatedParty $relatedOppositeParty;
 
+
+    /**
+     * @param Configuration $configuration
+     * @param Message       $levelA
+     * @param Statement     $levelB
+     * @param Entry         $levelC
+     * @param array         $levelD
+     */
     public function __construct(
-        Configuration                $configuration, Message $levelA, Statement $levelB, Entry $levelC, EntryTransactionDetail $levelD = null
+        Configuration $configuration, Message $levelA, Statement $levelB, Entry $levelC, array $levelD
     ) {
         $this->relatedOppositeParty = null;
         $this->configuration        = $configuration;
         $this->levelA               = $levelA;
         $this->levelB               = $levelB;
         $this->levelC               = $levelC;
-        $this->levelD               = null;
-        if (null !== $levelD) {
-            $this->levelD = $levelD;
-            $this->setOpposingInformation($levelD);
-        }
+        $this->levelD               = $levelD;
     }
 
+    /**
+     * @param string|null $fieldName
+     *
+     * @return string
+     * @throws ImporterErrorException
+     */
     public function getField(string $fieldName = null): string
     {
-        $ret = false;
         switch ($fieldName) {
             default:
                 throw new ImporterErrorException(sprintf('Unknown field "%s"', $fieldName));
@@ -351,5 +356,45 @@ class Transaction
         $addressLines = implode(", ", $address->getAddressLines());
 
         return $addressLines;
+    }
+
+    /**
+     * @return int
+     */
+    public function countSplits(): int
+    {
+        return count($this->levelD);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getDate(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getCurrencyCode(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+    }
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getAmount(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
 }

@@ -139,11 +139,15 @@ class RoleService
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
         }
+        /**
+         * This code creates separate Transaction objects for transaction details,
+         * even when the user indicates these details should be splits or ignored entirely.
+         * This is because we still need to extract possible example data from these transaction details.
+         */
         $statements = $camtMessage->getRecords();
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            /** @var Entry $entry */
             foreach ($entries as $entry) { // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
