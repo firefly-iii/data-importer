@@ -111,6 +111,7 @@
                                                     {% if true == field.mappable %}
                                                         <label for="do_mapping_{{ field.title }}">
                                                             <input type="checkbox" name="do_mapping[{{ field.title }}]" id="do_mapping_{{ field.title }}"
+                                                                   {% if field.do_mapping %}checked="checked"{% endif %}
                                                                    value="1"/>
                                                         </label>
                                                     {% endif %}

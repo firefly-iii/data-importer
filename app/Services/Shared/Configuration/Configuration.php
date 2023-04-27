@@ -358,6 +358,7 @@ class Configuration
         $object->dateNotBefore   = $array['date_not_before'] ?? '';
         $object->dateNotAfter    = $array['date_not_after'] ?? '';
 
+        // camt
         $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
         $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
 
@@ -900,52 +901,56 @@ class Configuration
     public function toArray(): array
     {
         $array = [
-            'version'                    => $this->version,
-            'source'                     => sprintf('fidi-%s', config('importer.version')),
-            'created_at'                 => date(DateTimeInterface::W3C),
-            'date'                       => $this->date,
-            'default_account'            => $this->defaultAccount,
-            'delimiter'                  => $this->delimiter,
-            'headers'                    => $this->headers,
-            'rules'                      => $this->rules,
-            'skip_form'                  => $this->skipForm,
-            'add_import_tag'             => $this->addImportTag,
-            'roles'                      => $this->roles,
-            'do_mapping'                 => $this->doMapping,
-            'mapping'                    => $this->mapping,
-            'duplicate_detection_method' => $this->duplicateDetectionMethod,
-            'ignore_duplicate_lines'     => $this->ignoreDuplicateLines,
-            'unique_column_index'        => $this->uniqueColumnIndex,
-            'unique_column_type'         => $this->uniqueColumnType,
-            'flow'                       => $this->flow,
-            'content_type'               => $this->contentType,
+            'version'                      => $this->version,
+            'source'                       => sprintf('fidi-%s', config('importer.version')),
+            'created_at'                   => date(DateTimeInterface::W3C),
+            'date'                         => $this->date,
+            'default_account'              => $this->defaultAccount,
+            'delimiter'                    => $this->delimiter,
+            'headers'                      => $this->headers,
+            'rules'                        => $this->rules,
+            'skip_form'                    => $this->skipForm,
+            'add_import_tag'               => $this->addImportTag,
+            'roles'                        => $this->roles,
+            'do_mapping'                   => $this->doMapping,
+            'mapping'                      => $this->mapping,
+            'duplicate_detection_method'   => $this->duplicateDetectionMethod,
+            'ignore_duplicate_lines'       => $this->ignoreDuplicateLines,
+            'unique_column_index'          => $this->uniqueColumnIndex,
+            'unique_column_type'           => $this->uniqueColumnType,
+            'flow'                         => $this->flow,
+            'content_type'                 => $this->contentType,
 
             // spectre
-            'identifier'                 => $this->identifier,
-            'connection'                 => $this->connection,
-            'ignore_spectre_categories'  => $this->ignoreSpectreCategories,
+            'identifier'                   => $this->identifier,
+            'connection'                   => $this->connection,
+            'ignore_spectre_categories'    => $this->ignoreSpectreCategories,
+
+            // camt:
+            'grouped_transaction_handling' => $this->groupedTransactionHandling,
+            'use_entire_opposing_address'  => $this->useEntireOpposingAddress,
 
             // mapping for spectre + nordigen
-            'map_all_data'               => $this->mapAllData,
+            'map_all_data'                 => $this->mapAllData,
 
             // settings for spectre + nordigen
-            'accounts'                   => $this->accounts,
+            'accounts'                     => $this->accounts,
 
             // date range settings:
-            'date_range'                 => $this->dateRange,
-            'date_range_number'          => $this->dateRangeNumber,
-            'date_range_unit'            => $this->dateRangeUnit,
-            'date_not_before'            => $this->dateNotBefore,
-            'date_not_after'             => $this->dateNotAfter,
+            'date_range'                   => $this->dateRange,
+            'date_range_number'            => $this->dateRangeNumber,
+            'date_range_unit'              => $this->dateRangeUnit,
+            'date_not_before'              => $this->dateNotBefore,
+            'date_not_after'               => $this->dateNotAfter,
 
             // nordigen information:
-            'nordigen_country'           => $this->nordigenCountry,
-            'nordigen_bank'              => $this->nordigenBank,
-            'nordigen_requisitions'      => $this->nordigenRequisitions,
-            'nordigen_max_days'          => $this->nordigenMaxDays,
+            'nordigen_country'             => $this->nordigenCountry,
+            'nordigen_bank'                => $this->nordigenBank,
+            'nordigen_requisitions'        => $this->nordigenRequisitions,
+            'nordigen_max_days'            => $this->nordigenMaxDays,
 
             // utf8
-            'conversion'                 => $this->conversion,
+            'conversion'                   => $this->conversion,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -1058,7 +1063,6 @@ class Configuration
     {
         return $this->useEntireOpposingAddress;
     }
-
 
 
 }
