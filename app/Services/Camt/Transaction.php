@@ -107,6 +107,7 @@ class Transaction
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
             case 'entryBtcSubFamilyCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+            case 'entryOpposingAccountIban':
             case 'entryDetailOpposingAccountIban':
                 $ret = '';
                 if ($account = $this->relatedOppositeParty?->getAccount()) {
@@ -116,6 +117,7 @@ class Transaction
                 }
 
                 return $ret;
+            case 'entryOpposingAccountNumber':
             case 'entryDetailOpposingAccountNumber':
                 $ret = '';
                 if ($account = $this->relatedOppositeParty?->getAccount()) {
@@ -130,6 +132,7 @@ class Transaction
                 }
 
                 return $ret;
+            case 'entryOpposingName':
             case 'entryDetailOpposingName':
                 return '';
                 // TODO this code doesnt work yet.

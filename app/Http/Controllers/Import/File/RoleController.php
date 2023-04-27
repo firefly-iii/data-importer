@@ -249,6 +249,7 @@ class RoleController extends Controller
                 'title'       => trans('camt.level_A'),
                 'explanation' => trans('camt.explain_A'),
                 'fields'      => [
+                    // TODO replace me with info from config.
                     [
                         'section'       => false,
                         'title'         => 'messageId',
@@ -263,6 +264,7 @@ class RoleController extends Controller
                 'title'       => trans('camt.level_B'),
                 'explanation' => trans('camt.explain_B'),
                 'fields'      => [
+                    // TODO replace me with info from config.
                     [
                         'section'       => false,
                         'title'         => 'statementCreationDate',
@@ -295,6 +297,7 @@ class RoleController extends Controller
                 'title'       => trans('camt.level_C'),
                 'explanation' => trans('camt.explain_C'),
                 'fields'      => [
+                    // TODO replace me with info from config.
                     [
                         'section'       => false,
                         'title'         => 'entryDate',
@@ -333,6 +336,7 @@ class RoleController extends Controller
                         'title'   => 'transaction',
                     ],
                     // entryAmount
+                    // TODO replace me with info from config.
                     [
                         'section'       => false,
                         'title'         => 'entryAmount',
@@ -407,32 +411,32 @@ class RoleController extends Controller
                     // entryDetailOpposingAccountIban
                     [
                         'section'       => false,
-                        'title'         => 'entryDetailOpposingAccountIban',
-                        'selected_role' => $roles['entryDetailOpposingAccountIban'] ?? 'opposing-iban',
+                        'title'         => 'entryOpposingAccountIban',
+                        'selected_role' => $roles['entryOpposingAccountIban'] ?? 'opposing-iban',
                         'roles'         => config('camt.roles.iban'),
                         'mappable'      => true,
-                        'do_mapping'    => $doMapping['entryDetailOpposingAccountIban'] ?? false,
+                        'do_mapping'    => $doMapping['entryOpposingAccountIban'] ?? false,
                         'example_data'  => $examples['entryDetailOpposingAccountIban'],
                     ],
                     // entryDetailOpposingAccountNumber
                     [
                         'section'       => false,
-                        'title'         => 'entryDetailOpposingAccountNumber',
-                        'selected_role' => $roles['entryDetailOpposingAccountNumber'] ?? 'opposing-number',
+                        'title'         => 'entryOpposingAccountNumber',
+                        'selected_role' => $roles['entryOpposingAccountNumber'] ?? 'opposing-number',
                         'roles'         => config('camt.roles.account_number'),
                         'mappable'      => true,
-                        'do_mapping'    => $doMapping['entryDetailOpposingAccountNumber'] ?? false,
-                        'example_data'  => $examples['entryDetailOpposingAccountNumber'],
+                        'do_mapping'    => $doMapping['entryOpposingAccountNumber'] ?? false,
+                        'example_data'  => $examples['entryOpposingAccountNumber'],
                     ],
                     // entryDetailOpposingName
                     [
                         'section'       => false,
-                        'title'         => 'entryDetailOpposingName',
-                        'selected_role' => $roles['entryDetailOpposingName'] ?? 'opposing-name',
+                        'title'         => 'entryOpposingName',
+                        'selected_role' => $roles['entryOpposingName'] ?? 'opposing-name',
                         'roles'         => config('camt.roles.account_name'),
                         'mappable'      => true,
-                        'do_mapping'    => $doMapping['entryDetailOpposingName'] ?? false,
-                        'example_data'  => $examples['entryDetailOpposingName'],
+                        'do_mapping'    => $doMapping['entryOpposingName'] ?? false,
+                        'example_data'  => $examples['entryOpposingName'],
                     ],
 
 
@@ -442,6 +446,7 @@ class RoleController extends Controller
                 'title'       => trans('camt.level_D'),
                 'explanation' => trans('camt.explain_D'),
                 'fields'      => [
+                    // TODO replace me with info from config.
                     // entryDetailAccountServicerReference
                     [
                         'section'       => false,
@@ -500,32 +505,32 @@ class RoleController extends Controller
                         'section' => true,
                         'title'   => 'Btc',
                     ],
-                    // entryBtcDomainCode
+                    // entryDetailBtcDomainCode
                     [
                         'section'       => false,
-                        'title'         => 'entryBtcDomainCode',
-                        'selected_role' => $roles['entryBtcDomainCode'] ?? 'note',
+                        'title'         => 'entryDetailBtcDomainCode',
+                        'selected_role' => $roles['entryDetailBtcDomainCode'] ?? 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
-                        'example_data'  => $examples['entryBtcDomainCode'],
+                        'example_data'  => $examples['entryDetailBtcDomainCode'],
                     ],
-                    // entryBtcFamilyCode
+                    // entryDetailBtcFamilyCode
                     [
                         'section'       => false,
-                        'title'         => 'entryBtcFamilyCode',
-                        'selected_role' => $roles['entryBtcFamilyCode'] ?? 'note',
+                        'title'         => 'entryDetailBtcFamilyCode',
+                        'selected_role' => $roles['entryDetailBtcFamilyCode'] ?? 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
-                        'example_data'  => $examples['entryBtcFamilyCode'],
+                        'example_data'  => $examples['entryDetailBtcFamilyCode'],
                     ],
-                    // entryBtcSubFamilyCode
+                    // entryDetailBtcSubFamilyCode
                     [
                         'section'       => false,
-                        'title'         => 'entryBtcSubFamilyCode',
-                        'selected_role' => $roles['entryBtcSubFamilyCode'] ?? 'note',
+                        'title'         => 'entryDetailBtcSubFamilyCode',
+                        'selected_role' => $roles['entryDetailBtcSubFamilyCode'] ?? 'note',
                         'roles'         => config('camt.roles.meta'),
                         'mappable'      => false,
-                        'example_data'  => $examples['entryBtcSubFamilyCode'],
+                        'example_data'  => $examples['entryDetailBtcSubFamilyCode'],
                     ],
 
                     // section_opposingPart
