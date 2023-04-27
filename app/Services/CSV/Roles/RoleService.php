@@ -135,34 +135,11 @@ class RoleService
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
         $transactions = [];
-        $examples     = [
-            'messageId'                                                                      => [],
-            'messageCreationDate'                                                            => [],
-            'statementId'                                                                    => [],
-            'statementAccountIban'                                                           => [],
-            'statementAccountNumber'                                                         => [],
-            'statementCreationDate'                                                          => [],
-            'entryDate'                                                                      => [],
-            'entryAccountServicerReference'                                                  => [],
-            'entryReference'                                                                 => [],
-            'entryAdditionalInfo'                                                            => [],
-            'entryAmount'                                                                    => [],
-            'entryAmountCurrency'                                                            => [],
-            'entryValueDate'                                                                 => [],
-            'entryBookingDate'                                                               => [],
-            'entryBtcDomainCode'                                                             => [],
-            'entryBtcFamilyCode'                                                             => [],
-            'entryBtcSubFamilyCode'                                                          => [],
-            'entryDetailOpposingAccountIban'                                                 => [],
-            'entryDetailOpposingAccountNumber'                                               => [],
-            'entryDetailOpposingName'                                                        => [],
-            'entryDetailAmount'                                                              => [],
-            'entryDetailAmountCurrency'                                                      => [],
-            'entryDetailAccountServicerReference'                                            => [],
-            'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => [],
-            'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => [],
-        ];
-        $statements   = $camtMessage->getRecords();
+        $fieldNames   = array_keys(config('camt.fields'));
+        foreach ($fieldNames as $name) {
+            $examples[$name] = [];
+        }
+        $statements = $camtMessage->getRecords();
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
@@ -186,49 +163,18 @@ class RoleService
             if (5 === $count) {
                 break;
             }
-            $examples['messageId'][]                                                                      = $transaction->getField('messageId');
-            $examples['messageCreationDate'][]                                                            = $transaction->getField('messageCreationDate');
-            $examples['statementId'][]                                                                    = $transaction->getField('statementId');
-            $examples['statementAccountIban'][]                                                           = $transaction->getField('statementAccountIban');
-            $examples['statementAccountNumber'][]                                                         = $transaction->getField('statementAccountNumber');
-            $examples['statementCreationDate'][]                                                          = $transaction->getField('statementCreationDate');
-            $examples       ['entryDate'][]                                                               = $transaction->getField('entryDate');
-            $examples       ['entryAccountServicerReference'][]                                           = $transaction->getField(
-                'entryAccountServicerReference'
-            );
-            $examples     ['entryReference'][]                                                            = $transaction->getField('entryReference');
-            $examples['entryAdditionalInfo'][]                                                            = $transaction->getField('entryAdditionalInfo');
-            $examples['entryAmount'][]                                                                    = $transaction->getField('entryAmount');
-            $examples['entryAmountCurrency'][]                                                            = $transaction->getField('entryAmountCurrency');
-            $examples['entryValueDate'][]                                                                 = $transaction->getField('entryValueDate');
-            $examples['entryBookingDate'][]                                                               = $transaction->getField('entryBookingDate');
-            $examples['entryBtcDomainCode'][]                                                             = $transaction->getField('entryBtcDomainCode');
-            $examples['entryBtcFamilyCode'][]                                                             = $transaction->getField('entryBtcFamilyCode');
-            $examples['entryBtcSubFamilyCode'][]                                                          = $transaction->getField('entryBtcSubFamilyCode');
-            $examples['entryDetailOpposingAccountIban'][]                                                 = $transaction->getField(
-                'entryDetailOpposingAccountIban'
-            );
-            $examples['entryDetailOpposingAccountNumber'][]                                               = $transaction->getField(
-                'entryDetailOpposingAccountNumber'
-            );
-            $examples['entryDetailOpposingName'][]                                                        = $transaction->getField('entryDetailOpposingName');
-            $examples['entryDetailAmount'][]                                                              = $transaction->getField('entryDetailAmount');
-            $examples['entryDetailAmountCurrency'][]                                                      = $transaction->getField('entryDetailAmountCurrency');
-            $examples['entryDetailAccountServicerReference'][]                                            = $transaction->getField(
-                'entryDetailAccountServicerReference'
-            );
-            $examples['entryDetailRemittanceInformationUnstructuredBlockMessage'][]                       = $transaction->getField(
-                'entryDetailRemittanceInformationUnstructuredBlockMessage'
-            );
-            $examples['entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'][] = $transaction->getField('entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation');
+            foreach ($fieldNames as $name) {
+                $examples[$name][] = $transaction->getField($name);
+            }
             $count++;
         }
-        foreach($examples as $key => $list) {
+        foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], function(string $value) {
+            $examples[$key] = array_filter($examples[$key], function (string $value) {
                 return '' !== $value;
             });
         }
+
         return $examples;
     }
 

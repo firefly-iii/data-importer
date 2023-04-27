@@ -101,10 +101,13 @@ class Transaction
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
             case 'entryBookingDate':
                 return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
+            case 'entryDetailBtcDomainCode':
             case 'entryBtcDomainCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+            case 'entryDetailBtcFamilyCode':
             case 'entryBtcFamilyCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+            case 'entryDetailBtcSubFamilyCode':
             case 'entryBtcSubFamilyCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
             case 'entryOpposingAccountIban':
