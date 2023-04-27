@@ -64,10 +64,6 @@ class ConfigurationPostRequest extends Request
             'flow'                          => $this->convertToString('flow'),
             'content_type'                  => $this->convertToString('content_type'),
 
-            // camt options
-            'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
-            'use_entire_opposing_address'   => $this->convertBoolean('use_entire_opposing_address'),
-
             // duplicate detection:
             'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),
             'unique_column_index'           => $this->convertToInteger('unique_column_index'),
@@ -97,6 +93,10 @@ class ConfigurationPostRequest extends Request
             // utf8 conversion
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
+            // camt
+            'grouped_transaction_handling'  => $this->convertToString($this->get('grouped_transaction_handling')),
+            'use_entire_opposing_address'  => $this->convertBoolean($this->get('use_entire_opposing_address')),
+
         ];
 
         return $result;
@@ -119,10 +119,6 @@ class ConfigurationPostRequest extends Request
             'add_import_tag'                => 'numeric|between:0,1',
             'ignore_spectre_categories'     => 'numeric|between:0,1',
 
-            // camt options, if present:
-            'use_entire_opposing_address'   => 'numeric|between:0,1',
-            'grouped_transaction_handling'  => 'in:single,split,group',
-
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',
             'unique_column_index'           => 'numeric',
@@ -130,6 +126,10 @@ class ConfigurationPostRequest extends Request
 
             // conversion
             'conversion'                    => 'numeric|between:0,1',
+
+            // camt
+            'grouped_transaction_handling'  => 'in:single,group,split',
+            'use_entire_opposing_address'   => 'numeric|between:0,1',
         ];
 
         return $rules;
