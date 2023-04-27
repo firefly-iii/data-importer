@@ -193,33 +193,39 @@ class Transaction
                 return $ret;
 
             case 'entryDetailAmount':
-                return (string)$this->getDecimalAmount($this->levelD?->getAmount());
+                $amount = '0';
+                /** @var EntryTransactionDetail $levelD */
+                foreach($this->levelD as $levelD) {
+                    $amount = bcadd($amount, $this->getDecimalAmount($levelD->getAmount()));
+                }
+                return $amount;
             case 'entryDetailAmountCurrency':
-                return (string)$this->levelD?->getAmount()->getCurrency()->getCode();
+                $result = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach($this->levelD as $levelD) {
+                    $result = (string)$levelD->getAmount()->getCurrency()->getCode();
+                }
+                return $result;
             case 'entryDetailAccountServicerReference': // external ID
                 return (string)$this->levelC?->getAccountServicerReference();
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage': // unstructured description
-                $ret = '';
-                // TODO assignment in if-statement.
-                if ($remittanceInformation = $this->levelD?->getRemittanceInformation()) {
-                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-                        $ret = (string)$unstructuredRemittanceInformation->getMessage();
+                $msg = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach($this->levelD as $levelD) {
+                    if(null !== $levelD->getRemittanceInformation()) {
+                        $msg .= (string)$levelD->getRemittanceInformation()->getMessage();
                     }
                 }
-
-                return $ret;
+                return $msg;
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation': // structured description
-                $ret = '';
-                // TODO assignment in if-statement.
-                if ($remittanceInformation = $this->levelD?->getRemittanceInformation()) {
-                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-                        $ret = (string)$unstructuredRemittanceInformation->getMessage();
+                $msg = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach($this->levelD as $levelD) {
+                    if(null !== $levelD->getRemittanceInformation() && null !== $levelD->getRemittanceInformation()->getUnstructuredBlock()) {
+                        $msg .= (string)$levelD->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
                     }
                 }
-
-                return $ret;
-                break;
-
+                return $msg;
                 //            case 'entryBookingDate':
                 //                $ret = $this->levelC->getBookingDate();
                 //
