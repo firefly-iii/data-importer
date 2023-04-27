@@ -150,12 +150,17 @@ class RoleService
             'entryAmountCurrency'                                                            => [],
             'entryValueDate'                                                                 => [],
             'entryBookingDate'                                                               => [],
+            'entryOpposingAccountNumber'                                                     => [],
+            'entryOpposingName'                                                              => [],
             'entryBtcDomainCode'                                                             => [],
             'entryBtcFamilyCode'                                                             => [],
             'entryBtcSubFamilyCode'                                                          => [],
             'entryDetailOpposingAccountIban'                                                 => [],
             'entryDetailOpposingAccountNumber'                                               => [],
             'entryDetailOpposingName'                                                        => [],
+            'entryDetailBtcDomainCode'                                                       => [],
+            'entryDetailBtcFamilyCode'                                                       => [],
+            'entryDetailBtcSubFamilyCode'                                                    => [],
             'entryDetailAmount'                                                              => [],
             'entryDetailAmountCurrency'                                                      => [],
             'entryDetailAccountServicerReference'                                            => [],
@@ -202,6 +207,8 @@ class RoleService
             $examples['entryAmountCurrency'][]                                                            = $transaction->getField('entryAmountCurrency');
             $examples['entryValueDate'][]                                                                 = $transaction->getField('entryValueDate');
             $examples['entryBookingDate'][]                                                               = $transaction->getField('entryBookingDate');
+            $examples['entryOpposingAccountNumber'][]                                                     = $transaction->getField('entryOpposingAccountNumber');
+            $examples['entryOpposingName'][]                                                              = $transaction->getField('entryOpposingName');
             $examples['entryBtcDomainCode'][]                                                             = $transaction->getField('entryBtcDomainCode');
             $examples['entryBtcFamilyCode'][]                                                             = $transaction->getField('entryBtcFamilyCode');
             $examples['entryBtcSubFamilyCode'][]                                                          = $transaction->getField('entryBtcSubFamilyCode');
@@ -212,6 +219,9 @@ class RoleService
                 'entryDetailOpposingAccountNumber'
             );
             $examples['entryDetailOpposingName'][]                                                        = $transaction->getField('entryDetailOpposingName');
+            $examples['entryDetailBtcDomainCode'][]                                                       = $transaction->getField('entryBtcDomainCode');
+            $examples['entryDetailBtcFamilyCode'][]                                                       = $transaction->getField('entryDetailBtcFamilyCode');
+            $examples['entryDetailBtcSubFamilyCode'][]                                                    = $transaction->getField('entryDetailBtcSubFamilyCode');
             $examples['entryDetailAmount'][]                                                              = $transaction->getField('entryDetailAmount');
             $examples['entryDetailAmountCurrency'][]                                                      = $transaction->getField('entryDetailAmountCurrency');
             $examples['entryDetailAccountServicerReference'][]                                            = $transaction->getField(
