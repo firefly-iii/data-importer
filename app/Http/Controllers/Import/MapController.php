@@ -196,19 +196,19 @@ class MapController extends Controller
             $info     = config('camt.all_roles')[$role] ?? null;
             $mappable = $info['mappable'] ?? false;
             if (null === $info) {
-                app('log')->warning(sprintf('Role "%s" does not exist.', $role));
+                app('log')->warning(sprintf('Field "%s" with role "%s" does not exist.', $index, $role));
                 continue;
             }
             if (false === $mappable) {
-                app('log')->warning(sprintf('Role "%s" cannot be mapped.', $role));
+                app('log')->warning(sprintf('Field "%s" with role "%s" cannot be mapped.', $index, $role));
                 continue;
             }
             $mapColumn = $doMapping[$index] ?? false;
             if (false === $mapColumn) {
-                app('log')->warning(sprintf('Role "%s" does not have to be mapped.', $role));
+                app('log')->warning(sprintf('Field "%s" with role "%s" does not have to be mapped.', $index, $role));
                 continue;
             }
-            app('log')->debug(sprintf('Mappable role is "%s"', $role));
+            app('log')->debug(sprintf('Field "%s" with role is "%s"', $index, $role));
 
             $info['role']   = $role;
             $info['values'] = [];
@@ -233,7 +233,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
 
         return MapperService::getMapDataForCamt($configuration, $content, $data);
     }

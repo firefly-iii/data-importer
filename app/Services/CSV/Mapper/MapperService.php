@@ -26,9 +26,7 @@ namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
-use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Storage\StorageService;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Entry;
@@ -148,7 +146,7 @@ class MapperService
 
 
         // loop over records.
-        $statements   = $camtMessage->getRecords();
+        $statements = $camtMessage->getRecords();
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
@@ -170,13 +168,15 @@ class MapperService
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             // take all mappable fields from this transaction, and add to $values in the data thing
-            foreach(array_keys($mappableFields) as $title) {
-                $data[$title]['values'][] = $transaction->getField($title);
+            foreach (array_keys($mappableFields) as $title) {
+                if (array_key_exists($title, $data)) {
+                    $data[$title]['values'][] = $transaction->getField($title);
+                }
             }
         }
         // make all values unique for mapping and remove empty vars.
-        foreach($data as $title => $info) {
-            $filtered = array_filter(
+        foreach ($data as $title => $info) {
+            $filtered       = array_filter(
                 $info['values'],
                 static function (string $value) {
                     return '' !== $value;
@@ -185,8 +185,14 @@ class MapperService
             $info['values'] = array_unique($filtered);
             sort($info['values']);
             $data[$title]['values'] = $info['values'];
-
         }
+        // unset entries with zero values.
+        foreach ($data as $title => $info) {
+            if(0 === count($info['values'])) {
+                unset($data[$title]);
+            }
+        }
+
         return $data;
     }
 
@@ -198,11 +204,12 @@ class MapperService
         $fields = config('camt.fields');
         $return = [];
         /** @var array $field */
-        foreach($fields as $name => $field) {
-            if($field['mappable']) {
+        foreach ($fields as $name => $field) {
+            if ($field['mappable']) {
                 $return[$name] = $field;
             }
         }
+
         return $return;
     }
 }
