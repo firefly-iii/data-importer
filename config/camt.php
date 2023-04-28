@@ -323,7 +323,6 @@ return [
     /*
      * This array denotes all fields that can be extracted from a CAMT file and the necessary
      * configuration:
-     * TODO this array needs to be expanded based on the content of RoleController.php:247
      */
     'fields'                => [
         // level A
