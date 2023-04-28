@@ -54,6 +54,17 @@ class SecretManager
     }
 
     /**
+     * Will verify if the user has an access token (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasAccessToken(): bool
+    {
+        return '' !== (string)request()->cookie(self::ACCESS_TOKEN);
+    }
+
+    /**
      * @return string
      */
     public static function getBaseUrl(): string
@@ -65,6 +76,17 @@ class SecretManager
         }
 
         return (string)request()->cookie(self::BASE_URL);
+    }
+
+    /**
+     * Will verify if the user has an base URL defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasBaseUrl(): bool
+    {
+        return '' !== (string)request()->cookie(self::BASE_URL);
     }
 
     /**
@@ -151,17 +173,6 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has an access token (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasAccessToken(): bool
-    {
-        return '' !== (string)request()->cookie(self::ACCESS_TOKEN);
-    }
-
-    /**
      * Will verify if the user has an refresh token (in a cookie)
      * TODO is a cookie the best place?
      *
@@ -170,17 +181,6 @@ class SecretManager
     private static function hasRefreshToken(): bool
     {
         return '' !== (string)request()->cookie(self::REFRESH_TOKEN);
-    }
-
-    /**
-     * Will verify if the user has an base URL defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasBaseUrl(): bool
-    {
-        return '' !== (string)request()->cookie(self::BASE_URL);
     }
 
     /**

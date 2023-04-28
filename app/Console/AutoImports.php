@@ -26,6 +26,7 @@ namespace App\Console;
 
 use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
+use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -246,12 +247,12 @@ trait AutoImports
                 exit();
             case 'file':
                 $contentType = $configuration->getContentType();
-                if('unknown' === $contentType) {
+                if ('unknown' === $contentType) {
                     app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
-                    $detector = new FileContentSherlock();
+                    $detector    = new FileContentSherlock();
                     $contentType = $detector->detectContentType($importableFile);
                 }
-                switch($contentType) {
+                switch ($contentType) {
                     default:
                     case 'unknown':
                     case 'csv':
@@ -260,7 +261,7 @@ trait AutoImports
                         $manager->setContent(file_get_contents($importableFile));
                         break;
                     case 'camt':
-                        $manager          = new NotExistingCamtManager(null);
+                        $manager          = new CamtRoutineManager(null);
                         $this->identifier = $manager->getIdentifier();
                         $manager->setContent(file_get_contents($importableFile));
                         break;

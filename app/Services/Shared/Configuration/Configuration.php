@@ -38,6 +38,7 @@ class Configuration
     private array  $accounts;
     private bool   $addImportTag;
     private string $connection;
+    private string $contentType;
     private bool   $conversion;
     private string $date;
     private string $dateNotAfter;
@@ -46,52 +47,51 @@ class Configuration
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
     private int    $defaultAccount;
-    private string $delimiter;
 
     // nordigen configuration
+    private string $delimiter;
     private array  $doMapping;
-    private string $duplicateDetectionMethod;
 
     // flow and file type
+    private string $duplicateDetectionMethod;
     private string $flow;
-    private string $contentType;
 
     // csv config
-    private bool $headers;
+    private string $groupedTransactionHandling;
 
     // spectre + nordigen configuration
-    private string $identifier;
+    private bool $headers;
 
     // spectre configuration
+    private string $identifier;
     private bool $ignoreDuplicateLines;
     private bool $ignoreDuplicateTransactions;
-    private bool $ignoreSpectreCategories;
 
     // camt configuration
-    private string $groupedTransactionHandling;
-    private bool   $useEntireOpposingAddress;
+    private bool $ignoreSpectreCategories;
+    private bool   $mapAllData;
 
     // date range settings
-    private bool   $mapAllData;
     private array  $mapping;
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
-
-    // what type of import?
     private array $nordigenRequisitions;
 
+    // what type of import?
+    private array $roles;
+
     // how to do double transaction detection?
-    private array $roles; // 'classic' or 'cell'
+    private bool $rules; // 'classic' or 'cell'
 
     // configuration for "classic" method:
-    private bool $rules;
     private bool $skipForm;
+    private array  $specifics;
 
     // configuration for "cell" method:
-    private array  $specifics;
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
+    private bool   $useEntireOpposingAddress;
 
     // configuration for utf-8
     private int $version;
@@ -556,6 +556,22 @@ class Configuration
     /**
      * @return string
      */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param string $contentType
+     */
+    public function setContentType(string $contentType): void
+    {
+        $this->contentType = $contentType;
+    }
+
+    /**
+     * @return string
+     */
     public function getDate(): string
     {
         return $this->date;
@@ -655,6 +671,14 @@ class Configuration
     public function setFlow(string $flow): void
     {
         $this->flow = $flow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupedTransactionHandling(): string
+    {
+        return $this->groupedTransactionHandling;
     }
 
     /**
@@ -883,6 +907,14 @@ class Configuration
     }
 
     /**
+     * @return bool
+     */
+    public function isUseEntireOpposingAddress(): bool
+    {
+        return $this->useEntireOpposingAddress;
+    }
+
+    /**
      * Return the array but drop some potentially massive arrays.
      *
      * @return array
@@ -1030,38 +1062,6 @@ class Configuration
         app('log')->error(sprintf('Could not parse date setting. Unknown key "%s"', $unit));
 
         return null;
-    }
-
-    /**
-     * @return string
-     */
-    public function getContentType(): string
-    {
-        return $this->contentType;
-    }
-
-    /**
-     * @param string $contentType
-     */
-    public function setContentType(string $contentType): void
-    {
-        $this->contentType = $contentType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getGroupedTransactionHandling(): string
-    {
-        return $this->groupedTransactionHandling;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUseEntireOpposingAddress(): bool
-    {
-        return $this->useEntireOpposingAddress;
     }
 
 

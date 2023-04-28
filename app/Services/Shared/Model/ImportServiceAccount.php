@@ -31,11 +31,11 @@ use App\Services\Spectre\Model\Account as SpectreAccount;
 
 class ImportServiceAccount
 {
-    public string $id;
-    public string $name;
-    public string $iban;
     public string $bban;
     public string $currencyCode;
+    public string $iban;
+    public string $id;
+    public string $name;
     public string $status;
 
     /**

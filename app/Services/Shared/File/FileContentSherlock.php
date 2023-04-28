@@ -22,6 +22,7 @@
 
 namespace App\Services\Shared\File;
 
+use Exception;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
 
@@ -46,8 +47,9 @@ class FileContentSherlock
         try {
             $message = $this->camtReader->readFile($file);
             app('log')->debug('CAMT.053 Check on file: positive');
+
             return 'camt';
-        } catch(\Exception $e) {
+        } catch (Exception $e) {
             app('log')->debug('CAMT.053 Check on file: negative');
             //app('log')->debug($e->getMessage());
         }
@@ -63,8 +65,9 @@ class FileContentSherlock
         try {
             $this->camtReader->readString($content);
             app('log')->debug('CAMT.053 Check of content: positive');
+
             return 'camt';
-        } catch(\Exception $e) {
+        } catch (Exception $e) {
             app('log')->debug('CAMT.053 Check of content: negative');
             //app('log')->debug($e->getMessage());
         }

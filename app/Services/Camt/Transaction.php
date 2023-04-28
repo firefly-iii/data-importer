@@ -7,6 +7,7 @@ namespace App\Services\Camt;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
+use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
@@ -24,34 +25,313 @@ class Transaction
 {
     public const TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
-
-    private Message $levelA;
-
-    private Statement $levelB;
-
-    private Statement|Entry|EntryTransactionDetail $levelC;
-
-    private ?EntryTransactionDetail $levelD;
+    private Message       $levelA;
+    private Statement     $levelB;
+    private Entry         $levelC;
+    private array         $levelD;
     private ?RelatedParty $relatedOppositeParty;
 
+
+    /**
+     * @param Configuration $configuration
+     * @param Message       $levelA
+     * @param Statement     $levelB
+     * @param Entry         $levelC
+     * @param array         $levelD
+     */
     public function __construct(
-        Configuration                $configuration, Message $levelA, Statement $levelB, Entry $levelC, EntryTransactionDetail $levelD = null
+        Configuration $configuration,
+        Message       $levelA,
+        Statement     $levelB,
+        Entry         $levelC,
+        array         $levelD
     ) {
         $this->relatedOppositeParty = null;
         $this->configuration        = $configuration;
         $this->levelA               = $levelA;
         $this->levelB               = $levelB;
         $this->levelC               = $levelC;
-        $this->levelD               = null;
-        if (null !== $levelD) {
-            $this->levelD = $levelD;
-            $this->setOpposingInformation($levelD);
-        }
+        $this->levelD               = $levelD;
     }
 
+    /**
+     * @return int
+     */
+    public function countSplits(): int
+    {
+        return count($this->levelD);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getCurrencyCode(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getDate(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+    }
+
+    /*public function setBTC(\Genkgo\Camt\DTO\BankTransactionCode $btc) {
+        $this->btcDomainCode = $btc->getDomain()->getCode();
+        $this->btcFamilyCode = $btc->getDomain()->getFamily()->getCode();
+        $this->btcSubFamilyCode = $btc->getDomain()->getFamily()->getSubFamilyCode();
+        // TODO get reals Description of Codes
+    }*/
+
+    /**
+     * @param string $field
+     * @param int    $index
+     *
+     * @return string
+     * @throws ImporterErrorException
+     */
+    public function getFieldByIndex(string $field, int $index): string
+    {
+        switch ($field) {
+            default:
+                // temporary debug message:
+                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+                echo PHP_EOL;
+                exit;
+                // end temporary debug message
+                throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
+            case 'messageId':
+                // always the same, since its level A.
+                return (string)$this->levelA->getGroupHeader()->getMessageId();
+            case 'statementCreationDate':
+                // always the same, since its level B.
+                return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
+            case 'statementAccountIban':
+                // always the same, since its level B.
+                $ret = '';
+                if (IbanAccount::class === get_class($this->levelB->getAccount())) {
+                    $ret = $this->levelB->getAccount()->getIdentification();
+                }
+
+                return $ret;
+            case 'statementAccountNumber':
+                // always the same, since its level B.
+                $list  = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                $class = get_class($this->levelB->getAccount());
+                $ret   = '';
+                if (in_array($class, $list, true)) {
+                    $ret = $this->levelB->getAccount()->getIdentification();
+                }
+
+                return $ret;
+            case 'entryDate':
+            case 'entryValueDate':
+                // always the same, since its level C.
+                return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+            case 'entryAccountServicerReference':
+                // always the same, since its level C.
+                return (string)$this->levelC->getAccountServicerReference();
+            case 'entryReference':
+                // always the same, since its level C.
+                return (string)$this->levelC->getReference();
+            case 'entryAdditionalInfo':
+                // always the same, since its level C.
+                return (string)$this->levelC->getAdditionalInfo();
+            case 'entryAmount':
+                // always the same, since its level C.
+                return (string)$this->getDecimalAmount($this->levelC->getAmount());
+            case 'entryAmountCurrency':
+                // always the same, since its level C.
+                return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+            case 'entryBookingDate':
+                // always the same, since its level C.
+                return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
+            case 'entryBtcDomainCode':
+                // always the same, since its level C.
+                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+            case 'entryBtcFamilyCode':
+                // always the same, since its level C.
+                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+            case 'entryBtcSubFamilyCode':
+                // always the same, since its level C.
+                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+            case 'entryOpposingAccountIban':
+                // always the same, since its level C.
+                $result = '';
+                // loop transaction details of level C.
+                foreach ($this->levelC->getTransactionDetails() as $detail) {
+                    $account = $detail?->getRelatedParty()?->getAccount();
+                    if (null !== $account && IbanAccount::class === get_class($account)) {
+                        $result = (string)$account->getIdentification();
+                    }
+                }
+
+                return $result;
+            case 'entryOpposingAccountNumber':
+                $result = '';
+                $list   = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                // loop transaction details of level C.
+                foreach ($this->levelC->getTransactionDetails() as $detail) {
+                    $account = $detail?->getRelatedParty()?->getAccount();
+                    $class   = null !== $account ? get_class($account) : '';
+                    if (in_array($class, $list, true)) {
+                        $result = (string)$account->getIdentification();
+
+                    }
+                }
+
+                return $result;
+            case 'entryOpposingName':
+                // TODO get name.
+                return '';
+            case 'entryDetailAccountServicerReference':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    // return level C:
+                    return (string)$this->levelC->getAccountServicerReference();
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getReference()->getAccountServicerReference();
+            case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    // TODO return nothing?
+                    return '';
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
+            case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    // TODO return nothing?
+                    return '';
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getRemittanceInformation()?->getStructuredBlock()?->getAdditionalRemittanceInformation();
+            case 'entryDetailAmount':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return $this->getDecimalAmount($this->levelC->getAmount());
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return $this->getDecimalAmount($info->getAmount());
+            case 'entryDetailAmountCurrency':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getAmount()->getCurrency()->getCode();
+            case 'entryDetailBtcDomainCode':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getBankTransactionCode()->getDomain()->getCode();
+            case 'entryDetailBtcFamilyCode':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+            case 'entryDetailBtcSubFamilyCode':
+                // this is level D, so grab from level C or loop.
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                }
+                /** @var EntryTransactionDetail $info */
+                $info = $this->levelD[$index];
+
+                return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+            case 'entryDetailOpposingAccountIban':
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    $result = '';
+                    // loop transaction details of level C.
+                    foreach ($this->levelC->getTransactionDetails() as $detail) {
+                        $account = $detail?->getRelatedParty()?->getAccount();
+                        if (null !== $account && IbanAccount::class === get_class($account)) {
+                            $result = (string)$account->getIdentification();
+                        }
+                    }
+
+                    return $result;
+                }
+                /** @var EntryTransactionDetail $info */
+                $info    = $this->levelD[$index];
+                $result  = '';
+                $account = $info->getRelatedParty()?->getAccount();
+                if (null !== $account && IbanAccount::class === get_class($account)) {
+                    $result = (string)$account->getIdentification();
+                }
+
+                return $result;
+            case 'entryDetailOpposingAccountNumber':
+                $list = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    $result = '';
+                    // loop transaction details of level C.
+                    foreach ($this->levelC->getTransactionDetails() as $detail) {
+                        $account = $detail?->getRelatedParty()?->getAccount();
+                        $class   = get_class($account);
+                        if (in_array($class, $list, true)) {
+                            $result = (string)$account->getIdentification();
+
+                        }
+                    }
+
+                    return $result;
+                }
+                /** @var EntryTransactionDetail $info */
+                $info    = $this->levelD[$index];
+                $result  = '';
+                $account = $info->getRelatedParty()?->getAccount();
+                $class   = null !== $account ? get_class($account) : '';
+                if (in_array($class, $list, true)) {
+                    $result = (string)$account->getIdentification();
+
+                }
+
+                return $result;
+            case 'entryDetailOpposingName':
+                // TODO get name
+                return '';
+
+        }
+
+    }
+
+    /**
+     * @param string|null $fieldName
+     *
+     * @return string
+     * @throws ImporterErrorException
+     */
     public function getField(string $fieldName = null): string
     {
-        $ret = false;
         switch ($fieldName) {
             default:
                 throw new ImporterErrorException(sprintf('Unknown field "%s"', $fieldName));
@@ -79,10 +359,8 @@ class Transaction
 
                 return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
             case 'entryAccountServicerReference': // external ID
-                // TODO gives a complex object back.
                 return (string)$this->levelC->getAccountServicerReference();
             case 'entryReference':
-                // TODO gives a complex object back.
                 return (string)$this->levelC->getReference();
             case 'entryAdditionalInfo':
                 // TODO gives a complex object back.
@@ -101,10 +379,13 @@ class Transaction
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
             case 'entryBookingDate':
                 return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
+            case 'entryDetailBtcDomainCode':
             case 'entryBtcDomainCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+            case 'entryDetailBtcFamilyCode':
             case 'entryBtcFamilyCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+            case 'entryDetailBtcSubFamilyCode':
             case 'entryBtcSubFamilyCode':
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
             case 'entryOpposingAccountIban':
@@ -136,40 +417,50 @@ class Transaction
             case 'entryDetailOpposingName':
                 return '';
                 // TODO this code doesnt work yet.
-                if (empty ($this->relatedOppositeParty)) {
+                if (empty($this->relatedOppositeParty)) {
                     $ret = $this->getOpposingName();
                 }
 
                 return $ret;
 
             case 'entryDetailAmount':
-                return (string)$this->getDecimalAmount($this->levelD?->getAmount());
+                $amount = '0';
+                /** @var EntryTransactionDetail $levelD */
+                foreach ($this->levelD as $levelD) {
+                    $amount = bcadd($amount, $this->getDecimalAmount($levelD->getAmount()));
+                }
+
+                return $amount;
             case 'entryDetailAmountCurrency':
-                return (string)$this->levelD?->getAmount()->getCurrency()->getCode();
+                $result = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach ($this->levelD as $levelD) {
+                    $result = (string)$levelD->getAmount()->getCurrency()->getCode();
+                }
+
+                return $result;
             case 'entryDetailAccountServicerReference': // external ID
                 return (string)$this->levelC?->getAccountServicerReference();
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage': // unstructured description
-                $ret = '';
-                // TODO assignment in if-statement.
-                if ($remittanceInformation = $this->levelD?->getRemittanceInformation()) {
-                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-                        $ret = (string)$unstructuredRemittanceInformation->getMessage();
+                $msg = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach ($this->levelD as $levelD) {
+                    if (null !== $levelD->getRemittanceInformation()) {
+                        $msg .= (string)$levelD->getRemittanceInformation()->getMessage();
                     }
                 }
 
-                return $ret;
+                return $msg;
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation': // structured description
-                $ret = '';
-                // TODO assignment in if-statement.
-                if ($remittanceInformation = $this->levelD?->getRemittanceInformation()) {
-                    if ($unstructuredRemittanceInformation = $remittanceInformation->getUnstructuredBlock()) {
-                        $ret = (string)$unstructuredRemittanceInformation->getMessage();
+                $msg = '';
+                /** @var EntryTransactionDetail $levelD */
+                foreach ($this->levelD as $levelD) {
+                    if (null !== $levelD->getRemittanceInformation() && null !== $levelD->getRemittanceInformation()->getUnstructuredBlock()) {
+                        $msg .= (string)$levelD->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
                     }
                 }
 
-                return $ret;
-                break;
-
+                return $msg;
             //            case 'entryBookingDate':
             //                $ret = $this->levelC->getBookingDate();
             //
@@ -288,6 +579,52 @@ class Transaction
         }
     }
 
+    private function getDecimalAmount(?Money $money): string
+    {
+        if (null === $money) {
+            return '';
+        }
+        $currencies            = new ISOCurrencies();
+        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
+
+        return $moneyDecimalFormatter->format($money);
+    }
+
+    /**
+     * @param int $index
+     *
+     * @return string
+     */
+    public function getAmount(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
+    }
+
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false)
+    { // TODO make depend on configuration
+        if (empty($relatedParty->getRelatedPartyType()->getName())) {
+            // there is no "name", so use the address instead
+            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
+        } else {
+            // there is a name
+            $opposingName = $relatedParty->getRelatedPartyType()->getName();
+            // but maybe you want also the entire address
+            if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+                $opposingName .= ', ' . $addressLine;
+            }
+        }
+
+        return $opposingName;
+    }
+
+    private function generateAddressLine(Address $address = null)
+    {
+        $addressLines = implode(", ", $address->getAddressLines());
+
+        return $addressLines;
+    }
+
     /**
      * @param EntryTransactionDetail $transactionDetail
      *
@@ -306,47 +643,5 @@ class Transaction
                 $this->relatedOppositeParty = $relatedParty;
             }
         }
-    }
-
-    private function getDecimalAmount(?Money $money): string
-    {
-        if (null === $money) {
-            return '';
-        }
-        $currencies            = new ISOCurrencies();
-        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
-
-        return $moneyDecimalFormatter->format($money);
-    }
-
-    /*public function setBTC(\Genkgo\Camt\DTO\BankTransactionCode $btc) {
-        $this->btcDomainCode = $btc->getDomain()->getCode();
-        $this->btcFamilyCode = $btc->getDomain()->getFamily()->getCode();
-        $this->btcSubFamilyCode = $btc->getDomain()->getFamily()->getSubFamilyCode();
-        // TODO get reals Description of Codes
-    }*/
-
-    private function getOpposingName(\Genkgo\Camt\DTO\RelatedParty $relatedParty, bool $useEntireAddress = false)
-    { // TODO make depend on configuration
-        if (empty($relatedParty->getRelatedPartyType()->getName())) {
-            // there is no "name", so use the address instead
-            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
-        } else {
-            // there is a name
-            $opposingName = $relatedParty->getRelatedPartyType()->getName();
-            // but maybe you want also the entire address
-            if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', ' . $addressLine;
-            }
-        }
-
-        return $opposingName;
-    }
-
-    private function generateAddressLine(\Genkgo\Camt\DTO\Address $address = null)
-    {
-        $addressLines = implode(", ", $address->getAddressLines());
-
-        return $addressLines;
     }
 }

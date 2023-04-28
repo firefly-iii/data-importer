@@ -122,6 +122,7 @@ class TokenManager
 
             return false;
         }
+
         //app('log')->debug('Nordigen token is valid.');
 
         return true;
