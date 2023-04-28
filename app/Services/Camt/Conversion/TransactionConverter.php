@@ -33,8 +33,6 @@ class TransactionConverter
             $result[] = $this->convertSingle($transaction);
         }
         app('log')->debug('Done converting all transactions into pseudo-transactions.');
-        print_r($result);
-        exit;
 
         return $result;
     }
@@ -52,10 +50,11 @@ class TransactionConverter
             'transactions' => [],
         ];
         $configuredRoles  = $this->getConfiguredRoles();
+        $mapping          = $this->configuration->getMapping();
         $allRoles         = $this->configuration->getRoles();
         $count            = $transaction->countSplits();
         $count            = 0 === $count ? 1 : $count; // add at least one transaction inside the Transaction.
-        $fieldNames = array_keys(config('camt.fields'));
+        $fieldNames       = array_keys(config('camt.fields'));
         $result['splits'] = $count;
 
         for ($i = 0; $i < $count; $i++) {
@@ -74,7 +73,16 @@ class TransactionConverter
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
-                    $current[$role][] = $value;
+                    $current[$role] = $current[$role] ?? [
+                        'data' => [],
+                        'mapping' => []
+                    ];
+                    if(array_key_exists($field, $mapping)) {
+                        $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
+                    }
+                    $current[$role]['data'][] = $value;
+                    $current[$role]['data']   = array_unique($current[$role]['data']);
+
                 }
             }
             $result['transactions'][] = $current;

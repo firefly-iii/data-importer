@@ -232,6 +232,13 @@ $availableRoles = [
         'mapper'          => 'OpposingAccounts',
         'append_value'    => false,
     ],
+    'description'           => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'CleanString',
+        'field'           => 'description',
+        'append_value'    => true,
+    ],
 ];
 
 
@@ -285,6 +292,7 @@ return [
         // roles for meta data
         'meta'           => [
             '_ignore'            => $availableRoles['_ignore'],
+            'description'        => $availableRoles['description'],
             'note'               => $availableRoles['note'],
             'external-id'        => $availableRoles['external-id'],
             'external-url'       => $availableRoles['external-url'],
@@ -368,7 +376,7 @@ return [
         'entryReference'                                                                 => [
             'section'      => false,
             'title'        => 'entryReference',
-            'default_role' => 'internal_reference',
+            'default_role' => 'note',
             'roles'        => 'meta',
             'mappable'     => false,
             'level'        => 'C',
@@ -376,7 +384,7 @@ return [
         'entryAdditionalInfo'                                                            => [
             'section'      => false,
             'title'        => 'entryAdditionalInfo',
-            'default_role' => 'note',
+            'default_role' => 'description',
             'roles'        => 'meta',
             'mappable'     => false,
             'level'        => 'C',
@@ -482,7 +490,7 @@ return [
         'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' =>
             [
                 'title'        => 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation',
-                'default_role' => 'note',
+                'default_role' => 'description',
                 'roles'        => 'meta',
                 'mappable'     => false,
                 'level'        => 'D',

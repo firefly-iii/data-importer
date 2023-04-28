@@ -45,14 +45,15 @@ class RoutineManager implements RoutineManagerInterface
     use IsRunningCli;
     use GeneratesIdentifier;
 
-    private array         $allErrors;
-    private array         $allMessages;
-    private array         $allWarnings;
-    private Configuration $configuration;
-    private string        $content;
-    private bool          $forceCli = false;
+    private array                $allErrors;
+    private array                $allMessages;
+    private array                $allWarnings;
+    private Configuration        $configuration;
+    private string               $content;
+    private bool                 $forceCli = false;
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
+    private TransactionMapper    $transactionMapper;
 
     /**
      *
@@ -108,6 +109,7 @@ class RoutineManager implements RoutineManagerInterface
         // make objects
         $this->transactionExtractor = new TransactionExtractor($this->configuration);
         $this->transactionConverter = new TransactionConverter($this->configuration);
+        $this->transactionMapper    = new TransactionMapper($this->configuration);
 
         // share config
         //$this->columnValueConverter       = new ColumnValueConverter($this->configuration);
@@ -139,6 +141,12 @@ class RoutineManager implements RoutineManagerInterface
 
         // get intermediate result (still needs processing like mapping etc)
         $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
+
+        // put the result into firefly iii compatible arrays (and replace mapping when necessary)
+        $transactions = $this->transactionMapper->map($pseudoTransactions);
+
+        print_r($transactions);
+        exit;
 
 
         // TODO -> hier muss alles ausgelesen werden
