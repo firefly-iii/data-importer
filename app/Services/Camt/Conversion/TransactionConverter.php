@@ -2,6 +2,7 @@
 
 namespace App\Services\Camt\Conversion;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
 use App\Services\Shared\Configuration\Configuration;
 
@@ -21,6 +22,7 @@ class TransactionConverter
      * @param array $transactions
      *
      * @return array
+     * @throws ImporterErrorException
      */
     public function convert(array $transactions): array
     {
@@ -31,7 +33,9 @@ class TransactionConverter
             $result[] = $this->convertSingle($transaction);
         }
         app('log')->debug('Done converting all transactions into pseudo-transactions.');
-        print_r($result);exit;
+        print_r($result);
+        exit;
+
         return $result;
     }
 
@@ -39,34 +43,37 @@ class TransactionConverter
      * @param Transaction $transaction
      *
      * @return array
+     * @throws ImporterErrorException
      */
     private function convertSingle(Transaction $transaction): array
     {
         app('log')->debug('Convert single transaction into pseudo-transaction.');
-        $result          = [
+        $result           = [
             'transactions' => [],
         ];
-        $configuredRoles = $this->getConfiguredRoles();
-        $allRoles = $this->configuration->getRoles();
-        $count           = $transaction->countSplits();
-        $count           = 0 === $count ? 1 : $count; // add at least one transaction:
+        $configuredRoles  = $this->getConfiguredRoles();
+        $allRoles         = $this->configuration->getRoles();
+        $count            = $transaction->countSplits();
+        $count            = 0 === $count ? 1 : $count; // add at least one transaction inside the Transaction.
+        $fieldNames = array_keys(config('camt.fields'));
+        $result['splits'] = $count;
 
         for ($i = 0; $i < $count; $i++) {
-            // loop all available roles, see if they're configured and if so, get the associated field
-            // from the transaction.
+            // loop all available roles, see if they're configured and if so, get the associated field from the transaction.
             // some roles can be configured multiple times, so the $current array may hold multiple values.
             // the final response to this may be to join these fields or only use the last one.
             $current = [];
-            foreach(array_keys(config('camt.fields')) as $field) {
+            foreach ($fieldNames as $field) {
                 $role = $allRoles[$field] ?? '_ignore';
-                if('_ignore' !== $role) {
+                if ('_ignore' !== $role) {
                     app('log')->debug(sprintf('Field "%s" was given role "%s".', $field, $role));
                 }
-                if('_ignore' === $role) {
+                if ('_ignore' === $role) {
                     app('log')->debug(sprintf('Field "%s" is ignored!', $field));
                 }
-                $value = trim($transaction->getField($field));
-                if('' !== $value) {
+                // get by index, so grab it from the appropriate split or get the first one.
+                $value = trim($transaction->getFieldByIndex($field, $i));
+                if ('' !== $value) {
                     $current[$role][] = $value;
                 }
             }
