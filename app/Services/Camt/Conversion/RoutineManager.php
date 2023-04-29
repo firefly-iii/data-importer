@@ -110,17 +110,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionExtractor = new TransactionExtractor($this->configuration);
         $this->transactionConverter = new TransactionConverter($this->configuration);
         $this->transactionMapper    = new TransactionMapper($this->configuration);
-
-        // share config
-        //$this->columnValueConverter       = new ColumnValueConverter($this->configuration);
-        //$this->pseudoTransactionProcessor = new PseudoTransactionProcessor($this->configuration->getDefaultAccount()); use from data
-        // TODO find DefaultAccount
-
-        // set identifier:
-        //$this->csvFileProcessor->setIdentifier($this->identifier);
-        //$this->lineProcessor->setIdentifier($this->identifier);
-        //$this->columnValueConverter->setIdentifier($this->identifier);
-        //$this->pseudoTransactionProcessor->setIdentifier($this->identifier);
     }
 
     /**
@@ -144,40 +133,6 @@ class RoutineManager implements RoutineManagerInterface
 
         // put the result into firefly iii compatible arrays (and replace mapping when necessary)
         $transactions = $this->transactionMapper->map($pseudoTransactions);
-
-        print_r($transactions);
-        exit;
-
-
-        // TODO -> hier muss alles ausgelesen werden
-
-        // TODO -> CALL CAMT EXTRACTOR
-        //try {
-        //$this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-        //} catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-        //    throw new ImporterErrorException($e->getMessage(), 0, $e);
-        //}
-        //}
-
-        //$CSVLines = $this->csvFileProcessor->processCSVFile();
-
-        // convert raw lines into arrays with individual ColumnValues
-        //$valueArrays = $this->lineProcessor->processCSVLines($CSVLines);
-
-        // convert value arrays into (pseudo) transactions.
-        //$pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
-
-        // TODO call my extractor here -> create PSEUDO
-
-        // convert pseudo transactions into actual transactions.
-        $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
-
-        $count = count($CSVLines);
-        $this->mergeMessages($count);
-        $this->mergeWarnings($count);
-        $this->mergeErrors($count);
-
-        file_put_contents('file_put_contents.txt', $transactions);
 
         return $transactions;
     }
