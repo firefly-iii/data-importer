@@ -35,6 +35,7 @@ return [
     'explain_B' => 'Information about the account. The amount of possible "Statements" in a file depends on the implementation-standard used. Some banks only allow one statement per file.',
     'explain_C' => 'Information about each booking. A booking might consist of several transactions. If you have chosen not to split grouped bookings the next level\'s can\'t be assigned a role.',
     'explain_D' => 'Information about each transaction inside a booking. Consists of one or multiple entries per booking.',
+    'explain_D_dropped' => 'According to the currently selected configuration-option "How to handle Level-D data", the details in the D level are not taken into account.',
 
 
     // field description for camt.053 import:
