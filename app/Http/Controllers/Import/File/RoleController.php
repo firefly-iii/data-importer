@@ -188,32 +188,39 @@ class RoleController extends Controller
                 'entryDetailOpposingName'          => config('camt.fields.entryDetailOpposingName'),
             ],
         ];
-
-        $levels['D'] = [
-            'title'       => trans('camt.level_D'),
-            'explanation' => trans('camt.explain_D'),
-            'fields'      => [
-                // have to collect D by hand because of intermediate sections
-                'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
-                'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
-                    'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'
-                ),
-                'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
-                    'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
-                ),
-                'section_tr'                                                                     => ['section' => true, 'title' => 'transaction',],
-                'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
-                'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
-                'section_btc'                                                                    => ['section' => true, 'title' => 'Btc',],
-                'entryDetailBtcDomainCode'                                                       => config('camt.fields.entryDetailBtcDomainCode'),
-                'entryDetailBtcFamilyCode'                                                       => config('camt.fields.entryDetailBtcFamilyCode'),
-                'entryDetailBtcSubFamilyCode'                                                    => config('camt.fields.entryDetailBtcSubFamilyCode'),
-                'section_opposing'                                                               => ['section' => true, 'title' => 'opposingPart',],
-                'entryDetailOpposingAccountIban'                                                 => config('camt.fields.entryDetailOpposingAccountIban'),
-                'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
-                'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),
-            ],
-        ];
+        $group_handling = $configuration->getGroupedTransactionHandling();
+        if('group' !== $group_handling) {
+            $levels['D'] = [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D'),
+                'fields'      => [
+                    // have to collect D by hand because of intermediate sections
+                    'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
+                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
+                        'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'
+                    ),
+                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
+                        'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
+                    ),
+                    'section_tr'                                                                     => ['section' => true, 'title' => 'transaction',],
+                    'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
+                    'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
+                    'section_btc'                                                                    => ['section' => true, 'title' => 'Btc',],
+                    'entryDetailBtcDomainCode'                                                       => config('camt.fields.entryDetailBtcDomainCode'),
+                    'entryDetailBtcFamilyCode'                                                       => config('camt.fields.entryDetailBtcFamilyCode'),
+                    'entryDetailBtcSubFamilyCode'                                                    => config('camt.fields.entryDetailBtcSubFamilyCode'),
+                    'section_opposing'                                                               => ['section' => true, 'title' => 'opposingPart',],
+                    'entryDetailOpposingAccountIban'                                                 => config('camt.fields.entryDetailOpposingAccountIban'),
+                    'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
+                    'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),
+                ],
+            ];
+        } else {
+            $levels['D'] = [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D_dropped')
+            ];
+        }
 
         return view(
             'import.005-roles.index-camt',
