@@ -94,7 +94,7 @@ class ConfigurationPostRequest extends Request
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
             // camt
-            'grouped_transaction_handling'  => $this->convertToString($this->get('grouped_transaction_handling')),
+            'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
             'use_entire_opposing_address'  => $this->convertBoolean($this->get('use_entire_opposing_address')),
 
         ];
