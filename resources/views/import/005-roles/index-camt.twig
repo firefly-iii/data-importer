@@ -58,6 +58,7 @@
                                 <p>
                                     {{ level.title }}: {{ level.explanation }}
                                 </p>
+                                {% if level.fields|length > 0 %}
                                 <table class="table">
                                     <thead>
                                     <tr>
@@ -68,61 +69,62 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for field in level.fields %}
-                                        {% if true == field.section %}
-                                            <tr>
-                                                <th colspan="4">{{ trans('camt.section_' ~ field.title) }}</th>
-                                            </tr>
-                                        {% endif %}
-                                        {% if false == field.section %}
-                                            <tr>
-                                                <td>
-                                                    {{ trans('camt.field_'~field.title) }}
-                                                    {% if trans('camt.field_'~field.title~'_description') != 'camt.field_'~field.title~'_description' %}
-                                                        <br><span class="text-muted small">{{ trans('camt.field_'~field.title~'_description') }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if 0 == examples[field.title]|length %}
-                                                        <small class="text-muted"><em>(no example data)</em></small>
-                                                    {% endif %}
-                                                    {% if 0 != examples[field.title]|length %}
-                                                        {% for example in examples[field.title] %}
-                                                            <code>{{ example }}</code><br>
-                                                        {% endfor %}
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if 0 == config('camt.roles.'~field.roles)|length %}
-                                                        <small class="text-muted"><em>(no roles available)</em></small>
-                                                    {% endif %}
-                                                    {% if 0 != config('camt.roles.'~field.roles)|length %}
-                                                        <select name="roles[{{ field.title }}]" id="roles_{{ field.title }}" class="form-control">
-                                                            {% for roleKey, role in config('camt.roles.'~field.roles) %}
-                                                                <option value="{{ roleKey }}" label="{{ trans('import.column_'~roleKey) }}"
-                                                                        {% if field.default_role == roleKey %}selected="selected"{% endif %}
-                                                                        {% if field.default_role != roleKey and roles[field.title] == roleKey %}selected="selected"{% endif %}
-                                                                >
-                                                                    {{ trans('import.column_'~roleKey) }}
-                                                                </option>
+                                        {% for field in level.fields %}
+                                            {% if true == field.section %}
+                                                <tr>
+                                                    <th colspan="4">{{ trans('camt.section_' ~ field.title) }}</th>
+                                                </tr>
+                                            {% endif %}
+                                            {% if false == field.section %}
+                                                <tr>
+                                                    <td>
+                                                        {{ trans('camt.field_'~field.title) }}
+                                                        {% if trans('camt.field_'~field.title~'_description') != 'camt.field_'~field.title~'_description' %}
+                                                            <br><span class="text-muted small">{{ trans('camt.field_'~field.title~'_description') }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if 0 == examples[field.title]|length %}
+                                                            <small class="text-muted"><em>(no example data)</em></small>
+                                                        {% endif %}
+                                                        {% if 0 != examples[field.title]|length %}
+                                                            {% for example in examples[field.title] %}
+                                                                <code>{{ example }}</code><br>
                                                             {% endfor %}
-                                                        </select>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if true == field.mappable %}
-                                                        <label for="do_mapping_{{ field.title }}">
-                                                            <input type="checkbox" name="do_mapping[{{ field.title }}]" id="do_mapping_{{ field.title }}"
-                                                                   {% if doMapping[field.title] %}checked="checked"{% endif %}
-                                                                   value="1"/>
-                                                        </label>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if 0 == config('camt.roles.'~field.roles)|length %}
+                                                            <small class="text-muted"><em>(no roles available)</em></small>
+                                                        {% endif %}
+                                                        {% if 0 != config('camt.roles.'~field.roles)|length %}
+                                                            <select name="roles[{{ field.title }}]" id="roles_{{ field.title }}" class="form-control">
+                                                                {% for roleKey, role in config('camt.roles.'~field.roles) %}
+                                                                    <option value="{{ roleKey }}" label="{{ trans('import.column_'~roleKey) }}"
+                                                                            {% if field.default_role == roleKey %}selected="selected"{% endif %}
+                                                                            {% if field.default_role != roleKey and roles[field.title] == roleKey %}selected="selected"{% endif %}
+                                                                    >
+                                                                        {{ trans('import.column_'~roleKey) }}
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if true == field.mappable %}
+                                                            <label for="do_mapping_{{ field.title }}">
+                                                                <input type="checkbox" name="do_mapping[{{ field.title }}]" id="do_mapping_{{ field.title }}"
+                                                                       {% if doMapping[field.title] %}checked="checked"{% endif %}
+                                                                       value="1"/>
+                                                            </label>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
                                     </tbody>
                                 </table>
+                                {% endif %}
                             {% endfor %}
                             <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
                         </form>
