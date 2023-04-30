@@ -43,7 +43,9 @@ class TransactionExtractor
                             $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, [$detail]);
                         }
                     }
-
+                    if ('group' === $handling) {
+                        $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                    }
                 }
             }
         }
