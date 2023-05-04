@@ -156,35 +156,6 @@ class Transaction
             case 'entryBtcSubFamilyCode':
                 // always the same, since its level C.
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-            case 'entryOpposingAccountIban':
-                // always the same, since its level C.
-                $result = '';
-                // loop transaction details of level C.
-                foreach ($this->levelC->getTransactionDetails() as $detail) {
-                    $account = $detail?->getRelatedParty()?->getAccount();
-                    if (null !== $account && IbanAccount::class === get_class($account)) {
-                        $result = (string)$account->getIdentification();
-                    }
-                }
-
-                return $result;
-            case 'entryOpposingAccountNumber':
-                $result = '';
-                $list   = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
-                // loop transaction details of level C.
-                foreach ($this->levelC->getTransactionDetails() as $detail) {
-                    $account = $detail?->getRelatedParty()?->getAccount();
-                    $class   = null !== $account ? get_class($account) : '';
-                    if (in_array($class, $list, true)) {
-                        $result = (string)$account->getIdentification();
-
-                    }
-                }
-
-                return $result;
-            case 'entryOpposingName':
-                // TODO get name.
-                return '';
             case 'entryDetailAccountServicerReference':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
