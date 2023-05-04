@@ -84,13 +84,6 @@ class Transaction
         return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
     }
 
-    /*public function setBTC(\Genkgo\Camt\DTO\BankTransactionCode $btc) {
-        $this->btcDomainCode = $btc->getDomain()->getCode();
-        $this->btcFamilyCode = $btc->getDomain()->getFamily()->getCode();
-        $this->btcSubFamilyCode = $btc->getDomain()->getFamily()->getSubFamilyCode();
-        // TODO get reals Description of Codes
-    }*/
-
     /**
      * @param string $field
      * @param int    $index
