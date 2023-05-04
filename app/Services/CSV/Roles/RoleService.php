@@ -223,11 +223,29 @@ class RoleService
         $count = 0;
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
-            if (5 === $count) {
+            if (15 === $count) { // do not check more than 15 transactions to fill the example-data
                 break;
             }
             foreach ($fieldNames as $name) {
-                $examples[$name][] = $transaction->getField($name);
+                if(array_key_exists($name,  $examples)) { // there is at least one example, so we can check how many
+                  if(count($examples[$name]) > 5 ) { // there are already five examples, so jump to next field
+                    continue;
+                  }
+                } // otherwise, try to fetch data
+                $splits = $transaction->countSplits();
+                if(0 !== $splits) {
+                  for($index = 0; $index < $splits; $index++) {
+                      $value = $transaction->getFieldByIndex($name, $index);
+                      if(null !== $value && '' !== $value) {
+                          $examples[$name][] = $value;
+                      }
+                  }
+                } else {
+                  $value = $transaction->getFieldByIndex($name, 0);
+                  if(null !== $value && '' !== $value) {
+                    $examples[$name][] = $value;
+                  }
+                }
             }
             $count++;
         }
