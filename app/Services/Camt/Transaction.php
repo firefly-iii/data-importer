@@ -237,69 +237,51 @@ class Transaction
                 $info = $this->levelD[$index];
 
                 return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-            case 'entryDetailOpposingAccountIban':
-                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    $result = '';
-                    // loop transaction details of level C.
-                    foreach ($this->levelC->getTransactionDetails() as $detail) {
-                        $account = $detail?->getRelatedParty()?->getAccount();
-                        if (null !== $account && IbanAccount::class === get_class($account)) {
-                            $result = (string)$account->getIdentification();
-                        }
-                    }
-
-                    return $result;
-                }
-                /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
-                $result  = '';
-                $account = $info->getRelatedParty()?->getAccount();
-                if (null !== $account && IbanAccount::class === get_class($account)) {
-                    $result = (string)$account->getIdentification();
-                }
-
-                return $result;
-            case 'entryDetailOpposingAccountNumber':
-                $list = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
-                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    $result = '';
-                    // loop transaction details of level C.
-                    foreach ($this->levelC->getTransactionDetails() as $detail) {
-                        $account = $detail?->getRelatedParty()?->getAccount();
-                        $class   = get_class($account);
-                        if (in_array($class, $list, true)) {
-                            $result = (string)$account->getIdentification();
-
-                        }
-                    }
-
-                    return $result;
-                }
-                /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
-                $result  = '';
-                $account = $info->getRelatedParty()?->getAccount();
-                $class   = null !== $account ? get_class($account) : '';
-                if (in_array($class, $list, true)) {
-                    $result = (string)$account->getIdentification();
-
-                }
-
-                return $result;
-            case 'entryDetailOpposingName':
-                // TODO get name
-                return '';
-
-        }
-
-    }
-
+            case 'entryDetailOpposingAccountIban': // TODO remove level-c part
                 $result = '';
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return $result;
                 }
+                /** @var EntryTransactionDetail $info */
+                $info    = $this->levelD[$index];
+                $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
+                    $result = (string)$opposingAccount->getIdentification();
+                }
+
+                return $result;
+            case 'entryDetailOpposingAccountNumber':
+                $result = '';
+
+                $list = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return $result;
+                }
+                /** @var EntryTransactionDetail $info */
+                $info    = $this->levelD[$index];
+                $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                $class   = null !== $opposingAccount ? get_class($opposingAccount) : '';
+                if (in_array($class, $list, true)) {
+                    $result = (string)$opposingAccount->getIdentification();
+                }
+
+                return $result;
+            case 'entryDetailOpposingName':
+                $result = '';
+
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return $result;
+                }
+                /** @var EntryTransactionDetail $info */
+                $info    = $this->levelD[$index];
+                //$result  = '';
+                $opposingParty = $this->getOpposingParty($info);
+                $result = $this->getOpposingName($opposingParty);
+
+                return $result;
         }
+
     }
 
     private function getDecimalAmount(?Money $money): string
@@ -353,7 +335,7 @@ class Transaction
      *
      * @return void
      */
-    private function setOpposingInformation(EntryTransactionDetail $transactionDetail)
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail)
     {
         $relatedParties = $transactionDetail->getRelatedParties();
         if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interessting one?
@@ -363,7 +345,7 @@ class Transaction
         }
         foreach ($relatedParties as $relatedParty) {
             if (get_class($relatedParty->getRelatedPartyType()) == $targetRelatedPartyObject) {
-                $this->relatedOppositeParty = $relatedParty;
+                return $relatedParty;
             }
         }
     }
