@@ -29,7 +29,6 @@ class Transaction
     private Statement     $levelB;
     private Entry         $levelC;
     private array         $levelD;
-    private ?RelatedParty $relatedOppositeParty;
 
 
     /**
@@ -46,7 +45,6 @@ class Transaction
         Entry         $levelC,
         array         $levelD
     ) {
-        $this->relatedOppositeParty = null;
         $this->configuration        = $configuration;
         $this->levelA               = $levelA;
         $this->levelB               = $levelB;
