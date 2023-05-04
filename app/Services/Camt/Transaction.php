@@ -203,6 +203,8 @@ class Transaction
 
                 return (string)$info->getReference()->getAccountServicerReference();
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
+                $result = '';
+
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     // TODO return nothing?
@@ -211,7 +213,11 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
 
-                return (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
+                if (null !== $info->getRemittanceInformation() && null !== $info->getRemittanceInformation()->getUnstructuredBlock()) {
+                        $result .= (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
+                    }
+
+                return $result;
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
