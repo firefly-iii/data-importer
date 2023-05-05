@@ -334,6 +334,13 @@ return [
             'level'        => 'A',
         ],
         // level B, Statement
+        'statementId'                                                          => [
+            'title'        => 'statementId',
+            'roles'        => 'level_b',
+            'mappable'     => false,
+            'default_role' => 'note',
+            'level'        => 'B',
+        ],
         'statementCreationDate'                                                          => [
             'title'        => 'statementCreationDate',
             'roles'        => 'dates',
