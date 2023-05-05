@@ -123,7 +123,6 @@ class Transaction
                 }
 
                 return $ret;
-            case 'entryDate':
             case 'entryValueDate':
                 // always the same, since its level C.
                 return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
