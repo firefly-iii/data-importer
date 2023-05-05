@@ -362,14 +362,7 @@ return [
             'default_role' => 'account-number',
             'level'        => 'B',
         ],
-        'entryDate'                                                                      => [
-            'section'      => false,
-            'title'        => 'entryDate',
-            'default_role' => 'date_transaction',
-            'roles'        => 'dates',
-            'mappable'     => false,
-            'level'        => 'C',
-        ],
+
         // level C, Entry
         'entryAccountServicerReference'                                                  => [
             'section'      => false,
@@ -449,30 +442,6 @@ return [
                 'default_role' => 'note',
                 'roles'        => 'meta',
                 'mappable'     => false,
-                'level'        => 'C',
-            ],
-        'entryOpposingAccountIban'                                                       =>
-            [
-                'title'        => 'entryDetailOpposingAccountIban',
-                'default_role' => 'opposing-iban',
-                'roles'        => 'iban',
-                'mappable'     => true,
-                'level'        => 'C',
-            ],
-        'entryOpposingAccountNumber'                                                     =>
-            [
-                'title'        => 'entryDetailOpposingAccountNumber',
-                'default_role' => 'opposing-number',
-                'roles'        => 'account_number',
-                'mappable'     => true,
-                'level'        => 'C',
-            ],
-        'entryOpposingName'                                                              =>
-            [
-                'title'        => 'entryDetailOpposingName',
-                'default_role' => 'opposing-name',
-                'roles'        => 'account_name',
-                'mappable'     => true,
                 'level'        => 'C',
             ],
 
