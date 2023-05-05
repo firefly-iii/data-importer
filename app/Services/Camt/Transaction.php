@@ -211,7 +211,8 @@ class Transaction
             case 'entryDetailBtcDomainCode':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                    //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                    return ''; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
@@ -220,7 +221,8 @@ class Transaction
             case 'entryDetailBtcFamilyCode':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    return ''; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
@@ -229,7 +231,8 @@ class Transaction
             case 'entryDetailBtcSubFamilyCode':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    return ''; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
