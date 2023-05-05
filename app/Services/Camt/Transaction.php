@@ -99,9 +99,13 @@ class Transaction
                 exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
+
+            // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
+
+            // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
@@ -125,6 +129,7 @@ class Transaction
                     $ret = $this->levelB->getAccount()->getIdentification();
                 }
 
+            // LEVEL C
                 return $ret;
             case 'entryValueDate':
                 // always the same, since its level C.
@@ -156,6 +161,8 @@ class Transaction
             case 'entryBtcSubFamilyCode':
                 // always the same, since its level C.
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+
+            // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
