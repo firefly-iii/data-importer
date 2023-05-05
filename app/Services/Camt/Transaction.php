@@ -194,7 +194,7 @@ class Transaction
                     return '';
                 }
                 /** @var EntryTransactionDetail $info */
-                $info = $this->levelD[$index];
+                $info = $this->levelD[$index]; // TODO, check if always readable or if we need some checks like with "unstructuredBlockMessage"
 
                 return (string)$info->getRemittanceInformation()?->getStructuredBlock()?->getAdditionalRemittanceInformation();
             case 'entryDetailAmount':
