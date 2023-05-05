@@ -193,7 +193,8 @@ class Transaction
             case 'entryDetailAmount':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    return $this->getDecimalAmount($this->levelC->getAmount());
+                    return ''; // config.-depending fallback handled in mapping
+                    //return $this->getDecimalAmount($this->levelC->getAmount());
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
@@ -202,7 +203,8 @@ class Transaction
             case 'entryDetailAmountCurrency':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+                    return ''; // config.-depending fallback handled in mapping
+                    //return (string)$this->levelC->getAmount()->getCurrency()->getCode();
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
