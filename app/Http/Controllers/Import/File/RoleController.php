@@ -169,7 +169,6 @@ class RoleController extends Controller
             'explanation' => trans('camt.explain_C'),
             'fields'      => [
                 // have to collect C by hand because of intermediate sections
-                'entryDate'                        => config('camt.fields.entryDate'),
                 'entryAccountServicerReference'    => config('camt.fields.entryAccountServicerReference'),
                 'entryReference'                   => config('camt.fields.entryReference'),
                 'entryAdditionalInfo'              => config('camt.fields.entryAdditionalInfo'),
@@ -183,9 +182,6 @@ class RoleController extends Controller
                 'entryBtcFamilyCode'               => config('camt.fields.entryBtcFamilyCode'),
                 'entryBtcSubFamilyCode'            => config('camt.fields.entryBtcSubFamilyCode'),
                 'section_opposing'                 => ['section' => true, 'title' => 'opposingPart',],
-                'entryDetailOpposingAccountIban'   => config('camt.fields.entryDetailOpposingAccountIban'),
-                'entryDetailOpposingAccountNumber' => config('camt.fields.entryDetailOpposingAccountNumber'),
-                'entryDetailOpposingName'          => config('camt.fields.entryDetailOpposingName'),
             ],
         ];
         $group_handling = $configuration->getGroupedTransactionHandling();
