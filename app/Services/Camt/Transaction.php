@@ -247,7 +247,7 @@ class Transaction
                 $info = $this->levelD[$index];
 
                 return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-            case 'entryDetailOpposingAccountIban': // TODO remove level-c part
+            case 'entryDetailOpposingAccountIban':
                 $result = '';
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
