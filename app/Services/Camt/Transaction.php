@@ -157,10 +157,8 @@ class Transaction
                 // always the same, since its level C.
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
             case 'entryDetailAccountServicerReference':
-                // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    // return level C:
-                    return (string)$this->levelC->getAccountServicerReference();
+                    return '';
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
