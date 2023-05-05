@@ -131,9 +131,6 @@ class Transaction
 
             // LEVEL C
                 return $ret;
-            case 'entryValueDate':
-                // always the same, since its level C.
-                return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
             case 'entryAccountServicerReference':
                 // always the same, since its level C.
                 return (string)$this->levelC->getAccountServicerReference();
@@ -149,6 +146,9 @@ class Transaction
             case 'entryAmountCurrency':
                 // always the same, since its level C.
                 return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+            case 'entryValueDate':
+                // always the same, since its level C.
+                return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
             case 'entryBookingDate':
                 // always the same, since its level C.
                 return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
