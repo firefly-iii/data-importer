@@ -102,6 +102,9 @@ class Transaction
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
+            case 'statementId':
+                // always the same, since its level B.
+                return (string)$this->levelB->getId();
             case 'statementCreationDate':
                 // always the same, since its level B.
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
