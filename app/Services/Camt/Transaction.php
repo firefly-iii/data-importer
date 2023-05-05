@@ -170,14 +170,14 @@ class Transaction
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     // TODO return nothing?
-                    return '';
+                    return $result;
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
 
                 if (null !== $info->getRemittanceInformation() && null !== $info->getRemittanceInformation()->getUnstructuredBlock()) {
-                        $result .= (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
-                    }
+                    $result .= (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
+                }
 
                 return $result;
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation':
