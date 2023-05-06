@@ -3,6 +3,7 @@
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\CSV\Mapper\GetAccounts;
 use App\Services\Shared\Configuration\Configuration;
 use Carbon\Carbon;
 
@@ -11,6 +12,7 @@ use Carbon\Carbon;
  */
 class TransactionMapper
 {
+    use GetAccounts;
     private Configuration $configuration;
 
     /**
@@ -28,6 +30,8 @@ class TransactionMapper
      */
     public function map(array $transactions): array
     {
+        // TODO download all accounts from Firefly III, we may need them for verification.
+
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
         $result = [];
         /** @var array $transaction */
@@ -132,6 +136,10 @@ class TransactionMapper
 
                 }
             }
+            $current = $this->sanityCheck($current);
+            if(null === $current) {
+                // give warning, skip transaction.
+            }
             // TODO loop over $current and clean up if necessary.
             $result['transactions'][] = $current;
 
@@ -190,6 +198,80 @@ class TransactionMapper
         }
 
         return $current;
+    }
+
+    /**
+     * A transaction has a bunch of minimal requirements. This method checks if they are met.
+     *
+     * It will also correct the transaction type (if possible).
+     *
+     * @param array $current
+     *
+     * @return array|null
+     */
+    private function sanityCheck(array $current): ?array
+    {
+        // at this point the source and destination could be set according to the content of the XML.
+        // but they could be reversed: in the case of incoming money the "source" is actually the
+        // relatedParty / opposing party and not the normal account. So both accounts (if present in the array)
+        // need to be validated to see what types they are. This also depends on the amount (positive or negative).
+
+        // not set source_id, iban or name? Then add the backup account
+        if(
+            !array_key_exists('source_id', $current) &&
+            !array_key_exists('source_name', $current) &&
+            !array_key_exists('source_iban', $current) &&
+            !array_key_exists('source_number', $current)) {
+            // TODO add backup account
+        }
+
+        $sourceIsNew = false;
+        // not set source_id, but others are present? Make sure the account mentioned actually exists.
+        // if it does not exist (it is "new"), do nothing for the time being just mark it as such.
+        if(
+            !array_key_exists('source_id', $current) &&
+            (array_key_exists('source_name', $current) ||
+            array_key_exists('source_iban', $current) ||
+            array_key_exists('source_number', $current))) {
+            // the reverse is true: if the info is valid, the source account is not "new".
+            $sourceIsNew = !$this->validAccountInfo('source', $current);
+        }
+
+        // not set destination? Then add a fake one
+        if(
+            !array_key_exists('destination_id', $current) &&
+            !array_key_exists('destination_name', $current) &&
+            !array_key_exists('destination_iban', $current) &&
+            !array_key_exists('destination_number', $current)) {
+            // TODO add backup account
+        }
+
+
+        // if the source is asset account AND the destination is expense or new AND amount is neg = withdrawal
+        // if the source is asset account AND the destination is revenue or new AND amount is pos = deposit
+        // if both are transfer AND amount is pos = transfer from dest to source
+        // if both are transfer AND amount is neg = transfer from source to dest
+        // any other combination is "illegal" and needs a warning.
+
+        // no description?
+        // no amount?
+        // no date?
+
+        return $current;
+    }
+
+    /**
+     * @param string $direction
+     * @param array  $current
+     *
+     * @return bool
+     */
+    private function validAccountInfo(string $direction, array $current): bool
+    {
+        // search for existing IBAN
+        // search for existing number
+        // search for existing name, TODO under which types?
+        return false;
     }
 
 
