@@ -13,6 +13,7 @@ use Carbon\Carbon;
 class TransactionMapper
 {
     use GetAccounts;
+
     private Configuration $configuration;
 
     /**
@@ -65,7 +66,9 @@ class TransactionMapper
                 app('log')->warning(sprintf('No split #%d found, break.', $i));
                 continue;
             }
-            $current = [];
+            $current = [
+                'type' => 'withdrawal', // perhaps to be overruled later.
+            ];
             /**
              * @var string $role
              * @var array  $data
@@ -105,19 +108,21 @@ class TransactionMapper
                         break;
                     case 'date_book':
                         // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
                         $current['book_date'] = $carbon->toIso8601String();
                         break;
-
                     case 'account-iban':
                         // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'source', $data);
+                        $current = $this->mapAccount($current, 'iban', 'source', $data);
                         break;
                     case 'opposing-iban':
                         // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'destination', $data);
+                        $current = $this->mapAccount($current, 'iban', 'destination', $data);
                         break;
-
+                    case 'opposing-name':
+                        // could be multiple, could be mapped.
+                        $current = $this->mapAccount($current, 'name', 'destination', $data);
+                        break;
                     case 'external-id':
                         $addition               = join(' ', $data['data']);
                         $current['external_id'] = $addition;
@@ -137,7 +142,7 @@ class TransactionMapper
                 }
             }
             $current = $this->sanityCheck($current);
-            if(null === $current) {
+            if (null === $current) {
                 // give warning, skip transaction.
             }
             // TODO loop over $current and clean up if necessary.
@@ -149,27 +154,42 @@ class TransactionMapper
     }
 
     /**
-     * @param mixed  $current
+     * This function takes the value in $data['data'], which is for example the account
+     * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
+     * the value "ShrtBankName" to "Short Bank Name".
+     *
+     * If there is a mapping the value will be replaced. If there is not, no replacement will take place.
+     * Either way, the new value will be placed in the correct place in $current.
+     *
+     * Example results:
+     * source_iban = something
+     * destination_number = 12345
+     * source_id = 5
+     *
+     * @param array  $current
+     * @param string $fieldName
      * @param string $direction
      * @param array  $data
      *
      * @return array
      */
-    private function mapAccount(mixed $current, string $direction, array $data): array
+    private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
     {
-        // bravely assume there's just one IBAN in the array:
-        $iban = join('', $data['data']);
+        // bravely assume there's just one value in the array:
+        $fieldValue = join('', $data['data']);
 
         // replace with mapping
-        if (array_key_exists($iban, $data['mapping'])) {
+        if (array_key_exists($fieldValue, $data['mapping'])) {
             $key           = sprintf('%s_id', $direction);
-            $current[$key] = $data['mapping'][$iban];
+            $current[$key] = $data['mapping'][$fieldValue];
         }
 
-        // leave original IBAN
-        if (!array_key_exists($iban, $data['mapping'])) {
-            $key           = sprintf('%s_iban', $direction);
-            $current[$key] = $iban;
+        // leave original value
+        if (!array_key_exists($fieldValue, $data['mapping'])) {
+            // $direction is either 'source' or 'destination'
+            // $fieldName is 'id', 'iban','name' or 'number'
+            $key           = sprintf('%s_%s', $direction, $fieldName);
+            $current[$key] = $fieldValue;
         }
 
         return $current;
@@ -217,32 +237,32 @@ class TransactionMapper
         // need to be validated to see what types they are. This also depends on the amount (positive or negative).
 
         // not set source_id, iban or name? Then add the backup account
-        if(
-            !array_key_exists('source_id', $current) &&
-            !array_key_exists('source_name', $current) &&
-            !array_key_exists('source_iban', $current) &&
-            !array_key_exists('source_number', $current)) {
+        if (
+            !array_key_exists('source_id', $current)
+            && !array_key_exists('source_name', $current)
+            && !array_key_exists('source_iban', $current)
+            && !array_key_exists('source_number', $current)) {
             // TODO add backup account
         }
 
         $sourceIsNew = false;
         // not set source_id, but others are present? Make sure the account mentioned actually exists.
         // if it does not exist (it is "new"), do nothing for the time being just mark it as such.
-        if(
-            !array_key_exists('source_id', $current) &&
-            (array_key_exists('source_name', $current) ||
-            array_key_exists('source_iban', $current) ||
-            array_key_exists('source_number', $current))) {
+        if (
+            !array_key_exists('source_id', $current)
+            && (array_key_exists('source_name', $current)
+                || array_key_exists('source_iban', $current)
+                || array_key_exists('source_number', $current))) {
             // the reverse is true: if the info is valid, the source account is not "new".
             $sourceIsNew = !$this->validAccountInfo('source', $current);
         }
 
         // not set destination? Then add a fake one
-        if(
-            !array_key_exists('destination_id', $current) &&
-            !array_key_exists('destination_name', $current) &&
-            !array_key_exists('destination_iban', $current) &&
-            !array_key_exists('destination_number', $current)) {
+        if (
+            !array_key_exists('destination_id', $current)
+            && !array_key_exists('destination_name', $current)
+            && !array_key_exists('destination_iban', $current)
+            && !array_key_exists('destination_number', $current)) {
             // TODO add backup account
         }
 
@@ -255,6 +275,14 @@ class TransactionMapper
 
         // no description?
         // no amount?
+        if (!array_key_exists('amount', $current)) {
+            return null;
+        }
+        // amount must be positive
+        if(-1 === bccomp($current['amount'],'0')) {
+            $current['amount'] = bcmul($current['amount'],'-1');
+        }
+
         // no date?
 
         return $current;
