@@ -77,6 +77,7 @@ class TransactionMapper
                 // actual content of the field is in $data['data'], which is an array
                 switch ($role) {
                     default:
+                        app('log')->error(sprintf('Cannot handle role "%s".', $role));
                         // temp debug exit message:
                         echo sprintf('Cannot handle role "%s".', $role);
                         echo PHP_EOL;
