@@ -169,9 +169,19 @@ class MapperService
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             // take all mappable fields from this transaction, and add to $values in the data thing
+
+            $splits = $transaction->countSplits();
+
             foreach (array_keys($mappableFields) as $title) {
                 if (array_key_exists($title, $data)) {
-                    $data[$title]['values'][] = $transaction->getField($title);
+                    if(0 !== $splits) {
+                      for($index = 0; $index < $splits; $index++) {
+                          $value = $transaction->getFieldByIndex($title, $index);
+                          if(null !== $value && '' !== $value) {
+                              $data[$title]['values'][] = $value;
+                          }
+                      }
+                    }
                 }
             }
         }
