@@ -77,13 +77,8 @@ class TransactionMapper
                 // actual content of the field is in $data['data'], which is an array
                 switch ($role) {
                     default:
-                        app('log')->error(sprintf('Cannot handle role "%s".', $role));
-                        // temp debug exit message:
-                        echo sprintf('Cannot handle role "%s".', $role);
-                        echo PHP_EOL;
-                        exit;
-                        // end of temp debug exit message
-                        throw new ImporterErrorException(sprintf('Cannot handle role "%s".', $role));
+                        app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));
+                        break;
                     case '_ignore':
                         break;
                     case 'note':
@@ -102,15 +97,6 @@ class TransactionMapper
                         $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
                         $current['date'] = $carbon->toIso8601String();
                         break;
-                    case 'date_interest':
-                        /* TODO */
-                        break;
-                    case 'date_due':
-                        /* TODO */
-                        break;
-                    case 'date_invoice':
-                        /* TODO */
-                        break;
                     case 'date_payment':
                         // TODO perhaps lift into separate method?
                         $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
@@ -125,18 +111,9 @@ class TransactionMapper
                         // could be multiple, could be mapped.
                         $current = $this->mapAccount($current, 'iban', 'source', $data);
                         break;
-                    case 'account-number':
-                        /* TODO */
-                        break;
-                    case 'account-name':
-                        /* TODO */
-                        break;
                     case 'opposing-iban':
                         // could be multiple, could be mapped.
                         $current = $this->mapAccount($current, 'iban', 'destination', $data);
-                        break;
-                    case 'opposing-number':
-                        /* TODO */
                         break;
                     case 'opposing-name':
                         // could be multiple, could be mapped.
@@ -146,12 +123,6 @@ class TransactionMapper
                         $addition               = join(' ', $data['data']);
                         $current['external_id'] = $addition;
                         break;
-                    case 'external-url':
-                        /* TODO */
-                        break;
-                    case 'internal_reference':
-                        /* TODO */
-                        break;
                     case 'description':
                         $current['description'] = $current['description'] ?? '';
                         $addition               = join(' ', $data['data']);
@@ -160,32 +131,8 @@ class TransactionMapper
                     case 'amount':
                         $current['amount'] = $data['data'][0];
                         break;
-                    case 'amount_credit':
-                        /* TODO */
-                        break;
-                    case 'amount_debit':
-                        /* TODO */
-                        break;
-                    case 'amount_negated':
-                        /* TODO */
-                        break;
                     case 'currency-code':
                         $current = $this->mapCurrency($current, 'currency', $data);
-                        break;
-                    case 'currency-id':
-                        /* TODO */
-                        break;
-                    case 'currency-name':
-                        /* TODO */
-                        break;
-                    case 'amount_foreign':
-                        /* TODO */
-                        break;
-                    case 'foreign-currency-code':
-                        /* TODO */
-                        break;
-                    case 'currency-symbol':
-                        /* TODO */
                         break;
                 }
             }

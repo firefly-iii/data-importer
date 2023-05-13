@@ -177,7 +177,7 @@ class MapperService
                     if(0 !== $splits) {
                       for($index = 0; $index < $splits; $index++) {
                           $value = $transaction->getFieldByIndex($title, $index);
-                          if(null !== $value && '' !== $value) {
+                          if('' !== $value) {
                               $data[$title]['values'][] = $value;
                           }
                       }
