@@ -291,7 +291,7 @@ class TransactionMapper
     private function swapAccounts(array $currentTransaction) {
 
         $ret = $currentTransaction;
-        $fieldType = array('id','iban','name');
+        $fieldType = array('id','iban','number','name');
 
         foreach($fieldType as $currentFieldType) {
             // move source to destination
