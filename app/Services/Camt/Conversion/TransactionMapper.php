@@ -284,6 +284,8 @@ class TransactionMapper
         // if both are transfer AND amount is neg = transfer from source to dest
         // any other combination is "illegal" and needs a warning.
 
+        $current['type'] = $this->getTransactionType($current);
+
         // no description?
         // no date?
 
