@@ -15,6 +15,7 @@ class TransactionMapper
     use GetAccounts;
 
     private Configuration $configuration;
+    private array $allAccounts;
 
     /**
      * @param Configuration $configuration
@@ -22,6 +23,7 @@ class TransactionMapper
     public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
+        $this->allAccounts = $this->getAllAccounts();
     }
 
     /**
