@@ -227,6 +227,19 @@ class TransactionMapper
      */
     private function sanityCheck(array $current): ?array
     {
+        // no amount?
+        if (!array_key_exists('amount', $current)) {
+            return null;
+        }
+        // amount must be positive
+        if(-1 === bccomp($current['amount'],'0')) {
+            // negative amount is debit (or transfer)
+            $current['amount'] = bcmul($current['amount'],'-1');
+        } else {
+            // positive account is credit (or transfer)
+            $current = $this->swapAccounts($current);
+        }
+
         // at this point the source and destination could be set according to the content of the XML.
         // but they could be reversed: in the case of incoming money the "source" is actually the
         // relatedParty / opposing party and not the normal account. So both accounts (if present in the array)
@@ -270,19 +283,6 @@ class TransactionMapper
         // any other combination is "illegal" and needs a warning.
 
         // no description?
-        // no amount?
-        if (!array_key_exists('amount', $current)) {
-            return null;
-        }
-        // amount must be positive
-        if(-1 === bccomp($current['amount'],'0')) {
-            // negative amount is debit (or transfer)
-            $current['amount'] = bcmul($current['amount'],'-1');
-        } else {
-            // positive account is credit (or transfer)
-            $current = $this->swapAccounts($current);
-        }
-
         // no date?
 
         return $current;
