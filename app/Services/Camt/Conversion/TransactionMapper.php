@@ -106,6 +106,7 @@ class TransactionMapper
                         // TODO perhaps lift into separate method?
                         $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
                         $current['book_date'] = $carbon->toIso8601String();
+                        $current['date'] = $carbon->toIso8601String();
                         break;
                     case 'account-iban':
                         // could be multiple, could be mapped.
