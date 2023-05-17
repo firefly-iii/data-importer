@@ -332,6 +332,42 @@ class TransactionMapper
         return false;
     }
 
+    /**
+     * @param array  $current
+     *
+     * @return string
+     */
+    private function getTransactionType(array $current): string
+    {
+        $accountIdentificationSuffixes = array('id','iban','number','name');
+        $directions = array('source','destination');
+
+        foreach($directions as $direction) {
+            $accountType[$direction] = null;
+            foreach($accountIdentificationSuffixes as $accountIdentificationSuffix) {
+                // try to find destination account
+                if(array_key_exists( $direction.'_'.$accountIdentificationSuffix,$current)) {
+                    $fieldName = $direction.'_'.$accountIdentificationSuffix;
+                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
+                }
+            }
+        }
+
+        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+
+        switch(true) {
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
+            case $accountType['source'] === 'asset' && $accountType['destination'] === '_new':
+                return "withdrawal";
+                break;
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue':
+                return "deposit";
+            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
+                return "transfer";
+            default:
+                return "ERROR - unknown transaction type";
+        }
+    }
 
     private function getAccountType($fieldName, $fieldValue): string
     {
