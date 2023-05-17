@@ -333,4 +333,15 @@ class TransactionMapper
     }
 
 
+    private function getAccountType($fieldName, $fieldValue): string
+    {
+        $accountType = "_new";
+        foreach($this->allAccounts as $account) {
+            if($account->$fieldName == $fieldValue) {
+                $accountType = $account->type;
+            }
+        }
+        return $accountType;
+    }
+
 }
