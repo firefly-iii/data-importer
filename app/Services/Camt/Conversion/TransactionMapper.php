@@ -275,12 +275,44 @@ class TransactionMapper
         }
         // amount must be positive
         if(-1 === bccomp($current['amount'],'0')) {
+            // negative amount is debit (or transfer)
             $current['amount'] = bcmul($current['amount'],'-1');
+        } else {
+            // positive account is credit (or transfer)
+            $current = $this->swapAccounts($current);
         }
 
         // no date?
 
         return $current;
+    }
+
+    private function swapAccounts(array $currentTransaction) {
+
+        $ret = $currentTransaction;
+        $fieldType = array('id','iban','name');
+
+        foreach($fieldType as $currentFieldType) {
+            // move source to destination
+            if(array_key_exists( 'source_'.$currentFieldType,$currentTransaction)) {
+                $ret['destination_'.$currentFieldType] = $currentTransaction['source_'.$currentFieldType];
+                app('log')->warning('Just replaced destination_'.$currentFieldType.' in $ret');
+            } else {
+                unset($ret['destination_'.$currentFieldType]);
+                app('log')->warning('Just DEL destination_'.$currentFieldType.' in $ret');
+            }
+
+            // move destination to source
+            if(array_key_exists( 'destination_'.$currentFieldType,$currentTransaction)) {
+                $ret['source_'.$currentFieldType] = $currentTransaction['destination_'.$currentFieldType];
+                app('log')->warning('Just replaced source_'.$currentFieldType.' in $ret');
+            } else {
+                app('log')->warning('Just DEL source_'.$currentFieldType.' in $ret');
+                unset($ret['source_'.$currentFieldType]);
+            }
+        }
+
+        return $ret;
     }
 
     /**
