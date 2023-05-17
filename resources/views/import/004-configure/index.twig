@@ -192,11 +192,11 @@
                                                     {% if configuration.grouped_transaction_handling == 'single' %}selected{% endif %}
                                                     value="single">Create multiple single bookings, for each Level-D record a single entry
                                             </option>
-                                            <option label="Create one splitted booking with all transactions"
+                                            <option disabled label="Create one splitted booking with all transactions"
                                                     {% if configuration.grouped_transaction_handling == 'split' %}selected{% endif %}
                                                     value="split">Create a Split-Booking which contains all Level-D records
                                             </option>
-                                            <option label="Group-Booking only (loss of details)"
+                                            <option disabled label="Group-Booking only (loss of details)"
                                                     {% if configuration.grouped_transaction_handling == 'group' %}selected{% endif %}
                                                     value="group">Drop the Level-D Data and take the sum of all amounts (loss of details, not recommended)
                                             </option>
