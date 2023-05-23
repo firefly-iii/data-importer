@@ -284,7 +284,7 @@ class TransactionMapper
         // if both are transfer AND amount is neg = transfer from source to dest
         // any other combination is "illegal" and needs a warning.
 
-        $current['type'] = $this->getTransactionType($current);
+        $current['type'] = $this->determineTransactionType($current);
 
         // no description?
         // no date?
@@ -339,7 +339,7 @@ class TransactionMapper
      *
      * @return string
      */
-    private function getTransactionType(array $current): string
+    private function determineTransactionType(array $current)
     {
         $accountIdentificationSuffixes = array('id','iban','number','name');
         $directions = array('source','destination');
@@ -359,21 +359,22 @@ class TransactionMapper
 
         switch(true) {
             case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
-            case $accountType['source'] === 'asset' && $accountType['destination'] === '_new':
-                return "withdrawal";
-                break;
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue':
-                return "deposit";
+            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
+                return "withdrawal"; // line 281
+            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
+            case $accountType['source'] === null && $accountType['destination'] === 'asset':
+                return "deposit"; // line 282
             case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
-                return "transfer";
+                return "transfer"; // line 283 / 284
             default:
-                return "ERROR - unknown transaction type";
+                app('log')->error(sprintf('Invalid transaction: source = "%s", destination = "%s"',$accountType['source'] ?: '<null>',$accountType['destination']?: '<null>')); // 285
+                return;
         }
     }
 
-    private function getAccountType($fieldName, $fieldValue): string
+    private function getAccountType($fieldName, $fieldValue)
     {
-        $accountType = "_new";
+        $accountType = null;
         foreach($this->allAccounts as $account) {
             if($account->$fieldName == $fieldValue) {
                 $accountType = $account->type;
