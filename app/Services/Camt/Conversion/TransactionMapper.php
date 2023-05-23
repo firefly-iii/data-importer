@@ -16,6 +16,7 @@ class TransactionMapper
 
     private Configuration $configuration;
     private array $allAccounts;
+    private array $accountIdentificationSuffixes;
 
     /**
      * @param Configuration $configuration
@@ -24,6 +25,7 @@ class TransactionMapper
     {
         $this->configuration = $configuration;
         $this->allAccounts = $this->getAllAccounts();
+        $this->accountIdentificationSuffixes = array('id','iban','number','name');
     }
 
     /**
@@ -284,7 +286,16 @@ class TransactionMapper
         // if both are transfer AND amount is neg = transfer from source to dest
         // any other combination is "illegal" and needs a warning.
 
+
+        // as the source account is not new, we try to map an existing account
+        if(!$sourceIsNew) {
+            $current['source_id'] = $this->getAccountId('source',$current);
+        }
         $current['type'] = $this->determineTransactionType($current);
+        // as the destination account is not new, we try to map an existing account
+        if($this->validAccountInfo('destination', $current)) {
+            $current['destination_id'] = $this->getAccountId('destination',$current);
+        }
 
         // no description?
         // no date?
@@ -331,6 +342,19 @@ class TransactionMapper
         // search for existing IBAN
         // search for existing number
         // search for existing name, TODO under which types?
+        foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+            $field = $direction.'_'.$accountIdentificationSuffix;
+            if(array_key_exists( $field, $current)) {
+                // there is a value...
+                foreach($this->allAccounts as $account) {
+                    // so we check all accounts for a match
+                    if($current[$field] == $account->$accountIdentificationSuffix) {
+                        // we have a match
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -341,12 +365,11 @@ class TransactionMapper
      */
     private function determineTransactionType(array $current)
     {
-        $accountIdentificationSuffixes = array('id','iban','number','name');
         $directions = array('source','destination');
 
         foreach($directions as $direction) {
             $accountType[$direction] = null;
-            foreach($accountIdentificationSuffixes as $accountIdentificationSuffix) {
+            foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
                 // try to find destination account
                 if(array_key_exists( $direction.'_'.$accountIdentificationSuffix,$current)) {
                     $fieldName = $direction.'_'.$accountIdentificationSuffix;
@@ -381,6 +404,25 @@ class TransactionMapper
             }
         }
         return $accountType;
+    }
+
+    private function getAccountId($direction, $current) {
+        foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+            $field = $direction.'_'.$accountIdentificationSuffix;
+            if(array_key_exists($field, $current)) {
+                // there is a value...
+                foreach($this->allAccounts as $account) {
+                    // so we check all accounts for a match
+                    if($current[$field] == $account->$accountIdentificationSuffix) {
+                        // we have a match
+                        app('log')->warning(sprintf('Just mapped account "%s"',$account->id));
+                        return $account->id;
+                    }
+                }
+                //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
+            }
+            //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
+        }
     }
 
 }
