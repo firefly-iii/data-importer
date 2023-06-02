@@ -261,6 +261,10 @@ return [
             '_ignore' => $availableRoles['_ignore'],
             'note'    => $availableRoles['note'],
         ],
+        'level_b'        => [
+            '_ignore' => $availableRoles['_ignore'],
+            'note'    => $availableRoles['note'],
+        ],
         // roles for any date field
         'dates'          => [
             '_ignore'          => $availableRoles['_ignore'],
