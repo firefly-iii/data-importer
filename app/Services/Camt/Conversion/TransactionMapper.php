@@ -136,7 +136,6 @@ class TransactionMapper
                         break;
                     case 'amount':
                         $current['amount'] = null;
-                        $current['amount'] = $data['data'][0];
                         if('group' !== $group_handling || 'split' !== $group_handling) {
                             // if multiple values, use smallest
                             foreach($data['data'] as $amount) {
