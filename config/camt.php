@@ -494,7 +494,7 @@ return [
 
         'entryDetailBtcDomainCode'    =>
             [
-                'title'        => 'entryBtcDomainCode',
+                'title'        => 'entryDetailBtcDomainCode',
                 'default_role' => 'note',
                 'roles'        => 'meta',
                 'mappable'     => false,
