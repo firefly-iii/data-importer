@@ -63,6 +63,7 @@ class TransactionMapper
             'transactions'            => [],
         ];
         $splits = $transaction['splits'] ?? 1;
+        $group_handling = $this->configuration->getGroupedTransactionHandling();
         app('log')->debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; $i++) {
             $split = $transaction['transactions'][$i] ?? false;
@@ -135,6 +136,10 @@ class TransactionMapper
                         break;
                     case 'amount':
                         $current['amount'] = $data['data'][0];
+                        if('group' !== $group_handling || 'split' !== $group_handling) {
+                        }
+                        if('single' !== $group_handling) {
+                        }
                         break;
                     case 'currency-code':
                         $current = $this->mapCurrency($current, 'currency', $data);
