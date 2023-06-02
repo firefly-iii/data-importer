@@ -129,23 +129,30 @@ class TransactionMapper
                         $addition               = join(' ', $data['data']);
                         $current['external_id'] = $addition;
                         break;
-                    case 'description':
+                    case 'description': // TODO think about a config value to use both values from level C and D
                         $current['description'] = $current['description'] ?? '';
-                        $addition               = join(' ', $data['data']);
+                        if('group' === $group_handling || 'split' === $group_handling) {
+                            // use first description
+                            $addition           = $data['data'][0];
+                        }
+                        if('single' === $group_handling) {
+                            // just use the last description
+                            $addition           = end($data['data']);
+                        }
                         $current['description'] .= $addition;
                         break;
                     case 'amount':
                         $current['amount'] = null;
-                        if('group' !== $group_handling || 'split' !== $group_handling) {
-                            // if multiple values, use smallest
+                        if('group' === $group_handling || 'split' === $group_handling) {
+                            // if multiple values, use biggest (... at index 0?)
                             foreach($data['data'] as $amount) {
-                                if($current['amount'] < $amount || $current['amount'] == null) $current['amount'] = $amount;
+                                if(abs($current['amount']) < abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
                             }
                         }
-                        if('single' !== $group_handling) {
-                            // if multiple values, use smallest
+                        if('single' === $group_handling) {
+                            // if multiple values, use smallest (... at index 1?)
                             foreach($data['data'] as $amount) {
-                                if($current['amount'] > $amount || $current['amount'] == null) $current['amount'] = $amount;
+                                if(abs($current['amount']) > abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
                             }
                         }
                         break;
