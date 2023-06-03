@@ -453,7 +453,7 @@ return [
         'entryDetailAccountServicerReference'                                            =>
             [
                 'title'        => 'entryDetailAccountServicerReference',
-                'default_role' => 'note',
+                'default_role' => 'external-id',
                 'roles'        => 'meta',
                 'mappable'     => false,
                 'level'        => 'D',
@@ -461,7 +461,7 @@ return [
         'entryDetailRemittanceInformationUnstructuredBlockMessage'                       =>
             [
                 'title'        => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
-                'default_role' => 'note',
+                'default_role' => 'description',
                 'roles'        => 'meta',
                 'mappable'     => false,
                 'level'        => 'D',
