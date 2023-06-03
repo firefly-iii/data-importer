@@ -194,6 +194,7 @@ class RoleService
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
         $transactions = [];
+        $examples = [];
         $fieldNames   = array_keys(config('camt.fields'));
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
@@ -233,17 +234,18 @@ class RoleService
                     }
                 } // otherwise, try to fetch data
                 $splits = $transaction->countSplits();
-                if(0 !== $splits) {
+                if(0 === $splits) {
+                    $value = $transaction->getFieldByIndex($name, 0);
+                    if(null !== $value && '' !== $value) {
+                        $examples[$name][] = $value;
+                    }
+                }
+                if($splits > 0) {
                     for($index = 0; $index < $splits; $index++) {
                         $value = $transaction->getFieldByIndex($name, $index);
                         if(null !== $value && '' !== $value) {
                             $examples[$name][] = $value;
                         }
-                    }
-                } else {
-                    $value = $transaction->getFieldByIndex($name, 0);
-                    if(null !== $value && '' !== $value) {
-                        $examples[$name][] = $value;
                     }
                 }
             }

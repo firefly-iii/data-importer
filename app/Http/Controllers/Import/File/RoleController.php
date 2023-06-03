@@ -185,6 +185,12 @@ class RoleController extends Controller
             ],
         ];
         $group_handling = $configuration->getGroupedTransactionHandling();
+        if('group' === $group_handling) {
+            $levels['D'] = [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D_dropped')
+            ];
+        }
         if('group' !== $group_handling) {
             $levels['D'] = [
                 'title'       => trans('camt.level_D'),
@@ -210,11 +216,6 @@ class RoleController extends Controller
                     'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
                     'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),
                 ],
-            ];
-        } else {
-            $levels['D'] = [
-                'title'       => trans('camt.level_D'),
-                'explanation' => trans('camt.explain_D_dropped')
             ];
         }
 

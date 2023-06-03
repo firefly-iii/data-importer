@@ -74,12 +74,12 @@ class ConversionController extends Controller
 
         app('log')->debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
-        if (empty($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
+        if (0 === count($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
-        if (empty($configuration->getMapping())) {
+        if (0 === count($configuration->getMapping())) {
             // back to mapping
             app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');

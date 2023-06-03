@@ -318,10 +318,11 @@ class Transaction
 
     private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false)
     { // TODO make depend on configuration
-        if (empty($relatedParty->getRelatedPartyType()->getName())) {
+        if ('' === (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
-        } else {
+        }
+        if ('' !== (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
@@ -348,10 +349,9 @@ class Transaction
     private function getOpposingParty(EntryTransactionDetail $transactionDetail)
     {
         $relatedParties = $transactionDetail->getRelatedParties();
-        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interessting one?
+        $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
+        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
-        } else {
-            $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
         }
         foreach ($relatedParties as $relatedParty) {
             if (get_class($relatedParty->getRelatedPartyType()) == $targetRelatedPartyObject) {
