@@ -174,7 +174,7 @@ class ConfigurationController extends Controller
         // loop accounts:
         $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (isset($fromRequest['accounts'][$identifier])) {
+            if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
             }
         }
