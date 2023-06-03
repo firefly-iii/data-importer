@@ -34,7 +34,7 @@ class Description implements ConverterInterface
      *
      * @param $value
      *
-     * @return mixed
+     * @return string
      *
      */
     public function convert($value)

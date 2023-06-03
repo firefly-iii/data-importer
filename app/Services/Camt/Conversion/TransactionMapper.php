@@ -2,6 +2,7 @@
 
 namespace App\Services\Camt\Conversion;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Mapper\GetAccounts;
 use App\Services\Shared\Configuration\Configuration;
 use Carbon\Carbon;
@@ -19,6 +20,7 @@ class TransactionMapper
 
     /**
      * @param  Configuration  $configuration
+     * @throws ImporterErrorException
      */
     public function __construct(Configuration $configuration)
     {
@@ -53,7 +55,7 @@ class TransactionMapper
      */
     private function mapSingle(array $transaction): array
     {
-        app('log')->debug(sprintf('Now mapping single transaction'));
+        app('log')->debug('Now mapping single transaction');
         // make a new transaction:
         $result         = [
             //'user'          => 1, // ??
@@ -130,6 +132,7 @@ class TransactionMapper
                         break;
                     case 'description': // TODO think about a config value to use both values from level C and D
                         $current['description'] = $current['description'] ?? '';
+                        $addition = '';
                         if ('group' === $group_handling || 'split' === $group_handling) {
                             // use first description
                             $addition = $data['data'][0];
@@ -428,7 +431,6 @@ class TransactionMapper
                         $accountType['destination'] ?: '<null>'
                     )
                 ); // 285
-                return;
         }
     }
 

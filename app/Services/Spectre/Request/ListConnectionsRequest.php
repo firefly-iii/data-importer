@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListConnectionsResponse;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class ListConnectionsRequest
@@ -55,6 +56,7 @@ class ListConnectionsRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws GuzzleException
      */
     public function get(): Response
     {

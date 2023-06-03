@@ -24,9 +24,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
-use App\Services\CSV\Specifics\SpecificInterface;
-use App\Services\CSV\Specifics\SpecificService;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -39,6 +38,8 @@ use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use League\Csv\UnableToProcessCsv;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoleService
@@ -107,19 +108,6 @@ class RoleService
             }
         }
 
-        // specific processors may add or remove headers.
-        // so those must be processed as well.
-        // Fix as suggested by @FelikZ in https://github.com/firefly-iii/csv-importer/pull/4
-        // TODO no longer used.
-        /** @var string $name */
-        foreach ($configuration->getSpecifics() as $name) {
-            if (SpecificService::exists($name)) {
-                /** @var SpecificInterface $object */
-                $object  = app(SpecificService::fullClass($name));
-                $headers = $object->runOnHeaders($headers);
-            }
-        }
-
         return $headers;
     }
 
@@ -184,10 +172,13 @@ class RoleService
     }
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {
@@ -236,14 +227,14 @@ class RoleService
                 $splits = $transaction->countSplits();
                 if(0 === $splits) {
                     $value = $transaction->getFieldByIndex($name, 0);
-                    if(null !== $value && '' !== $value) {
+                    if('' !== $value) {
                         $examples[$name][] = $value;
                     }
                 }
                 if($splits > 0) {
                     for($index = 0; $index < $splits; $index++) {
                         $value = $transaction->getFieldByIndex($name, $index);
-                        if(null !== $value && '' !== $value) {
+                        if('' !== $value) {
                             $examples[$name][] = $value;
                         }
                     }

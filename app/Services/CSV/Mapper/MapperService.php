@@ -126,11 +126,9 @@ class MapperService
     /**
      * Appends the given array with data from the CAMT file in the config.
      *
-     * @param string $content
-     * @param string $delimiter
-     * @param bool   $hasHeaders
-     * @param array  $specifics
-     * @param array  $data
+     * @param  Configuration  $configuration
+     * @param  string  $content
+     * @param  array  $data
      *
      * @return array
      * @throws ImporterErrorException

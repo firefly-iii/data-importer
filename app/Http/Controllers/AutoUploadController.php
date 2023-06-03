@@ -41,6 +41,7 @@ class AutoUploadController extends Controller
 
     /**
      *
+     * @throws ImporterErrorException
      */
     public function index(AutoUploadRequest $request)
     {

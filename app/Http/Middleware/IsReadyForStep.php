@@ -62,10 +62,12 @@ trait IsReadyForStep
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return bool
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     protected function isReadyForStep(Request $request): bool
     {
@@ -348,10 +350,12 @@ trait IsReadyForStep
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return RedirectResponse|null
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     protected function redirectToCorrectStep(Request $request): ?RedirectResponse
     {

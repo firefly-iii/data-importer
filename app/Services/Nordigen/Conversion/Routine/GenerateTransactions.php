@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Conversion\Routine;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Transaction;
@@ -68,6 +69,7 @@ class GenerateTransactions
     /**
      * TODO the result of this method is currently not used.
      *
+     * @throws AgreementExpiredException
      * @throws ImporterErrorException
      */
     public function collectNordigenAccounts(): void
@@ -112,6 +114,7 @@ class GenerateTransactions
 
     /**
      *
+     * @throws ApiHttpException
      */
     public function collectTargetAccounts(): void
     {
@@ -263,10 +266,11 @@ class GenerateTransactions
     /**
      * TODO function is way too complex.
      *
-     * @param string      $accountId
-     * @param Transaction $entry
+     * @param  string  $accountId
+     * @param  Transaction  $entry
      *
      * @return array
+     * @throws ImporterHttpException
      */
     private function generateTransaction(string $accountId, Transaction $entry): array
     {
@@ -479,6 +483,7 @@ class GenerateTransactions
     }
 
     /**
+     * TODO Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
      * @param int $mappedId
      *
      * @return string

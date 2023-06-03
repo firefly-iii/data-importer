@@ -26,6 +26,7 @@ namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Shared\Response\Response;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class PostNewRequisitionRequest
@@ -56,6 +57,7 @@ class PostNewRequisitionRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws GuzzleException
      */
     public function post(): Response
     {

@@ -39,6 +39,7 @@ use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
+use League\Flysystem\FilesystemException;
 use Storage;
 
 /**
@@ -349,7 +350,8 @@ trait AutoImports
     }
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
+     * @throws FilesystemException
      */
     private function startImport(Configuration $configuration): void
     {

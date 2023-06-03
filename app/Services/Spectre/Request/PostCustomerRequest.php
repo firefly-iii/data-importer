@@ -61,10 +61,12 @@ class PostCustomerRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
+     * @throws ImporterErrorException
      */
     public function post(): Response
     {
-        if (null === $this->identifier) {
+        if ('' === $this->identifier) {
             throw new ImporterErrorException('No identifier for PostCustomerRequest');
         }
         $data = [

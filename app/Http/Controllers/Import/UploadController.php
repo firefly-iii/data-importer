@@ -39,6 +39,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
+use League\Flysystem\FilesystemException;
 use Storage;
 
 /**
@@ -92,9 +93,11 @@ class UploadController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return RedirectResponse|Redirector
+     * @throws FileNotFoundException
+     * @throws FilesystemException
      * @throws ImporterErrorException
      */
     public function upload(Request $request)
@@ -137,7 +140,12 @@ class UploadController extends Controller
 
     /**
      *
+     * @param  string  $flow
+     * @param  MessageBag  $errors
+     * @param  UploadedFile|null  $file
      * @return MessageBag
+     * @throws FilesystemException
+     * @throws ImporterErrorException
      */
     private function processUploadedFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
     {
@@ -157,6 +165,7 @@ class UploadController extends Controller
             if (0 === $errorNumber) {
                 $detector = new FileContentSherlock();
                 $fileType = $detector->detectContentType($file->getPathname());
+                $content = '';
                 if ('csv' === $fileType) {
                     $content = file_get_contents($file->getPathname());
 
@@ -259,6 +268,7 @@ class UploadController extends Controller
 
             // process the config file
             $success = false;
+            $configuration = null;
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());

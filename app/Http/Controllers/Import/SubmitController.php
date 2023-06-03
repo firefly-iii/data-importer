@@ -40,6 +40,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
+use League\Flysystem\FilesystemException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Storage;
@@ -98,9 +99,12 @@ class SubmitController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
+     * @throws ContainerExceptionInterface
+     * @throws FilesystemException
+     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {

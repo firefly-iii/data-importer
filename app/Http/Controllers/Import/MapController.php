@@ -66,6 +66,10 @@ class MapController extends Controller
 
     /**
      * @return Factory|View
+     * @throws ContainerExceptionInterface
+     * @throws FileNotFoundException
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public function index()
     {

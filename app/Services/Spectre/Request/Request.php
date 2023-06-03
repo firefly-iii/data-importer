@@ -102,7 +102,7 @@ abstract class Request
     {
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
-        if (null !== $this->parameters) {
+        if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         $client = $this->getClient();
@@ -139,7 +139,7 @@ abstract class Request
 
             throw new ImporterErrorException('Transfer exception leads to error.', 0, $e);
         }
-        if (null !== $res && 200 !== $res->getStatusCode()) {
+        if (200 !== $res->getStatusCode()) {
             // return body, class must handle this
             app('log')->error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
@@ -154,7 +154,7 @@ abstract class Request
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
                     $fullUrl,
-                    $res ? $res->getStatusCode() : 0,
+                    $res->getStatusCode(),
                     $e->getMessage(),
                     $body
                 )

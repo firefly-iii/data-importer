@@ -93,7 +93,7 @@ class TransactionProcessor
 
                 return [];
             }
-            app('log')->debug(sprintf('Done downloading information for debug purposes.'));
+            app('log')->debug('Done downloading information for debug purposes.');
 
             $accessToken = TokenManager::getAccessToken();
             $url         = config('nordigen.url');

@@ -115,7 +115,7 @@ class Amount extends AbstractTask
         app('log')->debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
-        if (isset($transaction['foreign_amount']) && null !== $transaction['foreign_amount']) {
+        if (isset($transaction['foreign_amount'])) {
             $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
             app('log')->debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }

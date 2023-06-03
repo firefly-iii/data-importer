@@ -42,9 +42,10 @@ class Accounts extends AbstractTask
     use DeterminesTransactionType;
 
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
+     * @throws ImporterErrorException
      */
     public function process(array $group): array
     {

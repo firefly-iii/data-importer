@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -108,6 +109,7 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * @inheritDoc
+     * @throws ImporterHttpException
      */
     public function start(): array
     {

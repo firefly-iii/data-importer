@@ -100,7 +100,7 @@ abstract class Request
     {
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
-        if (null !== $this->parameters) {
+        if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
@@ -137,7 +137,7 @@ abstract class Request
             $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string)$e->getResponse()->getBody();
-                $json = json_decode($body, true, 512) ?? [];
+                $json = json_decode($body, true) ?? [];
             }
             if (array_key_exists('summary', $json) and str_ends_with($json['summary'], 'has expired')) {
                 $exception       = new AgreementExpiredException();
@@ -165,7 +165,7 @@ abstract class Request
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
                     $fullUrl,
-                    $res ? $res->getStatusCode() : 0,
+                    $res->getStatusCode(),
                     $e->getMessage(),
                     $body
                 )
@@ -254,7 +254,7 @@ abstract class Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
-        if (null !== $this->parameters) {
+        if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 

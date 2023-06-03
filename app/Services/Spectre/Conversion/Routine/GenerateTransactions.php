@@ -28,6 +28,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
@@ -57,6 +58,7 @@ class GenerateTransactions
 
     /**
      *
+     * @throws ApiHttpException
      */
     public function collectTargetAccounts(): void
     {

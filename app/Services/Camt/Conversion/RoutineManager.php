@@ -114,7 +114,10 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * @inheritDoc
+     * @return array
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public function start(): array
     {
@@ -156,71 +159,6 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return $camtMessage;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeMessages(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getMessages();
-        $two   = $this->lineProcessor->getMessages();
-        $three = $this->columnValueConverter->getMessages();
-        $four  = $this->pseudoTransactionProcessor->getMessages();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allMessages = $total;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeWarnings(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getWarnings();
-        $two   = $this->lineProcessor->getWarnings();
-        $three = $this->columnValueConverter->getWarnings();
-        $four  = $this->pseudoTransactionProcessor->getWarnings();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-        $this->allWarnings = $total;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeErrors(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getErrors();
-        $two   = $this->lineProcessor->getErrors();
-        $three = $this->columnValueConverter->getErrors();
-        $four  = $this->pseudoTransactionProcessor->getErrors();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allErrors = $total;
     }
 
     /**

@@ -62,6 +62,7 @@ class LinkController extends Controller
     }
 
     /**
+     * @throws ImporterHttpException
      */
     public function build()
     {

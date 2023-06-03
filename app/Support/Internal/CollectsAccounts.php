@@ -43,6 +43,7 @@ use App\Services\Spectre\Response\GetAccountsResponse;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Cache;
 
 trait CollectsAccounts
@@ -144,9 +145,11 @@ trait CollectsAccounts
     }
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      *
      * @return array
+     * @throws GuzzleException
+     * @throws ImporterHttpException
      */
     protected function getSpectreAccounts(Configuration $configuration): array
     {

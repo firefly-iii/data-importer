@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetAccountsResponse;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class GetAccountsRequest
@@ -56,6 +57,7 @@ class GetAccountsRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws GuzzleException
      */
     public function get(): Response
     {

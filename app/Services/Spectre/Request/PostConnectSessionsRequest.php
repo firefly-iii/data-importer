@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\PostConnectSessionResponse;
 
@@ -60,6 +61,7 @@ class PostConnectSessionsRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
      */
     public function post(): Response
     {

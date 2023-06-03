@@ -759,7 +759,7 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenBank
+     * @param  string  $nordigenMaxDays
      */
     public function setNordigenMaxDays(string $nordigenMaxDays): void
     {

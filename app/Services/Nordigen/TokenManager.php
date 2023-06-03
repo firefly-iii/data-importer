@@ -56,7 +56,9 @@ class TokenManager
     }
 
     /**
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public static function validateAllTokens(): void
     {

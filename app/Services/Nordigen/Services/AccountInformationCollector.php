@@ -170,7 +170,11 @@ class AccountInformationCollector
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
+     * @return Account
+     * @throws AgreementExpiredException
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     private static function getBasicDetails(Account $account): Account
     {

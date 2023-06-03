@@ -26,6 +26,7 @@ namespace App\Services\Nordigen\Request;
 
 use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Shared\Response\Response;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class PostNewUserAgreement
@@ -57,6 +58,7 @@ class PostNewUserAgreement extends Request
 
     /**
      * @inheritDoc
+     * @throws GuzzleException
      */
     public function post(): Response
     {

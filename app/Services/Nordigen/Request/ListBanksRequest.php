@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ErrorResponse;
@@ -51,6 +52,7 @@ class ListBanksRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws AgreementExpiredException
      */
     public function get(): Response
     {

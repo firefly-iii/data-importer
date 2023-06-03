@@ -9,6 +9,8 @@ use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
 use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;
+use Genkgo\Camt\DTO\Creditor;
+use Genkgo\Camt\DTO\Debtor;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
 use Genkgo\Camt\DTO\IbanAccount;
@@ -32,24 +34,24 @@ class Transaction
 
 
     /**
-     * @param Configuration $configuration
-     * @param Message       $levelA
-     * @param Statement     $levelB
-     * @param Entry         $levelC
-     * @param array         $levelD
+     * @param  Configuration  $configuration
+     * @param  Message  $levelA
+     * @param  Statement  $levelB
+     * @param  Entry  $levelC
+     * @param  array  $levelD
      */
     public function __construct(
         Configuration $configuration,
-        Message       $levelA,
-        Statement     $levelB,
-        Entry         $levelC,
-        array         $levelD
+        Message $levelA,
+        Statement $levelB,
+        Entry $levelC,
+        array $levelD
     ) {
-        $this->configuration        = $configuration;
-        $this->levelA               = $levelA;
-        $this->levelB               = $levelB;
-        $this->levelC               = $levelC;
-        $this->levelD               = $levelD;
+        $this->configuration = $configuration;
+        $this->levelA        = $levelA;
+        $this->levelB        = $levelB;
+        $this->levelC        = $levelC;
+        $this->levelD        = $levelD;
     }
 
     /**
@@ -61,7 +63,7 @@ class Transaction
     }
 
     /**
-     * @param int $index
+     * @param  int  $index
      *
      * @return string
      */
@@ -72,7 +74,7 @@ class Transaction
     }
 
     /**
-     * @param int $index
+     * @param  int  $index
      *
      * @return string
      */
@@ -83,8 +85,8 @@ class Transaction
     }
 
     /**
-     * @param string $field
-     * @param int    $index
+     * @param  string  $field
+     * @param  int  $index
      *
      * @return string
      * @throws ImporterErrorException
@@ -94,18 +96,18 @@ class Transaction
         switch ($field) {
             default:
                 // temporary debug message:
-                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-                echo PHP_EOL;
-                exit;
+//                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+//                echo PHP_EOL;
+//                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-                // LEVEL A
+            // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-                // LEVEL B
+            // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
@@ -162,7 +164,7 @@ class Transaction
                 // always the same, since its level C.
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
 
-                // LEVEL D
+            // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
@@ -254,9 +256,9 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
+                if (IbanAccount::class === get_class($opposingAccount)) {
                     $result = (string)$opposingAccount->getIdentification();
                 }
 
@@ -269,9 +271,9 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                $class   = null !== $opposingAccount ? get_class($opposingAccount) : '';
+                $class           = null !== $opposingAccount ? get_class($opposingAccount) : '';
                 if (in_array($class, $list, true)) {
                     $result = (string)$opposingAccount->getIdentification();
                 }
@@ -284,14 +286,13 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info = $this->levelD[$index];
                 //$result  = '';
                 $opposingParty = $this->getOpposingParty($info);
-                $result = $this->getOpposingName($opposingParty);
+                $result        = $this->getOpposingName($opposingParty);
 
                 return $result;
         }
-
     }
 
     private function getDecimalAmount(?Money $money): string
@@ -306,7 +307,7 @@ class Transaction
     }
 
     /**
-     * @param int $index
+     * @param  int  $index
      *
      * @return string
      */
@@ -316,39 +317,37 @@ class Transaction
         return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
 
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false)
-    { // TODO make depend on configuration
-        if ('' === (string) $relatedParty->getRelatedPartyType()->getName()) {
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string {
+        $opposingName = '';
+        // TODO make depend on configuration
+        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
         }
-        if ('' !== (string) $relatedParty->getRelatedPartyType()->getName()) {
+        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
             if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', ' . $addressLine;
+                $opposingName .= ', '.$addressLine;
             }
         }
 
         return $opposingName;
     }
 
-    private function generateAddressLine(Address $address = null)
-    {
+    private function generateAddressLine(Address $address = null) {
         $addressLines = implode(", ", $address->getAddressLines());
 
         return $addressLines;
     }
 
     /**
-     * @param EntryTransactionDetail $transactionDetail
-     *
-     * @return void
+     * @param  EntryTransactionDetail  $transactionDetail
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail)
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): Creditor|Debtor|null
     {
-        $relatedParties = $transactionDetail->getRelatedParties();
+        $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
         if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
@@ -358,5 +357,6 @@ class Transaction
                 return $relatedParty;
             }
         }
+        return null;
     }
 }

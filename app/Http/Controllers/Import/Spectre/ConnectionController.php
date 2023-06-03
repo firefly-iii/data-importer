@@ -152,11 +152,9 @@ class ConnectionController extends Controller
     public function post(Request $request)
     {
         $connectionId = $request->get('spectre_connection_id');
+        $configuration = $this->restoreConfiguration();
 
         if ('00' === $connectionId) {
-            // get identifier
-            $configuration = $this->restoreConfiguration();
-
             // make a new connection.
             $url                = config('spectre.url');
             $appId              = SpectreSecretManager::getAppId();

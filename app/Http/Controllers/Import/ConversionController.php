@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
@@ -39,6 +40,8 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Storage;
 
 /**
@@ -62,6 +65,7 @@ class ConversionController extends Controller
 
     /**
      *
+     * @throws ImporterErrorException
      */
     public function index()
     {
@@ -144,10 +148,13 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {

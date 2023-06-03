@@ -28,7 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
-use App\Services\Camt053\Converter;
 use App\Services\CSV\Roles\RoleService;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -42,6 +41,7 @@ use JsonException;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\UnableToProcessCsv;
+use League\Flysystem\FilesystemException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -65,7 +65,7 @@ class RoleController extends Controller
     /**
      * @param Request $request
      *
-     * @return Factory|View
+     * @return View|void
      * @throws JsonException
      * @throws Exception
      * @throws InvalidArgument
@@ -136,10 +136,13 @@ class RoleController extends Controller
     }
 
     /**
-     * @param Request       $request
-     * @param Configuration $configuration
+     * @param  Request  $request
+     * @param  Configuration  $configuration
      *
      * @return View
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     private function camtIndex(Request $request, Configuration $configuration): View
     {
@@ -244,11 +247,13 @@ class RoleController extends Controller
     }
 
     /**
-     * @param RolesPostRequest $request
+     * @param  RolesPostRequest  $request
      *
      * @return RedirectResponse
-     * @throws JsonException
      * @throws ContainerExceptionInterface
+     * @throws FilesystemException
+     * @throws ImporterErrorException
+     * @throws JsonException
      * @throws NotFoundExceptionInterface
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
@@ -335,10 +340,14 @@ class RoleController extends Controller
     /**
      * TODO is basically the same as the CSV processor.
      *
-     * @param RolesPostRequest $request
-     * @param Configuration    $configuration
+     * @param  RolesPostRequest  $request
+     * @param  Configuration  $configuration
      *
      * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws FilesystemException
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
      */
     private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {

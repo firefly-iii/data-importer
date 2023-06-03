@@ -44,6 +44,7 @@ class AutoImportController extends Controller
 
     /**
      *
+     * @throws ImporterErrorException
      */
     public function index(Request $request): Response
     {
