@@ -25,7 +25,7 @@ class TransactionMapper
     {
         $this->configuration = $configuration;
         $this->allAccounts = $this->getAllAccounts();
-        $this->accountIdentificationSuffixes = array('id','iban','number','name');
+        $this->accountIdentificationSuffixes = ['id','iban','number','name'];
     }
 
     /**
@@ -146,13 +146,17 @@ class TransactionMapper
                         if('group' === $group_handling || 'split' === $group_handling) {
                             // if multiple values, use biggest (... at index 0?)
                             foreach($data['data'] as $amount) {
-                                if(abs($current['amount']) < abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
+                                if(abs($current['amount']) < abs($amount) || $current['amount'] == null) {
+                                    $current['amount'] = $amount;
+                                }
                             }
                         }
                         if('single' === $group_handling) {
                             // if multiple values, use smallest (... at index 1?)
                             foreach($data['data'] as $amount) {
-                                if(abs($current['amount']) > abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
+                                if(abs($current['amount']) > abs($amount) || $current['amount'] == null) {
+                                    $current['amount'] = $amount;
+                                }
                             }
                         }
                         break;
@@ -256,9 +260,9 @@ class TransactionMapper
             return null;
         }
         // amount must be positive
-        if(-1 === bccomp($current['amount'],'0')) {
+        if(-1 === bccomp($current['amount'], '0')) {
             // negative amount is debit (or transfer)
-            $current['amount'] = bcmul($current['amount'],'-1');
+            $current['amount'] = bcmul($current['amount'], '-1');
         } else {
             // positive account is credit (or transfer)
             $current = $this->swapAccounts($current);
@@ -309,12 +313,12 @@ class TransactionMapper
 
         // as the source account is not new, we try to map an existing account
         if(!$sourceIsNew) {
-            $current['source_id'] = $this->getAccountId('source',$current);
+            $current['source_id'] = $this->getAccountId('source', $current);
         }
         $current['type'] = $this->determineTransactionType($current);
         // as the destination account is not new, we try to map an existing account
         if($this->validAccountInfo('destination', $current)) {
-            $current['destination_id'] = $this->getAccountId('destination',$current);
+            $current['destination_id'] = $this->getAccountId('destination', $current);
         }
 
         // no description?
@@ -323,14 +327,15 @@ class TransactionMapper
         return $current;
     }
 
-    private function swapAccounts(array $currentTransaction) {
+    private function swapAccounts(array $currentTransaction)
+    {
 
         $ret = $currentTransaction;
-        $fieldType = array('id','iban','number','name');
+        $fieldType = ['id','iban','number','name'];
 
         foreach($fieldType as $currentFieldType) {
             // move source to destination
-            if(array_key_exists( 'source_'.$currentFieldType,$currentTransaction)) {
+            if(array_key_exists('source_'.$currentFieldType, $currentTransaction)) {
                 $ret['destination_'.$currentFieldType] = $currentTransaction['source_'.$currentFieldType];
                 app('log')->warning('Just replaced destination_'.$currentFieldType.' in $ret');
             } else {
@@ -339,7 +344,7 @@ class TransactionMapper
             }
 
             // move destination to source
-            if(array_key_exists( 'destination_'.$currentFieldType,$currentTransaction)) {
+            if(array_key_exists('destination_'.$currentFieldType, $currentTransaction)) {
                 $ret['source_'.$currentFieldType] = $currentTransaction['destination_'.$currentFieldType];
                 app('log')->warning('Just replaced source_'.$currentFieldType.' in $ret');
             } else {
@@ -364,7 +369,7 @@ class TransactionMapper
         // search for existing name, TODO under which types?
         foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
             $field = $direction.'_'.$accountIdentificationSuffix;
-            if(array_key_exists( $field, $current)) {
+            if(array_key_exists($field, $current)) {
                 // there is a value...
                 foreach($this->allAccounts as $account) {
                     // so we check all accounts for a match
@@ -385,13 +390,13 @@ class TransactionMapper
      */
     private function determineTransactionType(array $current)
     {
-        $directions = array('source','destination');
+        $directions = ['source','destination'];
 
         foreach($directions as $direction) {
             $accountType[$direction] = null;
             foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
                 // try to find destination account
-                if(array_key_exists( $direction.'_'.$accountIdentificationSuffix,$current)) {
+                if(array_key_exists($direction.'_'.$accountIdentificationSuffix, $current)) {
                     $fieldName = $direction.'_'.$accountIdentificationSuffix;
                     $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
                 }
@@ -410,7 +415,7 @@ class TransactionMapper
             case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
                 return "transfer"; // line 283 / 284
             default:
-                app('log')->error(sprintf('Invalid transaction: source = "%s", destination = "%s"',$accountType['source'] ?: '<null>',$accountType['destination']?: '<null>')); // 285
+                app('log')->error(sprintf('Invalid transaction: source = "%s", destination = "%s"', $accountType['source'] ?: '<null>', $accountType['destination'] ?: '<null>')); // 285
                 return;
         }
     }
@@ -426,7 +431,8 @@ class TransactionMapper
         return $accountType;
     }
 
-    private function getAccountId($direction, $current) {
+    private function getAccountId($direction, $current)
+    {
         foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
             $field = $direction.'_'.$accountIdentificationSuffix;
             if(array_key_exists($field, $current)) {
@@ -435,7 +441,7 @@ class TransactionMapper
                     // so we check all accounts for a match
                     if($current[$field] == $account->$accountIdentificationSuffix) {
                         // we have a match
-                        app('log')->warning(sprintf('Just mapped account "%s"',$account->id));
+                        app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
                         return $account->id;
                     }
                 }

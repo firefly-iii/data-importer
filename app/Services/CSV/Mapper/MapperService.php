@@ -175,12 +175,12 @@ class MapperService
             foreach (array_keys($mappableFields) as $title) {
                 if (array_key_exists($title, $data)) {
                     if(0 !== $splits) {
-                      for($index = 0; $index < $splits; $index++) {
-                          $value = $transaction->getFieldByIndex($title, $index);
-                          if('' !== $value) {
-                              $data[$title]['values'][] = $value;
-                          }
-                      }
+                        for($index = 0; $index < $splits; $index++) {
+                            $value = $transaction->getFieldByIndex($title, $index);
+                            if('' !== $value) {
+                                $data[$title]['values'][] = $value;
+                            }
+                        }
                     }
                 }
             }
