@@ -26,8 +26,8 @@ bcscale(12);
 
 if (!function_exists('envNonEmpty')) {
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed|null
      */

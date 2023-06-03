@@ -129,7 +129,7 @@ class LinkController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException

@@ -48,7 +48,7 @@ class SubmissionStatus
     }
 
     /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return static
      */

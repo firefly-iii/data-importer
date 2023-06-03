@@ -45,7 +45,7 @@ class Date implements ConverterInterface
     {
         $this->dateFormat        = 'Y-m-d';
         $this->dateLocale        = 'en';
-        $this->dateFormatPattern = '/(?:(' . join("|", array_keys(Language::all())) . ')\:)?(.+)/';
+        $this->dateFormatPattern = '/(?:('.join("|", array_keys(Language::all())).')\:)?(.+)/';
     }
 
     /**
@@ -87,7 +87,7 @@ class Date implements ConverterInterface
     /**
      * Add extra configuration parameters.
      *
-     * @param string $configuration
+     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {
@@ -95,7 +95,7 @@ class Date implements ConverterInterface
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return array
      */

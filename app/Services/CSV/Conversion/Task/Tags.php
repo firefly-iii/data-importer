@@ -30,7 +30,7 @@ namespace App\Services\CSV\Conversion\Task;
 class Tags extends AbstractTask
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -66,7 +66,7 @@ class Tags extends AbstractTask
     /**
      * Do something with the collected tags.
      *
-     * @param array $transaction
+     * @param  array  $transaction
      *
      * @return array
      */

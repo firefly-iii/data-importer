@@ -33,7 +33,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 interface TaskInterface
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -54,12 +54,12 @@ interface TaskInterface
     public function requiresTransactionCurrency(): bool;
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      */
     public function setAccount(Account $account): void;
 
     /**
-     * @param TransactionCurrency $transactionCurrency
+     * @param  TransactionCurrency  $transactionCurrency
      */
     public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void;
 }

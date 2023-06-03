@@ -141,7 +141,7 @@ class ConnectionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
@@ -151,7 +151,7 @@ class ConnectionController extends Controller
      */
     public function post(Request $request)
     {
-        $connectionId = $request->get('spectre_connection_id');
+        $connectionId  = $request->get('spectre_connection_id');
         $configuration = $this->restoreConfiguration();
 
         if ('00' === $connectionId) {

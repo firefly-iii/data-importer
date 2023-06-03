@@ -12,7 +12,7 @@ class TransactionExtractor
     private Configuration $configuration;
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -27,7 +27,7 @@ class TransactionExtractor
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            foreach ($entries as $entry) { // -> Level C
+            foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?

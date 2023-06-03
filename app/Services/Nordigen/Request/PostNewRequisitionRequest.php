@@ -85,7 +85,7 @@ class PostNewRequisitionRequest extends Request
     }
 
     /**
-     * @param string $agreement
+     * @param  string  $agreement
      */
     public function setAgreement(string $agreement): void
     {
@@ -93,7 +93,7 @@ class PostNewRequisitionRequest extends Request
     }
 
     /**
-     * @param string $bank
+     * @param  string  $bank
      */
     public function setBank(string $bank): void
     {
@@ -101,7 +101,7 @@ class PostNewRequisitionRequest extends Request
     }
 
     /**
-     * @param string $reference
+     * @param  string  $reference
      */
     public function setReference(string $reference): void
     {

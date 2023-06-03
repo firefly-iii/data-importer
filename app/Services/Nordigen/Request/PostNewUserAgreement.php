@@ -85,7 +85,7 @@ class PostNewUserAgreement extends Request
     }
 
     /**
-     * @param string $accessValidForDays
+     * @param  string  $accessValidForDays
      */
     public function setAccessValidForDays(string $accessValidForDays): void
     {
@@ -93,7 +93,7 @@ class PostNewUserAgreement extends Request
     }
 
     /**
-     * @param string $bank
+     * @param  string  $bank
      */
     public function setBank(string $bank): void
     {
@@ -101,7 +101,7 @@ class PostNewUserAgreement extends Request
     }
 
     /**
-     * @param string $maxHistoricalDays
+     * @param  string  $maxHistoricalDays
      */
     public function setMaxHistoricalDays(string $maxHistoricalDays): void
     {

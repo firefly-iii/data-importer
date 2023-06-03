@@ -83,7 +83,7 @@ class Account
     }
 
     /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return static
      */
@@ -116,7 +116,7 @@ class Account
     }
 
     /**
-     * @param Balance $balance
+     * @param  Balance  $balance
      */
     public function addBalance(Balance $balance): void
     {
@@ -132,7 +132,7 @@ class Account
     }
 
     /**
-     * @param string $bban
+     * @param  string  $bban
      */
     public function setBban(string $bban): void
     {
@@ -148,7 +148,7 @@ class Account
     }
 
     /**
-     * @param string $bic
+     * @param  string  $bic
      */
     public function setBic(string $bic): void
     {
@@ -164,7 +164,7 @@ class Account
     }
 
     /**
-     * @param string $cashAccountType
+     * @param  string  $cashAccountType
      */
     public function setCashAccountType(string $cashAccountType): void
     {
@@ -180,7 +180,7 @@ class Account
     }
 
     /**
-     * @param string $currency
+     * @param  string  $currency
      */
     public function setCurrency(string $currency): void
     {
@@ -196,11 +196,27 @@ class Account
     }
 
     /**
-     * @param string $details
+     * @param  string  $details
      */
     public function setDetails(string $details): void
     {
         $this->details = $details;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayName(): string
+    {
+        return $this->displayName;
+    }
+
+    /**
+     * @param  string  $displayName
+     */
+    public function setDisplayName(string $displayName): void
+    {
+        $this->displayName = $displayName;
     }
 
     /**
@@ -238,61 +254,13 @@ class Account
     /**
      * @return string
      */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDisplayName(): string
-    {
-        return $this->displayName;
-    }
-
-    /**
-     * @param string $displayName
-     */
-    public function setDisplayName(string $displayName): void
-    {
-        $this->displayName = $displayName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOwnerName(): string
-    {
-        return $this->ownerName;
-    }
-
-    /**
-     * @param string $ownerName
-     */
-    public function setOwnerName(string $ownerName): void
-    {
-        $this->ownerName = $ownerName;
-    }
-
-    /**
-     * @return string
-     */
     public function getIban(): string
     {
         return $this->iban;
     }
 
     /**
-     * @param string $iban
+     * @param  string  $iban
      */
     public function setIban(string $iban): void
     {
@@ -308,7 +276,7 @@ class Account
     }
 
     /**
-     * @param string $identifier
+     * @param  string  $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -324,7 +292,7 @@ class Account
     }
 
     /**
-     * @param string $linkedAccounts
+     * @param  string  $linkedAccounts
      */
     public function setLinkedAccounts(string $linkedAccounts): void
     {
@@ -340,11 +308,27 @@ class Account
     }
 
     /**
-     * @param string $msisdn
+     * @param  string  $msisdn
      */
     public function setMsisdn(string $msisdn): void
     {
         $this->msisdn = $msisdn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param  string  $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
     /**
@@ -356,11 +340,27 @@ class Account
     }
 
     /**
-     * @param array $ownerAddressUnstructured
+     * @param  array  $ownerAddressUnstructured
      */
     public function setOwnerAddressUnstructured(array $ownerAddressUnstructured): void
     {
         $this->ownerAddressUnstructured = $ownerAddressUnstructured;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwnerName(): string
+    {
+        return $this->ownerName;
+    }
+
+    /**
+     * @param  string  $ownerName
+     */
+    public function setOwnerName(string $ownerName): void
+    {
+        $this->ownerName = $ownerName;
     }
 
     /**
@@ -372,7 +372,7 @@ class Account
     }
 
     /**
-     * @param string $product
+     * @param  string  $product
      */
     public function setProduct(string $product): void
     {
@@ -388,7 +388,7 @@ class Account
     }
 
     /**
-     * @param string $resourceId
+     * @param  string  $resourceId
      */
     public function setResourceId(string $resourceId): void
     {
@@ -404,7 +404,7 @@ class Account
     }
 
     /**
-     * @param string $status
+     * @param  string  $status
      */
     public function setStatus(string $status): void
     {
@@ -420,7 +420,7 @@ class Account
     }
 
     /**
-     * @param string $usage
+     * @param  string  $usage
      */
     public function setUsage(string $usage): void
     {

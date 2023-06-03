@@ -40,9 +40,9 @@ class GetRequisitionRequest extends Request
     private string $requisitionId;
 
     /**
-     * @param string $url
-     * @param string $token
-     * @param string $requisitionId
+     * @param  string  $url
+     * @param  string  $token
+     * @param  string  $requisitionId
      */
     public function __construct(string $url, string $token, string $requisitionId)
     {

@@ -36,7 +36,7 @@ class Balance
     public string $type;
 
     /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return static
      */

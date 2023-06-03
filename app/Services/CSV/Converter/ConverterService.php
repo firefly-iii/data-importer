@@ -32,9 +32,9 @@ use UnexpectedValueException;
 class ConverterService
 {
     /**
-     * @param string      $class
-     * @param mixed       $value
-     * @param string|null $configuration
+     * @param  string  $class
+     * @param  mixed  $value
+     * @param  string|null  $configuration
      *
      * @return mixed
      */
@@ -57,7 +57,7 @@ class ConverterService
     }
 
     /**
-     * @param string $class
+     * @param  string  $class
      *
      * @return bool
      */
@@ -69,7 +69,7 @@ class ConverterService
     }
 
     /**
-     * @param string $class
+     * @param  string  $class
      *
      * @return string
      */

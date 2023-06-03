@@ -72,7 +72,7 @@ class TransactionExtra
     /**
      * TransactionExtra constructor.
      *
-     * @param array $data
+     * @param  array  $data
      *
      * @return TransactionExtra
      */

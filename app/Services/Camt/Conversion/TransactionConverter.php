@@ -11,7 +11,7 @@ class TransactionConverter
     private Configuration $configuration;
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -19,7 +19,7 @@ class TransactionConverter
     }
 
     /**
-     * @param array $transactions
+     * @param  array  $transactions
      *
      * @return array
      * @throws ImporterErrorException
@@ -38,7 +38,7 @@ class TransactionConverter
     }
 
     /**
-     * @param Transaction $transaction
+     * @param  Transaction  $transaction
      *
      * @return array
      * @throws ImporterErrorException
@@ -74,15 +74,14 @@ class TransactionConverter
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
                     $current[$role] = $current[$role] ?? [
-                        'data' => [],
-                        'mapping' => []
+                        'data'    => [],
+                        'mapping' => [],
                     ];
-                    if(array_key_exists($field, $mapping)) {
+                    if (array_key_exists($field, $mapping)) {
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }
                     $current[$role]['data'][] = $value;
                     $current[$role]['data']   = array_unique($current[$role]['data']);
-
                 }
             }
             $result['transactions'][] = $current;

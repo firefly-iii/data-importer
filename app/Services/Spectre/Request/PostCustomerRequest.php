@@ -39,9 +39,9 @@ class PostCustomerRequest extends Request
     /**
      * PostCustomerRequest constructor.
      *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
+     * @param  string  $url
+     * @param  string  $appId
+     * @param  string  $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {

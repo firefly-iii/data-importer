@@ -56,7 +56,7 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
@@ -100,7 +100,7 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException

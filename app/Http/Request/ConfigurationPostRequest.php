@@ -95,7 +95,7 @@ class ConfigurationPostRequest extends Request
 
             // camt
             'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
-            'use_entire_opposing_address'  => $this->convertBoolean($this->get('use_entire_opposing_address')),
+            'use_entire_opposing_address'   => $this->convertBoolean($this->get('use_entire_opposing_address')),
 
         ];
 
@@ -139,7 +139,7 @@ class ConfigurationPostRequest extends Request
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
      *
-     * @param Validator $validator
+     * @param  Validator  $validator
      *
      * @return void
      */

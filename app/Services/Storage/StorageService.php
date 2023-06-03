@@ -36,8 +36,8 @@ use UnexpectedValueException;
 class StorageService
 {
     /**
-     * @param string $name
-     * @param bool   $convert
+     * @param  string  $name
+     * @param  bool  $convert
      *
      * @return string
      */

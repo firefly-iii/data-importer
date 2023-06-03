@@ -36,7 +36,7 @@ abstract class AbstractTask implements TaskInterface
     protected TransactionCurrency $transactionCurrency;
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      */
     public function setAccount(Account $account): void
     {
@@ -44,7 +44,7 @@ abstract class AbstractTask implements TaskInterface
     }
 
     /**
-     * @param TransactionCurrency $transactionCurrency
+     * @param  TransactionCurrency  $transactionCurrency
      */
     public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void
     {

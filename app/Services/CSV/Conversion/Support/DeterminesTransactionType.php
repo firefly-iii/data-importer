@@ -30,8 +30,8 @@ namespace App\Services\CSV\Conversion\Support;
 trait DeterminesTransactionType
 {
     /**
-     * @param string|null $sourceType
-     * @param string|null $destinationType
+     * @param  string|null  $sourceType
+     * @param  string|null  $destinationType
      *
      * @return string
      */

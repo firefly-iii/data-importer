@@ -38,9 +38,9 @@ class GetAccountBasicRequest extends Request
     private string $identifier;
 
     /**
-     * @param string $url
-     * @param string $token
-     * @param string $identifier
+     * @param  string  $url
+     * @param  string  $token
+     * @param  string  $identifier
      */
     public function __construct(string $url, string $token, string $identifier)
     {
@@ -66,6 +66,22 @@ class GetAccountBasicRequest extends Request
     }
 
     /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param  string  $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
+    /**
      * @inheritDoc
      */
     public function post(): Response
@@ -79,21 +95,5 @@ class GetAccountBasicRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 }

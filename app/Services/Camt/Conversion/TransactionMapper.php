@@ -14,9 +14,9 @@ class TransactionMapper
 {
     use GetAccounts;
 
-    private Configuration $configuration;
-    private array         $allAccounts;
     private array         $accountIdentificationSuffixes;
+    private array         $allAccounts;
+    private Configuration $configuration;
 
     /**
      * @param  Configuration  $configuration
@@ -46,6 +46,146 @@ class TransactionMapper
         }
 
         return $result;
+    }
+
+    /**
+     * @param  array  $current
+     *
+     * @return string
+     */
+    private function determineTransactionType(array $current)
+    {
+        $directions = ['source', 'destination'];
+
+        foreach ($directions as $direction) {
+            $accountType[$direction] = null;
+            foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+                // try to find destination account
+                if (array_key_exists($direction.'_'.$accountIdentificationSuffix, $current)) {
+                    $fieldName               = $direction.'_'.$accountIdentificationSuffix;
+                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
+                }
+            }
+        }
+
+        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+
+        switch (true) {
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
+            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
+                return "withdrawal"; // line 281
+            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
+            case $accountType['source'] === null && $accountType['destination'] === 'asset':
+                return "deposit"; // line 282
+            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
+                return "transfer"; // line 283 / 284
+            default:
+                app('log')->error(
+                    sprintf(
+                        'Invalid transaction: source = "%s", destination = "%s"',
+                        $accountType['source'] ?: '<null>',
+                        $accountType['destination'] ?: '<null>'
+                    )
+                ); // 285
+        }
+    }
+
+    private function getAccountId($direction, $current)
+    {
+        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+            $field = $direction.'_'.$accountIdentificationSuffix;
+            if (array_key_exists($field, $current)) {
+                // there is a value...
+                foreach ($this->allAccounts as $account) {
+                    // so we check all accounts for a match
+                    if ($current[$field] == $account->$accountIdentificationSuffix) {
+                        // we have a match
+                        app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
+                        return $account->id;
+                    }
+                }
+                //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
+            }
+            //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
+        }
+    }
+
+    private function getAccountType($fieldName, $fieldValue)
+    {
+        $accountType = null;
+        foreach ($this->allAccounts as $account) {
+            if ($account->$fieldName == $fieldValue) {
+                $accountType = $account->type;
+            }
+        }
+        return $accountType;
+    }
+
+    /**
+     * This function takes the value in $data['data'], which is for example the account
+     * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
+     * the value "ShrtBankName" to "Short Bank Name".
+     *
+     * If there is a mapping the value will be replaced. If there is not, no replacement will take place.
+     * Either way, the new value will be placed in the correct place in $current.
+     *
+     * Example results:
+     * source_iban = something
+     * destination_number = 12345
+     * source_id = 5
+     *
+     * @param  array  $current
+     * @param  string  $fieldName
+     * @param  string  $direction
+     * @param  array  $data
+     *
+     * @return array
+     */
+    private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
+    {
+        // bravely assume there's just one value in the array:
+        $fieldValue = join('', $data['data']);
+
+        // replace with mapping
+        if (array_key_exists($fieldValue, $data['mapping'])) {
+            $key           = sprintf('%s_id', $direction);
+            $current[$key] = $data['mapping'][$fieldValue];
+        }
+
+        // leave original value
+        if (!array_key_exists($fieldValue, $data['mapping'])) {
+            // $direction is either 'source' or 'destination'
+            // $fieldName is 'id', 'iban','name' or 'number'
+            $key           = sprintf('%s_%s', $direction, $fieldName);
+            $current[$key] = $fieldValue;
+        }
+
+        return $current;
+    }
+
+    /**
+     * @param  mixed  $current
+     * @param  string  $type
+     * @param  array  $data
+     *
+     * @return array
+     */
+    private function mapCurrency(mixed $current, string $type, array $data): array
+    {
+        $code = join('', $data['data']);
+        // replace with mapping
+        if (array_key_exists($code, $data['mapping'])) {
+            $key           = sprintf('%s_id', $type);
+            $current[$key] = $data['mapping'][$code];
+        }
+
+        // leave original IBAN
+        if (!array_key_exists($code, $data['mapping'])) {
+            $key           = sprintf('%s_code', $type);
+            $current[$key] = $code;
+        }
+
+        return $current;
     }
 
     /**
@@ -132,7 +272,7 @@ class TransactionMapper
                         break;
                     case 'description': // TODO think about a config value to use both values from level C and D
                         $current['description'] = $current['description'] ?? '';
-                        $addition = '';
+                        $addition               = '';
                         if ('group' === $group_handling || 'split' === $group_handling) {
                             // use first description
                             $addition = $data['data'][0];
@@ -176,73 +316,6 @@ class TransactionMapper
         }
 
         return $result;
-    }
-
-    /**
-     * This function takes the value in $data['data'], which is for example the account
-     * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
-     * the value "ShrtBankName" to "Short Bank Name".
-     *
-     * If there is a mapping the value will be replaced. If there is not, no replacement will take place.
-     * Either way, the new value will be placed in the correct place in $current.
-     *
-     * Example results:
-     * source_iban = something
-     * destination_number = 12345
-     * source_id = 5
-     *
-     * @param  array  $current
-     * @param  string  $fieldName
-     * @param  string  $direction
-     * @param  array  $data
-     *
-     * @return array
-     */
-    private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
-    {
-        // bravely assume there's just one value in the array:
-        $fieldValue = join('', $data['data']);
-
-        // replace with mapping
-        if (array_key_exists($fieldValue, $data['mapping'])) {
-            $key           = sprintf('%s_id', $direction);
-            $current[$key] = $data['mapping'][$fieldValue];
-        }
-
-        // leave original value
-        if (!array_key_exists($fieldValue, $data['mapping'])) {
-            // $direction is either 'source' or 'destination'
-            // $fieldName is 'id', 'iban','name' or 'number'
-            $key           = sprintf('%s_%s', $direction, $fieldName);
-            $current[$key] = $fieldValue;
-        }
-
-        return $current;
-    }
-
-    /**
-     * @param  mixed  $current
-     * @param  string  $type
-     * @param  array  $data
-     *
-     * @return array
-     */
-    private function mapCurrency(mixed $current, string $type, array $data): array
-    {
-        $code = join('', $data['data']);
-        // replace with mapping
-        if (array_key_exists($code, $data['mapping'])) {
-            $key           = sprintf('%s_id', $type);
-            $current[$key] = $data['mapping'][$code];
-        }
-
-        // leave original IBAN
-        if (!array_key_exists($code, $data['mapping'])) {
-            $key           = sprintf('%s_code', $type);
-            $current[$key] = $code;
-        }
-
-        return $current;
     }
 
     /**
@@ -390,79 +463,6 @@ class TransactionMapper
             }
         }
         return false;
-    }
-
-    /**
-     * @param  array  $current
-     *
-     * @return string
-     */
-    private function determineTransactionType(array $current)
-    {
-        $directions = ['source', 'destination'];
-
-        foreach ($directions as $direction) {
-            $accountType[$direction] = null;
-            foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-                // try to find destination account
-                if (array_key_exists($direction.'_'.$accountIdentificationSuffix, $current)) {
-                    $fieldName               = $direction.'_'.$accountIdentificationSuffix;
-                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
-                }
-            }
-        }
-
-        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-
-        switch (true) {
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
-            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
-                return "withdrawal"; // line 281
-            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
-            case $accountType['source'] === null && $accountType['destination'] === 'asset':
-                return "deposit"; // line 282
-            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
-                return "transfer"; // line 283 / 284
-            default:
-                app('log')->error(
-                    sprintf(
-                        'Invalid transaction: source = "%s", destination = "%s"',
-                        $accountType['source'] ?: '<null>',
-                        $accountType['destination'] ?: '<null>'
-                    )
-                ); // 285
-        }
-    }
-
-    private function getAccountType($fieldName, $fieldValue)
-    {
-        $accountType = null;
-        foreach ($this->allAccounts as $account) {
-            if ($account->$fieldName == $fieldValue) {
-                $accountType = $account->type;
-            }
-        }
-        return $accountType;
-    }
-
-    private function getAccountId($direction, $current)
-    {
-        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-            $field = $direction.'_'.$accountIdentificationSuffix;
-            if (array_key_exists($field, $current)) {
-                // there is a value...
-                foreach ($this->allAccounts as $account) {
-                    // so we check all accounts for a match
-                    if ($current[$field] == $account->$accountIdentificationSuffix) {
-                        // we have a match
-                        app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
-                        return $account->id;
-                    }
-                }
-                //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
-            }
-            //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
-        }
     }
 
 }

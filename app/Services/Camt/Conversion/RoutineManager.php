@@ -113,6 +113,22 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
+     * @param  string  $content
+     */
+    public function setContent(string $content): void
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * @param  bool  $forceCli
+     */
+    public function setForceCli(bool $forceCli): void
+    {
+        $this->forceCli = $forceCli;
+    }
+
+    /**
      * @inheritDoc
      * @return array
      * @throws ContainerExceptionInterface
@@ -159,21 +175,5 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return $camtMessage;
-    }
-
-    /**
-     * @param string $content
-     */
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
-    }
-
-    /**
-     * @param bool $forceCli
-     */
-    public function setForceCli(bool $forceCli): void
-    {
-        $this->forceCli = $forceCli;
     }
 }

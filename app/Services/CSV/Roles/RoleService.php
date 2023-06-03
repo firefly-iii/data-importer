@@ -50,8 +50,8 @@ class RoleService
     public const EXAMPLE_LENGTH = 26;
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
      * @throws InvalidArgument
@@ -100,7 +100,6 @@ class RoleService
                 for ($i = 0; $i < $count; $i++) {
                     $headers[] = sprintf('Column #%d', $i + 1);
                 }
-
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 app('log')->error($e->getMessage());
@@ -112,8 +111,8 @@ class RoleService
     }
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
      * @throws Exception
@@ -185,7 +184,7 @@ class RoleService
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
         $transactions = [];
-        $examples = [];
+        $examples     = [];
         $fieldNames   = array_keys(config('camt.fields'));
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
@@ -199,7 +198,7 @@ class RoleService
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            foreach ($entries as $entry) { // -> Level C
+            foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
@@ -219,22 +218,22 @@ class RoleService
                 break;
             }
             foreach ($fieldNames as $name) {
-                if(array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
-                    if(count($examples[$name]) > 5) { // there are already five examples, so jump to next field
+                if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
+                    if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         continue;
                     }
                 } // otherwise, try to fetch data
                 $splits = $transaction->countSplits();
-                if(0 === $splits) {
+                if (0 === $splits) {
                     $value = $transaction->getFieldByIndex($name, 0);
-                    if('' !== $value) {
+                    if ('' !== $value) {
                         $examples[$name][] = $value;
                     }
                 }
-                if($splits > 0) {
-                    for($index = 0; $index < $splits; $index++) {
+                if ($splits > 0) {
+                    for ($index = 0; $index < $splits; $index++) {
                         $value = $transaction->getFieldByIndex($name, $index);
-                        if('' !== $value) {
+                        if ('' !== $value) {
                             $examples[$name][] = $value;
                         }
                     }

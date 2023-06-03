@@ -43,7 +43,7 @@ use App\Services\Nordigen\TokenManager;
 class AccountInformationCollector
 {
     /**
-     * @param Account $account
+     * @param  Account  $account
      *
      * @return Account
      * @throws AgreementExpiredException
@@ -83,7 +83,7 @@ class AccountInformationCollector
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      *
      * @return Account
      * @throws ImporterErrorException
@@ -143,7 +143,7 @@ class AccountInformationCollector
     }
 
     /**
-     * @param Account $account
+     * @param  Account  $account
      *
      * @return Account
      * @throws ImporterErrorException

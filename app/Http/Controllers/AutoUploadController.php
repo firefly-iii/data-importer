@@ -40,6 +40,15 @@ class AutoUploadController extends Controller
     use VerifyJSON;
 
     /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        app('log')->error($string);
+        $this->line($string);
+    }
+
+    /**
      *
      * @throws ImporterErrorException
      */
@@ -76,11 +85,11 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @inheritDoc
+     * @param      $string
+     * @param  null  $verbosity
      */
-    public function error($string, $verbosity = null)
+    public function info($string, $verbosity = null)
     {
-        app('log')->error($string);
         $this->line($string);
     }
 
@@ -91,16 +100,7 @@ class AutoUploadController extends Controller
 
     /**
      * @param      $string
-     * @param null $verbosity
-     */
-    public function info($string, $verbosity = null)
-    {
-        $this->line($string);
-    }
-
-    /**
-     * @param      $string
-     * @param null $verbosity
+     * @param  null  $verbosity
      */
     public function warn($string, $verbosity = null)
     {

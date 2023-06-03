@@ -38,9 +38,9 @@ class ListAccountsRequest extends Request
     private string $identifier;
 
     /**
-     * @param string $url
-     * @param string $identifier
-     * @param string $token
+     * @param  string  $url
+     * @param  string  $identifier
+     * @param  string  $token
      */
     public function __construct(string $url, string $identifier, string $token)
     {
@@ -49,14 +49,6 @@ class ListAccountsRequest extends Request
         $this->setToken($token);
         $this->setIdentifier($identifier);
         $this->setUrl(sprintf('api/v2/requisitions/%s/', $identifier));
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**
@@ -87,5 +79,13 @@ class ListAccountsRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param  string  $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 }

@@ -71,7 +71,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
@@ -140,7 +140,7 @@ class ConfigurationController extends Controller
 
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
@@ -156,7 +156,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param ConfigurationPostRequest $request
+     * @param  ConfigurationPostRequest  $request
      *
      * @return RedirectResponse
      * @throws ImporterErrorException

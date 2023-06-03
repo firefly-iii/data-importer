@@ -44,7 +44,7 @@ class Customer
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return static
      */

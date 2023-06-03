@@ -39,8 +39,8 @@ class ListBanksRequest extends Request
     /**
      * ListCustomersRequest constructor.
      *
-     * @param string $url
-     * @param string $token
+     * @param  string  $url
+     * @param  string  $token
      */
     public function __construct(string $url, string $token)
     {

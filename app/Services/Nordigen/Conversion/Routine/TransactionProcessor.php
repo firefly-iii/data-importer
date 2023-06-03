@@ -114,7 +114,15 @@ class TransactionProcessor
     }
 
     /**
-     * @param string $identifier
+     * @param  Configuration  $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
+     * @param  string  $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -122,7 +130,7 @@ class TransactionProcessor
     }
 
     /**
-     * @param GetTransactionsResponse $transactions
+     * @param  GetTransactionsResponse  $transactions
      *
      * @return array
      */
@@ -166,13 +174,5 @@ class TransactionProcessor
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
-    }
-
-    /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
     }
 }

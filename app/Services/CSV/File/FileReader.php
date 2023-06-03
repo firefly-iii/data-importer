@@ -36,8 +36,8 @@ use Psr\Container\NotFoundExceptionInterface;
 class FileReader
 {
     /**
-     * @param string $content
-     * @param bool   $convert
+     * @param  string  $content
+     * @param  bool  $convert
      *
      * @return Reader
      */
@@ -57,7 +57,7 @@ class FileReader
     /**
      * Get a CSV file reader and fill it with data from CSV file.
      *
-     * @param bool $convert
+     * @param  bool  $convert
      *
      * @return Reader
      * @throws ContainerExceptionInterface

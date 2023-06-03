@@ -38,7 +38,7 @@ interface RoutineManagerInterface
     public function getIdentifier(): string;
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function setConfiguration(Configuration $configuration): void;
 

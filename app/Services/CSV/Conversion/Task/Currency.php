@@ -30,7 +30,7 @@ namespace App\Services\CSV\Conversion\Task;
 class Currency extends AbstractTask
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -64,7 +64,7 @@ class Currency extends AbstractTask
     }
 
     /**
-     * @param array $transaction
+     * @param  array  $transaction
      *
      * @return array
      */

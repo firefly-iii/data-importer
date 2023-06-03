@@ -91,7 +91,7 @@ trait CollectsAccounts
     /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
      *
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      *
      * @return array
      * @throws ImporterErrorException|AgreementExpiredException

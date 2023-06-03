@@ -56,6 +56,70 @@ abstract class Request
     abstract public function get(): Response;
 
     /**
+     * @return string
+     */
+    public function getAppId(): string
+    {
+        return $this->appId;
+    }
+
+    /**
+     * @param  string  $appId
+     */
+    public function setAppId(string $appId): void
+    {
+        $this->appId = $appId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBase(): string
+    {
+        return $this->base;
+    }
+
+    /**
+     * @param  string  $base
+     */
+    public function setBase(string $base): void
+    {
+        $this->base = $base;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSecret(): string
+    {
+        return $this->secret;
+    }
+
+    /**
+     * @param  string  $secret
+     */
+    public function setSecret(string $secret): void
+    {
+        $this->secret = $secret;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param  string  $url
+     */
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
+
+    /**
      * @return Response
      * @throws ImporterHttpException
      */
@@ -68,7 +132,7 @@ abstract class Request
     abstract public function put(): Response;
 
     /**
-     * @param array $body
+     * @param  array  $body
      */
     public function setBody(array $body): void
     {
@@ -76,7 +140,7 @@ abstract class Request
     }
 
     /**
-     * @param array $parameters
+     * @param  array  $parameters
      */
     public function setParameters(array $parameters): void
     {
@@ -85,7 +149,7 @@ abstract class Request
     }
 
     /**
-     * @param float $timeOut
+     * @param  float  $timeOut
      */
     public function setTimeOut(float $timeOut): void
     {
@@ -169,85 +233,26 @@ abstract class Request
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getBase(): string
+    protected function getDefaultHeaders(): array
     {
-        return $this->base;
+        $userAgent       = sprintf('FireflyIII Spectre v%s', config('spectre.version'));
+        $this->expiresAt = time() + 180;
+
+        return [
+            'App-id'        => $this->getAppId(),
+            'Secret'        => $this->getSecret(),
+            'Accept'        => 'application/json',
+            'Content-type'  => 'application/json',
+            'Cache-Control' => 'no-cache',
+            'User-Agent'    => $userAgent,
+            'Expires-at'    => $this->expiresAt,
+        ];
     }
 
     /**
-     * @param string $base
-     */
-    public function setBase(string $base): void
-    {
-        $this->base = $base;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @return Client
-     */
-    private function getClient(): Client
-    {
-        // config here
-
-        return new Client(
-            [
-                'connect_timeout' => $this->timeOut,
-            ]
-        );
-    }
-
-    /**
-     * @return string
-     */
-    public function getAppId(): string
-    {
-        return $this->appId;
-    }
-
-    /**
-     * @param string $appId
-     */
-    public function setAppId(string $appId): void
-    {
-        $this->appId = $appId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSecret(): string
-    {
-        return $this->secret;
-    }
-
-    /**
-     * @param string $secret
-     */
-    public function setSecret(string $secret): void
-    {
-        $this->secret = $secret;
-    }
-
-    /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return array
      *
@@ -298,26 +303,7 @@ abstract class Request
     }
 
     /**
-     * @return array
-     */
-    protected function getDefaultHeaders(): array
-    {
-        $userAgent       = sprintf('FireflyIII Spectre v%s', config('spectre.version'));
-        $this->expiresAt = time() + 180;
-
-        return [
-            'App-id'        => $this->getAppId(),
-            'Secret'        => $this->getSecret(),
-            'Accept'        => 'application/json',
-            'Content-type'  => 'application/json',
-            'Cache-Control' => 'no-cache',
-            'User-Agent'    => $userAgent,
-            'Expires-at'    => $this->expiresAt,
-        ];
-    }
-
-    /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return array
      *
@@ -374,7 +360,7 @@ abstract class Request
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return array
      *
@@ -448,5 +434,19 @@ abstract class Request
         $json['ResponseStatusCode'] = $statusCode;
 
         return $json;
+    }
+
+    /**
+     * @return Client
+     */
+    private function getClient(): Client
+    {
+        // config here
+
+        return new Client(
+            [
+                'connect_timeout' => $this->timeOut,
+            ]
+        );
     }
 }

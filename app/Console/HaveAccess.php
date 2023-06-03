@@ -33,6 +33,14 @@ use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 trait HaveAccess
 {
     /**
+     * @param      $string
+     * @param  null  $verbosity
+     *
+     * @return void
+     */
+    abstract public function error($string, $verbosity = null);
+
+    /**
      * @return bool
      */
     private function haveAccess(): bool
@@ -56,15 +64,7 @@ trait HaveAccess
     }
 
     /**
-     * @param      $string
-     * @param null $verbosity
-     *
-     * @return void
-     */
-    abstract public function error($string, $verbosity = null);
-
-    /**
-     * @param string $path
+     * @param  string  $path
      *
      * @return bool
      */

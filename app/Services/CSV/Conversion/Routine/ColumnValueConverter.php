@@ -46,7 +46,7 @@ class ColumnValueConverter
     /**
      * ColumnValueConverter constructor.
      *
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -55,7 +55,7 @@ class ColumnValueConverter
     }
 
     /**
-     * @param array $lines
+     * @param  array  $lines
      *
      * @return array
      * @throws ImporterErrorException
@@ -77,7 +77,7 @@ class ColumnValueConverter
     }
 
     /**
-     * @param array $line
+     * @param  array  $line
      *
      * @return array
      * @throws ImporterErrorException
@@ -115,7 +115,7 @@ class ColumnValueConverter
             ],
         ];
         /**
-         * @var int         $columnIndex
+         * @var int $columnIndex
          * @var ColumnValue $value
          */
         foreach ($line as $columnIndex => $value) {

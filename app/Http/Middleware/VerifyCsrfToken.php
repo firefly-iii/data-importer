@@ -38,6 +38,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except
         = [
-            'autoimport', 'autoupload',
+            'autoimport',
+            'autoupload',
         ];
 }

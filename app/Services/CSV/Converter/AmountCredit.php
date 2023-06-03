@@ -1,4 +1,5 @@
 <?php
+
 /*
  * AmountCredit.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -50,7 +51,7 @@ class AmountCredit implements ConverterInterface
     /**
      * Add extra configuration parameters.
      *
-     * @param string $configuration
+     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {

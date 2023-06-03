@@ -67,6 +67,17 @@ class Transaction
      *
      * @return string
      */
+    public function getAmount(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
+    }
+
+    /**
+     * @param  int  $index
+     *
+     * @return string
+     */
     public function getCurrencyCode(int $index): string
     {
         // TODO loop level D for the date that belongs to the index
@@ -96,18 +107,18 @@ class Transaction
         switch ($field) {
             default:
                 // temporary debug message:
-//                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-//                echo PHP_EOL;
-//                exit;
+                //                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+                //                echo PHP_EOL;
+                //                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-            // LEVEL A
+                // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-            // LEVEL B
+                // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
@@ -164,7 +175,7 @@ class Transaction
                 // always the same, since its level C.
                 return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
 
-            // LEVEL D
+                // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
@@ -295,6 +306,13 @@ class Transaction
         }
     }
 
+    private function generateAddressLine(Address $address = null)
+    {
+        $addressLines = implode(", ", $address->getAddressLines());
+
+        return $addressLines;
+    }
+
     private function getDecimalAmount(?Money $money): string
     {
         if (null === $money) {
@@ -306,18 +324,8 @@ class Transaction
         return $moneyDecimalFormatter->format($money);
     }
 
-    /**
-     * @param  int  $index
-     *
-     * @return string
-     */
-    public function getAmount(int $index): string
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
     {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->getDecimalAmount($this->levelC->getAmount());
-    }
-
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string {
         $opposingName = '';
         // TODO make depend on configuration
         if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
@@ -334,12 +342,6 @@ class Transaction
         }
 
         return $opposingName;
-    }
-
-    private function generateAddressLine(Address $address = null) {
-        $addressLines = implode(", ", $address->getAddressLines());
-
-        return $addressLines;
     }
 
     /**

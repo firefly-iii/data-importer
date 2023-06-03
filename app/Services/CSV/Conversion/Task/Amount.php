@@ -30,7 +30,7 @@ namespace App\Services\CSV\Conversion\Task;
 class Amount extends AbstractTask
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -64,7 +64,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param array $transaction
+     * @param  array  $transaction
      *
      * @return array
      */
@@ -139,7 +139,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param string $amount
+     * @param  string  $amount
      *
      * @return bool
      */

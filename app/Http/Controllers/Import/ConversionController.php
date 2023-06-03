@@ -107,7 +107,6 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-
             $contentType = $configuration->getContentType();
             switch ($contentType) {
                 default:
@@ -234,7 +233,7 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
