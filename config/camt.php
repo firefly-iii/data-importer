@@ -256,7 +256,7 @@ return [
      *
      * Make sure all groups also have the _ignore role as first option.
      */
-    'roles'                 => [
+    'roles'     => [
         'level_a'        => [
             '_ignore' => $availableRoles['_ignore'],
             'note'    => $availableRoles['note'],
@@ -322,13 +322,13 @@ return [
     /*
      * This particular config variable holds all possible roles.
      */
-    'all_roles'             => $availableRoles,
+    'all_roles' => $availableRoles,
 
     /*
      * This array denotes all fields that can be extracted from a CAMT file and the necessary
      * configuration:
      */
-    'fields'                => [
+    'fields'    => [
         // level A
         'messageId'                                                                      => [
             'title'        => 'messageId',
@@ -338,7 +338,7 @@ return [
             'level'        => 'A',
         ],
         // level B, Statement
-        'statementId'                                                          => [
+        'statementId'                                                                    => [
             'title'        => 'statementId',
             'roles'        => 'level_b',
             'mappable'     => false,
@@ -540,6 +540,6 @@ return [
                 'roles'        => 'account_name',
                 'mappable'     => true,
                 'level'        => 'D',
-            ]
-    ]
+            ],
+    ],
 ];

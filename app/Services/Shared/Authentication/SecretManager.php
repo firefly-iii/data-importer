@@ -54,17 +54,6 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has an access token (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasAccessToken(): bool
-    {
-        return '' !== (string)request()->cookie(self::ACCESS_TOKEN);
-    }
-
-    /**
      * @return string
      */
     public static function getBaseUrl(): string
@@ -76,17 +65,6 @@ class SecretManager
         }
 
         return (string)request()->cookie(self::BASE_URL);
-    }
-
-    /**
-     * Will verify if the user has an base URL defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasBaseUrl(): bool
-    {
-        return '' !== (string)request()->cookie(self::BASE_URL);
     }
 
     /**
@@ -106,17 +84,6 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has an client ID defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasClientId(): bool
-    {
-        return '' !== (string)request()->cookie('client_id');
-    }
-
-    /**
      * @return string
      */
     public static function getVanityUrl(): string
@@ -131,17 +98,6 @@ class SecretManager
         }
 
         return (string)request()->cookie(self::VANITY_URL);
-    }
-
-    /**
-     * Will verify if the user has a vanity URL defined (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasVanityUrl(): bool
-    {
-        return '' !== (string)request()->cookie(self::VANITY_URL);
     }
 
     /**
@@ -173,21 +129,10 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has an refresh token (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @see self::hasAccessToken
-     */
-    private static function hasRefreshToken(): bool
-    {
-        return '' !== (string)request()->cookie(self::REFRESH_TOKEN);
-    }
-
-    /**
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $token
+     * @param  string  $token
      *
      * @return Cookie
      */
@@ -200,7 +145,7 @@ class SecretManager
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $url
+     * @param  string  $url
      *
      * @return Cookie
      */
@@ -213,7 +158,7 @@ class SecretManager
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $token
+     * @param  string  $token
      *
      * @return Cookie
      */
@@ -226,12 +171,67 @@ class SecretManager
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $url
+     * @param  string  $url
      *
      * @return Cookie
      */
     public static function saveVanityUrl(string $url): Cookie
     {
         return cookie(self::VANITY_URL, $url);
+    }
+
+    /**
+     * Will verify if the user has an access token (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasAccessToken(): bool
+    {
+        return '' !== (string)request()->cookie(self::ACCESS_TOKEN);
+    }
+
+    /**
+     * Will verify if the user has an base URL defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasBaseUrl(): bool
+    {
+        return '' !== (string)request()->cookie(self::BASE_URL);
+    }
+
+    /**
+     * Will verify if the user has an client ID defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasClientId(): bool
+    {
+        return '' !== (string)request()->cookie('client_id');
+    }
+
+    /**
+     * Will verify if the user has an refresh token (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @see self::hasAccessToken
+     */
+    private static function hasRefreshToken(): bool
+    {
+        return '' !== (string)request()->cookie(self::REFRESH_TOKEN);
+    }
+
+    /**
+     * Will verify if the user has a vanity URL defined (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasVanityUrl(): bool
+    {
+        return '' !== (string)request()->cookie(self::VANITY_URL);
     }
 }

@@ -56,7 +56,7 @@ class ColumnValue
     }
 
     /**
-     * @param int $mappedValue
+     * @param  int  $mappedValue
      */
     public function setMappedValue(int $mappedValue): void
     {
@@ -72,7 +72,7 @@ class ColumnValue
     }
 
     /**
-     * @param string $originalRole
+     * @param  string  $originalRole
      */
     public function setOriginalRole(string $originalRole): void
     {
@@ -105,7 +105,7 @@ class ColumnValue
     }
 
     /**
-     * @param string $role
+     * @param  string  $role
      */
     public function setRole(string $role): void
     {
@@ -121,7 +121,7 @@ class ColumnValue
     }
 
     /**
-     * @param string $value
+     * @param  string  $value
      */
     public function setValue(string $value): void
     {
@@ -137,7 +137,7 @@ class ColumnValue
     }
 
     /**
-     * @param bool $appendValue
+     * @param  bool  $appendValue
      */
     public function setAppendValue(bool $appendValue): void
     {
@@ -145,7 +145,7 @@ class ColumnValue
     }
 
     /**
-     * @param string $configuration
+     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {

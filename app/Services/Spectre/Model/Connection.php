@@ -52,7 +52,7 @@ class Connection
     }
 
     /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return static
      */

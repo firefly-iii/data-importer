@@ -24,7 +24,9 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Shared\Response\Response;
 
@@ -36,9 +38,9 @@ class GetAccountBalanceRequest extends Request
     private string $identifier;
 
     /**
-     * @param string $url
-     * @param string $token
-     * @param string $identifier
+     * @param  string  $url
+     * @param  string  $token
+     * @param  string  $identifier
      */
     public function __construct(string $url, string $token, string $identifier)
     {
@@ -51,13 +53,32 @@ class GetAccountBalanceRequest extends Request
 
     /**
      * @inheritDoc
+     * @return Response
+     * @throws AgreementExpiredException
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     public function get(): Response
     {
         $array = $this->authenticatedGet();
 
         return new ArrayResponse($array);
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param  string  $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 
     /**
@@ -74,21 +95,5 @@ class GetAccountBalanceRequest extends Request
     public function put(): Response
     {
         // TODO: Implement put() method.
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 }

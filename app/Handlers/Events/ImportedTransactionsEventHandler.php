@@ -33,7 +33,7 @@ use Symfony\Component\Mailer\Exception\TransportException;
 class ImportedTransactionsEventHandler
 {
     /**
-     * @param ImportedTransactions $event
+     * @param  ImportedTransactions  $event
      */
     public function sendReportOverMail(ImportedTransactions $event): void
     {

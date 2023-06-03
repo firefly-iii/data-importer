@@ -160,7 +160,8 @@ return [
         'facades'   => [
             'Form' => [
                 'is_safe' => ['radio'],
-            ], 'Session',
+            ],
+            'Session',
         ],
 
         /*

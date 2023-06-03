@@ -40,9 +40,9 @@ class SubmissionStatusManager
     protected const DISK_NAME = 'submission-routines';
 
     /**
-     * @param string $identifier
-     * @param int    $index
-     * @param string $error
+     * @param  string  $identifier
+     * @param  int  $index
+     * @param  string  $error
      */
     public static function addError(string $identifier, int $index, string $error): void
     {
@@ -66,25 +66,9 @@ class SubmissionStatusManager
     }
 
     /**
-     * @param string           $identifier
-     * @param SubmissionStatus $status
-     */
-    private static function storeSubmissionStatus(string $identifier, SubmissionStatus $status): void
-    {
-        app('log')->debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
-        $disk = Storage::disk(self::DISK_NAME);
-        try {
-            $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        } catch (JsonException $e) {
-            // do nothing
-            app('log')->error($e->getMessage());
-        }
-    }
-
-    /**
-     * @param string $identifier
-     * @param int    $index
-     * @param string $message
+     * @param  string  $identifier
+     * @param  int  $index
+     * @param  string  $message
      *
      */
     public static function addMessage(string $identifier, int $index, string $message): void
@@ -110,9 +94,9 @@ class SubmissionStatusManager
     }
 
     /**
-     * @param string $identifier
-     * @param int    $index
-     * @param string $warning
+     * @param  string  $identifier
+     * @param  int  $index
+     * @param  string  $warning
      *
      */
     public static function addWarning(string $identifier, int $index, string $warning): void
@@ -137,8 +121,8 @@ class SubmissionStatusManager
     }
 
     /**
-     * @param string      $status
-     * @param string|null $identifier
+     * @param  string  $status
+     * @param  string|null  $identifier
      *
      * @return SubmissionStatus
      */
@@ -164,7 +148,7 @@ class SubmissionStatusManager
     }
 
     /**
-     * @param string $identifier
+     * @param  string  $identifier
      *
      * @return SubmissionStatus
      */
@@ -203,5 +187,21 @@ class SubmissionStatusManager
         app('log')->debug('Return status.', $status->toArray());
 
         return $status;
+    }
+
+    /**
+     * @param  string  $identifier
+     * @param  SubmissionStatus  $status
+     */
+    private static function storeSubmissionStatus(string $identifier, SubmissionStatus $status): void
+    {
+        app('log')->debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
+        $disk = Storage::disk(self::DISK_NAME);
+        try {
+            $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        } catch (JsonException $e) {
+            // do nothing
+            app('log')->error($e->getMessage());
+        }
     }
 }

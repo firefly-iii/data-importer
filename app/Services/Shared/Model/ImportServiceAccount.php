@@ -39,7 +39,7 @@ class ImportServiceAccount
     public string $status;
 
     /**
-     * @param array $accounts
+     * @param  array  $accounts
      *
      * @return array
      */
@@ -65,26 +65,7 @@ class ImportServiceAccount
     }
 
     /**
-     * @param array $array
-     *
-     * @return $this
-     */
-    public static function fromArray(array $array): self
-    {
-        app('log')->debug('Create generic account from', $array);
-        $account               = new self();
-        $account->id           = $array['id'];
-        $account->name         = $array['name'];
-        $account->iban         = $array['iban'];
-        $account->bban         = $array['bban'];
-        $account->currencyCode = $array['currency_code'];
-        $account->status       = $array['status'];
-
-        return $account;
-    }
-
-    /**
-     * @param array $spectre
+     * @param  array  $spectre
      *
      * @return array
      */
@@ -106,5 +87,24 @@ class ImportServiceAccount
         }
 
         return $return;
+    }
+
+    /**
+     * @param  array  $array
+     *
+     * @return $this
+     */
+    public static function fromArray(array $array): self
+    {
+        app('log')->debug('Create generic account from', $array);
+        $account               = new self();
+        $account->id           = $array['id'];
+        $account->name         = $array['name'];
+        $account->iban         = $array['iban'];
+        $account->bban         = $array['bban'];
+        $account->currencyCode = $array['currency_code'];
+        $account->status       = $array['status'];
+
+        return $account;
     }
 }

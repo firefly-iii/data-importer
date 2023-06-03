@@ -38,7 +38,7 @@ class ConfigFileProcessor
     /**
      * Input (the content of) a configuration file and this little script will convert it to a compatible array.
      *
-     * @param string $fileName
+     * @param  string  $fileName
      *
      * @return Configuration
      * @throws ImporterErrorException

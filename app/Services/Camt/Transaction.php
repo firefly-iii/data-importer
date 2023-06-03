@@ -9,6 +9,8 @@ use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
 use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;
+use Genkgo\Camt\DTO\Creditor;
+use Genkgo\Camt\DTO\Debtor;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
 use Genkgo\Camt\DTO\IbanAccount;
@@ -32,24 +34,25 @@ class Transaction
 
 
     /**
-     * @param Configuration $configuration
-     * @param Message       $levelA
-     * @param Statement     $levelB
-     * @param Entry         $levelC
-     * @param array         $levelD
+     * @param  Configuration  $configuration
+     * @param  Message  $levelA
+     * @param  Statement  $levelB
+     * @param  Entry  $levelC
+     * @param  array  $levelD
      */
     public function __construct(
         Configuration $configuration,
-        Message       $levelA,
-        Statement     $levelB,
-        Entry         $levelC,
-        array         $levelD
+        Message $levelA,
+        Statement $levelB,
+        Entry $levelC,
+        array $levelD
     ) {
-        $this->configuration        = $configuration;
-        $this->levelA               = $levelA;
-        $this->levelB               = $levelB;
-        $this->levelC               = $levelC;
-        $this->levelD               = $levelD;
+        app('log')->debug('Constructed a CAMT Transaction');
+        $this->configuration = $configuration;
+        $this->levelA        = $levelA;
+        $this->levelB        = $levelB;
+        $this->levelC        = $levelC;
+        $this->levelD        = $levelD;
     }
 
     /**
@@ -61,7 +64,18 @@ class Transaction
     }
 
     /**
-     * @param int $index
+     * @param  int  $index
+     *
+     * @return string
+     */
+    public function getAmount(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
+    }
+
+    /**
+     * @param  int  $index
      *
      * @return string
      */
@@ -72,7 +86,7 @@ class Transaction
     }
 
     /**
-     * @param int $index
+     * @param  int  $index
      *
      * @return string
      */
@@ -83,20 +97,21 @@ class Transaction
     }
 
     /**
-     * @param string $field
-     * @param int    $index
+     * @param  string  $field
+     * @param  int  $index
      *
      * @return string
      * @throws ImporterErrorException
      */
     public function getFieldByIndex(string $field, int $index): string
     {
+        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
                 // temporary debug message:
-                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-                echo PHP_EOL;
-                exit;
+                //                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+                //                echo PHP_EOL;
+                //                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
@@ -254,9 +269,9 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
+                if (IbanAccount::class === get_class($opposingAccount)) {
                     $result = (string)$opposingAccount->getIdentification();
                 }
 
@@ -269,9 +284,9 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                $class   = null !== $opposingAccount ? get_class($opposingAccount) : '';
+                $class           = null !== $opposingAccount ? get_class($opposingAccount) : '';
                 if (in_array($class, $list, true)) {
                     $result = (string)$opposingAccount->getIdentification();
                 }
@@ -284,16 +299,30 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info    = $this->levelD[$index];
+                $info = $this->levelD[$index];
                 //$result  = '';
                 $opposingParty = $this->getOpposingParty($info);
-                $result = $this->getOpposingName($opposingParty);
+                $result        = $this->getOpposingName($opposingParty);
 
                 return $result;
         }
-
     }
 
+    /**
+     * @param  Address|null  $address
+     * @return string
+     */
+    private function generateAddressLine(Address $address = null): string
+    {
+        $addressLines = implode(", ", $address->getAddressLines());
+
+        return $addressLines;
+    }
+
+    /**
+     * @param  Money|null  $money
+     * @return string
+     */
     private function getDecimalAmount(?Money $money): string
     {
         if (null === $money) {
@@ -306,57 +335,46 @@ class Transaction
     }
 
     /**
-     * @param int $index
-     *
+     * @param  RelatedParty  $relatedParty
+     * @param  bool  $useEntireAddress
      * @return string
      */
-    public function getAmount(int $index): string
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
     {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->getDecimalAmount($this->levelC->getAmount());
-    }
-
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false)
-    { // TODO make depend on configuration
-        if (empty($relatedParty->getRelatedPartyType()->getName())) {
+        $opposingName = '';
+        // TODO make depend on configuration
+        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
-        } else {
+        }
+        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
             if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', ' . $addressLine;
+                $opposingName .= ', '.$addressLine;
             }
         }
 
         return $opposingName;
     }
 
-    private function generateAddressLine(Address $address = null)
-    {
-        $addressLines = implode(", ", $address->getAddressLines());
-
-        return $addressLines;
-    }
-
     /**
-     * @param EntryTransactionDetail $transactionDetail
-     *
-     * @return void
+     * @param  EntryTransactionDetail  $transactionDetail
+     * @return Creditor|Debtor|null
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail)
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): Creditor|Debtor|null
     {
-        $relatedParties = $transactionDetail->getRelatedParties();
-        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interessting one?
+        $relatedParties           = $transactionDetail->getRelatedParties();
+        $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
+        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
-        } else {
-            $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
         }
         foreach ($relatedParties as $relatedParty) {
             if (get_class($relatedParty->getRelatedPartyType()) == $targetRelatedPartyObject) {
                 return $relatedParty;
             }
         }
+        return null;
     }
 }

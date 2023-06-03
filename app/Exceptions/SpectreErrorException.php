@@ -33,6 +33,5 @@ use Exception;
  */
 class SpectreErrorException extends Exception
 {
-    /** @var array */
-    public $json;
+    public array $json;
 }

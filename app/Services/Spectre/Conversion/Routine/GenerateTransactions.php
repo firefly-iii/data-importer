@@ -28,6 +28,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
@@ -57,6 +58,7 @@ class GenerateTransactions
 
     /**
      *
+     * @throws ApiHttpException
      */
     public function collectTargetAccounts(): void
     {
@@ -93,7 +95,7 @@ class GenerateTransactions
     }
 
     /**
-     * @param array $spectre
+     * @param  array  $spectre
      *
      * @return array
      */
@@ -112,7 +114,16 @@ class GenerateTransactions
     }
 
     /**
-     * @param Transaction $entry
+     * @param  Configuration  $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
+    }
+
+    /**
+     * @param  Transaction  $entry
      *
      * @return array
      */
@@ -175,35 +186,10 @@ class GenerateTransactions
     }
 
     /**
-     * @param Transaction $entry
-     * @param array       $transaction
-     * @param string      $amount
-     * @param string      $spectreAccountId
-     *
-     * @return array
-     */
-    private function processPositiveTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
-    {
-        // amount is positive: deposit or transfer. Spectre account is destination
-        $transaction['type']   = 'deposit';
-        $transaction['amount'] = $amount;
-
-        // destination is Spectre
-        $transaction['destination_id'] = (int)$this->accounts[$spectreAccountId];
-
-        // source is the other side (name!)
-        $transaction['source_name'] = $entry->getPayee('source');
-
-        app('log')->debug(sprintf('source_name = "%s", destination_id = %d', $transaction['source_name'], $transaction['destination_id']));
-
-        return $transaction;
-    }
-
-    /**
-     * @param Transaction $entry
-     * @param array       $transaction
-     * @param string      $amount
-     * @param string      $spectreAccountId
+     * @param  Transaction  $entry
+     * @param  array  $transaction
+     * @param  string  $amount
+     * @param  string  $spectreAccountId
      *
      * @return array
      */
@@ -223,11 +209,27 @@ class GenerateTransactions
     }
 
     /**
-     * @param Configuration $configuration
+     * @param  Transaction  $entry
+     * @param  array  $transaction
+     * @param  string  $amount
+     * @param  string  $spectreAccountId
+     *
+     * @return array
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function processPositiveTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
     {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
+        // amount is positive: deposit or transfer. Spectre account is destination
+        $transaction['type']   = 'deposit';
+        $transaction['amount'] = $amount;
+
+        // destination is Spectre
+        $transaction['destination_id'] = (int)$this->accounts[$spectreAccountId];
+
+        // source is the other side (name!)
+        $transaction['source_name'] = $entry->getPayee('source');
+
+        app('log')->debug(sprintf('source_name = "%s", destination_id = %d', $transaction['source_name'], $transaction['destination_id']));
+
+        return $transaction;
     }
 }

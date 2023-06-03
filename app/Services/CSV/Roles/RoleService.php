@@ -24,9 +24,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
-use App\Services\CSV\Specifics\SpecificInterface;
-use App\Services\CSV\Specifics\SpecificService;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -39,6 +38,8 @@ use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use League\Csv\UnableToProcessCsv;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoleService
@@ -49,8 +50,8 @@ class RoleService
     public const EXAMPLE_LENGTH = 26;
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
      * @throws InvalidArgument
@@ -99,7 +100,6 @@ class RoleService
                 for ($i = 0; $i < $count; $i++) {
                     $headers[] = sprintf('Column #%d', $i + 1);
                 }
-
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 app('log')->error($e->getMessage());
@@ -107,25 +107,12 @@ class RoleService
             }
         }
 
-        // specific processors may add or remove headers.
-        // so those must be processed as well.
-        // Fix as suggested by @FelikZ in https://github.com/firefly-iii/csv-importer/pull/4
-        // TODO no longer used.
-        /** @var string $name */
-        foreach ($configuration->getSpecifics() as $name) {
-            if (SpecificService::exists($name)) {
-                /** @var SpecificInterface $object */
-                $object  = app(SpecificService::fullClass($name));
-                $headers = $object->runOnHeaders($headers);
-            }
-        }
-
         return $headers;
     }
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
      * @throws Exception
@@ -184,16 +171,20 @@ class RoleService
     }
 
     /**
-     * @param string        $content
-     * @param Configuration $configuration
+     * @param  string  $content
+     * @param  Configuration  $configuration
      *
      * @return array
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
         $transactions = [];
+        $examples     = [];
         $fieldNames   = array_keys(config('camt.fields'));
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
@@ -207,7 +198,7 @@ class RoleService
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            foreach ($entries as $entry) { // -> Level C
+            foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
@@ -227,23 +218,24 @@ class RoleService
                 break;
             }
             foreach ($fieldNames as $name) {
-                if(array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
-                    if(count($examples[$name]) > 5) { // there are already five examples, so jump to next field
+                if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
+                    if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         continue;
                     }
                 } // otherwise, try to fetch data
                 $splits = $transaction->countSplits();
-                if(0 !== $splits) {
-                    for($index = 0; $index < $splits; $index++) {
+                if (0 === $splits) {
+                    $value = $transaction->getFieldByIndex($name, 0);
+                    if ('' !== $value) {
+                        $examples[$name][] = $value;
+                    }
+                }
+                if ($splits > 0) {
+                    for ($index = 0; $index < $splits; $index++) {
                         $value = $transaction->getFieldByIndex($name, $index);
-                        if(null !== $value && '' !== $value) {
+                        if ('' !== $value) {
                             $examples[$name][] = $value;
                         }
-                    }
-                } else {
-                    $value = $transaction->getFieldByIndex($name, 0);
-                    if(null !== $value && '' !== $value) {
-                        $examples[$name][] = $value;
                     }
                 }
             }

@@ -33,7 +33,7 @@ namespace App\Services\CSV\Conversion\Task;
 class EmptyAccounts extends AbstractTask
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -70,7 +70,7 @@ class EmptyAccounts extends AbstractTask
     }
 
     /**
-     * @param array $transaction
+     * @param  array  $transaction
      *
      * @return array
      */

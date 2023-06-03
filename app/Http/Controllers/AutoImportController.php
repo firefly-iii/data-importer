@@ -43,7 +43,17 @@ class AutoImportController extends Controller
     private string $directory;
 
     /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        app('log')->error($string);
+        $this->line($string);
+    }
+
+    /**
      *
+     * @throws ImporterErrorException
      */
     public function index(Request $request): Response
     {
@@ -92,7 +102,7 @@ class AutoImportController extends Controller
 
     /**
      * @param      $string
-     * @param null $verbosity
+     * @param  null  $verbosity
      */
     public function info($string, $verbosity = null)
     {
@@ -105,17 +115,8 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        app('log')->error($string);
-        $this->line($string);
-    }
-
-    /**
      * @param      $string
-     * @param null $verbosity
+     * @param  null  $verbosity
      */
     public function warn($string, $verbosity = null)
     {

@@ -71,7 +71,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
@@ -91,7 +91,7 @@ class ConfigurationController extends Controller
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
-        if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
+        if (true === $configuration->isSkipForm() && false === $overruleSkip) {
             app('log')->debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
@@ -140,7 +140,7 @@ class ConfigurationController extends Controller
 
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
@@ -156,7 +156,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param ConfigurationPostRequest $request
+     * @param  ConfigurationPostRequest  $request
      *
      * @return RedirectResponse
      * @throws ImporterErrorException
@@ -174,7 +174,7 @@ class ConfigurationController extends Controller
         // loop accounts:
         $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (isset($fromRequest['accounts'][$identifier])) {
+            if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
             }
         }

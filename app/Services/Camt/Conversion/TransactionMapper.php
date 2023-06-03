@@ -14,27 +14,30 @@ class TransactionMapper
 {
     use GetAccounts;
 
+    private array         $accountIdentificationSuffixes;
+    private array         $allAccounts;
     private Configuration $configuration;
-    private array $allAccounts;
-    private array $accountIdentificationSuffixes;
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
+     * @throws ImporterErrorException
      */
     public function __construct(Configuration $configuration)
     {
-        $this->configuration = $configuration;
-        $this->allAccounts = $this->getAllAccounts();
-        $this->accountIdentificationSuffixes = array('id','iban','number','name');
+        app('log')->debug('Constructed TransactionMapper.');
+        $this->configuration                 = $configuration;
+        $this->allAccounts                   = $this->getAllAccounts();
+        $this->accountIdentificationSuffixes = ['id', 'iban', 'number', 'name'];
     }
 
     /**
-     * @param array $transactions
+     * @param  array  $transactions
      *
      * @return array
      */
     public function map(array $transactions): array
     {
+        app('log')->debug('Map all transactions.');
         // TODO download all accounts from Firefly III, we may need them for verification.
 
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
@@ -48,129 +51,89 @@ class TransactionMapper
     }
 
     /**
-     * @param array $transaction
+     * @param  array  $current
      *
-     * @return array
+     * @return string
      */
-    private function mapSingle(array $transaction): array
+    private function determineTransactionType(array $current): string
     {
-        app('log')->debug(sprintf('Now mapping single transaction'));
-        // make a new transaction:
-        $result = [
-            //'user'          => 1, // ??
-            'group_title'             => null,
-            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [],
-        ];
-        $splits = $transaction['splits'] ?? 1;
-        $group_handling = $this->configuration->getGroupedTransactionHandling();
-        app('log')->debug(sprintf('Transaction has %d split(s)', $splits));
-        for ($i = 0; $i < $splits; $i++) {
-            $split = $transaction['transactions'][$i] ?? false;
-            if (false === $split) {
-                app('log')->warning(sprintf('No split #%d found, break.', $i));
-                continue;
-            }
-            $current = [
-                'type' => 'withdrawal', // perhaps to be overruled later.
-            ];
-            /**
-             * @var string $role
-             * @var array  $data
-             */
-            foreach ($split as $role => $data) {
-                // actual content of the field is in $data['data'], which is an array
-                switch ($role) {
-                    default:
-                        app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));
-                        break;
-                    case '_ignore':
-                        break;
-                    case 'note':
-                        // TODO perhaps lift into separate method?
-                        $current['notes'] = $current['notes'] ?? '';
-                        $addition         = "  \n" . join("  \n", $data['data']);
-                        $current['notes'] .= $addition;
-                        break;
-                    case 'date_process':
-                        // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
-                        $current['process_date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_transaction':
-                        // TODO perhaps lift into separate method?
-                        $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
-                        $current['date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_payment':
-                        // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
-                        $current['payment_date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_book':
-                        // TODO perhaps lift into separate method?
-                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
-                        $current['book_date'] = $carbon->toIso8601String();
-                        $current['date'] = $carbon->toIso8601String();
-                        break;
-                    case 'account-iban':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'iban', 'source', $data);
-                        break;
-                    case 'opposing-iban':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'iban', 'destination', $data);
-                        break;
-                    case 'opposing-name':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'name', 'destination', $data);
-                        break;
-                    case 'external-id':
-                        $addition               = join(' ', $data['data']);
-                        $current['external_id'] = $addition;
-                        break;
-                    case 'description': // TODO think about a config value to use both values from level C and D
-                        $current['description'] = $current['description'] ?? '';
-                        if('group' === $group_handling || 'split' === $group_handling) {
-                            // use first description
-                            $addition           = $data['data'][0];
-                        }
-                        if('single' === $group_handling) {
-                            // just use the last description
-                            $addition           = end($data['data']);
-                        }
-                        $current['description'] .= $addition;
-                        break;
-                    case 'amount':
-                        $current['amount'] = null;
-                        if('group' === $group_handling || 'split' === $group_handling) {
-                            // if multiple values, use biggest (... at index 0?)
-                            foreach($data['data'] as $amount) {
-                                if(abs($current['amount']) < abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
-                            }
-                        }
-                        if('single' === $group_handling) {
-                            // if multiple values, use smallest (... at index 1?)
-                            foreach($data['data'] as $amount) {
-                                if(abs($current['amount']) > abs($amount) || $current['amount'] == null) $current['amount'] = $amount;
-                            }
-                        }
-                        break;
-                    case 'currency-code':
-                        $current = $this->mapCurrency($current, 'currency', $data);
-                        break;
+        app('log')->debug('Determine transaction type.');
+        $directions = ['source', 'destination'];
+
+        foreach ($directions as $direction) {
+            $accountType[$direction] = null;
+            foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+                // try to find destination account
+                if (array_key_exists($direction.'_'.$accountIdentificationSuffix, $current)) {
+                    $fieldName               = $direction.'_'.$accountIdentificationSuffix;
+                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
                 }
             }
-            $current = $this->sanityCheck($current);
-            if (null === $current) {
-                // give warning, skip transaction.
-            }
-            // TODO loop over $current and clean up if necessary.
-            $result['transactions'][] = $current;
-
         }
 
-        return $result;
+        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+
+        switch (true) {
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
+            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
+                return "withdrawal"; // line 281
+            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
+            case $accountType['source'] === null && $accountType['destination'] === 'asset':
+                return "deposit"; // line 282
+            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
+                return "transfer"; // line 283 / 284
+            default:
+                app('log')->error(
+                    sprintf(
+                        'Invalid transaction: source = "%s", destination = "%s"',
+                        $accountType['source'] ?: '<null>',
+                        $accountType['destination'] ?: '<null>'
+                    )
+                ); // 285
+        }
+    }
+
+    /**
+     * @param $direction
+     * @param $current
+     * @return string
+     */
+    private function getAccountId($direction, $current): string
+    {
+        app('log')->debug('getAccountId');
+        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+            $field = $direction.'_'.$accountIdentificationSuffix;
+            if (array_key_exists($field, $current)) {
+                // there is a value...
+                foreach ($this->allAccounts as $account) {
+                    // so we check all accounts for a match
+                    if ($current[$field] == $account->$accountIdentificationSuffix) {
+                        // we have a match
+                        app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
+                        return (string) $account->id;
+                    }
+                }
+                //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
+            }
+            //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
+        }
+        return '';
+    }
+
+    /**
+     * @param $fieldName
+     * @param $fieldValue
+     * @return string|null
+     */
+    private function getAccountType($fieldName, $fieldValue): ?string
+    {
+        $accountType = null;
+        foreach ($this->allAccounts as $account) {
+            if ($account->$fieldName == $fieldValue) {
+                $accountType = $account->type;
+            }
+        }
+        return $accountType;
     }
 
     /**
@@ -186,10 +149,10 @@ class TransactionMapper
      * destination_number = 12345
      * source_id = 5
      *
-     * @param array  $current
-     * @param string $fieldName
-     * @param string $direction
-     * @param array  $data
+     * @param  array  $current
+     * @param  string  $fieldName
+     * @param  string  $direction
+     * @param  array  $data
      *
      * @return array
      */
@@ -216,9 +179,9 @@ class TransactionMapper
     }
 
     /**
-     * @param mixed  $current
-     * @param string $type
-     * @param array  $data
+     * @param  mixed  $current
+     * @param  string  $type
+     * @param  array  $data
      *
      * @return array
      */
@@ -241,11 +204,141 @@ class TransactionMapper
     }
 
     /**
+     * @param  array  $transaction
+     *
+     * @return array
+     */
+    private function mapSingle(array $transaction): array
+    {
+        app('log')->debug('Now mapping single transaction');
+        // make a new transaction:
+        $result         = [
+            //'user'          => 1, // ??
+            'group_title'             => null,
+            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
+            'transactions'            => [],
+        ];
+        $splits         = $transaction['splits'] ?? 1;
+        $group_handling = $this->configuration->getGroupedTransactionHandling();
+        app('log')->debug(sprintf('Transaction has %d split(s)', $splits));
+        for ($i = 0; $i < $splits; $i++) {
+            $split = $transaction['transactions'][$i] ?? false;
+            if (false === $split) {
+                app('log')->warning(sprintf('No split #%d found, break.', $i));
+                continue;
+            }
+            $current = [
+                'type' => 'withdrawal', // perhaps to be overruled later.
+            ];
+            /**
+             * @var string $role
+             * @var array $data
+             */
+            foreach ($split as $role => $data) {
+                // actual content of the field is in $data['data'], which is an array
+                switch ($role) {
+                    default:
+                        app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));
+                        break;
+                    case '_ignore':
+                        break;
+                    case 'note':
+                        // TODO perhaps lift into separate method?
+                        $current['notes'] = $current['notes'] ?? '';
+                        $addition         = "  \n".join("  \n", $data['data']);
+                        $current['notes'] .= $addition;
+                        break;
+                    case 'date_process':
+                        // TODO perhaps lift into separate method?
+                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $current['process_date'] = $carbon->toIso8601String();
+                        break;
+                    case 'date_transaction':
+                        // TODO perhaps lift into separate method?
+                        $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $current['date'] = $carbon->toIso8601String();
+                        break;
+                    case 'date_payment':
+                        // TODO perhaps lift into separate method?
+                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $current['payment_date'] = $carbon->toIso8601String();
+                        break;
+                    case 'date_book':
+                        // TODO perhaps lift into separate method?
+                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $current['book_date'] = $carbon->toIso8601String();
+                        $current['date']      = $carbon->toIso8601String();
+                        break;
+                    case 'account-iban':
+                        // could be multiple, could be mapped.
+                        $current = $this->mapAccount($current, 'iban', 'source', $data);
+                        break;
+                    case 'opposing-iban':
+                        // could be multiple, could be mapped.
+                        $current = $this->mapAccount($current, 'iban', 'destination', $data);
+                        break;
+                    case 'opposing-name':
+                        // could be multiple, could be mapped.
+                        $current = $this->mapAccount($current, 'name', 'destination', $data);
+                        break;
+                    case 'external-id':
+                        $addition               = join(' ', $data['data']);
+                        $current['external_id'] = $addition;
+                        break;
+                    case 'description': // TODO think about a config value to use both values from level C and D
+                        $current['description'] = $current['description'] ?? '';
+                        $addition               = '';
+                        if ('group' === $group_handling || 'split' === $group_handling) {
+                            // use first description
+                            $addition = $data['data'][0];
+                        }
+                        if ('single' === $group_handling) {
+                            // just use the last description
+                            $addition = end($data['data']);
+                        }
+                        $current['description'] .= $addition;
+                        break;
+                    case 'amount':
+                        $current['amount'] = null;
+                        if ('group' === $group_handling || 'split' === $group_handling) {
+                            // if multiple values, use biggest (... at index 0?)
+                            foreach ($data['data'] as $amount) {
+                                if (abs($current['amount']) < abs($amount) || $current['amount'] == null) {
+                                    $current['amount'] = $amount;
+                                }
+                            }
+                        }
+                        if ('single' === $group_handling) {
+                            // if multiple values, use smallest (... at index 1?)
+                            foreach ($data['data'] as $amount) {
+                                if (abs($current['amount']) > abs($amount) || $current['amount'] == null) {
+                                    $current['amount'] = $amount;
+                                }
+                            }
+                        }
+                        break;
+                    case 'currency-code':
+                        $current = $this->mapCurrency($current, 'currency', $data);
+                        break;
+                }
+            }
+            $current = $this->sanityCheck($current);
+            if (null === $current) {
+                // give warning, skip transaction.
+            }
+            // TODO loop over $current and clean up if necessary.
+            $result['transactions'][] = $current;
+        }
+
+        return $result;
+    }
+
+    /**
      * A transaction has a bunch of minimal requirements. This method checks if they are met.
      *
      * It will also correct the transaction type (if possible).
      *
-     * @param array $current
+     * @param  array  $current
      *
      * @return array|null
      */
@@ -256,10 +349,12 @@ class TransactionMapper
             return null;
         }
         // amount must be positive
-        if(-1 === bccomp($current['amount'],'0')) {
+        if (-1 === bccomp($current['amount'], '0')) {
             // negative amount is debit (or transfer)
-            $current['amount'] = bcmul($current['amount'],'-1');
-        } else {
+            $current['amount'] = bcmul($current['amount'], '-1');
+        }
+        // if is positive
+        if (1 === bccomp($current['amount'], '0')) {
             // positive account is credit (or transfer)
             $current = $this->swapAccounts($current);
         }
@@ -308,13 +403,13 @@ class TransactionMapper
 
 
         // as the source account is not new, we try to map an existing account
-        if(!$sourceIsNew) {
-            $current['source_id'] = $this->getAccountId('source',$current);
+        if (!$sourceIsNew) {
+            $current['source_id'] = $this->getAccountId('source', $current);
         }
         $current['type'] = $this->determineTransactionType($current);
         // as the destination account is not new, we try to map an existing account
-        if($this->validAccountInfo('destination', $current)) {
-            $current['destination_id'] = $this->getAccountId('destination',$current);
+        if ($this->validAccountInfo('destination', $current)) {
+            $current['destination_id'] = $this->getAccountId('destination', $current);
         }
 
         // no description?
@@ -323,26 +418,33 @@ class TransactionMapper
         return $current;
     }
 
-    private function swapAccounts(array $currentTransaction) {
+    /**
+     * TODO broken.
+     * @param  array  $currentTransaction
+     * @return array
+     */
+    private function swapAccounts(array $currentTransaction): array
+    {
+        $ret       = $currentTransaction;
+        $fieldType = ['id', 'iban', 'number', 'name'];
 
-        $ret = $currentTransaction;
-        $fieldType = array('id','iban','number','name');
-
-        foreach($fieldType as $currentFieldType) {
+        foreach ($fieldType as $currentFieldType) {
             // move source to destination
-            if(array_key_exists( 'source_'.$currentFieldType,$currentTransaction)) {
+            if (array_key_exists('source_'.$currentFieldType, $currentTransaction)) {
                 $ret['destination_'.$currentFieldType] = $currentTransaction['source_'.$currentFieldType];
                 app('log')->warning('Just replaced destination_'.$currentFieldType.' in $ret');
-            } else {
+            }
+            if (!array_key_exists('source_'.$currentFieldType, $currentTransaction)) {
                 unset($ret['destination_'.$currentFieldType]);
                 app('log')->warning('Just DEL destination_'.$currentFieldType.' in $ret');
             }
 
             // move destination to source
-            if(array_key_exists( 'destination_'.$currentFieldType,$currentTransaction)) {
+            if (array_key_exists('destination_'.$currentFieldType, $currentTransaction)) {
                 $ret['source_'.$currentFieldType] = $currentTransaction['destination_'.$currentFieldType];
                 app('log')->warning('Just replaced source_'.$currentFieldType.' in $ret');
-            } else {
+            }
+            if (!array_key_exists('destination_'.$currentFieldType, $currentTransaction)) {
                 app('log')->warning('Just DEL source_'.$currentFieldType.' in $ret');
                 unset($ret['source_'.$currentFieldType]);
             }
@@ -352,8 +454,8 @@ class TransactionMapper
     }
 
     /**
-     * @param string $direction
-     * @param array  $current
+     * @param  string  $direction
+     * @param  array  $current
      *
      * @return bool
      */
@@ -362,13 +464,13 @@ class TransactionMapper
         // search for existing IBAN
         // search for existing number
         // search for existing name, TODO under which types?
-        foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
+        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
             $field = $direction.'_'.$accountIdentificationSuffix;
-            if(array_key_exists( $field, $current)) {
+            if (array_key_exists($field, $current)) {
                 // there is a value...
-                foreach($this->allAccounts as $account) {
+                foreach ($this->allAccounts as $account) {
                     // so we check all accounts for a match
-                    if($current[$field] == $account->$accountIdentificationSuffix) {
+                    if ($current[$field] == $account->$accountIdentificationSuffix) {
                         // we have a match
                         return true;
                     }
@@ -376,73 +478,6 @@ class TransactionMapper
             }
         }
         return false;
-    }
-
-    /**
-     * @param array  $current
-     *
-     * @return string
-     */
-    private function determineTransactionType(array $current)
-    {
-        $directions = array('source','destination');
-
-        foreach($directions as $direction) {
-            $accountType[$direction] = null;
-            foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-                // try to find destination account
-                if(array_key_exists( $direction.'_'.$accountIdentificationSuffix,$current)) {
-                    $fieldName = $direction.'_'.$accountIdentificationSuffix;
-                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
-                }
-            }
-        }
-
-        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-
-        switch(true) {
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
-            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
-                return "withdrawal"; // line 281
-            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
-            case $accountType['source'] === null && $accountType['destination'] === 'asset':
-                return "deposit"; // line 282
-            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
-                return "transfer"; // line 283 / 284
-            default:
-                app('log')->error(sprintf('Invalid transaction: source = "%s", destination = "%s"',$accountType['source'] ?: '<null>',$accountType['destination']?: '<null>')); // 285
-                return;
-        }
-    }
-
-    private function getAccountType($fieldName, $fieldValue)
-    {
-        $accountType = null;
-        foreach($this->allAccounts as $account) {
-            if($account->$fieldName == $fieldValue) {
-                $accountType = $account->type;
-            }
-        }
-        return $accountType;
-    }
-
-    private function getAccountId($direction, $current) {
-        foreach($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-            $field = $direction.'_'.$accountIdentificationSuffix;
-            if(array_key_exists($field, $current)) {
-                // there is a value...
-                foreach($this->allAccounts as $account) {
-                    // so we check all accounts for a match
-                    if($current[$field] == $account->$accountIdentificationSuffix) {
-                        // we have a match
-                        app('log')->warning(sprintf('Just mapped account "%s"',$account->id));
-                        return $account->id;
-                    }
-                }
-                //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
-            }
-            //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
-        }
     }
 
 }

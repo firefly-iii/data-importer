@@ -52,7 +52,7 @@ class PseudoTransactionProcessor
     /**
      * PseudoTransactionProcessor constructor.
      *
-     * @param int|null $defaultAccountId
+     * @param  int|null  $defaultAccountId
      *
      * @throws ImporterErrorException
      */
@@ -64,7 +64,29 @@ class PseudoTransactionProcessor
     }
 
     /**
-     * @param int|null $accountId
+     * @param  array  $lines
+     *
+     * @return array
+     */
+    public function processPseudo(array $lines): array
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $count     = count($lines);
+        $processed = [];
+        app('log')->info(sprintf('Converting %d lines into transactions.', $count));
+        /** @var array $line */
+        foreach ($lines as $index => $line) {
+            app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
+            $processed[] = $this->processPseudoLine($line);
+            // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
+        }
+        app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
+
+        return $processed;
+    }
+
+    /**
+     * @param  int|null  $accountId
      *
      * @throws ImporterErrorException
      */
@@ -125,29 +147,7 @@ class PseudoTransactionProcessor
     }
 
     /**
-     * @param array $lines
-     *
-     * @return array
-     */
-    public function processPseudo(array $lines): array
-    {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $count     = count($lines);
-        $processed = [];
-        app('log')->info(sprintf('Converting %d lines into transactions.', $count));
-        /** @var array $line */
-        foreach ($lines as $index => $line) {
-            app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
-            $processed[] = $this->processPseudoLine($line);
-            // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
-        }
-        app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
-
-        return $processed;
-    }
-
-    /**
-     * @param array $line
+     * @param  array  $line
      *
      * @return array
      */

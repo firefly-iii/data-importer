@@ -42,7 +42,7 @@ class NavController extends Controller
         app('log')->debug(__METHOD__);
         session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
 
-        return redirect(route('004-configure.index') . '?overruleskip=true');
+        return redirect(route('004-configure.index').'?overruleskip=true');
     }
 
     /**

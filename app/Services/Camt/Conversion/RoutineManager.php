@@ -60,6 +60,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
+        app('log')->debug('Constructed CAMT RoutineManager');
         $this->forceCli    = false; // used in POST auto import
         $this->content     = '';    // used in CLI
         $this->allErrors   = [];
@@ -113,8 +114,27 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
+     * @param  string  $content
+     */
+    public function setContent(string $content): void
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * @param  bool  $forceCli
+     */
+    public function setForceCli(bool $forceCli): void
+    {
+        $this->forceCli = $forceCli;
+    }
+
+    /**
      * @inheritDoc
+     * @return array
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public function start(): array
     {
@@ -144,6 +164,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function getCamtMessage(): ?Message
     {
+        app('log')->debug('Now in getCamtMessage');
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
         // check if CLI or not and read as appropriate:
@@ -156,86 +177,5 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return $camtMessage;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeMessages(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getMessages();
-        $two   = $this->lineProcessor->getMessages();
-        $three = $this->columnValueConverter->getMessages();
-        $four  = $this->pseudoTransactionProcessor->getMessages();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allMessages = $total;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeWarnings(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getWarnings();
-        $two   = $this->lineProcessor->getWarnings();
-        $three = $this->columnValueConverter->getWarnings();
-        $four  = $this->pseudoTransactionProcessor->getWarnings();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-        $this->allWarnings = $total;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeErrors(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getErrors();
-        $two   = $this->lineProcessor->getErrors();
-        $three = $this->columnValueConverter->getErrors();
-        $four  = $this->pseudoTransactionProcessor->getErrors();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allErrors = $total;
-    }
-
-    /**
-     * @param string $content
-     */
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
-    }
-
-    /**
-     * @param bool $forceCli
-     */
-    public function setForceCli(bool $forceCli): void
-    {
-        $this->forceCli = $forceCli;
     }
 }

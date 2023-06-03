@@ -35,9 +35,9 @@ class GetTransactionsRequest extends Request
     private string $identifier;
 
     /**
-     * @param string $url
-     * @param string $token
-     * @param string $identifier
+     * @param  string  $url
+     * @param  string  $token
+     * @param  string  $identifier
      */
     public function __construct(string $url, string $token, string $identifier)
     {
@@ -46,14 +46,6 @@ class GetTransactionsRequest extends Request
         $this->setToken($token);
         $this->setIdentifier($identifier);
         $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**
@@ -93,5 +85,13 @@ class GetTransactionsRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param  string  $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 }

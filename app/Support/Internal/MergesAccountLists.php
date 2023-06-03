@@ -33,8 +33,55 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 trait MergesAccountLists
 {
     /**
-     * @param array $nordigen
-     * @param array $fireflyIII
+     * @param  array  $firefly
+     * @param  string  $iban
+     * @param  string  $number
+     *
+     * @return array
+     */
+    protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
+    {
+        if ('' === $iban) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
+                $result[] = $account;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  array  $fireflyIII
+     * @param  string  $currency
+     *
+     * @return array
+     */
+    protected function filterByCurrency(array $fireflyIII, string $currency): array
+    {
+        if ('' === $currency) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($currency === $account->currencyCode) {
+                $result[] = $account;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  array  $nordigen
+     * @param  array  $fireflyIII
      *
      * @return array
      */
@@ -47,8 +94,22 @@ trait MergesAccountLists
     }
 
     /**
-     * @param array $generic
-     * @param array $fireflyIII
+     * @param  array  $spectre
+     * @param  array  $fireflyIII
+     *
+     * @return array
+     */
+    protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
+    {
+        app('log')->debug('Now merging Nordigen account lists.');
+        $generic = ImportServiceAccount::convertSpectreArray($spectre);
+
+        return $this->mergeGenericAccountList($generic, $fireflyIII);
+    }
+
+    /**
+     * @param  array  $generic
+     * @param  array  $fireflyIII
      *
      * @return array
      */
@@ -108,66 +169,5 @@ trait MergesAccountLists
         }
 
         return $return;
-    }
-
-    /**
-     * @param array  $firefly
-     * @param string $iban
-     * @param string $number
-     *
-     * @return array
-     */
-    protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
-    {
-        if ('' === $iban) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
-                $result[] = $account;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array  $fireflyIII
-     * @param string $currency
-     *
-     * @return array
-     */
-    protected function filterByCurrency(array $fireflyIII, string $currency): array
-    {
-        if ('' === $currency) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($currency === $account->currencyCode) {
-                $result[] = $account;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array $spectre
-     * @param array $fireflyIII
-     *
-     * @return array
-     */
-    protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
-    {
-        app('log')->debug('Now merging Nordigen account lists.');
-        $generic = ImportServiceAccount::convertSpectreArray($spectre);
-
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
 }

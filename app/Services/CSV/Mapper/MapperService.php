@@ -44,11 +44,11 @@ class MapperService
      * Appends the given array with data from the CSV file in the config.
      * TODO remove reference to specifics.
      *
-     * @param string $content
-     * @param string $delimiter
-     * @param bool   $hasHeaders
-     * @param array  $specifics
-     * @param array  $data
+     * @param  string  $content
+     * @param  string  $delimiter
+     * @param  bool  $hasHeaders
+     * @param  array  $specifics
+     * @param  array  $data
      *
      * @return array
      * @throws ImporterErrorException
@@ -126,11 +126,9 @@ class MapperService
     /**
      * Appends the given array with data from the CAMT file in the config.
      *
-     * @param string $content
-     * @param string $delimiter
-     * @param bool   $hasHeaders
-     * @param array  $specifics
-     * @param array  $data
+     * @param  Configuration  $configuration
+     * @param  string  $content
+     * @param  array  $data
      *
      * @return array
      * @throws ImporterErrorException
@@ -150,8 +148,7 @@ class MapperService
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            /** @var Entry $entry */
-            foreach ($entries as $entry) { // -> Level C
+            foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
@@ -174,13 +171,13 @@ class MapperService
 
             foreach (array_keys($mappableFields) as $title) {
                 if (array_key_exists($title, $data)) {
-                    if(0 !== $splits) {
-                      for($index = 0; $index < $splits; $index++) {
-                          $value = $transaction->getFieldByIndex($title, $index);
-                          if('' !== $value) {
-                              $data[$title]['values'][] = $value;
-                          }
-                      }
+                    if (0 !== $splits) {
+                        for ($index = 0; $index < $splits; $index++) {
+                            $value = $transaction->getFieldByIndex($title, $index);
+                            if ('' !== $value) {
+                                $data[$title]['values'][] = $value;
+                            }
+                        }
                     }
                 }
             }

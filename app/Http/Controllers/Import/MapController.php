@@ -66,6 +66,10 @@ class MapController extends Controller
 
     /**
      * @return Factory|View
+     * @throws ContainerExceptionInterface
+     * @throws FileNotFoundException
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -111,6 +115,92 @@ class MapController extends Controller
 
 
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'roles', 'data'));
+    }
+
+    /**
+     * @param  Request  $request
+     *
+     * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
+     */
+    public function postIndex(Request $request): RedirectResponse
+    {
+        $values  = $request->get('values') ?? [];
+        $mapping = $request->get('mapping') ?? [];
+        $values  = !is_array($values) ? [] : $values;
+        $mapping = !is_array($mapping) ? [] : $mapping;
+        $data    = [];
+
+        $configuration = $this->restoreConfiguration();
+
+        /**
+         * Loop array with available columns.
+         *
+         * @var int $index
+         * @var array $row
+         */
+        foreach ($values as $columnIndex => $column) {
+            /**
+             * Loop all values for this column
+             *
+             * @var int $valueIndex
+             * @var string $value
+             */
+            foreach ($column as $valueIndex => $value) {
+                $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
+                if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
+                    $data[$columnIndex][$value] = (int)$mappedValue;
+                }
+            }
+        }
+
+        // at this point the $data array must be merged with the mapping as it is on the disk,
+        // and then saved to disk once again in a new config file.
+        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
+        $originalMapping = [];
+        $diskConfig      = null;
+        if (null !== $configFileName) {
+            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
+            $diskConfig      = Configuration::fromArray($diskArray);
+            $originalMapping = $diskConfig->getMapping();
+        }
+
+        // loop $data and save values:
+        $mergedMapping = $this->mergeMapping($originalMapping, $data);
+
+        $configuration->setMapping($mergedMapping);
+
+        // store mapping in config object ( + session)
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+        // since the configuration saved in the session will omit 'mapping', 'do_mapping' and 'roles'
+        // these must be set to the configuration file
+        // no need to do this sooner because toSessionArray would have dropped them anyway.
+        if (null !== $diskConfig) {
+            $configuration->setRoles($diskConfig->getRoles());
+            $configuration->setDoMapping($diskConfig->getDoMapping());
+        }
+
+        // then save entire thing to a new disk file:
+        // TODO write config needs helper too
+        $configFileName = StorageService::storeArray($configuration->toArray());
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // set map config as complete.
+        session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+            // if nordigen, now ready for submission!
+            session()->put(Constants::READY_FOR_SUBMISSION, true);
+        }
+
+        return redirect()->route('007-convert.index');
     }
 
     /**
@@ -239,6 +329,43 @@ class MapController extends Controller
     }
 
     /**
+     * @return array
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     */
+    private function getCategories(): array
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk               = Storage::disk(self::DISK_NAME);
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $categories = [];
+        $total      = count($array);
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', ($index + 1), $total));
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                $categories[] = (string)array_key_exists('category_name', $row) ? $row['category_name'] : '';
+            }
+        }
+        $filtered = array_filter(
+            $categories,
+            static function (?string $value) {
+                return '' !== (string)$value;
+            }
+        );
+
+        return array_unique($filtered);
+    }
+
+    /**
      * Weird bunch of code to return info on Spectre and Nordigen.
      *
      * @return array
@@ -305,7 +432,6 @@ class MapController extends Controller
 
     /**
      * @return array
-     * @throws FileNotFoundException
      * @throws ImporterErrorException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -345,132 +471,8 @@ class MapController extends Controller
     }
 
     /**
-     * @return array
-     * @throws ContainerExceptionInterface
-     * @throws FileNotFoundException
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
-     */
-    private function getCategories(): array
-    {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk               = Storage::disk(self::DISK_NAME);
-        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
-        try {
-            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        }
-        $categories = [];
-        $total      = count($array);
-        /** @var array $transaction */
-        foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', ($index + 1), $total));
-            /** @var array $row */
-            foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string)array_key_exists('category_name', $row) ? $row['category_name'] : '';
-            }
-        }
-        $filtered = array_filter(
-            $categories,
-            static function (?string $value) {
-                return '' !== (string)$value;
-            }
-        );
-
-        return array_unique($filtered);
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
-     */
-    public function postIndex(Request $request): RedirectResponse
-    {
-        $values  = $request->get('values') ?? [];
-        $mapping = $request->get('mapping') ?? [];
-        $values  = !is_array($values) ? [] : $values;
-        $mapping = !is_array($mapping) ? [] : $mapping;
-        $data    = [];
-
-        $configuration = $this->restoreConfiguration();
-
-        /**
-         * Loop array with available columns.
-         *
-         * @var int   $index
-         * @var array $row
-         */
-        foreach ($values as $columnIndex => $column) {
-            /**
-             * Loop all values for this column
-             *
-             * @var int    $valueIndex
-             * @var string $value
-             */
-            foreach ($column as $valueIndex => $value) {
-                $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
-                if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
-                    $data[$columnIndex][$value] = (int)$mappedValue;
-                }
-            }
-        }
-
-        // at this point the $data array must be merged with the mapping as it is on the disk,
-        // and then saved to disk once again in a new config file.
-        $configFileName  = session()->get(Constants::UPLOAD_CONFIG_FILE);
-        $originalMapping = [];
-        $diskConfig      = null;
-        if (null !== $configFileName) {
-            $diskArray       = json_decode(StorageService::getContent($configFileName), true, JSON_THROW_ON_ERROR);
-            $diskConfig      = Configuration::fromArray($diskArray);
-            $originalMapping = $diskConfig->getMapping();
-        }
-
-        // loop $data and save values:
-        $mergedMapping = $this->mergeMapping($originalMapping, $data);
-
-        $configuration->setMapping($mergedMapping);
-
-        // store mapping in config object ( + session)
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // since the configuration saved in the session will omit 'mapping', 'do_mapping' and 'roles'
-        // these must be set to the configuration file
-        // no need to do this sooner because toSessionArray would have dropped them anyway.
-        if (null !== $diskConfig) {
-            $configuration->setRoles($diskConfig->getRoles());
-            $configuration->setDoMapping($diskConfig->getDoMapping());
-        }
-
-        // then save entire thing to a new disk file:
-        // TODO write config needs helper too
-        $configFileName = StorageService::storeArray($configuration->toArray());
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set map config as complete.
-        session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-        session()->put(Constants::READY_FOR_CONVERSION, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-            // if nordigen, now ready for submission!
-            session()->put(Constants::READY_FOR_SUBMISSION, true);
-        }
-
-        return redirect()->route('007-convert.index');
-    }
-
-    /**
-     * @param array $original
-     * @param array $new
+     * @param  array  $original
+     * @param  array  $new
      *
      * @return array
      */

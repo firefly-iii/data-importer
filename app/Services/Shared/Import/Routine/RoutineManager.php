@@ -42,7 +42,7 @@ class RoutineManager
     private array         $transactions;
 
     /**
-     * @param string $identifier
+     * @param  string  $identifier
      */
     public function __construct(string $identifier)
     {
@@ -78,7 +78,7 @@ class RoutineManager
     }
 
     /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function setConfiguration(Configuration $configuration): void
     {
@@ -91,7 +91,7 @@ class RoutineManager
     }
 
     /**
-     * @param array $transactions
+     * @param  array  $transactions
      */
     public function setTransactions(array $transactions): void
     {

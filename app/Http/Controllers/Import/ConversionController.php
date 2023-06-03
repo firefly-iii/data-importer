@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
@@ -39,6 +40,8 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Storage;
 
 /**
@@ -62,6 +65,7 @@ class ConversionController extends Controller
 
     /**
      *
+     * @throws ImporterErrorException
      */
     public function index()
     {
@@ -74,12 +78,12 @@ class ConversionController extends Controller
 
         app('log')->debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
-        if (empty($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
+        if (0 === count($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
-        if (empty($configuration->getMapping())) {
+        if (0 === count($configuration->getMapping())) {
             // back to mapping
             app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
@@ -103,7 +107,6 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-
             $contentType = $configuration->getContentType();
             switch ($contentType) {
                 default:
@@ -144,10 +147,13 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {
@@ -227,7 +233,7 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */

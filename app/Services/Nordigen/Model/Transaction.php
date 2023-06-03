@@ -184,7 +184,7 @@ class Transaction
     }
 
     /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return static
      */
