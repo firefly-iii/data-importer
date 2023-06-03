@@ -16,11 +16,17 @@ class TransactionExtractor
      */
     public function __construct(Configuration $configuration)
     {
+        app('log')->debug('Now in TransactionExtractor.');
         $this->configuration = $configuration;
     }
 
+    /**
+     * @param  Message  $message
+     * @return array
+     */
     public function extractTransactions(Message $message): array
     {
+        app('log')->debug('Now in extractTransactions.');
         // get transactions from XML file
         $transactions = [];
         $statements   = $message->getRecords();

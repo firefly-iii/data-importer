@@ -240,7 +240,6 @@ class UploadController extends Controller
      *
      * @return MessageBag
      * @throws ImporterErrorException
-     * @throws FileNotFoundException
      */
     private function processSelection(MessageBag $errors, string $selection, UploadedFile|null $file): MessageBag
     {

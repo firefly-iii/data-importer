@@ -148,7 +148,6 @@ class MapperService
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
-            /** @var Entry $entry */
             foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {

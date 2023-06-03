@@ -126,7 +126,6 @@ class TransactionProcessor
             app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
-        /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 

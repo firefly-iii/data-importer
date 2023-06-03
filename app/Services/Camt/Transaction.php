@@ -47,6 +47,7 @@ class Transaction
         Entry $levelC,
         array $levelD
     ) {
+        app('log')->debug('Constructed a CAMT Transaction');
         $this->configuration = $configuration;
         $this->levelA        = $levelA;
         $this->levelB        = $levelB;
@@ -104,6 +105,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
+        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
                 // temporary debug message:
@@ -306,13 +308,21 @@ class Transaction
         }
     }
 
-    private function generateAddressLine(Address $address = null)
+    /**
+     * @param  Address|null  $address
+     * @return string
+     */
+    private function generateAddressLine(Address $address = null): string
     {
         $addressLines = implode(", ", $address->getAddressLines());
 
         return $addressLines;
     }
 
+    /**
+     * @param  Money|null  $money
+     * @return string
+     */
     private function getDecimalAmount(?Money $money): string
     {
         if (null === $money) {
@@ -324,6 +334,11 @@ class Transaction
         return $moneyDecimalFormatter->format($money);
     }
 
+    /**
+     * @param  RelatedParty  $relatedParty
+     * @param  bool  $useEntireAddress
+     * @return string
+     */
     private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
     {
         $opposingName = '';
@@ -346,6 +361,7 @@ class Transaction
 
     /**
      * @param  EntryTransactionDetail  $transactionDetail
+     * @return Creditor|Debtor|null
      */
     private function getOpposingParty(EntryTransactionDetail $transactionDetail): Creditor|Debtor|null
     {

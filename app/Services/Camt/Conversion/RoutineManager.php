@@ -60,6 +60,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
+        app('log')->debug('Constructed CAMT RoutineManager');
         $this->forceCli    = false; // used in POST auto import
         $this->content     = '';    // used in CLI
         $this->allErrors   = [];
@@ -163,6 +164,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function getCamtMessage(): ?Message
     {
+        app('log')->debug('Now in getCamtMessage');
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
         // check if CLI or not and read as appropriate:

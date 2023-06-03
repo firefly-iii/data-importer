@@ -331,7 +331,6 @@ class MapController extends Controller
     /**
      * @return array
      * @throws ContainerExceptionInterface
-     * @throws FileNotFoundException
      * @throws ImporterErrorException
      * @throws NotFoundExceptionInterface
      */
@@ -433,7 +432,6 @@ class MapController extends Controller
 
     /**
      * @return array
-     * @throws FileNotFoundException
      * @throws ImporterErrorException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface

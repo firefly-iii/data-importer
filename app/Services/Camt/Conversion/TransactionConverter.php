@@ -15,6 +15,7 @@ class TransactionConverter
      */
     public function __construct(Configuration $configuration)
     {
+        app('log')->debug('Constructed TransactionConverter.');
         $this->configuration = $configuration;
     }
 

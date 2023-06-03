@@ -38,7 +38,7 @@ class ConverterService
      *
      * @return mixed
      */
-    public static function convert(string $class, $value, ?string $configuration)
+    public static function convert(string $class, $value, ?string $configuration): mixed
     {
         if ('' === $class) {
             return $value;

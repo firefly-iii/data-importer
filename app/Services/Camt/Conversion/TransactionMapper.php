@@ -24,6 +24,7 @@ class TransactionMapper
      */
     public function __construct(Configuration $configuration)
     {
+        app('log')->debug('Constructed TransactionMapper.');
         $this->configuration                 = $configuration;
         $this->allAccounts                   = $this->getAllAccounts();
         $this->accountIdentificationSuffixes = ['id', 'iban', 'number', 'name'];
@@ -36,6 +37,7 @@ class TransactionMapper
      */
     public function map(array $transactions): array
     {
+        app('log')->debug('Map all transactions.');
         // TODO download all accounts from Firefly III, we may need them for verification.
 
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
@@ -53,8 +55,9 @@ class TransactionMapper
      *
      * @return string
      */
-    private function determineTransactionType(array $current)
+    private function determineTransactionType(array $current): string
     {
+        app('log')->debug('Determine transaction type.');
         $directions = ['source', 'destination'];
 
         foreach ($directions as $direction) {
@@ -90,8 +93,14 @@ class TransactionMapper
         }
     }
 
-    private function getAccountId($direction, $current)
+    /**
+     * @param $direction
+     * @param $current
+     * @return string
+     */
+    private function getAccountId($direction, $current): string
     {
+        app('log')->debug('getAccountId');
         foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
             $field = $direction.'_'.$accountIdentificationSuffix;
             if (array_key_exists($field, $current)) {
@@ -101,16 +110,22 @@ class TransactionMapper
                     if ($current[$field] == $account->$accountIdentificationSuffix) {
                         // we have a match
                         app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
-                        return $account->id;
+                        return (string) $account->id;
                     }
                 }
                 //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
             }
             //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
         }
+        return '';
     }
 
-    private function getAccountType($fieldName, $fieldValue)
+    /**
+     * @param $fieldName
+     * @param $fieldValue
+     * @return string|null
+     */
+    private function getAccountType($fieldName, $fieldValue): ?string
     {
         $accountType = null;
         foreach ($this->allAccounts as $account) {
@@ -408,7 +423,7 @@ class TransactionMapper
      * @param  array  $currentTransaction
      * @return array
      */
-    private function swapAccounts(array $currentTransaction)
+    private function swapAccounts(array $currentTransaction): array
     {
         $ret       = $currentTransaction;
         $fieldType = ['id', 'iban', 'number', 'name'];
