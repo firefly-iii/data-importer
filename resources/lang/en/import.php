@@ -51,7 +51,7 @@ return [
     'column_date_interest'          => 'Interest calculation date',
     'column_date_book'              => 'Transaction booking date',
     'column_date_process'           => 'Transaction process date',
-    'column_date_transaction'       => 'Date',
+    'column_date_transaction'       => 'Transaction date',
     'column_date_due'               => 'Transaction due date',
     'column_date_payment'           => 'Transaction payment date',
     'column_date_invoice'           => 'Transaction invoice date',

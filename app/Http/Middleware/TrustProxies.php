@@ -55,7 +55,7 @@ class TrustProxies extends Middleware
     /**
      * TrustProxies constructor.
      *
-     * @param Repository $config
+     * @param  Repository  $config
      */
     public function __construct(Repository $config)
     {

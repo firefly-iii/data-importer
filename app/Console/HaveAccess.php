@@ -33,6 +33,14 @@ use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 trait HaveAccess
 {
     /**
+     * @param      $string
+     * @param  null  $verbosity
+     *
+     * @return void
+     */
+    abstract public function error($string, $verbosity = null);
+
+    /**
      * @return bool
      */
     private function haveAccess(): bool
@@ -56,15 +64,7 @@ trait HaveAccess
     }
 
     /**
-     * @param      $string
-     * @param null $verbosity
-     *
-     * @return void
-     */
-    abstract public function error($string, $verbosity = null);
-
-    /**
-     * @param string $path
+     * @param  string  $path
      *
      * @return bool
      */
@@ -93,10 +93,12 @@ trait HaveAccess
             }
             if (str_starts_with($path, $current)) {
                 app('log')->debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
+
                 return true;
             }
         }
         app('log')->error(sprintf('"%s" is not in the allowed paths.', $path), $paths);
+
         return false;
     }
 }

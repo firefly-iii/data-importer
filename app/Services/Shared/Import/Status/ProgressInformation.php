@@ -59,7 +59,7 @@ trait ProgressInformation
     }
 
     /**
-     * @param string $identifier
+     * @param  string  $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -67,8 +67,8 @@ trait ProgressInformation
     }
 
     /**
-     * @param int    $index
-     * @param string $error
+     * @param  int  $index
+     * @param  string  $error
      */
     protected function addError(int $index, string $error): void
     {
@@ -81,8 +81,8 @@ trait ProgressInformation
     }
 
     /**
-     * @param int    $index
-     * @param string $message
+     * @param  int  $index
+     * @param  string  $message
      */
     protected function addMessage(int $index, string $message): void
     {
@@ -95,8 +95,8 @@ trait ProgressInformation
     }
 
     /**
-     * @param int    $index
-     * @param string $warning
+     * @param  int  $index
+     * @param  string  $warning
      */
     protected function addWarning(int $index, string $warning): void
     {

@@ -31,17 +31,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Converter\Date;
-use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -73,7 +71,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Factory|RedirectResponse|View
      * @throws ImporterErrorException
@@ -93,7 +91,7 @@ class ConfigurationController extends Controller
 
         // if config says to skip it, skip it:
         $overruleSkip = 'true' === $request->get('overruleskip');
-        if (null !== $configuration && true === $configuration->isSkipForm() && false === $overruleSkip) {
+        if (true === $configuration->isSkipForm() && false === $overruleSkip) {
             app('log')->debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
@@ -126,6 +124,14 @@ class ConfigurationController extends Controller
             $importerAccounts = $this->mergeSpectreAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
+        if ('file' === $flow) {
+            // detect content type and save to config object.
+            $detector = new FileContentSherlock();
+            $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+            $fileType = $detector->detectContentTypeFromContent($content);
+            $configuration->setContentType($fileType);
+        }
+
         return view(
             'import.004-configure.index',
             compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns')
@@ -134,7 +140,7 @@ class ConfigurationController extends Controller
 
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
@@ -150,7 +156,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param ConfigurationPostRequest $request
+     * @param  ConfigurationPostRequest  $request
      *
      * @return RedirectResponse
      * @throws ImporterErrorException
@@ -158,7 +164,7 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
         app('log')->debug(sprintf('Now running %s', __METHOD__));
-        // store config on drive.
+        // store config on drive.v
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
@@ -168,7 +174,7 @@ class ConfigurationController extends Controller
         // loop accounts:
         $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (isset($fromRequest['accounts'][$identifier])) {
+            if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
             }
         }

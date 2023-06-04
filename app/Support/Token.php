@@ -53,14 +53,12 @@ class Token
      * @return string
      * @throws ImporterErrorException
      */
-    public static function getVanityURL(): string
+    public static function getURL(): string
     {
-        $value = request()->cookie('vanity_url');
+        $value = request()->cookie('base_url');
         if (null === $value) {
-            $value = config('importer.vanity_url');
-        }
-        if (null === $value) {
-            $value = self::getURL();
+            // fall back to config:
+            $value = (string)config('importer.url');
         }
         if ('' === (string)$value) {
             throw new ImporterErrorException('No valid URL value.');
@@ -73,12 +71,14 @@ class Token
      * @return string
      * @throws ImporterErrorException
      */
-    public static function getURL(): string
+    public static function getVanityURL(): string
     {
-        $value = request()->cookie('base_url');
+        $value = request()->cookie('vanity_url');
         if (null === $value) {
-            // fall back to config:
-            $value = (string)config('importer.url');
+            $value = config('importer.vanity_url');
+        }
+        if (null === $value) {
+            $value = self::getURL();
         }
         if ('' === (string)$value) {
             throw new ImporterErrorException('No valid URL value.');

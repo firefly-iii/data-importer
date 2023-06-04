@@ -33,7 +33,7 @@ use JsonException;
 trait VerifyJSON
 {
     /**
-     * @param string $file
+     * @param  string  $file
      *
      * @return bool
      */

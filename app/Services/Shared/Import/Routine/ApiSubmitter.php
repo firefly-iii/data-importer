@@ -59,14 +59,14 @@ class ApiSubmitter
     private string        $vanityURL;
 
     /**
-     * @param array $lines
+     * @param  array  $lines
      *
      * @throws ImporterErrorException
      */
     public function processTransactions(array $lines): void
     {
         $this->createdTag = false;
-        $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $this->tag        = $this->parseTag();
         $this->tagDate    = date('Y-m-d');
         $count            = count($lines);
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
@@ -76,7 +76,7 @@ class ApiSubmitter
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 
         /**
-         * @var int   $index
+         * @var int $index
          * @var array $line
          */
         foreach ($lines as $index => $line) {
@@ -101,105 +101,291 @@ class ApiSubmitter
     }
 
     /**
-     * Verify if the transaction is unique, based on the configuration
-     * and the content of the transaction. Returns a boolean.
-     *
-     * @param int   $index
-     * @param array $line
-     *
-     * @return bool|null
+     * @param  array  $accountInfo
      */
-    private function uniqueTransaction(int $index, array $line): ?bool
+    public function setAccountInfo(array $accountInfo): void
     {
-        if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
-            app('log')->debug(
-                sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod())
-            );
-
-            return null;
-        }
-        // do a search for the value and the field:
-        $transactions = $line['transactions'] ?? [];
-        $field        = $this->configuration->getUniqueColumnType();
-        $field        = 'external-id' === $field ? 'external_id' : $field;
-        $value        = '';
-        foreach ($transactions as $transactionIndex => $transaction) {
-            $value = (string)($transaction[$field] ?? '');
-            if ('' === $value) {
-                app('log')->debug(
-                    sprintf(
-                        'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
-                        $field,
-                        $index,
-                        $transactionIndex
-                    )
-                );
-                continue;
-            }
-            $searchResult = $this->searchField($field, $value);
-            if (0 !== $searchResult) {
-                app('log')->debug(
-                    sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult)
-                );
-                $message = sprintf(
-                    'There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).',
-                    $field,
-                    $value,
-                    $this->vanityURL,
-                    $searchResult
-                );
-                if (false === config('importer.ignore_duplicate_errors')) {
-                    $this->addError($index, $message);
-                }
-
-                return false;
-            }
-        }
-        app('log')->debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
-
-        return true;
+        $this->accountInfo = $accountInfo;
     }
 
     /**
-     * Do a search at Firefly III and return the ID of the group found.
-     *
-     * @param string $field
-     * @param string $value
-     *
-     * @return int
+     * @param  bool  $addTag
      */
-    private function searchField(string $field, string $value): int
+    public function setAddTag(bool $addTag): void
     {
-        // search for the exact description and not just a part of it:
-        $searchModifier = config(sprintf('csv.search_modifier.%s', $field));
-        $query          = sprintf('%s:"%s"', $searchModifier, $value);
+        $this->addTag = $addTag;
+    }
 
-        app('log')->debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
+    /**
+     * @param  Configuration  $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->setAddTag($configuration->isAddImportTag());
+        $this->setMapping($configuration->getMapping());
+    }
 
+    /**
+     * @param  array  $mapping
+     */
+    public function setMapping(array $mapping): void
+    {
+        $this->mapping = $mapping;
+    }
+
+    /**
+     * @param  array  $groupInfo
+     */
+    private function addTagToGroups(array $groupInfo): void
+    {
+        if ([] === $groupInfo) {
+            app('log')->debug('Group is empty, may not have been stored correctly.');
+
+            return;
+        }
+        if (false === $this->addTag) {
+            app('log')->debug('Will not add import tag.');
+
+            return;
+        }
+        if (false === $this->createdTag) {
+            $this->createTag();
+            $this->createdTag = true;
+        }
+
+        $groupId = (int)$groupInfo['group_id'];
+        app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
+        $body = [
+            'transactions' => [],
+        ];
+        /**
+         * @var int $journalId
+         * @var array $currentTags
+         */
+        foreach ($groupInfo['journals'] as $journalId => $currentTags) {
+            $currentTags[]          = $this->tag;
+            $body['transactions'][] = [
+                'transaction_journal_id' => $journalId,
+                'tags'                   => $currentTags,
+            ];
+        }
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
-        $request = new GetSearchTransactionsRequest($url, $token);
-        $request->setQuery($query);
+        $request = new PutTransactionRequest($url, $token, $groupId);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setBody($body);
         try {
-            /** @var GetTransactionsResponse $response */
-            $response = $request->get();
+            $request->put();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
-
-            return 0;
+            //            app('log')->error($e->getTraceAsString());
+            $this->addError(0, 'Could not store transaction: see the log files.');
         }
-        if (0 === $response->count()) {
-            return 0;
-        }
-        $first = $response->current();
-        app('log')->debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
-
-        return $first->id;
     }
 
     /**
-     * @param int   $index
-     * @param array $line
+     * @param  array  $line
+     *
+     * @return array
+     */
+    private function cleanupLine(array $line): array
+    {
+        app('log')->debug('Going to map data for this line.');
+        if (array_key_exists(0, $this->mapping)) {
+            app('log')->debug('Configuration has mapping for opposing account name!');
+            /**
+             * @var int $index
+             * @var array $transaction
+             */
+            foreach ($line['transactions'] as $index => $transaction) {
+                if ('withdrawal' === $transaction['type']) {
+                    // replace destination_name with destination_id
+                    $destination = $transaction['destination_name'] ?? '';
+                    if (array_key_exists($destination, $this->mapping[0])) {
+                        unset($transaction['destination_name']);
+                        unset($transaction['destination_iban']);
+                        $transaction['destination_id'] = $this->mapping[0][$destination];
+                        app('log')->debug(
+                            sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination])
+                        );
+                    }
+                }
+                if ('deposit' === $transaction['type']) {
+                    // replace source_name with source_id
+                    $source = $transaction['source_name'] ?? '';
+                    if (array_key_exists($source, $this->mapping[0])) {
+                        unset($transaction['source_name']);
+                        unset($transaction['source_iban']);
+                        $transaction['source_id'] = $this->mapping[0][$source];
+                        app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
+                    }
+                }
+                if ('' === trim((string)$transaction['description'] ?? '')) {
+                    $transaction['description'] = '(no description)';
+                }
+                $line['transactions'][$index] = $this->updateTransactionType($transaction);
+            }
+        }
+
+        return $line;
+    }
+
+    /**
+     * @param  int  $lineIndex
+     * @param  array  $line
+     * @param  TransactionGroup  $group
+     */
+    private function compareArrays(int $lineIndex, array $line, TransactionGroup $group): void
+    {
+        // some fields may not have survived. Be sure to warn the user about this.
+        /** @var Transaction $transaction */
+        foreach ($group->transactions as $index => $transaction) {
+            // compare currency ID
+            if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id']
+                && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId
+            ) {
+                $this->addWarning(
+                    $lineIndex,
+                    sprintf(
+                        'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
+                        $lineIndex,
+                        $line['transactions'][$index]['currency_id'],
+                        (int)$transaction->currencyId
+                    )
+                );
+            }
+            // compare currency code:
+            if (array_key_exists('currency_code', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_code']
+                && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode
+            ) {
+                $this->addWarning(
+                    $lineIndex,
+                    sprintf(
+                        'Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.',
+                        $lineIndex,
+                        $line['transactions'][$index]['currency_code'],
+                        $transaction->currencyCode
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    private function createTag(): void
+    {
+        if (false === $this->addTag) {
+            app('log')->debug('Not instructed to add a tag, so will not create one.');
+
+            return;
+        }
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new PostTagRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $body = [
+            'tag'  => $this->tag,
+            'date' => $this->tagDate,
+        ];
+        $request->setBody($body);
+
+        try {
+            /** @var PostTagResponse $response */
+            $response = $request->post();
+        } catch (ApiHttpException $e) {
+            $message = sprintf('Could not create tag. %s', $e->getMessage());
+            app('log')->error($message);
+            //            app('log')->error($e->getTraceAsString());
+            $this->addError(0, $message);
+
+            return;
+        }
+        if ($response instanceof ValidationErrorResponse) {
+            app('log')->error(json_encode($response->errors->toArray()));
+
+            return;
+        }
+        if (null !== $response->getTag()) {
+            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
+        }
+    }
+
+    /**
+     * @param  string  $key
+     * @param  array  $transaction
+     *
+     * @return string
+     */
+    private function getOriginalValue(string $key, array $transaction): string
+    {
+        $parts = explode('.', $key);
+        if (1 === count($parts)) {
+            return $transaction[$key] ?? '(not found)';
+        }
+        if (3 !== count($parts)) {
+            return '(unknown)';
+        }
+        $index = (int)$parts[1];
+
+        return (string)($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
+    }
+
+    /**
+     * @param  string  $key
+     * @param  string  $error
+     *
+     * @return bool
+     */
+    private function isDuplicationError(string $key, string $error): bool
+    {
+        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
+            app('log')->debug('This is a duplicate transaction error');
+
+            return true;
+        }
+        app('log')->debug('This is not a duplicate transaction error');
+
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    private function parseTag(): string
+    {
+        // $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $customTag = $this->configuration->getCustomTag();
+        if ('' === $customTag) {
+            // return default tag:
+            return sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        }
+        $items = [
+            '%year%'        => date('Y'),
+            '%month%'       => date('m'),
+            '%month_full%'  => date('F'),
+            '%day%'         => date('d'),
+            '%day_of_week%' => date('l'),
+            '%hour%'        => date('H'),
+            '%minute%'      => date('i'),
+            '%second%'      => date('s'),
+            '%date%'        => date('Y-m-d'),
+            '%time%'        => date('H:i'),
+            '%datetime%'    => date('Y-m-d \@ H:i'),
+            '%version%'     => config('importer.version'),
+        ];
+        $result = str_replace(array_keys($items), array_values($items), $customTag);
+        app('log')->debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
+        return $result;
+    }
+
+    /**
+     * @param  int  $index
+     * @param  array  $line
      *
      * @return array
      */
@@ -299,54 +485,104 @@ class ApiSubmitter
     }
 
     /**
-     * @param array $line
+     * Do a search at Firefly III and return the ID of the group found.
      *
-     * @return array
+     * @param  string  $field
+     * @param  string  $value
+     *
+     * @return int
      */
-    private function cleanupLine(array $line): array
+    private function searchField(string $field, string $value): int
     {
-        app('log')->debug('Going to map data for this line.');
-        if (array_key_exists(0, $this->mapping)) {
-            app('log')->debug('Configuration has mapping for opposing account name!');
-            /**
-             * @var int   $index
-             * @var array $transaction
-             */
-            foreach ($line['transactions'] as $index => $transaction) {
-                if ('withdrawal' === $transaction['type']) {
-                    // replace destination_name with destination_id
-                    $destination = $transaction['destination_name'] ?? '';
-                    if (array_key_exists($destination, $this->mapping[0])) {
-                        unset($transaction['destination_name']);
-                        unset($transaction['destination_iban']);
-                        $transaction['destination_id'] = $this->mapping[0][$destination];
-                        app('log')->debug(
-                            sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination])
-                        );
-                    }
-                }
-                if ('deposit' === $transaction['type']) {
-                    // replace source_name with source_id
-                    $source = $transaction['source_name'] ?? '';
-                    if (array_key_exists($source, $this->mapping[0])) {
-                        unset($transaction['source_name']);
-                        unset($transaction['source_iban']);
-                        $transaction['source_id'] = $this->mapping[0][$source];
-                        app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
-                    }
-                }
-                if ('' === trim((string)$transaction['description'] ?? '')) {
-                    $transaction['description'] = '(no description)';
-                }
-                $line['transactions'][$index] = $this->updateTransactionType($transaction);
-            }
-        }
+        // search for the exact description and not just a part of it:
+        $searchModifier = config(sprintf('csv.search_modifier.%s', $field));
+        $query          = sprintf('%s:"%s"', $searchModifier, $value);
 
-        return $line;
+        app('log')->debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
+
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchTransactionsRequest($url, $token);
+        $request->setQuery($query);
+        try {
+            /** @var GetTransactionsResponse $response */
+            $response = $request->get();
+        } catch (ApiHttpException $e) {
+            app('log')->error($e->getMessage());
+
+            return 0;
+        }
+        if (0 === $response->count()) {
+            return 0;
+        }
+        $first = $response->current();
+        app('log')->debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
+
+        return $first->id;
     }
 
     /**
-     * @param array $transaction
+     * Verify if the transaction is unique, based on the configuration
+     * and the content of the transaction. Returns a boolean.
+     *
+     * @param  int  $index
+     * @param  array  $line
+     *
+     * @return bool|null
+     */
+    private function uniqueTransaction(int $index, array $line): ?bool
+    {
+        if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
+            app('log')->debug(
+                sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod())
+            );
+
+            return null;
+        }
+        // do a search for the value and the field:
+        $transactions = $line['transactions'] ?? [];
+        $field        = $this->configuration->getUniqueColumnType();
+        $field        = 'external-id' === $field ? 'external_id' : $field;
+        $value        = '';
+        foreach ($transactions as $transactionIndex => $transaction) {
+            $value = (string)($transaction[$field] ?? '');
+            if ('' === $value) {
+                app('log')->debug(
+                    sprintf(
+                        'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
+                        $field,
+                        $index,
+                        $transactionIndex
+                    )
+                );
+                continue;
+            }
+            $searchResult = $this->searchField($field, $value);
+            if (0 !== $searchResult) {
+                app('log')->debug(
+                    sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult)
+                );
+                $message = sprintf(
+                    'There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).',
+                    $field,
+                    $value,
+                    $this->vanityURL,
+                    $searchResult
+                );
+                if (false === config('importer.ignore_duplicate_errors')) {
+                    $this->addError($index, $message);
+                }
+
+                return false;
+            }
+        }
+        app('log')->debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
+
+        return true;
+    }
+
+    /**
+     * @param  array  $transaction
      *
      * @return array
      */
@@ -367,211 +603,5 @@ class ApiSubmitter
         }
 
         return $transaction;
-    }
-
-    /**
-     * @param string $key
-     * @param array  $transaction
-     *
-     * @return string
-     */
-    private function getOriginalValue(string $key, array $transaction): string
-    {
-        $parts = explode('.', $key);
-        if (1 === count($parts)) {
-            return $transaction[$key] ?? '(not found)';
-        }
-        if (3 !== count($parts)) {
-            return '(unknown)';
-        }
-        $index = (int)$parts[1];
-
-        return (string)($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
-    }
-
-    /**
-     * @param string $key
-     * @param string $error
-     *
-     * @return bool
-     */
-    private function isDuplicationError(string $key, string $error): bool
-    {
-        if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
-            app('log')->debug('This is a duplicate transaction error');
-
-            return true;
-        }
-        app('log')->debug('This is not a duplicate transaction error');
-
-        return false;
-    }
-
-    /**
-     * @param int              $lineIndex
-     * @param array            $line
-     * @param TransactionGroup $group
-     */
-    private function compareArrays(int $lineIndex, array $line, TransactionGroup $group): void
-    {
-        // some fields may not have survived. Be sure to warn the user about this.
-        /** @var Transaction $transaction */
-        foreach ($group->transactions as $index => $transaction) {
-            // compare currency ID
-            if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id']
-                && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId
-            ) {
-                $this->addWarning(
-                    $lineIndex,
-                    sprintf(
-                        'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex,
-                        $line['transactions'][$index]['currency_id'],
-                        (int)$transaction->currencyId
-                    )
-                );
-            }
-            // compare currency code:
-            if (array_key_exists('currency_code', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_code']
-                && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode
-            ) {
-                $this->addWarning(
-                    $lineIndex,
-                    sprintf(
-                        'Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex,
-                        $line['transactions'][$index]['currency_code'],
-                        $transaction->currencyCode
-                    )
-                );
-            }
-        }
-    }
-
-    /**
-     * @param array $groupInfo
-     */
-    private function addTagToGroups(array $groupInfo): void
-    {
-        if ([] === $groupInfo) {
-            app('log')->debug('Group is empty, may not have been stored correctly.');
-
-            return;
-        }
-        if (false === $this->addTag) {
-            app('log')->debug('Will not add import tag.');
-
-            return;
-        }
-        if (false === $this->createdTag) {
-            $this->createTag();
-            $this->createdTag = true;
-        }
-
-        $groupId = (int)$groupInfo['group_id'];
-        app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body = [
-            'transactions' => [],
-        ];
-        /**
-         * @var int   $journalId
-         * @var array $currentTags
-         */
-        foreach ($groupInfo['journals'] as $journalId => $currentTags) {
-            $currentTags[]          = $this->tag;
-            $body['transactions'][] = [
-                'transaction_journal_id' => $journalId,
-                'tags'                   => $currentTags,
-            ];
-        }
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new PutTransactionRequest($url, $token, $groupId);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setBody($body);
-        try {
-            $request->put();
-        } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
-            //            app('log')->error($e->getTraceAsString());
-            $this->addError(0, 'Could not store transaction: see the log files.');
-        }
-    }
-
-    /**
-     *
-     */
-    private function createTag(): void
-    {
-        if (false === $this->addTag) {
-            app('log')->debug('Not instructed to add a tag, so will not create one.');
-
-            return;
-        }
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new PostTagRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $body = [
-            'tag'  => $this->tag,
-            'date' => $this->tagDate,
-        ];
-        $request->setBody($body);
-
-        try {
-            /** @var PostTagResponse $response */
-            $response = $request->post();
-        } catch (ApiHttpException $e) {
-            $message = sprintf('Could not create tag. %s', $e->getMessage());
-            app('log')->error($message);
-            //            app('log')->error($e->getTraceAsString());
-            $this->addError(0, $message);
-
-            return;
-        }
-        if ($response instanceof ValidationErrorResponse) {
-            app('log')->error(json_encode($response->errors->toArray()));
-
-            return;
-        }
-        if (null !== $response->getTag()) {
-            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
-        }
-    }
-
-    /**
-     * @param array $accountInfo
-     */
-    public function setAccountInfo(array $accountInfo): void
-    {
-        $this->accountInfo = $accountInfo;
-    }
-
-    /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->setAddTag($configuration->isAddImportTag());
-        $this->setMapping($configuration->getMapping());
-    }
-
-    /**
-     * @param bool $addTag
-     */
-    public function setAddTag(bool $addTag): void
-    {
-        $this->addTag = $addTag;
-    }
-
-    /**
-     * @param array $mapping
-     */
-    public function setMapping(array $mapping): void
-    {
-        $this->mapping = $mapping;
     }
 }

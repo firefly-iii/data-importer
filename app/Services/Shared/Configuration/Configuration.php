@@ -35,10 +35,11 @@ use UnexpectedValueException;
 class Configuration
 {
     public const VERSION = 3;
-    private array $accounts;
+    private array  $accounts;
     private bool   $addImportTag;
     private string $connection;
-    private bool $conversion;
+    private string $contentType;
+    private bool   $conversion;
     private string $date;
     private string $dateNotAfter;
     private string $dateNotBefore;
@@ -46,46 +47,55 @@ class Configuration
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
     private int    $defaultAccount;
-    private string $delimiter;
+    private string $customTag;
 
     // nordigen configuration
+    private string $delimiter;
     private array  $doMapping;
+
+    // flow and file type
     private string $duplicateDetectionMethod;
     private string $flow;
-    private bool   $headers;
+
+    // csv config
+    private string $groupedTransactionHandling;
 
     // spectre + nordigen configuration
-    private string $identifier;
+    private bool $headers;
 
     // spectre configuration
+    private string $identifier;
     private bool   $ignoreDuplicateLines;
     private bool   $ignoreDuplicateTransactions;
-    private bool   $ignoreSpectreCategories;
+
+    // camt configuration
+    private bool $ignoreSpectreCategories;
+    private bool $mapAllData;
 
     // date range settings
-    private bool   $mapAllData;
-    private array $mapping;
+    private array  $mapping;
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
-
-    // what type of import?
     private array  $nordigenRequisitions;
 
+    // what type of import?
+    private array $roles;
+
     // how to do double transaction detection?
-    private array  $roles; // 'classic' or 'cell'
+    private bool $rules; // 'classic' or 'cell'
 
     // configuration for "classic" method:
-    private bool   $rules;
-    private bool   $skipForm;
+    private bool  $skipForm;
+    private array $specifics;
 
     // configuration for "cell" method:
-    private array  $specifics;
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
+    private bool   $useEntireOpposingAddress;
 
     // configuration for utf-8
-    private int    $version;
+    private int $version;
 
     /**
      * Configuration constructor.
@@ -104,6 +114,8 @@ class Configuration
         $this->mapping        = [];
         $this->doMapping      = [];
         $this->flow           = 'file';
+        $this->contentType    = 'unknown';
+        $this->customTag      = '';
 
         // date range settings
         $this->dateRange       = 'all';
@@ -111,6 +123,10 @@ class Configuration
         $this->dateRangeUnit   = 'd';
         $this->dateNotBefore   = '';
         $this->dateNotAfter    = '';
+
+        // camt settings
+        $this->groupedTransactionHandling = 'single';
+        $this->useEntireOpposingAddress   = false;
 
         // nordigen configuration
         $this->nordigenCountry      = '';
@@ -147,7 +163,97 @@ class Configuration
     }
 
     /**
-     * @param array $data
+     * @param  array  $array
+     *
+     * @return static
+     */
+    public static function fromArray(array $array): self
+    {
+        $delimiters             = config('csv.delimiters_reversed');
+        $object                 = new self();
+        $object->headers        = $array['headers'] ?? false;
+        $object->date           = $array['date'] ?? '';
+        $object->defaultAccount = $array['default_account'] ?? 0;
+        $object->delimiter      = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
+        $object->rules          = $array['rules'] ?? true;
+        $object->skipForm       = $array['skip_form'] ?? false;
+        $object->addImportTag   = $array['add_import_tag'] ?? true;
+        $object->roles          = $array['roles'] ?? [];
+        $object->mapping        = $array['mapping'] ?? [];
+        $object->doMapping      = $array['do_mapping'] ?? [];
+        $object->version        = self::VERSION;
+        $object->flow           = $array['flow'] ?? 'file';
+        $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->customTag      = $array['custom_tag'] ?? '';
+
+        // sort
+        ksort($object->doMapping);
+        ksort($object->mapping);
+        ksort($object->roles);
+
+        // settings for spectre + nordigen
+        $object->mapAllData = $array['map_all_data'] ?? false;
+        $object->accounts   = $array['accounts'] ?? [];
+
+
+        // spectre
+        $object->identifier              = $array['identifier'] ?? '0';
+        $object->connection              = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
+
+        // date range settings
+        $object->dateRange       = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+        $object->dateNotBefore   = $array['date_not_before'] ?? '';
+        $object->dateNotAfter    = $array['date_not_after'] ?? '';
+
+        // camt
+        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
+
+        // nordigen information:
+        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
+        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
+
+        // duplicate transaction detection
+        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+
+        // config for "classic":
+        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
+        $object->ignoreDuplicateTransactions = $array['ignore_duplicate_transactions'] ?? true;
+
+        if (!array_key_exists('duplicate_detection_method', $array)) {
+            if (false === $object->ignoreDuplicateTransactions) {
+                app('log')->debug('Set the duplicate method to "none".');
+                $object->duplicateDetectionMethod = 'none';
+            }
+        }
+
+        // overrule a setting:
+        if ('none' === $object->duplicateDetectionMethod) {
+            $object->ignoreDuplicateTransactions = false;
+        }
+
+        // config for "cell":
+        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
+        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
+
+        // utf8
+        $object->conversion = $array['conversion'] ?? false;
+
+        if ('csv' === $object->flow) {
+            $object->flow        = 'file';
+            $object->contentType = 'csv';
+        }
+
+        return $object;
+    }
+
+    /**
+     * @param  array  $data
      *
      * @return $this
      */
@@ -175,7 +281,131 @@ class Configuration
     }
 
     /**
-     * @param array $data
+     * @param  array  $array
+     *
+     * @return $this
+     */
+    public static function fromRequest(array $array): self
+    {
+        $delimiters             = config('csv.delimiters_reversed');
+        $object                 = new self();
+        $object->version        = self::VERSION;
+        $object->headers        = $array['headers'] ?? false;
+        $object->date           = $array['date'];
+        $object->defaultAccount = $array['default_account'];
+        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
+        $object->rules          = $array['rules'];
+        $object->skipForm       = $array['skip_form'];
+        $object->addImportTag   = $array['add_import_tag'] ?? true;
+        $object->roles          = $array['roles'] ?? [];
+        $object->mapping        = $array['mapping'] ?? [];
+        $object->doMapping      = $array['do_mapping'] ?? [];
+        $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->customTag      = $array['custom_tag'] ?? '';
+
+        // mapping for spectre + nordigen
+        $object->mapAllData = $array['map_all_data'] ?? false;
+
+        // spectre
+        $object->identifier              = $array['identifier'] ?? '0';
+        $object->connection              = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
+
+        // nordigen:
+        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
+        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
+
+        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
+
+        // spectre + nordigen
+        $object->accounts = $array['accounts'] ?? [];
+
+        // date range settings
+        $object->dateRange       = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+
+        // null or Carbon because fromRequest will give Carbon object.
+        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
+
+        // duplicate transaction detection
+        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+
+        // config for "classic":
+        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
+        $object->ignoreDuplicateTransactions = true;
+
+        // config for "cell":
+        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
+        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
+
+        // utf8 conversion
+        $object->conversion = $array['conversion'] ?? false;
+
+        // flow
+        $object->flow = $array['flow'] ?? 'file';
+
+        // overrule a setting:
+        if ('none' === $object->duplicateDetectionMethod) {
+            $object->ignoreDuplicateTransactions = false;
+        }
+
+        $object->specifics = [];
+        foreach ($array['specifics'] as $key => $enabled) {
+            if (true === $enabled) {
+                $object->specifics[] = $key;
+            }
+        }
+        if ('csv' === $object->flow) {
+            $object->flow        = 'file';
+            $object->contentType = 'csv';
+        }
+
+        return $object;
+    }
+
+    /**
+     * Create a standard empty configuration.
+     *
+     * @return Configuration
+     */
+    public static function make(): self
+    {
+        return new self();
+    }
+
+    /**
+     * @param  string  $unit
+     * @param  int  $number
+     *
+     * @return string|null
+     */
+    private static function calcDateNotBefore(string $unit, int $number): ?string
+    {
+        $functions = [
+            'd' => 'subDays',
+            'w' => 'subWeeks',
+            'm' => 'subMonths',
+            'y' => 'subYears',
+        ];
+        if (isset($functions[$unit])) {
+            $today    = Carbon::now();
+            $function = $functions[$unit];
+            $today->$function($number);
+
+            return $today->format('Y-m-d');
+        }
+        app('log')->error(sprintf('Could not parse date setting. Unknown key "%s"', $unit));
+
+        return null;
+    }
+
+    /**
+     * @param  array  $data
      *
      * @return static
      */
@@ -190,6 +420,12 @@ class Configuration
         $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'file';
+        $object->contentType    = $data['content_type'] ?? 'unknown';
+        $object->customTag      = $data['custom_tag'] ?? '';
+
+        // camt settings
+        $object->groupedTransactionHandling = $data['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress   = $data['use_entire_opposing_address'] ?? false;
 
         // other settings (are not in v1 anyway)
         $object->dateRange       = $data['date_range'] ?? 'all';
@@ -285,100 +521,7 @@ class Configuration
     }
 
     /**
-     * @param array $data
-     *
-     * @return static
-     */
-    private static function fromVersionTwo(array $data): self
-    {
-        return self::fromArray($data);
-    }
-
-    /**
-     * @param array $array
-     *
-     * @return static
-     */
-    public static function fromArray(array $array): self
-    {
-        $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self();
-        $object->headers        = $array['headers'] ?? false;
-        $object->date           = $array['date'] ?? '';
-        $object->defaultAccount = $array['default_account'] ?? 0;
-        $object->delimiter      = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
-        $object->rules          = $array['rules'] ?? true;
-        $object->skipForm       = $array['skip_form'] ?? false;
-        $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->roles          = $array['roles'] ?? [];
-        $object->mapping        = $array['mapping'] ?? [];
-        $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->version        = self::VERSION;
-        $object->flow           = $array['flow'] ?? 'file';
-
-        // sort
-        ksort($object->doMapping);
-        ksort($object->mapping);
-        ksort($object->roles);
-
-        // settings for spectre + nordigen
-        $object->mapAllData = $array['map_all_data'] ?? false;
-        $object->accounts   = $array['accounts'] ?? [];
-
-
-        // spectre
-        $object->identifier              = $array['identifier'] ?? '0';
-        $object->connection              = $array['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
-
-        // date range settings
-        $object->dateRange       = $array['date_range'] ?? 'all';
-        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
-        $object->dateNotBefore   = $array['date_not_before'] ?? '';
-        $object->dateNotAfter    = $array['date_not_after'] ?? '';
-
-        // nordigen information:
-        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
-        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
-
-        // duplicate transaction detection
-        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
-
-        // config for "classic":
-        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
-        $object->ignoreDuplicateTransactions = $array['ignore_duplicate_transactions'] ?? true;
-
-        if (!array_key_exists('duplicate_detection_method', $array)) {
-            if (false === $object->ignoreDuplicateTransactions) {
-                app('log')->debug('Set the duplicate method to "none".');
-                $object->duplicateDetectionMethod = 'none';
-            }
-        }
-
-        // overrule a setting:
-        if ('none' === $object->duplicateDetectionMethod) {
-            $object->ignoreDuplicateTransactions = false;
-        }
-
-        // config for "cell":
-        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
-        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
-
-        // utf8
-        $object->conversion = $array['conversion'] ?? false;
-
-        if ('csv' === $object->flow) {
-            $object->flow = 'file';
-        }
-
-        return $object;
-    }
-
-    /**
-     * @param array $data
+     * @param  array  $data
      *
      * @return static
      */
@@ -391,100 +534,18 @@ class Configuration
     }
 
     /**
-     * @param array $array
+     * @param  array  $data
      *
-     * @return $this
+     * @return static
      */
-    public static function fromRequest(array $array): self
+    private static function fromVersionTwo(array $data): self
     {
-        $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self();
-        $object->version        = self::VERSION;
-        $object->headers        = $array['headers'] ?? false;
-        $object->date           = $array['date'];
-        $object->defaultAccount = $array['default_account'];
-        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
-        $object->rules          = $array['rules'];
-        $object->skipForm       = $array['skip_form'];
-        $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->roles          = $array['roles'] ?? [];
-        $object->mapping        = $array['mapping'] ?? [];
-        $object->doMapping      = $array['do_mapping'] ?? [];
-
-        // mapping for spectre + nordigen
-        $object->mapAllData = $array['map_all_data'] ?? false;
-
-        // spectre
-        $object->identifier              = $array['identifier'] ?? '0';
-        $object->connection              = $array['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
-
-        // nordigen:
-        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
-        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
-
-        // spectre + nordigen
-        $object->accounts = $array['accounts'] ?? [];
-
-        // date range settings
-        $object->dateRange       = $array['date_range'] ?? 'all';
-        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
-
-        // null or Carbon because fromRequest will give Carbon object.
-        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
-        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
-
-        // duplicate transaction detection
-        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
-
-        // config for "classic":
-        $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
-        $object->ignoreDuplicateTransactions = true;
-
-        // config for "cell":
-        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
-        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
-
-        // utf8 conversion
-        $object->conversion = $array['conversion'] ?? false;
-
-        // flow
-        $object->flow = $array['flow'] ?? 'file';
-
-        // overrule a setting:
-        if ('none' === $object->duplicateDetectionMethod) {
-            $object->ignoreDuplicateTransactions = false;
-        }
-
-        $object->specifics = [];
-        foreach ($array['specifics'] as $key => $enabled) {
-            if (true === $enabled) {
-                $object->specifics[] = $key;
-            }
-        }
-        if ('csv' === $object->flow) {
-            $object->flow = 'file';
-        }
-
-        return $object;
+        return self::fromArray($data);
     }
 
     /**
-     * Create a standard empty configuration.
-     *
-     * @return Configuration
-     */
-    public static function make(): self
-    {
-        return new self();
-    }
-
-    /**
-     * @param string $key
-     * @param string $identifier
+     * @param  string  $key
+     * @param  string  $identifier
      */
     public function addRequisition(string $key, string $identifier)
     {
@@ -500,7 +561,7 @@ class Configuration
     }
 
     /**
-     * @param array $accounts
+     * @param  array  $accounts
      */
     public function setAccounts(array $accounts): void
     {
@@ -516,11 +577,27 @@ class Configuration
     }
 
     /**
-     * @param string $connection
+     * @param  string  $connection
      */
     public function setConnection(string $connection): void
     {
         $this->connection = $connection;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * @param  string  $contentType
+     */
+    public function setContentType(string $contentType): void
+    {
+        $this->contentType = $contentType;
     }
 
     /**
@@ -596,7 +673,7 @@ class Configuration
     }
 
     /**
-     * @param array $doMapping
+     * @param  array  $doMapping
      */
     public function setDoMapping(array $doMapping): void
     {
@@ -620,11 +697,19 @@ class Configuration
     }
 
     /**
-     * @param string $flow
+     * @param  string  $flow
      */
     public function setFlow(string $flow): void
     {
         $this->flow = $flow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupedTransactionHandling(): string
+    {
+        return $this->groupedTransactionHandling;
     }
 
     /**
@@ -636,7 +721,7 @@ class Configuration
     }
 
     /**
-     * @param string $identifier
+     * @param  string  $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -652,7 +737,7 @@ class Configuration
     }
 
     /**
-     * @param array $mapping
+     * @param  array  $mapping
      */
     public function setMapping(array $mapping): void
     {
@@ -673,7 +758,7 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenBank
+     * @param  string  $nordigenBank
      */
     public function setNordigenBank(string $nordigenBank): void
     {
@@ -689,7 +774,7 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenCountry
+     * @param  string  $nordigenCountry
      */
     public function setNordigenCountry(string $nordigenCountry): void
     {
@@ -705,7 +790,7 @@ class Configuration
     }
 
     /**
-     * @param string $nordigenBank
+     * @param  string  $nordigenMaxDays
      */
     public function setNordigenMaxDays(string $nordigenMaxDays): void
     {
@@ -721,7 +806,7 @@ class Configuration
     }
 
     /**
-     * @param string $key
+     * @param  string  $key
      *
      * @return string|null
      */
@@ -739,7 +824,7 @@ class Configuration
     }
 
     /**
-     * @param array $roles
+     * @param  array  $roles
      */
     public function setRoles(array $roles): void
     {
@@ -771,7 +856,7 @@ class Configuration
     }
 
     /**
-     * @param string $name
+     * @param  string  $name
      *
      * @return bool
      */
@@ -853,16 +938,11 @@ class Configuration
     }
 
     /**
-     * Return the array but drop some potentially massive arrays.
-     *
-     * @return array
+     * @return bool
      */
-    public function toSessionArray(): array
+    public function isUseEntireOpposingAddress(): bool
     {
-        $array = $this->toArray();
-        unset($array['mapping'], $array['do_mapping'], $array['roles']);
-
-        return $array;
+        return $this->useEntireOpposingAddress;
     }
 
     /**
@@ -871,51 +951,57 @@ class Configuration
     public function toArray(): array
     {
         $array = [
-            'version'                    => $this->version,
-            'source'                     => sprintf('fidi-%s', config('importer.version')),
-            'created_at'                 => date(DateTimeInterface::W3C),
-            'date'                       => $this->date,
-            'default_account'            => $this->defaultAccount,
-            'delimiter'                  => $this->delimiter,
-            'headers'                    => $this->headers,
-            'rules'                      => $this->rules,
-            'skip_form'                  => $this->skipForm,
-            'add_import_tag'             => $this->addImportTag,
-            'roles'                      => $this->roles,
-            'do_mapping'                 => $this->doMapping,
-            'mapping'                    => $this->mapping,
-            'duplicate_detection_method' => $this->duplicateDetectionMethod,
-            'ignore_duplicate_lines'     => $this->ignoreDuplicateLines,
-            'unique_column_index'        => $this->uniqueColumnIndex,
-            'unique_column_type'         => $this->uniqueColumnType,
-            'flow'                       => $this->flow,
+            'version'                      => $this->version,
+            'source'                       => sprintf('fidi-%s', config('importer.version')),
+            'created_at'                   => date(DateTimeInterface::W3C),
+            'date'                         => $this->date,
+            'default_account'              => $this->defaultAccount,
+            'delimiter'                    => $this->delimiter,
+            'headers'                      => $this->headers,
+            'rules'                        => $this->rules,
+            'skip_form'                    => $this->skipForm,
+            'add_import_tag'               => $this->addImportTag,
+            'roles'                        => $this->roles,
+            'do_mapping'                   => $this->doMapping,
+            'mapping'                      => $this->mapping,
+            'duplicate_detection_method'   => $this->duplicateDetectionMethod,
+            'ignore_duplicate_lines'       => $this->ignoreDuplicateLines,
+            'unique_column_index'          => $this->uniqueColumnIndex,
+            'unique_column_type'           => $this->uniqueColumnType,
+            'flow'                         => $this->flow,
+            'content_type'                 => $this->contentType,
+            'custom_tag'                   => $this->customTag,
 
             // spectre
-            'identifier'                 => $this->identifier,
-            'connection'                 => $this->connection,
-            'ignore_spectre_categories'  => $this->ignoreSpectreCategories,
+            'identifier'                   => $this->identifier,
+            'connection'                   => $this->connection,
+            'ignore_spectre_categories'    => $this->ignoreSpectreCategories,
+
+            // camt:
+            'grouped_transaction_handling' => $this->groupedTransactionHandling,
+            'use_entire_opposing_address'  => $this->useEntireOpposingAddress,
 
             // mapping for spectre + nordigen
-            'map_all_data'               => $this->mapAllData,
+            'map_all_data'                 => $this->mapAllData,
 
             // settings for spectre + nordigen
-            'accounts'                   => $this->accounts,
+            'accounts'                     => $this->accounts,
 
             // date range settings:
-            'date_range'                 => $this->dateRange,
-            'date_range_number'          => $this->dateRangeNumber,
-            'date_range_unit'            => $this->dateRangeUnit,
-            'date_not_before'            => $this->dateNotBefore,
-            'date_not_after'             => $this->dateNotAfter,
+            'date_range'                   => $this->dateRange,
+            'date_range_number'            => $this->dateRangeNumber,
+            'date_range_unit'              => $this->dateRangeUnit,
+            'date_not_before'              => $this->dateNotBefore,
+            'date_not_after'               => $this->dateNotAfter,
 
             // nordigen information:
-            'nordigen_country'           => $this->nordigenCountry,
-            'nordigen_bank'              => $this->nordigenBank,
-            'nordigen_requisitions'      => $this->nordigenRequisitions,
-            'nordigen_max_days'          => $this->nordigenMaxDays,
+            'nordigen_country'             => $this->nordigenCountry,
+            'nordigen_bank'                => $this->nordigenBank,
+            'nordigen_requisitions'        => $this->nordigenRequisitions,
+            'nordigen_max_days'            => $this->nordigenMaxDays,
 
             // utf8
-            'conversion'                 => $this->conversion,
+            'conversion'                   => $this->conversion,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -924,6 +1010,19 @@ class Configuration
         if ('classic' === $this->duplicateDetectionMethod) {
             $array['ignore_duplicate_transactions'] = true;
         }
+
+        return $array;
+    }
+
+    /**
+     * Return the array but drop some potentially massive arrays.
+     *
+     * @return array
+     */
+    public function toSessionArray(): array
+    {
+        $array = $this->toArray();
+        unset($array['mapping'], $array['do_mapping'], $array['roles']);
 
         return $array;
     }
@@ -972,28 +1071,12 @@ class Configuration
     }
 
     /**
-     * @param string $unit
-     * @param int    $number
-     *
-     * @return string|null
+     * @return string
      */
-    private static function calcDateNotBefore(string $unit, int $number): ?string
+    public function getCustomTag(): string
     {
-        $functions = [
-            'd' => 'subDays',
-            'w' => 'subWeeks',
-            'm' => 'subMonths',
-            'y' => 'subYears',
-        ];
-        if (isset($functions[$unit])) {
-            $today    = Carbon::now();
-            $function = $functions[$unit];
-            $today->$function($number);
-
-            return $today->format('Y-m-d');
-        }
-        app('log')->error(sprintf('Could not parse date setting. Unknown key "%s"', $unit));
-
-        return null;
+        return $this->customTag;
     }
+
+
 }

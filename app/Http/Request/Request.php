@@ -37,7 +37,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class Request extends FormRequest
 {
     /**
-     * @param string|null $value
+     * @param  string|null  $value
      *
      * @return bool
      */
@@ -56,7 +56,7 @@ class Request extends FormRequest
     /**
      * Return integer value.
      *
-     * @param string $field
+     * @param  string  $field
      *
      * @return int
      */
@@ -68,7 +68,7 @@ class Request extends FormRequest
     /**
      * Return string value.
      *
-     * @param string $field
+     * @param  string  $field
      *
      * @return string
      */
@@ -80,7 +80,7 @@ class Request extends FormRequest
     /**
      * Parse to integer
      *
-     * @param string|null $string
+     * @param  string|null  $string
      *
      * @return int|null
      */
@@ -99,7 +99,7 @@ class Request extends FormRequest
     /**
      * Return integer value, or NULL when it's not set.
      *
-     * @param string $field
+     * @param  string  $field
      *
      * @return int|null
      */
@@ -120,7 +120,7 @@ class Request extends FormRequest
     /**
      * Return string value, or NULL if empty.
      *
-     * @param string $field
+     * @param  string  $field
      *
      * @return string|null
      */
@@ -136,7 +136,7 @@ class Request extends FormRequest
     /**
      * Parse and clean a string.
      *
-     * @param string|null $string
+     * @param  string|null  $string
      *
      * @return string|null
      */
@@ -153,7 +153,7 @@ class Request extends FormRequest
     /**
      * Return date or NULL.
      *
-     * @param string $field
+     * @param  string  $field
      *
      * @return Carbon|null
      */

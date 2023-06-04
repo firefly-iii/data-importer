@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Nordigen;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
@@ -42,6 +43,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use JsonException;
+use League\Flysystem\FilesystemException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class SelectionController
@@ -63,7 +67,10 @@ class SelectionController extends Controller
      * Step 9, select a country + bank.
      *
      * @return Factory|View
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     * @throws AgreementExpiredException
      */
     public function index()
     {
@@ -105,10 +112,13 @@ class SelectionController extends Controller
     }
 
     /**
-     * @param SelectionRequest $request
+     * @param  SelectionRequest  $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
+     * @throws FilesystemException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {

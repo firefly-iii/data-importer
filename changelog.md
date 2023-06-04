@@ -2,7 +2,26 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.2.2 - 2021-03-19
+## v1.3.0 - 2023-06-05
+
+- ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### CAMT.053 support
+
+GitHub user @beatbesmer has been working hard to make the data importer support CAMT.053 files. You can now upload 
+these files like you would a CSV file and have them imported into Firefly III. Although this new feature has been
+thorougly tested by Beat and myself, CAMT.053's XML standards are a very loose standard so expect bugs, issues and
+crashes. We welcome your feedback in the form of [bug reports](https://github.com/firefly-iii/firefly-iii/issues/new?assignees=&labels=&projects=&template=bug.yml)
+
+### Added
+- [Issue 6108](https://github.com/firefly-iii/firefly-iii/issues/6108) You can customize the import tag used by the data importer
+
+### Fixed
+- [Issue 5996](https://github.com/firefly-iii/firefly-iii/issues/5996) Cannot send email using self-signed certificates
+- [Issue 7512](https://github.com/firefly-iii/firefly-iii/issues/7512) Broken links in app and documentation
+- [Issue 7264](https://github.com/firefly-iii/firefly-iii/issues/7264) Data Importer crashes when mail server auth fails
+
+## v1.2.2 - 2023-03-19
 
 - ⚠️ This release may create duplicate transactions. Don't import large batches!
 
@@ -297,7 +316,7 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 - 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
 
 ### Added
-- Code to support the [cloud installation](https://docs.firefly-iii.org/data-importer/install/public/).
+- Code to support the [cloud installation](https://docs.firefly-iii.org/data-importer/installation/public/).
 - Proper page for maintenance mode.
 
 ### Changed

@@ -38,5 +38,4 @@ return $config->setRules([
     'strict_param' => true,
     'array_syntax' => ['syntax' => 'short'],
 ])
-              ->setFinder($finder)
-    ;
+              ->setFinder($finder);

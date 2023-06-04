@@ -45,7 +45,7 @@ class CleanNlString implements ConverterInterface
     /**
      * Add extra configuration parameters.
      *
-     * @param string $configuration
+     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {

@@ -30,7 +30,7 @@ namespace App\Services\CSV\Conversion\Task;
 class Amount extends AbstractTask
 {
     /**
-     * @param array $group
+     * @param  array  $group
      *
      * @return array
      */
@@ -64,7 +64,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param array $transaction
+     * @param  array  $transaction
      *
      * @return array
      */
@@ -115,7 +115,7 @@ class Amount extends AbstractTask
         app('log')->debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
-        if (isset($transaction['foreign_amount']) && null !== $transaction['foreign_amount']) {
+        if (isset($transaction['foreign_amount'])) {
             $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
             app('log')->debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }
@@ -139,7 +139,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param string $amount
+     * @param  string  $amount
      *
      * @return bool
      */

@@ -1,0 +1,36 @@
+{% macro roleselection(roles, fieldName, selection) %}
+    <select name="roles[{{ fieldName }}]" id="roles_{{ fieldName}}" class="form-control">
+    {% for key, role in roles %}
+    <option value="{{ key }}" label="{{ trans('import.column_'~key) }}"{% if selection == key %} selected{% endif %}>
+        {{ trans('import.column_'~key) }}
+    </option>
+    {% endfor %}
+    </select>
+{% endmacro %}
+
+{% macro field(name) %}
+    {{trans('camt.field_'~name) }}
+{% endmacro %}
+
+{% macro description(name) %}
+    {% if trans('camt.field_'~name~'_description') != 'camt.field_'~name~'_description' %}
+        <br><span class="text-muted small">{{trans('camt.field_'~name~'_description') }}</span>
+    {% endif %}
+{% endmacro %}
+
+{% macro examples(examples) %}
+    {% if examples|length > 0 %}
+        {% for example in examples %}
+            <pre style="color:#e83e8c;margin-bottom:0;">{{ example }}</pre>
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+{% macro domapping(fieldName, isChecked = false) %}
+    <label for="do_mapping_{{ fieldName }}">
+        <input type="checkbox"
+           {% if isChecked %}checked{% endif %}
+               name="do_mapping[{{ fieldName }}]" id="do_mapping_{{ fieldName }}"
+           value="1"/>
+    </label>
+{% endmacro %}

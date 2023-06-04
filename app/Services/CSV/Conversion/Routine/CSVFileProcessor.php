@@ -48,7 +48,7 @@ class CSVFileProcessor
     /**
      * CSVFileProcessor constructor.
      *
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -102,7 +102,7 @@ class CSVFileProcessor
     }
 
     /**
-     * @param string $delimiter
+     * @param  string  $delimiter
      */
     public function setDelimiter(string $delimiter): void
     {
@@ -116,9 +116,25 @@ class CSVFileProcessor
     }
 
     /**
+     * @param  bool  $hasHeaders
+     */
+    public function setHasHeaders(bool $hasHeaders): void
+    {
+        $this->hasHeaders = $hasHeaders;
+    }
+
+    /**
+     * @param  Reader  $reader
+     */
+    public function setReader(Reader $reader): void
+    {
+        $this->reader = $reader;
+    }
+
+    /**
      * Loop all records from CSV file.
      *
-     * @param ResultSet $records
+     * @param  ResultSet  $records
      *
      * @return array
      * @throws ImporterErrorException
@@ -147,27 +163,7 @@ class CSVFileProcessor
     }
 
     /**
-     * Do a first sanity check on whatever comes out of the CSV file.
-     *
-     * @param array $line
-     *
-     * @return array
-     */
-    private function sanitize(array $line): array
-    {
-        $lineValues = array_values($line);
-        array_walk(
-            $lineValues,
-            static function ($element) {
-                return trim(str_replace('&nbsp;', ' ', (string)$element));
-            }
-        );
-
-        return $lineValues;
-    }
-
-    /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return array
      * @throws ImporterErrorException
@@ -200,18 +196,22 @@ class CSVFileProcessor
     }
 
     /**
-     * @param bool $hasHeaders
+     * Do a first sanity check on whatever comes out of the CSV file.
+     *
+     * @param  array  $line
+     *
+     * @return array
      */
-    public function setHasHeaders(bool $hasHeaders): void
+    private function sanitize(array $line): array
     {
-        $this->hasHeaders = $hasHeaders;
-    }
+        $lineValues = array_values($line);
+        array_walk(
+            $lineValues,
+            static function ($element) {
+                return trim(str_replace('&nbsp;', ' ', (string)$element));
+            }
+        );
 
-    /**
-     * @param Reader $reader
-     */
-    public function setReader(Reader $reader): void
-    {
-        $this->reader = $reader;
+        return $lineValues;
     }
 }

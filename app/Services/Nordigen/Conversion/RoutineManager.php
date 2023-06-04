@@ -42,9 +42,9 @@ class RoutineManager implements RoutineManagerInterface
     use IsRunningCli;
     use GeneratesIdentifier;
 
-    private array $allErrors;
-    private array $allMessages;
-    private array $allWarnings;
+    private array                $allErrors;
+    private array                $allMessages;
+    private array                $allWarnings;
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
     private GenerateTransactions $transactionGenerator;
@@ -167,7 +167,25 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param array $messages
+     * @param  array  $errors
+     *
+     * @return void
+     */
+    private function mergeErrors(array $errors): void
+    {
+        foreach ($errors as $index => $array) {
+            $exists = array_key_exists($index, $this->allErrors);
+            if (true === $exists) {
+                $this->allErrors[$index] = array_merge($this->allErrors[$index], $array);
+            }
+            if (false === $exists) {
+                $this->allErrors[$index] = $array;
+            }
+        }
+    }
+
+    /**
+     * @param  array  $messages
      *
      * @return void
      */
@@ -185,7 +203,7 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param array $warnings
+     * @param  array  $warnings
      *
      * @return void
      */
@@ -198,24 +216,6 @@ class RoutineManager implements RoutineManagerInterface
             }
             if (false === $exists) {
                 $this->allWarnings[$index] = $array;
-            }
-        }
-    }
-
-    /**
-     * @param array $errors
-     *
-     * @return void
-     */
-    private function mergeErrors(array $errors): void
-    {
-        foreach ($errors as $index => $array) {
-            $exists = array_key_exists($index, $this->allErrors);
-            if (true === $exists) {
-                $this->allErrors[$index] = array_merge($this->allErrors[$index], $array);
-            }
-            if (false === $exists) {
-                $this->allErrors[$index] = $array;
             }
         }
     }

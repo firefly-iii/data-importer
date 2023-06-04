@@ -53,17 +53,6 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has a Nordigen ID (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasId(): bool
-    {
-        return '' !== (string)request()->cookie(self::NORDIGEN_ID);
-    }
-
-    /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
      *
      * @return string
@@ -80,21 +69,10 @@ class SecretManager
     }
 
     /**
-     * Will verify if the user has a Nordigen Key (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasKey(): bool
-    {
-        return '' !== (string)request()->cookie(self::NORDIGEN_KEY);
-    }
-
-    /**
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $identifier
+     * @param  string  $identifier
      *
      * @return Cookie
      */
@@ -107,12 +85,34 @@ class SecretManager
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param string $key
+     * @param  string  $key
      *
      * @return Cookie
      */
     public static function saveKey(string $key): Cookie
     {
         return cookie(self::NORDIGEN_KEY, $key);
+    }
+
+    /**
+     * Will verify if the user has a Nordigen ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasId(): bool
+    {
+        return '' !== (string)request()->cookie(self::NORDIGEN_ID);
+    }
+
+    /**
+     * Will verify if the user has a Nordigen Key (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasKey(): bool
+    {
+        return '' !== (string)request()->cookie(self::NORDIGEN_KEY);
     }
 }

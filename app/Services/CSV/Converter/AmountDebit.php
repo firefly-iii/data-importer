@@ -1,4 +1,5 @@
 <?php
+
 /*
  * AmountDebit.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -52,7 +53,7 @@ class AmountDebit implements ConverterInterface
     /**
      * Add extra configuration parameters.
      *
-     * @param string $configuration
+     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {

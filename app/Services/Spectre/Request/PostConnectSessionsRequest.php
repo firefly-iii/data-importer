@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\PostConnectSessionResponse;
 
@@ -38,9 +39,9 @@ class PostConnectSessionsRequest extends Request
     /**
      * PostConnectSessionsRequest constructor.
      *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
+     * @param  string  $url
+     * @param  string  $appId
+     * @param  string  $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -60,6 +61,7 @@ class PostConnectSessionsRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
      */
     public function post(): Response
     {

@@ -26,6 +26,7 @@ namespace App\Services\Storage;
 
 use App\Exceptions\ImporterErrorException;
 use JsonException;
+use League\Flysystem\FilesystemException;
 use Storage;
 use UnexpectedValueException;
 
@@ -35,8 +36,8 @@ use UnexpectedValueException;
 class StorageService
 {
     /**
-     * @param string $name
-     * @param bool   $convert
+     * @param  string  $name
+     * @param  bool  $convert
      *
      * @return string
      */
@@ -65,9 +66,10 @@ class StorageService
     }
 
     /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return string
+     * @throws FilesystemException
      * @throws JsonException
      */
     public static function storeArray(array $array): string
@@ -87,9 +89,10 @@ class StorageService
     }
 
     /**
-     * @param string $content
+     * @param  string  $content
      *
      * @return string
+     * @throws FilesystemException
      * @throws ImporterErrorException
      */
     public static function storeContent(string $content): string

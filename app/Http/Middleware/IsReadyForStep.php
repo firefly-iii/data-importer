@@ -41,8 +41,8 @@ trait IsReadyForStep
     public const TEST = 'test';
 
     /**
-     * @param Request $request
-     * @param Closure $next
+     * @param  Request  $request
+     * @param  Closure  $next
      *
      * @return mixed
      * @throws ImporterErrorException
@@ -62,10 +62,12 @@ trait IsReadyForStep
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return bool
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     protected function isReadyForStep(Request $request): bool
     {
@@ -83,18 +85,64 @@ trait IsReadyForStep
         }
         if ('nordigen' === $flow) {
             $result = $this->isReadyForNordigenStep();
+
             //app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
 
             return $result;
         }
         if ('spectre' === $flow) {
             $result = $this->isReadyForSpectreStep();
+
             //app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
 
             return $result;
         }
 
         return $this->isReadyForBasicStep();
+    }
+
+    /**
+     * @param  Request  $request
+     *
+     * @return RedirectResponse|null
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     */
+    protected function redirectToCorrectStep(Request $request): ?RedirectResponse
+    {
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        if (null === $flow) {
+            app('log')->debug('redirectToCorrectStep returns true because $flow is null');
+
+            return null;
+        }
+        if ('file' === $flow) {
+            return $this->redirectToCorrectFileStep();
+        }
+        if ('nordigen' === $flow) {
+            return $this->redirectToCorrectNordigenStep();
+        }
+        if ('spectre' === $flow) {
+            return $this->redirectToCorrectSpectreStep();
+        }
+
+        return $this->redirectToBasicStep();
+    }
+
+    /**
+     * @return bool
+     * @throws ImporterErrorException
+     */
+    private function isReadyForBasicStep(): bool
+    {
+        app('log')->debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
+            case 'service-validation':
+                return true;
+        }
     }
 
     /**
@@ -331,45 +379,16 @@ trait IsReadyForStep
     }
 
     /**
-     * @return bool
+     * @return RedirectResponse
      * @throws ImporterErrorException
      */
-    private function isReadyForBasicStep(): bool
+    private function redirectToBasicStep(): RedirectResponse
     {
-        app('log')->debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
+        app('log')->debug(sprintf('redirectToBasicStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
-            case 'service-validation':
-                return true;
+                throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));
         }
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return RedirectResponse|null
-     * @throws ImporterErrorException
-     */
-    protected function redirectToCorrectStep(Request $request): ?RedirectResponse
-    {
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
-        if (null === $flow) {
-            app('log')->debug('redirectToCorrectStep returns true because $flow is null');
-
-            return null;
-        }
-        if ('file' === $flow) {
-            return $this->redirectToCorrectFileStep();
-        }
-        if ('nordigen' === $flow) {
-            return $this->redirectToCorrectNordigenStep();
-        }
-        if ('spectre' === $flow) {
-            return $this->redirectToCorrectSpectreStep();
-        }
-
-        return $this->redirectToBasicStep();
     }
 
     /**
@@ -536,19 +555,6 @@ trait IsReadyForStep
 
                     return redirect($route);
                 }
-        }
-    }
-
-    /**
-     * @return RedirectResponse
-     * @throws ImporterErrorException
-     */
-    private function redirectToBasicStep(): RedirectResponse
-    {
-        app('log')->debug(sprintf('redirectToBasicStep("%s")', self::STEP));
-        switch (self::STEP) {
-            default:
-                throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));
         }
     }
 }

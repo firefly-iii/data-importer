@@ -28,11 +28,12 @@ namespace App\Handlers\Events;
 use App\Events\ImportedTransactions;
 use App\Mail\ImportReportMail;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 class ImportedTransactionsEventHandler
 {
     /**
-     * @param ImportedTransactions $event
+     * @param  ImportedTransactions  $event
      */
     public function sendReportOverMail(ImportedTransactions $event): void
     {
@@ -67,7 +68,12 @@ class ImportedTransactionsEventHandler
             app('log')->debug(sprintf('Warnings count: %s', count($event->warnings)));
             app('log')->debug(sprintf('Errors count  : %s', count($event->errors)));
             app('log')->debug('If no error below this line, mail was sent!');
-            Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
+            try {
+                Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
+            } catch (TransportException $e) {
+                app('log')->error('Could not send mail. See error below');
+                app('log')->error($e->getMessage());
+            }
             app('log')->debug('If no error above this line, mail was sent!');
         }
         if (0 === count($event->messages) && 0 === count($event->warnings) && 0 === count($event->errors)) {

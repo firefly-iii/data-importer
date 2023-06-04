@@ -32,15 +32,15 @@ use Illuminate\Support\Collection;
 class Country
 {
     /**
-     * @param string     $code
-     * @param Collection $banks
+     * @param  string  $code
+     * @param  Collection  $banks
      */
     public function __construct(public string $code, public Collection $banks)
     {
     }
 
     /**
-     * @param Bank $bank
+     * @param  Bank  $bank
      */
     public function addBank(Bank $bank): void
     {

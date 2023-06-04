@@ -39,9 +39,9 @@ class ImportedTransactions
     public array $warnings;
 
     /**
-     * @param array $messages
-     * @param array $warnings
-     * @param array $errors
+     * @param  array  $messages
+     * @param  array  $warnings
+     * @param  array  $errors
      */
     public function __construct(array $messages, array $warnings, array $errors)
     {
@@ -54,7 +54,7 @@ class ImportedTransactions
     }
 
     /**
-     * @param array $collection
+     * @param  array  $collection
      *
      * @return array
      */

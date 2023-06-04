@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Services\Shared\Authentication\SecretManager;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 
@@ -40,6 +41,7 @@ class InfoCollector
      * Will be used in mapping routine.
      *
      * @return array
+     * @throws ApiHttpException
      */
     public function collectAccountTypes(): array
     {

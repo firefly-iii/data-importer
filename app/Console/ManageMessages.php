@@ -30,8 +30,8 @@ namespace App\Console;
 trait ManageMessages
 {
     /**
-     * @param string $key
-     * @param array  $messages
+     * @param  string  $key
+     * @param  array  $messages
      */
     protected function listMessages(string $key, array $messages): void
     {
@@ -43,9 +43,9 @@ trait ManageMessages
 
         $func = $functions[$key] ?? 'line';
 
-        if (!empty($messages)) {
+        if (0 !== count($messages)) {
             /**
-             * @var int   $index
+             * @var int $index
              * @var array $error
              */
             foreach ($messages as $index => $list) {

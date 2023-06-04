@@ -26,17 +26,20 @@ namespace App\Console;
 
 use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
+use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
+use League\Flysystem\FilesystemException;
 use Storage;
 
 /**
@@ -53,7 +56,7 @@ trait AutoImports
     protected array  $importWarnings     = [];
 
     /**
-     * @param string $directory
+     * @param  string  $directory
      *
      * @return array
      */
@@ -91,7 +94,21 @@ trait AutoImports
     }
 
     /**
-     * @param string $file
+     * @param  string  $directory
+     * @param  array  $files
+     *
+     * @throws ImporterErrorException
+     */
+    protected function importFiles(string $directory, array $files): void
+    {
+        /** @var string $file */
+        foreach ($files as $file) {
+            $this->importFile($directory, $file);
+        }
+    }
+
+    /**
+     * @param  string  $file
      *
      * @return string
      */
@@ -106,8 +123,28 @@ trait AutoImports
     }
 
     /**
-     * @param string $directory
-     * @param string $file
+     * TODO this function must be more universal.
+     *
+     * @param  string  $directory
+     * @param  string  $file
+     *
+     * @return bool
+     */
+    private function hasCsvFile(string $directory, string $file): bool
+    {
+        $short    = substr($file, 0, -5);
+        $csvFile  = sprintf('%s.csv', $short);
+        $fullJson = sprintf('%s/%s', $directory, $csvFile);
+        if (!file_exists($fullJson)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  string  $directory
+     * @param  string  $file
      *
      * @return bool
      */
@@ -126,42 +163,8 @@ trait AutoImports
     }
 
     /**
-     * TODO this function must be more universal.
-     *
-     * @param string $directory
-     * @param string $file
-     *
-     * @return bool
-     */
-    private function hasCsvFile(string $directory, string $file): bool
-    {
-        $short    = substr($file, 0, -5);
-        $csvFile  = sprintf('%s.csv', $short);
-        $fullJson = sprintf('%s/%s', $directory, $csvFile);
-        if (!file_exists($fullJson)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param string $directory
-     * @param array  $files
-     *
-     * @throws ImporterErrorException
-     */
-    protected function importFiles(string $directory, array $files): void
-    {
-        /** @var string $file */
-        foreach ($files as $file) {
-            $this->importFile($directory, $file);
-        }
-    }
-
-    /**
-     * @param string $file
-     * @param string $directory
+     * @param  string  $file
+     * @param  string  $directory
      *
      * @throws ImporterErrorException
      */
@@ -175,6 +178,10 @@ trait AutoImports
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.
         if ('csv' === $this->getExtension($file)) {
+            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
+        }
+        // same for XML files.
+        if ('xml' === $this->getExtension($file)) {
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
 
@@ -191,7 +198,7 @@ trait AutoImports
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
-        // sanity check. If the importableFile is a .json file and it parses as valid json, don't import it:
+        // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
 
@@ -219,11 +226,99 @@ trait AutoImports
         );
     }
 
+    /**
+     * @param  string  $jsonFile
+     * @param  null|string  $importableFile
+     *
+     * @throws ImporterErrorException
+     */
+    private function importUpload(string $jsonFile, ?string $importableFile): void
+    {
+        // do JSON check
+        $jsonResult = $this->verifyJSON($jsonFile);
+        if (false === $jsonResult) {
+            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
+            $this->error($message);
+
+            return;
+        }
+        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration->updateDateRange();
+
+        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
+
+        // this is it!
+        $this->startConversion($configuration, $importableFile);
+        $this->reportConversion();
+
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        $this->startImport($configuration);
+        $this->reportImport();
+
+        $this->line('Done!');
+        event(
+            new ImportedTransactions(
+                array_merge($this->conversionMessages, $this->importMessages),
+                array_merge($this->conversionWarnings, $this->importWarnings),
+                array_merge($this->conversionErrors, $this->importErrors)
+            )
+        );
+    }
 
     /**
-     * @param Configuration $configuration
      *
-     * @param string|null   $importableFile
+     */
+    private function reportConversion(): void
+    {
+        $list = [
+            'info'  => $this->conversionMessages,
+            'warn'  => $this->conversionWarnings,
+            'error' => $this->conversionErrors,
+        ];
+        foreach ($list as $func => $set) {
+            /**
+             * @var int $index
+             * @var array $messages
+             */
+            foreach ($set as $index => $messages) {
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $this->$func(sprintf('Conversion index %d: %s', $index, $message));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    private function reportImport(): void
+    {
+        $list = [
+            'info'  => $this->importMessages,
+            'warn'  => $this->importWarnings,
+            'error' => $this->importErrors,
+        ];
+        foreach ($list as $func => $set) {
+            /**
+             * @var int $index
+             * @var array $messages
+             */
+            foreach ($set as $index => $messages) {
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $this->$func(sprintf('Import index %d: %s', $index, $message));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param  Configuration  $configuration
+     *
+     * @param  string|null  $importableFile
      *
      * @throws ImporterErrorException
      */
@@ -240,12 +335,27 @@ trait AutoImports
                 $this->error(sprintf('There is no support for flow "%s"', $configuration->getFlow()));
                 exit();
             case 'file':
-                // create importer
-                // TODO detect file type / content here.
-                // TODO or perhaps create "FileRoutineManager"
-                $manager          = new CSVRoutineManager(null);
-                $this->identifier = $manager->getIdentifier();
-                $manager->setContent(file_get_contents($importableFile));
+                $contentType = $configuration->getContentType();
+                if ('unknown' === $contentType) {
+                    app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
+                    $detector    = new FileContentSherlock();
+                    $contentType = $detector->detectContentType($importableFile);
+                }
+                switch ($contentType) {
+                    default:
+                    case 'unknown':
+                    case 'csv':
+                        $manager          = new CSVRoutineManager(null);
+                        $this->identifier = $manager->getIdentifier();
+                        $manager->setContent(file_get_contents($importableFile));
+                        break;
+                    case 'camt':
+                        $manager          = new CamtRoutineManager(null);
+                        $this->identifier = $manager->getIdentifier();
+                        $manager->setContent(file_get_contents($importableFile));
+                        break;
+                }
+
                 break;
             case 'nordigen':
                 $manager          = new NordigenRoutineManager(null);
@@ -303,32 +413,8 @@ trait AutoImports
     }
 
     /**
-     *
-     */
-    private function reportConversion(): void
-    {
-        $list = [
-            'info'  => $this->conversionMessages,
-            'warn'  => $this->conversionWarnings,
-            'error' => $this->conversionErrors,
-        ];
-        foreach ($list as $func => $set) {
-            /**
-             * @var int   $index
-             * @var array $messages
-             */
-            foreach ($set as $index => $messages) {
-                if (count($messages) > 0) {
-                    foreach ($messages as $message) {
-                        $this->$func(sprintf('Conversion index %d: %s', $index, $message));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param Configuration $configuration
+     * @param  Configuration  $configuration
+     * @throws FilesystemException
      */
     private function startImport(Configuration $configuration): void
     {
@@ -401,70 +487,5 @@ trait AutoImports
         $this->importMessages = $routine->getAllMessages();
         $this->importWarnings = $routine->getAllWarnings();
         $this->importErrors   = $routine->getAllErrors();
-    }
-
-    /**
-     *
-     */
-    private function reportImport(): void
-    {
-        $list = [
-            'info'  => $this->importMessages,
-            'warn'  => $this->importWarnings,
-            'error' => $this->importErrors,
-        ];
-        foreach ($list as $func => $set) {
-            /**
-             * @var int   $index
-             * @var array $messages
-             */
-            foreach ($set as $index => $messages) {
-                if (count($messages) > 0) {
-                    foreach ($messages as $message) {
-                        $this->$func(sprintf('Import index %d: %s', $index, $message));
-                    }
-                }
-            }
-        }
-    }
-
-
-    /**
-     * @param string      $jsonFile
-     * @param null|string $importableFile
-     *
-     * @throws ImporterErrorException
-     */
-    private function importUpload(string $jsonFile, ?string $importableFile): void
-    {
-        // do JSON check
-        $jsonResult = $this->verifyJSON($jsonFile);
-        if (false === $jsonResult) {
-            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
-            $this->error($message);
-
-            return;
-        }
-        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
-        $configuration->updateDateRange();
-
-        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
-
-        // this is it!
-        $this->startConversion($configuration, $importableFile);
-        $this->reportConversion();
-
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        $this->startImport($configuration);
-        $this->reportImport();
-
-        $this->line('Done!');
-        event(
-            new ImportedTransactions(
-                array_merge($this->conversionMessages, $this->importMessages),
-                array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors)
-            )
-        );
     }
 }

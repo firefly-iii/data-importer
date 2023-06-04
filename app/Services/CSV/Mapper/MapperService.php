@@ -25,6 +25,12 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Camt\Transaction;
+use App\Services\Shared\Configuration\Configuration;
+use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
+use Genkgo\Camt\Config;
+use Genkgo\Camt\DTO\Entry;
+use Genkgo\Camt\Reader as CamtReader;
 use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\Statement;
@@ -36,12 +42,13 @@ class MapperService
 {
     /**
      * Appends the given array with data from the CSV file in the config.
+     * TODO remove reference to specifics.
      *
-     * @param string $content
-     * @param string $delimiter
-     * @param bool   $hasHeaders
-     * @param array  $specifics
-     * @param array  $data
+     * @param  string  $content
+     * @param  string  $delimiter
+     * @param  bool  $hasHeaders
+     * @param  array  $specifics
+     * @param  array  $data
      *
      * @return array
      * @throws ImporterErrorException
@@ -114,5 +121,103 @@ class MapperService
         }
 
         return $data;
+    }
+
+    /**
+     * Appends the given array with data from the CAMT file in the config.
+     *
+     * @param  Configuration  $configuration
+     * @param  string  $content
+     * @param  array  $data
+     *
+     * @return array
+     * @throws ImporterErrorException
+     */
+    public static function getMapDataForCamt(Configuration $configuration, string $content, array $data): array
+    {
+        app('log')->debug('Now in getMapDataForCamt');
+
+        // make file reader first.
+        $camtReader   = new CamtReader(Config::getDefault());
+        $camtMessage  = $camtReader->readString($content);
+        $transactions = [];
+
+
+        // loop over records.
+        $statements = $camtMessage->getRecords();
+        /** @var CamtStatement $statement */
+        foreach ($statements as $statement) { // -> Level B
+            $entries = $statement->getEntries();
+            foreach ($entries as $entry) {                       // -> Level C
+                $count = count($entry->getTransactionDetails()); // count level D entries.
+                if (0 === $count) {
+                    // TODO Create a single transaction, I guess?
+                    $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, []);
+                }
+                if (0 !== $count) {
+                    // create separate transactions, no matter user pref.
+                    foreach ($entry->getTransactionDetails() as $detail) {
+                        $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, [$detail]);
+                    }
+                }
+            }
+        }
+        $mappableFields = self::getMappableFieldsForCamt();
+        /** @var Transaction $transaction */
+        foreach ($transactions as $transaction) {
+            // take all mappable fields from this transaction, and add to $values in the data thing
+
+            $splits = $transaction->countSplits();
+
+            foreach (array_keys($mappableFields) as $title) {
+                if (array_key_exists($title, $data)) {
+                    if (0 !== $splits) {
+                        for ($index = 0; $index < $splits; $index++) {
+                            $value = $transaction->getFieldByIndex($title, $index);
+                            if ('' !== $value) {
+                                $data[$title]['values'][] = $value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // make all values unique for mapping and remove empty vars.
+        foreach ($data as $title => $info) {
+            $filtered       = array_filter(
+                $info['values'],
+                static function (string $value) {
+                    return '' !== $value;
+                }
+            );
+            $info['values'] = array_unique($filtered);
+            sort($info['values']);
+            $data[$title]['values'] = $info['values'];
+        }
+        // unset entries with zero values.
+        foreach ($data as $title => $info) {
+            if (0 === count($info['values'])) {
+                unset($data[$title]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return array
+     */
+    private static function getMappableFieldsForCamt(): array
+    {
+        $fields = config('camt.fields');
+        $return = [];
+        /** @var array $field */
+        foreach ($fields as $name => $field) {
+            if ($field['mappable']) {
+                $return[$name] = $field;
+            }
+        }
+
+        return $return;
     }
 }

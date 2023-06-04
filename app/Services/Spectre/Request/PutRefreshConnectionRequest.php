@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\PutRefreshConnectionResponse;
@@ -39,9 +40,9 @@ class PutRefreshConnectionRequest extends Request
     /**
      * ListCustomersRequest constructor.
      *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
+     * @param  string  $url
+     * @param  string  $appId
+     * @param  string  $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -67,6 +68,7 @@ class PutRefreshConnectionRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
      */
     public function put(): Response
     {
@@ -83,7 +85,7 @@ class PutRefreshConnectionRequest extends Request
     }
 
     /**
-     * @param string $connection
+     * @param  string  $connection
      */
     public function setConnection(string $connection): void
     {

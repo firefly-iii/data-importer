@@ -29,6 +29,8 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class DownloadController
@@ -39,6 +41,8 @@ class DownloadController extends Controller
 
     /**
      * @return Application|ResponseFactory|Response
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function download(): Response|Application|ResponseFactory
     {
@@ -49,7 +53,7 @@ class DownloadController extends Controller
 
         $response = response($result);
         $name     = sprintf('import_config_%s.json', date('Y-m-d'));
-        $response->header('Content-disposition', 'attachment; filename=' . $name)
+        $response->header('Content-disposition', 'attachment; filename='.$name)
                  ->header('Content-Type', 'application/json')
                  ->header('Content-Description', 'File Transfer')
                  ->header('Connection', 'Keep-Alive')

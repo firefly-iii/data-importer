@@ -44,7 +44,7 @@ class RolesPostRequest extends Request
     /**
      * @return array
      */
-    public function getAll(): array
+    public function getAllForFile(): array
     {
         $data = [
             'roles'      => $this->get('roles') ?? [],
@@ -74,7 +74,7 @@ class RolesPostRequest extends Request
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
      *
-     * @param Validator $validator
+     * @param  Validator  $validator
      *
      * @return void
      */
@@ -89,7 +89,7 @@ class RolesPostRequest extends Request
     }
 
     /**
-     * @param Validator $validator
+     * @param  Validator  $validator
      */
     protected function validateAmountRole(Validator $validator): void
     {
