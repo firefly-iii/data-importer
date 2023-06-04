@@ -34,7 +34,7 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const VERSION = 4;
+    public const VERSION = 3;
     private array  $accounts;
     private bool   $addImportTag;
     private string $connection;
@@ -47,6 +47,7 @@ class Configuration
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
     private int    $defaultAccount;
+    private string $customTag;
 
     // nordigen configuration
     private string $delimiter;
@@ -114,6 +115,7 @@ class Configuration
         $this->doMapping      = [];
         $this->flow           = 'file';
         $this->contentType    = 'unknown';
+        $this->customTag      = '';
 
         // date range settings
         $this->dateRange       = 'all';
@@ -182,6 +184,7 @@ class Configuration
         $object->version        = self::VERSION;
         $object->flow           = $array['flow'] ?? 'file';
         $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->customTag      = $array['custom_tag'] ?? '';
 
         // sort
         ksort($object->doMapping);
@@ -298,6 +301,7 @@ class Configuration
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->customTag      = $array['custom_tag'] ?? '';
 
         // mapping for spectre + nordigen
         $object->mapAllData = $array['map_all_data'] ?? false;
@@ -417,6 +421,7 @@ class Configuration
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'file';
         $object->contentType    = $data['content_type'] ?? 'unknown';
+        $object->customTag      = $data['custom_tag'] ?? '';
 
         // camt settings
         $object->groupedTransactionHandling = $data['grouped_transaction_handling'] ?? 'single';
@@ -965,6 +970,7 @@ class Configuration
             'unique_column_type'           => $this->uniqueColumnType,
             'flow'                         => $this->flow,
             'content_type'                 => $this->contentType,
+            'custom_tag'                   => $this->customTag,
 
             // spectre
             'identifier'                   => $this->identifier,
@@ -1062,6 +1068,14 @@ class Configuration
                 $this->dateNotAfter  = '' === $after ? '' : $after->format('Y-m-d');
                 app('log')->debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomTag(): string
+    {
+        return $this->customTag;
     }
 
 

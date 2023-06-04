@@ -364,6 +364,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- both camt and csv support custom tag -->
+                                <div class="form-group row mb-3">
+                                    <label for="date" class="col-sm-3 col-form-label">Custom import tag</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="custom_tag" class="form-control" id="custom_tag"
+                                               placeholder="Custom import tag"
+                                               value="{{ configuration.getCustomTag }}"
+                                               aria-describedby="custom_tagHelp">
+                                        <small id="custom_tagHelp" class="form-text text-muted">
+                                            You can set your own import tag to easily distinguish imports
+                                            or just because you don't like the default one.
+                                            <a href="https://docs.firefly-iii.org/data-importer/faq/custom-import-tag/" target="_blank">Read more in the documentation</a>.
+                                        </small>
+                                    </div>
+                                </div>
 
                                 <!-- TODO option is not used -->
                                 <!--

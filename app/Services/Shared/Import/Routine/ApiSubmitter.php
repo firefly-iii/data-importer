@@ -66,7 +66,7 @@ class ApiSubmitter
     public function processTransactions(array $lines): void
     {
         $this->createdTag = false;
-        $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $this->tag        = $this->parseTag();
         $this->tagDate    = date('Y-m-d');
         $count            = count($lines);
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
@@ -351,6 +351,36 @@ class ApiSubmitter
         app('log')->debug('This is not a duplicate transaction error');
 
         return false;
+    }
+
+    /**
+     * @return string
+     */
+    private function parseTag(): string
+    {
+        // $this->tag        = sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        $customTag = $this->configuration->getCustomTag();
+        if ('' === $customTag) {
+            // return default tag:
+            return sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+        }
+        $items = [
+            '%year%'        => date('Y'),
+            '%month%'       => date('m'),
+            '%month_full%'  => date('F'),
+            '%day%'         => date('d'),
+            '%day_of_week%' => date('l'),
+            '%hour%'        => date('H'),
+            '%minute%'      => date('i'),
+            '%second%'      => date('s'),
+            '%date%'        => date('Y-m-d'),
+            '%time%'        => date('H:i'),
+            '%datetime%'    => date('Y-m-d \@ H:i'),
+            '%version%'     => config('importer.version'),
+        ];
+        $result = str_replace(array_keys($items), array_values($items), $customTag);
+        app('log')->debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
+        return $result;
     }
 
     /**

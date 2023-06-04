@@ -164,7 +164,7 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
         app('log')->debug(sprintf('Now running %s', __METHOD__));
-        // store config on drive.
+        // store config on drive.v
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
