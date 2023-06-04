@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ErrorResponse;
@@ -39,9 +40,9 @@ class GetRequisitionRequest extends Request
     private string $requisitionId;
 
     /**
-     * @param string $url
-     * @param string $token
-     * @param string $requisitionId
+     * @param  string  $url
+     * @param  string  $token
+     * @param  string  $requisitionId
      */
     public function __construct(string $url, string $token, string $requisitionId)
     {
@@ -53,6 +54,7 @@ class GetRequisitionRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws AgreementExpiredException
      */
     public function get(): Response
     {

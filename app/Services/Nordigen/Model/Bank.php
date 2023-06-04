@@ -35,7 +35,7 @@ class Bank
     public int    $transactionTotalDays;
 
     /**
-     * @param array $array
+     * @param  array  $array
      *
      * @return static
      */

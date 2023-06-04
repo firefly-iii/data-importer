@@ -24,7 +24,9 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Shared\Response\Response;
 
@@ -36,9 +38,9 @@ class ListAccountsRequest extends Request
     private string $identifier;
 
     /**
-     * @param string $url
-     * @param string $identifier
-     * @param string $token
+     * @param  string  $url
+     * @param  string  $identifier
+     * @param  string  $token
      */
     public function __construct(string $url, string $identifier, string $token)
     {
@@ -50,16 +52,11 @@ class ListAccountsRequest extends Request
     }
 
     /**
-     * @param string $identifier
-     */
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
-    /**
      * @inheritDoc
+     * @return Response
+     * @throws AgreementExpiredException
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
      */
     public function get(): Response
     {
@@ -82,5 +79,13 @@ class ListAccountsRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
+    }
+
+    /**
+     * @param  string  $identifier
+     */
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 }

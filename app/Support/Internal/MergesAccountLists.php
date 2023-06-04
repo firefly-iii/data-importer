@@ -28,29 +28,14 @@ namespace App\Support\Internal;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Model\ImportServiceAccount;
-use App\Services\Spectre\Response\GetAccountsResponse as SpectreGetAccountsResponse;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 
 trait MergesAccountLists
 {
     /**
-     * @param array $nordigen
-     * @param array $fireflyIII
-     *
-     * @return array
-     */
-    protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
-    {
-        app('log')->debug('Now merging Nordigen account lists.');
-        $generic = ImportServiceAccount::convertNordigenArray($nordigen);
-
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
-    }
-
-    /**
-     * @param array  $firefly
-     * @param string $iban
-     * @param string $number
+     * @param  array  $firefly
+     * @param  string  $iban
+     * @param  string  $number
      *
      * @return array
      */
@@ -72,8 +57,8 @@ trait MergesAccountLists
     }
 
     /**
-     * @param array  $fireflyIII
-     * @param string $currency
+     * @param  array  $fireflyIII
+     * @param  string  $currency
      *
      * @return array
      */
@@ -95,8 +80,22 @@ trait MergesAccountLists
     }
 
     /**
-     * @param array $spectre
-     * @param array $fireflyIII
+     * @param  array  $nordigen
+     * @param  array  $fireflyIII
+     *
+     * @return array
+     */
+    protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
+    {
+        app('log')->debug('Now merging Nordigen account lists.');
+        $generic = ImportServiceAccount::convertNordigenArray($nordigen);
+
+        return $this->mergeGenericAccountList($generic, $fireflyIII);
+    }
+
+    /**
+     * @param  array  $spectre
+     * @param  array  $fireflyIII
      *
      * @return array
      */
@@ -108,10 +107,9 @@ trait MergesAccountLists
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
 
-
     /**
-     * @param array $generic
-     * @param array $fireflyIII
+     * @param  array  $generic
+     * @param  array  $fireflyIII
      *
      * @return array
      */
@@ -133,7 +131,7 @@ trait MergesAccountLists
             $number   = $account->bban;
             $currency = $account->currencyCode;
             $entry    = [
-                'import_account'       => $account,
+                'import_account' => $account,
             ];
 
             $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
@@ -158,14 +156,16 @@ trait MergesAccountLists
             $filteredByCurrency = $this->filterByCurrency($fireflyIII, $currency);
 
             if (count($filteredByCurrency) > 0) {
-                app('log')->debug(sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency.', count($filteredByCurrency), $currency));
+                app('log')->debug(
+                    sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency.', count($filteredByCurrency), $currency)
+                );
                 $entry['firefly_iii_accounts'] = $filteredByCurrency;
-                $return[]         = $entry;
+                $return[]                      = $entry;
                 continue;
             }
             app('log')->debug('No special filtering on the Firefly III account list.');
             $entry['firefly_iii_accounts'] = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS], $fireflyIII[Constants::LIABILITIES]);
-            $return[]         = $entry;
+            $return[]                      = $entry;
         }
 
         return $return;

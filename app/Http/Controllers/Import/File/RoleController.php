@@ -33,7 +33,6 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -41,6 +40,7 @@ use JsonException;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\UnableToProcessCsv;
+use League\Flysystem\FilesystemException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -62,9 +62,9 @@ class RoleController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
-     * @return Factory|View
+     * @return View|void
      * @throws JsonException
      * @throws Exception
      * @throws InvalidArgument
@@ -91,16 +91,17 @@ class RoleController extends Controller
                 return $this->csvIndex($request, $configuration);
             case 'camt':
                 return $this->camtIndex($request, $configuration);
-
         }
     }
 
     /**
-     * @param RolesPostRequest $request
+     * @param  RolesPostRequest  $request
      *
      * @return RedirectResponse
-     * @throws JsonException
      * @throws ContainerExceptionInterface
+     * @throws FilesystemException
+     * @throws ImporterErrorException
+     * @throws JsonException
      * @throws NotFoundExceptionInterface
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
@@ -116,22 +117,121 @@ class RoleController extends Controller
                 return $this->csvPostIndex($request, $configuration);
             case 'camt':
                 return $this->camtPostIndex($request, $configuration);
+                //return $this->camtPostIndex($request, $configuration);
 
         }
     }
 
     /**
-     * @param RolesPostRequest $request
-     * @param Configuration    $configuration
+     * @param  Request  $request
+     * @param  Configuration  $configuration
+     *
+     * @return View
+     * @throws ContainerExceptionInterface
+     * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
+     */
+    private function camtIndex(Request $request, Configuration $configuration): View
+    {
+        $mainTitle = 'Role definition';
+        $subTitle  = 'Configure the role of each field in your camt.053 file';
+
+        // get example data from file.
+        $content   = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $examples  = RoleService::getExampleDataFromCamt($content, $configuration);
+        $roles     = $configuration->getRoles();
+        $doMapping = $configuration->getDoMapping();
+        // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
+        // available fields and information.
+        $levels         = [];
+        $levels['A']    = [
+            'title'       => trans('camt.level_A'),
+            'explanation' => trans('camt.explain_A'),
+            'fields'      => $this->getFieldsForLevel('A'),
+        ];
+        $levels['B']    = [
+            'title'       => trans('camt.level_B'),
+            'explanation' => trans('camt.explain_B'),
+            'fields'      => $this->getFieldsForLevel('B'),
+        ];
+        $levels['C']    = [
+            'title'       => trans('camt.level_C'),
+            'explanation' => trans('camt.explain_C'),
+            'fields'      => [
+                // have to collect C by hand because of intermediate sections
+                'entryAccountServicerReference' => config('camt.fields.entryAccountServicerReference'),
+                'entryReference'                => config('camt.fields.entryReference'),
+                'entryAdditionalInfo'           => config('camt.fields.entryAdditionalInfo'),
+                'section_transaction'           => ['section' => true, 'title' => 'transaction',],
+                'entryAmount'                   => config('camt.fields.entryAmount'),
+                'entryAmountCurrency'           => config('camt.fields.entryAmountCurrency'),
+                'entryValueDate'                => config('camt.fields.entryValueDate'),
+                'entryBookingDate'              => config('camt.fields.entryBookingDate'),
+                'section_btc'                   => ['section' => true, 'title' => 'Btc',],
+                'entryBtcDomainCode'            => config('camt.fields.entryBtcDomainCode'),
+                'entryBtcFamilyCode'            => config('camt.fields.entryBtcFamilyCode'),
+                'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
+                'section_opposing'              => ['section' => true, 'title' => 'opposingPart',],
+            ],
+        ];
+        $group_handling = $configuration->getGroupedTransactionHandling();
+        if ('group' === $group_handling) {
+            $levels['D'] = [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D_dropped'),
+            ];
+        }
+        if ('group' !== $group_handling) {
+            $levels['D'] = [
+                'title'       => trans('camt.level_D'),
+                'explanation' => trans('camt.explain_D'),
+                'fields'      => [
+                    // have to collect D by hand because of intermediate sections
+                    'entryDetailAccountServicerReference'                                            => config(
+                        'camt.fields.entryDetailAccountServicerReference'
+                    ),
+                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
+                        'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'
+                    ),
+                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
+                        'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
+                    ),
+                    'section_tr'                                                                     => ['section' => true, 'title' => 'transaction',],
+                    'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
+                    'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
+                    'section_btc'                                                                    => ['section' => true, 'title' => 'Btc',],
+                    'entryDetailBtcDomainCode'                                                       => config('camt.fields.entryDetailBtcDomainCode'),
+                    'entryDetailBtcFamilyCode'                                                       => config('camt.fields.entryDetailBtcFamilyCode'),
+                    'entryDetailBtcSubFamilyCode'                                                    => config('camt.fields.entryDetailBtcSubFamilyCode'),
+                    'section_opposing'                                                               => ['section' => true, 'title' => 'opposingPart',],
+                    'entryDetailOpposingAccountIban'                                                 => config('camt.fields.entryDetailOpposingAccountIban'),
+                    'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
+                    'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),
+                ],
+            ];
+        }
+
+        return view(
+            'import.005-roles.index-camt',
+            compact('mainTitle', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles')
+        );
+    }
+
+    /**
+     * TODO is basically the same as the CSV processor.
+     *
+     * @param  RolesPostRequest  $request
+     * @param  Configuration  $configuration
      *
      * @return RedirectResponse
      * @throws ContainerExceptionInterface
+     * @throws FilesystemException
      * @throws JsonException
      * @throws NotFoundExceptionInterface
      */
-    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
-        $data         = $request->getAllForCSV();
+        $data         = $request->getAllForFile();
         $needsMapping = $this->needMapping($data['do_mapping']);
         $configuration->setRoles($data['roles']);
         $configuration->setDoMapping($data['do_mapping']);
@@ -165,27 +265,8 @@ class RoleController extends Controller
     }
 
     /**
-     * Will tell you if any role needs mapping.
-     *
-     * @param array $array
-     *
-     * @return bool
-     */
-    private function needMapping(array $array): bool
-    {
-        $need = false;
-        foreach ($array as $value) {
-            if (true === $value) {
-                $need = true;
-            }
-        }
-
-        return $need;
-    }
-
-    /**
-     * @param Request       $request
-     * @param Configuration $configuration
+     * @param  Request  $request
+     * @param  Configuration  $configuration
      *
      * @return View
      * @throws ContainerExceptionInterface
@@ -201,7 +282,7 @@ class RoleController extends Controller
         $subTitle  = 'Configure the role of each column in your file';
 
         // get columns from file
-        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $configuration->isConversion());
+        $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
         $columns  = RoleService::getColumns($content, $configuration);
         $examples = RoleService::getExampleData($content, $configuration);
 
@@ -223,24 +304,83 @@ class RoleController extends Controller
     }
 
     /**
-     * @param Request       $request
-     * @param Configuration $configuration
+     * @param  RolesPostRequest  $request
+     * @param  Configuration  $configuration
      *
-     * @return View
+     * @return RedirectResponse
+     * @throws ContainerExceptionInterface
+     * @throws JsonException
+     * @throws NotFoundExceptionInterface
      */
-    private function camtIndex(Request $request, Configuration $configuration): View
+    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
-        return view('import.0005-roles.index-camt');
+        $data         = $request->getAllForFile();
+        $needsMapping = $this->needMapping($data['do_mapping']);
+        $configuration->setRoles($data['roles']);
+        $configuration->setDoMapping($data['do_mapping']);
+
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+        // then this is the new, full array:
+        $fullArray = $configuration->toArray();
+
+        // and it can be saved on disk:
+        $configFileName = StorageService::storeArray($fullArray);
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // this is a new config file name.
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // set role config as complete.
+        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
+
+        // redirect to mapping thing.
+        if (true === $needsMapping) {
+            return redirect()->route('006-mapping.index');
+        }
+        // otherwise, store empty mapping, and continue:
+        // set map config as complete.
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+
+        return redirect()->route('007-convert.index');
     }
 
     /**
-     * @param RolesPostRequest $request
-     * @param Configuration    $configuration
+     * @param  string  $level
      *
-     * @return void
+     * @return array
      */
-    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration)
+    private function getFieldsForLevel(string $level): array
     {
-        die('not yet implemented.');
+        $allFields = config('camt.fields');
+        $return    = [];
+        foreach ($allFields as $title => $field) {
+            if ($level === $field['level']) {
+                $return[$title] = $field;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Will tell you if any role needs mapping.
+     *
+     * @param  array  $array
+     *
+     * @return bool
+     */
+    private function needMapping(array $array): bool
+    {
+        $need = false;
+        foreach ($array as $value) {
+            if (true === $value) {
+                $need = true;
+            }
+        }
+
+        return $need;
     }
 }

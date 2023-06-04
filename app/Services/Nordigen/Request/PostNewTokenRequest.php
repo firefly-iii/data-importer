@@ -27,6 +27,7 @@ namespace App\Services\Nordigen\Request;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class PostNewTokenRequest
@@ -51,6 +52,7 @@ class PostNewTokenRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws GuzzleException
      */
     public function post(): Response
     {

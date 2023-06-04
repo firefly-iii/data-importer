@@ -121,6 +121,22 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
+     * @param  string  $content
+     */
+    public function setContent(string $content): void
+    {
+        $this->content = $content;
+    }
+
+    /**
+     * @param  bool  $forceCli
+     */
+    public function setForceCli(bool $forceCli): void
+    {
+        $this->forceCli = $forceCli;
+    }
+
+    /**
      * @inheritDoc
      * @throws ImporterErrorException
      */
@@ -164,50 +180,7 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param int $count
-     */
-    private function mergeMessages(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getMessages();
-        $two   = $this->lineProcessor->getMessages();
-        $three = $this->columnValueConverter->getMessages();
-        $four  = $this->pseudoTransactionProcessor->getMessages();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allMessages = $total;
-    }
-
-    /**
-     * @param int $count
-     */
-    private function mergeWarnings(int $count): void
-    {
-        $one   = $this->csvFileProcessor->getWarnings();
-        $two   = $this->lineProcessor->getWarnings();
-        $three = $this->columnValueConverter->getWarnings();
-        $four  = $this->pseudoTransactionProcessor->getWarnings();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-        $this->allWarnings = $total;
-    }
-
-    /**
-     * @param int $count
+     * @param  int  $count
      */
     private function mergeErrors(int $count): void
     {
@@ -229,18 +202,45 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param string $content
+     * @param  int  $count
      */
-    public function setContent(string $content): void
+    private function mergeMessages(int $count): void
     {
-        $this->content = $content;
+        $one   = $this->csvFileProcessor->getMessages();
+        $two   = $this->lineProcessor->getMessages();
+        $three = $this->columnValueConverter->getMessages();
+        $four  = $this->pseudoTransactionProcessor->getMessages();
+        $total = [];
+        for ($i = 0; $i < $count; $i++) {
+            $total[$i] = array_merge(
+                $one[$i] ?? [],
+                $two[$i] ?? [],
+                $three[$i] ?? [],
+                $four[$i] ?? [],
+            );
+        }
+
+        $this->allMessages = $total;
     }
 
     /**
-     * @param bool $forceCli
+     * @param  int  $count
      */
-    public function setForceCli(bool $forceCli): void
+    private function mergeWarnings(int $count): void
     {
-        $this->forceCli = $forceCli;
+        $one   = $this->csvFileProcessor->getWarnings();
+        $two   = $this->lineProcessor->getWarnings();
+        $three = $this->columnValueConverter->getWarnings();
+        $four  = $this->pseudoTransactionProcessor->getWarnings();
+        $total = [];
+        for ($i = 0; $i < $count; $i++) {
+            $total[$i] = array_merge(
+                $one[$i] ?? [],
+                $two[$i] ?? [],
+                $three[$i] ?? [],
+                $four[$i] ?? [],
+            );
+        }
+        $this->allWarnings = $total;
     }
 }

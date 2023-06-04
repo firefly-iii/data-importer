@@ -64,30 +64,6 @@ class ListBanksResponse extends Response implements Iterator, Countable
     }
 
     /**
-     * @param array $bank
-     */
-    private function processCountries(array $bank): void
-    {
-        foreach ($bank['countries'] as $code) {
-            if (!isset($this->countries[$code])) {
-                $this->countries[$code] = new Country($code, new Collection());
-            }
-        }
-    }
-
-    /**
-     * @param Bank  $object
-     * @param array $countries
-     */
-    private function addToCountries(Bank $object, array $countries): void
-    {
-        /** @var string $code */
-        foreach ($countries as $code) {
-            $this->countries[$code]->addBank($object);
-        }
-    }
-
-    /**
      * Count elements of an object.
      *
      * @link  https://php.net/manual/en/countable.count.php
@@ -161,5 +137,29 @@ class ListBanksResponse extends Response implements Iterator, Countable
     public function valid(): bool
     {
         return $this->collection->has($this->position);
+    }
+
+    /**
+     * @param  Bank  $object
+     * @param  array  $countries
+     */
+    private function addToCountries(Bank $object, array $countries): void
+    {
+        /** @var string $code */
+        foreach ($countries as $code) {
+            $this->countries[$code]->addBank($object);
+        }
+    }
+
+    /**
+     * @param  array  $bank
+     */
+    private function processCountries(array $bank): void
+    {
+        foreach ($bank['countries'] as $code) {
+            if (!isset($this->countries[$code])) {
+                $this->countries[$code] = new Country($code, new Collection());
+            }
+        }
     }
 }

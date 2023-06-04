@@ -96,25 +96,23 @@ class TransactionProcessor
     }
 
     /**
-     * @throws ImporterHttpException
+     * @param  Configuration  $configuration
      */
-    private function refreshConnection(): void
+    public function setConfiguration(Configuration $configuration): void
     {
-        // refresh connection
-        $url    = config('spectre.url');
-        $appId  = SpectreSecretManager::getAppId();
-        $secret = SpectreSecretManager::getSecret();
-        $put    = new PutRefreshConnectionRequest($url, $appId, $secret);
-        $put->setConnection($this->configuration->getConnection());
-        $response = $put->put();
-        if ($response instanceof ErrorResponse) {
-            app('log')->alert('Could not refresh connection.');
-            app('log')->alert(sprintf('%s: %s', $response->class, $response->message));
-        }
+        $this->configuration = $configuration;
     }
 
     /**
-     * @param GetTransactionsResponse $transactions
+     * @param  string  $downloadIdentifier
+     */
+    public function setDownloadIdentifier(string $downloadIdentifier): void
+    {
+        $this->downloadIdentifier = $downloadIdentifier;
+    }
+
+    /**
+     * @param  GetTransactionsResponse  $transactions
      *
      * @return array
      */
@@ -128,7 +126,6 @@ class TransactionProcessor
             app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
-        /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             $madeOn = $transaction->madeOn;
 
@@ -162,18 +159,20 @@ class TransactionProcessor
     }
 
     /**
-     * @param Configuration $configuration
+     * @throws ImporterHttpException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function refreshConnection(): void
     {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * @param string $downloadIdentifier
-     */
-    public function setDownloadIdentifier(string $downloadIdentifier): void
-    {
-        $this->downloadIdentifier = $downloadIdentifier;
+        // refresh connection
+        $url    = config('spectre.url');
+        $appId  = SpectreSecretManager::getAppId();
+        $secret = SpectreSecretManager::getSecret();
+        $put    = new PutRefreshConnectionRequest($url, $appId, $secret);
+        $put->setConnection($this->configuration->getConnection());
+        $response = $put->put();
+        if ($response instanceof ErrorResponse) {
+            app('log')->alert('Could not refresh connection.');
+            app('log')->alert(sprintf('%s: %s', $response->class, $response->message));
+        }
     }
 }

@@ -32,7 +32,7 @@ abstract class Response
     /**
      * Response constructor.
      *
-     * @param array $data
+     * @param  array  $data
      */
     abstract public function __construct(array $data);
 }

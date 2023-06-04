@@ -54,6 +54,54 @@ abstract class Request
     abstract public function get(): Response;
 
     /**
+     * @return string
+     */
+    public function getBase(): string
+    {
+        return $this->base;
+    }
+
+    /**
+     * @param  string  $base
+     */
+    public function setBase(string $base): void
+    {
+        $this->base = $base;
+    }
+
+    /**
+     * @return string
+     */
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param  string  $token
+     */
+    public function setToken(string $token): void
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param  string  $url
+     */
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
+
+    /**
      * @return Response
      * @throws ImporterHttpException
      */
@@ -66,7 +114,7 @@ abstract class Request
     abstract public function put(): Response;
 
     /**
-     * @param array $body
+     * @param  array  $body
      */
     public function setBody(array $body): void
     {
@@ -74,7 +122,7 @@ abstract class Request
     }
 
     /**
-     * @param array $parameters
+     * @param  array  $parameters
      */
     public function setParameters(array $parameters): void
     {
@@ -83,7 +131,7 @@ abstract class Request
     }
 
     /**
-     * @param float $timeOut
+     * @param  float  $timeOut
      */
     public function setTimeOut(float $timeOut): void
     {
@@ -100,7 +148,7 @@ abstract class Request
     {
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
-        if (null !== $this->parameters) {
+        if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
@@ -137,7 +185,7 @@ abstract class Request
             $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string)$e->getResponse()->getBody();
-                $json = json_decode($body, true, 512) ?? [];
+                $json = json_decode($body, true) ?? [];
             }
             if (array_key_exists('summary', $json) and str_ends_with($json['summary'], 'has expired')) {
                 $exception       = new AgreementExpiredException();
@@ -165,7 +213,7 @@ abstract class Request
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
                     $fullUrl,
-                    $res ? $res->getStatusCode() : 0,
+                    $res->getStatusCode(),
                     $e->getMessage(),
                     $body
                 )
@@ -181,69 +229,7 @@ abstract class Request
     }
 
     /**
-     * @return string
-     */
-    public function getBase(): string
-    {
-        return $this->base;
-    }
-
-    /**
-     * @param string $base
-     */
-    public function setBase(string $base): void
-    {
-        $this->base = $base;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @return Client
-     */
-    private function getClient(): Client
-    {
-        // config here
-
-        return new Client(
-            [
-                'connect_timeout' => $this->timeOut,
-            ]
-        );
-    }
-
-    /**
-     * @return string
-     */
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    /**
-     * @param string $token
-     */
-    public function setToken(string $token): void
-    {
-        $this->token = $token;
-    }
-
-    /**
-     * @param array $json
+     * @param  array  $json
      *
      * @return array
      * @throws GuzzleException
@@ -254,7 +240,7 @@ abstract class Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
-        if (null !== $this->parameters) {
+        if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 
@@ -286,5 +272,19 @@ abstract class Request
         }
 
         return $json;
+    }
+
+    /**
+     * @return Client
+     */
+    private function getClient(): Client
+    {
+        // config here
+
+        return new Client(
+            [
+                'connect_timeout' => $this->timeOut,
+            ]
+        );
     }
 }

@@ -62,7 +62,7 @@ class ConfigurationPostRequest extends Request
             'mapping'                       => [],
             'do_mapping'                    => [],
             'flow'                          => $this->convertToString('flow'),
-            'content_type'                          => $this->convertToString('content_type'),
+            'content_type'                  => $this->convertToString('content_type'),
 
             // duplicate detection:
             'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),
@@ -93,6 +93,10 @@ class ConfigurationPostRequest extends Request
             // utf8 conversion
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
+            // camt
+            'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
+            'use_entire_opposing_address'   => $this->convertBoolean($this->get('use_entire_opposing_address')),
+
         ];
 
         return $result;
@@ -122,6 +126,10 @@ class ConfigurationPostRequest extends Request
 
             // conversion
             'conversion'                    => 'numeric|between:0,1',
+
+            // camt
+            'grouped_transaction_handling'  => 'in:single,group,split',
+            'use_entire_opposing_address'   => 'numeric|between:0,1',
         ];
 
         return $rules;
@@ -131,7 +139,7 @@ class ConfigurationPostRequest extends Request
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
      *
-     * @param Validator $validator
+     * @param  Validator  $validator
      *
      * @return void
      */

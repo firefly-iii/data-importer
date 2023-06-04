@@ -55,7 +55,7 @@ class Transaction
     /**
      * Transaction constructor.
      *
-     * @param array $data
+     * @param  array  $data
      *
      * @return Transaction
      */
@@ -155,7 +155,7 @@ class Transaction
     }
 
     /**
-     * @param string $direction
+     * @param  string  $direction
      *
      * @return string
      */
@@ -191,9 +191,9 @@ class Transaction
         return [
             'id'            => (string)$this->id,
             'account_id'    => $this->accountId,
-            'made_on'       => $this->madeOn ? $this->madeOn->toW3cString() : '',
-            'created_at'    => $this->createdAt ? $this->createdAt->toW3cString() : '',
-            'updated_at'    => $this->updatedAt ? $this->updatedAt->toW3cString() : '',
+            'made_on'       => $this->madeOn->toW3cString(),
+            'created_at'    => $this->createdAt->toW3cString(),
+            'updated_at'    => $this->updatedAt->toW3cString(),
             'mode'          => $this->mode,
             'status'        => $this->status,
             'amount'        => $this->amount,

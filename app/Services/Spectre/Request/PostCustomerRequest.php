@@ -39,9 +39,9 @@ class PostCustomerRequest extends Request
     /**
      * PostCustomerRequest constructor.
      *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
+     * @param  string  $url
+     * @param  string  $appId
+     * @param  string  $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -61,10 +61,12 @@ class PostCustomerRequest extends Request
 
     /**
      * @inheritDoc
+     * @throws ImporterErrorException
+     * @throws ImporterErrorException
      */
     public function post(): Response
     {
-        if (null === $this->identifier) {
+        if ('' === $this->identifier) {
             throw new ImporterErrorException('No identifier for PostCustomerRequest');
         }
         $data = [

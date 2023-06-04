@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Iban.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -44,8 +45,8 @@ class Iban implements Rule
     /**
      * Determine if the given value is a valid IBAN.
      *
-     * @param string $attribute
-     * @param mixed  $value
+     * @param  string  $attribute
+     * @param  mixed  $value
      *
      * @return bool
      */

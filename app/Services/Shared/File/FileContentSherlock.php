@@ -22,23 +22,37 @@
 
 namespace App\Services\Shared\File;
 
+use Exception;
+use Genkgo\Camt\Config;
+use Genkgo\Camt\Reader;
+
 /**
  * Class FileContentSherlock
  */
 class FileContentSherlock
 {
+    public Reader $camtReader;
+
+    public function __construct()
+    {
+        $this->camtReader = new Reader(Config::getDefault());
+    }
+
     public function detectContentType(?string $file): string
     {
         if (null === $file) {
             return 'unknown';
         }
-        // some pseudo code below:
-        /*
-         * $content= file_get_contents($file);
-         * if($this->isCamtFile($content)) {
-         * return 'camt';
-         * }
-         */
+
+        try {
+            $message = $this->camtReader->readFile($file);
+            app('log')->debug('CAMT.053 Check on file: positive');
+
+            return 'camt';
+        } catch (Exception $e) {
+            app('log')->debug('CAMT.053 Check on file: negative');
+            //app('log')->debug($e->getMessage());
+        }
 
         return 'csv';
     }
@@ -48,12 +62,15 @@ class FileContentSherlock
         if (null === $content) {
             return 'unknown';
         }
-        // some pseudo code below:
-        /*
-         * if($this->isCamtFile($content)) {
-         * return 'camt';
-         * }
-         */
+        try {
+            $this->camtReader->readString($content);
+            app('log')->debug('CAMT.053 Check of content: positive');
+
+            return 'camt';
+        } catch (Exception $e) {
+            app('log')->debug('CAMT.053 Check of content: negative');
+            //app('log')->debug($e->getMessage());
+        }
 
         return 'csv';
     }

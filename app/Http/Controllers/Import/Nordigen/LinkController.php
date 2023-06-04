@@ -62,6 +62,7 @@ class LinkController extends Controller
     }
 
     /**
+     * @throws ImporterHttpException
      */
     public function build()
     {
@@ -128,7 +129,7 @@ class LinkController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException

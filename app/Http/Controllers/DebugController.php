@@ -37,7 +37,7 @@ class DebugController extends Controller
     /**
      * Show debug info.
      *
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return Factory|View
      */
@@ -100,7 +100,7 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
+            $logContent = 'Truncated from this point <----|'.substr($logContent, -8192);
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
@@ -135,7 +135,7 @@ class DebugController extends Controller
     /**
      * Some common combinations.
      *
-     * @param int $value
+     * @param  int  $value
      *
      * @return string
      */

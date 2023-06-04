@@ -45,7 +45,24 @@ class IndexController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @return mixed
+     */
+    public function flush(): mixed
+    {
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->flush();
+        $cookies = [
+            cookie(Constants::FLOW_COOKIE, ''),
+        ];
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+
+        return redirect(route('index'))->withCookies($cookies);
+    }
+
+    /**
+     * @param  Request  $request
      *
      * @return mixed
      */
@@ -88,7 +105,7 @@ class IndexController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return mixed
      */
@@ -116,7 +133,7 @@ class IndexController extends Controller
     public function reset(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
         session()->flush();
         Artisan::call('cache:clear');
 
@@ -126,23 +143,6 @@ class IndexController extends Controller
             SecretManager::saveRefreshToken(''),
             cookie(Constants::FLOW_COOKIE, ''),
         ];
-
-        return redirect(route('index'))->withCookies($cookies);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function flush(): mixed
-    {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_CSV_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
-        session()->flush();
-        $cookies = [
-            cookie(Constants::FLOW_COOKIE, ''),
-        ];
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
 
         return redirect(route('index'))->withCookies($cookies);
     }

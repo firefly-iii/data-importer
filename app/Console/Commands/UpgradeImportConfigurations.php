@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\Shared\Configuration\Configuration;
+use FilesystemIterator;
 use Illuminate\Console\Command;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -82,23 +83,37 @@ class UpgradeImportConfigurations extends Command
     }
 
     /**
-     * @param string $directory
+     * @param  string  $name
+     *
+     * @return string
      */
-    private function processRoot(string $directory): void
+    private function getExtension(string $name): string
     {
-        $dir   = new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
-        /**
-         * @var string      $name
-         * @var SplFileInfo $object
-         */
-        foreach ($files as $name => $object) {
-            $this->processFile($name);
-        }
+        $parts = explode('.', $name);
+
+        return $parts[count($parts) - 1];
     }
 
     /**
-     * @param string $name
+     * @param  string  $content
+     *
+     * @return bool
+     */
+    private function isValidJson(string $content): bool
+    {
+        if ('' === $content) {
+            return false;
+        }
+        $json = json_decode($content, true);
+        if (false === $json) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  string  $name
      */
     private function processFile(string $name): void
     {
@@ -120,32 +135,18 @@ class UpgradeImportConfigurations extends Command
     }
 
     /**
-     * @param string $name
-     *
-     * @return string
+     * @param  string  $directory
      */
-    private function getExtension(string $name): string
+    private function processRoot(string $directory): void
     {
-        $parts = explode('.', $name);
-
-        return $parts[count($parts) - 1];
-    }
-
-    /**
-     * @param string $content
-     *
-     * @return bool
-     */
-    private function isValidJson(string $content): bool
-    {
-        if ('' === $content) {
-            return false;
+        $dir   = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
+        /**
+         * @var string $name
+         * @var SplFileInfo $object
+         */
+        foreach ($files as $name => $object) {
+            $this->processFile($name);
         }
-        $json = json_decode($content, true);
-        if (false === $json) {
-            return false;
-        }
-
-        return true;
     }
 }

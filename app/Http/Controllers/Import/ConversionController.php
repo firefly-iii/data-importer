@@ -25,20 +25,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
+use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
-use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use JsonException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Storage;
 
 /**
@@ -62,6 +65,7 @@ class ConversionController extends Controller
 
     /**
      *
+     * @throws ImporterErrorException
      */
     public function index()
     {
@@ -74,20 +78,22 @@ class ConversionController extends Controller
 
         app('log')->debug('Will now verify configuration content.');
         $jobBackUrl = route('back.mapping');
-        if (empty($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
+        if (0 === count($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
-        if (empty($configuration->getMapping())) {
+        if (0 === count($configuration->getMapping())) {
             // back to mapping
             app('log')->debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
-        if (true === $configuration->isMapAllData()) {
-            app('log')->debug('Pressing "back" will send you to mapping.');
-            $jobBackUrl = route('back.mapping');
-        }
+        // TODO option is not used atm.
+
+        //        if (true === $configuration->isMapAllData()) {
+        //            app('log')->debug('Pressing "back" will send you to mapping.');
+        //            $jobBackUrl = route('back.mapping');
+        //        }
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -101,9 +107,8 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-
             $contentType = $configuration->getContentType();
-            switch($contentType) {
+            switch ($contentType) {
                 default:
                 case 'unknown':
                 case 'csv':
@@ -142,10 +147,13 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {
@@ -160,7 +168,17 @@ class ConversionController extends Controller
         }
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
-            $routine = new CSVRoutineManager($identifier);
+            $contentType = $configuration->getContentType();
+            switch ($contentType) {
+                default:
+                case 'unknown':
+                case 'csv':
+                    $routine = new CSVRoutineManager($identifier);
+                    break;
+                case 'camt':
+                    $routine = new CAMTRoutineManager($identifier); // why do we need this one?
+                    break;
+            }
         }
         if ('nordigen' === $flow) {
             $routine = new NordigenRoutineManager($identifier);
@@ -215,7 +233,7 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */

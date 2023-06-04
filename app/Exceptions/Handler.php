@@ -56,8 +56,8 @@ class Handler extends ExceptionHandler
         ];
 
     /**
-     * @param Request $request
-     * @param Throwable                $e
+     * @param  Request  $request
+     * @param  Throwable  $e
      *
      * @return JsonResponse|\Illuminate\Http\Response|Response
      * @throws Throwable

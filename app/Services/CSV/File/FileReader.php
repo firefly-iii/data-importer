@@ -36,8 +36,8 @@ use Psr\Container\NotFoundExceptionInterface;
 class FileReader
 {
     /**
-     * @param string $content
-     * @param bool   $convert
+     * @param  string  $content
+     * @param  bool  $convert
      *
      * @return Reader
      */
@@ -57,7 +57,7 @@ class FileReader
     /**
      * Get a CSV file reader and fill it with data from CSV file.
      *
-     * @param bool $convert
+     * @param  bool  $convert
      *
      * @return Reader
      * @throws ContainerExceptionInterface
@@ -65,7 +65,7 @@ class FileReader
      */
     public static function getReaderFromSession(bool $convert = false): Reader
     {
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_CSV_FILE), $convert);
+        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $convert);
 
         // room for config
         return Reader::createFromString($content);
