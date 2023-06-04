@@ -76,7 +76,7 @@ You can contact me at [james@firefly-iii.org](mailto:james@firefly-iii.org), you
 
 Of course, there are some [contributing guidelines](https://github.com/firefly-iii/data-importer/blob/main/.github/contributing.md) and a [code of conduct](https://github.com/firefly-iii/data-importer/blob/main/.github/code_of_conduct.md), which I invite you to check out.
 
-I can always use your help [squashing bugs](https://docs.firefly-iii.org/support/contribute#bugs), thinking about [new features](https://docs.firefly-iii.org/support/contribute#feature-requests) or [translating Firefly III](https://docs.firefly-iii.org/support/contribute#translations) into other languages.
+I can always use your help [squashing bugs](https://docs.firefly-iii.org/firefly-iii/support/#contributing-code), thinking about [new features](https://docs.firefly-iii.org/firefly-iii/support/#contributing-code) or [translating Firefly III](https://docs.firefly-iii.org/firefly-iii/faq/translate/) into other languages.
 
 [Sonarcloud][sc-project-url] scans the code of Firefly III. If you want to help improve Firefly III, check out the latest reports and take your pick!
 
