@@ -389,7 +389,7 @@ class Transaction
      * @param  EntryTransactionDetail  $transactionDetail
      * @return Creditor|Debtor|null
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): Creditor|Debtor|null
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty|null
     {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
