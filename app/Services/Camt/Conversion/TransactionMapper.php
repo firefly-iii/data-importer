@@ -121,22 +121,6 @@ class TransactionMapper
     }
 
     /**
-     * @param $fieldName
-     * @param $fieldValue
-     * @return string|null
-     */
-    private function getAccountType($fieldName, $fieldValue): ?string
-    {
-        $accountType = null;
-        foreach ($this->allAccounts as $account) {
-            if ($account->$fieldName == $fieldValue) {
-                $accountType = $account->type;
-            }
-        }
-        return $accountType;
-    }
-
-    /**
      * This function takes the value in $data['data'], which is for example the account
      * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
      * the value "ShrtBankName" to "Short Bank Name".
@@ -344,21 +328,6 @@ class TransactionMapper
      */
     private function sanityCheck(array $current): ?array
     {
-        // no amount?
-        if (!array_key_exists('amount', $current)) {
-            return null;
-        }
-        // amount must be positive
-        if (-1 === bccomp($current['amount'], '0')) {
-            // negative amount is debit (or transfer)
-            $current['amount'] = bcmul($current['amount'], '-1');
-        }
-        // if is positive
-        if (1 === bccomp($current['amount'], '0')) {
-            // positive account is credit (or transfer)
-            $current = $this->swapAccounts($current);
-        }
-
         // at this point the source and destination could be set according to the content of the XML.
         // but they could be reversed: in the case of incoming money the "source" is actually the
         // relatedParty / opposing party and not the normal account. So both accounts (if present in the array)
@@ -412,6 +381,20 @@ class TransactionMapper
             $current['destination_id'] = $this->getAccountId('destination', $current);
         }
 
+        // no amount?
+        if (!array_key_exists('amount', $current)) {
+            return null;
+        }
+        // amount must be positive
+        if (-1 === bccomp($current['amount'], '0')) {
+            // negative amount is debit (or transfer)
+            $current['amount'] = bcmul($current['amount'], '-1');
+        }
+        // if is positive
+        if (1 === bccomp($current['amount'], '0')) {
+            // positive account is credit (or transfer)
+        }
+
         // no description?
         // no date?
 
@@ -451,6 +434,22 @@ class TransactionMapper
         }
 
         return $ret;
+    }
+
+    /**
+     * @param $fieldName
+     * @param $fieldValue
+     * @return string|null
+     */
+    private function getAccountType($fieldName, $fieldValue): ?string
+    {
+        $accountType = null;
+        foreach ($this->allAccounts as $account) {
+            if ($account->$fieldName == $fieldValue) {
+                $accountType = $account->type;
+            }
+        }
+        return $accountType;
     }
 
     /**
