@@ -74,14 +74,16 @@ class TransactionMapper
         // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
 
         switch (true) {
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense':
-            case $accountType['source'] === 'asset' && $accountType['destination'] === null:
-                return "withdrawal"; // line 281
-            case $accountType['source'] === 'revenue' && $accountType['destination'] === 'asset':
-            case $accountType['source'] === null && $accountType['destination'] === 'asset':
-                return "deposit"; // line 282
-            case $accountType['source'] === 'transfer' && $accountType['destination'] === 'transfer':
-                return "transfer"; // line 283 / 284
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense' && $current['amount'] < 0: // case on line 369
+            case $accountType['source'] === 'asset' && $accountType['destination'] === null && $current['amount'] < 0: // case on line 369
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue'  && $current['amount'] < 0: // there is no expense-account, but the account was found under revenue, so we assume this is a withdrawal with an inexisting expense account
+                return "withdrawal";
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue' && $current['amount'] > 0: // case on line 397
+            case $accountType['source'] === 'asset' && $accountType['destination'] === null && $current['amount'] > 0: // case on line 397
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense': // there is no revenue-account, but the account was found under expense, so we assume this is a deposit with an inexisting revenue account
+                return "deposit";
+            case $accountType['source'] === 'asset' && $accountType['destination'] === 'asset':
+                return "transfer"; // line 382 / 383
             default:
                 app('log')->error(
                     sprintf(
