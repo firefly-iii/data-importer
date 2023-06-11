@@ -387,14 +387,16 @@ class TransactionMapper
         if (!array_key_exists('amount', $current)) {
             return null;
         }
+
+        // if is positive
+        if (1 === bccomp($current['amount'], '0')) {
+            // positive account is credit (or transfer)
+        }
+
         // amount must be positive
         if (-1 === bccomp($current['amount'], '0')) {
             // negative amount is debit (or transfer)
             $current['amount'] = bcmul($current['amount'], '-1');
-        }
-        // if is positive
-        if (1 === bccomp($current['amount'], '0')) {
-            // positive account is credit (or transfer)
         }
 
         // no description?
