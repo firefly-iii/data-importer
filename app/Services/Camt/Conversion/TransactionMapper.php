@@ -111,7 +111,22 @@ class TransactionMapper
                     // so we check all accounts for a match
                     if ($current[$field] == $account->$accountIdentificationSuffix) {
                         // we have a match
-                        app('log')->warning(sprintf('Just mapped account "%s"', $account->id));
+
+                        // only select accounts that are suitable for the type of transaction
+                        if ($current['amount'] > 0) {
+                            // seems a deposit or transfer
+                            if (in_array($account->type,array('asset','revenue'))) {
+                                return (string) $account->id;
+                            }
+                        }
+
+                        if ($current['amount'] < 0) {
+                            // seems a withtrawal or transfer
+                            if (in_array($account->type,array('asset','expense'))) {
+                                return (string) $account->id;
+                            }
+                        }
+                        app('log')->warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
                         return (string) $account->id;
                     }
                 }
