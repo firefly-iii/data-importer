@@ -239,6 +239,13 @@ $availableRoles = [
         'field'           => 'description',
         'append_value'    => true,
     ],
+    'generic-debit-credit'  => [
+        'mappable'        => false,
+        'pre-process-map' => false,
+        'converter'       => 'BankDebitCredit',
+        'field'           => 'amount-modifier',
+        'append_value'    => false,
+    ],
 ];
 
 

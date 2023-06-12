@@ -105,7 +105,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
-        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
+        //app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
                 // temporary debug message:
@@ -115,18 +115,22 @@ class Transaction
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-                // LEVEL A
+            // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-                // LEVEL B
+            // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
             case 'statementCreationDate':
                 // always the same, since its level B.
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
+            case 'CdtDbtInd':
+                /** @var $set EntryTransactionDetail|null */
+                $set = $this->levelD[$index];
+                return (string)$set?->getCreditDebitIndicator();
             case 'statementAccountIban':
                 // always the same, since its level B.
                 $ret = '';
@@ -170,7 +174,7 @@ class Transaction
             case 'entryBtcDomainCode':
                 $return = '';
                 // always the same, since its level C.
-                if(null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
                     $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
                 }
 
@@ -178,7 +182,7 @@ class Transaction
             case 'entryBtcFamilyCode':
                 $return = '';
                 // always the same, since its level C.
-                if(null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
                     $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
@@ -186,12 +190,12 @@ class Transaction
             case 'entryBtcSubFamilyCode':
                 $return = '';
                 // always the same, since its level C.
-                if(null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
                     return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
-                // LEVEL D
+            // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
@@ -255,7 +259,7 @@ class Transaction
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
-                if(null !== $info->getBankTransactionCode()->getDomain()) {
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
                     $return = (string)$info->getBankTransactionCode()->getDomain()->getCode();
                 }
 
@@ -269,7 +273,7 @@ class Transaction
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
-                if(null !== $info->getBankTransactionCode()->getDomain()) {
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
                     $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
@@ -283,7 +287,7 @@ class Transaction
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
-                if(null !== $info->getBankTransactionCode()->getDomain()) {
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
                     $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 

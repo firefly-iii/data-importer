@@ -55,6 +55,7 @@ class TransactionExtractor
                 }
             }
         }
+        app('log')->debug(sprintf('Extracted %d transaction(s)', count($transactions)));
 
         return $transactions;
     }

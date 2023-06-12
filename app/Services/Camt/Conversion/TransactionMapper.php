@@ -46,7 +46,7 @@ class TransactionMapper
         foreach ($transactions as $transaction) {
             $result[] = $this->mapSingle($transaction);
         }
-
+        app('log')->debug(sprintf('Mapped %d transaction(s)', count($result)));
         return $result;
     }
 
@@ -58,41 +58,56 @@ class TransactionMapper
     private function determineTransactionType(array $current): string
     {
         app('log')->debug('Determine transaction type.');
-        $directions = ['source', 'destination'];
+        $directions  = ['source', 'destination'];
+        $accountType = [];
 
         foreach ($directions as $direction) {
             $accountType[$direction] = null;
-            foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-                // try to find destination account
-                if (array_key_exists($direction.'_'.$accountIdentificationSuffix, $current)) {
-                    $fieldName               = $direction.'_'.$accountIdentificationSuffix;
-                    $accountType[$direction] = $this->getAccountType($accountIdentificationSuffix, $current[$fieldName]);
+            foreach ($this->accountIdentificationSuffixes as $suffix) {
+                $key = sprintf('%s_%s', $direction, $suffix);
+                // try to find the account
+                if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
+                    $accountType[$direction] = $this->getAccountType($suffix, $current[$key]);
+                    app('log')->debug(
+                        sprintf('Transaction array has a "%s"-field with value "%s", and the type is "%s".', $key, $current[$key], $accountType[$direction])
+                    );
                 }
             }
         }
 
         // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-
+        $lessThanZero  = 1 === bccomp('0', $current['amount']);
+        $sourceIsAsset = 'asset' === $accountType['source'];
+        $destIsAsset   = 'asset' === $accountType['destination'];
+        $destIsExpense = 'expense' === $accountType['destination'];
+        $destIsRevenue = 'revenue' === $accountType['destination'];
+        $destIsNull    = null === $accountType['destination'];
+        app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
         switch (true) {
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense' && $current['amount'] < 0: // case on line 369
-            case $accountType['source'] === 'asset' && $accountType['destination'] === null && $current['amount'] < 0: // case on line 369
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue'  && $current['amount'] < 0: // there is no expense-account, but the account was found under revenue, so we assume this is a withdrawal with an inexisting expense account
-                return "withdrawal";
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'revenue' && $current['amount'] > 0: // case on line 397
-            case $accountType['source'] === 'asset' && $accountType['destination'] === null && $current['amount'] > 0: // case on line 397
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'expense': // there is no revenue-account, but the account was found under expense, so we assume this is a deposit with an inexisting revenue account
-                return "deposit";
-            case $accountType['source'] === 'asset' && $accountType['destination'] === 'asset':
-                return "transfer"; // line 382 / 383
+            case $sourceIsAsset && $destIsExpense && $lessThanZero:
+            case $sourceIsAsset && $destIsNull && $lessThanZero:
+                // there is no expense account, but the account was found under revenue, so we assume this is a withdrawal with a non-existing expense account
+            case $sourceIsAsset && $destIsRevenue && $lessThanZero:
+                return 'withdrawal';
+            case $sourceIsAsset && $destIsRevenue && !$lessThanZero:
+            case $sourceIsAsset && $destIsNull && !$lessThanZero:
+            case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
+                return 'deposit';
+            case $sourceIsAsset && $destIsAsset:
+                return 'transfer'; // line 382 / 383
             default:
                 app('log')->error(
                     sprintf(
-                        'Invalid transaction: source = "%s", destination = "%s"',
-                        $accountType['source'] ?: '<null>',
-                        $accountType['destination'] ?: '<null>'
+                        'Unknown transaction type: source = "%s", destination = "%s"',
+                        $accountType['source'] ?: null,
+                        $accountType['destination'] ?: null
                     )
                 ); // 285
         }
+
+
+        // default back to withdrawal.
+        return 'withdrawal';
     }
 
     /**
@@ -103,31 +118,31 @@ class TransactionMapper
     private function getAccountId($direction, $current): string
     {
         app('log')->debug('getAccountId');
-        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-            $field = $direction.'_'.$accountIdentificationSuffix;
+        foreach ($this->accountIdentificationSuffixes as $suffix) {
+            $field = sprintf('%s_%s', $direction, $suffix);
             if (array_key_exists($field, $current)) {
                 // there is a value...
                 foreach ($this->allAccounts as $account) {
                     // so we check all accounts for a match
-                    if ($current[$field] == $account->$accountIdentificationSuffix) {
+                    if ($current[$field] === $account->$suffix) {
                         // we have a match
 
                         // only select accounts that are suitable for the type of transaction
                         if ($current['amount'] > 0) {
                             // seems a deposit or transfer
-                            if (in_array($account->type,array('asset','revenue'))) {
-                                return (string) $account->id;
+                            if (in_array($account->type, ['asset', 'revenue'])) {
+                                return (string)$account->id;
                             }
                         }
 
                         if ($current['amount'] < 0) {
                             // seems a withtrawal or transfer
-                            if (in_array($account->type,array('asset','expense'))) {
-                                return (string) $account->id;
+                            if (in_array($account->type, ['asset', 'expense'])) {
+                                return (string)$account->id;
                             }
                         }
                         app('log')->warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
-                        return (string) $account->id;
+                        return (string)$account->id;
                     }
                 }
                 //app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
@@ -135,6 +150,23 @@ class TransactionMapper
             //app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
         }
         return '';
+    }
+
+    /**
+     * @param  string  $name
+     * @param  string  $value
+     * @return string|null
+     */
+    private function getAccountType(string $name, string $value): ?string
+    {
+        foreach ($this->allAccounts as $account) {
+            if ((string)$account->$name === (string)$value) {
+                app('log')->debug(sprintf('Recognized "%s" as a "%s"-account', $value, $account->type));
+                return $account->type;
+            }
+        }
+        app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s".', $name, $value));
+        return null;
     }
 
     /**
@@ -162,13 +194,13 @@ class TransactionMapper
         // bravely assume there's just one value in the array:
         $fieldValue = join('', $data['data']);
 
-        // replace with mapping
+        // replace with mapping, if mapping exists.
         if (array_key_exists($fieldValue, $data['mapping'])) {
             $key           = sprintf('%s_id', $direction);
             $current[$key] = $data['mapping'][$fieldValue];
         }
 
-        // leave original value
+        // leave original value if no mapping exists.
         if (!array_key_exists($fieldValue, $data['mapping'])) {
             // $direction is either 'source' or 'destination'
             // $fieldName is 'id', 'iban','name' or 'number'
@@ -211,16 +243,14 @@ class TransactionMapper
      */
     private function mapSingle(array $transaction): array
     {
-        app('log')->debug('Now mapping single transaction');
         // make a new transaction:
-        $result         = [
-            //'user'          => 1, // ??
+        $result        = [
             'group_title'             => null,
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
-        $splits         = $transaction['splits'] ?? 1;
-        $group_handling = $this->configuration->getGroupedTransactionHandling();
+        $splits        = $transaction['splits'] ?? 1;
+        $groupHandling = $this->configuration->getGroupedTransactionHandling();
         app('log')->debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; $i++) {
             $split = $transaction['transactions'][$i] ?? false;
@@ -289,27 +319,29 @@ class TransactionMapper
                     case 'description': // TODO think about a config value to use both values from level C and D
                         $current['description'] = $current['description'] ?? '';
                         $addition               = '';
-                        if ('group' === $group_handling || 'split' === $group_handling) {
+                        if ('group' === $groupHandling || 'split' === $groupHandling) {
                             // use first description
                             $addition = $data['data'][0];
                         }
-                        if ('single' === $group_handling) {
+                        if ('single' === $groupHandling) {
                             // just use the last description
                             $addition = end($data['data']);
                         }
                         $current['description'] .= $addition;
+                        app('log')->debug(sprintf('Description is "%s"', $current['description']));
                         break;
                     case 'amount':
                         $current['amount'] = null;
-                        if ('group' === $group_handling || 'split' === $group_handling) {
+                        if ('group' === $groupHandling || 'split' === $groupHandling) {
                             // if multiple values, use biggest (... at index 0?)
+                            // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
                             foreach ($data['data'] as $amount) {
                                 if (abs($current['amount']) < abs($amount) || $current['amount'] == null) {
                                     $current['amount'] = $amount;
                                 }
                             }
                         }
-                        if ('single' === $group_handling) {
+                        if ('single' === $groupHandling) {
                             // if multiple values, use smallest (... at index 1?)
                             foreach ($data['data'] as $amount) {
                                 if (abs($current['amount']) > abs($amount) || $current['amount'] == null) {
@@ -345,6 +377,18 @@ class TransactionMapper
      */
     private function sanityCheck(array $current): ?array
     {
+        app('log')->debug('Start of sanityCheck');
+        // no amount?
+        if (!array_key_exists('amount', $current)) {
+            return null;
+        }
+        // if is positive
+        if (1 === bccomp($current['amount'], '0')) {
+            app('log')->debug('Swap accounts because amount is positive');
+            // positive account is deposit (or transfer), so swap accounts.
+            $current = $this->swapAccounts($current);
+        }
+
         // at this point the source and destination could be set according to the content of the XML.
         // but they could be reversed: in the case of incoming money the "source" is actually the
         // relatedParty / opposing party and not the normal account. So both accounts (if present in the array)
@@ -357,6 +401,11 @@ class TransactionMapper
             && !array_key_exists('source_iban', $current)
             && !array_key_exists('source_number', $current)) {
             // TODO add backup account
+            $default = $this->configuration->getDefaultAccount();
+            if (null !== $default) {
+                app('log')->debug(sprintf('Set default source account to #%d', $default));
+                $current['source_id'] = (int)$default;
+            }
         }
 
         $sourceIsNew = false;
@@ -378,6 +427,7 @@ class TransactionMapper
             && !array_key_exists('destination_iban', $current)
             && !array_key_exists('destination_number', $current)) {
             // TODO add backup account
+            app('log')->debug('Should add fake destination or report.');
         }
 
 
@@ -390,12 +440,16 @@ class TransactionMapper
 
         // as the source account is not new, we try to map an existing account
         if (!$sourceIsNew) {
-            $current['source_id'] = $this->getAccountId('source', $current);
+            //$current['source_id'] = $this->getAccountId('source', $current);
         }
         $current['type'] = $this->determineTransactionType($current);
+        app('log')->debug(sprintf('Transaction type is %s', $current['type']));
+        // need a catch here to invert.
+
+
         // as the destination account is not new, we try to map an existing account
         if ($this->validAccountInfo('destination', $current)) {
-            $current['destination_id'] = $this->getAccountId('destination', $current);
+            //$current['destination_id'] = $this->getAccountId('destination', $current);
         }
 
         // no amount?
@@ -405,6 +459,7 @@ class TransactionMapper
 
         // if is positive
         if (1 === bccomp($current['amount'], '0')) {
+            // TODO remove this empty if statement.
             // positive account is credit (or transfer)
         }
 
@@ -421,54 +476,38 @@ class TransactionMapper
     }
 
     /**
-     * TODO broken.
      * @param  array  $currentTransaction
      * @return array
      */
     private function swapAccounts(array $currentTransaction): array
     {
-        $ret       = $currentTransaction;
-        $fieldType = ['id', 'iban', 'number', 'name'];
+        app('log')->debug('swapAccounts');
+        $return = $currentTransaction;
 
-        foreach ($fieldType as $currentFieldType) {
-            // move source to destination
-            if (array_key_exists('source_'.$currentFieldType, $currentTransaction)) {
-                $ret['destination_'.$currentFieldType] = $currentTransaction['source_'.$currentFieldType];
-                app('log')->warning('Just replaced destination_'.$currentFieldType.' in $ret');
-            }
-            if (!array_key_exists('source_'.$currentFieldType, $currentTransaction)) {
-                unset($ret['destination_'.$currentFieldType]);
-                app('log')->warning('Just DEL destination_'.$currentFieldType.' in $ret');
-            }
+        foreach ($this->accountIdentificationSuffixes as $suffix) {
+            $sourceKey = sprintf('source_%s', $suffix);
+            $destKey   = sprintf('destination_%s', $suffix);
+            // if source value exists, save it.
+            $sourceValue = array_key_exists($sourceKey, $currentTransaction) ? $currentTransaction[$sourceKey] : null;
+            // if destination value exists, save it.
+            $destValue = array_key_exists($destKey, $currentTransaction) ? $currentTransaction[$destKey] : null;
 
-            // move destination to source
-            if (array_key_exists('destination_'.$currentFieldType, $currentTransaction)) {
-                $ret['source_'.$currentFieldType] = $currentTransaction['destination_'.$currentFieldType];
-                app('log')->warning('Just replaced source_'.$currentFieldType.' in $ret');
+            // always unset source value
+            app('log')->debug(sprintf('Unset "%s" with value "%s"', $sourceKey, $sourceValue));
+            app('log')->debug(sprintf('Unset "%s" with value "%s"', $destKey, $destValue));
+            unset($return[$sourceKey], $return[$destKey]);
+
+            // set opposite values
+            if (null !== $sourceValue) {
+                app('log')->debug(sprintf('Set "%s" to "%s"', $destKey, $sourceValue));
+                $return[$destKey] = $sourceValue;
             }
-            if (!array_key_exists('destination_'.$currentFieldType, $currentTransaction)) {
-                app('log')->warning('Just DEL source_'.$currentFieldType.' in $ret');
-                unset($ret['source_'.$currentFieldType]);
+            if (null !== $destValue) {
+                app('log')->debug(sprintf('Set "%s" to "%s"', $sourceKey, $destValue));
+                $return[$sourceKey] = $destValue;
             }
         }
-
-        return $ret;
-    }
-
-    /**
-     * @param $fieldName
-     * @param $fieldValue
-     * @return string|null
-     */
-    private function getAccountType($fieldName, $fieldValue): ?string
-    {
-        $accountType = null;
-        foreach ($this->allAccounts as $account) {
-            if ($account->$fieldName == $fieldValue) {
-                $accountType = $account->type;
-            }
-        }
-        return $accountType;
+        return $return;
     }
 
     /**
@@ -483,7 +522,7 @@ class TransactionMapper
         // search for existing number
         // search for existing name, TODO under which types?
         foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-            $field = $direction.'_'.$accountIdentificationSuffix;
+            $field = sprintf('%s_%s', $direction, $accountIdentificationSuffix);
             if (array_key_exists($field, $current)) {
                 // there is a value...
                 foreach ($this->allAccounts as $account) {
