@@ -43,8 +43,10 @@ class TransactionMapper
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
         $result = [];
         /** @var array $transaction */
-        foreach ($transactions as $transaction) {
+        foreach ($transactions as $index => $transaction) {
+            app('log')->debug(sprintf('Now mapping index #%d', $index));
             $result[] = $this->mapSingle($transaction);
+            app('log')->debug(sprintf('Now done with mapping index #%d', $index));
         }
         app('log')->debug(sprintf('Mapped %d transaction(s)', count($result)));
         return $result;
@@ -76,12 +78,14 @@ class TransactionMapper
         }
 
         // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-        $lessThanZero  = 1 === bccomp('0', $current['amount']);
-        $sourceIsAsset = 'asset' === $accountType['source'];
-        $destIsAsset   = 'asset' === $accountType['destination'];
-        $destIsExpense = 'expense' === $accountType['destination'];
-        $destIsRevenue = 'revenue' === $accountType['destination'];
-        $destIsNull    = null === $accountType['destination'];
+        $lessThanZero    = 1 === bccomp('0', $current['amount']);
+        $sourceIsNull    = null === $accountType['source'];
+        $sourceIsAsset   = 'asset' === $accountType['source'];
+        $sourceIsRevenue = 'revenue' === $accountType['source'];
+        $destIsAsset     = 'asset' === $accountType['destination'];
+        $destIsExpense   = 'expense' === $accountType['destination'];
+        $destIsRevenue   = 'revenue' === $accountType['destination'];
+        $destIsNull      = null === $accountType['destination'];
         app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
         switch (true) {
             case $sourceIsAsset && $destIsExpense && $lessThanZero:
@@ -91,10 +95,13 @@ class TransactionMapper
                 return 'withdrawal';
             case $sourceIsAsset && $destIsRevenue && !$lessThanZero:
             case $sourceIsAsset && $destIsNull && !$lessThanZero:
+            case $sourceIsNull && $destIsAsset:
+            case $sourceIsRevenue && $destIsAsset:
             case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
                 return 'deposit';
             case $sourceIsAsset && $destIsAsset:
                 return 'transfer'; // line 382 / 383
+
             default:
                 app('log')->error(
                     sprintf(
@@ -159,14 +166,26 @@ class TransactionMapper
      */
     private function getAccountType(string $name, string $value): ?string
     {
+        $count  = 0;
+        $result = null;
         foreach ($this->allAccounts as $account) {
             if ((string)$account->$name === (string)$value) {
-                app('log')->debug(sprintf('Recognized "%s" as a "%s"-account', $value, $account->type));
-                return $account->type;
+                if (0 === $count) {
+                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account', $value, $account->type));
+                    $result = $account->type;
+                    $count++;
+                }
+                if (0 !== $count && $account->type !== $result) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account but ALSO as a "%s"-account!', $value, $result, $account->type));
+                    $result = null;
+                    $count++;
+                }
             }
         }
-        app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s".', $name, $value));
-        return null;
+        if (null === $result) {
+            app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s", or skipped because unsure.', $name, $value));
+        }
+        return $result;
     }
 
     /**

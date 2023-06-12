@@ -30,8 +30,10 @@ class TransactionConverter
         app('log')->debug('Convert all transactions into pseudo-transactions.');
         $result = [];
         /** @var Transaction $transaction */
-        foreach ($transactions as $transaction) {
+        foreach ($transactions as $index => $transaction) {
+            app('log')->debug(sprintf('Now working on index #%d', $index));
             $result[] = $this->convertSingle($transaction);
+            app('log')->debug(sprintf('Now done with index #%d', $index));
         }
         app('log')->debug('Done converting all transactions into pseudo-transactions.');
 
