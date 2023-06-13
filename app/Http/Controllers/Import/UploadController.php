@@ -47,6 +47,9 @@ use Storage;
  */
 class UploadController extends Controller
 {
+
+    private string $contentType;
+
     /**
      * UploadController constructor.
      */
@@ -55,6 +58,10 @@ class UploadController extends Controller
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadControllerMiddleware::class);
+        /*
+         * This variable is used to make sure the configuration object also knows the file type.
+         */
+        $this->contentType = 'unknown';
     }
 
     /**
@@ -217,6 +224,7 @@ class UploadController extends Controller
             $configuration = null;
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
+                $configuration->setContentType($this->contentType);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
                 $success = true;
             } catch (ImporterErrorException $e) {
@@ -287,10 +295,10 @@ class UploadController extends Controller
 
             // upload the file to a temp directory and use it from there.
             if (0 === $errorNumber) {
-                $detector = new FileContentSherlock();
-                $fileType = $detector->detectContentType($file->getPathname());
-                $content  = '';
-                if ('csv' === $fileType) {
+                $detector          = new FileContentSherlock();
+                $this->contentType = $detector->detectContentType($file->getPathname());
+                $content           = '';
+                if ('csv' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
 
                     // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
@@ -303,7 +311,7 @@ class UploadController extends Controller
                     }
                 }
 
-                if ('camt' === $fileType) {
+                if ('camt' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
                 }
                 $fileName = StorageService::storeContent($content);
