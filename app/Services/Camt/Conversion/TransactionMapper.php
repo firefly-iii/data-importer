@@ -300,22 +300,22 @@ class TransactionMapper
                         break;
                     case 'date_process':
                         // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                         $current['process_date'] = $carbon->toIso8601String();
                         break;
                     case 'date_transaction':
                         // TODO perhaps lift into separate method?
-                        $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                         $current['date'] = $carbon->toIso8601String();
                         break;
                     case 'date_payment':
                         // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                         $current['payment_date'] = $carbon->toIso8601String();
                         break;
                     case 'date_book':
                         // TODO perhaps lift into separate method?
-                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', $data['data'][0]);
+                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                         $current['book_date'] = $carbon->toIso8601String();
                         $current['date']      = $carbon->toIso8601String();
                         break;
@@ -340,7 +340,7 @@ class TransactionMapper
                         $addition               = '';
                         if ('group' === $groupHandling || 'split' === $groupHandling) {
                             // use first description
-                            $addition = $data['data'][0];
+                            $addition = reset($data['data']);
                         }
                         if ('single' === $groupHandling) {
                             // just use the last description
