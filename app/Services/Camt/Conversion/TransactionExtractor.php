@@ -50,7 +50,7 @@ class TransactionExtractor
                         }
                     }
                     if ('group' === $handling) {
-                        $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                        $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
                     }
                 }
             }
