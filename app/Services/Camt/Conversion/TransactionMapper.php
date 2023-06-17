@@ -309,6 +309,38 @@ class TransactionMapper
          */
         foreach ($split as $role => $data) {
             // actual content of the field is in $data['data'], which is an array
+            if('single' === $groupHandling OR 'group' === $groupHandling) {
+                if(array_key_exists('entryDetailAccounterServiceReference',$data['data'])) {
+                    // we'll use this one, no exception. so the one from level-c can be dropped (if available)
+                    if(array_key_exists('entryAccounterServiceReference',$data['data'])) {
+                        unset($data['data']['entryAccounterServiceReference']);
+                    }
+                }
+                if(array_key_exists('entryDetailBtcDomainCode',$data['data'])) {
+                    // we'll use this one, no exception. so the one from level-c can be dropped (if available)
+                    if(array_key_exists('entryBtcDomainCode',$data['data'])) {
+                        unset($data['data']['entryBtcDomainCode']);
+                    }
+                }
+                if(array_key_exists('entryDetailBtcFamilyCode',$data['data'])) {
+                    // we'll use this one, no exception. so the one from level-c can be dropped (if available)
+                    if(array_key_exists('entryBtcFamilyCode',$data['data'])) {
+                        unset($data['data']['entryBtcFamilyCode']);
+                    }
+                }
+                if(array_key_exists('entryDetailBtcSubFamilyCode',$data['data'])) {
+                    // we'll use this one, no exception. so the one from level-c can be dropped (if available)
+                    if(array_key_exists('entryBtcSubFamilyCode',$data['data'])) {
+                        unset($data['data']['entryBtcSubFamilyCode']);
+                    }
+                }
+                if(array_key_exists('entryDetailAmount',$data['data'])) {
+                    // we'll use this one, no exception. so the one from level-c can be dropped (if available)
+                    if(array_key_exists('entryAmount',$data['data'])) {
+                        unset($data['data']['entryAmount']);
+                    }
+                }
+            }
             switch ($role) {
                 default:
                     app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));

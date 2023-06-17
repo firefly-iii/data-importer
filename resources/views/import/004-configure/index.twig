@@ -196,7 +196,7 @@
                                                     {% if configuration.grouped_transaction_handling == 'split' %}selected{% endif %}
                                                     value="split">Create a Split-Booking which contains all Level-D records
                                             </option>
-                                            <option disabled label="Group-Booking only (loss of details)"
+                                            <option label="Group-Booking only (loss of details)"
                                                     {% if configuration.grouped_transaction_handling == 'group' %}selected{% endif %}
                                                     value="group">Drop the Level-D Data and take the sum of all amounts (loss of details, not recommended)
                                             </option>
