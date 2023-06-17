@@ -45,7 +45,7 @@ class TransactionMapper
         /** @var array $transaction */
         foreach ($transactions as $index => $transaction) {
             app('log')->debug(sprintf('Now mapping index #%d', $index));
-            $result[] = $this->mapSingle($transaction);
+            $result[] = $this->mapTransactionGroup($transaction);
             app('log')->debug(sprintf('Now done with mapping index #%d', $index));
         }
         app('log')->debug(sprintf('Mapped %d transaction(s)', count($result)));
@@ -260,7 +260,7 @@ class TransactionMapper
      *
      * @return array
      */
-    private function mapSingle(array $transaction): array
+    private function mapTransactionGroup(array $transaction): array
     {
         // make a new transaction:
         $result        = [
@@ -272,117 +272,134 @@ class TransactionMapper
         $groupHandling = $this->configuration->getGroupedTransactionHandling();
         app('log')->debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; $i++) {
+            /** @var array|bool $split */
             $split = $transaction['transactions'][$i] ?? false;
-            if (false === $split) {
+            if (is_bool($split) && false === $split) {
                 app('log')->warning(sprintf('No split #%d found, break.', $i));
                 continue;
             }
-            $current = [
-                'type' => 'withdrawal', // perhaps to be overruled later.
-            ];
-            /**
-             * @var string $role
-             * @var array $data
-             */
-            foreach ($split as $role => $data) {
-                // actual content of the field is in $data['data'], which is an array
-                switch ($role) {
-                    default:
-                        app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));
-                        break;
-                    case '_ignore':
-                        break;
-                    case 'note':
-                        // TODO perhaps lift into separate method?
-                        $current['notes'] = $current['notes'] ?? '';
-                        $addition         = "  \n".join("  \n", $data['data']);
-                        $current['notes'] .= $addition;
-                        break;
-                    case 'date_process':
-                        // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                        $current['process_date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_transaction':
-                        // TODO perhaps lift into separate method?
-                        $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                        $current['date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_payment':
-                        // TODO perhaps lift into separate method?
-                        $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                        $current['payment_date'] = $carbon->toIso8601String();
-                        break;
-                    case 'date_book':
-                        // TODO perhaps lift into separate method?
-                        $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                        $current['book_date'] = $carbon->toIso8601String();
-                        $current['date']      = $carbon->toIso8601String();
-                        break;
-                    case 'account-iban':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'iban', 'source', $data);
-                        break;
-                    case 'opposing-iban':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'iban', 'destination', $data);
-                        break;
-                    case 'opposing-name':
-                        // could be multiple, could be mapped.
-                        $current = $this->mapAccount($current, 'name', 'destination', $data);
-                        break;
-                    case 'external-id':
-                        $addition               = join(' ', $data['data']);
-                        $current['external_id'] = $addition;
-                        break;
-                    case 'description': // TODO think about a config value to use both values from level C and D
-                        $current['description'] = $current['description'] ?? '';
-                        $addition               = '';
-                        if ('group' === $groupHandling || 'split' === $groupHandling) {
-                            // use first description
-                            $addition = reset($data['data']);
-                        }
-                        if ('single' === $groupHandling) {
-                            // just use the last description
-                            $addition = end($data['data']);
-                        }
-                        $current['description'] .= $addition;
-                        app('log')->debug(sprintf('Description is "%s"', $current['description']));
-                        break;
-                    case 'amount':
-                        $current['amount'] = null;
-                        if ('group' === $groupHandling || 'split' === $groupHandling) {
-                            // if multiple values, use biggest (... at index 0?)
-                            // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
-                            foreach ($data['data'] as $amount) {
-                                if (abs($current['amount']) < abs($amount) || $current['amount'] == null) {
-                                    $current['amount'] = $amount;
-                                }
-                            }
-                        }
-                        if ('single' === $groupHandling) {
-                            // if multiple values, use smallest (... at index 1?)
-                            foreach ($data['data'] as $amount) {
-                                if (abs($current['amount']) > abs($amount) || $current['amount'] == null) {
-                                    $current['amount'] = $amount;
-                                }
-                            }
-                        }
-                        break;
-                    case 'currency-code':
-                        $current = $this->mapCurrency($current, 'currency', $data);
-                        break;
-                }
+            $rawJournal      = $this->mapTransactionJournal($groupHandling, $split);
+            $polishedJournal = null;
+            if (null !== $rawJournal) {
+                $polishedJournal = $this->sanityCheck($rawJournal);
             }
-            $current = $this->sanityCheck($current);
-            if (null === $current) {
+            if (null === $polishedJournal) {
                 // give warning, skip transaction.
             }
             // TODO loop over $current and clean up if necessary.
-            $result['transactions'][] = $current;
+            $result['transactions'][] = $polishedJournal;
         }
 
         return $result;
+    }
+
+    /**
+     * @param  string  $groupHandling
+     * @param  array  $split
+     * @return array|null
+     */
+    private function mapTransactionJournal(string $groupHandling, array $split): ?array
+    {
+        $current = [
+            'type' => 'withdrawal', // perhaps to be overruled later.
+        ];
+        /**
+         * @var string $role
+         * @var array $data
+         */
+        foreach ($split as $role => $data) {
+            // actual content of the field is in $data['data'], which is an array
+            switch ($role) {
+                default:
+                    app('log')->error(sprintf('Cannot handle role "%s" yet.', $role));
+                    break;
+                case '_ignore':
+                    break;
+                case 'note':
+                    // TODO perhaps lift into separate method?
+                    $current['notes'] = $current['notes'] ?? '';
+                    $addition         = "  \n".join("  \n", $data['data']);
+                    $current['notes'] .= $addition;
+                    break;
+                case 'date_process':
+                    // TODO perhaps lift into separate method?
+                    $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['process_date'] = $carbon->toIso8601String();
+                    break;
+                case 'date_transaction':
+                    // TODO perhaps lift into separate method?
+                    $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['date'] = $carbon->toIso8601String();
+                    break;
+                case 'date_payment':
+                    // TODO perhaps lift into separate method?
+                    $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['payment_date'] = $carbon->toIso8601String();
+                    break;
+                case 'date_book':
+                    // TODO perhaps lift into separate method?
+                    $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['book_date'] = $carbon->toIso8601String();
+                    $current['date']      = $carbon->toIso8601String();
+                    break;
+                case 'account-iban':
+                    // could be multiple, could be mapped.
+                    $current = $this->mapAccount($current, 'iban', 'source', $data);
+                    break;
+                case 'opposing-iban':
+                    // could be multiple, could be mapped.
+                    $current = $this->mapAccount($current, 'iban', 'destination', $data);
+                    break;
+                case 'opposing-name':
+                    // could be multiple, could be mapped.
+                    $current = $this->mapAccount($current, 'name', 'destination', $data);
+                    break;
+                case 'external-id':
+                    $addition               = join(' ', $data['data']);
+                    $current['external_id'] = $addition;
+                    break;
+                case 'description': // TODO think about a config value to use both values from level C and D
+                    $current['description'] = $current['description'] ?? '';
+                    $addition               = '';
+                    if ('group' === $groupHandling || 'split' === $groupHandling) {
+                        // use first description
+                        // TODO use named field?
+                        $addition = reset($data['data']);
+                    }
+                    if ('single' === $groupHandling) {
+                        // just use the last description
+                        // TODO use named field?
+                        $addition = end($data['data']);
+                    }
+                    $current['description'] .= $addition;
+                    app('log')->debug(sprintf('Description is "%s"', $current['description']));
+                    break;
+                case 'amount':
+                    $current['amount'] = null;
+                    if ('group' === $groupHandling || 'split' === $groupHandling) {
+                        // if multiple values, use biggest (... at index 0?)
+                        // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
+                        foreach ($data['data'] as $amount) {
+                            if (abs($current['amount']) < abs($amount) || $current['amount'] == null) {
+                                $current['amount'] = $amount;
+                            }
+                        }
+                    }
+                    if ('single' === $groupHandling) {
+                        // if multiple values, use smallest (... at index 1?)
+                        foreach ($data['data'] as $amount) {
+                            if (abs($current['amount']) > abs($amount) || $current['amount'] == null) {
+                                $current['amount'] = $amount;
+                            }
+                        }
+                    }
+                    break;
+                case 'currency-code':
+                    $current = $this->mapCurrency($current, 'currency', $data);
+                    break;
+            }
+        }
+        return $current;
     }
 
     /**
