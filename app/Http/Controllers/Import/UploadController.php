@@ -47,7 +47,6 @@ use Storage;
  */
 class UploadController extends Controller
 {
-
     private string $contentType;
 
     /**
