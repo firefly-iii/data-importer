@@ -309,35 +309,40 @@ class TransactionMapper
          */
         foreach ($split as $role => $data) {
             // actual content of the field is in $data['data'], which is an array
-            if('single' === $groupHandling or 'group' === $groupHandling) {
-                if(array_key_exists('entryDetailAccounterServiceReference', $data['data'])) {
+            if ('single' === $groupHandling or 'group' === $groupHandling) {
+                if (array_key_exists('entryDetailAccounterServiceReference', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
-                    if(array_key_exists('entryAccounterServiceReference', $data['data'])) {
+                    if (array_key_exists('entryAccounterServiceReference', $data['data'])) {
                         unset($data['data']['entryAccounterServiceReference']);
+                        app('log')->debug('Dropped entryAccounterServiceReference');
                     }
                 }
-                if(array_key_exists('entryDetailBtcDomainCode', $data['data'])) {
+                if (array_key_exists('entryDetailBtcDomainCode', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
-                    if(array_key_exists('entryBtcDomainCode', $data['data'])) {
+                    if (array_key_exists('entryBtcDomainCode', $data['data'])) {
                         unset($data['data']['entryBtcDomainCode']);
+                        app('log')->debug('Dropped entryBtcDomainCode');
                     }
                 }
-                if(array_key_exists('entryDetailBtcFamilyCode', $data['data'])) {
+                if (array_key_exists('entryDetailBtcFamilyCode', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
-                    if(array_key_exists('entryBtcFamilyCode', $data['data'])) {
+                    if (array_key_exists('entryBtcFamilyCode', $data['data'])) {
                         unset($data['data']['entryBtcFamilyCode']);
+                        app('log')->debug('Dropped entryBtcFamilyCode');
                     }
                 }
-                if(array_key_exists('entryDetailBtcSubFamilyCode', $data['data'])) {
+                if (array_key_exists('entryDetailBtcSubFamilyCode', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
-                    if(array_key_exists('entryBtcSubFamilyCode', $data['data'])) {
+                    if (array_key_exists('entryBtcSubFamilyCode', $data['data'])) {
                         unset($data['data']['entryBtcSubFamilyCode']);
+                        app('log')->debug('Dropped entryBtcSubFamilyCode');
                     }
                 }
-                if(array_key_exists('entryDetailAmount', $data['data'])) {
+                if (array_key_exists('entryDetailAmount', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
-                    if(array_key_exists('entryAmount', $data['data'])) {
+                    if (array_key_exists('entryAmount', $data['data'])) {
                         unset($data['data']['entryAmount']);
+                        app('log')->debug('Dropped entryAmount');
                     }
                 }
             }
