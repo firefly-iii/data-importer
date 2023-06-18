@@ -50,9 +50,10 @@ class TransactionExtractor
                         }
                     }
                     if ('group' === $handling) {
-                        if($count === 1) {
+                        if (1 === $count) {
                             $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
-                        } else {
+                        }
+                        if ($count > 1) {
                             $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
                         }
                     }
