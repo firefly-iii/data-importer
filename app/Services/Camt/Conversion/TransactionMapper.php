@@ -53,6 +53,20 @@ class TransactionMapper
     }
 
     /**
+     * @param  string  $direction
+     * @param  array  $current
+     * @return bool
+     */
+    private function accountDetailsEmpty(string $direction, array $current): bool
+    {
+        $noId     = '' === ($current[sprintf('%s_id', $direction)] ?? '');
+        $noIban   = '' === ($current[sprintf('%s_iban', $direction)] ?? '');
+        $noNumber = '' === ($current[sprintf('%s_number', $direction)] ?? '');
+        $noName   = '' === ($current[sprintf('%s_name', $direction)] ?? '');
+        return $noId && $noIban && $noNumber && $noName;
+    }
+
+    /**
      * @param  array  $current
      *
      * @return string
@@ -455,6 +469,19 @@ class TransactionMapper
         if (!array_key_exists('amount', $current)) {
             return null;
         }
+
+        // if there is no source information, add the default account now:
+        if ($this->accountDetailsEmpty('source', $current)) {
+            app('log')->debug('Array has no source information, added default info.');
+            $current['source_id'] = $this->configuration->getDefaultAccount();
+        }
+
+        // if there is no destination information, add an empty account now:
+        if ($this->accountDetailsEmpty('destination', $current)) {
+            app('log')->debug('Array has no destination information, added default info.');
+            $current['destination_name'] = '(no name)';
+        }
+
         // if is positive
         if (1 === bccomp($current['amount'], '0')) {
             app('log')->debug('Swap accounts because amount is positive');
@@ -462,59 +489,7 @@ class TransactionMapper
             $current = $this->swapAccounts($current);
         }
 
-        // at this point the source and destination could be set according to the content of the XML.
-        // but they could be reversed: in the case of incoming money the "source" is actually the
-        // relatedParty / opposing party and not the normal account. So both accounts (if present in the array)
-        // need to be validated to see what types they are. This also depends on the amount (positive or negative).
 
-        // not set source_id, iban or name? Then add the backup account
-        if (
-            !array_key_exists('source_id', $current)
-            && !array_key_exists('source_name', $current)
-            && !array_key_exists('source_iban', $current)
-            && !array_key_exists('source_number', $current)) {
-            // TODO add backup account
-            $default = $this->configuration->getDefaultAccount();
-            if (null !== $default) {
-                app('log')->debug(sprintf('Set default source account to #%d', $default));
-                $current['source_id'] = (int)$default;
-            }
-        }
-
-        $sourceIsNew = false;
-        // not set source_id, but others are present? Make sure the account mentioned actually exists.
-        // if it does not exist (it is "new"), do nothing for the time being just mark it as such.
-        if (
-            !array_key_exists('source_id', $current)
-            && (array_key_exists('source_name', $current)
-                || array_key_exists('source_iban', $current)
-                || array_key_exists('source_number', $current))) {
-            // the reverse is true: if the info is valid, the source account is not "new".
-            $sourceIsNew = !$this->validAccountInfo('source', $current);
-        }
-
-        // not set destination? Then add a fake one
-        if (
-            !array_key_exists('destination_id', $current)
-            && !array_key_exists('destination_name', $current)
-            && !array_key_exists('destination_iban', $current)
-            && !array_key_exists('destination_number', $current)) {
-            // TODO add backup account
-            app('log')->debug('Should add fake destination or report.');
-        }
-
-
-        // if the source is asset account AND the destination is expense or new AND amount is neg = withdrawal
-        // if the source is asset account AND the destination is revenue or new AND amount is pos = deposit
-        // if both are transfer AND amount is pos = transfer from dest to source
-        // if both are transfer AND amount is neg = transfer from source to dest
-        // any other combination is "illegal" and needs a warning.
-
-
-        // as the source account is not new, we try to map an existing account
-        if (!$sourceIsNew) {
-            //$current['source_id'] = $this->getAccountId('source', $current);
-        }
         $current['type'] = $this->determineTransactionType($current);
         app('log')->debug(sprintf('Transaction type is %s', $current['type']));
         // need a catch here to invert.
