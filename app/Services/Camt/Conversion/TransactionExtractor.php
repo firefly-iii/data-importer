@@ -38,7 +38,7 @@ class TransactionExtractor
         foreach ($statements as $i => $statement) { // -> Level B
             $entries = $statement->getEntries();
             $entryCount = count($entries);
-            app('log')->debug('[%d/%d] Now working on statement with %d entries.', $i+1, $totalCount, $entryCount);
+            app('log')->debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i+1, $totalCount, $entryCount));
             foreach ($entries as $ii => $entry) { // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 app('log')->debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii+1, $entryCount, $count));
