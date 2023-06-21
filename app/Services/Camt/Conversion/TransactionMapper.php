@@ -37,9 +37,6 @@ class TransactionMapper
      */
     public function map(array $transactions): array
     {
-        app('log')->debug('Map all transactions.');
-        // TODO download all accounts from Firefly III, we may need them for verification.
-
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
         $result = [];
         /** @var array $transaction */
@@ -182,16 +179,22 @@ class TransactionMapper
     {
         $count  = 0;
         $result = null;
+        $hitField = null; // the field on which we found a match.
         foreach ($this->allAccounts as $account) {
+            // we have a match!
             if ((string)$account->$name === (string)$value) {
+                // never found a match before!
                 if (0 === $count) {
-                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account', $value, $account->type));
+                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $name));
                     $result = $account->type;
+                    $hitField = $name;
                     $count++;
                 }
+                // we found a match before, and it's different too.
                 if (0 !== $count && $account->type !== $result) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account but ALSO as a "%s"-account!', $value, $result, $account->type));
-                    $result = null;
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    // the previous result always trumps the current result because the order of accountIdentificationSuffixes
+                    app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $name, $value, $result));
                     $count++;
                 }
             }
