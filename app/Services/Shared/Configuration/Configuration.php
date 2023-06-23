@@ -114,7 +114,7 @@ class Configuration
         $this->mapping        = [];
         $this->doMapping      = [];
         $this->flow           = 'file';
-        $this->contentType    = 'unknown';
+        $this->contentType    = 'csv';
         $this->customTag      = '';
 
         // date range settings
@@ -183,7 +183,7 @@ class Configuration
         $object->doMapping      = $array['do_mapping'] ?? [];
         $object->version        = self::VERSION;
         $object->flow           = $array['flow'] ?? 'file';
-        $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->contentType    = $array['content_type'] ?? 'csv';
         $object->customTag      = $array['custom_tag'] ?? '';
 
         // sort
@@ -300,7 +300,7 @@ class Configuration
         $object->roles          = $array['roles'] ?? [];
         $object->mapping        = $array['mapping'] ?? [];
         $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->contentType    = $array['content_type'] ?? 'unknown';
+        $object->contentType    = $array['content_type'] ?? 'csv';
         $object->customTag      = $array['custom_tag'] ?? '';
 
         // mapping for spectre + nordigen
@@ -420,7 +420,7 @@ class Configuration
         $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
         $object->rules          = $data['apply-rules'] ?? true;
         $object->flow           = $data['flow'] ?? 'file';
-        $object->contentType    = $data['content_type'] ?? 'unknown';
+        $object->contentType    = $data['content_type'] ?? 'csv';
         $object->customTag      = $data['custom_tag'] ?? '';
 
         // camt settings
