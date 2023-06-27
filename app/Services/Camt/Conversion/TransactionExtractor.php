@@ -30,11 +30,18 @@ class TransactionExtractor
         // get transactions from XML file
         $transactions = [];
         $statements   = $message->getRecords();
-        /** @var CamtStatement $statement */
-        foreach ($statements as $statement) { // -> Level B
+        $totalCount = count($statements);
+        /**
+         * @var int $index
+         * @var CamtStatement $statement
+         */
+        foreach ($statements as $i => $statement) { // -> Level B
             $entries = $statement->getEntries();
-            foreach ($entries as $entry) {                       // -> Level C
+            $entryCount = count($entries);
+            app('log')->debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i+1, $totalCount, $entryCount));
+            foreach ($entries as $ii => $entry) { // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
+                app('log')->debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii+1, $entryCount, $count));
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
                     $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
@@ -50,11 +57,17 @@ class TransactionExtractor
                         }
                     }
                     if ('group' === $handling) {
-                        $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                        if (1 === $count) {
+                            $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
+                        }
+                        if ($count > 1) {
+                            $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                        }
                     }
                 }
             }
         }
+        app('log')->debug(sprintf('Extracted %d transaction(s)', count($transactions)));
 
         return $transactions;
     }

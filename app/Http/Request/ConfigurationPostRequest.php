@@ -108,6 +108,11 @@ class ConfigurationPostRequest extends Request
      */
     public function rules(): array
     {
+        $flow          = request()->cookie(Constants::FLOW_COOKIE);
+        $columnOptions = join(',', array_keys(config('csv.unique_column_options')));
+        if('nordigen' === $flow) {
+            $columnOptions = join(',', array_keys(config('nordigen.unique_column_options')));
+        }
         $rules = [
             'headers'                       => 'numeric|between:0,1',
             'delimiter'                     => 'in:comma,semicolon,tab',
@@ -123,7 +128,7 @@ class ConfigurationPostRequest extends Request
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',
             'unique_column_index'           => 'numeric',
-            'unique_column_type'            => sprintf('in:%s', join(',', array_keys(config('csv.unique_column_options')))),
+            'unique_column_type'            => sprintf('in:%s', $columnOptions),
 
             // conversion
             'conversion'                    => 'numeric|between:0,1',

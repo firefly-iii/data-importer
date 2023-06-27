@@ -28,7 +28,8 @@ return [
     'url'                   => 'https://ob.nordigen.com',
     'use_sandbox'           => env('NORDIGEN_SANDBOX', false),
     'unique_column_options' => [
-        'external-id' => 'External identifier',
+        'external-id'            => 'External identifier',
+        'additional-information' => 'Additional information',
     ],
     'countries'             => [
         'AF' => 'Afghanistan',

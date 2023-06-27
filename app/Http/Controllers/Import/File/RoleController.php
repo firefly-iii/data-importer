@@ -171,7 +171,6 @@ class RoleController extends Controller
                 'entryBtcDomainCode'            => config('camt.fields.entryBtcDomainCode'),
                 'entryBtcFamilyCode'            => config('camt.fields.entryBtcFamilyCode'),
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
-                'section_opposing'              => ['section' => true, 'title' => 'opposingPart',],
             ],
         ];
         $group_handling = $configuration->getGroupedTransactionHandling();

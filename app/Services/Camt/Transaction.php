@@ -105,7 +105,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
-        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
+        //app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
                 // temporary debug message:
@@ -127,6 +127,10 @@ class Transaction
             case 'statementCreationDate':
                 // always the same, since its level B.
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
+            case 'CdtDbtInd':
+                /** @var $set EntryTransactionDetail|null */
+                $set = $this->levelD[$index];
+                return (string)$set?->getCreditDebitIndicator();
             case 'statementAccountIban':
                 // always the same, since its level B.
                 $ret = '';
@@ -168,15 +172,29 @@ class Transaction
                 // always the same, since its level C.
                 return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
             case 'entryBtcDomainCode':
+                $return = '';
                 // always the same, since its level C.
-                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
-            case 'entryBtcFamilyCode':
-                // always the same, since its level C.
-                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
-            case 'entryBtcSubFamilyCode':
-                // always the same, since its level C.
-                return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                    $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                }
 
+                return $return;
+            case 'entryBtcFamilyCode':
+                $return = '';
+                // always the same, since its level C.
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                    $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                }
+
+                return '';
+            case 'entryBtcSubFamilyCode':
+                $return = '';
+                // always the same, since its level C.
+                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                }
+
+                return $return;
                 // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
@@ -234,34 +252,46 @@ class Transaction
                 return (string)$info->getAmount()->getCurrency()->getCode();
             case 'entryDetailBtcDomainCode':
                 // this is level D, so grab from level C or loop.
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
-                    return ''; // config.-depending fallback handled in mapping
+                    return $return; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
+                    $return = (string)$info->getBankTransactionCode()->getDomain()->getCode();
+                }
 
-                return (string)$info->getBankTransactionCode()->getDomain()->getCode();
+                return $return;
             case 'entryDetailBtcFamilyCode':
                 // this is level D, so grab from level C or loop.
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
-                    return ''; // config.-depending fallback handled in mapping
+                    return $return; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
+                    $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                }
 
-                return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                return $return;
             case 'entryDetailBtcSubFamilyCode':
                 // this is level D, so grab from level C or loop.
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     //return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
-                    return ''; // config.-depending fallback handled in mapping
+                    return $return; // config.-depending fallback handled in mapping
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
+                if (null !== $info->getBankTransactionCode()->getDomain()) {
+                    $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                }
 
-                return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                return $return;
             case 'entryDetailOpposingAccountIban':
                 $result = '';
 
@@ -271,7 +301,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                if (IbanAccount::class === get_class($opposingAccount)) {
+                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
                     $result = (string)$opposingAccount->getIdentification();
                 }
 
@@ -363,7 +393,7 @@ class Transaction
      * @param  EntryTransactionDetail  $transactionDetail
      * @return Creditor|Debtor|null
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): Creditor|Debtor|null
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty|null
     {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";

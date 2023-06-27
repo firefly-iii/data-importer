@@ -493,20 +493,21 @@ class GenerateTransactions
         ];
         $valueDate   = $entry->getValueDate();
         $transaction = [
-            'type'               => 'withdrawal',
-            'date'               => $entry->getDate()->format('Y-m-d'),
-            'datetime'           => $entry->getDate()->toW3cString(),
-            'amount'             => $entry->transactionAmount,
-            'description'        => $entry->getDescription(),
-            'payment_date'       => is_null($valueDate) ? '' : $valueDate->format('Y-m-d'),
-            'order'              => 0,
-            'currency_code'      => $entry->currencyCode,
-            'tags'               => [],
-            'category_name'      => null,
-            'category_id'        => null,
-            'notes'              => $entry->getNotes(),
-            'external_id'        => $entry->transactionId,
-            'internal_reference' => $entry->accountIdentifier,
+            'type'                   => 'withdrawal',
+            'date'                   => $entry->getDate()->format('Y-m-d'),
+            'datetime'               => $entry->getDate()->toW3cString(),
+            'amount'                 => $entry->transactionAmount,
+            'description'            => $entry->getDescription(),
+            'payment_date'           => is_null($valueDate) ? '' : $valueDate->format('Y-m-d'),
+            'order'                  => 0,
+            'currency_code'          => $entry->currencyCode,
+            'tags'                   => [],
+            'category_name'          => null,
+            'category_id'            => null,
+            'notes'                  => $entry->getNotes(),
+            'external_id'            => $entry->transactionId,
+            'internal_reference'     => $entry->accountIdentifier,
+            'additional-information' => $entry->additionalInformation,
         ];
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
