@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.1 - 2021-06-27=8
+
+> ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### Changed
+- This version of the data importer requires Firefly III v6.0.16 or higher.
+
+### Fixed
+- Many small and large fixes in the new CAMT.053 import routine. Thanks again, @beatbesmer and bug testers!
+- [Issue 7643](https://github.com/firefly-iii/firefly-iii/issues/7643) Bad redirect when trying to import using a config file. 
+
 ## v1.3.0 - 2023-06-05
 
 - ⚠️ This release may create duplicate transactions. Don't import large batches!
