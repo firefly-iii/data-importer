@@ -19,7 +19,7 @@ class TransactionMapper
     private Configuration $configuration;
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
      * @throws ImporterErrorException
      */
     public function __construct(Configuration $configuration)
@@ -31,7 +31,7 @@ class TransactionMapper
     }
 
     /**
-     * @param  array  $transactions
+     * @param array $transactions
      *
      * @return array
      */
@@ -50,8 +50,8 @@ class TransactionMapper
     }
 
     /**
-     * @param  string  $direction
-     * @param  array  $current
+     * @param string $direction
+     * @param array  $current
      * @return bool
      */
     private function accountDetailsEmpty(string $direction, array $current): bool
@@ -64,15 +64,17 @@ class TransactionMapper
     }
 
     /**
-     * @param  array  $current
+     * @param array $current
      *
      * @return string
      */
     private function determineTransactionType(array $current): string
     {
         app('log')->debug('Determine transaction type.');
-        $directions  = ['source', 'destination'];
-        $accountType = [];
+        $directions   = ['source', 'destination'];
+        $accountType  = [];
+        $lessThanZero = 1 === bccomp('0', $current['amount']);
+
 
         foreach ($directions as $direction) {
             $accountType[$direction] = null;
@@ -80,7 +82,7 @@ class TransactionMapper
                 $key = sprintf('%s_%s', $direction, $suffix);
                 // try to find the account
                 if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
-                    $accountType[$direction] = $this->getAccountType($suffix, $current[$key]);
+                    $accountType[$direction] = $this->getAccountType($suffix, $current[$key], $lessThanZero);
                     app('log')->debug(
                         sprintf('Transaction array has a "%s"-field with value "%s", and the type is "%s".', $key, $current[$key], $accountType[$direction])
                     );
@@ -89,7 +91,6 @@ class TransactionMapper
         }
 
         // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-        $lessThanZero    = 1 === bccomp('0', $current['amount']);
         $sourceIsNull    = null === $accountType['source'];
         $sourceIsAsset   = 'asset' === $accountType['source'];
         $sourceIsRevenue = 'revenue' === $accountType['source'];
@@ -171,14 +172,15 @@ class TransactionMapper
     }
 
     /**
-     * @param  string  $name
-     * @param  string  $value
+     * @param string $name
+     * @param string $value
+     * @param bool $lessThanZero
      * @return string|null
      */
-    private function getAccountType(string $name, string $value): ?string
+    private function getAccountType(string $name, string $value, bool $lessThanZero): ?string
     {
-        $count  = 0;
-        $result = null;
+        $count    = 0;
+        $result   = null;
         $hitField = null; // the field on which we found a match.
         foreach ($this->allAccounts as $account) {
             // we have a match!
@@ -186,7 +188,7 @@ class TransactionMapper
                 // never found a match before!
                 if (0 === $count) {
                     app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $name));
-                    $result = $account->type;
+                    $result   = $account->type;
                     $hitField = $name;
                     $count++;
                 }
@@ -195,6 +197,23 @@ class TransactionMapper
                     app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
                     // the previous result always trumps the current result because the order of accountIdentificationSuffixes
                     app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $name, $value, $result));
+                    $count++;
+                }
+                // we found a match before and it's different. But the data importer has found both "revenue" AND "expense" accounts. What to do?
+                $set = [$account->type, $result];
+                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && $lessThanZero) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    app('log')->debug('Because amount is less than zero, we assume "expense" is the correct type.');
+                    $result = 'expense';
+
+                    $count++;
+                }
+                // we found a match before and it's different. But: previous result was "expense", current result is "revenue"
+                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && !$lessThanZero) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    app('log')->debug('Because amount is more than zero, we assume "revenue" is the correct type.');
+                    $result = 'revenue';
+
                     $count++;
                 }
             }
@@ -218,10 +237,10 @@ class TransactionMapper
      * destination_number = 12345
      * source_id = 5
      *
-     * @param  array  $current
-     * @param  string  $fieldName
-     * @param  string  $direction
-     * @param  array  $data
+     * @param array  $current
+     * @param string $fieldName
+     * @param string $direction
+     * @param array  $data
      *
      * @return array
      */
@@ -248,9 +267,9 @@ class TransactionMapper
     }
 
     /**
-     * @param  mixed  $current
-     * @param  string  $type
-     * @param  array  $data
+     * @param mixed  $current
+     * @param string $type
+     * @param array  $data
      *
      * @return array
      */
@@ -273,7 +292,7 @@ class TransactionMapper
     }
 
     /**
-     * @param  array  $transaction
+     * @param array $transaction
      *
      * @return array
      */
@@ -311,8 +330,8 @@ class TransactionMapper
     }
 
     /**
-     * @param  string  $groupHandling
-     * @param  array  $split
+     * @param string $groupHandling
+     * @param array  $split
      * @return array|null
      */
     private function mapTransactionJournal(string $groupHandling, array $split): ?array
@@ -322,7 +341,7 @@ class TransactionMapper
         ];
         /**
          * @var string $role
-         * @var array $data
+         * @var array  $data
          */
         foreach ($split as $role => $data) {
             // actual content of the field is in $data['data'], which is an array
@@ -372,7 +391,7 @@ class TransactionMapper
                 case 'note':
                     // TODO perhaps lift into separate method?
                     $current['notes'] = $current['notes'] ?? '';
-                    $addition         = "  \n".join("  \n", $data['data']);
+                    $addition         = "  \n" . join("  \n", $data['data']);
                     $current['notes'] .= $addition;
                     break;
                 case 'date_process':
@@ -461,7 +480,7 @@ class TransactionMapper
      *
      * It will also correct the transaction type (if possible).
      *
-     * @param  array  $current
+     * @param array $current
      *
      * @return array|null
      */
@@ -527,7 +546,7 @@ class TransactionMapper
     }
 
     /**
-     * @param  array  $currentTransaction
+     * @param array $currentTransaction
      * @return array
      */
     private function swapAccounts(array $currentTransaction): array
@@ -562,8 +581,8 @@ class TransactionMapper
     }
 
     /**
-     * @param  string  $direction
-     * @param  array  $current
+     * @param string $direction
+     * @param array  $current
      *
      * @return bool
      */
