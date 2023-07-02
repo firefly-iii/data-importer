@@ -5,6 +5,7 @@ namespace App\Services\Camt\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Mapper\GetAccounts;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
 
 /**
@@ -13,7 +14,7 @@ use Carbon\Carbon;
 class TransactionMapper
 {
     use GetAccounts;
-
+    use ProgressInformation;
     private array         $accountIdentificationSuffixes;
     private array         $allAccounts;
     private Configuration $configuration;
