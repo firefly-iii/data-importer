@@ -75,18 +75,33 @@ class TransactionMapper
         $directions   = ['source', 'destination'];
         $accountType  = [];
         $lessThanZero = 1 === bccomp('0', $current['amount']);
-
+        app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
 
         foreach ($directions as $direction) {
+            app('log')->debug(sprintf('Now working on direction "%s".', $direction));
             $accountType[$direction] = null;
             foreach ($this->accountIdentificationSuffixes as $suffix) {
                 $key = sprintf('%s_%s', $direction, $suffix);
+                app('log')->debug(sprintf('Now working on key "%s".', $key));
                 // try to find the account
                 if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
-                    $accountType[$direction] = $this->getAccountType($suffix, $current[$key], $lessThanZero);
+                    $foundDirection = $this->getAccountType($suffix, $current[$key], $lessThanZero);
                     app('log')->debug(
-                        sprintf('Transaction array has a "%s"-field with value "%s", and the type is "%s".', $key, $current[$key], $accountType[$direction])
+                        sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection)
                     );
+                    // should this overrule any existing account type? Since we work down from ID,
+                    // if it's already known it should not be overruled.
+                    if(null === $foundDirection && null !== $accountType[$direction]){
+                        app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
+                    }
+                    if(null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
+                        app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%".', $foundDirection, $direction, $accountType[$direction]));
+                        $accountType[$direction] = $foundDirection;
+                    }
+                    if(null === $accountType[$direction]) {
+                        app('log')->debug(sprintf('accountType[%s] is set to found direction "%s"', $direction, $foundDirection));
+                        $accountType[$direction] = $foundDirection;
+                    }
                 }
             }
         }
@@ -99,7 +114,6 @@ class TransactionMapper
         $destIsExpense   = 'expense' === $accountType['destination'];
         $destIsRevenue   = 'revenue' === $accountType['destination'];
         $destIsNull      = null === $accountType['destination'];
-        app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
         switch (true) {
             case $sourceIsAsset && $destIsExpense && $lessThanZero:
             case $sourceIsAsset && $destIsNull && $lessThanZero:
@@ -173,37 +187,37 @@ class TransactionMapper
     }
 
     /**
-     * @param string $name
+     * @param string $field
      * @param string $value
      * @param bool $lessThanZero
      * @return string|null
      */
-    private function getAccountType(string $name, string $value, bool $lessThanZero): ?string
+    private function getAccountType(string $field, string $value, bool $lessThanZero): ?string
     {
         $count    = 0;
         $result   = null;
         $hitField = null; // the field on which we found a match.
         foreach ($this->allAccounts as $account) {
             // we have a match!
-            if ((string)$account->$name === (string)$value) {
+            if ((string)$account->$field === (string)$value) {
                 // never found a match before!
                 if (0 === $count) {
-                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $name));
+                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $field));
                     $result   = $account->type;
-                    $hitField = $name;
+                    $hitField = $field;
                     $count++;
                 }
                 // we found a match before, and it's different too.
                 if (0 !== $count && $account->type !== $result) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
                     // the previous result always trumps the current result because the order of accountIdentificationSuffixes
-                    app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $name, $value, $result));
+                    app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $field, $value, $result));
                     $count++;
                 }
                 // we found a match before and it's different. But the data importer has found both "revenue" AND "expense" accounts. What to do?
                 $set = [$account->type, $result];
                 if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && $lessThanZero) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
                     app('log')->debug('Because amount is less than zero, we assume "expense" is the correct type.');
                     $result = 'expense';
 
@@ -211,7 +225,7 @@ class TransactionMapper
                 }
                 // we found a match before and it's different. But: previous result was "expense", current result is "revenue"
                 if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && !$lessThanZero) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $name, $account->type, $hitField));
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
                     app('log')->debug('Because amount is more than zero, we assume "revenue" is the correct type.');
                     $result = 'revenue';
 
@@ -220,7 +234,7 @@ class TransactionMapper
             }
         }
         if (null === $result) {
-            app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s", or skipped because unsure.', $name, $value));
+            app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s", or skipped because unsure.', $field, $value));
         }
         return $result;
     }
