@@ -116,16 +116,13 @@ class TokenController extends Controller
         }
         app('log')->debug('Response', $data);
 
-        // set cookies.
-        $cookies = [
-            SecretManager::saveAccessToken((string)$data['access_token']),
-            SecretManager::saveBaseUrl($baseURL),
-            SecretManager::saveVanityUrl($vanityURL),
-            SecretManager::saveRefreshToken((string)$data['refresh_token']),
-        ];
-        app('log')->debug(sprintf('Return redirect with cookies to "%s"', route('index')));
+        SecretManager::saveAccessToken((string)$data['access_token']);
+        SecretManager::saveBaseUrl($baseURL);
+        SecretManager::saveVanityUrl($vanityURL);
+        SecretManager::saveRefreshToken((string)$data['refresh_token']);
+        app('log')->debug(sprintf('Return redirect  to "%s"', route('index')));
 
-        return redirect(route('index'))->withCookies($cookies);
+        return redirect(route('index'));
     }
 
     /**
@@ -205,14 +202,12 @@ class TokenController extends Controller
         if ('' !== $accessToken && '' !== $baseUrl) {
             app('log')->debug(sprintf('Found personal access token + URL "%s" in config, set cookie and return to index.', $baseUrl));
 
-            $cookies = [
-                SecretManager::saveAccessToken($accessToken),
-                SecretManager::saveBaseUrl($baseUrl),
-                SecretManager::saveVanityUrl($vanityUrl),
-                SecretManager::saveRefreshToken(''),
-            ];
+            SecretManager::saveAccessToken($accessToken);
+            SecretManager::saveBaseUrl($baseUrl);
+            SecretManager::saveVanityUrl($vanityUrl);
+            SecretManager::saveRefreshToken('');
 
-            return redirect(route('index'))->withCookies($cookies);
+            return redirect(route('index'));
         }
 
         // Option 2: client ID + base URL.

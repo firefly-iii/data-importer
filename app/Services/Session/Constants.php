@@ -82,4 +82,12 @@ class Constants
     // other variables
     public const UPLOAD_CONFIG_FILE = 'config_file_path';
     public const UPLOAD_DATA_FILE   = 'data_file_path';
+
+    // session variable names:
+    public const SESSION_ACCESS_TOKEN = 'session_token';
+    public const SESSION_BASE_URL = 'base_url';
+    public const SESSION_VANITY_URL = 'vanity_url';
+
+    public const SESSION_CLIENT_ID = 'client_id';
+    public const SESSION_REFRESH_TOKEN = 'refresh_token';
 }

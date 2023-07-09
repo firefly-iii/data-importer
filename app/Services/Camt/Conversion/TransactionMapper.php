@@ -91,7 +91,7 @@ class TransactionMapper
                     );
                     // should this overrule any existing account type? Since we work down from ID,
                     // if it's already known it should not be overruled.
-                    if(null === $foundDirection && null !== $accountType[$direction]){
+                    if(null === $foundDirection && null !== $accountType[$direction]) {
                         app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
                     }
                     if(null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {

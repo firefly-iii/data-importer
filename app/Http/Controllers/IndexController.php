@@ -138,9 +138,9 @@ class IndexController extends Controller
         Artisan::call('cache:clear');
 
         $cookies = [
-            SecretManager::saveAccessToken(''),
-            SecretManager::saveBaseUrl(''),
-            SecretManager::saveRefreshToken(''),
+            //SecretManager::saveAccessToken(''),
+            //SecretManager::saveBaseUrl(''),
+            //SecretManager::saveRefreshToken(''),
             cookie(Constants::FLOW_COOKIE, ''),
         ];
 

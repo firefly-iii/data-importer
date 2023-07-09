@@ -61,7 +61,8 @@ class RoutineManager implements RoutineManagerInterface
     /**
      *
      */
-    public function __construct(?string $identifier) {
+    public function __construct(?string $identifier)
+    {
         app('log')->debug('Constructed CAMT RoutineManager');
         $this->forceCli    = false; // used in POST auto import
         $this->content     = '';    // used in CLI
@@ -79,21 +80,24 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @return array
      */
-    public function getAllErrors(): array {
+    public function getAllErrors(): array
+    {
         return $this->allErrors;
     }
 
     /**
      * @return array
      */
-    public function getAllMessages(): array {
+    public function getAllMessages(): array
+    {
         return $this->allMessages;
     }
 
     /**
      * @return array
      */
-    public function getAllWarnings(): array {
+    public function getAllWarnings(): array
+    {
         return $this->allWarnings;
     }
 
@@ -101,7 +105,8 @@ class RoutineManager implements RoutineManagerInterface
      * @inheritDoc
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void {
+    public function setConfiguration(Configuration $configuration): void
+    {
         // save config
         $this->configuration = $configuration;
 
@@ -114,14 +119,16 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @param string $content
      */
-    public function setContent(string $content): void {
+    public function setContent(string $content): void
+    {
         $this->content = $content;
     }
 
     /**
      * @param bool $forceCli
      */
-    public function setForceCli(bool $forceCli): void {
+    public function setForceCli(bool $forceCli): void
+    {
         $this->forceCli = $forceCli;
     }
 
@@ -132,7 +139,8 @@ class RoutineManager implements RoutineManagerInterface
      * @throws ImporterErrorException
      * @throws NotFoundExceptionInterface
      */
-    public function start(): array {
+    public function start(): array
+    {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // get XML file
@@ -162,7 +170,8 @@ class RoutineManager implements RoutineManagerInterface
      * @return Message|null
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface|ImporterErrorException
      */
-    private function getCamtMessage(): ?Message {
+    private function getCamtMessage(): ?Message
+    {
         app('log')->debug('Now in getCamtMessage');
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
@@ -189,7 +198,8 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @param int $count
      */
-    private function mergeErrors(int $count): void {
+    private function mergeErrors(int $count): void
+    {
         $one   = $this->transactionConverter->getErrors();
         $two   = $this->transactionExtractor->getErrors();
         $three = $this->transactionMapper->getErrors();
@@ -210,7 +220,8 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @param int $count
      */
-    private function mergeMessages(int $count): void {
+    private function mergeMessages(int $count): void
+    {
         $one   = $this->transactionConverter->getMessages();
         $two   = $this->transactionExtractor->getMessages();
         $three = $this->transactionMapper->getMessages();
@@ -231,7 +242,8 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @param int $count
      */
-    private function mergeWarnings(int $count): void {
+    private function mergeWarnings(int $count): void
+    {
         $one   = $this->transactionConverter->getWarnings();
         $two   = $this->transactionExtractor->getWarnings();
         $three = $this->transactionMapper->getWarnings();
