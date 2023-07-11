@@ -326,6 +326,9 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info          = $this->levelD[$index];
                 $opposingParty = $this->getOpposingParty($info);
+                if(null === $opposingParty) {
+                    app('log')->debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                }
                 if (null !== $opposingParty) {
                     $result = $this->getOpposingName($opposingParty);
                 }
