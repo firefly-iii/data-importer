@@ -5,9 +5,11 @@ namespace App\Services\Camt\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\ProgressInformation;
 
 class TransactionConverter
 {
+    use ProgressInformation;
     private Configuration $configuration;
 
     /**

@@ -25,6 +25,9 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Session\Constants;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class Token
@@ -37,7 +40,11 @@ class Token
      */
     public static function getAccessToken(): string
     {
-        $value = request()->cookie('access_token');
+        try {
+            $value = session()->get(Constants::SESSION_ACCESS_TOKEN);
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+            throw new ImporterErrorException('No valid access token value.');
+        }
         if (null === $value) {
             // fall back to config:
             $value = (string)config('importer.access_token');
@@ -55,13 +62,17 @@ class Token
      */
     public static function getURL(): string
     {
-        $value = request()->cookie('base_url');
+        try {
+            $value = session()->get(Constants::SESSION_BASE_URL);
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+            throw new ImporterErrorException('No valid base URL value.');
+        }
         if (null === $value) {
             // fall back to config:
             $value = (string)config('importer.url');
         }
         if ('' === (string)$value) {
-            throw new ImporterErrorException('No valid URL value.');
+            throw new ImporterErrorException('No valid base URL value.');
         }
 
         return (string)$value;
@@ -73,7 +84,11 @@ class Token
      */
     public static function getVanityURL(): string
     {
-        $value = request()->cookie('vanity_url');
+        try {
+            $value = session()->get(Constants::SESSION_VANITY_URL);
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+            throw new ImporterErrorException('No valid vanity URL value.');
+        }
         if (null === $value) {
             $value = config('importer.vanity_url');
         }
@@ -81,7 +96,7 @@ class Token
             $value = self::getURL();
         }
         if ('' === (string)$value) {
-            throw new ImporterErrorException('No valid URL value.');
+            throw new ImporterErrorException('No valid vanity URL value.');
         }
 
         return (string)$value;

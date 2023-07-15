@@ -34,18 +34,18 @@ class Transaction
 
 
     /**
-     * @param  Configuration  $configuration
-     * @param  Message  $levelA
-     * @param  Statement  $levelB
-     * @param  Entry  $levelC
-     * @param  array  $levelD
+     * @param Configuration $configuration
+     * @param Message       $levelA
+     * @param Statement     $levelB
+     * @param Entry         $levelC
+     * @param array         $levelD
      */
     public function __construct(
         Configuration $configuration,
-        Message $levelA,
-        Statement $levelB,
-        Entry $levelC,
-        array $levelD
+        Message       $levelA,
+        Statement     $levelB,
+        Entry         $levelC,
+        array         $levelD
     ) {
         app('log')->debug('Constructed a CAMT Transaction');
         $this->configuration = $configuration;
@@ -64,7 +64,7 @@ class Transaction
     }
 
     /**
-     * @param  int  $index
+     * @param int $index
      *
      * @return string
      */
@@ -75,7 +75,7 @@ class Transaction
     }
 
     /**
-     * @param  int  $index
+     * @param int $index
      *
      * @return string
      */
@@ -86,7 +86,7 @@ class Transaction
     }
 
     /**
-     * @param  int  $index
+     * @param int $index
      *
      * @return string
      */
@@ -97,8 +97,8 @@ class Transaction
     }
 
     /**
-     * @param  string  $field
-     * @param  int  $index
+     * @param string $field
+     * @param int    $index
      *
      * @return string
      * @throws ImporterErrorException
@@ -329,17 +329,22 @@ class Transaction
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
-                $info = $this->levelD[$index];
-                //$result  = '';
+                $info          = $this->levelD[$index];
                 $opposingParty = $this->getOpposingParty($info);
-                $result        = $this->getOpposingName($opposingParty);
+                if(null === $opposingParty) {
+                    app('log')->debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                }
+                if (null !== $opposingParty) {
+                    $result = $this->getOpposingName($opposingParty);
+                }
 
                 return $result;
         }
     }
 
     /**
-     * @param  Address|null  $address
+     * @param Address|null $address
+     *
      * @return string
      */
     private function generateAddressLine(Address $address = null): string
@@ -350,7 +355,8 @@ class Transaction
     }
 
     /**
-     * @param  Money|null  $money
+     * @param Money|null $money
+     *
      * @return string
      */
     private function getDecimalAmount(?Money $money): string
@@ -365,8 +371,9 @@ class Transaction
     }
 
     /**
-     * @param  RelatedParty  $relatedParty
-     * @param  bool  $useEntireAddress
+     * @param RelatedParty $relatedParty
+     * @param bool         $useEntireAddress
+     *
      * @return string
      */
     private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
@@ -382,7 +389,7 @@ class Transaction
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
             if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', '.$addressLine;
+                $opposingName .= ', ' . $addressLine;
             }
         }
 
@@ -390,10 +397,11 @@ class Transaction
     }
 
     /**
-     * @param  EntryTransactionDetail  $transactionDetail
+     * @param EntryTransactionDetail $transactionDetail
+     *
      * @return Creditor|Debtor|null
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty|null
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty | null
     {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
