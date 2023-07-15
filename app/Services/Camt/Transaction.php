@@ -58,7 +58,8 @@ class Transaction
     /**
      * @return int
      */
-    public function countSplits(): int {
+    public function countSplits(): int
+    {
         return count($this->levelD);
     }
 
@@ -67,7 +68,8 @@ class Transaction
      *
      * @return string
      */
-    public function getAmount(int $index): string {
+    public function getAmount(int $index): string
+    {
         // TODO loop level D for the date that belongs to the index
         return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
@@ -77,7 +79,8 @@ class Transaction
      *
      * @return string
      */
-    public function getCurrencyCode(int $index): string {
+    public function getCurrencyCode(int $index): string
+    {
         // TODO loop level D for the date that belongs to the index
         return (string)$this->levelC->getAmount()->getCurrency()->getCode();
     }
@@ -87,7 +90,8 @@ class Transaction
      *
      * @return string
      */
-    public function getDate(int $index): string {
+    public function getDate(int $index): string
+    {
         // TODO loop level D for the date that belongs to the index
         return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
     }
@@ -99,7 +103,8 @@ class Transaction
      * @return string
      * @throws ImporterErrorException
      */
-    public function getFieldByIndex(string $field, int $index): string {
+    public function getFieldByIndex(string $field, int $index): string
+    {
         //app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
@@ -110,12 +115,12 @@ class Transaction
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-            // LEVEL A
+                // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-            // LEVEL B
+                // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
@@ -190,7 +195,7 @@ class Transaction
                 }
 
                 return $return;
-            // LEVEL D
+                // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
@@ -342,7 +347,8 @@ class Transaction
      *
      * @return string
      */
-    private function generateAddressLine(Address $address = null): string {
+    private function generateAddressLine(Address $address = null): string
+    {
         $addressLines = implode(", ", $address->getAddressLines());
 
         return $addressLines;
@@ -353,7 +359,8 @@ class Transaction
      *
      * @return string
      */
-    private function getDecimalAmount(?Money $money): string {
+    private function getDecimalAmount(?Money $money): string
+    {
         if (null === $money) {
             return '';
         }
@@ -369,7 +376,8 @@ class Transaction
      *
      * @return string
      */
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string {
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
+    {
         $opposingName = '';
         // TODO make depend on configuration
         if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
@@ -393,7 +401,8 @@ class Transaction
      *
      * @return Creditor|Debtor|null
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty | null {
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty | null
+    {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
         if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?

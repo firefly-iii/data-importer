@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.2 - 2023-07-16
+
+### Added
+- Better error handling for CAMT files.
+
+### Changed
+- New way of saving user info, should make it easier to change variables without running into old values.
+
+### Fixed
+- [Issue 7729](https://github.com/firefly-iii/firefly-iii/issues/7729) Make sure account type detection can't be overruled by later attempts.
+  - [Issue 7747](https://github.com/firefly-iii/firefly-iii/issues/7747) Nullpointer in CAMT import
+
 ## 1.3.1 - 2021-06-27=8
 
 > ⚠️ This release may create duplicate transactions. Don't import large batches!
