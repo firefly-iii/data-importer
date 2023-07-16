@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.3 - 2021-07-17
+
+### Fixed
+- Formatting issue in debug log message broke the CAMT import
+
 ## 1.3.2 - 2023-07-16
 
 ### Added
@@ -12,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - [Issue 7729](https://github.com/firefly-iii/firefly-iii/issues/7729) Make sure account type detection can't be overruled by later attempts.
-  - [Issue 7747](https://github.com/firefly-iii/firefly-iii/issues/7747) Nullpointer in CAMT import
+- [Issue 7747](https://github.com/firefly-iii/firefly-iii/issues/7747) Nullpointer in CAMT import
 
 ## 1.3.1 - 2021-06-27=8
 

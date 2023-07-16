@@ -95,7 +95,7 @@ class TransactionMapper
                         app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
                     }
                     if(null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
-                        app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%".', $foundDirection, $direction, $accountType[$direction]));
+                        app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%s".', $foundDirection, $direction, $accountType[$direction]));
                         $accountType[$direction] = $foundDirection;
                     }
                     if(null === $accountType[$direction]) {
