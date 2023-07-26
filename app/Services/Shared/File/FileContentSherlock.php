@@ -51,7 +51,7 @@ class FileContentSherlock
             return 'camt';
         } catch (Exception $e) {
             app('log')->debug('CAMT.053 Check on file: negative');
-            //app('log')->debug($e->getMessage());
+            app('log')->debug($e->getMessage());
         }
 
         return 'csv';

@@ -18,6 +18,7 @@ use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\OtherAccount;
 use Genkgo\Camt\DTO\ProprietaryAccount;
 use Genkgo\Camt\DTO\RelatedParty;
+use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\UPICAccount;
 use Money\Currencies\ISOCurrencies;
 use Money\Formatter\DecimalMoneyFormatter;
@@ -209,15 +210,21 @@ class Transaction
 
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    app('log')->debug('There is no info for this thing.');
                     // TODO return nothing?
                     return $result;
                 }
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
 
-                if (null !== $info->getRemittanceInformation() && null !== $info->getRemittanceInformation()->getUnstructuredBlock()) {
-                    $result .= (string)$info->getRemittanceInformation()->getUnstructuredBlock()->getMessage();
+                if (null !== $info->getRemittanceInformation()) {
+                    $unstructured = $info->getRemittanceInformation()->getUnstructuredBlocks();
+                    /** @var UnstructuredRemittanceInformation $block */
+                    foreach ($unstructured as $block) {
+                        $result .= sprintf('%s ', $block->getMessage());
+                    }
                 }
+
 
                 return $result;
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation':
@@ -229,7 +236,16 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index]; // TODO, check if always readable or if we need some checks like with "unstructuredBlockMessage"
 
-                return (string)$info->getRemittanceInformation()?->getStructuredBlock()?->getAdditionalRemittanceInformation();
+                // like the unstructured block, these could be multiple blocks, so loop:
+                if (null !== $info->getRemittanceInformation() && count($info->getRemittanceInformation()->getStructuredBlocks()) > 0) {
+                    $return = '';
+                    foreach ($info->getRemittanceInformation()->getStructuredBlocks() as $block) {
+                        $return .= sprintf('%s ', $block->getAdditionalRemittanceInformation());
+                    }
+                    // TODO also include getCreditorReferenceInformation
+                    return $return;
+                }
+                break;
             case 'entryDetailAmount':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
@@ -331,7 +347,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info          = $this->levelD[$index];
                 $opposingParty = $this->getOpposingParty($info);
-                if(null === $opposingParty) {
+                if (null === $opposingParty) {
                     app('log')->debug('In entryDetailOpposingName, opposing party is NULL, return "".');
                 }
                 if (null !== $opposingParty) {
