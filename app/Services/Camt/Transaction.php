@@ -265,7 +265,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
 
-                return (string)$info->getAmount()->getCurrency()->getCode();
+                return (string)$info->getAmount()?->getCurrency()?->getCode();
             case 'entryDetailBtcDomainCode':
                 // this is level D, so grab from level C or loop.
                 $return = '';
