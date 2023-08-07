@@ -106,7 +106,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
-        //app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
+        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
         switch ($field) {
             default:
                 // temporary debug message:
