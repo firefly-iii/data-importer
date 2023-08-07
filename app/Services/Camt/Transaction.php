@@ -245,6 +245,7 @@ class Transaction
                     // TODO also include getCreditorReferenceInformation
                     return $return;
                 }
+                return '';
                 break;
             case 'entryDetailAmount':
                 // this is level D, so grab from level C or loop.
