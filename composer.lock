@@ -7783,38 +7783,35 @@
         },
         {
             "name": "nunomaduro/collision",
-            "version": "v7.7.0",
+            "version": "v7.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nunomaduro/collision.git",
-                "reference": "69a07197d055456d29911116fca3bc2c985f524b"
+                "reference": "61553ad3260845d7e3e49121b7074619233d361b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nunomaduro/collision/zipball/69a07197d055456d29911116fca3bc2c985f524b",
-                "reference": "69a07197d055456d29911116fca3bc2c985f524b",
+                "url": "https://api.github.com/repos/nunomaduro/collision/zipball/61553ad3260845d7e3e49121b7074619233d361b",
+                "reference": "61553ad3260845d7e3e49121b7074619233d361b",
                 "shasum": ""
             },
             "require": {
-                "filp/whoops": "^2.15.2",
+                "filp/whoops": "^2.15.3",
                 "nunomaduro/termwind": "^1.15.1",
                 "php": "^8.1.0",
-                "symfony/console": "^6.3.0"
-            },
-            "conflict": {
-                "phpunit/phpunit": "<10.1.2"
+                "symfony/console": "^6.3.2"
             },
             "require-dev": {
-                "brianium/paratest": "^7.2.2",
-                "laravel/framework": "^10.14.1",
-                "laravel/pint": "^1.10.3",
-                "laravel/sail": "^1.23.0",
+                "brianium/paratest": "^7.2.4",
+                "laravel/framework": "^10.17.1",
+                "laravel/pint": "^1.10.5",
+                "laravel/sail": "^1.23.1",
                 "laravel/sanctum": "^3.2.5",
                 "laravel/tinker": "^2.8.1",
-                "nunomaduro/larastan": "^2.6.3",
-                "orchestra/testbench-core": "^8.5.8",
-                "pestphp/pest": "^2.8.1",
-                "phpunit/phpunit": "^10.2.2",
+                "nunomaduro/larastan": "^2.6.4",
+                "orchestra/testbench-core": "^8.5.9",
+                "pestphp/pest": "^2.12.1",
+                "phpunit/phpunit": "^10.3.1",
                 "sebastian/environment": "^6.0.1",
                 "spatie/laravel-ignition": "^2.2.0"
             },
@@ -7875,7 +7872,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2023-06-29T09:10:16+00:00"
+            "time": "2023-08-07T08:03:21+00:00"
         },
         {
             "name": "nunomaduro/larastan",
