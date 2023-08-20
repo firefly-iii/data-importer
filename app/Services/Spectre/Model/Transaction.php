@@ -49,7 +49,9 @@ class Transaction
     /**
      * Transaction constructor.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     /**
      * Transaction constructor.

@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.4 - 2023-08-21
+
+>  ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### Added
+- Unmapped fields are now sorted at the top for CSV files.
+- Spectre import will include IBAN and name, not just "name or IBAN".
+
+### Fixed
+- Notes are properly trimmed for import
+- Account search will report on its results in the logs
+- Fixed several camt.053 unstructured data import issues.
+- [Issue 7816](https://github.com/firefly-iii/firefly-iii/issues/7816) Importer would break when there was no currency information in a camt file.
+
 ## 1.3.3 - 2021-07-17
 
 ### Fixed
