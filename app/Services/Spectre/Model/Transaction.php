@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Model;
 
+use App\Services\CSV\Converter\Iban as IbanConverter;
 use Carbon\Carbon;
 
 /**
@@ -55,7 +56,7 @@ class Transaction
     /**
      * Transaction constructor.
      *
-     * @param  array  $data
+     * @param array $data
      *
      * @return Transaction
      */
@@ -155,24 +156,58 @@ class Transaction
     }
 
     /**
-     * @param  string  $direction
+     * @param string $direction
      *
      * @return string
      */
     public function getPayee(string $direction): string
     {
-        $value = $this->extra->getPayee();
-        app('log')->debug(sprintf('Payee is "%s"', $value));
-        if (null === $value) {
-            $value = $this->extra->getPayeeInformation();
-            app('log')->debug(sprintf('Payee is "%s" (payee information)', $value));
-        }
-        if (null === $value) {
-            $value = sprintf('(unknown %s account)', $direction);
-            app('log')->debug(sprintf('Payee is "%s" (empty fallback)', $value));
-        }
+        $payee     = (string)$this->extra->getPayee();
+        $payeeInfo = (string)$this->extra->getPayeeInformation();
+        $valid     = IbanConverter::isValidIban($payee);
 
-        return $value;
+        // if payee is IBAN, first see if payee information may be a better field:
+        if ($valid && '' !== $payeeInfo) {
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the latter.', $payee, $payeeInfo));
+            return $payeeInfo;
+        }
+        if (!$valid && '' === $payeeInfo) {
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the former.', $payee, $payeeInfo));
+            return $payee;
+        }
+        if ($valid && '' === $payeeInfo) {
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the former.', $payee, $payeeInfo));
+            return $payee;
+        }
+        app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return "unknown".', $payee, $payeeInfo));
+
+        // i think this covers everything but you never know, so:
+        return sprintf('(unknown %s account)', $direction);
+    }
+
+    /**
+     * @param string $direction
+     *
+     * @return string
+     */
+    public function getPayeeIban(string $direction): string
+    {
+        $payee = $this->extra->getPayee();
+        $valid = IbanConverter::isValidIban((string)$payee);
+        // payee is valid IBAN:
+        if ($valid) {
+            app('log')->debug(sprintf('Payee IBAN is "%s"', $payee));
+            return (string)$payee;
+        }
+        // is not valid IBAN (also includes NULL)
+        $payeeInfo = $this->extra->getPayeeInformation();
+        $valid     = IbanConverter::isValidIban((string)$payeeInfo);
+        if ($valid) {
+            app('log')->debug(sprintf('Payee IBAN (payee information) is "%s"', $payeeInfo));
+            return (string)$payeeInfo;
+        }
+        app('log')->debug('Payee IBAN is "" (empty fallback)');
+        return '';
     }
 
     /**

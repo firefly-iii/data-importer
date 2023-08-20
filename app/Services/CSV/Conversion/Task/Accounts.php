@@ -100,7 +100,7 @@ class Accounts extends AbstractTask
         $result = null;
         // if the ID is set, at least search for the ID.
         if (is_int($array['id']) && $array['id'] > 0) {
-            app('log')->debug('Find by ID field.');
+            app('log')->debug('Will search by ID field.');
             $result = $this->findById((string)$array['id']);
         }
         if (null !== $result) {
@@ -109,10 +109,13 @@ class Accounts extends AbstractTask
 
             return $return;
         }
+        if(array_key_exists('id', $array) && null === $array['id']) {
+            app('log')->debug('ID field is NULL, will not search for it.');
+        }
 
         // if the IBAN is set, search for the IBAN.
         if (isset($array['iban']) && '' !== (string)$array['iban']) {
-            app('log')->debug('Find by IBAN.');
+            app('log')->debug('Will search by IBAN.');
             $transactionType = (string)($array['transaction_type'] ?? null);
             $result          = $this->findByIban((string)$array['iban'], $transactionType);
         }
@@ -122,12 +125,15 @@ class Accounts extends AbstractTask
 
             return $return;
         }
+        if(array_key_exists('iban', $array) && null === $array['iban']) {
+            app('log')->debug('IBAN field is NULL, will not search for it.');
+        }
         // If the IBAN search result is NULL, but the IBAN itself is not null,
         // data importer will return an array with the IBAN (and optionally the name).
 
         // if the account number is set, search for the account number.
         if (isset($array['number']) && '' !== (string)$array['number']) {
-            app('log')->debug('Find by account number.');
+            app('log')->debug('Search by account number.');
             $transactionType = (string)($array['transaction_type'] ?? null);
             $result          = $this->findByNumber((string)$array['number'], $transactionType);
         }
@@ -137,11 +143,14 @@ class Accounts extends AbstractTask
 
             return $return;
         }
+        if(array_key_exists('number', $array) && null === $array['number']) {
+            app('log')->debug('Number field is NULL, will not search for it.');
+        }
 
 
         // find by name, return only if it's an asset or liability account.
         if (isset($array['name']) && '' !== (string)$array['name']) {
-            app('log')->debug('Find by name.');
+            app('log')->debug('Search by name.');
             $result = $this->findByName((string)$array['name']);
         }
         if (null !== $result) {
@@ -150,8 +159,11 @@ class Accounts extends AbstractTask
 
             return $return;
         }
+        if(array_key_exists('name', $array) && null === $array['name']) {
+            app('log')->debug('Name field is NULL, will not search for it.');
+        }
 
-        app('log')->debug('Found no account or haven\'t searched for one.');
+        app('log')->debug('Found no account or haven\'t searched for one because of missing data.');
 
         // append an empty type to the array for consistency's sake.
         $array['type'] = $array['type'] ?? null;
@@ -159,14 +171,14 @@ class Accounts extends AbstractTask
 
         // Return ID or name if not null
         if (null !== $array['id'] || '' !== (string)$array['name']) {
-            app('log')->debug('Array with account has some name info, return that.', $array);
+            app('log')->debug('At least the array with account-info has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
         if ('' !== (string)$array['iban']) {
-            app('log')->debug('Array with account has some IBAN info, return that.', $array);
+            app('log')->debug('At least the with account-info has some IBAN info, return that.', $array);
 
             return $array;
         }
@@ -174,11 +186,11 @@ class Accounts extends AbstractTask
         // if the default account is not NULL, return that one instead:
         if (null !== $defaultAccount) {
             $default = $defaultAccount->toArray();
-            app('log')->debug('Default account is not null, so will return:', $default);
+            app('log')->debug('At least the default account is not null, so will return that:', $default);
 
             return $default;
         }
-        app('log')->debug('Default account is NULL, so will return: ', $array);
+        app('log')->debug('The default account is NULL, so will return what we started with: ', $array);
 
         return $array;
     }
@@ -500,7 +512,7 @@ class Accounts extends AbstractTask
         $sourceArray = $this->getSourceArray($transaction);
         $destArray   = $this->getDestinationArray($transaction);
         $source      = $this->findAccount($sourceArray, $this->account);
-        $destination = $this->findAccount($destArray, null);
+        $destination = $this->findAccount($destArray, $this->account);
 
         /*
          * First, set source and destination in the transaction array:

@@ -189,7 +189,7 @@ class LineProcessor
             $mapped = $this->mapping[$columnIndex][$value] ?? 0;
             app('log')->debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
             app('log')->debug(sprintf('Value is %s', var_export($value, true)));
-            app('log')->debug('Local mapping (will not be printed)');
+            // app('log')->debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
             $role        = $this->getRoleForColumn($columnIndex, $mapped);
             $appendValue = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
