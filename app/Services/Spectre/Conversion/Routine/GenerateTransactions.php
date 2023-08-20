@@ -202,8 +202,9 @@ class GenerateTransactions
         $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
         // dest is shop
         $transaction['destination_name'] = $entry->getPayee('destination');
+        $transaction['destination_iban'] = $entry->getPayeeIban('destination');
 
-        app('log')->debug(sprintf('source_id = %d, destination_name = "%s"', $transaction['source_id'], $transaction['destination_name']));
+        app('log')->debug(sprintf('source_id = %d, destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_name'], $transaction['destination_iban']));
 
         return $transaction;
     }
@@ -227,8 +228,9 @@ class GenerateTransactions
 
         // source is the other side (name!)
         $transaction['source_name'] = $entry->getPayee('source');
+        $transaction['source_iban'] = $entry->getPayeeIban('source');
 
-        app('log')->debug(sprintf('source_name = "%s", destination_id = %d', $transaction['source_name'], $transaction['destination_id']));
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s"', $transaction['destination_id'], $transaction['source_name'], $transaction['source_iban']));
 
         return $transaction;
     }

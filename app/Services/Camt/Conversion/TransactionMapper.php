@@ -408,6 +408,7 @@ class TransactionMapper
                     $current['notes'] = $current['notes'] ?? '';
                     $addition         = "  \n" . join("  \n", $data['data']);
                     $current['notes'] .= $addition;
+                    $current['notes'] = trim($current['notes']);
                     break;
                 case 'date_process':
                     // TODO perhaps lift into separate method?

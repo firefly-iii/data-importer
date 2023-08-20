@@ -118,7 +118,7 @@ class MapController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return RedirectResponse
      * @throws ContainerExceptionInterface
@@ -138,14 +138,14 @@ class MapController extends Controller
         /**
          * Loop array with available columns.
          *
-         * @var int $index
+         * @var int   $index
          * @var array $row
          */
         foreach ($values as $columnIndex => $column) {
             /**
              * Loop all values for this column
              *
-             * @var int $valueIndex
+             * @var int    $valueIndex
              * @var string $value
              */
             foreach ($column as $valueIndex => $value) {
@@ -262,7 +262,21 @@ class MapController extends Controller
         $content   = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
         $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
 
-        return MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+        $result = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+
+        // sort the column on if they're mapped or not.
+        foreach ($result as $index => $set) {
+            $values = $set['values'];
+            $mapped = array_keys($set['mapped']);
+            usort($values, function (string $a, string $b) use ($mapped) {
+                if (in_array($a, $mapped, true) && !in_array($b, $mapped, true)) {
+                    return 1;
+                }
+                return -1;
+            });
+            $result[$index]['values'] = $values;
+        }
+        return $result;
     }
 
     /**
@@ -471,8 +485,8 @@ class MapController extends Controller
     }
 
     /**
-     * @param  array  $original
-     * @param  array  $new
+     * @param array $original
+     * @param array $new
      *
      * @return array
      */

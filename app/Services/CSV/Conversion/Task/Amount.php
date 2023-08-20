@@ -30,7 +30,7 @@ namespace App\Services\CSV\Conversion\Task;
 class Amount extends AbstractTask
 {
     /**
-     * @param  array  $group
+     * @param array $group
      *
      * @return array
      */
@@ -64,7 +64,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param  array  $transaction
+     * @param array $transaction
      *
      * @return array
      */
@@ -96,8 +96,13 @@ class Amount extends AbstractTask
             $amount = $transaction['amount_negated'];
         }
 
+        if (!array_key_exists('amount_modifier', $transaction)) {
+            app('log')->debug('Missing default amount modifier: amount modifier is now "1".');
+            $transaction['amount_modifier'] = '1';
+        }
         if (array_key_exists('amount_modifier', $transaction)) {
             $transaction['amount_modifier'] = (string)$transaction['amount_modifier'];
+            app('log')->debug(sprintf('Amount modifier is "%s".', $transaction['amount_modifier']));
         }
         if (array_key_exists('foreign_amount', $transaction)) {
             $transaction['foreign_amount'] = (string)$transaction['foreign_amount'];
@@ -139,7 +144,7 @@ class Amount extends AbstractTask
     }
 
     /**
-     * @param  string  $amount
+     * @param string $amount
      *
      * @return bool
      */

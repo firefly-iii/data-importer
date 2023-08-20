@@ -76,7 +76,7 @@ class Date implements ConverterInterface
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
             } catch (InvalidArgumentException|Exception $e) {
                 app('log')->error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
-
+                app('log')->debug('Date parsing error, will return today instead.');
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
             }
         }
