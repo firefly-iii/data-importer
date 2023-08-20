@@ -47,7 +47,8 @@ class Transaction
         Statement     $levelB,
         Entry         $levelC,
         array         $levelD
-    ) {
+    )
+    {
         app('log')->debug('Constructed a CAMT Transaction');
         $this->configuration = $configuration;
         $this->levelA        = $levelA;
@@ -116,12 +117,12 @@ class Transaction
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-                // LEVEL A
+            // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
                 return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-                // LEVEL B
+            // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
                 return (string)$this->levelB->getId();
@@ -196,7 +197,7 @@ class Transaction
                 }
 
                 return $return;
-                // LEVEL D
+            // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
@@ -315,11 +316,13 @@ class Transaction
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return $result;
                 }
-                /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
-                $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
-                    $result = (string)$opposingAccount->getIdentification();
+                /** @var EntryTransactionDetail|null $info */
+                $info = $this->levelD[$index] ?? null;
+                if (null !== $info) {
+                    $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                    if (IbanAccount::class === get_class($opposingAccount)) {
+                        $result = (string)$opposingAccount->getIdentification();
+                    }
                 }
 
                 return $result;
