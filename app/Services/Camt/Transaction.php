@@ -320,7 +320,7 @@ class Transaction
                 $info = $this->levelD[$index] ?? null;
                 if (null !== $info) {
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                    if (IbanAccount::class === get_class($opposingAccount)) {
+                    if (is_object($opposingAccount) && IbanAccount::class === get_class($opposingAccount)) {
                         $result = (string)$opposingAccount->getIdentification();
                     }
                 }
