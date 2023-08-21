@@ -425,7 +425,8 @@ class Transaction
     {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
-        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?
+        $amount = $transactionDetail?->getAmount()?->getAmount();
+        if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
         }
         foreach ($relatedParties as $relatedParty) {
