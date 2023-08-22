@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.5 - 2023-08-23
+
+### Fixed
+- Error in CSV import would break imports for many users, thanks for reporting!
+- Many null pointers removed from CAMT.053 import.
+
 ## 1.3.4 - 2023-08-21
 
 >  ⚠️ This release may create duplicate transactions. Don't import large batches!
