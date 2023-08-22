@@ -512,7 +512,7 @@ class Accounts extends AbstractTask
         $sourceArray = $this->getSourceArray($transaction);
         $destArray   = $this->getDestinationArray($transaction);
         $source      = $this->findAccount($sourceArray, $this->account);
-        $destination = $this->findAccount($destArray, $this->account);
+        $destination = $this->findAccount($destArray, null);
 
         /*
          * First, set source and destination in the transaction array:

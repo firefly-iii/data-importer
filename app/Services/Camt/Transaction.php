@@ -315,11 +315,13 @@ class Transaction
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return $result;
                 }
-                /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
-                $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                if (null !== $opposingAccount && IbanAccount::class === get_class($opposingAccount)) {
-                    $result = (string)$opposingAccount->getIdentification();
+                /** @var EntryTransactionDetail|null $info */
+                $info = $this->levelD[$index] ?? null;
+                if (null !== $info) {
+                    $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                    if (is_object($opposingAccount) && IbanAccount::class === get_class($opposingAccount)) {
+                        $result = (string)$opposingAccount->getIdentification();
+                    }
                 }
 
                 return $result;
@@ -422,7 +424,8 @@ class Transaction
     {
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
-        if ($transactionDetail->getAmount()->getAmount() > 0) { // which part in this array is the interesting one?
+        $amount = $transactionDetail?->getAmount()?->getAmount();
+        if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
         }
         foreach ($relatedParties as $relatedParty) {
