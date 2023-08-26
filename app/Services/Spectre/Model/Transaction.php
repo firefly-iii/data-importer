@@ -179,6 +179,10 @@ class Transaction
             app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee.', $payee, $payeeInfo));
             return $payee;
         }
+        if (!$valid && '' !== $payeeInfo) {
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee info.', $payee, $payeeInfo));
+            return $payeeInfo;
+        }
         app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return "unknown".', $payee, $payeeInfo));
 
         // i think this covers everything but you never know, so:
