@@ -209,8 +209,8 @@ class GenerateTransactions
         $iban        = $transaction['destination_iban'];
         $accountType = $this->targetTypes[$iban] ?? 'unknown';
         $accountId   = $this->targetAccounts[$iban] ?? 0;
+        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
         if ('unknown' !== $accountType) {
-            app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
             if ('asset' === $accountType) {
                 app('log')->debug('Changing transaction type to "transfer"');
                 $transaction['type'] = 'transfer';
@@ -253,8 +253,9 @@ class GenerateTransactions
         $iban        = $transaction['source_iban'];
         $accountType = $this->targetTypes[$iban] ?? 'unknown';
         $accountId   = $this->targetAccounts[$iban] ?? 0;
+        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+
         if ('unknown' !== $accountType) {
-            app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
             if ('asset' === $accountType) {
                 app('log')->debug('Changing transaction type to "transfer"');
                 $transaction['type'] = 'transfer';
