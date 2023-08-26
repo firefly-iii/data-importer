@@ -86,7 +86,7 @@ class GenerateTransactions
                 continue;
             }
             app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
-            $return[$iban] = $entry->id;
+            $return[$iban] = (int)$entry->id;
             $types[$iban]  = $entry->type;
         }
         $this->targetAccounts = $return;
@@ -95,7 +95,7 @@ class GenerateTransactions
     }
 
     /**
-     * @param  array  $spectre
+     * @param array $spectre
      *
      * @return array
      */
@@ -114,7 +114,7 @@ class GenerateTransactions
     }
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
      */
     public function setConfiguration(Configuration $configuration): void
     {
@@ -123,7 +123,7 @@ class GenerateTransactions
     }
 
     /**
-     * @param  Transaction  $entry
+     * @param Transaction $entry
      *
      * @return array
      */
@@ -186,10 +186,10 @@ class GenerateTransactions
     }
 
     /**
-     * @param  Transaction  $entry
-     * @param  array  $transaction
-     * @param  string  $amount
-     * @param  string  $spectreAccountId
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
      *
      * @return array
      */
@@ -204,16 +204,34 @@ class GenerateTransactions
         $transaction['destination_name'] = $entry->getPayee('destination');
         $transaction['destination_iban'] = $entry->getPayeeIban('destination');
 
-        app('log')->debug(sprintf('source_id = %d, destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_name'], $transaction['destination_iban']));
+        // check if the destination IBAN is a known account and what type it has: perhaps the
+        // transaction type needs to be changed:
+        $iban        = $transaction['destination_iban'];
+        $accountType = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        if ('unknown' !== $accountType) {
+            app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+            if ('asset' === $accountType) {
+                app('log')->debug('Changing transaction type to "transfer"');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        if (0 !== $accountId) {
+            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            $transaction['destination_id'] = $accountId;
+            unset($transaction['destination_name'], $transaction['destination_iban']);
+        }
+
+        app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
         return $transaction;
     }
 
     /**
-     * @param  Transaction  $entry
-     * @param  array  $transaction
-     * @param  string  $amount
-     * @param  string  $spectreAccountId
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
      *
      * @return array
      */
@@ -230,7 +248,25 @@ class GenerateTransactions
         $transaction['source_name'] = $entry->getPayee('source');
         $transaction['source_iban'] = $entry->getPayeeIban('source');
 
-        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s"', $transaction['destination_id'], $transaction['source_name'], $transaction['source_iban']));
+        // check if the source IBAN is a known account and what type it has: perhaps the
+        // transaction type needs to be changed:
+        $iban        = $transaction['source_iban'];
+        $accountType = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        if ('unknown' !== $accountType) {
+            app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+            if ('asset' === $accountType) {
+                app('log')->debug('Changing transaction type to "transfer"');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        if (0 !== $accountId) {
+            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            $transaction['source_id'] = $accountId;
+            unset($transaction['source_name'], $transaction['source_iban']);
+        }
+
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'], $transaction['source_name'], $transaction['source_iban'], $transaction['source_id'] ?? ''));
 
         return $transaction;
     }

@@ -168,15 +168,15 @@ class Transaction
 
         // if payee is IBAN, first see if payee information may be a better field:
         if ($valid && '' !== $payeeInfo) {
-            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the latter.', $payee, $payeeInfo));
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee info.', $payee, $payeeInfo));
             return $payeeInfo;
         }
         if (!$valid && '' === $payeeInfo) {
-            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the former.', $payee, $payeeInfo));
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee.', $payee, $payeeInfo));
             return $payee;
         }
         if ($valid && '' === $payeeInfo) {
-            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", prefer the former.', $payee, $payeeInfo));
+            app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee.', $payee, $payeeInfo));
             return $payee;
         }
         app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return "unknown".', $payee, $payeeInfo));
