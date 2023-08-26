@@ -62,7 +62,7 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        app('log')->debug('Going to collect all target accounts from Firefly III.');
+        app('log')->debug('Spectre: Going to collect all target accounts from Firefly III!');
         // send account list request to Firefly III.
         $token   = SecretManager::getAccessToken();
         $url     = SecretManager::getBaseUrl();
@@ -77,6 +77,7 @@ class GenerateTransactions
         $types  = [];
         /** @var Account $entry */
         foreach ($result as $entry) {
+            app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type = $entry->type;
             if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
                 continue;
@@ -85,13 +86,19 @@ class GenerateTransactions
             if ('' === (string)$iban) {
                 continue;
             }
+            $number = sprintf('%s.', (string)$entry->number);
+            if ('.' !== $number) {
+                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
+                $return[$number] = $entry->id;
+                $types[$number]  = $entry->type;
+            }
             app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
             $return[$iban] = (int)$entry->id;
             $types[$iban]  = $entry->type;
         }
         $this->targetAccounts = $return;
         $this->targetTypes    = $types;
-        app('log')->debug(sprintf('Collected %d accounts.', count($this->targetAccounts)));
+        app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
     /**

@@ -118,15 +118,7 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        if (config('importer.use_cache') && Cache::has('collect_target_accounts')) {
-            app('log')->debug('Grab target accounts from cache.');
-            $info                 = Cache::get('collect_target_accounts');
-            $this->targetAccounts = $info['accounts'];
-            $this->targetTypes    = $info['types'];
-
-            return;
-        }
-        app('log')->debug('Going to collect all target accounts from Firefly III.');
+        app('log')->debug('Nordigen: Going to collect all target accounts from Firefly III.');
         // send account list request to Firefly III.
         $token   = SecretManager::getAccessToken();
         $url     = SecretManager::getBaseUrl();
@@ -141,6 +133,7 @@ class GenerateTransactions
         $types  = [];
         /** @var Account $entry */
         foreach ($result as $entry) {
+            app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type = $entry->type;
             if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
                 continue;
@@ -161,15 +154,7 @@ class GenerateTransactions
         }
         $this->targetAccounts = $return;
         $this->targetTypes    = $types;
-        app('log')->debug(sprintf('Collected %d accounts.', count($this->targetAccounts)), $this->targetAccounts);
-        if (config('importer.use_cache')) {
-            $array = [
-                'accounts' => $return,
-                'types'    => $types,
-            ];
-            Cache::put('collect_target_accounts', $array, 86400); // 24h
-            app('log')->info('Stored collected accounts in cache.');
-        }
+        app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)), $this->targetAccounts);
     }
 
     /**
