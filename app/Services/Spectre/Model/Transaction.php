@@ -95,7 +95,14 @@ class Transaction
      */
     public function getAmount(): string
     {
-        return $this->amount;
+        $amount = $this->amount;
+
+        // if the number contains "E", it's in scientific notation, so we need to convert it to a normal number first.
+        if (false !== stripos($amount, 'e')) {
+            $amount = sprintf('%.12f', $amount);
+        }
+
+        return $amount;
     }
 
     /**
