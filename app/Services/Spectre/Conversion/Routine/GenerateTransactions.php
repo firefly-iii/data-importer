@@ -246,7 +246,7 @@ class GenerateTransactions
             unset($transaction['source_name'], $transaction['source_iban']);
         }
 
-        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'], $transaction['source_name'], $transaction['source_iban'], $transaction['source_id'] ?? ''));
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
     }
