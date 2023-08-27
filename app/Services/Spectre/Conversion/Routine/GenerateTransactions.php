@@ -24,15 +24,11 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
-use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
 use App\Support\Http\CollectsAccounts;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
-use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 /**
  * Class GenerateTransactions.
@@ -66,7 +62,7 @@ class GenerateTransactions
         app('log')->debug('Spectre: Defer account search to trait.');
         // defer to trait:
         $array = $this->collectAllTargetAccounts();
-        foreach($array as $number => $info) {
+        foreach ($array as $number => $info) {
             $this->targetAccounts[$number] = $info['id'];
             $this->targetTypes[$number]    = $info['type'];
         }
@@ -201,6 +197,27 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
+        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
+        // The data importer will try to correct this.
+        if ('transfer' === $transaction['type'] &&
+            array_key_exists('source_id', $transaction) &&
+            array_key_exists('destination_id', $transaction) &&
+            0 !== $transaction['source_id'] &&
+            0 !== $transaction['destination_id'] &&
+            $transaction['destination_id'] === $transaction['source_id']) {
+            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            $transaction['type'] = 'withdrawal';
+            $transaction['notes'] = $transaction['notes'] ?? '';
+            $transaction['notes'] .= sprintf("  \nOriginal destination account name: '%s'  \nOriginal destination account IBAN: '%s'  \nThe values above have been ignored by the data importer.",
+                                             $entry->getPayee('destination'),
+                                             $entry->getPayeeIban('destination'));
+            $transaction['notes'] = trim($transaction['notes']);
+            unset($transaction['destination_id']);
+            $transaction['destination_name'] = '(unknown destination account)';
+        }
+
+
+
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
         return $transaction;
@@ -242,9 +259,29 @@ class GenerateTransactions
         }
         if (0 !== $accountId) {
             app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
-            $transaction['source_id'] = $accountId;
+            $transaction['source_id'] = (int)$accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
+
+        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
+        // The data importer will try to correct this.
+        if ('transfer' === $transaction['type'] &&
+            array_key_exists('source_id', $transaction) &&
+            array_key_exists('destination_id', $transaction) &&
+            0 !== $transaction['source_id'] &&
+            0 !== $transaction['destination_id'] &&
+            $transaction['destination_id'] === $transaction['source_id']) {
+            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            $transaction['type'] = 'deposit';
+            $transaction['notes'] = $transaction['notes'] ?? '';
+            $transaction['notes'] .= sprintf("  \nOriginal source account name: '%s'  \nOriginal source account IBAN: '%s'  \nThe values above have been ignored by the data importer.",
+                                             $entry->getPayee('source'),
+                                             $entry->getPayeeIban('source'));
+            $transaction['notes'] = trim($transaction['notes']);
+            unset($transaction['source_id']);
+            $transaction['source_name'] = '(unknown source account)';
+        }
+
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
