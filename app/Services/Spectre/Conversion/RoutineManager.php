@@ -32,13 +32,14 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;
 use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
 use App\Services\Spectre\Conversion\Routine\TransactionProcessor;
+use App\Support\Http\CollectsAccounts;
 
 /**
  * Class RoutineManager
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use GeneratesIdentifier;
+    use GeneratesIdentifier, CollectsAccounts;
 
     private array                $allErrors;
     private array                $allMessages;

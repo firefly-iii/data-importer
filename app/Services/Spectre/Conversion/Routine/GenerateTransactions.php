@@ -28,6 +28,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
+use App\Support\Http\CollectsAccounts;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -38,7 +39,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
  */
 class GenerateTransactions
 {
-    use ProgressInformation;
+    use ProgressInformation, CollectsAccounts;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -62,42 +63,13 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        app('log')->debug('Spectre: Going to collect all target accounts from Firefly III!');
-        // send account list request to Firefly III.
-        $token   = SecretManager::getAccessToken();
-        $url     = SecretManager::getBaseUrl();
-        $request = new GetAccountsRequest($url, $token);
-
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var GetAccountsResponse $result */
-        $result = $request->get();
-        $return = [];
-        $types  = [];
-        /** @var Account $entry */
-        foreach ($result as $entry) {
-            app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
-            $type = $entry->type;
-            if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
-                continue;
-            }
-            $iban = $entry->iban;
-            if ('' === (string)$iban) {
-                continue;
-            }
-            $number = sprintf('%s.', (string)$entry->number);
-            if ('.' !== $number) {
-                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
-                $return[$number] = $entry->id;
-                $types[$number]  = $entry->type;
-            }
-            app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
-            $return[$iban] = (int)$entry->id;
-            $types[$iban]  = $entry->type;
+        app('log')->debug('Spectre: Defer account search to trait.');
+        // defer to trait:
+        $array = $this->collectAllTargetAccounts();
+        foreach($array as $number => $info) {
+            $this->targetAccounts[$number] = $info['id'];
+            $this->targetTypes[$number]    = $info['type'];
         }
-        $this->targetAccounts = $return;
-        $this->targetTypes    = $types;
         app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
