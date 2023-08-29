@@ -239,9 +239,9 @@ class GenerateTransactions
         // source is Spectre:
         $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
 
-        // dest is shop
-        $transaction['destination_name'] = $entry->getPayer() ?? $entry->getPayee() ?? '(unknown destination account)';
-        $transaction['destination_iban'] = $entry->getPayerIban() ?? $entry->getPayeeIban() ?? '';
+        // dest is shop. Payee / payer is reverse from the other one.
+        $transaction['destination_name'] = $entry->getPayee() ?? $entry->getPayer() ?? '(unknown destination account)';
+        $transaction['destination_iban'] = $entry->getPayeeIban() ?? $entry->getPayerIban() ?? '';
 
         // check if the destination IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
@@ -275,8 +275,8 @@ class GenerateTransactions
             // add error message to transaction:
             $transaction['notes'] = $transaction['notes'] ?? '';
             $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
-            $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $entry->getPayer());
-            $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $entry->getPayerIban());
+            $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $entry->getPayee());
+            $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $entry->getPayeeIban());
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
             $transaction['notes'] = trim($transaction['notes']);
 
