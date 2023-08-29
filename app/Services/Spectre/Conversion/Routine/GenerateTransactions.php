@@ -175,6 +175,8 @@ class GenerateTransactions
         $transaction['source_name'] = $entry->getPayer() ?? '(unknown source account)';
         $transaction['source_iban'] = $entry->getPayerIban() ?? '';
 
+        app('log')->debug(sprintf('processPositiveTransaction: source_name = "%s", source_iban = "%s"', $transaction['source_name'], $transaction['source_iban']));
+
         // check if the source IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
         $iban        = $transaction['source_iban'];
@@ -242,6 +244,8 @@ class GenerateTransactions
         // dest is shop. Payee / payer is reverse from the other one.
         $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
         $transaction['destination_iban'] = $entry->getPayeeIban() ?? '';
+
+        app('log')->debug(sprintf('processNegativeTransaction: destination_name = "%s", destination_iban = "%s"', $transaction['destination_name'], $transaction['destination_iban']));
 
         // check if the destination IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
