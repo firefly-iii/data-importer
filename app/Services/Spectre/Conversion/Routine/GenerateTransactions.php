@@ -207,16 +207,18 @@ class GenerateTransactions
             $transaction['destination_id'] === $transaction['source_id']) {
             app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
             $transaction['type'] = 'withdrawal';
+
+            // add error message to transaction:
             $transaction['notes'] = $transaction['notes'] ?? '';
-            $transaction['notes'] .= sprintf("  \nOriginal destination account name: '%s'  \nOriginal destination account IBAN: '%s'  \nThe values above have been ignored by the data importer.",
-                                             $entry->getPayee('destination'),
-                                             $entry->getPayeeIban('destination'));
+            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
+            $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $entry->getPayee('destination'));
+            $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $entry->getPayeeIban('destination'));
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
             $transaction['notes'] = trim($transaction['notes']);
+
             unset($transaction['destination_id']);
             $transaction['destination_name'] = '(unknown destination account)';
         }
-
-
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
@@ -273,11 +275,15 @@ class GenerateTransactions
             $transaction['destination_id'] === $transaction['source_id']) {
             app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
             $transaction['type'] = 'deposit';
+
+            // add error message to transaction:
             $transaction['notes'] = $transaction['notes'] ?? '';
-            $transaction['notes'] .= sprintf("  \nOriginal source account name: '%s'  \nOriginal source account IBAN: '%s'  \nThe values above have been ignored by the data importer.",
-                                             $entry->getPayee('source'),
-                                             $entry->getPayeeIban('source'));
+            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
+            $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $entry->getPayee('source'));
+            $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $entry->getPayeeIban('source'));
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
             $transaction['notes'] = trim($transaction['notes']);
+
             unset($transaction['source_id']);
             $transaction['source_name'] = '(unknown source account)';
         }
