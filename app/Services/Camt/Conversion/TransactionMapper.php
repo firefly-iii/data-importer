@@ -155,6 +155,11 @@ class TransactionMapper
                 $current['destination_type'] = '';
                 $current['type']             = 'deposit';
                 break;
+            case $sourceIsExpense && $destIsNull:
+                app('log')->warning('The source is "expense" but the destination is a new account. Weird! Lets make source_type = "" and type="withdrawal"');
+                $current['source_type'] = '';
+                $current['type']        = 'withdrawal';
+                break;
             default:
                 app('log')->error(
                     sprintf(
