@@ -15,12 +15,14 @@ class TransactionMapper
 {
     use GetAccounts;
     use ProgressInformation;
+
     private array         $accountIdentificationSuffixes;
     private array         $allAccounts;
     private Configuration $configuration;
 
     /**
      * @param Configuration $configuration
+     *
      * @throws ImporterErrorException
      */
     public function __construct(Configuration $configuration)
@@ -40,7 +42,7 @@ class TransactionMapper
     {
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
         $result = [];
-        $total = count($transactions);
+        $total  = count($transactions);
         /** @var array $transaction */
         foreach ($transactions as $index => $transaction) {
             app('log')->debug(sprintf('[%d/%d] Now mapping.', $index + 1, $total));
@@ -54,6 +56,7 @@ class TransactionMapper
     /**
      * @param string $direction
      * @param array  $current
+     *
      * @return bool
      */
     private function accountDetailsEmpty(string $direction, array $current): bool
@@ -68,9 +71,9 @@ class TransactionMapper
     /**
      * @param array $current
      *
-     * @return string
+     * @return array
      */
-    private function determineTransactionType(array $current): string
+    private function determineTransactionType(array $current): array
     {
         app('log')->debug('Determine transaction type.');
         $directions   = ['source', 'destination'];
@@ -80,7 +83,9 @@ class TransactionMapper
 
         foreach ($directions as $direction) {
             app('log')->debug(sprintf('Now working on direction "%s".', $direction));
-            $accountType[$direction] = null;
+            $accountType[$direction]  = null;
+            $accountTypeKey           = sprintf('%s_type', $direction);
+            $current[$accountTypeKey] = '';
             foreach ($this->accountIdentificationSuffixes as $suffix) {
                 $key = sprintf('%s_%s', $direction, $suffix);
                 app('log')->debug(sprintf('Now working on key "%s".', $key));
@@ -92,16 +97,20 @@ class TransactionMapper
                     );
                     // should this overrule any existing account type? Since we work down from ID,
                     // if it's already known it should not be overruled.
-                    if(null === $foundDirection && null !== $accountType[$direction]) {
+                    if (null === $foundDirection && null !== $accountType[$direction]) {
                         app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
                     }
-                    if(null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
+                    if (null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
                         app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%s".', $foundDirection, $direction, $accountType[$direction]));
-                        $accountType[$direction] = $foundDirection;
+                        $accountType[$direction]  = $foundDirection;
+                        $current[$accountTypeKey] = $foundDirection;
+                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
                     }
-                    if(null === $accountType[$direction]) {
+                    if (null === $accountType[$direction]) {
                         app('log')->debug(sprintf('accountType[%s] is set to found direction "%s"', $direction, $foundDirection));
-                        $accountType[$direction] = $foundDirection;
+                        $accountType[$direction]  = $foundDirection;
+                        $current[$accountTypeKey] = $foundDirection;
+                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
                     }
                 }
             }
@@ -113,6 +122,7 @@ class TransactionMapper
         $sourceIsRevenue = 'revenue' === $accountType['source'];
         $destIsAsset     = 'asset' === $accountType['destination'];
         $destIsExpense   = 'expense' === $accountType['destination'];
+        $sourceIsExpense = 'expense' === $accountType['source'];
         $destIsRevenue   = 'revenue' === $accountType['destination'];
         $destIsNull      = null === $accountType['destination'];
         switch (true) {
@@ -120,34 +130,52 @@ class TransactionMapper
             case $sourceIsAsset && $destIsNull && $lessThanZero:
                 // there is no expense account, but the account was found under revenue, so we assume this is a withdrawal with a non-existing expense account
             case $sourceIsAsset && $destIsRevenue && $lessThanZero:
-                return 'withdrawal';
+                app('log')->debug('Based on types, this is a withdrawal');
+                $current['type'] = 'withdrawal';
+                break;
             case $sourceIsAsset && $destIsRevenue && !$lessThanZero:
             case $sourceIsAsset && $destIsNull && !$lessThanZero:
             case $sourceIsNull && $destIsAsset:
             case $sourceIsRevenue && $destIsAsset:
             case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
-                return 'deposit';
+                app('log')->debug('Based on types, this is a deposit');
+                $current['type'] = 'deposit';
+                break;
             case $sourceIsAsset && $destIsAsset:
-                return 'transfer'; // line 382 / 383
-
+                app('log')->debug('Based on types, this is a transfer');
+                $current['type'] = 'transfer'; // line 382 / 383
+                break;
+            case $sourceIsExpense && $destIsExpense:
+                app('log')->warning('Both types are expense. Impossible. Lets make source_type = "" and type="withdrawal"');
+                $current['source_type'] = '';
+                $current['type']        = 'withdrawal';
+                break;
+            case $sourceIsRevenue && $destIsRevenue:
+                app('log')->warning('Both types are revenue. Impossible. Lets make destination_type = "" and type="deposit"');
+                $current['destination_type'] = '';
+                $current['type']             = 'deposit';
+                break;
             default:
                 app('log')->error(
                     sprintf(
-                        'Unknown transaction type: source = "%s", destination = "%s"',
+                        'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
                         $accountType['source'] ?: null,
                         $accountType['destination'] ?: null
                     )
-                ); // 285
+                );                               // 285
+                $current['type'] = 'withdrawal'; // line 382 / 383
+                break;
         }
 
 
         // default back to withdrawal.
-        return 'withdrawal';
+        return $current;
     }
 
     /**
      * @param $direction
      * @param $current
+     *
      * @return string
      */
     private function getAccountId($direction, $current): string
@@ -190,7 +218,8 @@ class TransactionMapper
     /**
      * @param string $field
      * @param string $value
-     * @param bool $lessThanZero
+     * @param bool   $lessThanZero
+     *
      * @return string|null
      */
     private function getAccountType(string $field, string $value, bool $lessThanZero): ?string
@@ -349,6 +378,7 @@ class TransactionMapper
     /**
      * @param string $groupHandling
      * @param array  $split
+     *
      * @return array|null
      */
     private function mapTransactionJournal(string $groupHandling, array $split): ?array
@@ -520,7 +550,7 @@ class TransactionMapper
         $current['destination_is_empty'] = false;
         if ($this->accountDetailsEmpty('destination', $current)) {
             app('log')->debug('Array has no destination information, added default info.');
-            $current['destination_name'] = '(no name)';
+            $current['destination_name']     = '(no name)';
             $current['destination_is_empty'] = true;
         }
 
@@ -531,27 +561,35 @@ class TransactionMapper
             $current = $this->swapAccounts($current);
         }
 
-
-        $current['type'] = $this->determineTransactionType($current);
+        $current = $this->determineTransactionType($current);
         app('log')->debug(sprintf('Transaction type is %s', $current['type']));
-        // need a catch here to invert.
-
-
-        // as the destination account is not new, we try to map an existing account
-        if ($this->validAccountInfo('destination', $current)) {
-            //$current['destination_id'] = $this->getAccountId('destination', $current);
-        }
 
         // no amount?
         if (!array_key_exists('amount', $current)) {
             return null;
         }
 
-        // if is positive
-        if (1 === bccomp($current['amount'], '0')) {
-            // TODO remove this empty if statement.
-            // positive account is credit (or transfer)
+        // the type is a withdrawal, but we did not recognize the type of the source account.
+        // if that did not succeed we did not FIND the source account, and must fall back
+        // on the default account.
+        $overruleAccount = false;
+        if ('withdrawal' === $current['type'] && '' === (string)$current['source_type']) {
+            $current['source_id'] = $this->configuration->getDefaultAccount();
+            unset($current['source_name'], $current['source_iban']);
+            app('log')->warning(sprintf('Withdrawal, but did not recognize the type of the source account. It will be replaced with the default account (#%d).', $current['source_id']));
+            $overruleAccount = true;
         }
+        // same for deposit:
+        if ('deposit' === $current['type'] && '' === (string)$current['destination_type']) {
+            $current['destination_id'] = $this->configuration->getDefaultAccount();
+            unset($current['destination_name'], $current['destination_iban']);
+            app('log')->warning(sprintf('Deposit, but did not recognize the destination account. It will be replaced with the default account (#%d).', $current['destination_id']));
+            $overruleAccount = true;
+        }
+        // at this point it is possible that either of the two actions above have accidentally
+        // set BOTH accounts to be the same one. For example, source_id = 1 and destination_iban = ABC
+        // (and they point to the same account). This sanity check must be done again. But not right now.
+
 
         // amount must be positive
         if (-1 === bccomp($current['amount'], '0')) {
@@ -560,13 +598,34 @@ class TransactionMapper
         }
 
         // no description?
+        if (!array_key_exists('description', $current)) {
+            app('log')->warning('Did not find a description in the transaction, added "(no description)"');
+            $current['description'] = '(no description)';
+        }
+        if (array_key_exists('description', $current) && '' === (string)$current['description']) {
+            app('log')->warning('Did not find a description in the transaction, added "(no description)"');
+            $current['description'] = '(no description)';
+        }
+
         // no date?
+        if (!array_key_exists('date', $current)) {
+            app('log')->warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
+            $current['date'] = date('Y-m-d');
+        }
+        if (array_key_exists('date', $current) && '' === (string)$current['date']) {
+            app('log')->warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
+            $current['date'] = date('Y-m-d');
+        }
+
+        // unset var
+        unset($current['destination_is_empty'], $current['source_type'], $current['destination_type']);
 
         return $current;
     }
 
     /**
      * @param array $currentTransaction
+     *
      * @return array
      */
     private function swapAccounts(array $currentTransaction): array
@@ -593,7 +652,7 @@ class TransactionMapper
                 $return[$destKey] = $sourceValue;
             }
             // a small exception. Do not set the destination name to "no name" if it's set to "no name" because it was empty.
-            if(true === $currentTransaction['destination_is_empty']) {
+            if (true === $currentTransaction['destination_is_empty']) {
                 app('log')->debug(sprintf('Will not set "%s" to "%s" because destination is empty.', $sourceKey, $destValue));
             }
             if (null !== $destValue && false === $currentTransaction['destination_is_empty']) {
