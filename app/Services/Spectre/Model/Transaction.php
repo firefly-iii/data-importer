@@ -163,11 +163,32 @@ class Transaction
     }
 
     /**
-     * @param string $direction
-     *
-     * @return string
+     * @return string|null
      */
-    public function getPayee(string $direction): string
+    public function getPayeeIban(): ?string
+    {
+        $payee = $this->extra->getPayee();
+        $valid = IbanConverter::isValidIban((string)$payee);
+        // payee is valid IBAN:
+        if ($valid) {
+            app('log')->debug(sprintf('Payee IBAN is "%s"', $payee));
+            return (string)$payee;
+        }
+        // is not valid IBAN (also includes NULL)
+        $payeeInfo = $this->extra->getPayeeInformation();
+        $valid     = IbanConverter::isValidIban((string)$payeeInfo);
+        if ($valid) {
+            app('log')->debug(sprintf('Payee IBAN (payee information) is "%s"', $payeeInfo));
+            return (string)$payeeInfo;
+        }
+        app('log')->debug('Payee IBAN is "" (empty fallback)');
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayee(): ?string
     {
         $payee     = (string)$this->extra->getPayee();
         $payeeInfo = (string)$this->extra->getPayeeInformation();
@@ -192,33 +213,65 @@ class Transaction
         }
         app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return "unknown".', $payee, $payeeInfo));
 
-        // i think this covers everything but you never know, so:
-        return sprintf('(unknown %s account)', $direction);
+        // I think this covers everything, but you never know, so:
+        return null;
+        //return sprintf('(unknown %s account)', $direction);
     }
 
     /**
-     * @param string $direction
-     *
-     * @return string
+     * @return string|null
      */
-    public function getPayeeIban(string $direction): string
+    public function getPayerIban(): ?string
     {
-        $payee = $this->extra->getPayee();
-        $valid = IbanConverter::isValidIban((string)$payee);
-        // payee is valid IBAN:
+        $payer = $this->extra->getpayer();
+        $valid = IbanConverter::isValidIban((string)$payer);
+        // payer is valid IBAN:
         if ($valid) {
-            app('log')->debug(sprintf('Payee IBAN is "%s"', $payee));
-            return (string)$payee;
+            app('log')->debug(sprintf('Payer IBAN is "%s"', $payer));
+            return (string)$payer;
         }
         // is not valid IBAN (also includes NULL)
-        $payeeInfo = $this->extra->getPayeeInformation();
-        $valid     = IbanConverter::isValidIban((string)$payeeInfo);
+        $payerInfo = $this->extra->getpayerInformation();
+        $valid     = IbanConverter::isValidIban((string)$payerInfo);
         if ($valid) {
-            app('log')->debug(sprintf('Payee IBAN (payee information) is "%s"', $payeeInfo));
-            return (string)$payeeInfo;
+            app('log')->debug(sprintf('Payer IBAN (payer information) is "%s"', $payerInfo));
+            return (string)$payerInfo;
         }
-        app('log')->debug('Payee IBAN is "" (empty fallback)');
-        return '';
+        app('log')->debug('Payer IBAN is "" (empty fallback)');
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayer(): ?string
+    {
+        $payer     = (string)$this->extra->getPayer();
+        $payerInfo = (string)$this->extra->getPayerInformation();
+        $valid     = IbanConverter::isValidIban($payer);
+
+        // if payer is IBAN, first see if payer information may be a better field:
+        if ($valid && '' !== $payerInfo) {
+            app('log')->debug(sprintf('payer is "%s", payer info is "%s", return payer info.', $payer, $payerInfo));
+            return $payerInfo;
+        }
+        if (!$valid && '' === $payerInfo) {
+            app('log')->debug(sprintf('payer is "%s", payer info is "%s", return payer.', $payer, $payerInfo));
+            return $payer;
+        }
+        if ($valid && '' === $payerInfo) {
+            app('log')->debug(sprintf('payer is "%s", payer info is "%s", return payer.', $payer, $payerInfo));
+            return $payer;
+        }
+        if (!$valid && '' !== $payerInfo) {
+            app('log')->debug(sprintf('payer is "%s", payer info is "%s", return payer info.', $payer, $payerInfo));
+            return $payerInfo;
+        }
+        app('log')->debug(sprintf('payer is "%s", payer info is "%s", return "unknown".', $payer, $payerInfo));
+
+        // I think this covers everything, but you never know, so:
+        return null;
+        //return sprintf('(unknown %s account)', $direction);
     }
 
     /**

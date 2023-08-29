@@ -50,6 +50,8 @@ class TransactionExtra
     private ?string $originalSubCategory;
     private ?string $payee;
     private ?string $payeeInformation;
+    private ?string $payer;
+    private ?string $payerInformation;
     private ?bool   $possibleDuplicate;
     private ?Carbon $postingDate;
     private ?Carbon $postingTime;
@@ -72,7 +74,7 @@ class TransactionExtra
     /**
      * TransactionExtra constructor.
      *
-     * @param  array  $data
+     * @param array $data
      *
      * @return TransactionExtra
      */
@@ -99,6 +101,8 @@ class TransactionExtra
         $model->mcc                      = $data['mcc'] ?? null;
         $model->payee                    = $data['payee'] ?? null;
         $model->payeeInformation         = $data['payee_information'] ?? null;
+        $model->payer                    = $data['payer'] ?? null;
+        $model->payerInformation         = $data['payer_information'] ?? null;
         $model->type                     = $data['type'] ?? null;
         $model->checkNumber              = $data['check_number'] ?? null;
         $model->units                    = array_key_exists('units', $data) ? (string)$data['units'] : null;
@@ -143,6 +147,22 @@ class TransactionExtra
     }
 
     /**
+     * @return string|null
+     */
+    public function getPayer(): ?string
+    {
+        return $this->payer;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayerInformation(): ?string
+    {
+        return $this->payerInformation;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -168,6 +188,8 @@ class TransactionExtra
             'mcc'                       => $this->mcc,
             'payee'                     => $this->payee,
             'payee_information'         => $this->payeeInformation,
+            'payer'                     => $this->payer,
+            'payer_information'         => $this->payerInformation,
             'type'                      => $this->type,
             'check_number'              => $this->checkNumber,
             'units'                     => $this->units,

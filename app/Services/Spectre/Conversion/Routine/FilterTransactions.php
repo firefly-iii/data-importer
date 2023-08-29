@@ -41,7 +41,7 @@ class FilterTransactions
     }
 
     /**
-     * @param  array  $transactions
+     * @param array $transactions
      *
      * @return array
      */

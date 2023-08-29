@@ -39,7 +39,8 @@ use App\Support\Http\CollectsAccounts;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use GeneratesIdentifier, CollectsAccounts;
+    use GeneratesIdentifier;
+    use CollectsAccounts;
 
     private array                $allErrors;
     private array                $allMessages;

@@ -53,7 +53,7 @@ class Account
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *
      * @return static
      */

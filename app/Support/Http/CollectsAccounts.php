@@ -30,7 +30,6 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 trait CollectsAccounts
 {
-
     /**
      * @return array
      */

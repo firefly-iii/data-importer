@@ -398,7 +398,7 @@ class ApiSubmitter
         $request = new PostTransactionRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        app('log')->debug('Submitting to Firefly III:', $line);
+        app('log')->debug(sprintf('Submitting to Firefly III: %s', json_encode($line)));
         $request->setBody($line);
         try {
             $response = $request->post();

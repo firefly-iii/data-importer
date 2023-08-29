@@ -40,11 +40,12 @@ class TransactionMapper
     {
         app('log')->debug(sprintf('Now mapping %d transaction(s)', count($transactions)));
         $result = [];
+        $total = count($transactions);
         /** @var array $transaction */
         foreach ($transactions as $index => $transaction) {
-            app('log')->debug(sprintf('Now mapping index #%d', $index));
+            app('log')->debug(sprintf('[%d/%d] Now mapping.', $index + 1, $total));
             $result[] = $this->mapTransactionGroup($transaction);
-            app('log')->debug(sprintf('Now done with mapping index #%d', $index));
+            app('log')->debug(sprintf('[%d/%d] Now done with mapping', $index + 1, $total));
         }
         app('log')->debug(sprintf('Mapped %d transaction(s)', count($result)));
         return $result;
@@ -340,6 +341,7 @@ class TransactionMapper
             // TODO loop over $current and clean up if necessary.
             $result['transactions'][] = $polishedJournal;
         }
+        app('log')->debug('Firefly III transaction is', $result);
 
         return $result;
     }
@@ -515,9 +517,11 @@ class TransactionMapper
         }
 
         // if there is no destination information, add an empty account now:
+        $current['destination_is_empty'] = false;
         if ($this->accountDetailsEmpty('destination', $current)) {
             app('log')->debug('Array has no destination information, added default info.');
             $current['destination_name'] = '(no name)';
+            $current['destination_is_empty'] = true;
         }
 
         // if is positive
@@ -579,17 +583,21 @@ class TransactionMapper
             $destValue = array_key_exists($destKey, $currentTransaction) ? $currentTransaction[$destKey] : null;
 
             // always unset source value
-            app('log')->debug(sprintf('Unset "%s" with value "%s"', $sourceKey, $sourceValue));
-            app('log')->debug(sprintf('Unset "%s" with value "%s"', $destKey, $destValue));
+            app('log')->debug(sprintf('[1] Unset "%s" with value "%s"', $sourceKey, $sourceValue));
+            app('log')->debug(sprintf('[2] Unset "%s" with value "%s"', $destKey, $destValue));
             unset($return[$sourceKey], $return[$destKey]);
 
             // set opposite values
             if (null !== $sourceValue) {
-                app('log')->debug(sprintf('Set "%s" to "%s"', $destKey, $sourceValue));
+                app('log')->debug(sprintf('[1] Set "%s" to "%s"', $destKey, $sourceValue));
                 $return[$destKey] = $sourceValue;
             }
-            if (null !== $destValue) {
-                app('log')->debug(sprintf('Set "%s" to "%s"', $sourceKey, $destValue));
+            // a small exception. Do not set the destination name to "no name" if it's set to "no name" because it was empty.
+            if(true === $currentTransaction['destination_is_empty']) {
+                app('log')->debug(sprintf('Will not set "%s" to "%s" because destination is empty.', $sourceKey, $destValue));
+            }
+            if (null !== $destValue && false === $currentTransaction['destination_is_empty']) {
+                app('log')->debug(sprintf('[2] Set "%s" to "%s"', $sourceKey, $destValue));
                 $return[$sourceKey] = $destValue;
             }
         }

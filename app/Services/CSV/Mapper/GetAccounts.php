@@ -37,13 +37,14 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 trait GetAccounts
 {
     /**
-     * Returns a combined list of asset accounts and all liability accounts.
+     * Returns a combined list of all accounts in Firefly III.
      *
      * @return array
      * @throws ImporterErrorException
      */
     protected function getAllAccounts(): array
     {
+        app('log')->debug('getAllAccounts: return a list of Firefly III accounts.');
         // get list of asset accounts:
         $accounts = [];
         $url      = SecretManager::getBaseUrl();
@@ -70,8 +71,9 @@ trait GetAccounts
         if (!$response instanceof GetAccountsResponse) {
             throw new ImporterErrorException('Could not get list of ALL accounts.');
         }
-
-        return array_merge($accounts);
+        $result = array_merge($accounts);
+        app('log')->debug(sprintf('getAllAccounts: Done collecting, found %d account(s)', count($result)));
+        return $result;
     }
 
     /**
@@ -218,6 +220,7 @@ trait GetAccounts
     {
         $return = [];
         foreach ($list as $account) {
+            app('log')->debug(sprintf('Downloaded account: %s', json_encode($account->toArray())));
             $return[] = $account;
         }
 

@@ -48,7 +48,8 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
  */
 class GenerateTransactions
 {
-    use ProgressInformation, CollectsAccounts;
+    use ProgressInformation;
+    use CollectsAccounts;
 
     private array         $accounts;
     private Configuration $configuration;
