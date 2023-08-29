@@ -172,8 +172,8 @@ class GenerateTransactions
         // source is the other side (name!)
         // payee is the destination, payer is the source.
         // since we know the destination already, we're looking for the payer here:
-        $transaction['source_name'] = $entry->getPayer() ?? $entry->getPayee() ?? '(unknown source account)';
-        $transaction['source_iban'] = $entry->getPayerIban() ?? $entry->getPayeeIban() ?? '';
+        $transaction['source_name'] = $entry->getPayer() ?? '(unknown source account)';
+        $transaction['source_iban'] = $entry->getPayerIban() ?? '';
 
         // check if the source IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
@@ -240,8 +240,8 @@ class GenerateTransactions
         $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
 
         // dest is shop. Payee / payer is reverse from the other one.
-        $transaction['destination_name'] = $entry->getPayee() ?? $entry->getPayer() ?? '(unknown destination account)';
-        $transaction['destination_iban'] = $entry->getPayeeIban() ?? $entry->getPayerIban() ?? '';
+        $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
+        $transaction['destination_iban'] = $entry->getPayeeIban() ?? '';
 
         // check if the destination IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
