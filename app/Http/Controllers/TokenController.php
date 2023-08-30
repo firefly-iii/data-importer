@@ -252,25 +252,25 @@ class TokenController extends Controller
 
         // grab base URL from config first, otherwise from submitted data:
         $baseURL = config('importer.url');
-        app('log')->debug(sprintf('Base URL is "%s"', $baseURL));
+        app('log')->debug(sprintf('[a] Base URL is "%s"', $baseURL));
         $vanityURL = $baseURL;
 
-        app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
+        app('log')->debug(sprintf('[b] Vanity URL is now "%s"', $vanityURL));
 
         // if the config has a vanity URL it will always overrule.
         if ('' !== (string)config('importer.vanity_url')) {
             $vanityURL = config('importer.vanity_url');
-            app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
+            app('log')->debug(sprintf('[c] Vanity URL is now "%s"', $vanityURL));
         }
 
         // otherwise take base URL from the submitted data:
         if (array_key_exists('base_url', $data) && '' !== $data['base_url']) {
             $baseURL = $data['base_url'];
-            app('log')->debug(sprintf('Base URL is now "%s"', $baseURL));
+            app('log')->debug(sprintf('[d] Base URL is now "%s"', $baseURL));
         }
         if ('' === (string)$vanityURL) {
             $vanityURL = $baseURL;
-            app('log')->debug(sprintf('Vanity URL is now "%s"', $vanityURL));
+            app('log')->debug(sprintf('[e] Vanity URL is now "%s"', $vanityURL));
         }
 
         // return request for permission:
