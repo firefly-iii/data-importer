@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.6 - 2023-09-02
+
+>  ⚠️ This release may create duplicate transactions. Don't import large batches!
+
+### Fixed
+- [Issue 7891](https://github.com/firefly-iii/firefly-iii/issues/7891) Importing from Spectre has improved, taking into account new API information. This may change the look and feel of your transactions.
+- Some banks would return amount in scientific notation.
+- Several CAMT fixes when the file is missing data.
+- CAMT fix to verify the transaction type.
+- Better flow for the onboarding of new users. Updated the documentation to match.
+
 ## 1.3.5 - 2023-08-23
 
 ### Fixed
