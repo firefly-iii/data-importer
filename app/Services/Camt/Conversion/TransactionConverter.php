@@ -10,10 +10,11 @@ use App\Services\Shared\Conversion\ProgressInformation;
 class TransactionConverter
 {
     use ProgressInformation;
+
     private Configuration $configuration;
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -22,28 +23,29 @@ class TransactionConverter
     }
 
     /**
-     * @param  array  $transactions
+     * @param array $transactions
      *
      * @return array
      * @throws ImporterErrorException
      */
     public function convert(array $transactions): array
     {
-        app('log')->debug('Convert all transactions into pseudo-transactions.');
+        $total = count($transactions);
+        app('log')->debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
         $result = [];
         /** @var Transaction $transaction */
         foreach ($transactions as $index => $transaction) {
-            app('log')->debug(sprintf('Now working on index #%d', $index));
+            app('log')->debug(sprintf('[%d/%d] Now working on transaction.', $index + 1, $total));
             $result[] = $this->convertSingle($transaction);
-            app('log')->debug(sprintf('Now done with index #%d', $index));
+            app('log')->debug(sprintf('[%d/%d] Now done with transaction.', $index + 1, $total));
         }
-        app('log')->debug('Done converting all transactions into pseudo-transactions.');
+        app('log')->debug(sprintf('Done converting all %d transactions into pseudo-transactions.', $total));
 
         return $result;
     }
 
     /**
-     * @param  Transaction  $transaction
+     * @param Transaction $transaction
      *
      * @return array
      * @throws ImporterErrorException
@@ -86,12 +88,12 @@ class TransactionConverter
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }
                     $current[$role]['data'][$field] = $value;
-                    $current[$role]['data']   = array_unique($current[$role]['data']);
+                    $current[$role]['data']         = array_unique($current[$role]['data']);
                 }
             }
             $result['transactions'][] = $current;
         }
-
+        app('log')->debug(sprintf('Pseudo-transaction is: %s', json_encode($result)));
         return $result;
     }
 

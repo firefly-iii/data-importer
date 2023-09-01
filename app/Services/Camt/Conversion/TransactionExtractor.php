@@ -67,6 +67,7 @@ class TransactionExtractor
                         }
                     }
                 }
+                app('log')->debug(sprintf('[%d/%d] Done working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
             }
         }
         app('log')->debug(sprintf('Extracted %d transaction(s)', count($transactions)));

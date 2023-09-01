@@ -22,16 +22,16 @@
                                 documentation</a>. Any links you see to the docs will open in a new window or tab.
                         </p>
                         <p class="card-text">
-                            {% if '' != baseURL %}
+                            {% if '' != baseUrl %}
                                 In order to get access to your Firefly III installation at <a
-                                href="{{ baseURL }}">{{ baseURL }}</a>, you will need to submit a valid Client ID. This is a number.
+                                href="{{ baseUrl }}">{{ baseUrl }}</a>, you will need to submit a valid Client ID. This is a number.
                             {% else %}
                                 In order to get access to your Firefly III installation, you will need to submit a valid Client ID. This is a number.
                             {% endif %}
                         </p>
                         <p>
-                            {% if '' != baseURL %}
-                                If you don't have one, you must create <a href="{{ baseURL }}/profile">in your
+                            {% if '' != baseUrl %}
+                                If you don't have one, you must create <a href="{{ baseUrl }}/profile">in your
                                 profile</a> under "OAuth". Make sure you
                                 <em>remove</em> the checkbox under "Confidential".
                             {% else %}
@@ -48,10 +48,10 @@
 
                         <form action="{{ route('token.submitClientId') }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                            {% if '' == baseURL %}
+                            {% if '' == baseUrl %}
                                 <div class="form-group mb-3">
                                     <label for="input_base_url">Firefly III URL</label>
-                                    <input type="url" placeholder="https://" value="{{ baseURL }}" class="form-control"
+                                    <input type="url" placeholder="https://" value="{{ baseUrl }}" class="form-control"
                                            id="input_base_url" autocomplete="off" name="base_url">
                                     {% if errors.has('base_url') %}<span
                                         class="text-danger">{{ errors.first('base_url') }}</span>{% endif %}

@@ -54,6 +54,17 @@ class SecretManager
     }
 
     /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasAppId(): bool
+    {
+        return '' !== (string)request()->cookie(self::APP_ID);
+    }
+
+    /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
      * TODO is a cookie the best place?
      *
@@ -71,10 +82,21 @@ class SecretManager
     }
 
     /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     * TODO is a cookie the best place?
+     *
+     * @return bool
+     */
+    private static function hasSecret(): bool
+    {
+        return '' !== (string)request()->cookie(self::SECRET);
+    }
+
+    /**
      * Store app ID.
      * TODO is a cookie the best place?
      *
-     * @param  string  $appId
+     * @param string $appId
      *
      * @return Cookie
      */
@@ -87,34 +109,12 @@ class SecretManager
      * Store access token in a cookie.
      * TODO is a cookie the best place?
      *
-     * @param  string  $secret
+     * @param string $secret
      *
      * @return Cookie
      */
     public static function saveSecret(string $secret): Cookie
     {
         return cookie(self::SECRET, $secret);
-    }
-
-    /**
-     * Will verify if the user has a Spectre App ID (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasAppId(): bool
-    {
-        return '' !== (string)request()->cookie(self::APP_ID);
-    }
-
-    /**
-     * Will verify if the user has a Spectre App ID (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasSecret(): bool
-    {
-        return '' !== (string)request()->cookie(self::SECRET);
     }
 }

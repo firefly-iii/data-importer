@@ -24,14 +24,11 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
-use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
+use App\Support\Http\CollectsAccounts;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
-use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 /**
  * Class GenerateTransactions.
@@ -39,6 +36,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 class GenerateTransactions
 {
     use ProgressInformation;
+    use CollectsAccounts;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -62,40 +60,18 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        app('log')->debug('Going to collect all target accounts from Firefly III.');
-        // send account list request to Firefly III.
-        $token   = SecretManager::getAccessToken();
-        $url     = SecretManager::getBaseUrl();
-        $request = new GetAccountsRequest($url, $token);
-
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var GetAccountsResponse $result */
-        $result = $request->get();
-        $return = [];
-        $types  = [];
-        /** @var Account $entry */
-        foreach ($result as $entry) {
-            $type = $entry->type;
-            if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
-                continue;
-            }
-            $iban = $entry->iban;
-            if ('' === (string)$iban) {
-                continue;
-            }
-            app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
-            $return[$iban] = $entry->id;
-            $types[$iban]  = $entry->type;
+        app('log')->debug('Spectre: Defer account search to trait.');
+        // defer to trait:
+        $array = $this->collectAllTargetAccounts();
+        foreach ($array as $number => $info) {
+            $this->targetAccounts[$number] = $info['id'];
+            $this->targetTypes[$number]    = $info['type'];
         }
-        $this->targetAccounts = $return;
-        $this->targetTypes    = $types;
-        app('log')->debug(sprintf('Collected %d accounts.', count($this->targetAccounts)));
+        app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
     /**
-     * @param  array  $spectre
+     * @param array $spectre
      *
      * @return array
      */
@@ -114,16 +90,7 @@ class GenerateTransactions
     }
 
     /**
-     * @param  Configuration  $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
-    }
-
-    /**
-     * @param  Transaction  $entry
+     * @param Transaction $entry
      *
      * @return array
      */
@@ -186,34 +153,10 @@ class GenerateTransactions
     }
 
     /**
-     * @param  Transaction  $entry
-     * @param  array  $transaction
-     * @param  string  $amount
-     * @param  string  $spectreAccountId
-     *
-     * @return array
-     */
-    private function processNegativeTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
-    {
-        // amount is negative: withdrawal or transfer.
-        $transaction['amount'] = bcmul($amount, '-1');
-
-        // source is Spectre:
-        $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
-        // dest is shop
-        $transaction['destination_name'] = $entry->getPayee('destination');
-        $transaction['destination_iban'] = $entry->getPayeeIban('destination');
-
-        app('log')->debug(sprintf('source_id = %d, destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_name'], $transaction['destination_iban']));
-
-        return $transaction;
-    }
-
-    /**
-     * @param  Transaction  $entry
-     * @param  array  $transaction
-     * @param  string  $amount
-     * @param  string  $spectreAccountId
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
      *
      * @return array
      */
@@ -227,11 +170,135 @@ class GenerateTransactions
         $transaction['destination_id'] = (int)$this->accounts[$spectreAccountId];
 
         // source is the other side (name!)
-        $transaction['source_name'] = $entry->getPayee('source');
-        $transaction['source_iban'] = $entry->getPayeeIban('source');
+        // payee is the destination, payer is the source.
+        // since we know the destination already, we're looking for the payer here:
+        $transaction['source_name'] = $entry->getPayer() ?? '(unknown source account)';
+        $transaction['source_iban'] = $entry->getPayerIban() ?? '';
 
-        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s"', $transaction['destination_id'], $transaction['source_name'], $transaction['source_iban']));
+        app('log')->debug(sprintf('processPositiveTransaction: source_name = "%s", source_iban = "%s"', $transaction['source_name'], $transaction['source_iban']));
+
+        // check if the source IBAN is a known account and what type it has: perhaps the
+        // transaction type needs to be changed:
+        $iban        = $transaction['source_iban'];
+        $accountType = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+
+        if ('unknown' !== $accountType) {
+            if ('asset' === $accountType) {
+                app('log')->debug('Changing transaction type to "transfer"');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        if (0 !== $accountId) {
+            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            $transaction['source_id'] = (int)$accountId;
+            unset($transaction['source_name'], $transaction['source_iban']);
+        }
+
+        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
+        // The data importer will try to correct this.
+        if ('transfer' === $transaction['type'] &&
+            array_key_exists('source_id', $transaction) &&
+            array_key_exists('destination_id', $transaction) &&
+            0 !== $transaction['source_id'] &&
+            0 !== $transaction['destination_id'] &&
+            $transaction['destination_id'] === $transaction['source_id']) {
+            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            $transaction['type'] = 'deposit';
+
+            // add error message to transaction:
+            $transaction['notes'] = $transaction['notes'] ?? '';
+            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
+            $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $entry->getPayer());
+            $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $entry->getPayerIban());
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
+            $transaction['notes'] = trim($transaction['notes']);
+
+            unset($transaction['source_id']);
+            $transaction['source_name'] = '(unknown source account)';
+        }
+
+
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
+    }
+
+    /**
+     * @param Transaction $entry
+     * @param array       $transaction
+     * @param string      $amount
+     * @param string      $spectreAccountId
+     *
+     * @return array
+     */
+    private function processNegativeTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
+    {
+        // amount is negative: withdrawal or transfer.
+        $transaction['amount'] = bcmul($amount, '-1');
+
+        // source is Spectre:
+        $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
+
+        // dest is shop. Payee / payer is reverse from the other one.
+        $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
+        $transaction['destination_iban'] = $entry->getPayeeIban() ?? '';
+
+        app('log')->debug(sprintf('processNegativeTransaction: destination_name = "%s", destination_iban = "%s"', $transaction['destination_name'], $transaction['destination_iban']));
+
+        // check if the destination IBAN is a known account and what type it has: perhaps the
+        // transaction type needs to be changed:
+        $iban        = $transaction['destination_iban'];
+        $accountType = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+        if ('unknown' !== $accountType) {
+            if ('asset' === $accountType) {
+                app('log')->debug('Changing transaction type to "transfer"');
+                $transaction['type'] = 'transfer';
+            }
+        }
+        if (0 !== $accountId) {
+            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            $transaction['destination_id'] = $accountId;
+            unset($transaction['destination_name'], $transaction['destination_iban']);
+        }
+
+        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
+        // The data importer will try to correct this.
+        if ('transfer' === $transaction['type'] &&
+            array_key_exists('source_id', $transaction) &&
+            array_key_exists('destination_id', $transaction) &&
+            0 !== $transaction['source_id'] &&
+            0 !== $transaction['destination_id'] &&
+            $transaction['destination_id'] === $transaction['source_id']) {
+            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            $transaction['type'] = 'withdrawal';
+
+            // add error message to transaction:
+            $transaction['notes'] = $transaction['notes'] ?? '';
+            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
+            $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $entry->getPayee());
+            $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $entry->getPayeeIban());
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
+            $transaction['notes'] = trim($transaction['notes']);
+
+            unset($transaction['destination_id']);
+            $transaction['destination_name'] = '(unknown destination account)';
+        }
+
+        app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
+
+        return $transaction;
+    }
+
+    /**
+     * @param Configuration $configuration
+     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
     }
 }

@@ -422,17 +422,32 @@ class Transaction
      */
     private function getOpposingParty(EntryTransactionDetail $transactionDetail): RelatedParty | null
     {
+        app('log')->debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = "Genkgo\Camt\DTO\Creditor";
+
+        // get amount from "getAmount":
         $amount = $transactionDetail?->getAmount()?->getAmount();
+        if (null !== $amount) {
+            app('log')->debug(sprintf('Amount in getAmount() is "%s"', $amount));
+        }
+        if (null === $amount) {
+            $amount = $transactionDetail->getAmountDetails()?->getAmount();
+            app('log')->debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
+        }
+
         if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
+            app('log')->debug('getOpposingParty(), interested in Debtor!');
             $targetRelatedPartyObject = "Genkgo\Camt\DTO\Debtor";
         }
         foreach ($relatedParties as $relatedParty) {
+            app('log')->debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));
             if (get_class($relatedParty->getRelatedPartyType()) == $targetRelatedPartyObject) {
+                app('log')->debug('This is the type we are looking for!');
                 return $relatedParty;
             }
         }
+        app('log')->debug('getOpposingParty(), no opposing party found, return NULL.');
         return null;
     }
 }

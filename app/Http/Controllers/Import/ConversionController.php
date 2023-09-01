@@ -69,7 +69,7 @@ class ConversionController extends Controller
      */
     public function index()
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        //app('log')->debug(sprintf('Now in %s', __METHOD__));
         $mainTitle = 'Convert the data';
 
         // create configuration:
@@ -239,7 +239,7 @@ class ConversionController extends Controller
      */
     public function status(Request $request): JsonResponse
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        //        app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {

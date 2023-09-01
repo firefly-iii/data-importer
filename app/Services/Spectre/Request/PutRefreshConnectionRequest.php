@@ -40,9 +40,9 @@ class PutRefreshConnectionRequest extends Request
     /**
      * ListCustomersRequest constructor.
      *
-     * @param  string  $url
-     * @param  string  $appId
-     * @param  string  $secret
+     * @param string $url
+     * @param string $appId
+     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -85,7 +85,7 @@ class PutRefreshConnectionRequest extends Request
     }
 
     /**
-     * @param  string  $connection
+     * @param string $connection
      */
     public function setConnection(string $connection): void
     {

@@ -34,6 +34,7 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
+use App\Support\Http\CollectsAccounts;
 use Cache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -48,6 +49,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 class GenerateTransactions
 {
     use ProgressInformation;
+    use CollectsAccounts;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -74,12 +76,6 @@ class GenerateTransactions
      */
     public function collectNordigenAccounts(): void
     {
-        if (config('importer.use_cache') && Cache::has('collect_nordigen_accounts')) {
-            app('log')->debug('Grab Nordigen accounts from cache.');
-            $this->nordigenAccountInfo = Cache::get('collect_nordigen_accounts');
-
-            return;
-        }
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
         $info        = [];
@@ -106,10 +102,6 @@ class GenerateTransactions
             app('log')->debug(sprintf('Collected IBAN "%s" for Nordigen account "%s"', $set['iban'], $nordigenIdentifier));
         }
         $this->nordigenAccountInfo = $info;
-        if (config('importer.use_cache')) {
-            Cache::put('collect_nordigen_accounts', $info, 86400); // 24h
-            app('log')->info('Stored collected Nordigen accounts in cache.');
-        }
     }
 
     /**
@@ -118,58 +110,14 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        if (config('importer.use_cache') && Cache::has('collect_target_accounts')) {
-            app('log')->debug('Grab target accounts from cache.');
-            $info                 = Cache::get('collect_target_accounts');
-            $this->targetAccounts = $info['accounts'];
-            $this->targetTypes    = $info['types'];
-
-            return;
+        app('log')->debug('Spectre: Defer account search to trait.');
+        // defer to trait:
+        $array = $this->collectAllTargetAccounts();
+        foreach($array as $number => $info) {
+            $this->targetAccounts[$number] = $info['id'];
+            $this->targetTypes[$number]    = $info['type'];
         }
-        app('log')->debug('Going to collect all target accounts from Firefly III.');
-        // send account list request to Firefly III.
-        $token   = SecretManager::getAccessToken();
-        $url     = SecretManager::getBaseUrl();
-        $request = new GetAccountsRequest($url, $token);
-
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var GetAccountsResponse $result */
-        $result = $request->get();
-        $return = [];
-        $types  = [];
-        /** @var Account $entry */
-        foreach ($result as $entry) {
-            $type = $entry->type;
-            if (in_array($type, ['reconciliation', 'initial-balance', 'expense', 'revenue'], true)) {
-                continue;
-            }
-            $iban = $this->filterSpaces((string)$entry->iban);
-
-            if ('' !== $iban) {
-                app('log')->debug(sprintf('Collected IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
-                $return[$iban] = $entry->id;
-                $types[$iban]  = $entry->type;
-            }
-            $number = sprintf('%s.', (string)$entry->number);
-            if ('.' !== $number) {
-                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
-                $return[$number] = $entry->id;
-                $types[$number]  = $entry->type;
-            }
-        }
-        $this->targetAccounts = $return;
-        $this->targetTypes    = $types;
-        app('log')->debug(sprintf('Collected %d accounts.', count($this->targetAccounts)), $this->targetAccounts);
-        if (config('importer.use_cache')) {
-            $array = [
-                'accounts' => $return,
-                'types'    => $types,
-            ];
-            Cache::put('collect_target_accounts', $array, 86400); // 24h
-            app('log')->info('Stored collected accounts in cache.');
-        }
+        app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
     /**
