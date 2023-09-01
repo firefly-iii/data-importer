@@ -43,15 +43,6 @@ class AutoImportController extends Controller
     private string $directory;
 
     /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
-    {
-        app('log')->error($string);
-        $this->line($string);
-    }
-
-    /**
      *
      * @throws ImporterErrorException
      */
@@ -120,6 +111,15 @@ class AutoImportController extends Controller
      */
     public function warn($string, $verbosity = null)
     {
+        $this->line($string);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function error($string, $verbosity = null)
+    {
+        app('log')->error($string);
         $this->line($string);
     }
 }
