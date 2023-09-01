@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.7 - 2023-09-02
+
+### Fixed
+- The POST import command and the CLI import routine will also stop working if the connected Firefly III is too old.
+
 ## 1.3.6 - 2023-09-02
 
 >  ⚠️ This release may create duplicate transactions. Don't import large batches!
