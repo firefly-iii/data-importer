@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.8 - 2023-09-02
+
+### Fixed
+- [Issue 7918](https://github.com/firefly-iii/firefly-iii/issues/7918) Make sure XML file are recognized by the POST importer
+
 ## 1.3.7 - 2023-09-02
 
 ### Fixed
