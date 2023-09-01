@@ -26,6 +26,7 @@ namespace App\Console;
 
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
 
 /**
  * Trait HaveAccess
@@ -53,9 +54,21 @@ trait HaveAccess
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
-            $request->get();
+            /** @var SystemInformationResponse $result */
+            $result = $request->get();
         } catch (ApiHttpException $e) {
             $this->error(sprintf('Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
+
+            return false;
+        }
+        $reportedVersion = (string)$result->version;
+        if(str_starts_with($reportedVersion, 'v')) {
+            $reportedVersion = substr($reportedVersion, 1);
+        }
+        $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
+        $compare = version_compare($reportedVersion, config('importer.minimum_version'));
+        if (-1 === $compare) {
+            $this->error(sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
 
             return false;
         }
