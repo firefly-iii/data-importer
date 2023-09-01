@@ -83,6 +83,11 @@ trait AutoImports
             if ('csv' === $this->getExtension($file) && $this->hasJsonConfiguration($directory, $file)) {
                 $return[] = $file;
             }
+
+            if ('xml' === $this->getExtension($file) && $this->hasJsonConfiguration($directory, $file)) {
+                $return[] = $file;
+            }
+
             // import JSON with no importable file.
             // TODO must detect json files without accompanying camt/csv/whatever file.
             if ('json' === $this->getExtension($file) && !$this->hasCsvFile($directory, $file)) {
@@ -143,6 +148,8 @@ trait AutoImports
     }
 
     /**
+     * This method only works on files with an extension with exactly three letters
+     * (ie. "csv", "xml").
      * @param  string  $directory
      * @param  string  $file
      *
