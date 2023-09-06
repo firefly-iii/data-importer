@@ -35,6 +35,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
+use App\Support\Internal\DuplicateSafetyCatch;
 use Cache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -50,6 +51,7 @@ class GenerateTransactions
 {
     use ProgressInformation;
     use CollectsAccounts;
+    use DuplicateSafetyCatch;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -306,6 +308,10 @@ class GenerateTransactions
             }
         }
 
+        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getDestinationName(), (string) $entry->getDestinationIban());
+
+        app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
+
         return $transaction;
     }
 
@@ -358,6 +364,10 @@ class GenerateTransactions
                 $transaction['source_name'] = $originalSourceName;
             }
         }
+
+        $transaction = $this->positiveTransactionSafetyCatch($transaction, (string) $entry->getSourceName(), (string) $entry->getSourceIban());
+
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
     }
