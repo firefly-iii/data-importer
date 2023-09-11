@@ -62,7 +62,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
             $transaction['notes'] = trim($transaction['notes']);
 
-            unset($transaction['source_id']);
+            unset($transaction['source_id'], $transaction['source_iban'], $transaction['source_number'], $transaction['source_name']);
             $transaction['source_name'] = '(unknown source account)';
             return $transaction;
         }
@@ -105,7 +105,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
             $transaction['notes'] = trim($transaction['notes']);
 
-            unset($transaction['destination_id']);
+            unset($transaction['destination_id'], $transaction['destination_iban'], $transaction['destination_number'], $transaction['destination_name']);
             $transaction['destination_name'] = '(unknown destination account)';
         }
 
