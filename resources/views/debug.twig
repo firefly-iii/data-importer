@@ -1,43 +1,19 @@
 <html>
 <head>
-    <title>FIDI Debug</title>
+    <title>Firefly III Data Importer Debug</title>
 </head>
 <body>
 
 <p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:600px;">
     Firefly III data importer debug page
 </p>
-<p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:600px;">
-    Copy and paste this textarea in your issue. <strong>DO NOT ADD BACKTICKS or QUOTES</strong>
+<p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:800px;">
+    Copy and paste the content of this textarea in your issue. <strong>Please do not add quotes or backticks, it breaks the table.</strong>
 </p>
 <textarea rows="30" cols="100" name="debug_info" id="debug_info" style="font-family:Menlo, Monaco, Consolas, monospace;font-size:8pt;">
 Debug information generated at {{ now }} for Firefly III Data Importer version **{{ config('importer.version') }}**.
 
-| Scope | Version |
-| --- | --- |
-| FIDI | {{ config('importer.version') }} |
-| Build | {{ buildNr }}, {{ buildDate }} |
-| PHP | {{ phpVersion }} |
-| Host | {{ phpOs }} |
-
-| System info | Value |
-| --- | --- |
-| Using docker? | {% if isDocker %}true{% else %}false{% endif %} |
-| System TZ | {{ tz }} |
-| Browser TZ | [BrowserTZ] |
-| App environment | {{ appEnv }} |
-| App debug mode | {{ appDebug }} |
-| App cache driver | {{ cacheDriver }} |
-| App logging | {{ appLogLevel }}, {{ logChannel }} |
-| Display errors | {{ displayErrors }} |
-| Error reporting | {{ errorReporting }} |
-| Interface | {{ interface }} |
-| BCscale | {{ bcscale }} |
-| Trusted proxies (.env) | {{ trustedProxies }} |
-
-| User info | Value |
-| --- | --- |
-| User agent | {{ userAgent }} |
+{{ table }}
 </textarea>
 <script type="text/javascript" nonce="{{ JS_NONCE }}">
     var textArea = document.getElementById('debug_info');

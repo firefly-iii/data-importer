@@ -952,7 +952,7 @@ class Configuration
     {
         $array = [
             'version'                      => $this->version,
-            'source'                       => sprintf('fidi-%s', config('importer.version')),
+            'source'                       => sprintf('ff3-importer-%s', config('importer.version')),
             'created_at'                   => date(DateTimeInterface::W3C),
             'date'                         => $this->date,
             'default_account'              => $this->defaultAccount,
