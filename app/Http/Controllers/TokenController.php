@@ -144,11 +144,12 @@ class TokenController extends Controller
         $infoRequest->setVerify(config('importer.connection.verify'));
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
 
+        app('log')->debug(sprintf('Now trying to authenticate with Firefly III at %s', $url));
         try {
             $result = $infoRequest->get();
         } catch (ApiHttpException $e) {
+            app('log')->notice(sprintf('Could NOT authenticate with Firefly III at %s', $url));
             app('log')->error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
-
             return response()->json(['result' => 'NOK', 'message' => $e->getMessage()]);
         }
         // -1 = OK (minimum is smaller)

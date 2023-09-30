@@ -99,7 +99,7 @@ trait CollectsAccounts
                 app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
                 $return[$number] = ['id' => $entry->id, 'type' => $entry->type];
             }
-            app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
+            app('log')->debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
             $return[$iban] = ['id' => $entry->id, 'type' => $entry->type];
         }
         app('log')->debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));

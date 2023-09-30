@@ -157,7 +157,7 @@ trait MergesAccountLists
 
             if (count($filteredByCurrency) > 0) {
                 app('log')->debug(
-                    sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency.', count($filteredByCurrency), $currency)
+                    sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency %s.', $account->name, count($filteredByCurrency), $currency)
                 );
                 $entry['firefly_iii_accounts'] = $filteredByCurrency;
                 $return[]                      = $entry;

@@ -48,6 +48,10 @@ trait HaveAccess
     {
         $url     = (string)config('importer.url');
         $token   = (string)config('importer.access_token');
+
+        $this->line(sprintf('Trying to connect to %s...', $url));
+        $this->line(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
+
         $request = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
@@ -58,6 +62,7 @@ trait HaveAccess
             $result = $request->get();
         } catch (ApiHttpException $e) {
             $this->error(sprintf('Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
+            $this->error(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
             return false;
         }

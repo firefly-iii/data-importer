@@ -4,33 +4,38 @@ Hash: SHA256
 # Please report security issues related to Firefly III to me ASAP, via the email address below.
 # Feel free to encrypt your message using GPG altough it's a pain let's be honest
 #
-# Please do not contact me for random vulnerabilities on other people's websites.
+# There are some ground rules, please keep them in mind:
 #
-# If it's not related to Firefly III I will not be able to help you.
+# 1. Your security report must be related to Firefly III or the associated tools
+# 2. There is no bug bounty program
+# 3. Please don't report denial of service attacks on the login form
 #
 
 Contact: mailto:james@firefly-iii.org
-Expires: 2023-12-31T23:00:00.000Z
+Expires: 2024-12-31T23:00:00.000Z
 Preferred-Languages: en, nl
 Policy: https://docs.firefly-iii.org/firefly-iii/support/
 
 #
 # Thank you for your time!
 #
+# Cheers,
+# James
+#
 -----BEGIN PGP SIGNATURE-----
 
-iQJKBAABCAA0FiEEAvQEbEsjbgYJVxYStJoyS36tbYAFAmT5U18WHGphbWVzQGZp
-cmVmbHktaWlpLm9yZwAKCRC0mjJLfq1tgFS5D/9vPf3QKbiDcXhjdG/cNchlK8JQ
-lVSy7AZ/fQfiaJHcjvVVSLIwdv+V88tyZXuyxydiQd6cr2VLcSmWcIKm/f4bDbOM
-8/n0gFNUTyoOl4FBlXdIrDZMIVJetZoCbGT5u3PnYbC9HdMcDueU0eFNCNHHa25l
-tJDGxtWEUFlMbWg6X4C0CWvBWVZG7NzTaPYcYyPpFIYWKtDWYiXeYWmUadB8ueH2
-Kc/w5awF6eEcCH7Rahscm5Fvsw2/tfL5KTeqsrp13BWh99/eoF0jElYKhEwwMqxs
-bopdB3MBGJ7QJbJSyf4RVb4TxGDXYVw4LX+33zLsas8SgQ8jFa1ZbJ9x4iF2KIj+
-KEWET/l9mT8F2GpMp8wewOZUwRFG9o3857h+Sxiw0/Acoy5Ho7G75uNZcJrNA3GP
-1OF7eOFRQQKNwJVvWA3r5HsECZOrINXWmsBqasj+RQPVCbxgvWXQwLlIPbP7lcJy
-kQyzdW1oGOB1siWvxzr7+Wi+SBDSXj6KafZlkOxf4KIDSAkh/cprb8PXbXhzj2Lt
-mDJBjp1auyz9kbvbeDayjQyNAQ09RDrkkp+D6d7Td5kN4Q3T0WnKLsF91dUIEaC9
-7WEW2m869MDd28GnNuO9EIQn3OL9zNEAtSHpbwZ6M1U2gAykwIz3jBvGxS5n+K0E
-SWQVwbDxbtbM2Ko67w==
-=hT7Q
+iQJKBAABCAA0FiEEAvQEbEsjbgYJVxYStJoyS36tbYAFAmUGj9gWHGphbWVzQGZp
+cmVmbHktaWlpLm9yZwAKCRC0mjJLfq1tgA0WD/9cHNSphMqPx05Tkak5kNKsmyYW
+YXZ4kcw5haLwcxk4ipudCzYLWejcXI7z/WVdYQrZVMw6Kaz6Z/ZgJQk6mQXTeb3L
+WcmxmiKGQk5twnmIy7vpoBgt2QH70lhP/x+FH0w1j22RM5b66gj/BZBYowtmUI1L
+HIwsTvtjBGZA8aJSPmtRGULJ45/GDZYi/Hjx49hPPLjIE8VP53Wa7L284i4R+gG9
+IEle9kqb2OUUp0+CmIXSKAvtFpDHt9Yc0AE6PU0WpSg3LI6NqyUiM2CdKvyKvtIV
+Y15LoJTkTuORzudP1HCImfcQUdJgrMe1DGz2siHqxTJVDUwzEVc6mOkGnefhIpFy
+jN0ik6pCSkLNsSYImQZq9H6d9yiPPYSR3JFjTDtEVnANjlT08ywPdsyWgvNaHHh1
+eMRy9+X24g9cQ7MqU77Y8p2/v3IudWbEsi+M1FUm4W0TE/MsNv9xydRvB6M41eVc
+raYnk8cVmEzpjsyxi9lAqpk4+qYD04JecYCPxkX6XxkFxzswS20LR4VVOamfKgv1
+yIzg1sCMArHeq0OC1k6lskB8DTXvw5+838iw4h8I0T6MAqXj4RKv8C45w7+uSlG9
+oXhpUweiiRzyZPWbWXU7jC9BvDyqfuxq9jn4LFDzAOV0raLz6QThiUcR3f7h2Rvo
+KiDjx3KprWU+swTosw==
+=1jlJ
 -----END PGP SIGNATURE-----
