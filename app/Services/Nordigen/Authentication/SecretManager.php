@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Authentication;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 
 /**
@@ -37,82 +39,84 @@ class SecretManager
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     * TODO is a cookie the best place?
      *
      * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getId(): string
     {
         if (!self::hasId()) {
-            app('log')->debug('No Nordigen ID in hasId(), will return config variable.');
+            app('log')->debug('No Nordigen ID in hasId() session, will return config variable.');
 
             return (string)config('nordigen.id');
         }
-
-        return request()->cookie(self::NORDIGEN_ID);
+        return (string)session()->get(self::NORDIGEN_ID);
     }
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
      *
      * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getKey(): string
     {
         if (!self::hasKey()) {
-            app('log')->debug('No Nordigen key in hasKey(), will return config variable.');
+            app('log')->debug('No Nordigen key in hasKey() session, will return config variable.');
 
             return (string)config('nordigen.key');
         }
 
-        return request()->cookie(self::NORDIGEN_KEY);
+        return (string)session()->get(self::NORDIGEN_KEY);
     }
 
     /**
      * Store access token in a cookie.
-     * TODO is a cookie the best place?
      *
-     * @param  string  $identifier
+     * @param string $identifier
      *
-     * @return Cookie
+     * @return void
      */
-    public static function saveId(string $identifier): Cookie
+    public static function saveId(string $identifier): void
     {
-        return cookie(self::NORDIGEN_ID, $identifier);
+        session()->put(self::NORDIGEN_ID, $identifier);
     }
 
     /**
      * Store access token in a cookie.
-     * TODO is a cookie the best place?
      *
-     * @param  string  $key
+     * @param string $key
      *
-     * @return Cookie
+     * @return void
      */
-    public static function saveKey(string $key): Cookie
+    public static function saveKey(string $key): void
     {
-        return cookie(self::NORDIGEN_KEY, $key);
+        session()->put(self::NORDIGEN_KEY, $key);
     }
 
     /**
      * Will verify if the user has a Nordigen ID (in a cookie)
-     * TODO is a cookie the best place?
      *
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private static function hasId(): bool
     {
-        return '' !== (string)request()->cookie(self::NORDIGEN_ID);
+        return '' !== (string)session()->get(self::NORDIGEN_ID);
     }
 
     /**
      * Will verify if the user has a Nordigen Key (in a cookie)
-     * TODO is a cookie the best place?
      *
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private static function hasKey(): bool
     {
-        return '' !== (string)request()->cookie(self::NORDIGEN_KEY);
+        return '' !== (string)session()->get(self::NORDIGEN_KEY);
     }
 }
