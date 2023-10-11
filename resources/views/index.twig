@@ -117,7 +117,7 @@
                         <p>
                             If you change your settings, you may need to press <strong>start over</strong> for the settings to be recognized.
                             If you are in doubt if the button works: your session identifier is "{{ identifier }}" and should change every time you
-                            press the button{% if not isDocker %}.{% else %} or restart the container.{% endif %}
+                            press the button{% if not isDocker %},{% else %} or restart the container,{% endif %} but it has to stay the same when you simply refresh the page.
                         </p>
                         <p>
                             <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top"
