@@ -52,6 +52,7 @@ class IndexController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
         session()->flush();
+        session()->regenerate(true);
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),
         ];
@@ -62,7 +63,7 @@ class IndexController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return mixed
      */
@@ -101,11 +102,14 @@ class IndexController extends Controller
             $flexible = true;
         }
 
-        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible'));
+        $isDocker = env('IS_DOCKER', false);
+        $identifier = substr(session()->getId(),0,10);
+
+        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier','isDocker'));
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return mixed
      */
@@ -127,23 +131,4 @@ class IndexController extends Controller
         return redirect(route('index'));
     }
 
-    /**
-     * @return mixed
-     */
-    public function reset(): mixed
-    {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
-        session()->flush();
-        Artisan::call('cache:clear');
-
-        $cookies = [
-            //SecretManager::saveAccessToken(''),
-            //SecretManager::saveBaseUrl(''),
-            //SecretManager::saveRefreshToken(''),
-            cookie(Constants::FLOW_COOKIE, ''),
-        ];
-
-        return redirect(route('index'))->withCookies($cookies);
-    }
 }

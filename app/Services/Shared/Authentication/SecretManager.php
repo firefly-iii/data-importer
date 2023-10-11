@@ -41,7 +41,7 @@ class SecretManager
     public static function getAccessToken(): string
     {
         if (!self::hasAccessToken()) {
-            app('log')->debug('No access token in hasAccessToken(), will return config variable.');
+            app('log')->debug('No access token in hasAccessToken() session, will return config variable.');
 
             return (string)config('importer.access_token');
         }
@@ -55,7 +55,7 @@ class SecretManager
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
-            app('log')->debug('No base url in getBaseUrl(), will return config variable.');
+            app('log')->debug('No base url in getBaseUrl() session, will return config variable.');
 
             return (string)config('importer.url');
         }
@@ -71,7 +71,7 @@ class SecretManager
     public static function getClientId(): int
     {
         if (!self::hasClientId()) {
-            app('log')->debug('No client id in hasClientId(), will return config variable.');
+            app('log')->debug('No client id in hasClientId() session, will return config variable.');
 
             return (int)config('importer.client_id');
         }
@@ -85,7 +85,7 @@ class SecretManager
     public static function getVanityUrl(): string
     {
         if (!self::hasVanityUrl()) {
-            app('log')->debug('No vanity url in getVanityUrl(), will return config variable.');
+            app('log')->debug('No vanity url in getVanityUrl() session, will return config variable.');
             if ('' === (string)config('importer.vanity_url')) {
                 return (string)config('importer.url');
             }

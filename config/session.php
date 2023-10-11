@@ -147,7 +147,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        'fidi_session'
+        'data_session'
     ),
 
     /*
