@@ -164,6 +164,9 @@ abstract class Request
         if (null === $json) {
             throw new ImporterHttpException(sprintf('Body is empty. [4] Status code is %d.', $res->getStatusCode()));
         }
+        if (config('importer.log_return_json')) {
+            app('log')->debug('JSON', $json);
+        }
 
         return $json;
     }

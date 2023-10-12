@@ -38,6 +38,7 @@ return [
     'url'                     => env('FIREFLY_III_URL'),
     'client_id'               => env('FIREFLY_III_CLIENT_ID'),
     'upload_path'             => storage_path('uploads'),
+    'log_return_json'         => env('LOG_RETURN_JSON', false),
     'expect_secure_url'       => env('EXPECT_SECURE_URL', false),
     'is_external'             => env('IS_EXTERNAL', false),
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),

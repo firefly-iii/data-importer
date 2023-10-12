@@ -62,7 +62,7 @@ abstract class Request
     }
 
     /**
-     * @param  string  $base
+     * @param string $base
      */
     public function setBase(string $base): void
     {
@@ -78,7 +78,7 @@ abstract class Request
     }
 
     /**
-     * @param  string  $token
+     * @param string $token
      */
     public function setToken(string $token): void
     {
@@ -94,7 +94,7 @@ abstract class Request
     }
 
     /**
-     * @param  string  $url
+     * @param string $url
      */
     public function setUrl(string $url): void
     {
@@ -114,7 +114,7 @@ abstract class Request
     abstract public function put(): Response;
 
     /**
-     * @param  array  $body
+     * @param array $body
      */
     public function setBody(array $body): void
     {
@@ -122,7 +122,7 @@ abstract class Request
     }
 
     /**
-     * @param  array  $parameters
+     * @param array $parameters
      */
     public function setParameters(array $parameters): void
     {
@@ -131,7 +131,7 @@ abstract class Request
     }
 
     /**
-     * @param  float  $timeOut
+     * @param float $timeOut
      */
     public function setTimeOut(float $timeOut): void
     {
@@ -167,7 +167,7 @@ abstract class Request
                     ],
                 ]
             );
-        } catch (TransferException|GuzzleException $e) {
+        } catch (TransferException | GuzzleException $e) {
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
@@ -223,13 +223,15 @@ abstract class Request
         if (null === $json) {
             throw new ImporterHttpException(sprintf('Body is empty. [2] Status code is %d.', $res->getStatusCode()));
         }
-        app('log')->debug('Return JSON result of authenticatedGet');
+        if (config('importer.log_return_json')) {
+            app('log')->debug('JSON', $json);
+        }
 
         return $json;
     }
 
     /**
-     * @param  array  $json
+     * @param array $json
      *
      * @return array
      * @throws GuzzleException

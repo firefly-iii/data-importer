@@ -56,17 +56,20 @@ class GetTransactionsRequest extends Request
         $response = $this->authenticatedGet();
         $keys     = ['booked', 'pending'];
         $return   = [];
+        $count = 0;
         foreach ($keys as $key) {
             if (array_key_exists($key, $response['transactions'])) {
                 $set    = $response['transactions'][$key];
                 $set    = array_map(function (array $value) use ($key) {
                     $value['key'] = $key;
-
                     return $value;
                 }, $set);
+                $count += count($set);
                 $return = $return + $set;
             }
         }
+        $total = count($return);
+        app('log')->debug(sprintf('Downloaded [%d:%d] transactions', $count, $total));
 
         return new GetTransactionsResponse($return);
     }
