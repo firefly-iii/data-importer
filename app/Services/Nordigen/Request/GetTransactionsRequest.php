@@ -65,7 +65,7 @@ class GetTransactionsRequest extends Request
                     return $value;
                 }, $set);
                 $count += count($set);
-                $return = $return + $set;
+                $return = array_merge($return, $set);
             }
         }
         $total = count($return);
