@@ -40,7 +40,6 @@ Route::get('/validate/nordigen', 'ServiceController@validateNordigen')->name('va
 
 // clear session
 Route::get('/flush', 'IndexController@flush')->name('flush');
-Route::get('/reset', 'IndexController@reset')->name('reset');
 
 // step 2: Authenticate Nordigen / Spectre manually if necessary.
 // check : must not be CSV flow. If so redirect to upload.

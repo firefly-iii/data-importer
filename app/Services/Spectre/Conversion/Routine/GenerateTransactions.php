@@ -28,6 +28,7 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
 use App\Support\Http\CollectsAccounts;
+use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 
 /**
@@ -37,6 +38,7 @@ class GenerateTransactions
 {
     use ProgressInformation;
     use CollectsAccounts;
+    use DuplicateSafetyCatch;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -195,30 +197,7 @@ class GenerateTransactions
             $transaction['source_id'] = (int)$accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
-
-        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
-        // The data importer will try to correct this.
-        if ('transfer' === $transaction['type'] &&
-            array_key_exists('source_id', $transaction) &&
-            array_key_exists('destination_id', $transaction) &&
-            0 !== $transaction['source_id'] &&
-            0 !== $transaction['destination_id'] &&
-            $transaction['destination_id'] === $transaction['source_id']) {
-            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
-            $transaction['type'] = 'deposit';
-
-            // add error message to transaction:
-            $transaction['notes'] = $transaction['notes'] ?? '';
-            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
-            $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $entry->getPayer());
-            $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $entry->getPayerIban());
-            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
-            $transaction['notes'] = trim($transaction['notes']);
-
-            unset($transaction['source_id']);
-            $transaction['source_name'] = '(unknown source account)';
-        }
-
+        $transaction = $this->positiveTransactionSafetyCatch($transaction, $entry->getPayer(), $entry->getPayerIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
@@ -265,28 +244,7 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
-        // The data importer will try to correct this.
-        if ('transfer' === $transaction['type'] &&
-            array_key_exists('source_id', $transaction) &&
-            array_key_exists('destination_id', $transaction) &&
-            0 !== $transaction['source_id'] &&
-            0 !== $transaction['destination_id'] &&
-            $transaction['destination_id'] === $transaction['source_id']) {
-            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
-            $transaction['type'] = 'withdrawal';
-
-            // add error message to transaction:
-            $transaction['notes'] = $transaction['notes'] ?? '';
-            $transaction['notes'] .= sprintf("  \nThe data importer has ignored the following values in the Salt Edge Spectre transaction data:\n");
-            $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $entry->getPayee());
-            $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $entry->getPayeeIban());
-            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
-            $transaction['notes'] = trim($transaction['notes']);
-
-            unset($transaction['destination_id']);
-            $transaction['destination_name'] = '(unknown destination account)';
-        }
+        $transaction = $this->negativeTransactionSafetyCatch($transaction, $entry->getPayee(), $entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 

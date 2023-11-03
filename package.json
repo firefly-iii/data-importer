@@ -10,8 +10,8 @@
         "production": "mix --production"
     },
     "devDependencies": {
-        "@vue/compiler-sfc": "^3.3.4",
-        "axios": "^1.5",
+        "@vue/compiler-sfc": "^3.3.7",
+        "axios": "^1.6",
         "bootstrap": "^4.6.1",
         "cross-env": "^7.0",
         "jquery": "^3.7",
@@ -20,10 +20,10 @@
         "popper.js": "^1.12",
         "postcss": "^8.4",
         "resolve-url-loader": "5.0.0",
-        "sass": "^1.65.1",
+        "sass": "^1.69.5",
         "sass-loader": "12.*",
         "vue": "^2.7",
         "vue-loader": "^15",
-        "vue-template-compiler": "^2.7.14"
+        "vue-template-compiler": "^2.7.15"
     }
 }

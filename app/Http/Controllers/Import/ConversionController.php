@@ -197,6 +197,7 @@ class ConversionController extends Controller
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
+            app('log')->error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());
@@ -215,6 +216,7 @@ class ConversionController extends Controller
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
         } catch (JsonException $e) {
             app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
+            app('log')->error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());

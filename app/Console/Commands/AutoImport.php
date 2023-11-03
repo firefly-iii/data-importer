@@ -89,6 +89,7 @@ class AutoImport extends Command
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));
+            return 1;
         }
 
         return 0;

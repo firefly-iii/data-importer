@@ -204,7 +204,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info = $this->levelD[$index];
 
-                return (string)$info->getReference()->getAccountServicerReference();
+                return (string)$info?->getReference()?->getAccountServicerReference();
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
                 $result = '';
 

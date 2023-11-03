@@ -37,52 +37,14 @@ class DebugController extends Controller
     /**
      * Show debug info.
      *
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return Factory|View
      */
     public function index(Request $request)
     {
-        app('log')->emergency('I am a EMERGENCY message.');
-        app('log')->alert('I am a ALERT message.');
-        app('log')->critical('I am a CRITICAL message.');
-        app('log')->error('I am a ERROR message.');
-        app('log')->warning('I am a WARNING message.');
-        app('log')->notice('I am a NOTICE message.');
-        app('log')->info('I am a INFO message.');
-        app('log')->debug('I am a DEBUG message.');
-
-
-        $search  = ['~', '#'];
-        $replace = ['\~', '# '];
-
-        $buildNr        = '(unknown)';
-        $buildDate      = '(unknown)';
-        $now            = Carbon::now()->format('Y-m-d H:i:s e');
-        $phpVersion     = str_replace($search, $replace, PHP_VERSION);
-        $phpOs          = str_replace($search, $replace, PHP_OS);
-        $interface      = PHP_SAPI;
-        $userAgent      = $request->header('user-agent');
-        $trustedProxies = config('importer.trusted_proxies');
-        $displayErrors  = ini_get('display_errors');
-        $errorReporting = $this->errorReporting((int)ini_get('error_reporting'));
-        $appEnv         = config('app.env');
-        $appDebug       = var_export(config('app.debug'), true);
-        $logChannel     = config('logging.default');
-        $appLogLevel    = config('logging.level');
-        $cacheDriver    = config('cache.default');
-        $bcscale        = bcscale();
-        $tz             = env('TZ');
-        $isDocker       = env('IS_DOCKER', false);
-
-        if (file_exists('/var/www/counter-main.txt')) {
-            $buildNr = trim(file_get_contents('/var/www/counter-main.txt'));
-        }
-        if (file_exists('/var/www/build-date-main.txt')) {
-            $buildDate = trim(file_get_contents('/var/www/build-date-main.txt'));
-        }
-
-        // get latest log file:
+        $now        = Carbon::now()->format('Y-m-d H:i:s e');
+        $table      = $this->getTable();
         $logger     = app('log')->driver();
         $handlers   = $logger->getHandlers();
         $logContent = '';
@@ -100,34 +62,27 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|'.substr($logContent, -8192);
+            $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
         }
 
+        app('log')->emergency('I am a EMERGENCY message.');
+        app('log')->alert('I am a ALERT message.');
+        app('log')->critical('I am a CRITICAL message.');
+        app('log')->error('I am a ERROR message.');
+        app('log')->warning('I am a WARNING message.');
+        app('log')->notice('I am a NOTICE message.');
+        app('log')->info('I am a INFO message.');
+        app('log')->debug('I am a DEBUG message.');
+
         return view(
             'debug',
             compact(
-                'phpVersion',
-                'appEnv',
-                'appDebug',
-                'logChannel',
-                'tz',
-                'appLogLevel',
                 'now',
-                'bcscale',
-                'buildDate',
-                'userAgent',
-                'displayErrors',
-                'errorReporting',
-                'phpOs',
-                'interface',
+                'table',
                 'logContent',
-                'buildNr',
-                'cacheDriver',
-                'trustedProxies',
-                'isDocker'
             )
         );
     }
@@ -135,7 +90,7 @@ class DebugController extends Controller
     /**
      * Some common combinations.
      *
-     * @param  int  $value
+     * @param int $value
      *
      * @return string
      */
@@ -153,4 +108,64 @@ class DebugController extends Controller
 
         return $array[$value] ?? (string)$value;
     }
+
+    private function getTable(): string
+    {
+        $system = $this->getSystemInfo();
+        $app    = $this->getAppInfo();
+        $user   = $this->getUserInfo();
+        $table  = (string)view('debug-table', compact('system', 'app', 'user'))->render();
+        return str_replace(["\n", "\t", '  '], '', $table);
+    }
+
+    private function getSystemInfo(): array
+    {
+        $build     = null;
+        $baseBuild = null;
+        $isDocker  = env('IS_DOCKER', false);
+
+        if ($isDocker) {
+            if (file_exists('/var/www/counter-main.txt')) {
+                $build = trim(file_get_contents('/var/www/counter-main.txt'));
+            }
+            if ('' !== (string)env('BASE_IMAGE_BUILD')) {
+                $baseBuild = env('BASE_IMAGE_BUILD');
+            }
+        }
+        $search  = ['~', '#'];
+        $replace = ['\~', '# '];
+        return [
+            'is_docker'   => $isDocker,
+            'build'       => $build,
+            'base_build'  => $baseBuild,
+            'php_version' => str_replace($search, $replace, PHP_VERSION),
+            'php_os'      => str_replace($search, $replace, PHP_OS),
+            'interface'   => PHP_SAPI,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getAppInfo(): array
+    {
+        return [
+            'debug'          => var_export(config('app.debug'), true),
+            'display_errors' => ini_get('display_errors'),
+            'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
+            'bcscale'        => bcscale(),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getUserInfo(): array
+    {
+        return [
+            'user_agent' => request()->header('user-agent'),
+        ];
+    }
+
+
 }

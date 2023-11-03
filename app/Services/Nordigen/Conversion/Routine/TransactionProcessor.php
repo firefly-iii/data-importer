@@ -103,6 +103,7 @@ class TransactionProcessor
             try {
                 $transactions = $request->get();
             } catch (ImporterHttpException $e) {
+                $this->addError(0, $e->getMessage());
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
             $return[$account] = $this->filterTransactions($transactions);

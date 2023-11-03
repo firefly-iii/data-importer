@@ -56,7 +56,7 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
@@ -100,7 +100,7 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
@@ -108,10 +108,7 @@ class AuthenticateController extends Controller
     public function postIndex(Request $request)
     {
         // variables for page:
-        $mainTitle = 'Authentication';
-        $pageTitle = 'Authentication';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
-        $subTitle  = ucfirst($flow);
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
 
         // set cookies and redirect, validator will pick it up.
         if ('spectre' === $flow) {
@@ -133,12 +130,10 @@ class AuthenticateController extends Controller
                 return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
             }
             // store ID and key in session:
-            $cookies = [
-                NordigenSecretManager::saveId($identifier),
-                NordigenSecretManager::saveKey($key),
-            ];
+            NordigenSecretManager::saveId($identifier);
+            NordigenSecretManager::saveKey($key);
 
-            return redirect(route(self::AUTH_ROUTE))->withCookies($cookies);
+            return redirect(route(self::AUTH_ROUTE));
         }
 
         throw new ImporterErrorException('Impossible flow exception.');

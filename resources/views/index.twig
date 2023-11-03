@@ -111,14 +111,17 @@
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
-                        Extra buttons!
+                        Extra information
                     </div>
                     <div class="card-body">
                         <p>
+                            If you change your settings, you may need to press <strong>start over</strong> for the settings to be recognized.
+                            If you are in doubt if the button works: your session identifier is "{{ identifier }}" and should change every time you
+                            press the button{% if not isDocker %},{% else %} or restart the container,{% endif %} but it has to stay the same when you simply refresh the page.
+                        </p>
+                        <p>
                             <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip" data-bs-placement="top"
                                title="This button resets your progress">Start over</a>
-                            <a class="btn btn-danger btn-sm" href="{{ route('reset') }}" data-bs-toggle="tooltip" data-bs-placement="top"
-                               title="This button tries to connect to Firefly III again">Reauthenticate</a>
                         </p>
                     </div>
                 </div>
@@ -140,7 +143,6 @@
             if ('OK' === data.result) {
                 $('#file_button').removeClass('disabled').text('Import file').removeAttr('disabled');
             } else {
-
                 $('#importers').hide();
                 $('#error_explain').show();
                 $('#firefly_expl').hide();

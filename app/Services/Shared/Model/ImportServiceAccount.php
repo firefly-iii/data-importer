@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Model;
 
+use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Spectre\Model\Account as SpectreAccount;
 
@@ -49,11 +50,17 @@ class ImportServiceAccount
         $return = [];
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
+            $iban = $account->getIban();
+            if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
+
             $return[] = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getName(),
-                    'iban'          => $account->getIban(),
+                    'iban'          => $iban,
                     'bban'          => $account->getBban(),
                     'currency_code' => $account->getCurrency(),
                     'status'        => '',
@@ -74,11 +81,16 @@ class ImportServiceAccount
         $return = [];
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
+            $iban = (string) $account->iban;
+            if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
             $return[] = self::fromArray(
                 [
                     'id'            => $account->id,
                     'name'          => $account->name,
-                    'iban'          => $account->iban,
+                    'iban'          => $iban,
                     'bban'          => $account->accountNumber,
                     'currency_code' => $account->currencyCode,
                     'status'        => $account->status,
@@ -97,10 +109,15 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         app('log')->debug('Create generic account from', $array);
+        $iban = (string) ($array['iban'] ?? '');
+        if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+            app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+            $iban = '';
+        }
         $account               = new self();
         $account->id           = $array['id'];
         $account->name         = $array['name'];
-        $account->iban         = $array['iban'];
+        $account->iban         = $iban;
         $account->bban         = $array['bban'];
         $account->currencyCode = $array['currency_code'];
         $account->status       = $array['status'];

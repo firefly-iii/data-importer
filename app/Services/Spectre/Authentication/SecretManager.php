@@ -25,7 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Authentication;
 
-use Symfony\Component\HttpFoundation\Cookie;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class SecretManager
@@ -38,19 +39,19 @@ class SecretManager
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     * TODO is a cookie the best place?
      *
      * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public static function getAppId(): string
     {
         if (!self::hasAppId()) {
-            app('log')->debug('No Spectre App ID in hasAppId(), will return config variable.');
+            app('log')->debug('No Spectre App ID in hasAppId() session, will return config variable.');
 
             return (string)config('spectre.app_id');
         }
-
-        return request()->cookie(self::APP_ID);
+        return (string)session()->get(self::APP_ID);
     }
 
     /**
@@ -61,7 +62,7 @@ class SecretManager
      */
     private static function hasAppId(): bool
     {
-        return '' !== (string)request()->cookie(self::APP_ID);
+        return '' !== (string)session()->get(self::APP_ID);
     }
 
     /**
@@ -77,19 +78,17 @@ class SecretManager
 
             return (string)config('spectre.secret');
         }
-
-        return request()->cookie(self::SECRET);
+        return (string)session()->get(self::SECRET);
     }
 
     /**
      * Will verify if the user has a Spectre App ID (in a cookie)
-     * TODO is a cookie the best place?
      *
      * @return bool
      */
     private static function hasSecret(): bool
     {
-        return '' !== (string)request()->cookie(self::SECRET);
+        return '' !== (string)session()->get(self::SECRET);
     }
 
     /**
@@ -98,11 +97,11 @@ class SecretManager
      *
      * @param string $appId
      *
-     * @return Cookie
+     * @return void
      */
-    public static function saveAppId(string $appId): Cookie
+    public static function saveAppId(string $appId): void
     {
-        return cookie(self::APP_ID, $appId);
+        session()->put(self::APP_ID, $appId);
     }
 
     /**
@@ -111,10 +110,10 @@ class SecretManager
      *
      * @param string $secret
      *
-     * @return Cookie
+     * @return void
      */
-    public static function saveSecret(string $secret): Cookie
+    public static function saveSecret(string $secret): void
     {
-        return cookie(self::SECRET, $secret);
+        session()->put(self::SECRET, $secret);
     }
 }

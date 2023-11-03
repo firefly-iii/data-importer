@@ -56,7 +56,7 @@ trait AutoImports
     protected array  $importWarnings     = [];
 
     /**
-     * @param  string  $directory
+     * @param string $directory
      *
      * @return array
      */
@@ -99,8 +99,8 @@ trait AutoImports
     }
 
     /**
-     * @param  string  $directory
-     * @param  array  $files
+     * @param string $directory
+     * @param array  $files
      *
      * @throws ImporterErrorException
      */
@@ -113,7 +113,7 @@ trait AutoImports
     }
 
     /**
-     * @param  string  $file
+     * @param string $file
      *
      * @return string
      */
@@ -130,8 +130,8 @@ trait AutoImports
     /**
      * TODO this function must be more universal.
      *
-     * @param  string  $directory
-     * @param  string  $file
+     * @param string $directory
+     * @param string $file
      *
      * @return bool
      */
@@ -150,8 +150,9 @@ trait AutoImports
     /**
      * This method only works on files with an extension with exactly three letters
      * (ie. "csv", "xml").
-     * @param  string  $directory
-     * @param  string  $file
+     *
+     * @param string $directory
+     * @param string $file
      *
      * @return bool
      */
@@ -170,8 +171,8 @@ trait AutoImports
     }
 
     /**
-     * @param  string  $file
-     * @param  string  $directory
+     * @param string $file
+     * @param string $directory
      *
      * @throws ImporterErrorException
      */
@@ -219,6 +220,13 @@ trait AutoImports
         $this->startConversion($configuration, $importableFile);
         $this->reportConversion();
 
+        // crash here if the conversion failed.
+        if (0 !== count($this->conversionErrors)) {
+            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionMessages)));
+            throw new ImporterErrorException('Too many errors in the data conversion.');
+        }
+
+
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImport($configuration);
         $this->reportImport();
@@ -234,8 +242,8 @@ trait AutoImports
     }
 
     /**
-     * @param  string  $jsonFile
-     * @param  null|string  $importableFile
+     * @param string      $jsonFile
+     * @param null|string $importableFile
      *
      * @throws ImporterErrorException
      */
@@ -284,7 +292,7 @@ trait AutoImports
         ];
         foreach ($list as $func => $set) {
             /**
-             * @var int $index
+             * @var int   $index
              * @var array $messages
              */
             foreach ($set as $index => $messages) {
@@ -309,7 +317,7 @@ trait AutoImports
         ];
         foreach ($list as $func => $set) {
             /**
-             * @var int $index
+             * @var int   $index
              * @var array $messages
              */
             foreach ($set as $index => $messages) {
@@ -323,9 +331,9 @@ trait AutoImports
     }
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
      *
-     * @param  string|null  $importableFile
+     * @param string|null   $importableFile
      *
      * @throws ImporterErrorException
      */
@@ -420,7 +428,8 @@ trait AutoImports
     }
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
+     *
      * @throws FilesystemException
      */
     private function startImport(Configuration $configuration): void
@@ -449,7 +458,7 @@ trait AutoImports
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
+        } catch (FileNotFoundException | JsonException $e) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
             $message = sprintf('File "%s" could not be decoded, cannot continue..', $fileName);
             $this->error($message);

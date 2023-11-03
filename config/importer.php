@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '1.3.8',
+    'version'                 => '1.3.9',
     'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
         'file'     => 'File',
@@ -38,12 +38,13 @@ return [
     'url'                     => env('FIREFLY_III_URL'),
     'client_id'               => env('FIREFLY_III_CLIENT_ID'),
     'upload_path'             => storage_path('uploads'),
+    'log_return_json'         => env('LOG_RETURN_JSON', false),
     'expect_secure_url'       => env('EXPECT_SECURE_URL', false),
     'is_external'             => env('IS_EXTERNAL', false),
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
-    'minimum_version'         => '6.0.22',
+    'minimum_version'         => '6.0.30',
     'cache_api_calls'         => false,
     'ignored_files'           => ['.gitignore'],
     'tracker_site_id'         => env('TRACKER_SITE_ID', ''),

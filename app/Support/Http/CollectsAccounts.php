@@ -49,13 +49,13 @@ trait CollectsAccounts
             app('log')->error(sprintf('Could not collect liability accounts: %s', $e->getMessage()));
         }
         $return = [];
-        foreach($set1 as $key => $value) {
-            if(is_string($key) && !array_key_exists($key, $return)) {
+        foreach ($set1 as $key => $value) {
+            if (is_string($key) && !array_key_exists($key, $return)) {
                 $return[$key] = $value;
             }
         }
-        foreach($set2 as $key => $value) {
-            if(is_string($key) && !array_key_exists($key, $return)) {
+        foreach ($set2 as $key => $value) {
+            if (is_string($key) && !array_key_exists($key, $return)) {
                 $return[$key] = $value;
             }
         }
@@ -88,18 +88,19 @@ trait CollectsAccounts
         foreach ($result as $entry) {
             app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type = $entry->type;
-            $iban = $entry->iban;
-            if ('' === (string)$iban) {
+            $iban = (string)$entry->iban;
+            if ('' === $iban) {
                 continue;
             }
             $iban   = $this->filterSpaces($iban);
             $number = sprintf('%s.', (string)$entry->number);
             if ('.' !== $number) {
-                $number = $this->filterSpaces(substr($number, 0, -1));
-                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $number, $entry->type, $entry->id));
-                $return[$number] = ['id' => $entry->id, 'type' => $entry->type];
+                $number = $this->filterSpaces((string)$entry->number);
+                $key    = sprintf('nr_%s', $number);
+                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
+                $return[$key] = ['id' => $entry->id, 'type' => $entry->type];
             }
-            app('log')->debug(sprintf('Collected %s (%s) under ID #%d', $iban, $entry->type, $entry->id));
+            app('log')->debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
             $return[$iban] = ['id' => $entry->id, 'type' => $entry->type];
         }
         app('log')->debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));
