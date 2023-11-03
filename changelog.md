@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.9 - 2023-11-04
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes but it can't always be helped.
+
+### Added
+- Fancy new security.txt file.
+
+### Changed
+- Better safety catches for Nordigen and Spectre, in case they accidentally try to create deposits or withdrawals that should be transfers.
+
+### Fixed
+- [Issue 7948](https://github.com/firefly-iii/firefly-iii/issues/7948) Null pointer exception in CAMT processing.
+- [Issue 8005](https://github.com/firefly-iii/firefly-iii/issues/8005) Sometimes the importer does not recognize the importer account
+- [Issue 8045](https://github.com/firefly-iii/firefly-iii/issues/8045) Bad caching leads to unfixable authentication errors
+- [Issue 8052](https://github.com/firefly-iii/firefly-iii/issues/8052) Credit card transactions after a certain date are not imported while all other transactions are
+- [Issue 8207](https://github.com/firefly-iii/firefly-iii/issues/8207) Data Importer ignoring relevant Nordigen error.
+
 ## 1.3.8 - 2023-09-02
 
 ### Fixed

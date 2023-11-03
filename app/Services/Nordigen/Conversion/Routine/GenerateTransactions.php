@@ -55,7 +55,7 @@ class GenerateTransactions
     private array         $nordigenAccountInfo;
     private array         $targetAccounts;
     private array         $targetTypes;
-    const NUMBER_FORMAT = 'nr_%s';
+    public const NUMBER_FORMAT = 'nr_%s';
 
     /**
      * GenerateTransactions constructor.
