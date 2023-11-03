@@ -181,7 +181,7 @@ abstract class Request
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
             }
 
-            // if can get response, parse it.
+            // if app can get response, parse it.
             $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string)$e->getResponse()->getBody();

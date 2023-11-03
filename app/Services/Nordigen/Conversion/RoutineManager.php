@@ -124,7 +124,16 @@ class RoutineManager implements RoutineManagerInterface
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
+        try {
         $nordigen = $this->transactionProcessor->download();
+        } catch(ImporterErrorException $e) {
+            app('log')->error('Could not download transactions from Nordigen.');
+            app('log')->error($e->getMessage());
+            $this->mergeMessages($this->transactionProcessor->getMessages());
+            $this->mergeWarnings($this->transactionProcessor->getWarnings());
+            $this->mergeErrors($this->transactionProcessor->getErrors());
+            throw $e;
+        }
 
         // collect errors from transactionProcessor.
         $this->mergeMessages($this->transactionProcessor->getMessages());
