@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Services\Camt\Conversion;
 
@@ -302,7 +302,7 @@ class TransactionMapper
     private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
     {
         // bravely assume there's just one value in the array:
-        $fieldValue = join('', $data['data']);
+        $fieldValue = implode('', $data['data']);
 
         // replace with mapping, if mapping exists.
         if (array_key_exists($fieldValue, $data['mapping'])) {
@@ -330,7 +330,7 @@ class TransactionMapper
      */
     private function mapCurrency(mixed $current, string $type, array $data): array
     {
-        $code = join('', $data['data']);
+        $code = implode('', $data['data']);
         // replace with mapping
         if (array_key_exists($code, $data['mapping'])) {
             $key           = sprintf('%s_id', $type);
@@ -402,7 +402,7 @@ class TransactionMapper
          */
         foreach ($split as $role => $data) {
             // actual content of the field is in $data['data'], which is an array
-            if ('single' === $groupHandling or 'group' === $groupHandling) {
+            if ('single' === $groupHandling || 'group' === $groupHandling) {
                 if (array_key_exists('entryDetailAccounterServiceReference', $data['data'])) {
                     // we'll use this one, no exception. so the one from level-c can be dropped (if available)
                     if (array_key_exists('entryAccounterServiceReference', $data['data'])) {
@@ -448,7 +448,7 @@ class TransactionMapper
                 case 'note':
                     // TODO perhaps lift into separate method?
                     $current['notes'] = $current['notes'] ?? '';
-                    $addition         = "  \n" . join("  \n", $data['data']);
+                    $addition         = "  \n" . implode("  \n", $data['data']);
                     $current['notes'] .= $addition;
                     $current['notes'] = trim($current['notes']);
                     break;
@@ -486,7 +486,7 @@ class TransactionMapper
                     $current = $this->mapAccount($current, 'name', 'destination', $data);
                     break;
                 case 'external-id':
-                    $addition               = join(' ', $data['data']);
+                    $addition               = implode(' ', $data['data']);
                     $current['external_id'] = $addition;
                     break;
                 case 'description': // TODO think about a config value to use both values from level C and D
@@ -511,7 +511,7 @@ class TransactionMapper
                         // if multiple values, use biggest (... at index 0?)
                         // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
                         foreach ($data['data'] as $amount) {
-                            if (abs($current['amount']) < abs($amount) || $current['amount'] == null) {
+                            if (abs($current['amount']) < abs($amount) || $current['amount'] === null) {
                                 $current['amount'] = $amount;
                             }
                         }
@@ -519,7 +519,7 @@ class TransactionMapper
                     if ('single' === $groupHandling) {
                         // if multiple values, use smallest (... at index 1?)
                         foreach ($data['data'] as $amount) {
-                            if (abs($current['amount']) > abs($amount) || $current['amount'] == null) {
+                            if (abs($current['amount']) > abs($amount) || $current['amount'] === null) {
                                 $current['amount'] = $amount;
                             }
                         }
@@ -690,7 +690,7 @@ class TransactionMapper
                 // there is a value...
                 foreach ($this->allAccounts as $account) {
                     // so we check all accounts for a match
-                    if ($current[$field] == $account->$accountIdentificationSuffix) {
+                    if ($current[$field] === $account->$accountIdentificationSuffix) {
                         // we have a match
                         return true;
                     }

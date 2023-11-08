@@ -42,8 +42,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use IsRunningCli;
     use GeneratesIdentifier;
+    use IsRunningCli;
 
     private array                      $allErrors;
     private array                      $allMessages;

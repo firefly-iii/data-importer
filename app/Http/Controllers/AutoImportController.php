@@ -36,8 +36,8 @@ use Illuminate\Http\Response;
  */
 class AutoImportController extends Controller
 {
-    use HaveAccess;
     use AutoImports;
+    use HaveAccess;
     use VerifyJSON;
 
     private string $directory;

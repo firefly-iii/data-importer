@@ -46,9 +46,9 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
  */
 class GenerateTransactions
 {
-    use ProgressInformation;
     use CollectsAccounts;
     use DuplicateSafetyCatch;
+    use ProgressInformation;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -453,14 +453,14 @@ class GenerateTransactions
             'datetime'               => $entry->getDate()->toW3cString(),
             'amount'                 => $entry->transactionAmount,
             'description'            => $entry->getDescription(),
-            'payment_date'           => is_null($valueDate) ? '' : $valueDate->format('Y-m-d'),
+            'payment_date'           => null === $valueDate ? '' : $valueDate->format('Y-m-d'),
             'order'                  => 0,
             'currency_code'          => $entry->currencyCode,
             'tags'                   => [],
             'category_name'          => null,
             'category_id'            => null,
             'notes'                  => $entry->getNotes(),
-            'external_id'            => $entry->transactionId,
+            'external_id'            => $entry->getTransactionId(),
             'internal_reference'     => $entry->accountIdentifier,
             'additional-information' => $entry->additionalInformation,
         ];
@@ -475,7 +475,7 @@ class GenerateTransactions
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
         $return['transactions'][] = $transaction;
-        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->transactionId), $transaction);
+        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->getTransactionId()), $transaction);
 
 
         return $return;

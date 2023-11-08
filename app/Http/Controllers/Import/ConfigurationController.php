@@ -55,9 +55,9 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ConfigurationController extends Controller
 {
-    use RestoresConfiguration;
-    use MergesAccountLists;
     use CollectsAccounts;
+    use MergesAccountLists;
+    use RestoresConfiguration;
 
 
     /**

@@ -140,7 +140,7 @@ class DebugController extends Controller
             'base_build'  => $baseBuild,
             'php_version' => str_replace($search, $replace, PHP_VERSION),
             'php_os'      => str_replace($search, $replace, PHP_OS),
-            'interface'   => PHP_SAPI,
+            'interface'   => \PHP_SAPI,
         ];
     }
 

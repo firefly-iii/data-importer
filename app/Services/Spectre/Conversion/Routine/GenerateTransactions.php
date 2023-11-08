@@ -36,9 +36,9 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
  */
 class GenerateTransactions
 {
-    use ProgressInformation;
     use CollectsAccounts;
     use DuplicateSafetyCatch;
+    use ProgressInformation;
 
     private array         $accounts;
     private Configuration $configuration;

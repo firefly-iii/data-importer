@@ -35,8 +35,8 @@ use App\Http\Request\AutoUploadRequest;
  */
 class AutoUploadController extends Controller
 {
-    use HaveAccess;
     use AutoImports;
+    use HaveAccess;
     use VerifyJSON;
 
     /**

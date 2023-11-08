@@ -45,7 +45,7 @@ class Date implements ConverterInterface
     {
         $this->dateFormat        = 'Y-m-d';
         $this->dateLocale        = 'en';
-        $this->dateFormatPattern = '/(?:('.join("|", array_keys(Language::all())).')\:)?(.+)/';
+        $this->dateFormatPattern = '/(?:('.implode("|", array_keys(Language::all())).')\:)?(.+)/';
     }
 
     /**

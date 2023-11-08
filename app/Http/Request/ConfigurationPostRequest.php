@@ -109,9 +109,9 @@ class ConfigurationPostRequest extends Request
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
-        $columnOptions = join(',', array_keys(config('csv.unique_column_options')));
+        $columnOptions = implode(',', array_keys(config('csv.unique_column_options')));
         if('nordigen' === $flow) {
-            $columnOptions = join(',', array_keys(config('nordigen.unique_column_options')));
+            $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
         }
         $rules = [
             'headers'                       => 'numeric|between:0,1',

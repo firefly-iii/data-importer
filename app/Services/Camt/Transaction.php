@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 // contains plain-text information as they have to be used for the API or wherever. no objects and stuff
 
@@ -407,7 +407,7 @@ class Transaction
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
-            if ($useEntireAddress and $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
                 $opposingName .= ', ' . $addressLine;
             }
         }
@@ -442,7 +442,7 @@ class Transaction
         }
         foreach ($relatedParties as $relatedParty) {
             app('log')->debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));
-            if (get_class($relatedParty->getRelatedPartyType()) == $targetRelatedPartyObject) {
+            if (get_class($relatedParty->getRelatedPartyType()) === $targetRelatedPartyObject) {
                 app('log')->debug('This is the type we are looking for!');
                 return $relatedParty;
             }

@@ -37,9 +37,9 @@ use Illuminate\Console\Command;
  */
 class Import extends Command
 {
+    use AutoImports;
     use HaveAccess;
     use VerifyJSON;
-    use AutoImports;
 
     /**
      * The console command description.

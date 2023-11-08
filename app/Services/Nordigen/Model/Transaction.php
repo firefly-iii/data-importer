@@ -184,7 +184,7 @@ class Transaction
     }
 
     /**
-     * @param  array  $array
+     * @param array $array
      *
      * @return static
      */
@@ -299,7 +299,7 @@ class Transaction
         $description = trim($description);
 
         if ('' === $description) {
-            app('log')->warning(sprintf('Transaction "%s" has no description.', $this->transactionId));
+            app('log')->warning(sprintf('Transaction "%s" has no description.', $this->getTransactionId()));
             $description = '(no description)';
         }
 
@@ -328,7 +328,7 @@ class Transaction
 
             return $this->creditorAccountIban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -346,7 +346,7 @@ class Transaction
 
             return $this->creditorName;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->getTransactionId()));
 
         return null;
     }
@@ -364,7 +364,7 @@ class Transaction
 
             return $this->creditorAccountBban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination BBAN information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no destination BBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -408,7 +408,7 @@ class Transaction
 
             return $this->debtorAccountIban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source IBAN information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no source IBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -426,7 +426,7 @@ class Transaction
 
             return $this->debtorName;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source account name information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no source account name information.', $this->getTransactionId()));
 
         return null;
     }
@@ -444,7 +444,7 @@ class Transaction
 
             return $this->debtorAccountBban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source BBAN information.', $this->transactionId));
+        app('log')->warning(sprintf('Transaction "%s" has no source BBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -466,7 +466,7 @@ class Transaction
 
     /**
      * Call this "toLocalArray" because we want to confusion with "fromArray", which is really based
-     * on Nordigen information. Likewise there is also "fromLocalArray".
+     * on Nordigen information. Likewise, there is also "fromLocalArray".
      *
      * @return array
      */
@@ -494,7 +494,7 @@ class Transaction
             'remittance_information_structured_array'   => $this->remittanceInformationStructuredArray,
             'remittance_information_unstructured'       => $this->remittanceInformationUnstructured,
             'remittance_information_unstructured_array' => $this->remittanceInformationUnstructuredArray,
-            'transaction_id'                            => $this->transactionId,
+            'transaction_id'                            => $this->getTransactionId(),
             'ultimate_creditor'                         => $this->ultimateCreditor,
             'ultimate_debtor'                           => $this->ultimateDebtor,
             'value_date'                                => $this->valueDate->toW3cString(),
@@ -519,4 +519,14 @@ class Transaction
 
         return $return;
     }
+
+    /**
+     * @return string
+     */
+    public function getTransactionId(): string
+    {
+        return trim(preg_replace('/\s+/', ' ', $this->transactionId));
+    }
+
+
 }

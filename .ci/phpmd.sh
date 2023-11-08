@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #
-# phpunit.sh
-# Copyright (c) 2021 james@firefly-iii.org
+# phpmd.sh
+# Copyright (c) 2023 james@firefly-iii.org
 #
 # This file is part of Firefly III (https://github.com/firefly-iii).
 #
@@ -20,14 +20,32 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# enable test .env file.
-cp .ci/.env.ci ../.env
 
-# download test database
-# TODO no longer exists
-wget --quiet https://raw.githubusercontent.com/firefly-iii/test-data/main/test_db.sqlite -o storage/database/test_db.sqlite
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+OUTPUT_FORMAT=text
 
-# run phpunit
-./vendor/bin/phpunit --configuration phpunit.coverage.xml
+if [[ $GITHUB_ACTIONS = "true" ]]
+then
+    OUTPUT_FORMAT=github
+fi
 
+
+cd $SCRIPT_DIR/phpmd
+composer update --quiet
+./vendor/bin/phpmd \
+  $SCRIPT_DIR/../app,$SCRIPT_DIR/../database,$SCRIPT_DIR/../routes,$SCRIPT_DIR/../config \
+   $OUTPUT_FORMAT phpmd.xml \
+  --exclude $SCRIPT_DIR/../app/resources/** \
+  --exclude $SCRIPT_DIR/../app/frontend/** \
+  --exclude $SCRIPT_DIR/../app/public/** \
+  --exclude $SCRIPT_DIR/../app/vendor/**
+
+EXIT_CODE=$?
+
+cd $SCRIPT_DIR/..
+
+echo "Exit code is $EXIT_CODE, but we ignore this for the time being."
+
+# for the time being, exit 0
+#exit $EXIT_CODE
 exit 0

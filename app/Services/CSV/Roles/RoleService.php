@@ -146,7 +146,7 @@ class RoleService
             app('log')->error($e->getMessage());
             throw new InvalidArgumentException($e->getMessage());
         }
-        // @codeCoverageIgnoreEnd
+        /** @codeCoverageIgnoreEnd */
 
         // grab the records:
         $records = $stmt->process($reader);
