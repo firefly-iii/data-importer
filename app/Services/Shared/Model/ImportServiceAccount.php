@@ -38,9 +38,10 @@ class ImportServiceAccount
     public string $id;
     public string $name;
     public string $status;
+    public array  $extra;
 
     /**
-     * @param  array  $accounts
+     * @param array $accounts
      *
      * @return array
      */
@@ -51,7 +52,7 @@ class ImportServiceAccount
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
             $iban = $account->getIban();
-            if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
@@ -59,11 +60,19 @@ class ImportServiceAccount
             $return[] = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
-                    'name'          => $account->getName(),
+                    'name'          => $account->getFullName(),
+                    'currency_code' => $account->getCurrency(),
                     'iban'          => $iban,
                     'bban'          => $account->getBban(),
-                    'currency_code' => $account->getCurrency(),
                     'status'        => '',
+                    'extra'         => [
+                        'Name'         => $account->getName(),
+                        'Display name' => $account->getDisplayName(),
+                        'Owner name'   => $account->getOwnerName(),
+                        'Currency'     => $account->getCurrency(),
+                        'IBAN'         => $iban,
+                        'BBAN'         => $account->getBban(),
+                    ],
                 ]
             );
         }
@@ -72,7 +81,7 @@ class ImportServiceAccount
     }
 
     /**
-     * @param  array  $spectre
+     * @param array $spectre
      *
      * @return array
      */
@@ -81,8 +90,8 @@ class ImportServiceAccount
         $return = [];
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban = (string) $account->iban;
-            if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+            $iban = (string)$account->iban;
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
@@ -90,10 +99,15 @@ class ImportServiceAccount
                 [
                     'id'            => $account->id,
                     'name'          => $account->name,
+                    'currency_code' => $account->currencyCode,
                     'iban'          => $iban,
                     'bban'          => $account->accountNumber,
-                    'currency_code' => $account->currencyCode,
                     'status'        => $account->status,
+                    'extra'         => [
+                        'Currency' => $account->currencyCode,
+                        'IBAN'     => $iban,
+                        'BBAN'     => $account->accountNumber,
+                    ],
                 ]
             );
         }
@@ -102,15 +116,15 @@ class ImportServiceAccount
     }
 
     /**
-     * @param  array  $array
+     * @param array $array
      *
      * @return $this
      */
     public static function fromArray(array $array): self
     {
         app('log')->debug('Create generic account from', $array);
-        $iban = (string) ($array['iban'] ?? '');
-        if('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+        $iban = (string)($array['iban'] ?? '');
+        if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
         }
@@ -121,6 +135,7 @@ class ImportServiceAccount
         $account->bban         = $array['bban'];
         $account->currencyCode = $array['currency_code'];
         $account->status       = $array['status'];
+        $account->extra        = $array['extra'];
 
         return $account;
     }

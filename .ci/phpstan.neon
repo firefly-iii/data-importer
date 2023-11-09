@@ -6,11 +6,7 @@ parameters:
   checkGenericClassInNonGenericObjectType: false  # remove this rule when all other issues are solved.
   ignoreErrors:
   # TODO: slowly remove these exceptions and fix the issues found.
-    - '#is not allowed to extend#'
-    - '#is neither abstract nor final#'
-    - '#has a nullable return type declaration#'
-    - '#with a nullable type declaration#'
-    - '#with null as default value#'
+    - '#Control structures using switch should not be used#'
   paths:
     - ../app
     - ../database

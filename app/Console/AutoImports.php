@@ -298,7 +298,7 @@ trait AutoImports
             foreach ($set as $index => $messages) {
                 if (count($messages) > 0) {
                     foreach ($messages as $message) {
-                        $this->$func(sprintf('Conversion index %d: %s', $index, $message));
+                        $this->$func(sprintf('Conversion index %d: %s', $index, $message)); // @phpstan-ignore-line
                     }
                 }
             }
@@ -323,7 +323,7 @@ trait AutoImports
             foreach ($set as $index => $messages) {
                 if (count($messages) > 0) {
                     foreach ($messages as $message) {
-                        $this->$func(sprintf('Import index %d: %s', $index, $message));
+                        $this->$func(sprintf('Import index %d: %s', $index, $message)); // @phpstan-ignore-line
                     }
                 }
             }
