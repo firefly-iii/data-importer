@@ -197,7 +197,7 @@ class GenerateTransactions
             $transaction['source_id'] = (int)$accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, $entry->getPayer(), $entry->getPayerIban());
+        $transaction = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getPayer(), (string)$entry->getPayerIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
