@@ -158,9 +158,6 @@ class PseudoTransactionProcessor
             /** @var AbstractTask $object */
             $object = app($task);
             app('log')->debug(sprintf('Now running task %s', $task));
-
-
-
             if ($object->requiresDefaultAccount()) {
                 $object->setAccount($this->defaultAccount);
             }
