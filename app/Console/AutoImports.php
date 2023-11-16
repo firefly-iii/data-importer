@@ -60,7 +60,7 @@ trait AutoImports
      *
      * @return array
      */
-    protected function getFiles(string $directory): array
+    private function getFiles(string $directory): array
     {
         $ignore = ['.', '..'];
 
@@ -104,7 +104,7 @@ trait AutoImports
      *
      * @throws ImporterErrorException
      */
-    protected function importFiles(string $directory, array $files): void
+    private function importFiles(string $directory, array $files): void
     {
         /** @var string $file */
         foreach ($files as $file) {
@@ -222,6 +222,9 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
+            app('log')->error('Conversion errors', $this->conversionErrors);
+            app('log')->error('Conversion warnings', $this->conversionWarnings);
+            app('log')->error('Conversion messages', $this->conversionMessages);
             // log all conversion errors first.
             foreach ($this->conversionErrors as $index => $errors) {
                 foreach ($errors as $error) {
@@ -259,12 +262,12 @@ trait AutoImports
     }
 
     /**
-     * @param string      $jsonFile
-     * @param null|string $importableFile
+     * @param string $jsonFile
+     * @param string $importableFile
      *
      * @throws ImporterErrorException
      */
-    private function importUpload(string $jsonFile, ?string $importableFile): void
+    private function importUpload(string $jsonFile, string $importableFile): void
     {
         // do JSON check
         $jsonResult = $this->verifyJSON($jsonFile);
@@ -350,11 +353,11 @@ trait AutoImports
     /**
      * @param Configuration $configuration
      *
-     * @param string|null   $importableFile
+     * @param string        $importableFile
      *
      * @throws ImporterErrorException
      */
-    private function startConversion(Configuration $configuration, ?string $importableFile): void
+    private function startConversion(Configuration $configuration, string $importableFile): void
     {
         $this->conversionMessages = [];
         $this->conversionWarnings = [];
@@ -362,41 +365,39 @@ trait AutoImports
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
-        switch ($configuration->getFlow()) {
-            default:
-                $this->error(sprintf('There is no support for flow "%s"', $configuration->getFlow()));
-                exit();
-            case 'file':
-                $contentType = $configuration->getContentType();
-                if ('unknown' === $contentType) {
-                    app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
-                    $detector    = new FileContentSherlock();
-                    $contentType = $detector->detectContentType($importableFile);
-                }
-                switch ($contentType) {
-                    default:
-                    case 'unknown':
-                    case 'csv':
-                        $manager          = new CSVRoutineManager(null);
-                        $this->identifier = $manager->getIdentifier();
-                        $manager->setContent(file_get_contents($importableFile));
-                        break;
-                    case 'camt':
-                        $manager          = new CamtRoutineManager(null);
-                        $this->identifier = $manager->getIdentifier();
-                        $manager->setContent(file_get_contents($importableFile));
-                        break;
-                }
-
-                break;
-            case 'nordigen':
-                $manager          = new NordigenRoutineManager(null);
+        $manager = null;
+        $flow    = $configuration->getFlow();
+        if ('file' === $flow) {
+            $contentType = $configuration->getContentType();
+            if ('unknown' === $contentType) {
+                app('log')->debug('Content type is "unknown" in startConversion(), detect it.');
+                $detector    = new FileContentSherlock();
+                $contentType = $detector->detectContentType($importableFile);
+            }
+            if ('unknown' === $contentType || 'csv' === $contentType) {
+                app('log')->debug(sprintf('Content type is "%s" in startConversion(), use the CSV routine.', $contentType));
+                $manager          = new CSVRoutineManager(null);
                 $this->identifier = $manager->getIdentifier();
-                break;
-            case 'spectre':
-                $manager          = new SpectreRoutineManager(null);
+                $manager->setContent(file_get_contents($importableFile));
+            }
+            if ('camt' === $contentType) {
+                app('log')->debug('Content type is "camt" in startConversion(), use the CAMT routine.');
+                $manager          = new CamtRoutineManager(null);
                 $this->identifier = $manager->getIdentifier();
-                break;
+                $manager->setContent(file_get_contents($importableFile));
+            }
+        }
+        if ('nordigen' === $flow) {
+            $manager          = new NordigenRoutineManager(null);
+            $this->identifier = $manager->getIdentifier();
+        }
+        if ('spectre' === $flow) {
+            $manager          = new SpectreRoutineManager(null);
+            $this->identifier = $manager->getIdentifier();
+        }
+        if (null === $manager) {
+            $this->error(sprintf('There is no support for flow "%s"', $flow));
+            exit(1);
         }
 
         RoutineStatusManager::startOrFindConversion($this->identifier);
