@@ -244,7 +244,7 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, $entry->getPayee(), $entry->getPayeeIban());
+        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
