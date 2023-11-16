@@ -225,27 +225,9 @@ trait AutoImports
             app('log')->error('Conversion errors', $this->conversionErrors);
             app('log')->error('Conversion warnings', $this->conversionWarnings);
             app('log')->error('Conversion messages', $this->conversionMessages);
-            // log all conversion errors first.
-            foreach ($this->conversionErrors as $index => $errors) {
-                foreach ($errors as $error) {
-                    app('log')->error(sprintf('Conversion error on line #%d: %s', $index, $error));
-                }
-            }
-            foreach ($this->conversionWarnings as $index => $warnings) {
-                foreach ($warnings as $warning) {
-                    app('log')->warning(sprintf('Conversion warning on line #%d: %s', $index, $warning));
-                }
-            }
-            foreach ($this->conversionMessages as $index => $messages) {
-                foreach ($messages as $message) {
-                    app('log')->info(sprintf('Conversion message on line #%d: %s', $index, $message));
-                }
-            }
-
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
-
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImport($configuration);
@@ -286,6 +268,15 @@ trait AutoImports
         $this->startConversion($configuration, $importableFile);
         $this->reportConversion();
 
+        // crash here if the conversion failed.
+        if (0 !== count($this->conversionErrors)) {
+            app('log')->error('Conversion errors', $this->conversionErrors);
+            app('log')->error('Conversion warnings', $this->conversionWarnings);
+            app('log')->error('Conversion messages', $this->conversionMessages);
+            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+            throw new ImporterErrorException('Too many errors in the data conversion.');
+        }
+
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImport($configuration);
         $this->reportImport();
@@ -318,7 +309,7 @@ trait AutoImports
             foreach ($set as $index => $messages) {
                 if (count($messages) > 0) {
                     foreach ($messages as $message) {
-                        $this->$func(sprintf('Conversion index %d: %s', $index, $message)); // @phpstan-ignore-line
+                        $this->$func(sprintf('Conversion index (%s) %d: %s', $func, $index, $message)); // @phpstan-ignore-line
                     }
                 }
             }
