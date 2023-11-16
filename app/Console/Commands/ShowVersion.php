@@ -29,7 +29,7 @@ use Illuminate\Console\Command;
 /**
  * Class ShowVersion
  */
-class ShowVersion extends Command
+final class ShowVersion extends Command
 {
     /**
      * The console command description.

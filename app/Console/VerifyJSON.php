@@ -43,7 +43,7 @@ trait VerifyJSON
         $json = file_get_contents($file);
         try {
             json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception|JsonException $e) {
+        } catch (JsonException $e) {
             $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
             app('log')->error($message);
 

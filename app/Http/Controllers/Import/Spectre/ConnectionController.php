@@ -130,7 +130,7 @@ class ConnectionController extends Controller
 
         app('log')->debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
-        $request->customer = (string)$identifier;
+        $request->customer = $identifier;
         $list              = $request->get();
 
         if ($list instanceof ErrorResponse) {

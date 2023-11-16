@@ -35,7 +35,7 @@ use Illuminate\Console\Command;
 /**
  * Class Import
  */
-class Import extends Command
+final class Import extends Command
 {
     use AutoImports;
     use HaveAccess;

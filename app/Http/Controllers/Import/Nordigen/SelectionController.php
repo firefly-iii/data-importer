@@ -105,7 +105,7 @@ class SelectionController extends Controller
         }
 
         if ($response instanceof ErrorResponse) {
-            throw new ImporterErrorException((string)$response->message);
+            throw new ImporterErrorException($response->message);
         }
 
         return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries', 'configuration'));
@@ -128,7 +128,7 @@ class SelectionController extends Controller
         $values        = $request->getAll();
 
         // overrule with sandbox?
-        if (config('nordigen.use_sandbox')) {
+        if (true === config('nordigen.use_sandbox')) {
             $values['bank'] = 'SANDBOXFINANCE_SFIN0000';
         }
 

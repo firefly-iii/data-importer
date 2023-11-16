@@ -33,7 +33,7 @@ use Illuminate\Console\Command;
 /**
  * Class AutoImport
  */
-class AutoImport extends Command
+final class AutoImport extends Command
 {
     use AutoImports;
     use HaveAccess;

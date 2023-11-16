@@ -72,7 +72,7 @@ class AutoUploadController extends Controller
         $json = $request->file('json');
         // TODO update documentation to document rename of importable file variable.
         $importable     = $request->file('importable');
-        $importablePath = $importable?->getPathname();
+        $importablePath = (string) $importable?->getPathname();
 
         try {
             $this->importUpload($json->getPathname(), $importablePath);

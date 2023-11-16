@@ -366,13 +366,13 @@ class MapController extends Controller
             app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', ($index + 1), $total));
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string)array_key_exists('category_name', $row) ? $row['category_name'] : '';
+                $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
             }
         }
         $filtered = array_filter(
             $categories,
-            static function (?string $value) {
-                return '' !== (string)$value;
+            static function (string $value) {
+                return '' !== $value;
             }
         );
 

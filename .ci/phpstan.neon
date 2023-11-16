@@ -6,7 +6,10 @@ parameters:
   checkGenericClassInNonGenericObjectType: false  # remove this rule when all other issues are solved.
   ignoreErrors:
   # TODO: slowly remove these exceptions and fix the issues found.
-    - '#Control structures using switch should not be used#'
+    - '#is not allowed to extend#' # don't care.
+    - '#is neither abstract nor final#' # don't care
+    - '#with null as default value#' # don't care
+    - '#Function compact\(\) should not be used.#' # don't care
   paths:
     - ../app
     - ../database
