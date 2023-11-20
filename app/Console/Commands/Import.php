@@ -35,11 +35,11 @@ use Illuminate\Console\Command;
 /**
  * Class Import
  */
-class Import extends Command
+final class Import extends Command
 {
+    use AutoImports;
     use HaveAccess;
     use VerifyJSON;
-    use AutoImports;
 
     /**
      * The console command description.
@@ -75,7 +75,7 @@ class Import extends Command
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $file   = (string)$this->argument('file');
-        $config = (string)$this->argument('config');
+        $config = (string)$this->argument('config'); // @phpstan-ignore-line
 
         // validate config path:
         if ('' !== $config) {
@@ -131,6 +131,15 @@ class Import extends Command
         // first do conversion based on the file:
         $this->startConversion($configuration, $file);
         $this->reportConversion();
+
+        // crash here if the conversion failed.
+        if (0 !== count($this->conversionErrors)) {
+            app('log')->error('Conversion errors', $this->conversionErrors);
+            app('log')->error('Conversion warnings', $this->conversionWarnings);
+            app('log')->error('Conversion messages', $this->conversionMessages);
+            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+            throw new ImporterErrorException('Too many errors in the data conversion.');
+        }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
         $this->startImport($configuration);

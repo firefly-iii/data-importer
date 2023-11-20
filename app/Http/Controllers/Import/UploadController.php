@@ -118,7 +118,9 @@ class UploadController extends Controller
         $errors = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
-        $errors = $this->processConfigFile($errors, $configFile);
+        if (0 === count($errors) && null !== $configFile) {
+            $errors = $this->processConfigFile($errors, $configFile);
+        }
 
         // process pre-selected file (if present):
         $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
@@ -201,11 +203,8 @@ class UploadController extends Controller
      * @return MessageBag
      * @throws ImporterErrorException
      */
-    private function processConfigFile(MessageBag $errors, UploadedFile|null $file): MessageBag
+    private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
     {
-        if (count($errors) > 0 || null === $file) {
-            return $errors;
-        }
         app('log')->debug('Config file is present.');
         $errorNumber = $file->getError();
         if (0 !== $errorNumber) {

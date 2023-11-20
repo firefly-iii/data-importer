@@ -23,11 +23,11 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '1.3.9',
+    'version'                 => '1.3.10',
     'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
         'file'     => 'File',
-        'nordigen' => 'Nordigen',
+        'nordigen' => 'GoCardless',
         'spectre'  => 'Spectre',
     ],
     'import_dir_allowlist'    => explode(',', env('IMPORT_DIR_ALLOWLIST', '')),

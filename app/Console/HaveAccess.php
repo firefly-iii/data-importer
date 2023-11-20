@@ -66,7 +66,7 @@ trait HaveAccess
 
             return false;
         }
-        $reportedVersion = (string)$result->version;
+        $reportedVersion = $result->version;
         if(str_starts_with($reportedVersion, 'v')) {
             $reportedVersion = substr($reportedVersion, 1);
         }

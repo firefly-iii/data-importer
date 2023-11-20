@@ -101,7 +101,7 @@ trait MergesAccountLists
      */
     protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
     {
-        app('log')->debug('Now merging Nordigen account lists.');
+        app('log')->debug('Now merging Spectre account lists.');
         $generic = ImportServiceAccount::convertSpectreArray($spectre);
 
         return $this->mergeGenericAccountList($generic, $fireflyIII);

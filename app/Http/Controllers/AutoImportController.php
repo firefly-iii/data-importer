@@ -36,8 +36,8 @@ use Illuminate\Http\Response;
  */
 class AutoImportController extends Controller
 {
-    use HaveAccess;
     use AutoImports;
+    use HaveAccess;
     use VerifyJSON;
 
     private string $directory;
@@ -85,7 +85,7 @@ class AutoImportController extends Controller
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
-            throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
 
         return response('');
@@ -100,6 +100,11 @@ class AutoImportController extends Controller
         $this->line($string);
     }
 
+    /**
+     * @param string $string
+     *
+     * @return void
+     */
     public function line(string $string)
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);

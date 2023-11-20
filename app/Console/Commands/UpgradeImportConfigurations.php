@@ -32,7 +32,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-class UpgradeImportConfigurations extends Command
+final class UpgradeImportConfigurations extends Command
 {
     /**
      * The console command description.
@@ -64,7 +64,7 @@ class UpgradeImportConfigurations extends Command
      */
     public function handle(): int
     {
-        $directory = (string)$this->argument('directory');
+        $directory = (string)$this->argument('directory'); // @phpstan-ignore-line
 
         if (!file_exists($directory)) {
             $this->error(sprintf('"%s" does not exist.', $directory));

@@ -33,11 +33,11 @@ use Illuminate\Console\Command;
 /**
  * Class AutoImport
  */
-class AutoImport extends Command
+final class AutoImport extends Command
 {
+    use AutoImports;
     use HaveAccess;
     use VerifyJSON;
-    use AutoImports;
 
     /**
      * The console command description.
@@ -66,7 +66,7 @@ class AutoImport extends Command
             return 1;
         }
 
-        $argument  = (string)($this->argument('directory') ?? './');
+        $argument  = (string)($this->argument('directory') ?? './'); /** @phpstan-ignore-line */
         $directory = realpath($argument);
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));

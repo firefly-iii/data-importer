@@ -11,12 +11,25 @@
 /> <label class="form-check-label"
           {% if '' != information.import_account.iban %}title="IBAN: {{ information.import_account.iban }}"{% endif %}
           for="do_import_{{ information.import_account.id }}">
-    Account "{{ information.import_account.name }}"
+    {% if '' != information.import_account.name %}
+        Account "{{ information.import_account.name }}"
+    {% else %}
+        Account with no name
+    {% endif %}
 </label>
-{% if '' != information.import_account.iban %}
+<br>
+<small>
+{% for key, item in information.import_account.extra %}
+    {% if '' != item %}
+        {{ key }}: {{ item }}<br>
+    {% endif %}
+    {# {% if '' != information.import_account.iban %}
     <br><small>
     IBAN: {{ information.import_account.iban }}</small>
-{% endif %}
+{% endif %} #}
+    {% endfor %}
+
+</small>
 {% if 'disabled' == information.import_account.status %}<br>
     <small class="text-danger">(this account is
         disabled)</small>{% endif %}

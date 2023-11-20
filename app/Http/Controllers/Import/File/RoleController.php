@@ -62,7 +62,7 @@ class RoleController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return View|void
      * @throws JsonException
@@ -84,18 +84,18 @@ class RoleController extends Controller
         $configuration = $this->restoreConfiguration();
         $contentType   = $configuration->getContentType();
 
-        switch ($contentType) {
-            default:
-                throw new ImporterErrorException(sprintf('Cannot handle file type "%s"', $contentType));
-            case 'csv':
-                return $this->csvIndex($request, $configuration);
-            case 'camt':
-                return $this->camtIndex($request, $configuration);
+        if ('csv' === $contentType) {
+            return $this->csvIndex($request, $configuration);
         }
+        if ('camt' === $contentType) {
+            return $this->camtIndex($request, $configuration);
+
+        }
+        throw new ImporterErrorException(sprintf('Cannot handle file type "%s"', $contentType));
     }
 
     /**
-     * @param  RolesPostRequest  $request
+     * @param RolesPostRequest $request
      *
      * @return RedirectResponse
      * @throws ContainerExceptionInterface
@@ -110,21 +110,20 @@ class RoleController extends Controller
         $configuration = $this->restoreConfiguration();
         $contentType   = $configuration->getContentType();
 
-        switch ($contentType) {
-            default:
-                throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
-            case 'csv':
-                return $this->csvPostIndex($request, $configuration);
-            case 'camt':
-                return $this->camtPostIndex($request, $configuration);
-                //return $this->camtPostIndex($request, $configuration);
+        if ('csv' === $contentType) {
+            return $this->csvPostIndex($request, $configuration);
 
         }
+        if ('camt' === $contentType) {
+            return $this->camtPostIndex($request, $configuration);
+
+        }
+        throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
     }
 
     /**
-     * @param  Request  $request
-     * @param  Configuration  $configuration
+     * @param Request       $request
+     * @param Configuration $configuration
      *
      * @return View
      * @throws ContainerExceptionInterface
@@ -219,8 +218,8 @@ class RoleController extends Controller
     /**
      * TODO is basically the same as the CSV processor.
      *
-     * @param  RolesPostRequest  $request
-     * @param  Configuration  $configuration
+     * @param RolesPostRequest $request
+     * @param Configuration    $configuration
      *
      * @return RedirectResponse
      * @throws ContainerExceptionInterface
@@ -264,8 +263,8 @@ class RoleController extends Controller
     }
 
     /**
-     * @param  Request  $request
-     * @param  Configuration  $configuration
+     * @param Request       $request
+     * @param Configuration $configuration
      *
      * @return View
      * @throws ContainerExceptionInterface
@@ -303,8 +302,8 @@ class RoleController extends Controller
     }
 
     /**
-     * @param  RolesPostRequest  $request
-     * @param  Configuration  $configuration
+     * @param RolesPostRequest $request
+     * @param Configuration    $configuration
      *
      * @return RedirectResponse
      * @throws ContainerExceptionInterface
@@ -347,7 +346,7 @@ class RoleController extends Controller
     }
 
     /**
-     * @param  string  $level
+     * @param string $level
      *
      * @return array
      */
@@ -367,7 +366,7 @@ class RoleController extends Controller
     /**
      * Will tell you if any role needs mapping.
      *
-     * @param  array  $array
+     * @param array $array
      *
      * @return bool
      */

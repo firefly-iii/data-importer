@@ -114,7 +114,7 @@ class DebugController extends Controller
         $system = $this->getSystemInfo();
         $app    = $this->getAppInfo();
         $user   = $this->getUserInfo();
-        $table  = (string)view('debug-table', compact('system', 'app', 'user'))->render();
+        $table  = view('debug-table', compact('system', 'app', 'user'))->render();
         return str_replace(["\n", "\t", '  '], '', $table);
     }
 
@@ -124,7 +124,7 @@ class DebugController extends Controller
         $baseBuild = null;
         $isDocker  = env('IS_DOCKER', false);
 
-        if ($isDocker) {
+        if (true === $isDocker) {
             if (file_exists('/var/www/counter-main.txt')) {
                 $build = trim(file_get_contents('/var/www/counter-main.txt'));
             }
@@ -140,7 +140,7 @@ class DebugController extends Controller
             'base_build'  => $baseBuild,
             'php_version' => str_replace($search, $replace, PHP_VERSION),
             'php_os'      => str_replace($search, $replace, PHP_OS),
-            'interface'   => PHP_SAPI,
+            'interface'   => \PHP_SAPI,
         ];
     }
 

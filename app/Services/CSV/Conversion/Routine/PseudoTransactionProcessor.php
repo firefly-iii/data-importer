@@ -73,14 +73,14 @@ class PseudoTransactionProcessor
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $count     = count($lines);
         $processed = [];
-        app('log')->info(sprintf('Converting %d lines into transactions.', $count));
+        app('log')->info(sprintf('Converting %d line(s) into transactions.', $count));
         /** @var array $line */
         foreach ($lines as $index => $line) {
             app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
             $processed[] = $this->processPseudoLine($line);
             // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
         }
-        app('log')->info(sprintf('Done converting %d lines into transactions.', $count));
+        app('log')->info(sprintf('Done converting %d line(s) into transactions.', $count));
 
         return $processed;
     }
@@ -158,9 +158,6 @@ class PseudoTransactionProcessor
             /** @var AbstractTask $object */
             $object = app($task);
             app('log')->debug(sprintf('Now running task %s', $task));
-
-
-
             if ($object->requiresDefaultAccount()) {
                 $object->setAccount($this->defaultAccount);
             }

@@ -42,8 +42,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use IsRunningCli;
     use GeneratesIdentifier;
+    use IsRunningCli;
 
     private array                      $allErrors;
     private array                      $allMessages;
@@ -121,7 +121,7 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param  string  $content
+     * @param string $content
      */
     public function setContent(string $content): void
     {
@@ -129,7 +129,7 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param  bool  $forceCli
+     * @param bool $forceCli
      */
     public function setForceCli(bool $forceCli): void
     {
@@ -155,7 +155,7 @@ class RoutineManager implements RoutineManagerInterface
         if ('' === $this->content) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }
@@ -171,6 +171,7 @@ class RoutineManager implements RoutineManagerInterface
         // convert pseudo transactions into actual transactions.
         $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
 
+
         $count = count($CSVLines);
         $this->mergeMessages($count);
         $this->mergeWarnings($count);
@@ -180,67 +181,76 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @param  int  $count
+     * @param int $count
      */
     private function mergeErrors(int $count): void
     {
-        $one   = $this->csvFileProcessor->getErrors();
-        $two   = $this->lineProcessor->getErrors();
-        $three = $this->columnValueConverter->getErrors();
-        $four  = $this->pseudoTransactionProcessor->getErrors();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
+        $this->allErrors = $this->mergeArrays([
+                                                  $this->csvFileProcessor->getErrors(),
+                                                  $this->lineProcessor->getErrors(),
+                                                  $this->columnValueConverter->getErrors(),
+                                                  $this->pseudoTransactionProcessor->getErrors(),
+                                              ], $count);
 
-        $this->allErrors = $total;
     }
 
     /**
-     * @param  int  $count
+     * @param int $count
      */
     private function mergeMessages(int $count): void
     {
-        $one   = $this->csvFileProcessor->getMessages();
-        $two   = $this->lineProcessor->getMessages();
-        $three = $this->columnValueConverter->getMessages();
-        $four  = $this->pseudoTransactionProcessor->getMessages();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
-        }
-
-        $this->allMessages = $total;
+        $this->allMessages = $this->mergeArrays([
+                                                    $this->csvFileProcessor->getMessages(),
+                                                    $this->lineProcessor->getMessages(),
+                                                    $this->columnValueConverter->getMessages(),
+                                                    $this->pseudoTransactionProcessor->getMessages(),
+                                                ], $count);
     }
 
     /**
-     * @param  int  $count
+     * @param int $count
      */
     private function mergeWarnings(int $count): void
     {
-        $one   = $this->csvFileProcessor->getWarnings();
-        $two   = $this->lineProcessor->getWarnings();
-        $three = $this->columnValueConverter->getWarnings();
-        $four  = $this->pseudoTransactionProcessor->getWarnings();
-        $total = [];
-        for ($i = 0; $i < $count; $i++) {
-            $total[$i] = array_merge(
-                $one[$i] ?? [],
-                $two[$i] ?? [],
-                $three[$i] ?? [],
-                $four[$i] ?? [],
-            );
+        $this->allWarnings = $this->mergeArrays([
+                                                    $this->csvFileProcessor->getWarnings(),
+                                                    $this->lineProcessor->getWarnings(),
+                                                    $this->columnValueConverter->getWarnings(),
+                                                    $this->pseudoTransactionProcessor->getWarnings(),
+                                                ], $count);
+    }
+
+    /**
+     * @param array $collection
+     * @param int   $count
+     *
+     * @return array
+     */
+    private function mergeArrays(array $collection, int $count): array
+    {
+        $return = [];
+        foreach ($collection as $set) {
+            if (0 === count($set)) {
+                continue;
+            }
+            for ($i = 0; $i < $count; $i++) {
+                if (array_key_exists($i, $set)) {
+                    $return[$i] = array_key_exists($i, $return) ? $return[$i] : [];
+                    $return[$i] = array_merge($return[$i], $set[$i]);
+                }
+            }
         }
-        $this->allWarnings = $total;
+
+        // sanity check (should not be necessary)
+        foreach ($return as $index => $set) {
+            if (0 === count($set)) {
+                unset($return[$index]);
+            }
+        }
+        if (0 === count($return)) {
+            $return = [];
+        }
+
+        return $return;
     }
 }

@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## 1.3.10 - 2023-11-21
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes but it can't always be helped.
+
+### Added
+- [Issue 7977](https://github.com/firefly-iii/firefly-iii/issues/7977) More details on accounts added
+
+### Changed
+- Renamed Nordigen to GoCardless
+
+### Fixed
+- [Issue 8130](https://github.com/firefly-iii/firefly-iii/issues/8130) External ID with space breaks duplicate check
+- [Issue 8158](https://github.com/firefly-iii/firefly-iii/issues/8158) Several nullpointers
+
+
 ## 1.3.9 - 2023-11-04
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes but it can't always be helped.

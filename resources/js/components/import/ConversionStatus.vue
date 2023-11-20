@@ -28,7 +28,7 @@
                     <p>
                         The first step in the import process is a <strong>conversion</strong>.
                         <span v-if="flow === 'csv'">The CSV file you uploaded</span>
-                        <span v-if="flow === 'nordigen'">The transactions downloaded from Nordigen</span>
+                        <span v-if="flow === 'nordigen'">The transactions downloaded from GoCardless</span>
                         <span v-if="flow === 'spectre'">The transactions downloaded from Spectre</span>
                         will be converted to Firefly III compatible transactions. Please press <strong>Start
                         job</strong> to start.

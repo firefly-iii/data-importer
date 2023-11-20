@@ -97,6 +97,7 @@ class ConversionController extends Controller
 
         // job ID may be in session:
         $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $routine    = null;
         $flow       = $configuration->getFlow();
         app('log')->debug('Will redirect to submission after conversion.');
         $nextUrl = route('008-submit.index');
@@ -108,17 +109,13 @@ class ConversionController extends Controller
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
-            switch ($contentType) {
-                default:
-                case 'unknown':
-                case 'csv':
-                    app('log')->debug('Create CSV routine manager.');
-                    $routine = new CSVRoutineManager($identifier);
-                    break;
-                case 'camt':
-                    app('log')->debug('Create CAMT routine manager.');
-                    $routine = new CAMTRoutineManager($identifier);
-                    break;
+            if ('unknown' === $contentType || 'csv' === $contentType) {
+                app('log')->debug('Create CSV routine manager.');
+                $routine = new CSVRoutineManager($identifier);
+            }
+            if ('camt' === $contentType) {
+                app('log')->debug('Create CAMT routine manager.');
+                $routine = new CAMTRoutineManager($identifier);
             }
         }
         if ('nordigen' === $flow) {
@@ -132,6 +129,9 @@ class ConversionController extends Controller
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
             app('log')->debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
+        }
+        if (null === $routine) {
+            throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
 
         // may be a new identifier! Yay!
@@ -147,7 +147,7 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @throws ImporterErrorException
@@ -160,6 +160,7 @@ class ConversionController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $identifier    = $request->get('identifier');
         $configuration = $this->restoreConfiguration();
+        $routine       = null;
 
         // now create the right class:
         $flow = $configuration->getFlow();
@@ -169,15 +170,11 @@ class ConversionController extends Controller
         /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
-            switch ($contentType) {
-                default:
-                case 'unknown':
-                case 'csv':
-                    $routine = new CSVRoutineManager($identifier);
-                    break;
-                case 'camt':
-                    $routine = new CAMTRoutineManager($identifier); // why do we need this one?
-                    break;
+            if ('unknown' === $contentType || 'csv' === $contentType) {
+                $routine = new CSVRoutineManager($identifier);
+            }
+            if ('camt' === $contentType) {
+                $routine = new CAMTRoutineManager($identifier); // why do we need this one?
             }
         }
         if ('nordigen' === $flow) {
@@ -185,6 +182,10 @@ class ConversionController extends Controller
         }
         if ('spectre' === $flow) {
             $routine = new SpectreRoutineManager($identifier);
+        }
+
+        if (null === $routine) {
+            throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
 
         $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
@@ -235,7 +236,7 @@ class ConversionController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      */

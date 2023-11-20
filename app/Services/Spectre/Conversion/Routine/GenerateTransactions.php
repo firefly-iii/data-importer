@@ -36,9 +36,9 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
  */
 class GenerateTransactions
 {
-    use ProgressInformation;
     use CollectsAccounts;
     use DuplicateSafetyCatch;
+    use ProgressInformation;
 
     private array         $accounts;
     private Configuration $configuration;
@@ -197,7 +197,7 @@ class GenerateTransactions
             $transaction['source_id'] = (int)$accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, $entry->getPayer(), $entry->getPayerIban());
+        $transaction = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getPayer(), (string)$entry->getPayerIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
@@ -244,7 +244,7 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, $entry->getPayee(), $entry->getPayeeIban());
+        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 

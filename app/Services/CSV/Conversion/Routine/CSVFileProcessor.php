@@ -63,8 +63,6 @@ class CSVFileProcessor
     public function processCSVFile(): array
     {
         app('log')->debug('Now in processCSVFile()');
-
-
         $offset = $this->hasHeaders ? 1 : 0;
         try {
             $this->reader->setDelimiter($this->delimiter);
@@ -149,6 +147,7 @@ class CSVFileProcessor
             $line = $this->sanitize($line);
             app('log')->debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
             $updatedRecords[] = $line;
+
             $currentIndex++;
         }
         app('log')->info(sprintf('Parsed all %d lines.', $count));

@@ -39,8 +39,8 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use IsRunningCli;
     use GeneratesIdentifier;
+    use IsRunningCli;
 
     private array                $allErrors;
     private array                $allMessages;

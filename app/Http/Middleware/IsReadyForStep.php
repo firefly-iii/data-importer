@@ -41,11 +41,13 @@ trait IsReadyForStep
     public const TEST = 'test';
 
     /**
-     * @param  Request  $request
-     * @param  Closure  $next
+     * @param Request $request
+     * @param Closure $next
      *
      * @return mixed
+     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
+     * @throws NotFoundExceptionInterface
      */
     public function handle(Request $request, Closure $next): mixed
     {
@@ -62,7 +64,7 @@ trait IsReadyForStep
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return bool
      * @throws ContainerExceptionInterface
@@ -84,25 +86,17 @@ trait IsReadyForStep
             return $result;
         }
         if ('nordigen' === $flow) {
-            $result = $this->isReadyForNordigenStep();
-
-            //app('log')->debug(sprintf('isReadyForNordigenStep: Return %s', var_export($result, true)));
-
-            return $result;
+            return $this->isReadyForNordigenStep();
         }
         if ('spectre' === $flow) {
-            $result = $this->isReadyForSpectreStep();
-
-            //app('log')->debug(sprintf('isReadyForSpectreStep: Return %s', var_export($result, true)));
-
-            return $result;
+            return $this->isReadyForSpectreStep();
         }
 
         return $this->isReadyForBasicStep();
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return RedirectResponse|null
      * @throws ContainerExceptionInterface
@@ -113,7 +107,7 @@ trait IsReadyForStep
     {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
-            app('log')->debug('redirectToCorrectStep returns true because $flow is null');
+            app('log')->debug('redirectToCorrectStep returns NULL because $flow is null');
 
             return null;
         }
@@ -137,12 +131,12 @@ trait IsReadyForStep
     private function isReadyForBasicStep(): bool
     {
         app('log')->debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
-        switch (self::STEP) {
-            default:
-                throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
-            case 'service-validation':
-                return true;
+
+        if (self::STEP === 'service-validation') {
+            return true;
         }
+
+        throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP));
     }
 
     /**

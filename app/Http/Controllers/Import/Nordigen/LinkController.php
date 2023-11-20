@@ -95,7 +95,7 @@ class LinkController extends Controller
             return redirect(route('004-configure.index'));
         }
 
-        $uuid        = (string)Uuid::uuid4()->toString();
+        $uuid        = Uuid::uuid4()->toString();
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
 

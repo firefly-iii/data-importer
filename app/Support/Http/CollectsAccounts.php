@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * CollectsAccounts.php
  * Copyright (c) 2023 james@firefly-iii.org
