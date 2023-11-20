@@ -81,7 +81,7 @@
                         <div class="col-lg-4">
                             <div class="card">
                                 <div class="card-header">
-                                    Import from Nordigen
+                                    Import from GoCardless
                                 </div>
                                 <div class="card-body">
                                     <p id="nordigen_result" style="display: none;"></p>
@@ -175,18 +175,18 @@
             $('#spectre_button').hide();
         });
 
-        // validate Nordigen information
+        // validate GoCardless information
         url = '{{ route('validate.nordigen') }}';
         $.getJSON(url).done(function (data) {
             if ('OK' === data.result) {
                 $('#nordigen_result').hide();
-                $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
+                $('#nordigen_button').removeClass('disabled').text('Import from GoCardless').removeAttr('disabled');
             }
             if ('NODATA' === data.result) {
-                $('#nordigen_button').removeClass('disabled').text('Import from Nordigen').removeAttr('disabled');
+                $('#nordigen_button').removeClass('disabled').text('Import from GoCardless').removeAttr('disabled');
             }
         }).fail(function () {
-            $('#nordigen_result').show().text('The Nordigen API is configured incorrectly and cannot be used to import data.');
+            $('#nordigen_result').show().text('The GoCardless API is configured incorrectly and cannot be used to import data.');
             $('#nordigen_button').hide();
         });
 

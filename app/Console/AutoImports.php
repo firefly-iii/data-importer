@@ -356,6 +356,11 @@ trait AutoImports
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
+        if('' === $importableFile) {
+            $this->error('Importable file path is empty. That means there is no importable file to import.');
+            exit(1);
+        }
+
         $manager = null;
         $flow    = $configuration->getFlow();
         if ('file' === $flow) {
