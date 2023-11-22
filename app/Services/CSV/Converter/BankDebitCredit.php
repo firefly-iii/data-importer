@@ -48,6 +48,7 @@ class BankDebitCredit implements ConverterInterface
             'Af', // ING (NL).
             'Debet', // Triodos (NL)
             'Debit', // ING (EN), thx Quibus!
+            'debit', // Mint
             'S', // Volksbank (DE), Short for "Soll"
             'DBIT', // https://subsembly.com/index.html (Banking4 App)
             'Charge', // not sure which bank but it's insane.

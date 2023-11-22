@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.3.11 - 2021-11-23
+## 1.3.12 - 2023-11-23
+
+### Added
+- Support for Mint imports. Use [this configuration file](https://github.com/firefly-iii/import-configurations/blob/main/other-software/mint.json).
+
+## 1.3.11 - 2023-11-23
 
 ### Changed
 - Add some more explanation text to the date input
