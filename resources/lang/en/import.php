@@ -64,7 +64,7 @@ return [
     'column_opposing-name'          => 'Opposing account (name)',
     'column_rabo-debit-credit'      => 'Rabobank specific debit/credit indicator',
     'column_ing-debit-credit'       => 'ING specific debit/credit indicator',
-    'column_generic-debit-credit'   => 'Generic bank debit/credit indicator',
+    'column_generic-debit-credit'   => 'Bank debit/credit indicator',
     'column_sepa_ct_id'             => 'SEPA end-to-end Identifier',
     'column_sepa_ct_op'             => 'SEPA Opposing Account Identifier',
     'column_sepa_db'                => 'SEPA Mandate Identifier',
