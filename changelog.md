@@ -2,10 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.11 - 2021-11-23
+
+### Changed
+- Add some more explanation text to the date input
+
+### Fixed
+- [Issue 8184](https://github.com/firefly-iii/firefly-iii/issues/8184) I broke the importer 
 
 ## 1.3.10 - 2023-11-21
 
->  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes but it can't always be helped.
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
 
 ### Added
 - [Issue 7977](https://github.com/firefly-iii/firefly-iii/issues/7977) More details on accounts added
@@ -20,7 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.3.9 - 2023-11-04
 
->  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes but it can't always be helped.
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
 
 ### Added
 - Fancy new security.txt file.
