@@ -86,6 +86,8 @@ final class Import extends Command
                 return 1;
             }
         }
+
+        // validate file path
         if ('' !== $file) {
             $directory = dirname($file);
             if (!$this->isAllowedPath($directory)) {
