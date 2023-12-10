@@ -52,7 +52,7 @@ trait HaveAccess
         // grab token from authentication header.
         $headerToken = (string)request()->header('Authorization');
         if ('' !== $headerToken) {
-            $token = str_replace('Bearer ', '', $token);
+            $token = str_replace('Bearer ', '', $headerToken);
             $this->line('Overrule token with token from Authorization header.');
         }
 
