@@ -35,7 +35,7 @@ trait HaveAccess
 {
     /**
      * @param      $string
-     * @param  null  $verbosity
+     * @param null $verbosity
      *
      * @return void
      */
@@ -46,8 +46,15 @@ trait HaveAccess
      */
     private function haveAccess(): bool
     {
-        $url     = (string)config('importer.url');
-        $token   = (string)config('importer.access_token');
+        $url   = (string)config('importer.url');
+        $token = (string)config('importer.access_token');
+
+        // grab token from authentication header.
+        $headerToken = (string)request()->header('Authorization');
+        if ('' !== $headerToken) {
+            $token = str_replace('Bearer ', '', $token);
+            $this->line('Overrule token with token from Authorization header.');
+        }
 
         $this->line(sprintf('Trying to connect to %s...', $url));
         $this->line(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
@@ -67,7 +74,7 @@ trait HaveAccess
             return false;
         }
         $reportedVersion = $result->version;
-        if(str_starts_with($reportedVersion, 'v')) {
+        if (str_starts_with($reportedVersion, 'v')) {
             $reportedVersion = substr($reportedVersion, 1);
         }
         $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
@@ -82,7 +89,7 @@ trait HaveAccess
     }
 
     /**
-     * @param  string  $path
+     * @param string $path
      *
      * @return bool
      */
