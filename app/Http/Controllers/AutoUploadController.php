@@ -58,7 +58,6 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-
         $secret       = (string)($request->get('secret') ?? '');
         $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {

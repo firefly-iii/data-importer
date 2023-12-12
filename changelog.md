@@ -430,7 +430,7 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 - 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
 
 ### Added
-- Code to support the [cloud installation](https://docs.firefly-iii.org/data-importer/installation/public/).
+- Code to support the [cloud installation](https://docs.firefly-iii.org/references/data-importer/public/).
 - Proper page for maintenance mode.
 
 ### Changed

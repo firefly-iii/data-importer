@@ -39,7 +39,7 @@ The data importer can import CSV files you've downloaded from your bank.
 
 You can run the data importer once, for a bulk import. You can also run it regularly to keep up with new transactions.
 
-Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/data-importer)!
+Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/)!
 
 <!-- HELP TEXT -->
 ## Need help?
@@ -60,7 +60,7 @@ If you need support using Firefly III or the associated tools, come find us!
 * Import over an API for easy automation
 * Use rules and data mapping for transaction clarity
 
-Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/).
 
 ## Who's it for?
 
@@ -68,7 +68,7 @@ This application is for people who want to track their finances, keep an eye on 
 
 ## Getting Started
 
-Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/).
 
 ## Contributing
 
@@ -76,7 +76,7 @@ You can contact me at [james@firefly-iii.org](mailto:james@firefly-iii.org), you
 
 Of course, there are some [contributing guidelines](https://github.com/firefly-iii/data-importer/blob/main/.github/contributing.md) and a [code of conduct](https://github.com/firefly-iii/data-importer/blob/main/.github/code_of_conduct.md), which I invite you to check out.
 
-I can always use your help [squashing bugs](https://docs.firefly-iii.org/firefly-iii/support/#contributing-code), thinking about [new features](https://docs.firefly-iii.org/firefly-iii/support/#contributing-code) or [translating Firefly III](https://docs.firefly-iii.org/firefly-iii/faq/translate/) into other languages.
+I can always use your help [squashing bugs](https://docs.firefly-iii.org/explanation/support/#contributing-code), thinking about [new features](https://docs.firefly-iii.org/explanation/support/#contributing-code) or [translating Firefly III](https://docs.firefly-iii.org/how-to/firefly-iii/development/translations/) into other languages.
 
 [Sonarcloud][sc-project-url] scans the code of Firefly III. If you want to help improve Firefly III, check out the latest reports and take your pick!
 

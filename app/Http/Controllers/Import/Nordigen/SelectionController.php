@@ -134,7 +134,7 @@ class SelectionController extends Controller
 
         $configuration->setNordigenCountry($values['country']);
         $configuration->setNordigenBank($values['bank']);
-        $configuration->setNordigenMaxDays($values['days']);
+        $configuration->    setNordigenMaxDays($values['days']);
 
         // save config
         $json = '[]';

@@ -10,6 +10,6 @@ are necessary. Bugs have a lot of priority!
 ## Installation problems
 
 Please take the time to read the [documentation of Firefly III](https://docs.firefly-iii.org/) or the
-[documentation of the data importer](https://docs.firefly-iii.org/data-importer/) and make sure you search through closed issues for the problems
+[documentation of the data importer](https://docs.firefly-iii.org/) and make sure you search through closed issues for the problems
 other people have had. Your problem may be among them! If not, open an issue, and I will help where I can.
  

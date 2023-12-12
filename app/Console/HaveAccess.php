@@ -53,7 +53,7 @@ trait HaveAccess
         $headerToken = (string)request()->header('Authorization');
         if ('' !== $headerToken) {
             $token = str_replace('Bearer ', '', $headerToken);
-            $this->line('Overrule token with token from Authorization header.');
+            $this->line('Overrule token with token from Authorization heade r.');
         }
 
         $this->line(sprintf('Trying to connect to %s...', $url));
