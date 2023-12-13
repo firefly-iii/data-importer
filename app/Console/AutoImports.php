@@ -326,6 +326,11 @@ trait AutoImports
             'warn'  => $this->importWarnings,
             'error' => $this->importErrors,
         ];
+
+        $this->info(sprintf('There are %d message(s)', count($this->importMessages)));
+        $this->info(sprintf('There are %d warning(s)', count($this->importWarnings)));
+        $this->info(sprintf('There are %d error(s)', count($this->importErrors)));
+
         foreach ($list as $func => $set) {
             /**
              * @var int   $index
@@ -353,11 +358,11 @@ trait AutoImports
         $this->conversionMessages = [];
         $this->conversionWarnings = [];
         $this->conversionErrors   = [];
-        $flow    = $configuration->getFlow();
+        $flow                     = $configuration->getFlow();
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
-        if('' === $importableFile && 'file' === $flow) {
+        if ('' === $importableFile && 'file' === $flow) {
             $this->warning('Importable file path is empty. That means there is no importable file to import.');
             exit(1);
         }
