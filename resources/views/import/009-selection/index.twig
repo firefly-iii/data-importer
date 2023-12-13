@@ -128,16 +128,17 @@
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
                         <div class="card-header">
-                            Number of days to import
+                            Number of days the connection is valid
                         </div>
                         <div class="card-body">
                             <div class="form-group row">
-                                <label for="days" class="col-sm-3 col-form-label">Maximum days to import</label>
+                                <label for="days" class="col-sm-3 col-form-label">Number of days the connection is valid</label>
                                 <div class="col-sm-9">
                                     <input name="days" class="form-control" step="1" min="1" id="days" type="number"
                                            value="{{ configuration.getNordigenMaxDays }}"/>
                                     <small id="daysHelp" class="form-text text-muted">
-                                        Be careful importing large amounts of data.
+                                        The connection to your bank can be recycled for this number of days. It will be stored
+                                        in the import configuration file. Keep in mind most banks don't support more than 90 days.
                                     </small>
                                 </div>
                             </div>
