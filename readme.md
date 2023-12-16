@@ -39,7 +39,7 @@ The data importer can import CSV files you've downloaded from your bank.
 
 You can run the data importer once, for a bulk import. You can also run it regularly to keep up with new transactions.
 
-Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/data-importer)!
+Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/references/data-importer/json/)!
 
 <!-- HELP TEXT -->
 ## Need help?
@@ -60,7 +60,7 @@ If you need support using Firefly III or the associated tools, come find us!
 * Import over an API for easy automation
 * Use rules and data mapping for transaction clarity
 
-Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/references/data-importer/json/).
 
 ## Who's it for?
 
@@ -68,7 +68,7 @@ This application is for people who want to track their finances, keep an eye on 
 
 ## Getting Started
 
-Many more features are listed in the [documentation](https://docs.firefly-iii.org/data-importer).
+Many more features are listed in the [documentation](https://docs.firefly-iii.org/references/data-importer/json/).
 
 ## Contributing
 
