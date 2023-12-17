@@ -72,10 +72,6 @@ class ConnectionController extends Controller
     /**
      *
      * @return Application|Factory|View
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -144,10 +140,6 @@ class ConnectionController extends Controller
      * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function post(Request $request)
     {

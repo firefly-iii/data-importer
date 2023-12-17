@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
@@ -46,33 +47,35 @@ class PostNewTokenRequest extends Request
     /**
      * @inheritDoc
      */
-    public function get(): Response
-    {
-    }
+    public function get(): Response {}
 
     /**
      * @inheritDoc
-     * @throws GuzzleException
      */
     public function post(): Response
     {
         $url    = sprintf('%s/%s', config('nordigen.url'), 'api/v2/token/new/');
         $client = new Client();
 
-        $res  = $client->post(
-            $url,
-            [
-                'json'    => [
-                    'secret_id'  => $this->identifier,
-                    'secret_key' => $this->key,
-                ],
-                'headers' => [
-                    'accept'       => 'application/json',
-                    'content-type' => 'application/json',
-                    'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
-                ],
-            ]
-        );
+        try {
+            $res = $client->post(
+                $url,
+                [
+                    'json'    => [
+                        'secret_id'  => $this->identifier,
+                        'secret_key' => $this->key,
+                    ],
+                    'headers' => [
+                        'accept'       => 'application/json',
+                        'content-type' => 'application/json',
+                        'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
+                    ],
+                ]
+            );
+        } catch (GuzzleException $e) {
+            app('log')->error($e->getMessage());
+            throw new ImporterHttpException($e->getMessage(), 0, $e);
+        }
         $body = (string)$res->getBody();
         $json = json_decode($body, true, JSON_THROW_ON_ERROR);
 
@@ -82,7 +85,5 @@ class PostNewTokenRequest extends Request
     /**
      * @inheritDoc
      */
-    public function put(): Response
-    {
-    }
+    public function put(): Response {}
 }

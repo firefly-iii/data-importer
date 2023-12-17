@@ -60,8 +60,6 @@ class FileReader
      * @param  bool  $convert
      *
      * @return Reader
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public static function getReaderFromSession(bool $convert = false): Reader
     {

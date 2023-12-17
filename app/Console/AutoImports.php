@@ -222,11 +222,18 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error('Conversion errors', $this->conversionErrors);
-            app('log')->error('Conversion warnings', $this->conversionWarnings);
-            app('log')->error('Conversion messages', $this->conversionMessages);
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+
+            // report about it anyway:
+            event(
+                new ImportedTransactions(
+                    array_merge($this->conversionMessages, $this->importMessages),
+                    array_merge($this->conversionWarnings, $this->importWarnings),
+                    array_merge($this->conversionErrors, $this->importErrors)
+                )
+            );
             throw new ImporterErrorException('Too many errors in the data conversion.');
+
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
@@ -270,9 +277,6 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error('Conversion errors', $this->conversionErrors);
-            app('log')->error('Conversion warnings', $this->conversionWarnings);
-            app('log')->error('Conversion messages', $this->conversionMessages);
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
@@ -326,6 +330,11 @@ trait AutoImports
             'warn'  => $this->importWarnings,
             'error' => $this->importErrors,
         ];
+
+        $this->info(sprintf('There are %d message(s)', count($this->importMessages)));
+        $this->info(sprintf('There are %d warning(s)', count($this->importWarnings)));
+        $this->info(sprintf('There are %d error(s)', count($this->importErrors)));
+
         foreach ($list as $func => $set) {
             /**
              * @var int   $index
@@ -353,12 +362,12 @@ trait AutoImports
         $this->conversionMessages = [];
         $this->conversionWarnings = [];
         $this->conversionErrors   = [];
-        $flow    = $configuration->getFlow();
+        $flow                     = $configuration->getFlow();
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
-        if('' === $importableFile && 'file' === $flow) {
-            $this->warning('Importable file path is empty. That means there is no importable file to import.');
+        if ('' === $importableFile && 'file' === $flow) {
+            $this->warn('Importable file path is empty. That means there is no importable file to import.');
             exit(1);
         }
 
@@ -412,12 +421,13 @@ trait AutoImports
             $this->conversionErrors   = $manager->getAllErrors();
         }
         if (0 === count($transactions)) {
-            app('log')->error('Zero transactions!');
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
+            app('log')->error('[a] Zero transactions!');
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
         }
+
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk = Storage::disk('jobs');
         try {

@@ -163,7 +163,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $array
+     * @param array $array
      *
      * @return static
      */
@@ -253,7 +253,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *
      * @return $this
      */
@@ -281,7 +281,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $array
+     * @param array $array
      *
      * @return $this
      */
@@ -379,8 +379,8 @@ class Configuration
     }
 
     /**
-     * @param  string  $unit
-     * @param  int  $number
+     * @param string $unit
+     * @param int    $number
      *
      * @return string|null
      */
@@ -405,7 +405,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *
      * @return static
      */
@@ -521,7 +521,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *
      * @return static
      */
@@ -534,7 +534,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *
      * @return static
      */
@@ -544,8 +544,8 @@ class Configuration
     }
 
     /**
-     * @param  string  $key
-     * @param  string  $identifier
+     * @param string $key
+     * @param string $identifier
      */
     public function addRequisition(string $key, string $identifier)
     {
@@ -561,7 +561,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $accounts
+     * @param array $accounts
      */
     public function setAccounts(array $accounts): void
     {
@@ -577,7 +577,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $connection
+     * @param string $connection
      */
     public function setConnection(string $connection): void
     {
@@ -593,7 +593,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $contentType
+     * @param string $contentType
      */
     public function setContentType(string $contentType): void
     {
@@ -673,7 +673,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $doMapping
+     * @param array $doMapping
      */
     public function setDoMapping(array $doMapping): void
     {
@@ -697,7 +697,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $flow
+     * @param string $flow
      */
     public function setFlow(string $flow): void
     {
@@ -721,7 +721,15 @@ class Configuration
     }
 
     /**
-     * @param  string  $identifier
+     * @return void
+     */
+    public function clearRequisitions(): void
+    {
+        $this->nordigenRequisitions = [];
+    }
+
+    /**
+     * @param string $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -737,7 +745,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $mapping
+     * @param array $mapping
      */
     public function setMapping(array $mapping): void
     {
@@ -758,7 +766,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $nordigenBank
+     * @param string $nordigenBank
      */
     public function setNordigenBank(string $nordigenBank): void
     {
@@ -774,7 +782,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $nordigenCountry
+     * @param string $nordigenCountry
      */
     public function setNordigenCountry(string $nordigenCountry): void
     {
@@ -790,7 +798,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $nordigenMaxDays
+     * @param string $nordigenMaxDays
      */
     public function setNordigenMaxDays(string $nordigenMaxDays): void
     {
@@ -806,7 +814,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $key
+     * @param string $key
      *
      * @return string|null
      */
@@ -824,7 +832,7 @@ class Configuration
     }
 
     /**
-     * @param  array  $roles
+     * @param array $roles
      */
     public function setRoles(array $roles): void
     {
@@ -856,7 +864,7 @@ class Configuration
     }
 
     /**
-     * @param  string  $name
+     * @param string $name
      *
      * @return bool
      */

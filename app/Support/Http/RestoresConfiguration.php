@@ -37,8 +37,6 @@ trait RestoresConfiguration
      * Restore configuration from session and drive.
      *
      * @return Configuration
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     protected function restoreConfiguration(): Configuration
     {

@@ -456,7 +456,7 @@ class GenerateTransactions
             'payment_date'           => null === $valueDate ? '' : $valueDate->format('Y-m-d'),
             'order'                  => 0,
             'currency_code'          => $entry->currencyCode,
-            'tags'                   => [],
+            'tags'                   => $entry->tags,
             'category_name'          => null,
             'category_id'            => null,
             'notes'                  => $entry->getNotes(),

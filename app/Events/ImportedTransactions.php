@@ -34,6 +34,8 @@ class ImportedTransactions
 {
     use SerializesModels;
 
+    public const int TEST = 3;
+
     public array $errors;
     public array $messages;
     public array $warnings;
@@ -48,17 +50,18 @@ class ImportedTransactions
         app('log')->debug('Created event ImportedTransactions with filtering (2)');
 
         // filter messages:
-        $this->messages = $this->filterArray($messages);
-        $this->warnings = $this->filterArray($warnings);
-        $this->errors   = $this->filterArray($errors);
+        $this->messages = $this->filterArray('message(s)', $messages);
+        $this->warnings = $this->filterArray('warning(s)',$warnings);
+        $this->errors   = $this->filterArray('error(s)', $errors);
     }
 
     /**
      * @param  array  $collection
      *
+     * @string $title
      * @return array
      */
-    private function filterArray(array $collection): array
+    private function filterArray(string $title, array $collection): array
     {
         $count         = 0;
         $newCollection = [];
@@ -75,7 +78,7 @@ class ImportedTransactions
                 $newCollection[$index] = $newSet;
             }
         }
-        app('log')->debug(sprintf('Array contains %d line(s)', $count));
+        app('log')->debug(sprintf('Array contains %d %s', $count, $title));
 
         return $newCollection;
     }

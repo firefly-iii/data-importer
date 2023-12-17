@@ -131,6 +131,11 @@ class Account
         return $this->bban;
     }
 
+    public function getBalances(): array
+    {
+        return $this->balances;
+    }
+
     /**
      * @param  string  $bban
      */

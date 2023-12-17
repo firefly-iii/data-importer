@@ -57,13 +57,13 @@
                             {% if 'camt' == configuration.getContentType %}
                                 Even though camt.053 is a defined standard, you might want to customize. Some of the most important settings are below.
                                 They apply to all records in the uploaded files. If you would like some support, you won't find anything at <a
-                                    href="https://docs.firefly-iii.org/data-importer/how-to-use/configure-import/" target="_blank">
+                                    href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/" target="_blank">
                                     this page.</a> right now.
                             {% endif %}
                             {% if 'csv' == configuration.getContentType %}
                                 Importable files come in many shapes and forms. Some of the most important settings are below.
                                 They apply to all lines in the file. If you would like some support, <a
-                                    href="https://docs.firefly-iii.org/data-importer/how-to-use/configure-import/" target="_blank">
+                                    href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/" target="_blank">
                                     check out the documentation for this page.</a>
                             {% endif %}
                             </p>
@@ -71,7 +71,7 @@
                             {% if 'nordigen' == flow or 'spectre' == flow %}
                                 <p>
                                     Your {{ flow|capitalize }} import can be configured and fine-tuned.
-                                    <a href="https://docs.firefly-iii.org/data-importer/how-to-use/configure-import/" target="_blank">Check
+                                    <a href="https://docs.firefly-iii.org/how-to/data-importer/import/gocardless/" target="_blank">Check
                                         out the documentation for this page.</a>
                                 </p>
                             {% endif %}
@@ -371,7 +371,7 @@
                                         <small id="custom_tagHelp" class="form-text text-muted">
                                             You can set your own import tag to easily distinguish imports
                                             or just because you don't like the default one.
-                                            <a href="https://docs.firefly-iii.org/data-importer/faq/custom-import-tag/" target="_blank">Read more in the documentation</a>.
+                                            <a href="https://docs.firefly-iii.org/how-to/data-importer/advanced/custom-import-tag/" target="_blank">Read more in the documentation</a>.
                                         </small>
                                     </div>
                                 </div>
@@ -486,7 +486,7 @@
                                         Firefly III can automatically detect duplicate transactions. This is pretty
                                         foolproof. In some special cases however,
                                         you want more control over this process. Read more about the options below in <a
-                                            href="https://docs.firefly-iii.org/data-importer/how-to-use/configure-import/"
+                                            href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/"
                                             target="_blank">the documentation</a>.
                                     </p>
                                 </div>
@@ -535,7 +535,7 @@
                                         </select>
                                         <small id="duplicate_detection_method_help" class="form-text text-muted">
                                             For more details on these detection method see <a
-                                                href="https://docs.firefly-iii.org/data-importer/how-to-use/configure-import/#duplicate-transaction-detection"
+                                                href="https://docs.firefly-iii.org/references/data-importer/duplicate-detection/"
                                                 target="_blank">the documentation</a>. If you're not sure, select
                                             "content-based" detection.
                                         </small>

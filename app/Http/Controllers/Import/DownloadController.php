@@ -41,8 +41,6 @@ class DownloadController extends Controller
 
     /**
      * @return Application|ResponseFactory|Response
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function download(): Response|Application|ResponseFactory
     {

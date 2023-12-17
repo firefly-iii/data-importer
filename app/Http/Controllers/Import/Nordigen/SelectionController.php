@@ -67,10 +67,6 @@ class SelectionController extends Controller
      * Step 9, select a country + bank.
      *
      * @return Factory|View
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
-     * @throws AgreementExpiredException
      */
     public function index()
     {
@@ -115,10 +111,6 @@ class SelectionController extends Controller
      * @param  SelectionRequest  $request
      *
      * @return Application|RedirectResponse|Redirector
-     * @throws ImporterErrorException
-     * @throws FilesystemException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function postIndex(SelectionRequest $request)
     {
@@ -134,7 +126,7 @@ class SelectionController extends Controller
 
         $configuration->setNordigenCountry($values['country']);
         $configuration->setNordigenBank($values['bank']);
-        $configuration->setNordigenMaxDays($values['days']);
+        $configuration->    setNordigenMaxDays($values['days']);
 
         // save config
         $json = '[]';

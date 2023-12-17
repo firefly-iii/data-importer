@@ -28,6 +28,7 @@ namespace App\Services\Shared\Model;
 
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\Nordigen\Model\Balance;
 use App\Services\Spectre\Model\Account as SpectreAccount;
 
 class ImportServiceAccount
@@ -57,7 +58,7 @@ class ImportServiceAccount
                 $iban = '';
             }
 
-            $return[] = self::fromArray(
+            $current = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getFullName(),
@@ -75,6 +76,12 @@ class ImportServiceAccount
                     ],
                 ]
             );
+            /** @var Balance $balance */
+            foreach ($account->getBalances() as $balance) {
+                $key                  = sprintf('Balance (%s) (%s)', $balance->type, $balance->currency);
+                $current->extra[$key] = $balance->amount;
+            }
+            $return[] = $current;
         }
 
         return $return;

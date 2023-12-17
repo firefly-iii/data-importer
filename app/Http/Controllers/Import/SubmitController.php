@@ -67,9 +67,6 @@ class SubmitController extends Controller
 
     /**
      * @return Application|Factory|View
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -102,9 +99,6 @@ class SubmitController extends Controller
      * @param  Request  $request
      *
      * @return JsonResponse
-     * @throws ContainerExceptionInterface
-     * @throws FilesystemException
-     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {

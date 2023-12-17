@@ -63,6 +63,8 @@ class Transaction
     public string $mandateId;
     public string $proprietaryBank;
 
+    public array $tags;
+
     // debtorAccount is an array, but is saved as strings
     // iban, currency
     public string $purposeCode;
@@ -96,8 +98,8 @@ class Transaction
     public static function fromArray($array): self
     {
         app('log')->debug('Nordigen transaction from array', $array);
-        $object = new self();
-
+        $object                                         = new self();
+        $object->tags                                   = [];
         $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
         $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
         $object->bankTransactionCode                    = trim($array['bankTransactionCode'] ?? '');
@@ -151,6 +153,12 @@ class Transaction
             $object->balanceAfterTransaction = Balance::createFromArray([]);
         }
 
+        // add "pending" or "booked" if it exists.
+        $key = (string)$array['key'];
+        if ('' !== $key) {
+            $object->tags[] = $key;
+        }
+
 
         // array values:
         $object->creditorAccountIban     = trim($array['creditorAccount']['iban'] ?? '');
@@ -192,6 +200,7 @@ class Transaction
     {
         $object = new self();
 
+        $object->tags                                   = [];
         $object->additionalInformation                  = $array['additional_information'];
         $object->additionalInformationStructured        = $array['additional_information_structured'];
         $object->balanceAfterTransaction                = Balance::fromLocalArray($array['balance_after_transaction']);
@@ -220,6 +229,11 @@ class Transaction
         $object->transactionAmount                      = $array['transaction_amount']['amount'];
         $object->currencyCode                           = $array['transaction_amount']['currency'];
         $object->accountIdentifier                      = $array['account_identifier'];
+
+        // add tags from array, if they exist.
+        if (is_array($array['tags']) && count($array['tags']) > 0) {
+            $object->tags = $array['tags'];
+        }
 
         // undocumented values:
         $object->endToEndId = $array['end_to_end_id'];
@@ -341,8 +355,12 @@ class Transaction
     public function getDestinationName(): ?string
     {
         app('log')->debug(__METHOD__);
+        if ('' !== $this->ultimateCreditor) {
+            app('log')->debug(sprintf('Destination name is "%s" (ultimateCreditor)', $this->ultimateCreditor));
+            return $this->ultimateCreditor;
+        }
         if ('' !== $this->creditorName) {
-            app('log')->debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
+            app('log')->debug(sprintf('Destination name is "%s" (creditorName)', $this->creditorName));
 
             return $this->creditorName;
         }
@@ -421,8 +439,13 @@ class Transaction
     public function getSourceName(): ?string
     {
         app('log')->debug(__METHOD__);
+        if ('' !== $this->ultimateDebtor) {
+            app('log')->debug(sprintf('Source name is "%s" (ultimateDebtor)', $this->ultimateDebtor));
+
+            return $this->ultimateDebtor;
+        }
         if ('' !== $this->debtorName) {
-            app('log')->debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
+            app('log')->debug(sprintf('Source name is "%s" (debtorName)', $this->debtorName));
 
             return $this->debtorName;
         }
@@ -484,6 +507,7 @@ class Transaction
             'creditor_name'                             => $this->creditorName,
             'currency_exchange'                         => $this->currencyExchange,
             'debtor_agent'                              => $this->debtorAgent,
+            'tags'                                      => $this->tags,
             'debtor_name'                               => $this->debtorName,
             'entry_reference'                           => $this->entryReference,
             'key'                                       => $this->key,

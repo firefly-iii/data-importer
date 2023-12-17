@@ -110,12 +110,11 @@ class TransactionProcessor
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
         app('log')->debug('Done with download');
-
         return $return;
     }
 
     /**
-     * @param  Configuration  $configuration
+     * @param Configuration $configuration
      */
     public function setConfiguration(Configuration $configuration): void
     {
@@ -123,7 +122,7 @@ class TransactionProcessor
     }
 
     /**
-     * @param  string  $identifier
+     * @param string $identifier
      */
     public function setIdentifier(string $identifier): void
     {
@@ -131,7 +130,7 @@ class TransactionProcessor
     }
 
     /**
-     * @param  GetTransactionsResponse  $transactions
+     * @param GetTransactionsResponse $transactions
      *
      * @return array
      */
@@ -169,7 +168,17 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT), ));
+            // add error if amount is zero:
+            if (0 === bccomp('0', $transaction->transactionAmount)) {
+                $this->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
+                                                          $transaction->transactionId, $transaction->getSourceName(), $transaction->getDestinationName(), $transaction->getDescription()));
+                app('log')->debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
+                continue;
+            }
+
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+
+
             $return[] = $transaction;
         }
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));

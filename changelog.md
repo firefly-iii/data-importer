@@ -2,6 +2,33 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.0 - 2023-12-18
+
+> ⚠️⚠️ This release required **PHP 8.3.0** and will not work on earlier releases of PHP ⚠️⚠️
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Added
+- GoCardless-users are forwarded to refresh their agreement if necessary.
+
+### Changed
+- ⚠️⚠️ Added support for PHP 8.3 ⚠️⚠️
+- Requires Firefly III **v6.1.0** or higher
+
+### Removed
+- ⚠️⚠️ Removed support for PHP 8.2 ⚠️⚠️
+
+### Fixed
+- [Issue 8000](https://github.com/firefly-iii/firefly-iii/issues/8000) Inform user when there are no transactions found by the Nordigen Data Importer
+- [Issue 6500](https://github.com/firefly-iii/firefly-iii/issues/6500) Transactions with 0.0 amount are not imported
+- [Issue 6470](https://github.com/firefly-iii/firefly-iii/issues/6470) use the "ultimateCreditor"-field for Nordigen transactions
+- [Issue 5460](https://github.com/firefly-iii/firefly-iii/issues/5460) Add balance info in configuration screen
+- Access token from `Authorization`-header is forwarded to Firefly III if necessary.
+- All documentation links are fixed again.
+- Improve text in configuration screen.
+- Expand notifications so logging can be more easily parsed.
+- Nordigen / GoCardless now saves the booked / pending tags as well.
+
 ## 1.3.12 - 2023-11-23
 
 ### Added
@@ -430,7 +457,7 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 - 💡 Some people have reported running into loops when trying to start importing CSV files. Please [open an issue](https://github.com/firefly-iii/firefly-iii/issues) if this happens to you.
 
 ### Added
-- Code to support the [cloud installation](https://docs.firefly-iii.org/data-importer/installation/public/).
+- Code to support the [cloud installation](https://docs.firefly-iii.org/references/data-importer/public/).
 - Proper page for maintenance mode.
 
 ### Changed

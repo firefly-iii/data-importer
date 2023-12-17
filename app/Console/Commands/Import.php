@@ -136,18 +136,14 @@ final class Import extends Command
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error('Conversion errors', $this->conversionErrors);
-            app('log')->error('Conversion warnings', $this->conversionWarnings);
-            app('log')->error('Conversion messages', $this->conversionMessages);
-            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-            throw new ImporterErrorException('Too many errors in the data conversion.');
+            $this->error('There are many errors in the data conversion. The import will stop here.');
         }
-
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
-        $this->startImport($configuration);
-        $this->reportImport();
-
-        $this->line('Done!');
+        if (0 === count($this->conversionErrors)) {
+            $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
+            $this->startImport($configuration);
+            $this->reportImport();
+            $this->line('Done!');
+        }
 
         event(
             new ImportedTransactions(

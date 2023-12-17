@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
-use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
@@ -39,15 +38,12 @@ use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
-use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class ConfigurationController
@@ -71,15 +67,9 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return Factory|RedirectResponse|View
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ApiHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws AgreementExpiredException
      */
     public function index(Request $request)
     {
@@ -113,7 +103,23 @@ class ConfigurationController extends Controller
         $importerAccounts = [];
         $uniqueColumns    = config('csv.unique_column_options');
         if ('nordigen' === $flow) {
+            // TODO here we need to redirect to Nordigen.
+            try {
             $importerAccounts = $this->getNordigenAccounts($configuration);
+            } catch (AgreementExpiredException $e) {
+                app('log')->error($e->getMessage());
+
+                // remove thing from configuration
+                $configuration->clearRequisitions();
+
+                // save configuration in session and on disk:
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+                $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+                // redirect to selection.
+                return redirect()->route('009-selection.index');
+            }
             $uniqueColumns    = config('nordigen.unique_column_options');
             $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
@@ -140,7 +146,7 @@ class ConfigurationController extends Controller
 
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      */
@@ -156,7 +162,7 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param  ConfigurationPostRequest  $request
+     * @param ConfigurationPostRequest $request
      *
      * @return RedirectResponse
      * @throws ImporterErrorException

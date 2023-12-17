@@ -116,7 +116,7 @@ class TransactionMapper
             }
         }
 
-        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/firefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/fxirefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
         $sourceIsNull    = null === $accountType['source'];
         $sourceIsAsset   = 'asset' === $accountType['source'];
         $sourceIsRevenue = 'revenue' === $accountType['source'];

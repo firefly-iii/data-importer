@@ -72,7 +72,7 @@
         }
     ],
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-bcmath": "*",
         "ext-json": "*",
         "doctrine/dbal": "^3.0",
@@ -83,7 +83,7 @@
         "league/csv": "9.*",
         "rcrowe/twigbridge": "^0.14.0",
         "spatie/enum": "^3.10",
-        "symfony/http-client": "^6.2",
+        "symfony/http-client": "^7.0",
         "symfony/mailgun-mailer": "^6.2",
         "genkgo/camt": ">=2.0.0"
     },
@@ -106,9 +106,6 @@
         "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
     "config": {
-        "platform": {
-            "php": "8.2"
-        },
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,

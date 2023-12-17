@@ -79,7 +79,7 @@ final class AutoImport extends Command
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
-            $this->info('https://docs.firefly-iii.org/data-importer/');
+            $this->info('https://docs.firefly-iii.org/');
 
             return 1;
         }

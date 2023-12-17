@@ -150,10 +150,6 @@ class ConversionController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {
@@ -205,7 +201,7 @@ class ConversionController extends Controller
         }
         app('log')->debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
-            app('log')->error('Zero transactions!');
+            app('log')->error('[b] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());

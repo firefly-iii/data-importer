@@ -29,15 +29,15 @@ namespace App\Services\Shared\Conversion;
  */
 trait ProgressInformation
 {
-    protected array  $errors;
+    protected array  $errors = [];
     protected string $identifier;
-    protected array  $messages;
-    protected array  $warnings;
+    protected array  $messages = [];
+    protected array  $warnings = [];
 
     /**
      * @return array
      */
-    public function getErrors(): array
+    final public function getErrors(): array
     {
         return $this->errors ?? [];
     }
@@ -45,7 +45,7 @@ trait ProgressInformation
     /**
      * @return array
      */
-    public function getMessages(): array
+    final public function getMessages(): array
     {
         return $this->messages ?? [];
     }
@@ -53,7 +53,7 @@ trait ProgressInformation
     /**
      * @return array
      */
-    public function getWarnings(): array
+    final public function getWarnings(): array
     {
         return $this->warnings ?? [];
     }
@@ -61,7 +61,7 @@ trait ProgressInformation
     /**
      * @param  string  $identifier
      */
-    public function setIdentifier(string $identifier): void
+    final public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
     }
@@ -70,7 +70,7 @@ trait ProgressInformation
      * @param  int  $index
      * @param  string  $error
      */
-    protected function addError(int $index, string $error): void
+    final protected function addError(int $index, string $error): void
     {
         $this->errors           = $this->errors ?? [];
         $this->errors[$index]   = $this->errors[$index] ?? [];
@@ -84,7 +84,7 @@ trait ProgressInformation
      * @param  int  $index
      * @param  string  $message
      */
-    protected function addMessage(int $index, string $message): void
+    final protected function addMessage(int $index, string $message): void
     {
         $this->messages           = $this->messages ?? [];
         $this->messages[$index]   = $this->messages[$index] ?? [];
@@ -98,7 +98,7 @@ trait ProgressInformation
      * @param  int  $index
      * @param  string  $warning
      */
-    protected function addWarning(int $index, string $warning): void
+    final protected function addWarning(int $index, string $warning): void
     {
         $this->warnings           = $this->warnings ?? [];
         $this->warnings[$index]   = $this->warnings[$index] ?? [];
