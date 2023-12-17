@@ -43,7 +43,7 @@ use App\Services\Nordigen\TokenManager;
 class AccountInformationCollector
 {
     /**
-     * @param  Account  $account
+     * @param Account $account
      *
      * @return Account
      * @throws AgreementExpiredException
@@ -56,7 +56,7 @@ class AccountInformationCollector
         $detailedAccount = $account;
         try {
             $detailedAccount = self::getAccountDetails($account);
-        } catch (ImporterHttpException|ImporterErrorException $e) {
+        } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $detailedAccount->setStatus('no-info');
@@ -66,7 +66,7 @@ class AccountInformationCollector
 
         try {
             $balanceAccount = self::getBalanceDetails($account);
-        } catch (ImporterHttpException|ImporterErrorException $e) {
+        } catch (ImporterHttpException | ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $status = $balanceAccount->getStatus();
@@ -83,12 +83,10 @@ class AccountInformationCollector
     }
 
     /**
-     * @param  Account  $account
+     * @param Account $account
      *
      * @return Account
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws AgreementExpiredException
+     * @throws ImporterErrorException|AgreementExpiredException
      */
     protected static function getAccountDetails(Account $account): Account
     {
@@ -99,11 +97,18 @@ class AccountInformationCollector
         $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         /** @var ArrayResponse $response */
 
-        $response = $request->get();
+        try {
+            $response = $request->get();
+        } catch (AgreementExpiredException $e) {
+            // need to redirect user at some point.
+            throw new AgreementExpiredException($e->getMessage(), 0, $e);
+        } catch (ImporterHttpException | ImporterErrorException $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
 
         if (!array_key_exists('account', $response->data)) {
             app('log')->error('Missing account array', $response->data);
-            throw new ImporterHttpException('No account array, exit.');
+            throw new ImporterErrorException('No account array, exit.');
         }
 
         $information = $response->data['account'];
@@ -143,11 +148,9 @@ class AccountInformationCollector
     }
 
     /**
-     * @param  Account  $account
+     * @param Account $account
      *
      * @return Account
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
      */
     private static function getBalanceDetails(Account $account): Account
     {
@@ -170,11 +173,9 @@ class AccountInformationCollector
     }
 
     /**
-     * @param  Account  $account
+     * @param Account $account
+     *
      * @return Account
-     * @throws AgreementExpiredException
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
      */
     private static function getBasicDetails(Account $account): Account
     {

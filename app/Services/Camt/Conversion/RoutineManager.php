@@ -105,9 +105,6 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @inheritDoc
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public function start(): array
     {
@@ -154,7 +151,6 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * @return Message|null
-     * @throws ContainerExceptionInterface|NotFoundExceptionInterface|ImporterErrorException
      */
     private function getCamtMessage(): ?Message
     {

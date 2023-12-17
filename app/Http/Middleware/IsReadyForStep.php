@@ -45,9 +45,6 @@ trait IsReadyForStep
      * @param Closure $next
      *
      * @return mixed
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public function handle(Request $request, Closure $next): mixed
     {
@@ -67,9 +64,6 @@ trait IsReadyForStep
      * @param Request $request
      *
      * @return bool
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     protected function isReadyForStep(Request $request): bool
     {
@@ -99,9 +93,6 @@ trait IsReadyForStep
      * @param Request $request
      *
      * @return RedirectResponse|null
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     protected function redirectToCorrectStep(Request $request): ?RedirectResponse
     {
@@ -141,9 +132,6 @@ trait IsReadyForStep
 
     /**
      * @return bool
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function isReadyForFileStep(): bool
     {
@@ -200,9 +188,6 @@ trait IsReadyForStep
 
     /**
      * @return bool
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function isReadyForNordigenStep(): bool
     {
@@ -291,9 +276,6 @@ trait IsReadyForStep
 
     /**
      * @return bool
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function isReadyForSpectreStep(): bool
     {
@@ -437,9 +419,6 @@ trait IsReadyForStep
 
     /**
      * @return RedirectResponse
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function redirectToCorrectNordigenStep(): RedirectResponse
     {
@@ -502,9 +481,6 @@ trait IsReadyForStep
 
     /**
      * @return RedirectResponse
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function redirectToCorrectSpectreStep(): RedirectResponse
     {

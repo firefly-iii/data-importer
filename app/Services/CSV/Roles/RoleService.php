@@ -175,9 +175,6 @@ class RoleService
      * @param  Configuration  $configuration
      *
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {

@@ -132,10 +132,6 @@ class LinkController extends Controller
      * @param  Request  $request
      *
      * @return Application|RedirectResponse|Redirector
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function callback(Request $request)
     {

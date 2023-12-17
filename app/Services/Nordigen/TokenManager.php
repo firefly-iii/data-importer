@@ -48,7 +48,7 @@ class TokenManager
         self::validateAllTokens();
         try {
             $token = session()->get(Constants::NORDIGEN_ACCESS_TOKEN);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
@@ -101,8 +101,6 @@ class TokenManager
 
     /**
      * @return bool
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public static function hasValidAccessToken(): bool
     {
@@ -113,7 +111,11 @@ class TokenManager
 
             return false;
         }
-        $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
+        try {
+            $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
+        } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+            $tokenValidity = 0;
+        }
         //app('log')->debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
         $result = time() < $tokenValidity;
         if (false === $result) {
@@ -129,8 +131,6 @@ class TokenManager
 
     /**
      * @return bool
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public static function hasValidRefreshToken(): bool
     {
@@ -141,15 +141,17 @@ class TokenManager
 
             return false;
         }
-        $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
+        try {
+            $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
+        } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+            $tokenValidity = 0;
+        }
 
         return time() < $tokenValidity;
     }
 
     /**
-     * @throws ContainerExceptionInterface
      * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public static function validateAllTokens(): void
     {

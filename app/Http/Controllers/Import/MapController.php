@@ -66,10 +66,6 @@ class MapController extends Controller
 
     /**
      * @return Factory|View
-     * @throws ContainerExceptionInterface
-     * @throws FileNotFoundException
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     public function index()
     {
@@ -121,9 +117,6 @@ class MapController extends Controller
      * @param Request $request
      *
      * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
      */
     public function postIndex(Request $request): RedirectResponse
     {
@@ -209,9 +202,6 @@ class MapController extends Controller
      * TODO needs renaming or specific CAMT counterpart.
      *
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     private function getCSVMapInformation(): array
     {
@@ -284,9 +274,6 @@ class MapController extends Controller
      * TODO needs refactoring and proper splitting into helpers.
      *
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     private function getCamtMapInformation(): array
     {
@@ -344,9 +331,6 @@ class MapController extends Controller
 
     /**
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     private function getCategories(): array
     {
@@ -383,10 +367,6 @@ class MapController extends Controller
      * Weird bunch of code to return info on Spectre and Nordigen.
      *
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws FileNotFoundException
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     private function getImporterMapInformation(): array
     {
@@ -446,9 +426,6 @@ class MapController extends Controller
 
     /**
      * @return array
-     * @throws ImporterErrorException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      *
      * TODO move to helper or something
      */

@@ -65,13 +65,6 @@ class RoleController extends Controller
      * @param Request $request
      *
      * @return View|void
-     * @throws JsonException
-     * @throws Exception
-     * @throws InvalidArgument
-     * @throws UnableToProcessCsv
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ImporterErrorException
      */
     public function index(Request $request)
     {
@@ -98,11 +91,6 @@ class RoleController extends Controller
      * @param RolesPostRequest $request
      *
      * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws FilesystemException
-     * @throws ImporterErrorException
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
      */
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
@@ -126,9 +114,6 @@ class RoleController extends Controller
      * @param Configuration $configuration
      *
      * @return View
-     * @throws ContainerExceptionInterface
-     * @throws ImporterErrorException
-     * @throws NotFoundExceptionInterface
      */
     private function camtIndex(Request $request, Configuration $configuration): View
     {
@@ -222,10 +207,6 @@ class RoleController extends Controller
      * @param Configuration    $configuration
      *
      * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws FilesystemException
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
      */
     private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
@@ -267,12 +248,6 @@ class RoleController extends Controller
      * @param Configuration $configuration
      *
      * @return View
-     * @throws ContainerExceptionInterface
-     * @throws Exception
-     * @throws InvalidArgument
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
-     * @throws UnableToProcessCsv
      */
     private function csvIndex(Request $request, Configuration $configuration): View
     {
@@ -306,9 +281,6 @@ class RoleController extends Controller
      * @param Configuration    $configuration
      *
      * @return RedirectResponse
-     * @throws ContainerExceptionInterface
-     * @throws JsonException
-     * @throws NotFoundExceptionInterface
      */
     private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {

@@ -150,10 +150,6 @@ class ConversionController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws ImporterErrorException
-     * @throws ImporterHttpException
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public function start(Request $request): JsonResponse
     {

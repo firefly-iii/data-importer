@@ -41,8 +41,6 @@ class SecretManager
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
      *
      * @return string
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     public static function getAppId(): string
     {
