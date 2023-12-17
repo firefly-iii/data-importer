@@ -133,7 +133,7 @@ class AccountInformationCollector
         $account->setStatus($information['status'] ?? '');
         $account->setUsage($information['usage'] ?? '');
 
-        // set owner info (could be array or string)
+        // set owner info (could be an array or string)
         $ownerAddress = [];
         if (array_key_exists('ownerAddressUnstructured', $information) && is_array($information['ownerAddressUnstructured'])) {
             $ownerAddress = $information['ownerAddressUnstructured'];
