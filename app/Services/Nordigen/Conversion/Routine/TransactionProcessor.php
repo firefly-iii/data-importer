@@ -171,13 +171,14 @@ class TransactionProcessor
             }
             // add error if amount is zero:
             if (0 === bccomp('0', $transaction->transactionAmount)) {
-                $this->addWarning(count($return), sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
+                $this->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
                                                           $transaction->transactionId, $transaction->getSourceName(), $transaction->getDestinationName(), $transaction->getDescription()));
                 app('log')->debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
                 continue;
             }
 
             app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
+
 
             $return[] = $transaction;
         }
