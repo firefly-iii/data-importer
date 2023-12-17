@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '1.3.12',
+    'version'                 => '1.4.0',
     'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
         'file'     => 'File',
