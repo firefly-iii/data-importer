@@ -44,10 +44,10 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    use CombinedProgressInformation;
     use GeneratesIdentifier;
     use IsRunningCli;
     use ProgressInformation;
-    use CombinedProgressInformation;
 
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;

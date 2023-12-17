@@ -43,9 +43,9 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
+    use CombinedProgressInformation;
     use GeneratesIdentifier;
     use ProgressInformation;
-    use CombinedProgressInformation;
 
     private array                $allErrors;
     private array                $allMessages;

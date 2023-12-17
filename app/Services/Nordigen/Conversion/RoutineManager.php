@@ -43,10 +43,10 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    use CombinedProgressInformation;
     use GeneratesIdentifier;
     use IsRunningCli;
     use ProgressInformation;
-    use CombinedProgressInformation;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;

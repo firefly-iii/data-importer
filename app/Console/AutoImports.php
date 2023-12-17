@@ -367,7 +367,7 @@ trait AutoImports
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         if ('' === $importableFile && 'file' === $flow) {
-            $this->warning('Importable file path is empty. That means there is no importable file to import.');
+            $this->warn('Importable file path is empty. That means there is no importable file to import.');
             exit(1);
         }
 
