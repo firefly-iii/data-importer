@@ -34,6 +34,8 @@ class ImportedTransactions
 {
     use SerializesModels;
 
+    public const int TEST = 3;
+
     public array $errors;
     public array $messages;
     public array $warnings;
