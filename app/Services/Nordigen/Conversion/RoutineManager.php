@@ -115,9 +115,7 @@ class RoutineManager implements RoutineManagerInterface
             throw $e;
         }
 
-        $nordigen = [];
         // collect errors from transactionProcessor.
-
         if (0 === count($nordigen)) {
             app('log')->warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
