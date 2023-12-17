@@ -418,7 +418,7 @@ trait AutoImports
         }
         if (0 === count($transactions)) {
             app('log')->error('Zero transactions!');
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();

@@ -32,7 +32,9 @@ use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
+use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -44,10 +46,9 @@ class RoutineManager implements RoutineManagerInterface
 {
     use GeneratesIdentifier;
     use IsRunningCli;
+    use ProgressInformation;
+    use CombinedProgressInformation;
 
-    private array                      $allErrors;
-    private array                      $allMessages;
-    private array                      $allWarnings;
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;
     private string                     $content;
@@ -72,30 +73,6 @@ class RoutineManager implements RoutineManagerInterface
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
     }
 
     /**
@@ -173,6 +150,11 @@ class RoutineManager implements RoutineManagerInterface
 
 
         $count = count($CSVLines);
+
+        if (0 === $count) {
+            $this->addError(0, 'No transactions found in CSV file.');
+        }
+
         $this->mergeMessages($count);
         $this->mergeWarnings($count);
         $this->mergeErrors($count);
@@ -185,12 +167,14 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function mergeErrors(int $count): void
     {
-        $this->allErrors = $this->mergeArrays([
-                                                  $this->csvFileProcessor->getErrors(),
-                                                  $this->lineProcessor->getErrors(),
-                                                  $this->columnValueConverter->getErrors(),
-                                                  $this->pseudoTransactionProcessor->getErrors(),
-                                              ], $count);
+        $this->allErrors = $this->mergeArrays(
+            [
+                $this->getErrors(),
+                $this->csvFileProcessor->getErrors(),
+                $this->lineProcessor->getErrors(),
+                $this->columnValueConverter->getErrors(),
+                $this->pseudoTransactionProcessor->getErrors(),
+            ], $count);
 
     }
 
@@ -200,6 +184,7 @@ class RoutineManager implements RoutineManagerInterface
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays([
+                                                    $this->getMessages(),
                                                     $this->csvFileProcessor->getMessages(),
                                                     $this->lineProcessor->getMessages(),
                                                     $this->columnValueConverter->getMessages(),
@@ -213,6 +198,7 @@ class RoutineManager implements RoutineManagerInterface
     private function mergeWarnings(int $count): void
     {
         $this->allWarnings = $this->mergeArrays([
+                                                    $this->getWarnings(),
                                                     $this->csvFileProcessor->getWarnings(),
                                                     $this->lineProcessor->getWarnings(),
                                                     $this->columnValueConverter->getWarnings(),
@@ -220,37 +206,5 @@ class RoutineManager implements RoutineManagerInterface
                                                 ], $count);
     }
 
-    /**
-     * @param array $collection
-     * @param int   $count
-     *
-     * @return array
-     */
-    private function mergeArrays(array $collection, int $count): array
-    {
-        $return = [];
-        foreach ($collection as $set) {
-            if (0 === count($set)) {
-                continue;
-            }
-            for ($i = 0; $i < $count; $i++) {
-                if (array_key_exists($i, $set)) {
-                    $return[$i] = array_key_exists($i, $return) ? $return[$i] : [];
-                    $return[$i] = array_merge($return[$i], $set[$i]);
-                }
-            }
-        }
 
-        // sanity check (should not be necessary)
-        foreach ($return as $index => $set) {
-            if (0 === count($set)) {
-                unset($return[$index]);
-            }
-        }
-        if (0 === count($return)) {
-            $return = [];
-        }
-
-        return $return;
-    }
 }
