@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - ⚠️⚠️ Added support for PHP 8.3 ⚠️⚠️
+- Requires Firefly III **v6.1.0** or higher
 
 ### Removed
 - ⚠️⚠️ Removed support for PHP 8.2 ⚠️⚠️
