@@ -27,12 +27,15 @@ namespace App\Services\Spectre\Conversion;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
+use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;
 use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
 use App\Services\Spectre\Conversion\Routine\TransactionProcessor;
 use App\Support\Http\CollectsAccounts;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 
 /**
  * Class RoutineManager
@@ -41,6 +44,8 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
     use GeneratesIdentifier;
+    use ProgressInformation;
+    use CombinedProgressInformation;
 
     private array                $allErrors;
     private array                $allMessages;
@@ -55,7 +60,6 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier)
     {
-        // TODO conversion does not add errors, warnings and messages.
         $this->allErrors   = [];
         $this->allWarnings = [];
         $this->allMessages = [];
@@ -69,30 +73,6 @@ class RoutineManager implements RoutineManagerInterface
         if (null !== $identifier) {
             $this->identifier = $identifier;
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
     }
 
     /**
@@ -120,14 +100,77 @@ class RoutineManager implements RoutineManagerInterface
 
         // generate Firefly III ready transactions:
         app('log')->debug('Generating Firefly III transactions.');
-        $this->transactionGenerator->collectTargetAccounts();
+        try {
+            $this->transactionGenerator->collectTargetAccounts();
+        } catch (ApiHttpException $e) {
+            $this->addError(0, sprintf('Cannot download Spectre accounts: %s', $e->getMessage()));
+            $this->mergeMessages(1);
+            $this->mergeWarnings(1);
+            $this->mergeErrors(1);
+            throw new ImporterHttpException($e->getMessage(), 0, $e);
+        }
 
         $converted = $this->transactionGenerator->getTransactions($transactions);
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
+        if(0 === count($converted)) {
+            $this->addError(0, 'No transactions were converted, probably zero found at Spectre.');
+            $this->mergeMessages(1);
+            $this->mergeWarnings(1);
+            $this->mergeErrors(1);
+            return [];
+        }
 
         $filtered = $this->transactionFilter->filter($converted);
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
+        $this->mergeMessages(count($transactions));
+        $this->mergeWarnings(count($transactions));
+        $this->mergeErrors(count($transactions));
+
         return $filtered;
+    }
+
+
+    /**
+     * @param int $count
+     */
+    private function mergeErrors(int $count): void
+    {
+        $this->allErrors = $this->mergeArrays(
+            [
+                $this->getErrors(),
+                $this->transactionFilter->getErrors(),
+                $this->transactionProcessor->getErrors(),
+                $this->transactionGenerator->getErrors(),
+            ], $count);
+
+    }
+
+    /**
+     * @param int $count
+     */
+    private function mergeMessages(int $count): void
+    {
+        $this->allMessages = $this->mergeArrays(
+            [
+                $this->getMessages(),
+                $this->transactionFilter->getMessages(),
+                $this->transactionProcessor->getMessages(),
+                $this->transactionGenerator->getMessages(),
+            ], $count);
+    }
+
+    /**
+     * @param int $count
+     */
+    private function mergeWarnings(int $count): void
+    {
+        $this->allWarnings = $this->mergeArrays(
+            [
+                $this->getWarnings(),
+                $this->transactionFilter->getWarnings(),
+                $this->transactionProcessor->getWarnings(),
+                $this->transactionGenerator->getWarnings(),
+            ], $count);
     }
 }

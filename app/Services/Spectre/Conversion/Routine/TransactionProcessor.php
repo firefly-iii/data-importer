@@ -27,6 +27,7 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetTransactionsRequest;
 use App\Services\Spectre\Request\PutRefreshConnectionRequest;
@@ -39,6 +40,7 @@ use Carbon\Carbon;
  */
 class TransactionProcessor
 {
+    use ProgressInformation;
     private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
     private string        $downloadIdentifier;

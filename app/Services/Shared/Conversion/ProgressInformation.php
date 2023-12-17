@@ -29,10 +29,10 @@ namespace App\Services\Shared\Conversion;
  */
 trait ProgressInformation
 {
-    protected array  $errors;
+    protected array  $errors = [];
     protected string $identifier;
-    protected array  $messages;
-    protected array  $warnings;
+    protected array  $messages = [];
+    protected array  $warnings = [];
 
     /**
      * @return array

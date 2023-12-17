@@ -187,13 +187,14 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function mergeMessages(int $count): void
     {
-        $this->allMessages = $this->mergeArrays([
-                                                    $this->getMessages(),
-                                                    $this->csvFileProcessor->getMessages(),
-                                                    $this->lineProcessor->getMessages(),
-                                                    $this->columnValueConverter->getMessages(),
-                                                    $this->pseudoTransactionProcessor->getMessages(),
-                                                ], $count);
+        $this->allMessages = $this->mergeArrays(
+            [
+                $this->getMessages(),
+                $this->csvFileProcessor->getMessages(),
+                $this->lineProcessor->getMessages(),
+                $this->columnValueConverter->getMessages(),
+                $this->pseudoTransactionProcessor->getMessages(),
+            ], $count);
     }
 
     /**
@@ -201,13 +202,14 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function mergeWarnings(int $count): void
     {
-        $this->allWarnings = $this->mergeArrays([
-                                                    $this->getWarnings(),
-                                                    $this->csvFileProcessor->getWarnings(),
-                                                    $this->lineProcessor->getWarnings(),
-                                                    $this->columnValueConverter->getWarnings(),
-                                                    $this->pseudoTransactionProcessor->getWarnings(),
-                                                ], $count);
+        $this->allWarnings = $this->mergeArrays(
+            [
+                $this->getWarnings(),
+                $this->csvFileProcessor->getWarnings(),
+                $this->lineProcessor->getWarnings(),
+                $this->columnValueConverter->getWarnings(),
+                $this->pseudoTransactionProcessor->getWarnings(),
+            ], $count);
     }
 
 

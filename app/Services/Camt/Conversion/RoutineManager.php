@@ -217,7 +217,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->allWarnings = $this->mergeArrays(
             [
-                $this->getMessages(),
+                $this->getWarnings(),
                 $this->transactionConverter->getWarnings(),
                 $this->transactionExtractor->getWarnings(),
                 $this->transactionMapper->getWarnings(),
