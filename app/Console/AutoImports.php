@@ -226,7 +226,17 @@ trait AutoImports
             app('log')->error('Conversion warnings', $this->conversionWarnings);
             app('log')->error('Conversion messages', $this->conversionMessages);
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+
+            // report about it anyway:
+            event(
+                new ImportedTransactions(
+                    array_merge($this->conversionMessages, $this->importMessages),
+                    array_merge($this->conversionWarnings, $this->importWarnings),
+                    array_merge($this->conversionErrors, $this->importErrors)
+                )
+            );
             throw new ImporterErrorException('Too many errors in the data conversion.');
+
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
