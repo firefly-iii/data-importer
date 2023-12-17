@@ -153,6 +153,10 @@ class RoutineManager implements RoutineManagerInterface
 
         if (0 === $count) {
             $this->addError(0, 'No transactions found in CSV file.');
+            $this->mergeMessages(1);
+            $this->mergeWarnings(1);
+            $this->mergeErrors(1);
+            return [];
         }
 
         $this->mergeMessages($count);
