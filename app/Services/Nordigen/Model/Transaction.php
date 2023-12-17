@@ -355,8 +355,12 @@ class Transaction
     public function getDestinationName(): ?string
     {
         app('log')->debug(__METHOD__);
+        if ('' !== $this->ultimateCreditor) {
+            app('log')->debug(sprintf('Destination name is "%s" (ultimateCreditor)', $this->ultimateCreditor));
+            return $this->ultimateCreditor;
+        }
         if ('' !== $this->creditorName) {
-            app('log')->debug(sprintf('Destination name is "%s" (creditor)', $this->creditorName));
+            app('log')->debug(sprintf('Destination name is "%s" (creditorName)', $this->creditorName));
 
             return $this->creditorName;
         }
@@ -435,8 +439,13 @@ class Transaction
     public function getSourceName(): ?string
     {
         app('log')->debug(__METHOD__);
+        if ('' !== $this->ultimateDebtor) {
+            app('log')->debug(sprintf('Source name is "%s" (ultimateDebtor)', $this->ultimateDebtor));
+
+            return $this->ultimateDebtor;
+        }
         if ('' !== $this->debtorName) {
-            app('log')->debug(sprintf('Source name is "%s" (debtor)', $this->debtorName));
+            app('log')->debug(sprintf('Source name is "%s" (debtorName)', $this->debtorName));
 
             return $this->debtorName;
         }
