@@ -222,9 +222,6 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error('Conversion errors', $this->conversionErrors);
-            app('log')->error('Conversion warnings', $this->conversionWarnings);
-            app('log')->error('Conversion messages', $this->conversionMessages);
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
 
             // report about it anyway:
@@ -280,9 +277,6 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error('Conversion errors', $this->conversionErrors);
-            app('log')->error('Conversion warnings', $this->conversionWarnings);
-            app('log')->error('Conversion messages', $this->conversionMessages);
             $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
@@ -427,12 +421,13 @@ trait AutoImports
             $this->conversionErrors   = $manager->getAllErrors();
         }
         if (0 === count($transactions)) {
-            app('log')->error('Zero transactions!');
+            app('log')->error('[a] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
         }
+
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk = Storage::disk('jobs');
         try {

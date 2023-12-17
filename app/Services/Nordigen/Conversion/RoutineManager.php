@@ -116,7 +116,11 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         // collect errors from transactionProcessor.
-        if (0 === count($nordigen)) {
+        $total = 0;
+        foreach($nordigen as $accountId => $transactions) {
+            $total += count($transactions);
+        }
+        if (0 === $total) {
             app('log')->warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->addError(0, 'Zero transactions found at GoCardless');
@@ -170,7 +174,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function mergeWarnings(int $count): void
     {
-        $this->allErrors = $this->mergeArrays(
+        $this->allWarnings = $this->mergeArrays(
             [
                 $this->getWarnings(),
                 $this->transactionFilter->getWarnings(),
@@ -185,7 +189,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function mergeMessages(int $count): void
     {
-        $this->allErrors = $this->mergeArrays(
+        $this->allMessages = $this->mergeArrays(
             [
                 $this->getMessages(),
                 $this->transactionFilter->getMessages(),

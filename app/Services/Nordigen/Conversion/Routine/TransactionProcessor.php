@@ -110,7 +110,6 @@ class TransactionProcessor
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
         app('log')->debug('Done with download');
-
         return $return;
     }
 
