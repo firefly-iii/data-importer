@@ -172,9 +172,6 @@ class Transaction
         $object->transactionAmount = trim($array['transactionAmount']['amount'] ?? '');
         $object->currencyCode      = trim($array['transactionAmount']['currency'] ?? '');
 
-        // temporary
-        $object->transactionAmount = '0.0';
-
         // other fields:
         $object->accountIdentifier = '';
 
