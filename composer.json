@@ -84,7 +84,7 @@
         "rcrowe/twigbridge": "^0.14.0",
         "spatie/enum": "^3.10",
         "symfony/http-client": "^7.0",
-        "symfony/mailgun-mailer": "^6.2",
+        "symfony/mailgun-mailer": "^7.0",
         "genkgo/camt": ">=2.0.0"
     },
     "require-dev": {
