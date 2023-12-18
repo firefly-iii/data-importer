@@ -32,5 +32,5 @@ use Exception;
  */
 class AgreementExpiredException extends Exception
 {
-    public array $json;
+    public array $json = [];
 }
