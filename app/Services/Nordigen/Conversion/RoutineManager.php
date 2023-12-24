@@ -117,7 +117,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // collect errors from transactionProcessor.
         $total = 0;
-        foreach($nordigen as $accountId => $transactions) {
+        foreach($nordigen as $transactions) {
             $total += count($transactions);
         }
         if (0 === $total) {
