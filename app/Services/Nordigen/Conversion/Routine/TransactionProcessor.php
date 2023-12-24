@@ -51,7 +51,6 @@ class TransactionProcessor
 
     /**
      * @return array
-     * @throws ImporterErrorException
      */
     public function download(): array
     {
@@ -90,12 +89,18 @@ class TransactionProcessor
                 if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
                     $this->addError(0, $e->json['detail']);
                 }
-
-                return [];
+                $return[$account] = [];
+                continue;
             }
             app('log')->debug('Done downloading information for debug purposes.');
 
-            $accessToken = TokenManager::getAccessToken();
+            try {
+                $accessToken = TokenManager::getAccessToken();
+            } catch (ImporterErrorException $e) {
+                $this->addError(0, $e->getMessage());
+                $return[$account] = [];
+                continue;
+            }
             $url         = config('nordigen.url');
             $request     = new GetTransactionsRequest($url, $accessToken, $account);
             $request->setTimeOut(config('importer.connection.timeout'));
@@ -104,7 +109,8 @@ class TransactionProcessor
                 $transactions = $request->get();
             } catch (ImporterHttpException $e) {
                 $this->addError(0, $e->getMessage());
-                throw new ImporterErrorException($e->getMessage(), 0, $e);
+                $return[$account] = [];
+                continue;
             }
             $return[$account] = $this->filterTransactions($transactions);
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
