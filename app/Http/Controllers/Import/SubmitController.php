@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
@@ -157,23 +158,13 @@ class SubmitController extends Controller
         // set config as complete.
         session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
 
-
-        //            // if configured, send report!
-        //            // TODO make event handler.
-        //            $log
-        //                = [
-        //                'messages' => $routine->getAllMessages(),
-        //                'warnings' => $routine->getAllWarnings(),
-        //                'errors'   => $routine->getAllErrors(),
-        //            ];
-        //
-        //            $send = config('mail.enable_mail_report');
-        //            app('log')->debug('Log log', $log);
-        //            if (true === $send) {
-        //                app('log')->debug('SEND MAIL');
-        //                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-        //            }
-
+        event(
+            new ImportedTransactions(
+                array_merge($routine->getAllMessages()),
+                array_merge($routine->getAllMessages()),
+                array_merge($routine->getAllMessages())
+            )
+        );
 
         return response()->json($importJobStatus->toArray());
     }
