@@ -55,7 +55,7 @@ class GenerateTransactions
     private array         $nordigenAccountInfo;
     private array         $targetAccounts;
     private array         $targetTypes;
-    public const NUMBER_FORMAT = 'nr_%s';
+    public const string NUMBER_FORMAT = 'nr_%s';
 
     /**
      * GenerateTransactions constructor.
@@ -449,7 +449,7 @@ class GenerateTransactions
         $valueDate   = $entry->getValueDate();
         $transaction = [
             'type'                   => 'withdrawal',
-            'date'                   => $entry->getDate()->format('Y-m-d'),
+            'date'                   => $entry->getDate()->toW3cString(),
             'datetime'               => $entry->getDate()->toW3cString(),
             'amount'                 => $entry->transactionAmount,
             'description'            => $entry->getDescription(),
