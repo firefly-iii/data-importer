@@ -108,6 +108,16 @@ class Transaction
             $array['bookingDate'],
             config('app.timezone')
         ) : null;
+
+        // overrule with "bookingDateTime" if present:
+        if(array_key_exists('bookingDateTime', $array)) {
+            $object->bookingDate = Carbon::createFromFormat(
+                '!Y-m-d\TH:i:s.uP',
+                $array['bookingDateTime'],
+                config('app.timezone')
+            );
+        }
+
         $object->key                                    = trim($array['key'] ?? '');
         $object->checkId                                = trim($array['checkId'] ?? '');
         $object->creditorAgent                          = trim($array['creditorAgent'] ?? '');
