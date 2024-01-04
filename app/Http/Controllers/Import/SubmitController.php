@@ -161,8 +161,8 @@ class SubmitController extends Controller
         event(
             new ImportedTransactions(
                 array_merge($routine->getAllMessages()),
-                array_merge($routine->getAllMessages()),
-                array_merge($routine->getAllMessages())
+                array_merge($routine->getAllWarnings()),
+                array_merge($routine->getAllErrors())
             )
         );
 
