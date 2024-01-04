@@ -40,7 +40,6 @@ class FilterTransactions
 
     public function filter(array $transactions): array
     {
-        $start  = count($transactions);
         $return = [];
 
         /** @var array $transaction */
@@ -50,9 +49,6 @@ class FilterTransactions
 
             $return[] = $transaction;
         }
-        $end    = count($return);
-
-        $this->addMessage(0, sprintf('Filtered down from %d (possibly duplicate) entries to %d unique transactions.', $start, $end));
 
         return $return;
     }
