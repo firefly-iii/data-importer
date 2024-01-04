@@ -90,7 +90,8 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
     public function info($string, $verbosity = null): void
     {
@@ -103,7 +104,8 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
     public function warn($string, $verbosity = null): void
     {

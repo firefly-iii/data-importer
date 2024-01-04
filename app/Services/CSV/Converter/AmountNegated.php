@@ -31,6 +31,8 @@ class AmountNegated implements ConverterInterface
 {
     /**
      * Negate amount.
+     *
+     * @param mixed $value
      */
     public function convert($value): string
     {

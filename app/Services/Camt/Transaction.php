@@ -104,7 +104,7 @@ class Transaction
                 return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
 
             case 'CdtDbtInd':
-                /** @var EntryTransactionDetail|null $set */
+                /** @var null|EntryTransactionDetail $set */
                 $set             = $this->levelD[$index];
 
                 return (string)$set?->getCreditDebitIndicator();

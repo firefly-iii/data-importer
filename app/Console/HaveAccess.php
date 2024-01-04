@@ -34,9 +34,10 @@ use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
 trait HaveAccess
 {
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
-    abstract public function error($string, $verbosity = null): void;
+    abstract public function error($string, $verbosity = null);
 
     private function haveAccess(): bool
     {

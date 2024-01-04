@@ -179,6 +179,8 @@ class ColumnValueConverter
     }
 
     /**
+     * @param mixed $value
+     *
      * @throws ImporterErrorException
      */
     private function toString($value): string

@@ -87,6 +87,8 @@ class Transaction
 
     /**
      * Creates a transaction from a downloaded array.
+     *
+     * @param mixed $array
      */
     public static function fromArray($array): self
     {

@@ -32,6 +32,8 @@ class CleanId implements ConverterInterface
     /**
      * Convert a value.
      *
+     * @param mixed $value
+     *
      * @return null|int
      */
     public function convert($value)

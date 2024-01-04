@@ -49,6 +49,8 @@ class Date implements ConverterInterface
     /**
      * Convert a value.
      *
+     * @param mixed $value
+     *
      * @return string
      */
     public function convert($value)

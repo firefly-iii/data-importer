@@ -32,6 +32,8 @@ class CleanNlString implements ConverterInterface
     /**
      * Convert a value.
      *
+     * @param mixed $value
+     *
      * @return mixed
      */
     public function convert($value)

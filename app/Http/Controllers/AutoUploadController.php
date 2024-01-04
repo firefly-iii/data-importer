@@ -77,7 +77,8 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
     public function info($string, $verbosity = null): void
     {
@@ -90,7 +91,8 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
     public function warn($string, $verbosity = null): void
     {
