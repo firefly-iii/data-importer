@@ -169,6 +169,7 @@ class ApiSubmitter
             //            app('log')->error($e->getTraceAsString());
             $this->addError(0, 'Could not store transaction: see the log files.');
         }
+        app('log')->debug(sprintf('Added import tag to transaction group #%d', $groupId));
     }
 
     private function cleanupLine(array $line): array
