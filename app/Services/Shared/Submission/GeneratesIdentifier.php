@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Shared\Conversion;
+namespace App\Services\Shared\Submission;
 
 use Storage;
 use Str;
@@ -34,7 +34,7 @@ use Str;
 trait GeneratesIdentifier
 {
     protected string $identifier;
-    private string   $diskName = 'conversion-routines';
+    private string   $diskName = 'submission-routines';
 
     /**
      * @inheritDoc
@@ -47,17 +47,18 @@ trait GeneratesIdentifier
     /**
      *
      */
-    protected function generateIdentifier(): void
+    public function generateIdentifier(): string
     {
-        app('log')->debug('Going to generate conversion routine identifier.');
+        app('log')->debug('Going to generate submission routine identifier.');
         $disk  = Storage::disk($this->diskName);
         $count = 0;
         do {
-            $generatedId = sprintf('conversion-%s', Str::random(12));
+            $generatedId = sprintf('submission-%s', Str::random(12));
             $count++;
             app('log')->debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
         } while ($count < 30 && $disk->exists($generatedId));
         $this->identifier = $generatedId;
         app('log')->info(sprintf('Job identifier is "%s"', $generatedId));
+        return $generatedId;
     }
 }

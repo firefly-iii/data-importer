@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Status;
 
 use App\Services\Session\Constants;
+use App\Services\Shared\Submission\GeneratesIdentifier;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use JsonException;
 use Psr\Container\ContainerExceptionInterface;
@@ -37,7 +38,8 @@ use Storage;
  */
 class SubmissionStatusManager
 {
-    protected const DISK_NAME = 'submission-routines';
+    protected const string DISK_NAME = 'submission-routines';
+    use GeneratesIdentifier;
 
     /**
      * @param  string  $identifier
@@ -59,6 +61,9 @@ class SubmissionStatusManager
                 $status->errors[$index]   = $status->errors[$index] ?? [];
                 $status->errors[$index][] = $error;
                 self::storeSubmissionStatus($identifier, $status);
+            }
+            if (!$disk->exists($identifier)) {
+                app('log')->error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
             app('log')->error($e->getMessage());
@@ -88,6 +93,9 @@ class SubmissionStatusManager
                 $status->messages[$index][] = $message;
                 self::storeSubmissionStatus($identifier, $status);
             }
+            if (!$disk->exists($identifier)) {
+                app('log')->error(sprintf('Could not find file for job %s.', $identifier));
+            }
         } catch (FileNotFoundException $e) {
             app('log')->error($e->getMessage());
         }
@@ -115,6 +123,9 @@ class SubmissionStatusManager
                 $status->warnings[$index][] = $warning;
                 self::storeSubmissionStatus($identifier, $status);
             }
+            if (!$disk->exists($identifier)) {
+                app('log')->error(sprintf('Could not find file for job %s.', $identifier));
+            }
         } catch (FileNotFoundException $e) {
             app('log')->error($e->getMessage());
         }
@@ -130,7 +141,7 @@ class SubmissionStatusManager
     {
         if (null === $identifier) {
             try {
-                $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+                $identifier = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
             } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
                 app('log')->error($e->getMessage());
                 $identifier = 'error-setSubmissionStatus';
@@ -167,6 +178,8 @@ class SubmissionStatusManager
                     app('log')->error($e->getMessage());
                     $status = new SubmissionStatus();
                 }
+                app('log')->debug(sprintf('Status: %s',$status->status));
+                app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d',count($status->messages), count($status->warnings), count($status->errors)));
 
                 return $status;
             }
@@ -196,6 +209,7 @@ class SubmissionStatusManager
     private static function storeSubmissionStatus(string $identifier, SubmissionStatus $status): void
     {
         app('log')->debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
+        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d',count($status->messages), count($status->warnings), count($status->errors)));
         $disk = Storage::disk(self::DISK_NAME);
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));

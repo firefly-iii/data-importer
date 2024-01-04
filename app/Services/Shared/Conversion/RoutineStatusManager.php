@@ -37,7 +37,7 @@ use Storage;
  */
 class RoutineStatusManager
 {
-    private const DISK_NAME = 'conversion-routines';
+    private const string DISK_NAME = 'conversion-routines';
 
     /**
      * @param  string  $identifier
@@ -195,6 +195,7 @@ class RoutineStatusManager
     private static function storeConversionStatus(string $identifier, ConversionStatus $status): void
     {
         app('log')->debug(sprintf('Now in storeConversionStatus(%s): %s', $identifier, $status->status));
+        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d',count($status->messages), count($status->warnings), count($status->errors)));
         $disk = Storage::disk(self::DISK_NAME);
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));

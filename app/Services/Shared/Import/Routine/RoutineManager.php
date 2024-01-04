@@ -113,9 +113,11 @@ class RoutineManager
         app('log')->debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
         $this->apiSubmitter->setAccountInfo($accountInfo);
+        $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->processTransactions($this->transactions);
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
         $this->allErrors   = $this->apiSubmitter->getErrors();
+        app('log')->debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d',count($this->allMessages), count($this->allWarnings), count($this->allErrors)));
     }
 }

@@ -28,7 +28,7 @@ namespace App\Services\Shared\Import\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
+use App\Services\Shared\Submission\ProgressInformation;
 use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
