@@ -32,34 +32,19 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
  */
 interface TaskInterface
 {
-    /**
-     * @param  array  $group
-     *
-     * @return array
-     */
     public function process(array $group): array;
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool;
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool;
 
-    /**
-     * @param  Account  $account
-     */
     public function setAccount(Account $account): void;
 
-    /**
-     * @param  TransactionCurrency  $transactionCurrency
-     */
     public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void;
 }

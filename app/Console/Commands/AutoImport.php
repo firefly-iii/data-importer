@@ -45,28 +45,29 @@ final class AutoImport extends Command
      * @var string
      */
     protected $description = 'Will automatically import from the given directory and use the JSON and importable files found.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'importer:auto-import {directory : The directory from which to import automatically.}';
+    protected $signature   = 'importer:auto-import {directory : The directory from which to import automatically.}';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
-        $access = $this->haveAccess();
+        $access    = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
 
             return 1;
         }
 
-        $argument  = (string)($this->argument('directory') ?? './'); /** @phpstan-ignore-line */
+        $argument  = (string)($this->argument('directory') ?? './');
+
+/** @phpstan-ignore-line */
         $directory = realpath($argument);
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
@@ -75,7 +76,7 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files = $this->getFiles($directory);
+        $files     = $this->getFiles($directory);
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
@@ -84,11 +85,13 @@ final class AutoImport extends Command
             return 1;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));
+
             return 1;
         }
 

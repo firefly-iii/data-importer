@@ -38,9 +38,6 @@ class ListBanksRequest extends Request
 {
     /**
      * ListCustomersRequest constructor.
-     *
-     * @param  string  $url
-     * @param  string  $token
      */
     public function __construct(string $url, string $token)
     {
@@ -51,7 +48,6 @@ class ListBanksRequest extends Request
     }
 
     /**
-     * @inheritDoc
      * @throws AgreementExpiredException
      */
     public function get(): Response
@@ -73,17 +69,11 @@ class ListBanksRequest extends Request
         return new ListBanksResponse($response);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

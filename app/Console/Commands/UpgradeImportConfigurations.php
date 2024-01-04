@@ -26,11 +26,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\Shared\Configuration\Configuration;
-use FilesystemIterator;
 use Illuminate\Console\Command;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use SplFileInfo;
 
 final class UpgradeImportConfigurations extends Command
 {
@@ -40,17 +36,16 @@ final class UpgradeImportConfigurations extends Command
      * @var string
      */
     protected $description = 'Pointed to a directory, will parse and OVERWRITE all JSON files found there according to the latest JSON configuration file standards.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'importer:upgrade-import-configurations {directory}';
+    protected $signature   = 'importer:upgrade-import-configurations {directory}';
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -59,8 +54,6 @@ final class UpgradeImportConfigurations extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
@@ -82,11 +75,6 @@ final class UpgradeImportConfigurations extends Command
         return 0;
     }
 
-    /**
-     * @param  string  $name
-     *
-     * @return string
-     */
     private function getExtension(string $name): string
     {
         $parts = explode('.', $name);
@@ -94,11 +82,6 @@ final class UpgradeImportConfigurations extends Command
         return $parts[count($parts) - 1];
     }
 
-    /**
-     * @param  string  $content
-     *
-     * @return bool
-     */
     private function isValidJson(string $content): bool
     {
         if ('' === $content) {
@@ -112,16 +95,13 @@ final class UpgradeImportConfigurations extends Command
         return true;
     }
 
-    /**
-     * @param  string  $name
-     */
     private function processFile(string $name): void
     {
         if ('json' !== $this->getExtension($name) || is_dir($name)) {
             return;
         }
         $this->line(sprintf('Now processing "%s" ...', $name));
-        $content = (string)file_get_contents($name);
+        $content                    = (string)file_get_contents($name);
         if (!$this->isValidJson($content)) {
             $this->error('File does not contain valid JSON. Skipped.');
 
@@ -134,16 +114,14 @@ final class UpgradeImportConfigurations extends Command
         file_put_contents($name, json_encode($newJson, JSON_PRETTY_PRINT));
     }
 
-    /**
-     * @param  string  $directory
-     */
     private function processRoot(string $directory): void
     {
-        $dir   = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
+        $dir   = new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS);
+        $files = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
+
         /**
-         * @var string $name
-         * @var SplFileInfo $object
+         * @var string       $name
+         * @var \SplFileInfo $object
          */
         foreach ($files as $name => $object) {
             $this->processFile($name);

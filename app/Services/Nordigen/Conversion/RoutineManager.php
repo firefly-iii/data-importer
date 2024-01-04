@@ -53,14 +53,11 @@ class RoutineManager implements RoutineManagerInterface
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
 
-    /**
-     *
-     */
     public function __construct(?string $identifier)
     {
-        $this->allErrors   = [];
-        $this->allWarnings = [];
-        $this->allMessages = [];
+        $this->allErrors            = [];
+        $this->allWarnings          = [];
+        $this->allMessages          = [];
 
         if (null === $identifier) {
             $this->generateIdentifier();
@@ -73,9 +70,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
     }
 
-    /**
-     * @inheritDoc
-     */
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
@@ -92,7 +86,6 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function start(): array
@@ -101,6 +94,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
+
         try {
             $nordigen = $this->transactionProcessor->download();
         } catch (ImporterErrorException $e) {
@@ -112,11 +106,12 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             throw $e;
         }
 
         // collect errors from transactionProcessor.
-        $total = 0;
+        $total        = 0;
         foreach($nordigen as $transactions) {
             $total += count($transactions);
         }
@@ -132,6 +127,7 @@ class RoutineManager implements RoutineManagerInterface
         }
         // generate Firefly III ready transactions:
         app('log')->debug('Generating Firefly III transactions.');
+
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
@@ -139,6 +135,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
@@ -152,26 +149,23 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
         $transactions = $this->transactionGenerator->getTransactions($nordigen);
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         $this->mergeMessages(count($transactions));
         $this->mergeWarnings(count($transactions));
         $this->mergeErrors(count($transactions));
 
-
         return $filtered;
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeWarnings(int $count): void
     {
         $this->allWarnings = $this->mergeArrays(
@@ -180,13 +174,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getWarnings(),
                 $this->transactionGenerator->getWarnings(),
                 $this->transactionProcessor->getWarnings(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -195,13 +187,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getMessages(),
                 $this->transactionGenerator->getMessages(),
                 $this->transactionProcessor->getMessages(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeErrors(int $count): void
     {
         $this->allErrors = $this->mergeArrays(
@@ -210,8 +200,8 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getErrors(),
                 $this->transactionGenerator->getErrors(),
                 $this->transactionProcessor->getErrors(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
-
 }

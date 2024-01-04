@@ -31,8 +31,6 @@ interface MapperInterface
 {
     /**
      * Get map of objects.
-     *
-     * @return array
      */
     public function getMap(): array;
 }

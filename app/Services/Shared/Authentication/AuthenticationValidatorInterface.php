@@ -29,8 +29,5 @@ use App\Services\Enums\AuthenticationStatus;
 
 interface AuthenticationValidatorInterface
 {
-    /**
-     * @return AuthenticationStatus
-     */
     public function validate(): AuthenticationStatus;
 }

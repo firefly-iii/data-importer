@@ -32,7 +32,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
-use JsonException;
 
 /**
  * Class Request
@@ -43,103 +42,72 @@ abstract class Request
     private array  $body;
     private array  $parameters;
     private float  $timeOut = 3.14;
-    /** @var string */
+
     private string $token;
     private string $url;
 
     /**
-     * @return Response
      * @throws ImporterHttpException
      */
     abstract public function get(): Response;
 
-    /**
-     * @return string
-     */
     public function getBase(): string
     {
         return $this->base;
     }
 
-    /**
-     * @param string $base
-     */
     public function setBase(string $base): void
     {
         $this->base = $base;
     }
 
-    /**
-     * @return string
-     */
     public function getToken(): string
     {
         return $this->token;
     }
 
-    /**
-     * @param string $token
-     */
     public function setToken(string $token): void
     {
         $this->token = $token;
     }
 
-    /**
-     * @return string
-     */
     public function getUrl(): string
     {
         return $this->url;
     }
 
-    /**
-     * @param string $url
-     */
     public function setUrl(string $url): void
     {
         $this->url = $url;
     }
 
     /**
-     * @return Response
      * @throws ImporterHttpException
      */
     abstract public function post(): Response;
 
     /**
-     * @return Response
      * @throws ImporterHttpException
      */
     abstract public function put(): Response;
 
-    /**
-     * @param array $body
-     */
     public function setBody(array $body): void
     {
         $this->body = $body;
     }
 
-    /**
-     * @param array $parameters
-     */
     public function setParameters(array $parameters): void
     {
         app('log')->debug('Request parameters will be set to: ', $parameters);
         $this->parameters = $parameters;
     }
 
-    /**
-     * @param float $timeOut
-     */
     public function setTimeOut(float $timeOut): void
     {
         $this->timeOut = $timeOut;
     }
 
     /**
-     * @return array
      * @throws ImporterErrorException
      * @throws ImporterHttpException
      * @throws AgreementExpiredException
@@ -152,8 +120,9 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client = $this->getClient();
-        $body   = null;
+        $client  = $this->getClient();
+        $body    = null;
+
         try {
             $res = $client->request(
                 'GET',
@@ -167,7 +136,7 @@ abstract class Request
                     ],
                 ]
             );
-        } catch (TransferException | GuzzleException $e) {
+        } catch (GuzzleException|TransferException $e) {
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
@@ -182,7 +151,7 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json = [];
+            $json            = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string)$e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
@@ -190,12 +159,14 @@ abstract class Request
             if (array_key_exists('summary', $json) && str_ends_with($json['summary'], 'has expired')) {
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
+
                 throw $exception;
             }
 
             // if status code is 503, the account does not exist.
             $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
             $exception->json = $json;
+
             throw $exception;
         }
         if (200 !== $res->getStatusCode()) {
@@ -204,11 +175,11 @@ abstract class Request
 
             $body = (string)$res->getBody();
         }
-        $body = $body ?? (string)$res->getBody();
+        $body ??= (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new ImporterHttpException(
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
@@ -231,9 +202,6 @@ abstract class Request
     }
 
     /**
-     * @param array $json
-     *
-     * @return array
      * @throws GuzzleException
      * @throws ImporterHttpException
      */
@@ -246,7 +214,8 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 
-        $client = $this->getClient();
+        $client  = $this->getClient();
+
         try {
             $res = $client->request(
                 'POST',
@@ -264,11 +233,11 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string)$res->getBody();
+        $body    = (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }
@@ -276,9 +245,6 @@ abstract class Request
         return $json;
     }
 
-    /**
-     * @return Client
-     */
     private function getClient(): Client
     {
         // config here

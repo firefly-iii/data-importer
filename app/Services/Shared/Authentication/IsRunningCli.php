@@ -30,9 +30,6 @@ namespace App\Services\Shared\Authentication;
  */
 trait IsRunningCli
 {
-    /**
-     * @return bool
-     */
     protected function isCli(): bool
     {
         if (defined('STDIN')) {

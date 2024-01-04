@@ -25,7 +25,6 @@ declare(strict_types=1);
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Cache Store
@@ -53,24 +52,23 @@ return [
     |
     */
 
-    'stores' => [
-
-        'apc' => [
+    'stores'  => [
+        'apc'       => [
             'driver' => 'apc',
         ],
 
-        'array' => [
+        'array'     => [
             'driver'    => 'array',
             'serialize' => false,
         ],
 
-        'database' => [
+        'database'  => [
             'driver'     => 'database',
             'table'      => 'cache',
             'connection' => null,
         ],
 
-        'file' => [
+        'file'      => [
             'driver' => 'file',
             'path'   => storage_path('framework/cache/data'),
         ],
@@ -94,12 +92,12 @@ return [
             ],
         ],
 
-        'redis' => [
+        'redis'     => [
             'driver'     => 'redis',
             'connection' => 'cache',
         ],
 
-        'dynamodb' => [
+        'dynamodb'  => [
             'driver'   => 'dynamodb',
             'key'      => env('AWS_ACCESS_KEY_ID'),
             'secret'   => env('AWS_SECRET_ACCESS_KEY'),
@@ -107,7 +105,6 @@ return [
             'table'    => env('DYNAMODB_CACHE_TABLE', 'cache'),
             'endpoint' => env('DYNAMODB_ENDPOINT'),
         ],
-
     ],
 
     /*
@@ -121,6 +118,5 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
-
+    'prefix'  => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
 ];

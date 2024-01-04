@@ -41,8 +41,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use JsonException;
-use Storage;
 
 /**
  * Class SubmitController
@@ -52,7 +50,6 @@ class SubmitController extends Controller
     use RestoresConfiguration;
 
     protected const string DISK_NAME = 'jobs';
-
 
     /**
      * StartController constructor.
@@ -77,7 +74,7 @@ class SubmitController extends Controller
         $jobBackUrl    = route('back.conversion');
 
         // submission job ID may be in session:
-        $identifier = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
+        $identifier    = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
         // if null, create a new one:
         if (null === $identifier) {
             $identifier = $statusManager->generateIdentifier();
@@ -94,18 +91,13 @@ class SubmitController extends Controller
         session()->put(Constants::IMPORT_JOB_IDENTIFIER, $identifier);
         app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::IMPORT_JOB_IDENTIFIER));
 
-        return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl',));
+        return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
+        $identifier           = $request->get('identifier');
         if (null === $identifier) {
             app('log')->error('Start: Identifier is NULL');
             $status         = new SubmissionStatus();
@@ -113,14 +105,14 @@ class SubmitController extends Controller
 
             return response()->json($status->toArray());
         }
-        $configuration = $this->restoreConfiguration();
-        $routine       = new RoutineManager($identifier);
+        $configuration        = $this->restoreConfiguration();
+        $routine              = new RoutineManager($identifier);
         app('log')->error('Start: Find import job status.');
-        $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);
+        $importJobStatus      = SubmissionStatusManager::startOrFindSubmission($identifier);
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
         $conversionIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk                 = Storage::disk(self::DISK_NAME);
+        $disk                 = \Storage::disk(self::DISK_NAME);
         $fileName             = sprintf('%s.json', $conversionIdentifier);
 
         // get files from disk:
@@ -136,7 +128,7 @@ class SubmitController extends Controller
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException | JsonException $e) {
+        } catch (FileNotFoundException|\JsonException $e) {
             Log::error(sprintf('The file "%s" on "%s" disk contains error: %s', $fileName, self::DISK_NAME, $e->getMessage()));
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
@@ -150,6 +142,7 @@ class SubmitController extends Controller
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
+
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
@@ -176,14 +169,9 @@ class SubmitController extends Controller
         return response()->json($importJobStatus->toArray());
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function status(Request $request): JsonResponse
     {
-        $identifier = $request->get('identifier');
+        $identifier      = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             app('log')->warning('Identifier is NULL.');

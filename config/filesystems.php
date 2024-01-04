@@ -23,7 +23,6 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
@@ -48,7 +47,7 @@ return [
     |
     */
 
-    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
+    'cloud'   => env('FILESYSTEM_CLOUD', 's3'),
 
     /*
     |--------------------------------------------------------------------------
@@ -63,8 +62,7 @@ return [
     |
     */
 
-    'disks' => [
-
+    'disks'   => [
         'local'               => [
             'driver' => 'local',
             'root'   => storage_path('app'),
@@ -96,7 +94,7 @@ return [
             'visibility' => 'public',
         ],
 
-        's3' => [
+        's3'                  => [
             'driver'   => 's3',
             'key'      => env('AWS_ACCESS_KEY_ID'),
             'secret'   => env('AWS_SECRET_ACCESS_KEY'),
@@ -105,7 +103,6 @@ return [
             'url'      => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
         ],
-
     ],
 
     /*
@@ -119,8 +116,7 @@ return [
     |
     */
 
-    'links' => [
+    'links'   => [
         public_path('storage') => storage_path('app/public'),
     ],
-
 ];

@@ -36,19 +36,13 @@ class FilterTransactions
     /**
      * FilterTransactions constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
-    /**
-     * @param  array  $transactions
-     *
-     * @return array
-     */
     public function filter(array $transactions): array
     {
         $start  = count($transactions);
         $return = [];
+
         /** @var array $transaction */
         foreach ($transactions as $transaction) {
             // TODO no real filtering takes place yet.
@@ -56,7 +50,7 @@ class FilterTransactions
 
             $return[] = $transaction;
         }
-        $end = count($return);
+        $end    = count($return);
 
         $this->addMessage(0, sprintf('Filtered down from %d (possibly duplicate) entries to %d unique transactions.', $start, $end));
 

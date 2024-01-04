@@ -56,9 +56,8 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @return Application|Factory|Redirector|RedirectResponse|View
      *
-     * @return Application|Factory|View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
     public function index(Request $request)
@@ -68,7 +67,7 @@ class AuthenticateController extends Controller
         $pageTitle = 'Authentication';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
-        $error     = Session::get('error');
+        $error     = \Session::get('error');
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator();
@@ -96,13 +95,13 @@ class AuthenticateController extends Controller
                 return redirect(route('003-upload.index'));
             }
         }
+
         throw new ImporterErrorException('Impossible flow exception.');
     }
 
     /**
-     * @param Request $request
+     * @return Application|Redirector|RedirectResponse
      *
-     * @return Application|RedirectResponse|Redirector
      * @throws ImporterErrorException
      */
     public function postIndex(Request $request)

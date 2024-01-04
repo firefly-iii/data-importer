@@ -39,7 +39,6 @@ trait GetAccounts
     /**
      * Returns a combined list of all accounts in Firefly III.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     protected function getAllAccounts(): array
@@ -55,11 +54,12 @@ trait GetAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::ALL);
 
-        /** @var GetAccountsResponse $response */
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
@@ -71,15 +71,15 @@ trait GetAccounts
         if (!$response instanceof GetAccountsResponse) {
             throw new ImporterErrorException('Could not get list of ALL accounts.');
         }
-        $result = array_merge($accounts);
+        $result   = array_merge($accounts);
         app('log')->debug(sprintf('getAllAccounts: Done collecting, found %d account(s)', count($result)));
+
         return $result;
     }
 
     /**
      * Returns a combined list of asset accounts and all liability accounts.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     protected function getAssetAccounts(): array
@@ -95,11 +95,12 @@ trait GetAccounts
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var GetAccountsResponse $response */
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download asset accounts: %s', $e->getMessage()));
         }
@@ -112,17 +113,18 @@ trait GetAccounts
             throw new ImporterErrorException('Could not get list of asset accounts.');
         }
 
-        $request = new GetAccountsRequest($url, $token);
+        $request     = new GetAccountsRequest($url, $token);
 
         $request->setType(GetAccountsRequest::LIABILITIES);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var GetAccountsResponse $response */
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download liability accounts: %s', $e->getMessage()));
         }
@@ -140,18 +142,15 @@ trait GetAccounts
 
     /**
      * Merge all arrays into <select> ready list.
-     *
-     * @param  array  $accounts
-     *
-     * @return array
      */
     protected function mergeAll(array $accounts): array
     {
         $invalidTypes = ['initial-balance', 'reconciliation'];
         $result       = [];
+
         /** @var Account $account */
         foreach ($accounts as $account) {
-            $name = $account->name;
+            $name                         = $account->name;
 
             // remove some types:
             if (in_array($account->type, $invalidTypes, true)) {
@@ -164,7 +163,7 @@ trait GetAccounts
 
             // add optgroup to result:
             $group                        = trans(sprintf('import.account_types_%s', $account->type));
-            $result[$group]               = $result[$group] ?? [];
+            $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
         foreach ($result as $group => $accounts) {
@@ -177,15 +176,12 @@ trait GetAccounts
 
     /**
      * Merge all arrays into <select> ready list.
-     *
-     * @param  array  $accounts
-     *
-     * @return array
      */
     protected function mergeWithIBAN(array $accounts): array
     {
         $result       = [];
         $invalidTypes = ['initial-balance', 'reconciliation'];
+
         /** @var Account $account */
         foreach ($accounts as $account) {
             // remove some types:
@@ -195,10 +191,10 @@ trait GetAccounts
 
             // only merge if IBAN is not null.
             if (null !== $account->iban) {
-                $name = sprintf('%s (%s)', $account->name, $account->iban);
+                $name                         = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
                 $group                        = trans(sprintf('import.account_types_%s', $account->type));
-                $result[$group]               = $result[$group] ?? [];
+                $result[$group] ??= [];
                 $result[$group][$account->id] = $name;
             }
         }
@@ -211,11 +207,6 @@ trait GetAccounts
         return $result;
     }
 
-    /**
-     * @param  GetAccountsResponse  $list
-     *
-     * @return array
-     */
     private function toArray(GetAccountsResponse $list): array
     {
         $return = [];

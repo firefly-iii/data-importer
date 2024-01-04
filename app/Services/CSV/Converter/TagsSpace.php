@@ -32,10 +32,7 @@ class TagsSpace implements ConverterInterface
     /**
      * Convert a value.
      *
-     * @param $value
-     *
      * @return string[]
-     *
      */
     public function convert($value)
     {
@@ -47,10 +44,6 @@ class TagsSpace implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

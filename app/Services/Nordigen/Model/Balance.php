@@ -36,8 +36,6 @@ class Balance
     public string $type;
 
     /**
-     * @param  array  $data
-     *
      * @return static
      */
     public static function createFromArray(array $data): self
@@ -68,9 +66,6 @@ class Balance
         return $object;
     }
 
-    /**
-     * @return array
-     */
     public function toLocalArray(): array
     {
         return [

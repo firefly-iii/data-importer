@@ -48,27 +48,23 @@ class PostNewUserAgreement extends Request
         $this->bank               = '';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         // Implement get() method.
     }
 
     /**
-     * @inheritDoc
      * @throws GuzzleException
      */
     public function post(): Response
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array
-            = [
-            'institution_id'        => $this->bank,
-            'max_historical_days'   => $this->maxHistoricalDays,
-            'access_valid_for_days' => $this->accessValidForDays,
-        ];
+                = [
+                'institution_id'        => $this->bank,
+                'max_historical_days'   => $this->maxHistoricalDays,
+                'access_valid_for_days' => $this->accessValidForDays,
+            ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
@@ -76,33 +72,21 @@ class PostNewUserAgreement extends Request
         return new NewUserAgreementResponse($result);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.
     }
 
-    /**
-     * @param  string  $accessValidForDays
-     */
     public function setAccessValidForDays(string $accessValidForDays): void
     {
         $this->accessValidForDays = $accessValidForDays;
     }
 
-    /**
-     * @param  string  $bank
-     */
     public function setBank(string $bank): void
     {
         $this->bank = $bank;
     }
 
-    /**
-     * @param  string  $maxHistoricalDays
-     */
     public function setMaxHistoricalDays(string $maxHistoricalDays): void
     {
         $this->maxHistoricalDays = $maxHistoricalDays;

@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Nordigen;
 
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
@@ -42,10 +41,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
-use JsonException;
-use League\Flysystem\FilesystemException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class SelectionController
@@ -54,9 +49,6 @@ class SelectionController extends Controller
 {
     use RestoresConfiguration;
 
-    /**
-     *
-     */
     public function __construct()
     {
         parent::__construct();
@@ -77,9 +69,9 @@ class SelectionController extends Controller
         $configuration = $this->restoreConfiguration();
 
         // if there is a requisition & country etc in the config file, go to next step.
-        $requisitions = $configuration->getNordigenRequisitions();
-        $country      = $configuration->getNordigenCountry();
-        $bank         = $configuration->getNordigenBank();
+        $requisitions  = $configuration->getNordigenRequisitions();
+        $country       = $configuration->getNordigenCountry();
+        $bank          = $configuration->getNordigenBank();
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
             session()->put(Constants::CONFIGURATION, $configuration->toArray());
             session()->put(Constants::SELECTED_BANK_COUNTRY, true);
@@ -88,10 +80,10 @@ class SelectionController extends Controller
             return redirect(route('010-build-link.index'));
         }
         // get banks and countries
-        $accessToken = TokenManager::getAccessToken();
-        $url         = config('nordigen.url');
+        $accessToken   = TokenManager::getAccessToken();
+        $url           = config('nordigen.url');
 
-        $request = new ListBanksRequest($url, $accessToken);
+        $request       = new ListBanksRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
@@ -108,9 +100,7 @@ class SelectionController extends Controller
     }
 
     /**
-     * @param  SelectionRequest  $request
-     *
-     * @return Application|RedirectResponse|Redirector
+     * @return Application|Redirector|RedirectResponse
      */
     public function postIndex(SelectionRequest $request)
     {
@@ -126,13 +116,14 @@ class SelectionController extends Controller
 
         $configuration->setNordigenCountry($values['country']);
         $configuration->setNordigenBank($values['bank']);
-        $configuration->    setNordigenMaxDays($values['days']);
+        $configuration->setNordigenMaxDays($values['days']);
 
         // save config
-        $json = '[]';
+        $json          = '[]';
+
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             app('log')->error($e->getMessage());
         }
         StorageService::storeContent($json);

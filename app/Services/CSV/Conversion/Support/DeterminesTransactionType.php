@@ -29,12 +29,6 @@ namespace App\Services\CSV\Conversion\Support;
  */
 trait DeterminesTransactionType
 {
-    /**
-     * @param  string|null  $sourceType
-     * @param  string|null  $destinationType
-     *
-     * @return string
-     */
     protected function determineType(?string $sourceType, ?string $destinationType): string
     {
         app('log')->debug(sprintf('Now in determineType::determineType("%s", "%s")', $sourceType, $destinationType));
@@ -61,7 +55,6 @@ trait DeterminesTransactionType
 
             return 'withdrawal';
         }
-
 
         // if destination is asset and source is NULL, it's a deposit
         if (null === $sourceType && 'asset' === $destinationType) {

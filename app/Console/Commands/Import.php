@@ -47,12 +47,13 @@ final class Import extends Command
      * @var string
      */
     protected $description = 'Import into Firefly III. Requires a configuration file and optionally a configuration file.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'importer:import
+    protected $signature   = 'importer:import
     {config : The configuration file. }
     {file? : Optionally, the importable file you want to import}
     ';
@@ -60,12 +61,11 @@ final class Import extends Command
     /**
      * Execute the console command.
      *
-     * @return int
      * @throws ImporterErrorException
      */
     public function handle(): int
     {
-        $access = $this->haveAccess();
+        $access        = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
 
@@ -74,8 +74,8 @@ final class Import extends Command
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $file   = (string)$this->argument('file');
-        $config = (string)$this->argument('config'); // @phpstan-ignore-line
+        $file          = (string)$this->argument('file');
+        $config        = (string)$this->argument('config'); // @phpstan-ignore-line
 
         // validate config path:
         if ('' !== $config) {
@@ -105,8 +105,7 @@ final class Import extends Command
             return 1;
         }
 
-
-        $jsonResult = $this->verifyJSON($config);
+        $jsonResult    = $this->verifyJSON($config);
         if (false === $jsonResult) {
             $message = 'The importer can\'t import: could not decode the JSON in the config file.';
             $this->error($message);

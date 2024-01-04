@@ -32,82 +32,58 @@ use Illuminate\Support\Facades\Log;
  */
 trait ProgressInformation
 {
-    protected array  $errors = [];
+    protected array  $errors   = [];
     protected string $identifier;
     protected array  $messages = [];
     protected array  $warnings = [];
 
-    /**
-     * @return array
-     */
     final public function getErrors(): array
     {
         return $this->errors ?? [];
     }
 
-    /**
-     * @return array
-     */
     final public function getMessages(): array
     {
         return $this->messages ?? [];
     }
 
-    /**
-     * @return array
-     */
     final public function getWarnings(): array
     {
         return $this->warnings ?? [];
     }
 
-    /**
-     * @param  string  $identifier
-     */
     final public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
     }
 
-    /**
-     * @param  int  $index
-     * @param  string  $error
-     */
     final protected function addError(int $index, string $error): void
     {
         Log::error(sprintf('Add error to index #%d: %s', $index, $error));
-        $this->errors           = $this->errors ?? [];
-        $this->errors[$index]   = $this->errors[$index] ?? [];
+        $this->errors         ??= [];
+        $this->errors[$index] ??= [];
         $this->errors[$index][] = $error;
 
         // write errors to disk
         SubmissionStatusManager::addError($this->identifier, $index, $error);
     }
 
-    /**
-     * @param  int  $index
-     * @param  string  $message
-     */
     final protected function addMessage(int $index, string $message): void
     {
         Log::info(sprintf('Add message to index #%d: %s', $index, $message));
-        $this->messages           = $this->messages ?? [];
-        $this->messages[$index]   = $this->messages[$index] ?? [];
+        $this->messages         ??= [];
+        $this->messages[$index] ??= [];
         $this->messages[$index][] = $message;
 
         // write message
         SubmissionStatusManager::addMessage($this->identifier, $index, $message);
     }
 
-    /**
-     * @param  int  $index
-     * @param  string  $warning
-     */
     final protected function addWarning(int $index, string $warning): void
     {
         Log::error(sprintf('Add warning to index #%d: %s', $index, $warning));
-        $this->warnings           = $this->warnings ?? [];
-        $this->warnings[$index]   = $this->warnings[$index] ?? [];
+        $this->warnings         ??= [];
+        $this->warnings[$index] ??= [];
         $this->warnings[$index][] = $warning;
 
         // write warning

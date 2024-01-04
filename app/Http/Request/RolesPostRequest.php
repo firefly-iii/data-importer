@@ -33,17 +33,12 @@ class RolesPostRequest extends Request
 {
     /**
      * Verify the request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * @return array
-     */
     public function getAllForFile(): array
     {
         $data = [
@@ -57,10 +52,6 @@ class RolesPostRequest extends Request
         return $data;
     }
 
-
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         $keys = implode(',', array_keys(config('csv.import_roles')));
@@ -73,24 +64,17 @@ class RolesPostRequest extends Request
 
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
-     *
-     * @param  Validator  $validator
-     *
-     * @return void
      */
     public function withValidator(Validator $validator): void
     {
         $validator->after(
-            function (Validator $validator) {
+            function (Validator $validator): void {
                 // validate all account info
                 $this->validateAmountRole($validator);
             }
         );
     }
 
-    /**
-     * @param  Validator  $validator
-     */
     protected function validateAmountRole(Validator $validator): void
     {
         $data  = $validator->getData();
@@ -98,7 +82,7 @@ class RolesPostRequest extends Request
         $count = 0;
         foreach ($roles as $role) {
             if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
-                $count++;
+                ++$count;
             }
         }
         if (0 === $count) {

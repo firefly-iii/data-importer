@@ -34,20 +34,15 @@ class ConfigurationPostRequest extends Request
 {
     /**
      * Verify the request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * @return array
-     */
     public function getAll(): array
     {
-        $result = [
+        return [
             'headers'                       => $this->convertBoolean($this->get('headers')),
             'delimiter'                     => $this->convertToString('delimiter'),
             'date'                          => $this->convertToString('date'),
@@ -97,15 +92,9 @@ class ConfigurationPostRequest extends Request
             // camt
             'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
             'use_entire_opposing_address'   => $this->convertBoolean($this->get('use_entire_opposing_address')),
-
         ];
-
-        return $result;
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
@@ -113,7 +102,8 @@ class ConfigurationPostRequest extends Request
         if('nordigen' === $flow) {
             $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
         }
-        $rules = [
+
+        return [
             'headers'                       => 'numeric|between:0,1',
             'delimiter'                     => 'in:comma,semicolon,tab',
             'date'                          => 'between:1,25',
@@ -137,22 +127,15 @@ class ConfigurationPostRequest extends Request
             'grouped_transaction_handling'  => 'in:single,group,split',
             'use_entire_opposing_address'   => 'numeric|between:0,1',
         ];
-
-        return $rules;
     }
-
 
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
-     *
-     * @param  Validator  $validator
-     *
-     * @return void
      */
     public function withValidator(Validator $validator): void
     {
         $validator->after(
-            function (Validator $validator) {
+            function (Validator $validator): void {
                 // validate all account info
                 $flow     = request()->cookie(Constants::FLOW_COOKIE);
                 $data     = $validator->getData();

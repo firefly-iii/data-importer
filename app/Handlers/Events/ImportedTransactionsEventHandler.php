@@ -32,9 +32,6 @@ use Symfony\Component\Mailer\Exception\TransportException;
 
 class ImportedTransactionsEventHandler
 {
-    /**
-     * @param  ImportedTransactions  $event
-     */
     public function sendReportOverMail(ImportedTransactions $event): void
     {
         app('log')->debug('Now in sendReportOverMail');
@@ -57,7 +54,7 @@ class ImportedTransactionsEventHandler
             return;
         }
 
-        $log = [
+        $log      = [
             'messages' => $event->messages,
             'warnings' => $event->warnings,
             'errors'   => $event->errors,
@@ -68,6 +65,7 @@ class ImportedTransactionsEventHandler
             app('log')->debug(sprintf('Warnings count: %s', count($event->warnings)));
             app('log')->debug(sprintf('Errors count  : %s', count($event->errors)));
             app('log')->debug('If no error below this line, mail was sent!');
+
             try {
                 Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
             } catch (TransportException $e) {

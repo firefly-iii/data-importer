@@ -34,9 +34,6 @@ class ArrayResponse extends Response
 {
     public array $data;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->data = $data;

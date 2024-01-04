@@ -34,9 +34,6 @@ class PostCustomerResponse extends Response
 {
     public Customer $customer;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->customer = Customer::fromArray($data);

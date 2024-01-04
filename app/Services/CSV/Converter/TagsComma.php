@@ -32,10 +32,7 @@ class TagsComma implements ConverterInterface
     /**
      * Convert a value.
      *
-     * @param $value
-     *
      * @return string[]
-     *
      */
     public function convert($value)
     {
@@ -47,10 +44,6 @@ class TagsComma implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

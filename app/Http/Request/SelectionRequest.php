@@ -31,9 +31,6 @@ use Illuminate\Validation\Validator;
  */
 class SelectionRequest extends Request
 {
-    /**
-     * @return array
-     */
     public function getAll(): array
     {
         $country = $this->get('country');
@@ -46,9 +43,6 @@ class SelectionRequest extends Request
         ];
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         return [
@@ -58,19 +52,13 @@ class SelectionRequest extends Request
         ];
     }
 
-
     /**
      * Configure the validator instance with special rules for after the basic validation rules.
-     *
-     * @param  Validator  $validator
-     * See reference nr. 74
-     *
-     * @return void
      */
     public function withValidator(Validator $validator): void
     {
         $validator->after(
-            function (Validator $validator) {
+            function (Validator $validator): void {
                 $data    = $validator->getData();
                 $country = $data['country'];
                 $key     = sprintf('bank_%s', $country);

@@ -27,10 +27,8 @@ namespace App\Services\Shared\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use JsonException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Storage;
 
 /**
  * Class RoutineStatusManager
@@ -39,26 +37,22 @@ class RoutineStatusManager
 {
     private const string DISK_NAME = 'conversion-routines';
 
-    /**
-     * @param  string  $identifier
-     * @param  int  $index
-     * @param  string  $error
-     */
     public static function addError(string $identifier, int $index, string $error): void
     {
         $lineNo = $index + 1;
         app('log')->debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
+
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException $e) {
+                } catch (\JsonException $e) {
                     app('log')->error($e->getMessage());
                     $status = new ConversionStatus();
                 }
-                $status->errors[$index]   = $status->errors[$index] ?? [];
+                $status->errors[$index] ??= [];
                 $status->errors[$index][] = $error;
                 self::storeConversionStatus($identifier, $status);
             }
@@ -67,27 +61,22 @@ class RoutineStatusManager
         }
     }
 
-    /**
-     * @param  string  $identifier
-     * @param  int  $index
-     * @param  string  $message
-     *
-     */
     public static function addMessage(string $identifier, int $index, string $message): void
     {
         $lineNo = $index + 1;
         app('log')->debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
+
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException $e) {
+                } catch (\JsonException $e) {
                     app('log')->error($e->getMessage());
                     $status = new ConversionStatus();
                 }
-                $status->messages[$index]   = $status->messages[$index] ?? [];
+                $status->messages[$index] ??= [];
                 $status->messages[$index][] = $message;
                 self::storeConversionStatus($identifier, $status);
             }
@@ -96,27 +85,22 @@ class RoutineStatusManager
         }
     }
 
-    /**
-     * @param  string  $identifier
-     * @param  int  $index
-     * @param  string  $warning
-     *
-     */
     public static function addWarning(string $identifier, int $index, string $warning): void
     {
         $lineNo = $index + 1;
         app('log')->debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
+
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException $e) {
+                } catch (\JsonException $e) {
                     app('log')->error($e->getMessage());
                     $status = new ConversionStatus();
                 }
-                $status->warnings[$index]   = $status->warnings[$index] ?? [];
+                $status->warnings[$index] ??= [];
                 $status->warnings[$index][] = $warning;
                 self::storeConversionStatus($identifier, $status);
             }
@@ -126,10 +110,6 @@ class RoutineStatusManager
     }
 
     /**
-     * @param  string  $status
-     * @param  string|null  $identifier
-     *
-     * @return ConversionStatus
      * @throws ImporterErrorException
      */
     public static function setConversionStatus(string $status, ?string $identifier = null): ConversionStatus
@@ -152,22 +132,17 @@ class RoutineStatusManager
         return $jobStatus;
     }
 
-    /**
-     * @param  string  $identifier
-     *
-     * @return ConversionStatus
-     */
     public static function startOrFindConversion(string $identifier): ConversionStatus
     {
         app('log')->debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
-        $disk = Storage::disk(self::DISK_NAME);
-        //app('log')->debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
+        $disk   = \Storage::disk(self::DISK_NAME);
+        // app('log')->debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
         if ($disk->exists($identifier)) {
-            //app('log')->debug(sprintf('Status file exists for conversion "%s".', $identifier));
+            // app('log')->debug(sprintf('Status file exists for conversion "%s".', $identifier));
             try {
                 $array  = json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                 $status = ConversionStatus::fromArray($array);
-            } catch (FileNotFoundException|JsonException $e) {
+            } catch (FileNotFoundException|\JsonException $e) {
                 app('log')->error($e->getMessage());
                 $status = new ConversionStatus();
             }
@@ -177,9 +152,10 @@ class RoutineStatusManager
         }
         app('log')->debug('File does not exist or error, create a new one.');
         $status = new ConversionStatus();
+
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             app('log')->error($e->getMessage());
         }
 
@@ -188,18 +164,15 @@ class RoutineStatusManager
         return $status;
     }
 
-    /**
-     * @param  string  $identifier
-     * @param  ConversionStatus  $status
-     */
     private static function storeConversionStatus(string $identifier, ConversionStatus $status): void
     {
         app('log')->debug(sprintf('Now in storeConversionStatus(%s): %s', $identifier, $status->status));
-        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d',count($status->messages), count($status->warnings), count($status->errors)));
-        $disk = Storage::disk(self::DISK_NAME);
+        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
+        $disk = \Storage::disk(self::DISK_NAME);
+
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             // do nothing
             app('log')->error($e->getMessage());
         }

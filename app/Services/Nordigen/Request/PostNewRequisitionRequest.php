@@ -47,28 +47,24 @@ class PostNewRequisitionRequest extends Request
         $this->agreement = '';
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         // Implement get() method.
     }
 
     /**
-     * @inheritDoc
      * @throws GuzzleException
      */
     public function post(): Response
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array
-            = [
-            'redirect'       => route('010-build-link.callback'),
-            'institution_id' => $this->bank,
-            'reference'      => $this->reference,
-            'agreement'      => $this->agreement,
-        ];
+                = [
+                'redirect'       => route('010-build-link.callback'),
+                'institution_id' => $this->bank,
+                'reference'      => $this->reference,
+                'agreement'      => $this->agreement,
+            ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);
@@ -76,33 +72,21 @@ class PostNewRequisitionRequest extends Request
         return new NewRequisitionResponse($result);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.
     }
 
-    /**
-     * @param  string  $agreement
-     */
     public function setAgreement(string $agreement): void
     {
         $this->agreement = $agreement;
     }
 
-    /**
-     * @param  string  $bank
-     */
     public function setBank(string $bank): void
     {
         $this->bank = $bank;
     }
 
-    /**
-     * @param  string  $reference
-     */
     public function setReference(string $reference): void
     {
         $this->reference = $reference;

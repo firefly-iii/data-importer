@@ -25,27 +25,18 @@ declare(strict_types=1);
 namespace App\Services\Storage;
 
 use App\Exceptions\ImporterErrorException;
-use JsonException;
 use League\Flysystem\FilesystemException;
-use Storage;
-use UnexpectedValueException;
 
 /**
  * Class StorageService
  */
 class StorageService
 {
-    /**
-     * @param  string  $name
-     * @param  bool  $convert
-     *
-     * @return string
-     */
     public static function getContent(string $name, bool $convert = false): string
     {
-        $disk = Storage::disk('uploads');
+        $disk     = \Storage::disk('uploads');
         if (!$disk->exists($name)) {
-            throw new UnexpectedValueException(sprintf('No such file %s', $name));
+            throw new \UnexpectedValueException(sprintf('No such file %s', $name));
         }
         if (false === $convert) {
             return $disk->get($name);
@@ -66,15 +57,12 @@ class StorageService
     }
 
     /**
-     * @param  array  $array
-     *
-     * @return string
      * @throws FilesystemException
-     * @throws JsonException
+     * @throws \JsonException
      */
     public static function storeArray(array $array): string
     {
-        $disk     = Storage::disk('uploads');
+        $disk     = \Storage::disk('uploads');
         $json     = json_encode($array, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT, 256);
         $fileName = hash('sha256', $json);
 
@@ -89,16 +77,13 @@ class StorageService
     }
 
     /**
-     * @param  string  $content
-     *
-     * @return string
      * @throws FilesystemException
      * @throws ImporterErrorException
      */
     public static function storeContent(string $content): string
     {
         $fileName = hash('sha256', $content);
-        $disk     = Storage::disk('uploads');
+        $disk     = \Storage::disk('uploads');
         if ('{}' === $content) {
             throw new ImporterErrorException('Content is {}');
         }

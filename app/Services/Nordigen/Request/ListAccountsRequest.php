@@ -37,11 +37,6 @@ class ListAccountsRequest extends Request
 {
     private string $identifier;
 
-    /**
-     * @param  string  $url
-     * @param  string  $identifier
-     * @param  string  $token
-     */
     public function __construct(string $url, string $identifier, string $token)
     {
         $this->setParameters([]);
@@ -52,8 +47,6 @@ class ListAccountsRequest extends Request
     }
 
     /**
-     * @inheritDoc
-     * @return Response
      * @throws AgreementExpiredException
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -65,25 +58,16 @@ class ListAccountsRequest extends Request
         return new ListAccountsResponse($json);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.
     }
 
-    /**
-     * @param  string  $identifier
-     */
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;

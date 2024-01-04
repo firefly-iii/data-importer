@@ -39,10 +39,6 @@ class ListCustomersRequest extends Request
 {
     /**
      * ListCustomersRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -54,14 +50,11 @@ class ListCustomersRequest extends Request
         $this->setUrl('customers');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         try {
             $response = $this->authenticatedGet();
-        } catch (GuzzleException | ImporterHttpException | ImporterErrorException $e) {
+        } catch (GuzzleException|ImporterErrorException|ImporterHttpException $e) {
             app('log')->error($e->getMessage());
 
             // JSON thing.
@@ -71,17 +64,11 @@ class ListCustomersRequest extends Request
         return new ListCustomersResponse($response['data']);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

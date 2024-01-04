@@ -29,10 +29,6 @@ namespace App\Console;
  */
 trait ManageMessages
 {
-    /**
-     * @param  string  $key
-     * @param  array  $messages
-     */
     protected function listMessages(string $key, array $messages): void
     {
         $functions = [
@@ -41,17 +37,17 @@ trait ManageMessages
             'Message' => 'info',
         ];
 
-        $func = $functions[$key] ?? 'line';
+        $func      = $functions[$key] ?? 'line';
 
         if (0 !== count($messages)) {
             /**
-             * @var int $index
+             * @var int   $index
              * @var array $error
              */
             foreach ($messages as $index => $list) {
                 /** @var string $line */
                 foreach ($list as $line) {
-                    $this->$func(sprintf('%s in line #%d: %s', $key, $index + 1, $line));
+                    $this->{$func}(sprintf('%s in line #%d: %s', $key, $index + 1, $line));
                 }
             }
         }

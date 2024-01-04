@@ -49,16 +49,10 @@ class Transaction
     /**
      * Transaction constructor.
      */
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
      * Transaction constructor.
-     *
-     * @param array $data
-     *
-     * @return Transaction
      */
     public static function fromArray(array $data): self
     {
@@ -80,9 +74,6 @@ class Transaction
         return $model;
     }
 
-    /**
-     * @return string
-     */
     public function getAccountId(): string
     {
         app('log')->debug(sprintf('Get getAccountId(): "%s"', $this->accountId));
@@ -90,9 +81,6 @@ class Transaction
         return $this->accountId;
     }
 
-    /**
-     * @return string
-     */
     public function getAmount(): string
     {
         $amount = $this->amount;
@@ -105,25 +93,16 @@ class Transaction
         return $amount;
     }
 
-    /**
-     * @return string
-     */
     public function getCategory(): string
     {
         return $this->category;
     }
 
-    /**
-     * @return string
-     */
     public function getCurrencyCode(): string
     {
         return $this->currencyCode;
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         $description = app('steam')->cleanString($this->description);
@@ -138,41 +117,30 @@ class Transaction
         return trim($description);
     }
 
-    /**
-     * @return string
-     */
     public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return Carbon
-     */
     public function getMadeOn(): Carbon
     {
         return $this->madeOn;
     }
 
-    /**
-     * @return string
-     */
     public function getMode(): string
     {
         return $this->mode;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayeeIban(): ?string
     {
         app('log')->debug('getPayeeIban()');
-        $payee = $this->extra->getPayee();
-        $valid = IbanConverter::isValidIban((string)$payee);
+        $payee     = $this->extra->getPayee();
+        $valid     = IbanConverter::isValidIban((string)$payee);
         // payee is valid IBAN:
         if ($valid) {
             app('log')->debug(sprintf('Payee IBAN is "%s", return this.', $payee));
+
             return (string)$payee;
         }
         // is not valid IBAN (also includes NULL)
@@ -180,15 +148,14 @@ class Transaction
         $valid     = IbanConverter::isValidIban((string)$payeeInfo);
         if ($valid) {
             app('log')->debug(sprintf('Payee IBAN (payee information) is "%s", return this.', $payeeInfo));
+
             return (string)$payeeInfo;
         }
         app('log')->debug('Payee IBAN is "" (empty fallback), return NULL');
+
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayee(): ?string
     {
         app('log')->debug('getPayee()');
@@ -199,38 +166,40 @@ class Transaction
         // if payee is IBAN, first see if payee information may be a better field:
         if ($valid && '' !== $payeeInfo) {
             app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee info.', $payee, $payeeInfo));
+
             return $payeeInfo;
         }
         if (!$valid && '' === $payeeInfo) {
             app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee.', $payee, $payeeInfo));
+
             return $payee;
         }
         if ($valid && '' === $payeeInfo) {
             app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee.', $payee, $payeeInfo));
+
             return $payee;
         }
         if (!$valid && '' !== $payeeInfo) {
             app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return payee info.', $payee, $payeeInfo));
+
             return $payeeInfo;
         }
         app('log')->debug(sprintf('Payee is "%s", payee info is "%s", return NULL.', $payee, $payeeInfo));
 
         // I think this covers everything, but you never know, so:
         return null;
-        //return sprintf('(unknown %s account)', $direction);
+        // return sprintf('(unknown %s account)', $direction);
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayerIban(): ?string
     {
         app('log')->debug('getPayerIban()');
-        $payer = $this->extra->getpayer();
-        $valid = IbanConverter::isValidIban((string)$payer);
+        $payer     = $this->extra->getpayer();
+        $valid     = IbanConverter::isValidIban((string)$payer);
         // payer is valid IBAN:
         if ($valid) {
             app('log')->debug(sprintf('Payer IBAN is "%s", return this.', $payer));
+
             return (string)$payer;
         }
         // is not valid IBAN (also includes NULL)
@@ -238,15 +207,14 @@ class Transaction
         $valid     = IbanConverter::isValidIban((string)$payerInfo);
         if ($valid) {
             app('log')->debug(sprintf('Payer IBAN (payer information) is "%s", return thuis.', $payerInfo));
+
             return (string)$payerInfo;
         }
         app('log')->debug('Payer IBAN is "" (empty fallback), return NULL');
+
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayer(): ?string
     {
         app('log')->debug('getPayer()');
@@ -257,38 +225,36 @@ class Transaction
         // if payer is IBAN, first see if payer information may be a better field:
         if ($valid && '' !== $payerInfo) {
             app('log')->debug(sprintf('Payer is "%s", payer info is "%s", return payer info.', $payer, $payerInfo));
+
             return $payerInfo;
         }
         if (!$valid && '' === $payerInfo) {
             app('log')->debug(sprintf('Payer is "%s", payer info is "%s", return payer.', $payer, $payerInfo));
+
             return $payer;
         }
         if ($valid && '' === $payerInfo) {
             app('log')->debug(sprintf('Payer is "%s", payer info is "%s", return payer.', $payer, $payerInfo));
+
             return $payer;
         }
         if (!$valid && '' !== $payerInfo) {
             app('log')->debug(sprintf('Payer is "%s", payer info is "%s", return payer info.', $payer, $payerInfo));
+
             return $payerInfo;
         }
         app('log')->debug(sprintf('Payer is "%s", payer info is "%s", return NULL.', $payer, $payerInfo));
 
         // I think this covers everything, but you never know, so:
         return null;
-        //return sprintf('(unknown %s account)', $direction);
+        // return sprintf('(unknown %s account)', $direction);
     }
 
-    /**
-     * @return string
-     */
     public function getStatus(): string
     {
         return $this->status;
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [

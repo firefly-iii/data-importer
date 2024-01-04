@@ -29,7 +29,6 @@ use App\Services\Camt\Transaction;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
-use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\Reader as CamtReader;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -44,13 +43,6 @@ class MapperService
      * Appends the given array with data from the CSV file in the config.
      * TODO remove reference to specifics.
      *
-     * @param  string  $content
-     * @param  string  $delimiter
-     * @param  bool  $hasHeaders
-     * @param  array  $specifics
-     * @param  array  $data
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
@@ -64,6 +56,7 @@ class MapperService
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
@@ -72,17 +65,19 @@ class MapperService
         if (true === $hasHeaders) {
             $offset = 1;
         }
+
         try {
             $stmt    = (new Statement())->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException($e->getMessage());
         }
         // loop each row, apply specific:
         app('log')->debug('Going to loop all records to collect information');
         foreach ($records as $row) {
-            //$row = SpecificService::runSpecifics($row, $specifics);
+            // $row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
             foreach ($row as $columnIndex => $column) {
                 if (!isset($data[$columnIndex])) {
@@ -126,11 +121,6 @@ class MapperService
     /**
      * Appends the given array with data from the CAMT file in the config.
      *
-     * @param  Configuration  $configuration
-     * @param  string  $content
-     * @param  array  $data
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     public static function getMapDataForCamt(Configuration $configuration, string $content, array $data): array
@@ -138,13 +128,13 @@ class MapperService
         app('log')->debug('Now in getMapDataForCamt');
 
         // make file reader first.
-        $camtReader   = new CamtReader(Config::getDefault());
-        $camtMessage  = $camtReader->readString($content);
-        $transactions = [];
-
+        $camtReader     = new CamtReader(Config::getDefault());
+        $camtMessage    = $camtReader->readString($content);
+        $transactions   = [];
 
         // loop over records.
-        $statements = $camtMessage->getRecords();
+        $statements     = $camtMessage->getRecords();
+
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
@@ -163,6 +153,7 @@ class MapperService
             }
         }
         $mappableFields = self::getMappableFieldsForCamt();
+
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             // take all mappable fields from this transaction, and add to $values in the data thing
@@ -172,7 +163,7 @@ class MapperService
             foreach (array_keys($mappableFields) as $title) {
                 if (array_key_exists($title, $data)) {
                     if (0 !== $splits) {
-                        for ($index = 0; $index < $splits; $index++) {
+                        for ($index = 0; $index < $splits; ++$index) {
                             $value = $transaction->getFieldByIndex($title, $index);
                             if ('' !== $value) {
                                 $data[$title]['values'][] = $value;
@@ -184,13 +175,13 @@ class MapperService
         }
         // make all values unique for mapping and remove empty vars.
         foreach ($data as $title => $info) {
-            $filtered       = array_filter(
+            $filtered               = array_filter(
                 $info['values'],
                 static function (string $value) {
                     return '' !== $value;
                 }
             );
-            $info['values'] = array_unique($filtered);
+            $info['values']         = array_unique($filtered);
             sort($info['values']);
             $data[$title]['values'] = $info['values'];
         }
@@ -204,13 +195,11 @@ class MapperService
         return $data;
     }
 
-    /**
-     * @return array
-     */
     private static function getMappableFieldsForCamt(): array
     {
         $fields = config('camt.fields');
         $return = [];
+
         /** @var array $field */
         foreach ($fields as $name => $field) {
             if ($field['mappable']) {

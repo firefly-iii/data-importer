@@ -38,8 +38,6 @@ class SecretManager
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     *
-     * @return string
      */
     public static function getId(): string
     {
@@ -48,18 +46,18 @@ class SecretManager
 
             return (string)config('nordigen.id');
         }
+
         try {
             $id = (string)session()->get(self::NORDIGEN_ID);
-        } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $id = '(super invalid)';
         }
+
         return $id;
     }
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     *
-     * @return string
      */
     public static function getKey(): string
     {
@@ -71,18 +69,15 @@ class SecretManager
 
         try {
             $key = (string)session()->get(self::NORDIGEN_KEY);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $key = '(super invalid key)';
         }
+
         return $key;
     }
 
     /**
      * Store access token in a cookie.
-     *
-     * @param string $identifier
-     *
-     * @return void
      */
     public static function saveId(string $identifier): void
     {
@@ -91,10 +86,6 @@ class SecretManager
 
     /**
      * Store access token in a cookie.
-     *
-     * @param string $key
-     *
-     * @return void
      */
     public static function saveKey(string $key): void
     {
@@ -103,31 +94,29 @@ class SecretManager
 
     /**
      * Will verify if the user has a Nordigen ID (in a cookie)
-     *
-     * @return bool
      */
     private static function hasId(): bool
     {
         try {
             $id = (string)session()->get(self::NORDIGEN_ID);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $id = '';
         }
+
         return '' !== $id;
     }
 
     /**
      * Will verify if the user has a Nordigen Key (in a cookie)
-     *
-     * @return bool
      */
     private static function hasKey(): bool
     {
         try {
             $key = (string)session()->get(self::NORDIGEN_KEY);
-        } catch (NotFoundExceptionInterface | ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $key = '';
         }
+
         return '' !== $key;
     }
 }

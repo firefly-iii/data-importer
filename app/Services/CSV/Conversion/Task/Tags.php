@@ -29,11 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class Tags extends AbstractTask
 {
-    /**
-     * @param  array  $group
-     *
-     * @return array
-     */
     public function process(array $group): array
     {
         foreach ($group['transactions'] as $index => $transaction) {
@@ -45,8 +40,6 @@ class Tags extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -55,8 +48,6 @@ class Tags extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
@@ -65,10 +56,6 @@ class Tags extends AbstractTask
 
     /**
      * Do something with the collected tags.
-     *
-     * @param  array  $transaction
-     *
-     * @return array
      */
     private function processTags(array $transaction): array
     {

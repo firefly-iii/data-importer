@@ -248,7 +248,6 @@ $availableRoles = [
     ],
 ];
 
-
 return [
     /*
      * Roles are divided into a number of groups,
@@ -326,9 +325,7 @@ return [
             'foreign-currency-code' => $availableRoles['foreign-currency-code'],
         ],
     ],
-    /*
-     * This particular config variable holds all possible roles.
-     */
+    // This particular config variable holds all possible roles.
     'all_roles' => $availableRoles,
 
     /*
@@ -407,146 +404,129 @@ return [
             'mappable'     => false,
             'level'        => 'C',
         ],
-        'entryAmountCurrency'                                                            =>
-            [
-                'title'        => 'entryAmountCurrency',
-                'default_role' => 'currency-code',
-                'roles'        => 'currency',
-                'mappable'     => true,
-                'level'        => 'C',
-            ],
-        'entryValueDate'                                                                 =>
-            [
-                'title'        => 'entryValueDate',
-                'default_role' => 'date_payment',
-                'roles'        => 'dates',
-                'mappable'     => false,
-                'level'        => 'C',
-            ],
-        'entryBookingDate'                                                               =>
-            [
-                'title'        => 'entryBookingDate',
-                'default_role' => 'date_book',
-                'roles'        => 'dates',
-                'mappable'     => false,
-                'level'        => 'C',
-            ],
-        'entryBtcDomainCode'                                                             =>
-            [
-                'title'        => 'entryBtcDomainCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'C',
-            ],
-        'entryBtcFamilyCode'                                                             =>
-            [
-                'title'        => 'entryBtcFamilyCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'C',
-            ],
-        'entryBtcSubFamilyCode'                                                          =>
-            [
-                'title'        => 'entryBtcSubFamilyCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'C',
-            ],
+        'entryAmountCurrency'                                                            => [
+            'title'        => 'entryAmountCurrency',
+            'default_role' => 'currency-code',
+            'roles'        => 'currency',
+            'mappable'     => true,
+            'level'        => 'C',
+        ],
+        'entryValueDate'                                                                 => [
+            'title'        => 'entryValueDate',
+            'default_role' => 'date_payment',
+            'roles'        => 'dates',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryBookingDate'                                                               => [
+            'title'        => 'entryBookingDate',
+            'default_role' => 'date_book',
+            'roles'        => 'dates',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryBtcDomainCode'                                                             => [
+            'title'        => 'entryBtcDomainCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryBtcFamilyCode'                                                             => [
+            'title'        => 'entryBtcFamilyCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
+        'entryBtcSubFamilyCode'                                                          => [
+            'title'        => 'entryBtcSubFamilyCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'C',
+        ],
 
         // level D, entry detail
-        'entryDetailAccountServicerReference'                                            =>
-            [
-                'title'        => 'entryDetailAccountServicerReference',
-                'default_role' => 'external-id',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
-        'entryDetailRemittanceInformationUnstructuredBlockMessage'                       =>
-            [
-                'title'        => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
-                'default_role' => 'description',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
-        'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' =>
-            [
-                'title'        => 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation',
-                'default_role' => 'description',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
+        'entryDetailAccountServicerReference'                                            => [
+            'title'        => 'entryDetailAccountServicerReference',
+            'default_role' => 'external-id',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
+        'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => [
+            'title'        => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
+            'default_role' => 'description',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
+        'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => [
+            'title'        => 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation',
+            'default_role' => 'description',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
 
-        'entryDetailAmount'         =>
-            [
-                'title'        => 'entryDetailAmount',
-                'default_role' => 'amount',
-                'roles'        => 'amount',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
-        'entryDetailAmountCurrency' =>
-            [
-                'title'        => 'entryDetailAmountCurrency',
-                'default_role' => 'currency-code',
-                'roles'        => 'currency',
-                'mappable'     => true,
-                'level'        => 'D',
-            ],
+        'entryDetailAmount'                                                              => [
+            'title'        => 'entryDetailAmount',
+            'default_role' => 'amount',
+            'roles'        => 'amount',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
+        'entryDetailAmountCurrency'                                                      => [
+            'title'        => 'entryDetailAmountCurrency',
+            'default_role' => 'currency-code',
+            'roles'        => 'currency',
+            'mappable'     => true,
+            'level'        => 'D',
+        ],
 
-        'entryDetailBtcDomainCode'    =>
-            [
-                'title'        => 'entryDetailBtcDomainCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
-        'entryDetailBtcFamilyCode'    =>
-            [
-                'title'        => 'entryDetailBtcFamilyCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
-        'entryDetailBtcSubFamilyCode' =>
-            [
-                'title'        => 'entryDetailBtcSubFamilyCode',
-                'default_role' => 'note',
-                'roles'        => 'meta',
-                'mappable'     => false,
-                'level'        => 'D',
-            ],
+        'entryDetailBtcDomainCode'                                                       => [
+            'title'        => 'entryDetailBtcDomainCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
+        'entryDetailBtcFamilyCode'                                                       => [
+            'title'        => 'entryDetailBtcFamilyCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
+        'entryDetailBtcSubFamilyCode'                                                    => [
+            'title'        => 'entryDetailBtcSubFamilyCode',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
 
-        'entryDetailOpposingAccountIban'   =>
-            [
-                'title'        => 'entryDetailOpposingAccountIban',
-                'default_role' => 'opposing-iban',
-                'roles'        => 'iban',
-                'mappable'     => true,
-                'level'        => 'D',
-            ],
-        'entryDetailOpposingAccountNumber' =>
-            [
-                'title'        => 'entryDetailOpposingAccountNumber',
-                'default_role' => 'opposing-number',
-                'roles'        => 'account_number',
-                'mappable'     => true,
-                'level'        => 'D',
-            ],
-        'entryDetailOpposingName'          =>
-            [
-                'title'        => 'entryDetailOpposingName',
-                'default_role' => 'opposing-name',
-                'roles'        => 'account_name',
-                'mappable'     => true,
-                'level'        => 'D',
-            ],
+        'entryDetailOpposingAccountIban'                                                 => [
+            'title'        => 'entryDetailOpposingAccountIban',
+            'default_role' => 'opposing-iban',
+            'roles'        => 'iban',
+            'mappable'     => true,
+            'level'        => 'D',
+        ],
+        'entryDetailOpposingAccountNumber'                                               => [
+            'title'        => 'entryDetailOpposingAccountNumber',
+            'default_role' => 'opposing-number',
+            'roles'        => 'account_number',
+            'mappable'     => true,
+            'level'        => 'D',
+        ],
+        'entryDetailOpposingName'                                                        => [
+            'title'        => 'entryDetailOpposingName',
+            'default_role' => 'opposing-name',
+            'roles'        => 'account_name',
+            'mappable'     => true,
+            'level'        => 'D',
+        ],
     ],
 ];

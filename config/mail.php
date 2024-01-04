@@ -23,7 +23,6 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Mailer
@@ -35,7 +34,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', ''),
+    'default'            => env('MAIL_MAILER', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -55,8 +54,8 @@ return [
     |
     */
 
-    'mailers' => [
-        'smtp' => [
+    'mailers'            => [
+        'smtp'     => [
             'transport'   => 'smtp',
             'host'        => env('MAIL_HOST', 'smtp.mailgun.org'),
             'port'        => env('MAIL_PORT', 587),
@@ -67,11 +66,11 @@ return [
             'verify_peer' => null !== env('MAIL_ENCRYPTION'),
         ],
 
-        'ses' => [
+        'ses'      => [
             'transport' => 'ses',
         ],
 
-        'mailgun' => [
+        'mailgun'  => [
             'transport' => 'mailgun',
         ],
 
@@ -84,12 +83,12 @@ return [
             'path'      => '/usr/sbin/sendmail -bs',
         ],
 
-        'log' => [
+        'log'      => [
             'transport' => 'log',
             'channel'   => env('MAIL_LOG_CHANNEL'),
         ],
 
-        'array' => [
+        'array'    => [
             'transport' => 'array',
         ],
     ],
@@ -123,12 +122,11 @@ return [
     |
     */
 
-    'markdown' => [
+    'markdown'           => [
         'theme' => 'default',
 
         'paths' => [
             resource_path('views/vendor/mail'),
         ],
     ],
-
 ];

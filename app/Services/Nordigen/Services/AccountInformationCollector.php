@@ -43,9 +43,6 @@ use App\Services\Nordigen\TokenManager;
 class AccountInformationCollector
 {
     /**
-     * @param Account $account
-     *
-     * @return Account
      * @throws AgreementExpiredException
      */
     public static function collectInformation(Account $account): Account
@@ -54,6 +51,7 @@ class AccountInformationCollector
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
+
         try {
             $detailedAccount = self::getAccountDetails($account);
         } catch (ImporterErrorException $e) {
@@ -62,11 +60,11 @@ class AccountInformationCollector
             $detailedAccount->setStatus('no-info');
             $detailedAccount->setName('Unknown account');
         }
-        $balanceAccount = $detailedAccount;
+        $balanceAccount  = $detailedAccount;
 
         try {
             $balanceAccount = self::getBalanceDetails($account);
-        } catch (ImporterHttpException | ImporterErrorException $e) {
+        } catch (ImporterErrorException|ImporterHttpException $e) {
             app('log')->error($e->getMessage());
             // ignore error otherwise for now.
             $status = $balanceAccount->getStatus();
@@ -83,35 +81,33 @@ class AccountInformationCollector
     }
 
     /**
-     * @param Account $account
-     *
-     * @return Account
-     * @throws ImporterErrorException|AgreementExpiredException
+     * @throws AgreementExpiredException|ImporterErrorException
      */
     protected static function getAccountDetails(Account $account): Account
     {
         app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
-        $url         = config('nordigen.url');
-        $accessToken = TokenManager::getAccessToken();
-        $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
-        /** @var ArrayResponse $response */
+        $url          = config('nordigen.url');
+        $accessToken  = TokenManager::getAccessToken();
+        $request      = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
+        // @var ArrayResponse $response
 
         try {
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             // need to redirect user at some point.
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
-        } catch (ImporterHttpException | ImporterErrorException $e) {
+        } catch (ImporterErrorException|ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
         if (!array_key_exists('account', $response->data)) {
             app('log')->error('Missing account array', $response->data);
+
             throw new ImporterErrorException('No account array, exit.');
         }
 
-        $information = $response->data['account'];
+        $information  = $response->data['account'];
 
         app('log')->debug('getAccountDetails: Collected information for account', $information);
 
@@ -143,15 +139,9 @@ class AccountInformationCollector
         }
         $account->setOwnerAddressUnstructured($ownerAddress);
 
-
         return $account;
     }
 
-    /**
-     * @param Account $account
-     *
-     * @return Account
-     */
     private static function getBalanceDetails(Account $account): Account
     {
         app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
@@ -160,8 +150,9 @@ class AccountInformationCollector
         $accessToken = TokenManager::getAccessToken();
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
+
         /** @var ArrayResponse $response */
-        $response = $request->get();
+        $response    = $request->get();
         if (array_key_exists('balances', $response->data)) {
             foreach ($response->data['balances'] as $array) {
                 app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
@@ -172,11 +163,6 @@ class AccountInformationCollector
         return $account;
     }
 
-    /**
-     * @param Account $account
-     *
-     * @return Account
-     */
     private static function getBasicDetails(Account $account): Account
     {
         app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
@@ -185,9 +171,10 @@ class AccountInformationCollector
         $accessToken = TokenManager::getAccessToken();
         $request     = new GetAccountBasicRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
+
         /** @var ArrayResponse $response */
-        $response = $request->get();
-        $array    = $response->data;
+        $response    = $request->get();
+        $array       = $response->data;
         app('log')->debug('Response for basic information request:', $array);
 
         // save IBAN if not already present

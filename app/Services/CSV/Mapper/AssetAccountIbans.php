@@ -36,7 +36,6 @@ class AssetAccountIbans implements MapperInterface
     /**
      * Get map of objects.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     public function getMap(): array

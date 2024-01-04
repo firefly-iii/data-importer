@@ -27,8 +27,6 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
-use JsonException;
-use UnexpectedValueException;
 
 /**
  * Class ColumnValueConverter
@@ -45,8 +43,6 @@ class ColumnValueConverter
 
     /**
      * ColumnValueConverter constructor.
-     *
-     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -55,9 +51,6 @@ class ColumnValueConverter
     }
 
     /**
-     * @param  array  $lines
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     public function processValueArrays(array $lines): array
@@ -68,7 +61,7 @@ class ColumnValueConverter
         $count     = count($lines);
         app('log')->info(sprintf('Now parsing and combining %d lines.', $count));
         foreach ($lines as $index => $line) {
-            app('log')->debug(sprintf('Now processing line %d/%d', ($index + 1), $count));
+            app('log')->debug(sprintf('Now processing line %d/%d', $index + 1, $count));
             $processed[] = $this->processValueArray($line);
         }
         app('log')->info(sprintf('Done parsing and combining %d lines.', $count));
@@ -77,18 +70,15 @@ class ColumnValueConverter
     }
 
     /**
-     * @param  array  $line
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function processValueArray(array $line): array
     {
-        $count = count($line);
+        $count       = count($line);
         app('log')->debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
         // make a new transaction:
         $transaction = [
-            //'user'          => 1, // ??
+            // 'user'          => 1, // ??
             'group_title'             => null,
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [
@@ -114,8 +104,9 @@ class ColumnValueConverter
                 ],
             ],
         ];
+
         /**
-         * @var int $columnIndex
+         * @var int         $columnIndex
          * @var ColumnValue $value
          */
         foreach ($line as $columnIndex => $value) {
@@ -123,10 +114,11 @@ class ColumnValueConverter
             $transactionField = $this->roleToTransaction[$role] ?? null;
             $parsedValue      = $value->getParsedValue();
             if (null === $transactionField) {
-                throw new UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
+                throw new \UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
             }
             if (null === $parsedValue) {
                 app('log')->debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
+
                 continue;
             }
             app('log')->debug(
@@ -146,7 +138,7 @@ class ColumnValueConverter
                     [$parsedValue]
                 );
                 if (is_array($parsedValue)) {
-                    $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? [];
+                    $transaction['transactions'][0][$transactionField] ??= [];
                     $transaction['transactions'][0][$transactionField] = array_merge($transaction['transactions'][0][$transactionField], $parsedValue);
                     app('log')->debug(
                         sprintf('Value for [transactions][#0][%s] is now ', $transactionField),
@@ -154,7 +146,7 @@ class ColumnValueConverter
                     );
                 }
                 if (!is_array($parsedValue)) {
-                    $transaction['transactions'][0][$transactionField] = $transaction['transactions'][0][$transactionField] ?? '';
+                    $transaction['transactions'][0][$transactionField] ??= '';
                     $transaction['transactions'][0][$transactionField] = trim(
                         sprintf('%s %s', $transaction['transactions'][0][$transactionField], $parsedValue)
                     );
@@ -168,7 +160,7 @@ class ColumnValueConverter
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
             }
             // if this is an account field, AND the column is mapped, store the original value just in case.
-            $saveRoles = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
+            $saveRoles        = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
             if (0 !== $value->getMappedValue() && in_array($value->getOriginalRole(), $saveRoles, true)) {
                 app('log')->debug(
                     sprintf(
@@ -187,9 +179,6 @@ class ColumnValueConverter
     }
 
     /**
-     * @param $value
-     *
-     * @return string
      * @throws ImporterErrorException
      */
     private function toString($value): string
@@ -197,7 +186,7 @@ class ColumnValueConverter
         if (is_array($value)) {
             try {
                 return json_encode($value, JSON_THROW_ON_ERROR);
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }

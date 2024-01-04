@@ -47,33 +47,21 @@ class ColumnValue
         $this->configuration = null;
     }
 
-    /**
-     * @return int
-     */
     public function getMappedValue(): int
     {
         return $this->mappedValue;
     }
 
-    /**
-     * @param  int  $mappedValue
-     */
     public function setMappedValue(int $mappedValue): void
     {
         $this->mappedValue = $mappedValue;
     }
 
-    /**
-     * @return string
-     */
     public function getOriginalRole(): string
     {
         return $this->originalRole;
     }
 
-    /**
-     * @param  string  $originalRole
-     */
     public function setOriginalRole(string $originalRole): void
     {
         $this->originalRole = $originalRole;
@@ -85,7 +73,7 @@ class ColumnValue
     public function getParsedValue()
     {
         if (0 !== $this->mappedValue) {
-            /** @noinspection UnnecessaryCastingInspection */
+            // @noinspection UnnecessaryCastingInspection
             return (int)$this->mappedValue;
         }
 
@@ -96,57 +84,36 @@ class ColumnValue
         return ConverterService::convert($converterClass, $this->value, $this->configuration);
     }
 
-    /**
-     * @return string
-     */
     public function getRole(): string
     {
         return $this->role;
     }
 
-    /**
-     * @param  string  $role
-     */
     public function setRole(string $role): void
     {
         $this->role = $role;
     }
 
-    /**
-     * @return string
-     */
     public function getValue(): string
     {
         return $this->value;
     }
 
-    /**
-     * @param  string  $value
-     */
     public function setValue(string $value): void
     {
         $this->value = $value;
     }
 
-    /**
-     * @return bool
-     */
     public function isAppendValue(): bool
     {
         return $this->appendValue;
     }
 
-    /**
-     * @param  bool  $appendValue
-     */
     public function setAppendValue(bool $appendValue): void
     {
         $this->appendValue = $appendValue;
     }
 
-    /**
-     * @param  string  $configuration
-     */
     public function setConfiguration(string $configuration): void
     {
         $this->configuration = $configuration;

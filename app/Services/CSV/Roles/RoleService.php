@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -32,14 +31,11 @@ use App\Services\Storage\StorageService;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader as CamtReader;
-use InvalidArgumentException;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use League\Csv\UnableToProcessCsv;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoleService
@@ -50,33 +46,35 @@ class RoleService
     public const EXAMPLE_LENGTH = 26;
 
     /**
-     * @param  string  $content
-     * @param  Configuration  $configuration
-     *
-     * @return array
      * @throws InvalidArgument
      * @throws UnableToProcessCsv
      */
     public static function getColumns(string $content, Configuration $configuration): array
     {
-        $reader = Reader::createFromString($content);
+        $reader    = Reader::createFromString($content);
 
         // configure reader:
         $delimiter = $configuration->getDelimiter();
+
         switch ($delimiter) {
             default:
             case 'comma':
                 $reader->setDelimiter(',');
+
                 break;
+
             case 'semicolon':
                 $reader->setDelimiter(';');
+
                 break;
+
             case 'tab':
                 $reader->setDelimiter("\t");
+
                 break;
         }
 
-        $headers = [];
+        $headers   = [];
         if (true === $configuration->isHeaders()) {
             try {
                 $stmt    = (new Statement())->limit(1)->offset(0);
@@ -85,25 +83,28 @@ class RoleService
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 app('log')->error($e->getMessage());
-                throw new InvalidArgumentException($e->getMessage());
+
+                throw new \InvalidArgumentException($e->getMessage());
             }
             // @codeCoverageIgnoreEnd
             app('log')->debug('Detected file headers:', $headers);
         }
         if (false === $configuration->isHeaders()) {
             app('log')->debug('Role service: file has no headers');
+
             try {
                 $stmt    = (new Statement())->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $count   = count($records->fetchOne());
                 app('log')->debug(sprintf('Role service: first row has %d columns', $count));
-                for ($i = 0; $i < $count; $i++) {
+                for ($i = 0; $i < $count; ++$i) {
                     $headers[] = sprintf('Column #%d', $i + 1);
                 }
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 app('log')->error($e->getMessage());
-                throw new InvalidArgumentException($e->getMessage());
+
+                throw new \InvalidArgumentException($e->getMessage());
             }
         }
 
@@ -111,49 +112,55 @@ class RoleService
     }
 
     /**
-     * @param  string  $content
-     * @param  Configuration  $configuration
-     *
-     * @return array
      * @throws Exception
      */
     public static function getExampleData(string $content, Configuration $configuration): array
     {
-        $reader = Reader::createFromString($content);
+        $reader    = Reader::createFromString($content);
 
         // configure reader:
         $delimiter = $configuration->getDelimiter();
+
         switch ($delimiter) {
             default:
             case 'comma':
                 $reader->setDelimiter(',');
+
                 break;
+
             case 'semicolon':
                 $reader->setDelimiter(';');
+
                 break;
+
             case 'tab':
                 $reader->setDelimiter("\t");
+
                 break;
         }
 
-        $offset   = $configuration->isHeaders() ? 1 : 0;
-        $examples = [];
+        $offset    = $configuration->isHeaders() ? 1 : 0;
+        $examples  = [];
+
         // make statement.
         try {
             $stmt = (new Statement())->limit(self::EXAMPLE_COUNT)->offset($offset);
             // @codeCoverageIgnoreStart
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-            throw new InvalidArgumentException($e->getMessage());
+
+            throw new \InvalidArgumentException($e->getMessage());
         }
+
         /** @codeCoverageIgnoreEnd */
 
         // grab the records:
-        $records = $stmt->process($reader);
+        $records   = $stmt->process($reader);
+
         /** @var array $line */
         foreach ($records as $line) {
             $line = array_values($line);
-            //$line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
+            // $line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
             foreach ($line as $index => $cell) {
                 if (strlen($cell) > self::EXAMPLE_LENGTH) {
                     $cell = sprintf('%s...', substr($cell, 0, self::EXAMPLE_LENGTH));
@@ -170,12 +177,6 @@ class RoleService
         return $examples;
     }
 
-    /**
-     * @param  string  $content
-     * @param  Configuration  $configuration
-     *
-     * @return array
-     */
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {
         $camtReader   = new CamtReader(Config::getDefault());
@@ -186,12 +187,14 @@ class RoleService
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
         }
+
         /**
          * This code creates separate Transaction objects for transaction details,
          * even when the user indicates these details should be splits or ignored entirely.
          * This is because we still need to extract possible example data from these transaction details.
          */
-        $statements = $camtMessage->getRecords();
+        $statements   = $camtMessage->getRecords();
+
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
@@ -208,7 +211,8 @@ class RoleService
                 }
             }
         }
-        $count = 0;
+        $count        = 0;
+
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
             if (15 === $count) { // do not check more than 15 transactions to fill the example-data
@@ -228,7 +232,7 @@ class RoleService
                     }
                 }
                 if ($splits > 0) {
-                    for ($index = 0; $index < $splits; $index++) {
+                    for ($index = 0; $index < $splits; ++$index) {
                         $value = $transaction->getFieldByIndex($name, $index);
                         if ('' !== $value) {
                             $examples[$name][] = $value;
@@ -236,7 +240,7 @@ class RoleService
                     }
                 }
             }
-            $count++;
+            ++$count;
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);

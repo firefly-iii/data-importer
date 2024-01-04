@@ -43,7 +43,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use JsonException;
 
 /**
  * Class ConfigurationController
@@ -54,7 +53,6 @@ class ConfigurationController extends Controller
     use CollectsAccounts;
     use MergesAccountLists;
     use RestoresConfiguration;
-
 
     /**
      * StartController constructor.
@@ -67,20 +65,18 @@ class ConfigurationController extends Controller
     }
 
     /**
-     * @param Request $request
-     *
      * @return Factory|RedirectResponse|View
      */
     public function index(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle     = 'Configuration';
-        $subTitle      = 'Configure your import';
-        $flow          = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
-        $configuration = $this->restoreConfiguration();
+        $mainTitle          = 'Configuration';
+        $subTitle           = 'Configure your import';
+        $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+        $configuration      = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
-        $overruleSkip = 'true' === $request->get('overruleskip');
+        $overruleSkip       = 'true' === $request->get('overruleskip');
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {
             app('log')->debug('Skip configuration, go straight to the next step.');
             // set config as complete.
@@ -100,12 +96,12 @@ class ConfigurationController extends Controller
         // possibilities for duplicate detection (unique columns)
 
         // also get the nordigen / spectre accounts
-        $importerAccounts = [];
-        $uniqueColumns    = config('csv.unique_column_options');
+        $importerAccounts   = [];
+        $uniqueColumns      = config('csv.unique_column_options');
         if ('nordigen' === $flow) {
             // TODO here we need to redirect to Nordigen.
             try {
-            $importerAccounts = $this->getNordigenAccounts($configuration);
+                $importerAccounts = $this->getNordigenAccounts($configuration);
             } catch (AgreementExpiredException $e) {
                 app('log')->error($e->getMessage());
 
@@ -144,27 +140,18 @@ class ConfigurationController extends Controller
         );
     }
 
-
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function phpDate(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj = new Date();
+        $dateObj           = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
-        $date = Carbon::make('1984-09-17')->locale($locale);
+        $date              = Carbon::make('1984-09-17')->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
 
     /**
-     * @param ConfigurationPostRequest $request
-     *
-     * @return RedirectResponse
      * @throws ImporterErrorException
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
@@ -178,7 +165,7 @@ class ConfigurationController extends Controller
         // TODO are all fields actually in the config?
 
         // loop accounts:
-        $accounts = [];
+        $accounts      = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
@@ -187,18 +174,18 @@ class ConfigurationController extends Controller
         $configuration->setAccounts($accounts);
         $configuration->updateDateRange();
 
+        $json          = '{}';
 
-        $json = '{}';
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         StorageService::storeContent($json);
 
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
 
         app('log')->debug(sprintf('Configuration debug: Connection ID is "%s"', $configuration->getConnection()));
         // set config as complete.
@@ -207,6 +194,7 @@ class ConfigurationController extends Controller
             // at this point, nordigen is ready for data conversion.
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }
+
         // always redirect to roles, even if this isn't the step yet
         // for nordigen and spectre, roles will be skipped right away.
         return redirect(route('005-roles.index'));

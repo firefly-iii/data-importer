@@ -41,8 +41,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -52,9 +50,6 @@ class LinkController extends Controller
 {
     use RestoresConfiguration;
 
-    /**
-     *
-     */
     public function __construct()
     {
         parent::__construct();
@@ -69,24 +64,24 @@ class LinkController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
         // create a new config thing
-        $configuration = $this->restoreConfiguration();
+        $configuration     = $this->restoreConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
             return redirect(route('back.selection'));
         }
 
         TokenManager::validateAllTokens();
 
-
         // if already a requisition in config file, no need to make a new one unless its invalid.
-        $requisitions = $configuration->getNordigenRequisitions();
+        $requisitions      = $configuration->getNordigenRequisitions();
         if (1 === count($requisitions)) {
             $url         = config('nordigen.url');
             $accessToken = TokenManager::getAccessToken();
             $reference   = array_shift($requisitions);
             $request     = new GetRequisitionRequest($url, $accessToken, $reference);
             $request->setTimeOut(config('importer.connection.timeout'));
+
             /** @var GetRequisitionResponse $result */
-            $result = $request->get();
+            $result      = $request->get();
 
             $configuration->setAccounts($result->accounts);
 
@@ -95,18 +90,18 @@ class LinkController extends Controller
             return redirect(route('004-configure.index'));
         }
 
-        $uuid        = Uuid::uuid4()->toString();
-        $url         = config('nordigen.url');
-        $accessToken = TokenManager::getAccessToken();
+        $uuid              = Uuid::uuid4()->toString();
+        $url               = config('nordigen.url');
+        $accessToken       = TokenManager::getAccessToken();
 
-        $agreementRequest = new PostNewUserAgreement($url, $accessToken);
+        $agreementRequest  = new PostNewUserAgreement($url, $accessToken);
         $agreementRequest->setTimeOut(config('importer.connection.timeout'));
         $agreementRequest->setBank($configuration->getNordigenBank());
-        $agreementRequest->setAccessValidForDays("90");
+        $agreementRequest->setAccessValidForDays('90');
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
         $agreementResponse = $agreementRequest->post();
 
-        $request = new PostNewRequisitionRequest($url, $accessToken);
+        $request           = new PostNewRequisitionRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
@@ -115,7 +110,7 @@ class LinkController extends Controller
         app('log')->debug(sprintf('Reference is "%s"', $uuid));
 
         /** @var NewRequisitionResponse $response */
-        $response = $request->post();
+        $response          = $request->post();
         app('log')->debug(sprintf('Got a new requisition with id "%s"', $response->id));
         app('log')->debug(sprintf('Status: %s, returned reference: "%s"', $response->status, $response->reference));
         app('log')->debug(sprintf('Will now redirect the user to %s', $response->link));
@@ -129,13 +124,11 @@ class LinkController extends Controller
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return Application|RedirectResponse|Redirector
+     * @return Application|Redirector|RedirectResponse
      */
     public function callback(Request $request)
     {
-        $reference = (string)$request->get('ref');
+        $reference     = (string)$request->get('ref');
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         app('log')->debug(sprintf('Reference is "%s"', $reference));
 

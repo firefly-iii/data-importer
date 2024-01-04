@@ -50,21 +50,24 @@ class Controller extends BaseController
         $vanityUrl   = (string)env('VANITY_URL', '');
 
         // access token AND client ID cannot be set together
-        if ('' !== $accessToken && $clientId !== '') {
+        if ('' !== $accessToken && '' !== $clientId) {
             echo 'You can\'t set FIREFLY_III_ACCESS_TOKEN together with FIREFLY_III_CLIENT_ID. One must remain empty.';
+
             exit;
         }
 
         // if vanity URL is not empty, Firefly III url must also be set.
         if ('' !== $vanityUrl && '' === $baseUrl) {
             echo 'If you set VANITY_URL you must also set FIREFLY_III_URL';
+
             exit;
         }
 
-        $path     = config('importer.upload_path');
-        $writable = is_dir($path) && is_writable($path);
+        $path        = config('importer.upload_path');
+        $writable    = is_dir($path) && is_writable($path);
         if (false === $writable) {
             echo sprintf('Make sure that directory "%s" exists and is writeable.', $path);
+
             exit;
         }
 

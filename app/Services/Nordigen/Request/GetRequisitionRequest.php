@@ -39,11 +39,6 @@ class GetRequisitionRequest extends Request
 {
     private string $requisitionId;
 
-    /**
-     * @param  string  $url
-     * @param  string  $token
-     * @param  string  $requisitionId
-     */
     public function __construct(string $url, string $token, string $requisitionId)
     {
         $this->setParameters([]);
@@ -53,7 +48,6 @@ class GetRequisitionRequest extends Request
     }
 
     /**
-     * @inheritDoc
      * @throws AgreementExpiredException
      */
     public function get(): Response
@@ -75,17 +69,11 @@ class GetRequisitionRequest extends Request
         return new GetRequisitionResponse($response);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // TODO: Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // TODO: Implement put() method.

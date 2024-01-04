@@ -34,9 +34,6 @@ class ErrorResponse extends Response
     public string $class;
     public string $message;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->class   = $data['error']['class'] ?? 'Unknown Spectre Error Class';

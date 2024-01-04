@@ -35,8 +35,6 @@ class SecretManager
 {
     /**
      * Will return the access token. From a cookie if its there, otherwise from configuration.
-     *
-     * @return string
      */
     public static function getAccessToken(): string
     {
@@ -49,9 +47,6 @@ class SecretManager
         return session()->get(Constants::SESSION_ACCESS_TOKEN);
     }
 
-    /**
-     * @return string
-     */
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
@@ -65,8 +60,6 @@ class SecretManager
 
     /**
      * Will return the client ID. From a cookie if its there, otherwise from configuration.
-     *
-     * @return int
      */
     public static function getClientId(): int
     {
@@ -79,9 +72,6 @@ class SecretManager
         return (int)session()->get(Constants::SESSION_CLIENT_ID);
     }
 
-    /**
-     * @return string
-     */
     public static function getVanityUrl(): string
     {
         if (!self::hasVanityUrl()) {
@@ -98,8 +88,6 @@ class SecretManager
 
     /**
      * Will return true if the session / cookies hold valid secrets (access token, URLs)
-     *
-     * @return bool
      */
     public static function hasValidSecrets(): bool
     {
@@ -114,10 +102,6 @@ class SecretManager
 
     /**
      * Store access token.
-     *
-     * @param  string  $token
-     *
-     * @return void
      */
     public static function saveAccessToken(string $token): void
     {
@@ -126,10 +110,6 @@ class SecretManager
 
     /**
      * Store access token.
-     *
-     * @param  string  $url
-     *
-     * @return void
      */
     public static function saveBaseUrl(string $url): void
     {
@@ -138,10 +118,6 @@ class SecretManager
 
     /**
      * Store access token.
-     *
-     * @param  string  $token
-     *
-     * @return void
      */
     public static function saveRefreshToken(string $token): void
     {
@@ -150,10 +126,6 @@ class SecretManager
 
     /**
      * Store access token.
-     *
-     * @param  string  $url
-     *
-     * @return void
      */
     public static function saveVanityUrl(string $url): void
     {
@@ -162,8 +134,6 @@ class SecretManager
 
     /**
      * Will verify if the user has an access token (in a cookie)
-     *
-     * @return bool
      */
     private static function hasAccessToken(): bool
     {
@@ -172,8 +142,6 @@ class SecretManager
 
     /**
      * Will verify if the user has an base URL defined (in a cookie)
-     *
-     * @return bool
      */
     private static function hasBaseUrl(): bool
     {
@@ -182,8 +150,6 @@ class SecretManager
 
     /**
      * Will verify if the user has an client ID defined
-     *
-     * @return bool
      */
     private static function hasClientId(): bool
     {
@@ -202,8 +168,6 @@ class SecretManager
 
     /**
      * Will verify if the user has a vanity URL defined
-     *
-     * @return bool
      */
     private static function hasVanityUrl(): bool
     {

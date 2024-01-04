@@ -29,8 +29,6 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class DownloadController
@@ -39,26 +37,24 @@ class DownloadController extends Controller
 {
     use RestoresConfiguration;
 
-    /**
-     * @return Application|ResponseFactory|Response
-     */
-    public function download(): Response|Application|ResponseFactory
+    public function download(): Application|Response|ResponseFactory
     {
         // do something
         $configuration = $this->restoreConfiguration();
         $array         = $configuration->toArray();
         $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
 
-        $response = response($result);
-        $name     = sprintf('import_config_%s.json', date('Y-m-d'));
+        $response      = response($result);
+        $name          = sprintf('import_config_%s.json', date('Y-m-d'));
         $response->header('Content-disposition', 'attachment; filename='.$name)
-                 ->header('Content-Type', 'application/json')
-                 ->header('Content-Description', 'File Transfer')
-                 ->header('Connection', 'Keep-Alive')
-                 ->header('Expires', '0')
-                 ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
-                 ->header('Pragma', 'public')
-                 ->header('Content-Length', strlen($result));
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Description', 'File Transfer')
+            ->header('Connection', 'Keep-Alive')
+            ->header('Expires', '0')
+            ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
+            ->header('Pragma', 'public')
+            ->header('Content-Length', strlen($result))
+        ;
 
         return $response;
     }

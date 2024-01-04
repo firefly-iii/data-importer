@@ -22,11 +22,9 @@
 
 declare(strict_types=1);
 
-
 use App\Support\Facades\Steam;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -38,7 +36,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name'            => env('APP_NAME', 'Laravel'),
 
     /*
     |--------------------------------------------------------------------------
@@ -51,7 +49,7 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+    'env'             => env('APP_ENV', 'production'),
 
     /*
     |--------------------------------------------------------------------------
@@ -64,7 +62,7 @@ return [
     |
     */
 
-    'debug' => (bool)env('APP_DEBUG', false),
+    'debug'           => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -77,9 +75,9 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url'             => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL'),
+    'asset_url'       => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------
@@ -92,7 +90,7 @@ return [
     |
     */
 
-    'timezone' => env('TZ', 'Europe/Amsterdam'),
+    'timezone'        => env('TZ', 'Europe/Amsterdam'),
 
     /*
     |--------------------------------------------------------------------------
@@ -105,7 +103,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale'          => 'en',
 
     /*
     |--------------------------------------------------------------------------
@@ -131,7 +129,7 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    'faker_locale'    => 'en_US',
 
     /*
     |--------------------------------------------------------------------------
@@ -144,9 +142,9 @@ return [
     |
     */
     // not used by data importer.
-    'key'          => 'PSPGRY5PWJ6D1UMZLBL5BNAZIN4I1QSD',
+    'key'             => 'PSPGRY5PWJ6D1UMZLBL5BNAZIN4I1QSD',
 
-    'cipher' => 'AES-256-CBC',
+    'cipher'          => 'AES-256-CBC',
 
     /*
     |--------------------------------------------------------------------------
@@ -159,11 +157,8 @@ return [
     |
     */
 
-    'providers' => [
-
-        /*
-         * Laravel Framework Service Providers...
-         */
+    'providers'       => [
+        // Laravel Framework Service Providers...
         Illuminate\Auth\AuthServiceProvider::class,
         Illuminate\Broadcasting\BroadcastServiceProvider::class,
         Illuminate\Bus\BusServiceProvider::class,
@@ -187,20 +182,15 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
-        /*
-         * Package Service Providers...
-         */
+        // Package Service Providers...
         TwigBridge\ServiceProvider::class,
 
-        /*
-         * Application Service Providers...
-         */
+        // Application Service Providers...
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
     ],
 
     /*
@@ -214,8 +204,7 @@ return [
     |
     */
 
-    'aliases' => [
-
+    'aliases'         => [
         'App'          => Illuminate\Support\Facades\App::class,
         'Arr'          => Illuminate\Support\Arr::class,
         'Artisan'      => Illuminate\Support\Facades\Artisan::class,
@@ -255,5 +244,4 @@ return [
         'Twig'         => TwigBridge\Facade\Twig::class,
         'Steam'        => Steam::class,
     ],
-
 ];

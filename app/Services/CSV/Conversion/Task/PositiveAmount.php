@@ -34,29 +34,23 @@ class PositiveAmount extends AbstractTask
     /**
      * Make sure amount is always positive when submitting.
      *
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function process(array $group): array
     {
         foreach ($group['transactions'] as $index => $transaction) {
-            $group['transactions'][$index]['amount'] = $group['transactions'][$index]['amount'] ?? '0';
+            $group['transactions'][$index]['amount'] ??= '0';
             $group['transactions'][$index]['amount'] = AmountConverter::positive($group['transactions'][$index]['amount']);
         }
 
         return $group;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function requiresDefaultAccount(): bool
     {
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function requiresTransactionCurrency(): bool
     {
         return false;

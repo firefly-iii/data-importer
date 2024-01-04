@@ -57,9 +57,6 @@ class RoutineManager implements RoutineManagerInterface
     private LineProcessor              $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
 
-    /**
-     *
-     */
     public function __construct(?string $identifier)
     {
         $this->forceCli    = false; // used in POST auto import
@@ -76,13 +73,12 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
-        $this->configuration = $configuration;
+        $this->configuration              = $configuration;
 
         // share config
         $this->csvFileProcessor           = new CSVFileProcessor($this->configuration);
@@ -97,24 +93,17 @@ class RoutineManager implements RoutineManagerInterface
         $this->pseudoTransactionProcessor->setIdentifier($this->identifier);
     }
 
-    /**
-     * @param string $content
-     */
     public function setContent(string $content): void
     {
         $this->content = $content;
     }
 
-    /**
-     * @param bool $forceCli
-     */
     public function setForceCli(bool $forceCli): void
     {
         $this->forceCli = $forceCli;
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function start(): array
@@ -132,30 +121,30 @@ class RoutineManager implements RoutineManagerInterface
         if ('' === $this->content) {
             try {
                 $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface | NotFoundExceptionInterface $e) {
+            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }
 
-        $CSVLines = $this->csvFileProcessor->processCSVFile();
+        $CSVLines     = $this->csvFileProcessor->processCSVFile();
 
         // convert raw lines into arrays with individual ColumnValues
-        $valueArrays = $this->lineProcessor->processCSVLines($CSVLines);
+        $valueArrays  = $this->lineProcessor->processCSVLines($CSVLines);
 
         // convert value arrays into (pseudo) transactions.
-        $pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
+        $pseudo       = $this->columnValueConverter->processValueArrays($valueArrays);
 
         // convert pseudo transactions into actual transactions.
         $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
 
-
-        $count = count($CSVLines);
+        $count        = count($CSVLines);
 
         if (0 === $count) {
             $this->addError(0, 'No transactions found in CSV file.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             return [];
         }
 
@@ -166,9 +155,6 @@ class RoutineManager implements RoutineManagerInterface
         return $transactions;
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeErrors(int $count): void
     {
         $this->allErrors = $this->mergeArrays(
@@ -178,13 +164,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->lineProcessor->getErrors(),
                 $this->columnValueConverter->getErrors(),
                 $this->pseudoTransactionProcessor->getErrors(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -194,12 +178,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->lineProcessor->getMessages(),
                 $this->columnValueConverter->getMessages(),
                 $this->pseudoTransactionProcessor->getMessages(),
-            ], $count);
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeWarnings(int $count): void
     {
         $this->allWarnings = $this->mergeArrays(
@@ -209,8 +192,8 @@ class RoutineManager implements RoutineManagerInterface
                 $this->lineProcessor->getWarnings(),
                 $this->columnValueConverter->getWarnings(),
                 $this->pseudoTransactionProcessor->getWarnings(),
-            ], $count);
+            ],
+            $count
+        );
     }
-
-
 }

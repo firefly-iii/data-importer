@@ -36,7 +36,6 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
-use Cache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
@@ -49,13 +48,13 @@ class GenerateTransactions
     use CollectsAccounts;
     use DuplicateSafetyCatch;
     use ProgressInformation;
+    public const string NUMBER_FORMAT = 'nr_%s';
 
     private array         $accounts;
     private Configuration $configuration;
     private array         $nordigenAccountInfo;
     private array         $targetAccounts;
     private array         $targetTypes;
-    public const string NUMBER_FORMAT = 'nr_%s';
 
     /**
      * GenerateTransactions constructor.
@@ -76,21 +75,23 @@ class GenerateTransactions
      */
     public function collectNordigenAccounts(): void
     {
-        $url         = config('nordigen.url');
-        $accessToken = TokenManager::getAccessToken();
-        $info        = [];
+        $url                       = config('nordigen.url');
+        $accessToken               = TokenManager::getAccessToken();
+        $info                      = [];
         app('log')->debug('Going to collect account information from Nordigen.');
+
         /**
          * @var string $nordigenIdentifier
          * @var int    $account
          */
         foreach ($this->accounts as $nordigenIdentifier => $account) {
             app('log')->debug(sprintf('Now at #%d => %s', $account, $nordigenIdentifier));
-            $set = [];
+            $set                       = [];
             // get account details
-            $request = new GetAccountInformationRequest($url, $accessToken, $nordigenIdentifier);
+            $request                   = new GetAccountInformationRequest($url, $accessToken, $nordigenIdentifier);
             $request->setTimeOut(config('importer.connection.timeout'));
-            /** @var ArrayResponse $response */
+
+            // @var ArrayResponse $response
             try {
                 $response = $request->get();
             } catch (ImporterHttpException $e) {
@@ -105,7 +106,6 @@ class GenerateTransactions
     }
 
     /**
-     *
      * @throws ApiHttpException
      */
     public function collectTargetAccounts(): void
@@ -120,15 +120,11 @@ class GenerateTransactions
         app('log')->debug(sprintf('Nordigen: Collected %d accounts.', count($this->targetAccounts)));
     }
 
-    /**
-     * @param array $transactions
-     *
-     * @return array
-     */
     public function getTransactions(array $transactions): array
     {
         app('log')->debug('Now generate transactions.');
         $return = [];
+
         /**
          * @var string $accountId
          * @var array  $entries
@@ -136,38 +132,29 @@ class GenerateTransactions
         foreach ($transactions as $accountId => $entries) {
             $total = count($entries);
             app('log')->debug(sprintf('Going to parse account %s with %d transaction(s).', $accountId, $total));
+
             /**
              * @var int         $index
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
-                app('log')->debug(sprintf('[%d/%d] Parsing transaction (3)', ($index + 1), $total));
+                app('log')->debug(sprintf('[%d/%d] Parsing transaction (3)', $index + 1, $total));
                 $return[] = $this->generateTransaction($accountId, $entry);
-                app('log')->debug(sprintf('[%d/%d] Done parsing transaction.', ($index + 1), $total));
+                app('log')->debug(sprintf('[%d/%d] Done parsing transaction.', $index + 1, $total));
             }
         }
-        //$this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
+        // $this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
         app('log')->debug('Done parsing transactions.');
 
         return $return;
     }
 
-    /**
-     * @param Configuration $configuration
-     */
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
         $this->accounts      = $configuration->getAccounts();
     }
 
-    /**
-     * @param array       $transaction
-     * @param Transaction $entry
-     * @param string      $direction
-     *
-     * @return array
-     */
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
     {
         app('log')->debug(sprintf('Now in %s($transaction, $entry, "%s")', __METHOD__, $direction));
@@ -175,7 +162,8 @@ class GenerateTransactions
         // these are the values we're going to use:
         switch ($direction) {
             default:
-                die(sprintf('Cannot handle direction "%s"', $direction));
+                exit(sprintf('Cannot handle direction "%s"', $direction));
+
             case 'source':
                 $iban      = $entry->getSourceIban();
                 $number    = sprintf(self::NUMBER_FORMAT, $entry->getSourceNumber());
@@ -184,7 +172,9 @@ class GenerateTransactions
                 $ibanKey   = 'source_iban';
                 $nameKey   = 'source_name';
                 $numberKey = 'source_number';
+
                 break;
+
             case 'destination':
                 $iban      = $entry->getDestinationIban();
                 $number    = sprintf(self::NUMBER_FORMAT, $entry->getDestinationNumber());
@@ -193,10 +183,11 @@ class GenerateTransactions
                 $ibanKey   = 'destination_iban';
                 $nameKey   = 'destination_name';
                 $numberKey = 'destination_number';
+
                 break;
         }
         // temp measure to make sure it's a string:
-        $iban = (string)$iban;
+        $iban        = (string)$iban;
         app('log')->debug('Done collecting account numbers and names.');
 
         // The data importer determines the account type based on the IBAN.
@@ -263,11 +254,6 @@ class GenerateTransactions
     /**
      * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.
      *
-     * @param string      $accountId
-     * @param array       $transaction
-     * @param Transaction $entry
-     *
-     * @return array
      * @throws ImporterHttpException
      */
     private function appendNegativeAmountInfo(string $accountId, array $transaction, Transaction $entry): array
@@ -276,9 +262,9 @@ class GenerateTransactions
         $transaction['source_id'] = (int)$this->accounts[$accountId]; // TODO entry may not exist, then what?
 
         // append source iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'destination');
+        $transaction              = $this->appendAccountFields($transaction, $entry, 'destination');
 
-        $mappedId = null;
+        $mappedId                 = null;
         if (isset($transaction['destination_name'])) {
             app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['destination_name']));
             $mappedId = $this->getMappedAccountId($transaction['destination_name']);
@@ -289,10 +275,11 @@ class GenerateTransactions
 
         if (null !== $mappedId && 0 !== $mappedId) {
             app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['destination_name'], $mappedId));
-            $mappedType = $this->getMappedAccountType($mappedId);
+            $mappedType                    = $this->getMappedAccountType($mappedId);
 
             $originalDestName              = $transaction['destination_name'];
             $transaction['destination_id'] = $mappedId;
+
             // catch error here:
             try {
                 $transaction['type'] = $this->getTransactionType('asset', $mappedType);
@@ -305,7 +292,7 @@ class GenerateTransactions
             }
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), (string)$entry->getDestinationIban());
+        $transaction              = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), (string)$entry->getDestinationIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
@@ -315,28 +302,23 @@ class GenerateTransactions
     /**
      * Handle transaction information when the amount is positive, and this is probably a deposit or a transfer.
      *
-     * @param string      $accountId
-     * @param array       $transaction
-     * @param Transaction $entry
-     *
-     * @return array
      * @throws ImporterHttpException
      */
     private function appendPositiveAmountInfo(string $accountId, array $transaction, Transaction $entry): array
     {
         // amount is positive: deposit or transfer. Nordigen account is the destination
-        $transaction['type']   = 'deposit';
-        $transaction['amount'] = $entry->transactionAmount;
+        $transaction['type']           = 'deposit';
+        $transaction['amount']         = $entry->transactionAmount;
 
         // destination is a Nordigen account (has to be!)
         $transaction['destination_id'] = (int)$this->accounts[$accountId];
         app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
 
         // append source iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'source');
+        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
 
         // TODO clean up mapping
-        $mappedId = null;
+        $mappedId                      = null;
         if (isset($transaction['source_name'])) {
             app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
             $mappedId = $this->getMappedAccountId($transaction['source_name']);
@@ -350,6 +332,7 @@ class GenerateTransactions
             $mappedType               = $this->getMappedAccountType($mappedId);
             $originalSourceName       = $transaction['source_name'];
             $transaction['source_id'] = $mappedId;
+
             // catch error here:
             try {
                 $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
@@ -362,18 +345,13 @@ class GenerateTransactions
             }
         }
 
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getSourceName(), (string)$entry->getSourceIban());
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getSourceName(), (string)$entry->getSourceIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
     }
 
-    /**
-     * @param string $iban
-     *
-     * @return string
-     */
     private function filterSpaces(string $iban): string
     {
         $search = [
@@ -431,23 +409,19 @@ class GenerateTransactions
     /**
      * TODO function is way too complex.
      *
-     * @param string      $accountId
-     * @param Transaction $entry
-     *
-     * @return array
      * @throws ImporterHttpException
      */
     private function generateTransaction(string $accountId, Transaction $entry): array
     {
         app('log')->debug(sprintf('Nordigen transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
 
-        $return      = [
+        $return                   = [
             'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
-        $valueDate   = $entry->getValueDate();
-        $transaction = [
+        $valueDate                = $entry->getValueDate();
+        $transaction              = [
             'type'                   => 'withdrawal',
             'date'                   => $entry->getDate()->toW3cString(),
             'datetime'               => $entry->getDate()->toW3cString(),
@@ -477,41 +451,33 @@ class GenerateTransactions
         $return['transactions'][] = $transaction;
         app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->getTransactionId()), $transaction);
 
-
         return $return;
     }
 
     /**
-     * @param int $accountId
-     *
-     * @return string
      * @throws ImporterHttpException
      */
     private function getAccountType(int $accountId): string
     {
-        $token = SecretManager::getAccessToken();
-        $url   = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
         app('log')->debug(sprintf('Going to download account #%d', $accountId));
         $request = new GetAccountRequest($url, $token);
         $request->setId($accountId);
-        /** @var GetAccountResponse $result */
+
+        // @var GetAccountResponse $result
         try {
             $result = $request->get();
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
-        $type = $result->getAccount()->type;
+        $type    = $result->getAccount()->type;
 
         app('log')->debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
 
         return $type;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return int|null
-     */
     private function getMappedAccountId(string $name): ?int
     {
         if (isset($this->configuration->getMapping()['accounts'][$name])) {
@@ -524,9 +490,6 @@ class GenerateTransactions
     /**
      * TODO Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
      *
-     * @param int $mappedId
-     *
-     * @return string
      * @throws ImporterHttpException
      */
     private function getMappedAccountType(int $mappedId): string
@@ -549,23 +512,23 @@ class GenerateTransactions
     }
 
     /**
-     * @param string $source
-     * @param string $destination
-     *
-     * @return string
      * @throws ImporterErrorException
      */
     private function getTransactionType(string $source, string $destination): string
     {
         $combination = sprintf('%s-%s', $source, $destination);
+
         switch ($combination) {
             default:
                 throw new ImporterErrorException(sprintf('Unknown combination: %s and %s', $source, $destination));
+
             case 'asset-liabilities':
             case 'asset-expense':
                 return 'withdrawal';
+
             case 'asset-asset':
                 return 'transfer';
+
             case 'liabilities-asset':
             case 'revenue-asset':
                 return 'deposit';

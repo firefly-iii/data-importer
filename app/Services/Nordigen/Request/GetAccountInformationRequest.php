@@ -36,11 +36,6 @@ class GetAccountInformationRequest extends Request
 {
     private string $identifier;
 
-    /**
-     * @param  string  $url
-     * @param  string  $token
-     * @param  string  $identifier
-     */
     public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
@@ -51,7 +46,6 @@ class GetAccountInformationRequest extends Request
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      * @throws AgreementExpiredException
      */
@@ -62,33 +56,21 @@ class GetAccountInformationRequest extends Request
         return new ArrayResponse($array);
     }
 
-    /**
-     * @return string
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
     }
 
-    /**
-     * @param  string  $identifier
-     */
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

@@ -33,9 +33,6 @@ class PutRefreshConnectionResponse extends Response
 {
     private array $data;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->data = $data;

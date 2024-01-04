@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,8 +35,6 @@ class DebugController extends Controller
 {
     /**
      * Show debug info.
-     *
-     * @param Request $request
      *
      * @return Factory|View
      */
@@ -54,7 +51,7 @@ class DebugController extends Controller
                 if (null !== $logFile) {
                     try {
                         $logContent = file_get_contents($logFile);
-                    } catch (Exception $e) { // @phpstan-ignore-line
+                    } catch (\Exception $e) { // @phpstan-ignore-line
                         // @ignoreException
                     }
                 }
@@ -62,7 +59,7 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
+            $logContent = 'Truncated from this point <----|'.substr($logContent, -8192);
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
@@ -89,10 +86,6 @@ class DebugController extends Controller
 
     /**
      * Some common combinations.
-     *
-     * @param int $value
-     *
-     * @return string
      */
     protected function errorReporting(int $value): string // get configuration
     {
@@ -115,6 +108,7 @@ class DebugController extends Controller
         $app    = $this->getAppInfo();
         $user   = $this->getUserInfo();
         $table  = view('debug-table', compact('system', 'app', 'user'))->render();
+
         return str_replace(["\n", "\t", '  '], '', $table);
     }
 
@@ -132,8 +126,9 @@ class DebugController extends Controller
                 $baseBuild = env('BASE_IMAGE_BUILD');
             }
         }
-        $search  = ['~', '#'];
-        $replace = ['\~', '# '];
+        $search    = ['~', '#'];
+        $replace   = ['\~', '# '];
+
         return [
             'is_docker'   => $isDocker,
             'build'       => $build,
@@ -144,9 +139,6 @@ class DebugController extends Controller
         ];
     }
 
-    /**
-     * @return array
-     */
     private function getAppInfo(): array
     {
         return [
@@ -157,15 +149,10 @@ class DebugController extends Controller
         ];
     }
 
-    /**
-     * @return array
-     */
     private function getUserInfo(): array
     {
         return [
             'user_agent' => request()->header('user-agent'),
         ];
     }
-
-
 }

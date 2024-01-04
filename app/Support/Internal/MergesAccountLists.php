@@ -1,6 +1,5 @@
 <?php
 
-
 /*
  * MergesAccountLists.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -32,13 +31,6 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 
 trait MergesAccountLists
 {
-    /**
-     * @param  array  $firefly
-     * @param  string  $iban
-     * @param  string  $number
-     *
-     * @return array
-     */
     protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
     {
         if ('' === $iban) {
@@ -46,6 +38,7 @@ trait MergesAccountLists
         }
         $result = [];
         $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
+
         /** @var Account $account */
         foreach ($all as $account) {
             if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
@@ -56,12 +49,6 @@ trait MergesAccountLists
         return $result;
     }
 
-    /**
-     * @param  array  $fireflyIII
-     * @param  string  $currency
-     *
-     * @return array
-     */
     protected function filterByCurrency(array $fireflyIII, string $currency): array
     {
         if ('' === $currency) {
@@ -69,6 +56,7 @@ trait MergesAccountLists
         }
         $result = [];
         $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
+
         /** @var Account $account */
         foreach ($all as $account) {
             if ($currency === $account->currencyCode) {
@@ -79,12 +67,6 @@ trait MergesAccountLists
         return $result;
     }
 
-    /**
-     * @param  array  $nordigen
-     * @param  array  $fireflyIII
-     *
-     * @return array
-     */
     protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
     {
         app('log')->debug('Now merging Nordigen account lists.');
@@ -93,12 +75,6 @@ trait MergesAccountLists
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
 
-    /**
-     * @param  array  $spectre
-     * @param  array  $fireflyIII
-     *
-     * @return array
-     */
     protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
     {
         app('log')->debug('Now merging Spectre account lists.');
@@ -107,15 +83,10 @@ trait MergesAccountLists
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
 
-    /**
-     * @param  array  $generic
-     * @param  array  $fireflyIII
-     *
-     * @return array
-     */
     private function mergeGenericAccountList(array $generic, array $fireflyIII): array
     {
         $return = [];
+
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
             app('log')->debug(
@@ -127,14 +98,14 @@ trait MergesAccountLists
                     $account->bban
                 )
             );
-            $iban     = $account->iban;
-            $number   = $account->bban;
-            $currency = $account->currencyCode;
-            $entry    = [
+            $iban                          = $account->iban;
+            $number                        = $account->bban;
+            $currency                      = $account->currencyCode;
+            $entry                         = [
                 'import_account' => $account,
             ];
 
-            $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
+            $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
 
             if (1 === count($filteredByNumber)) {
                 app('log')->debug(
@@ -148,12 +119,13 @@ trait MergesAccountLists
                 );
                 $entry['firefly_iii_accounts'] = $filteredByNumber;
                 $return[]                      = $entry;
+
                 continue;
             }
             app('log')->debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', count($filteredByNumber), $iban));
 
             // only currency?
-            $filteredByCurrency = $this->filterByCurrency($fireflyIII, $currency);
+            $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
 
             if (count($filteredByCurrency) > 0) {
                 app('log')->debug(
@@ -161,6 +133,7 @@ trait MergesAccountLists
                 );
                 $entry['firefly_iii_accounts'] = $filteredByCurrency;
                 $return[]                      = $entry;
+
                 continue;
             }
             app('log')->debug('No special filtering on the Firefly III account list.');

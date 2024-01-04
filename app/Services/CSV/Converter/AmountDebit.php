@@ -31,10 +31,6 @@ class AmountDebit implements ConverterInterface
 {
     /**
      * Convert amount, always return positive.
-     *
-     * @param $value
-     *
-     * @return string
      */
     public function convert($value): string
     {
@@ -52,10 +48,6 @@ class AmountDebit implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

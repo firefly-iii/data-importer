@@ -26,11 +26,9 @@ namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
-use Artisan;
 use Illuminate\Http\Request;
 
 /**
- *
  * Class IndexController
  */
 class IndexController extends Controller
@@ -44,9 +42,6 @@ class IndexController extends Controller
         app('view')->share('pageTitle', 'Index');
     }
 
-    /**
-     * @return mixed
-     */
     public function flush(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
@@ -56,17 +51,12 @@ class IndexController extends Controller
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),
         ];
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
+        \Artisan::call('cache:clear');
+        \Artisan::call('config:clear');
 
         return redirect(route('index'))->withCookies($cookies);
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return mixed
-     */
     public function index(Request $request): mixed
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -74,7 +64,7 @@ class IndexController extends Controller
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
-        $validInfo = SecretManager::hasValidSecrets();
+        $validInfo       = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             app('log')->debug('No valid secrets, redirect to token.index');
 
@@ -82,9 +72,9 @@ class IndexController extends Controller
         }
 
         // display to user the method of authentication
-        $clientId = (string)config('importer.client_id');
-        $url      = (string)config('importer.url');
-        $pat      = false;
+        $clientId        = (string)config('importer.client_id');
+        $url             = (string)config('importer.url');
+        $pat             = false;
         if ('' !== (string)config('importer.access_token')) {
             $pat = true;
         }
@@ -92,27 +82,22 @@ class IndexController extends Controller
         if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
-        $URLonly = false;
+        $URLonly         = false;
         if ('' !== $url && '' === $clientId && '' === (string)config('importer.access_token')
         ) {
             $URLonly = true;
         }
-        $flexible = false;
+        $flexible        = false;
         if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
 
-        $isDocker = env('IS_DOCKER', false);
-        $identifier = substr(session()->getId(), 0, 10);
+        $isDocker        = env('IS_DOCKER', false);
+        $identifier      = substr(session()->getId(), 0, 10);
 
         return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker'));
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return mixed
-     */
     public function postIndex(Request $request): mixed
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -130,5 +115,4 @@ class IndexController extends Controller
 
         return redirect(route('index'));
     }
-
 }

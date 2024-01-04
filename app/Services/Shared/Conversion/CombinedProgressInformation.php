@@ -30,36 +30,21 @@ trait CombinedProgressInformation
     private array                      $allMessages;
     private array                      $allWarnings;
 
-    /**
-     * @return array
-     */
     final public function getAllErrors(): array
     {
         return $this->allErrors;
     }
 
-    /**
-     * @return array
-     */
     final public function getAllMessages(): array
     {
         return $this->allMessages;
     }
 
-    /**
-     * @return array
-     */
     final public function getAllWarnings(): array
     {
         return $this->allWarnings;
     }
 
-    /**
-     * @param array $collection
-     * @param int   $count
-     *
-     * @return array
-     */
     final protected function mergeArrays(array $collection, int $count): array
     {
         $return = [];
@@ -67,7 +52,7 @@ trait CombinedProgressInformation
             if (0 === count($set)) {
                 continue;
             }
-            for ($i = 0; $i < $count; $i++) {
+            for ($i = 0; $i < $count; ++$i) {
                 if (array_key_exists($i, $set)) {
                     $return[$i] = array_key_exists($i, $return) ? $return[$i] : [];
                     $return[$i] = array_merge($return[$i], $set[$i]);

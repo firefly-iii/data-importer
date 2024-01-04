@@ -40,19 +40,18 @@ class InfoCollector
      *
      * Will be used in mapping routine.
      *
-     * @return array
      * @throws ApiHttpException
      */
     public function collectAccountTypes(): array
     {
         app('log')->debug('Now in collectAccountTypes()');
         // get list of asset accounts:
-        $url    = SecretManager::getBaseUrl();
-        $token  = SecretManager::getAccessToken();
-        $return = [];
-        $count  = 0;
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
+        $return   = [];
+        $count    = 0;
 
-        $request = new GetAccountsRequest($url, $token);
+        $request  = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ALL);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -61,7 +60,7 @@ class InfoCollector
         /** @var Account $account */
         foreach ($response as $account) {
             $return[$account->id] = $account->type;
-            $count++;
+            ++$count;
         }
         app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
 

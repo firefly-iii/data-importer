@@ -23,7 +23,6 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
@@ -35,17 +34,17 @@ return [
     |
     */
 
-    'defaults' => [
+    'defaults'         => [
         'guard'     => 'web',
         'passwords' => 'users',
     ],
 
     //  Al stewart - A small fruit song
-    'line_a'   => 'Said the apple to the orange',
-    'line_b'   => 'Oh I wanted you to come',
-    'line_c'   => 'Close to me and kiss me to the core',
-    'line_d'   => 'Then you might know me like no other orange',
-    'line_e'   => 'Has ever done before',
+    'line_a'           => 'Said the apple to the orange',
+    'line_b'           => 'Oh I wanted you to come',
+    'line_c'           => 'Close to me and kiss me to the core',
+    'line_d'           => 'Then you might know me like no other orange',
+    'line_e'           => 'Has ever done before',
 
     /*
     |--------------------------------------------------------------------------
@@ -64,7 +63,7 @@ return [
     |
     */
 
-    'guards' => [
+    'guards'           => [
         'web' => [
             'driver'   => 'session',
             'provider' => 'users',
@@ -94,7 +93,7 @@ return [
     |
     */
 
-    'providers' => [
+    'providers'        => [
         'users' => [
             'driver' => 'eloquent',
             'model'  => App\User::class,
@@ -121,7 +120,7 @@ return [
     |
     */
 
-    'passwords' => [
+    'passwords'        => [
         'users' => [
             'provider' => 'users',
             'table'    => 'password_resets',
@@ -142,5 +141,4 @@ return [
     */
 
     'password_timeout' => 10800,
-
 ];

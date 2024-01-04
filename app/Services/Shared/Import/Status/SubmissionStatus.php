@@ -48,8 +48,6 @@ class SubmissionStatus
     }
 
     /**
-     * @param  array  $array
-     *
      * @return static
      */
     public static function fromArray(array $array): self
@@ -63,9 +61,6 @@ class SubmissionStatus
         return $config;
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [

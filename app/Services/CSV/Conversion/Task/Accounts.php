@@ -42,9 +42,6 @@ class Accounts extends AbstractTask
     use DeterminesTransactionType;
 
     /**
-     * @param  array  $group
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     public function process(array $group): array
@@ -61,8 +58,6 @@ class Accounts extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -71,8 +66,6 @@ class Accounts extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
@@ -80,11 +73,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  array  $array
-     *
-     * @param  Account|null  $defaultAccount
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function findAccount(array $array, ?Account $defaultAccount): array
@@ -147,7 +135,6 @@ class Accounts extends AbstractTask
             app('log')->debug('Number field is NULL, will not search for it.');
         }
 
-
         // find by name, return only if it's an asset or liability account.
         if (isset($array['name']) && '' !== (string)$array['name']) {
             app('log')->debug('Search by name.');
@@ -166,8 +153,8 @@ class Accounts extends AbstractTask
         app('log')->debug('Found no account or haven\'t searched for one because of missing data.');
 
         // append an empty type to the array for consistency's sake.
-        $array['type'] = $array['type'] ?? null;
-        $array['bic']  = $array['bic'] ?? null;
+        $array['type'] ??= null;
+        $array['bic']  ??= null;
 
         // Return ID or name if not null
         if (null !== $array['id'] || '' !== (string)$array['name']) {
@@ -196,10 +183,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  string  $iban
-     * @param  string  $transactionType
-     *
-     * @return Account|null
      * @throws ImporterErrorException
      */
     private function findByIban(string $iban, string $transactionType): ?Account
@@ -212,7 +195,8 @@ class Accounts extends AbstractTask
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('iban');
         $request->setQuery($iban);
-        /** @var GetAccountsResponse $response */
+
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
@@ -225,7 +209,7 @@ class Accounts extends AbstractTask
         }
 
         if (1 === count($response)) {
-            /** @var Account $account */
+            // @var Account $account
             try {
                 $account = $response->current();
             } catch (ApiException $e) {
@@ -254,7 +238,6 @@ class Accounts extends AbstractTask
                 return null;
             }
 
-
             return $account;
         }
 
@@ -269,9 +252,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  string  $value
-     *
-     * @return Account|null
      * @throws ImporterErrorException
      */
     private function findById(string $value): ?Account
@@ -284,14 +264,15 @@ class Accounts extends AbstractTask
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('id');
         $request->setQuery($value);
-        /** @var GetAccountsResponse $response */
+
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
             throw new ImporterErrorException($e->getMessage());
         }
         if (1 === count($response)) {
-            /** @var Account $account */
+            // @var Account $account
             try {
                 $account = $response->current();
             } catch (ApiException $e) {
@@ -309,9 +290,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  string  $name
-     *
-     * @return Account|null
      * @throws ImporterErrorException
      */
     private function findByName(string $name): ?Account
@@ -324,7 +302,8 @@ class Accounts extends AbstractTask
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('name');
         $request->setQuery($name);
-        /** @var GetAccountsResponse $response */
+
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
@@ -335,6 +314,7 @@ class Accounts extends AbstractTask
 
             return null;
         }
+
         /** @var Account $account */
         foreach ($response as $account) {
             if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
@@ -352,10 +332,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  string  $accountNumber
-     * @param  string  $transactionType
-     *
-     * @return Account|null
      * @throws ImporterErrorException
      */
     private function findByNumber(string $accountNumber, string $transactionType): ?Account
@@ -368,7 +344,8 @@ class Accounts extends AbstractTask
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setField('number');
         $request->setQuery($accountNumber);
-        /** @var GetAccountsResponse $response */
+
+        // @var GetAccountsResponse $response
         try {
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
@@ -381,7 +358,7 @@ class Accounts extends AbstractTask
         }
 
         if (1 === count($response)) {
-            /** @var Account $account */
+            // @var Account $account
             try {
                 $account = $response->current();
             } catch (ApiException $e) {
@@ -410,7 +387,6 @@ class Accounts extends AbstractTask
                 return null;
             }
 
-
             return $account;
         }
 
@@ -424,11 +400,6 @@ class Accounts extends AbstractTask
         return null;
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function getDestinationArray(array $transaction): array
     {
         return [
@@ -442,11 +413,6 @@ class Accounts extends AbstractTask
         ];
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function getSourceArray(array $transaction): array
     {
         return [
@@ -462,10 +428,6 @@ class Accounts extends AbstractTask
 
     /**
      * Basic check for currency info.
-     *
-     * @param  array  $transaction
-     *
-     * @return bool
      */
     private function hasAllAmountInformation(array $transaction): bool
     {
@@ -476,17 +438,12 @@ class Accounts extends AbstractTask
             && (array_key_exists('currency_code', $transaction) || array_key_exists('currency_id', $transaction));
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return bool
-     */
     private function hasAllCurrencies(array $transaction): bool
     {
-        $transaction['foreign_currency_code'] = $transaction['foreign_currency_code'] ?? '';
-        $transaction['currency_code']         = $transaction['currency_code'] ?? '';
-        $transaction['amount']                = $transaction['amount'] ?? '';
-        $transaction['foreign_amount']        = $transaction['foreign_amount'] ?? '';
+        $transaction['foreign_currency_code'] ??= '';
+        $transaction['currency_code']         ??= '';
+        $transaction['amount']                ??= '';
+        $transaction['foreign_amount']        ??= '';
 
         return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
                && '' !== (string)$transaction['amount']
@@ -494,9 +451,6 @@ class Accounts extends AbstractTask
     }
 
     /**
-     * @param  array  $transaction
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function processTransaction(array $transaction): array
@@ -509,14 +463,12 @@ class Accounts extends AbstractTask
          * The source account will default back to the user's submitted default account.
          * So when everything fails, the transaction will be an expense for amount X.
          */
-        $sourceArray = $this->getSourceArray($transaction);
-        $destArray   = $this->getDestinationArray($transaction);
-        $source      = $this->findAccount($sourceArray, $this->account);
-        $destination = $this->findAccount($destArray, null);
+        $sourceArray         = $this->getSourceArray($transaction);
+        $destArray           = $this->getDestinationArray($transaction);
+        $source              = $this->findAccount($sourceArray, $this->account);
+        $destination         = $this->findAccount($destArray, null);
 
-        /*
-         * First, set source and destination in the transaction array:
-         */
+        // First, set source and destination in the transaction array:
         $transaction         = $this->setSource($transaction, $source);
         $transaction         = $this->setDestination($transaction, $destination);
         $transaction['type'] = $this->determineType($source['type'], $destination['type']);
@@ -524,8 +476,8 @@ class Accounts extends AbstractTask
         app('log')->debug('Source is now:', $source);
         app('log')->debug('Destination is now:', $destination);
 
-        $amount = (string)$transaction['amount'];
-        $amount = '' === $amount ? '0' : $amount;
+        $amount              = (string)$transaction['amount'];
+        $amount              = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
             app('log')->error('Amount is ZERO. This will give trouble further down the line.');
@@ -540,9 +492,9 @@ class Accounts extends AbstractTask
         if ('withdrawal' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
             app('log')->debug(sprintf('%s is positive and type is "%s", switch source/destination', $amount, $transaction['type']));
-            $transaction         = $this->setSource($transaction, $destination);
-            $transaction         = $this->setDestination($transaction, $source);
-            $transaction['type'] = $this->determineType($destination['type'], $source['type']);
+            $transaction            = $this->setSource($transaction, $destination);
+            $transaction            = $this->setDestination($transaction, $source);
+            $transaction['type']    = $this->determineType($destination['type'], $source['type']);
             app('log')->debug('Source is now:', $destination); // yes this is correct.
             app('log')->debug('Destination is now:', $source); // yes this is correct.
 
@@ -550,9 +502,7 @@ class Accounts extends AbstractTask
             [$source, $destination] = [$destination, $source];
         }
 
-        /*
-         * If the amount is positive and the type is a transfer, switch accounts around.
-         */
+        // If the amount is positive and the type is a transfer, switch accounts around.
         if ('transfer' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             app('log')->debug('Transaction is a transfer, and amount is positive, will switch accounts.');
             $transaction = $this->setSource($transaction, $destination);
@@ -568,9 +518,7 @@ class Accounts extends AbstractTask
             }
         }
 
-        /*
-         * If deposit and amount is positive, do nothing.
-         */
+        // If deposit and amount is positive, do nothing.
         if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             app('log')->debug('Transaction is a deposit, and amount is positive. Will not change account types.');
         }
@@ -598,9 +546,7 @@ class Accounts extends AbstractTask
             $transaction = $this->setSource($transaction, $newSource);
         }
 
-        /*
-         * If amount is negative and type is transfer, make sure accounts are "original".
-         */
+        // If amount is negative and type is transfer, make sure accounts are "original".
         if ('transfer' === $transaction['type'] && -1 === bccomp($amount, '0')) {
             app('log')->debug('Transaction is a transfer, and amount is negative, must not change accounts.');
             $transaction = $this->setSource($transaction, $source);
@@ -636,9 +582,7 @@ class Accounts extends AbstractTask
             $transaction['source_iban'] = $source['iban'];
         }
 
-        /*
-         * if new source or destination ID is filled in, drop the other fields:
-         */
+        // if new source or destination ID is filled in, drop the other fields:
         if (0 !== $transaction['source_id'] && null !== $transaction['source_id']) {
             $transaction['source_name']   = null;
             $transaction['source_iban']   = null;
@@ -688,35 +632,16 @@ class Accounts extends AbstractTask
         return $transaction;
     }
 
-    /**
-     * @param  array  $transaction
-     * @param  array  $source
-     *
-     * @return array
-     */
     private function setDestination(array $transaction, array $source): array
     {
         return $this->setTransactionAccount('destination', $transaction, $source);
     }
 
-    /**
-     * @param  array  $transaction
-     * @param  array  $source
-     *
-     * @return array
-     */
     private function setSource(array $transaction, array $source): array
     {
         return $this->setTransactionAccount('source', $transaction, $source);
     }
 
-    /**
-     * @param  string  $direction
-     * @param  array  $transaction
-     * @param  array  $account
-     *
-     * @return array
-     */
     private function setTransactionAccount(string $direction, array $transaction, array $account): array
     {
         $transaction[sprintf('%s_id', $direction)]     = $account['id'];
@@ -728,11 +653,6 @@ class Accounts extends AbstractTask
         return $transaction;
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function swapCurrencyInformation(array $transaction): array
     {
         // swap amount and foreign amount:

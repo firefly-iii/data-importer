@@ -39,16 +39,13 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     use IsRunningCli;
 
-    /**
-     * @inheritDoc
-     */
     public function validate(): AuthenticationStatus
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
 
-        $url    = config('spectre.url');
-        $appId  = SecretManager::getAppId();
-        $secret = SecretManager::getSecret();
+        $url     = config('spectre.url');
+        $appId   = SecretManager::getAppId();
+        $secret  = SecretManager::getSecret();
 
         if ('' === $appId || '' === $secret) {
             return AuthenticationStatus::nodata();

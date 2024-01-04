@@ -25,9 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Submission;
 
-use Storage;
-use Str;
-
 /**
  * Trait GeneratesIdentifier
  */
@@ -36,29 +33,24 @@ trait GeneratesIdentifier
     protected string $identifier;
     private string   $diskName = 'submission-routines';
 
-    /**
-     * @inheritDoc
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
     }
 
-    /**
-     *
-     */
     public function generateIdentifier(): string
     {
         app('log')->debug('Going to generate submission routine identifier.');
-        $disk  = Storage::disk($this->diskName);
-        $count = 0;
+        $disk             = \Storage::disk($this->diskName);
+        $count            = 0;
         do {
-            $generatedId = sprintf('submission-%s', Str::random(12));
-            $count++;
+            $generatedId = sprintf('submission-%s', \Str::random(12));
+            ++$count;
             app('log')->debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
         } while ($count < 30 && $disk->exists($generatedId));
         $this->identifier = $generatedId;
         app('log')->info(sprintf('Job identifier is "%s"', $generatedId));
+
         return $generatedId;
     }
 }

@@ -31,9 +31,6 @@ use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/**
- *
- */
 class AutoImportController extends Controller
 {
     use AutoImports;
@@ -43,7 +40,6 @@ class AutoImportController extends Controller
     private string $directory;
 
     /**
-     *
      * @throws ImporterErrorException
      */
     public function index(Request $request): Response
@@ -58,8 +54,8 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $argument  = (string)($request->get('directory') ?? './');
-        $directory = realpath($argument);
+        $argument     = (string)($request->get('directory') ?? './');
+        $directory    = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
@@ -68,7 +64,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access = $this->haveAccess();
+        $access       = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
         }
@@ -76,15 +72,17 @@ class AutoImportController extends Controller
         // take code from auto importer.
         app('log')->info(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files = $this->getFiles($directory);
+        $files        = $this->getFiles($directory);
         if (0 === count($files)) {
             return response('');
         }
         app('log')->info(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
 
@@ -92,37 +90,27 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @param      $string
-     * @param  null  $verbosity
+     * @param null $verbosity
      */
-    public function info($string, $verbosity = null)
+    public function info($string, $verbosity = null): void
     {
         $this->line($string);
     }
 
-    /**
-     * @param string $string
-     *
-     * @return void
-     */
-    public function line(string $string)
+    public function line(string $string): void
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
     /**
-     * @param      $string
-     * @param  null  $verbosity
+     * @param null $verbosity
      */
-    public function warn($string, $verbosity = null)
+    public function warn($string, $verbosity = null): void
     {
         $this->line($string);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
+    public function error($string, $verbosity = null): void
     {
         app('log')->error($string);
         $this->line($string);
