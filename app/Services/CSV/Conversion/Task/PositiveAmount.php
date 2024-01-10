@@ -41,6 +41,13 @@ class PositiveAmount extends AbstractTask
         foreach ($group['transactions'] as $index => $transaction) {
             $group['transactions'][$index]['amount'] ??= '0';
             $group['transactions'][$index]['amount'] = AmountConverter::positive($group['transactions'][$index]['amount']);
+
+            // also make foreign amount positive:
+            if (array_key_exists('foreign_amount', $group['transactions'][$index])) {
+                if ('' !== $group['transactions'][$index]['foreign_amount'] && null !== $group['transactions'][$index]['foreign_amount']) {
+                    $group['transactions'][$index]['foreign_amount'] = AmountConverter::positive($group['transactions'][$index]['foreign_amount']);
+                }
+            }
         }
 
         return $group;

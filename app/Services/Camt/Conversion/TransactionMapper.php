@@ -513,7 +513,7 @@ class TransactionMapper
                         // if multiple values, use smallest (... at index 1?)
                         foreach ($data['data'] as $amount) {
                             // check for null first, should prevent null pointers in abs()
-                            if (null === $current['amount'] || abs($current['amount']) > abs($amount)) {
+                            if (null === $current['amount'] && null !== $amount && abs($current['amount']) > abs($amount)) {
                                 $current['amount'] = $amount;
                             }
                         }
