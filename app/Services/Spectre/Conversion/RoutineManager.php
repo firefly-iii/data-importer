@@ -55,14 +55,11 @@ class RoutineManager implements RoutineManagerInterface
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
 
-    /**
-     *
-     */
     public function __construct(?string $identifier)
     {
-        $this->allErrors   = [];
-        $this->allWarnings = [];
-        $this->allMessages = [];
+        $this->allErrors            = [];
+        $this->allWarnings          = [];
+        $this->allMessages          = [];
 
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
@@ -75,9 +72,6 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
@@ -90,7 +84,6 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterHttpException
      */
     public function start(): array
@@ -100,6 +93,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // generate Firefly III ready transactions:
         app('log')->debug('Generating Firefly III transactions.');
+
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
@@ -107,20 +101,22 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
 
-        $converted = $this->transactionGenerator->getTransactions($transactions);
+        $converted    = $this->transactionGenerator->getTransactions($transactions);
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
         if(0 === count($converted)) {
             $this->addError(0, 'No transactions were converted, probably zero found at Spectre.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             return [];
         }
 
-        $filtered = $this->transactionFilter->filter($converted);
+        $filtered     = $this->transactionFilter->filter($converted);
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         $this->mergeMessages(count($transactions));
@@ -130,10 +126,6 @@ class RoutineManager implements RoutineManagerInterface
         return $filtered;
     }
 
-
-    /**
-     * @param int $count
-     */
     private function mergeErrors(int $count): void
     {
         $this->allErrors = $this->mergeArrays(
@@ -142,13 +134,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getErrors(),
                 $this->transactionProcessor->getErrors(),
                 $this->transactionGenerator->getErrors(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -157,12 +147,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getMessages(),
                 $this->transactionProcessor->getMessages(),
                 $this->transactionGenerator->getMessages(),
-            ], $count);
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeWarnings(int $count): void
     {
         $this->allWarnings = $this->mergeArrays(
@@ -171,6 +160,8 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getWarnings(),
                 $this->transactionProcessor->getWarnings(),
                 $this->transactionGenerator->getWarnings(),
-            ], $count);
+            ],
+            $count
+        );
     }
 }

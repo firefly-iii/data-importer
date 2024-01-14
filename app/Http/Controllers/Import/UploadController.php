@@ -40,7 +40,6 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
 use League\Flysystem\FilesystemException;
-use Storage;
 
 /**
  * Class UploadController
@@ -57,9 +56,7 @@ class UploadController extends Controller
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadControllerMiddleware::class);
-        /*
-         * This variable is used to make sure the configuration object also knows the file type.
-         */
+        // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType = 'unknown';
     }
 
@@ -73,20 +70,19 @@ class UploadController extends Controller
         $subTitle  = 'Start page and instructions';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
-
         // get existing configs.
-        $disk = Storage::disk('configurations');
+        $disk      = \Storage::disk('configurations');
         app('log')->debug(
             sprintf(
                 'Going to check directory for config files: %s',
                 config('filesystems.disks.configurations.root'),
             )
         );
-        $all = $disk->files();
+        $all       = $disk->files();
 
         // remove files from list
-        $list    = [];
-        $ignored = config('importer.ignored_files');
+        $list      = [];
+        $ignored   = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -99,9 +95,8 @@ class UploadController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @return Redirector|RedirectResponse
      *
-     * @return RedirectResponse|Redirector
      * @throws FileNotFoundException
      * @throws FilesystemException
      * @throws ImporterErrorException
@@ -115,7 +110,7 @@ class UploadController extends Controller
         $errors       = new MessageBag();
 
         // process uploaded file (if present)
-        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors       = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -123,8 +118,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
-
+        $errors       = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
@@ -146,11 +140,6 @@ class UploadController extends Controller
         return redirect(route('004-configure.index'));
     }
 
-    /**
-     * @param  string  $string
-     *
-     * @return string
-     */
     private function detectEOL(string $string): string
     {
         $eols     = [
@@ -174,11 +163,6 @@ class UploadController extends Controller
         return $curEol;
     }
 
-    /**
-     * @param  int  $error
-     *
-     * @return string
-     */
     private function getError(int $error): string
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
@@ -197,10 +181,8 @@ class UploadController extends Controller
     }
 
     /**
-     * @param  MessageBag  $errors
-     * @param  UploadedFile|null  $file
+     * @param null|UploadedFile $file
      *
-     * @return MessageBag
      * @throws ImporterErrorException
      */
     private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
@@ -218,13 +200,14 @@ class UploadController extends Controller
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
             // process the config file
-            $success       = false;
-            $configuration = null;
+            $success        = false;
+            $configuration  = null;
+
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
                 $configuration->setContentType($this->contentType);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $success = true;
+                $success       = true;
             } catch (ImporterErrorException $e) {
                 $errors->add('config_file', $e->getMessage());
             }
@@ -240,18 +223,13 @@ class UploadController extends Controller
     }
 
     /**
-     * @param  MessageBag  $errors
-     * @param  string  $selection
-     * @param  UploadedFile|null  $file
-     *
-     * @return MessageBag
      * @throws ImporterErrorException
      */
-    private function processSelection(MessageBag $errors, string $selection, UploadedFile|null $file): MessageBag
+    private function processSelection(MessageBag $errors, string $selection, null|UploadedFile $file): MessageBag
     {
         if (null === $file && '' !== $selection) {
             app('log')->debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
+            $disk           = \Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
@@ -269,15 +247,10 @@ class UploadController extends Controller
     }
 
     /**
-     *
-     * @param  string  $flow
-     * @param  MessageBag  $errors
-     * @param  UploadedFile|null  $file
-     * @return MessageBag
      * @throws FilesystemException
      * @throws ImporterErrorException
      */
-    private function processUploadedFile(string $flow, MessageBag $errors, UploadedFile|null $file): MessageBag
+    private function processUploadedFile(string $flow, MessageBag $errors, null|UploadedFile $file): MessageBag
     {
         if (null === $file && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
@@ -290,7 +263,6 @@ class UploadController extends Controller
                 $errors->add('importable_file', $this->getError($errorNumber));
             }
 
-
             // upload the file to a temp directory and use it from there.
             if (0 === $errorNumber) {
                 $detector          = new FileContentSherlock();
@@ -302,7 +274,7 @@ class UploadController extends Controller
                     // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                     // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                     // This one is for you: 🤦‍♀️
-                    $eol = $this->detectEOL($content);
+                    $eol     = $this->detectEOL($content);
                     if ("\r" === $eol) {
                         app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
                         $content = str_replace("\r", "\n", $content);
@@ -312,7 +284,7 @@ class UploadController extends Controller
                 if ('camt' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
                 }
-                $fileName = StorageService::storeContent($content);
+                $fileName          = StorageService::storeContent($content);
                 session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
             }

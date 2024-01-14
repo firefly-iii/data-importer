@@ -27,7 +27,6 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
-use JsonException;
 use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
@@ -47,8 +46,6 @@ class CSVFileProcessor
 
     /**
      * CSVFileProcessor constructor.
-     *
-     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -57,24 +54,24 @@ class CSVFileProcessor
 
     /**
      * Get a reader, and start looping over each line.
-     *
-     * @return array
      */
     public function processCSVFile(): array
     {
         app('log')->debug('Now in processCSVFile()');
         $offset = $this->hasHeaders ? 1 : 0;
+
         try {
             $this->reader->setDelimiter($this->delimiter);
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
-            //app('log')->error($e->getTraceAsString());
+            // app('log')->error($e->getTraceAsString());
             $message = sprintf('Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
 
             return [];
         }
         app('log')->debug(sprintf('Offset is %d', $offset));
+
         try {
             $stmt    = (new Statement())->offset($offset);
             $records = $stmt->process($this->reader);
@@ -99,12 +96,9 @@ class CSVFileProcessor
         }
     }
 
-    /**
-     * @param  string  $delimiter
-     */
     public function setDelimiter(string $delimiter): void
     {
-        $map = [
+        $map             = [
             'tab'       => "\t",
             'semicolon' => ';',
             'comma'     => ',',
@@ -113,17 +107,11 @@ class CSVFileProcessor
         $this->delimiter = $map[$delimiter] ?? ',';
     }
 
-    /**
-     * @param  bool  $hasHeaders
-     */
     public function setHasHeaders(bool $hasHeaders): void
     {
         $this->hasHeaders = $hasHeaders;
     }
 
-    /**
-     * @param  Reader  $reader
-     */
     public function setReader(Reader $reader): void
     {
         $this->reader = $reader;
@@ -132,9 +120,6 @@ class CSVFileProcessor
     /**
      * Loop all records from CSV file.
      *
-     * @param  ResultSet  $records
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function processCSVLines(ResultSet $records): array
@@ -142,13 +127,13 @@ class CSVFileProcessor
         $updatedRecords = [];
         $count          = $records->count();
         app('log')->info(sprintf('Now in %s with %d records', __METHOD__, $count));
-        $currentIndex = 1;
+        $currentIndex   = 1;
         foreach ($records as $line) {
-            $line = $this->sanitize($line);
+            $line             = $this->sanitize($line);
             app('log')->debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
             $updatedRecords[] = $line;
 
-            $currentIndex++;
+            ++$currentIndex;
         }
         app('log')->info(sprintf('Parsed all %d lines.', $count));
 
@@ -162,9 +147,6 @@ class CSVFileProcessor
     }
 
     /**
-     * @param  array  $array
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function removeDuplicateLines(array $array): array
@@ -174,8 +156,9 @@ class CSVFileProcessor
         foreach ($array as $index => $line) {
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 app('log')->error($e->getMessage());
+
                 //                app('log')->error($e->getTraceAsString());
                 throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));
             }
@@ -196,10 +179,6 @@ class CSVFileProcessor
 
     /**
      * Do a first sanity check on whatever comes out of the CSV file.
-     *
-     * @param  array  $line
-     *
-     * @return array
      */
     private function sanitize(array $line): array
     {

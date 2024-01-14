@@ -350,7 +350,6 @@ return [
             'converter'       => 'Iban',
             'mapper'          => 'AssetAccounts',
             'append_value'    => false,
-
         ],
         'account-number'        => [
             'mappable'        => true,

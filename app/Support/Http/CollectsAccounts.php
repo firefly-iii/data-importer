@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /*
  * CollectsAccounts.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -30,18 +32,17 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 trait CollectsAccounts
 {
-    /**
-     * @return array
-     */
     protected function collectAllTargetAccounts(): array
     {
         app('log')->debug('Now in collectAllTargetAccounts()');
+
         try {
             $set1 = $this->collectAccounts('asset');
         } catch (ApiHttpException $e) {
             app('log')->error(sprintf('Could not collect asset accounts: %s', $e->getMessage()));
             $set1 = [];
         }
+
         try {
             $set2 = $this->collectAccounts('liabilities');
         } catch (ApiHttpException $e) {
@@ -59,13 +60,11 @@ trait CollectsAccounts
                 $return[$key] = $value;
             }
         }
+
         return $return;
     }
 
     /**
-     * @param string $type
-     *
-     * @return array
      * @throws ApiHttpException
      */
     private function collectAccounts(string $type): array
@@ -81,22 +80,23 @@ trait CollectsAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var GetAccountsResponse $result */
-        $result = $request->get();
+        $result  = $request->get();
         app('log')->debug(sprintf('Found %d accounts of type "%s"', count($result), $type));
-        $return = [];
+        $return  = [];
+
         /** @var Account $entry */
         foreach ($result as $entry) {
             app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
-            $type = $entry->type;
-            $iban = (string)$entry->iban;
+            $type          = $entry->type;
+            $iban          = (string)$entry->iban;
             if ('' === $iban) {
                 continue;
             }
-            $iban   = $this->filterSpaces($iban);
-            $number = sprintf('%s.', (string)$entry->number);
+            $iban          = $this->filterSpaces($iban);
+            $number        = sprintf('%s.', (string)$entry->number);
             if ('.' !== $number) {
-                $number = $this->filterSpaces((string)$entry->number);
-                $key    = sprintf('nr_%s', $number);
+                $number       = $this->filterSpaces((string)$entry->number);
+                $key          = sprintf('nr_%s', $number);
                 app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
                 $return[$key] = ['id' => $entry->id, 'type' => $entry->type];
             }
@@ -104,14 +104,10 @@ trait CollectsAccounts
             $return[$iban] = ['id' => $entry->id, 'type' => $entry->type];
         }
         app('log')->debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));
+
         return $return;
     }
 
-    /**
-     * @param string $iban
-     *
-     * @return string
-     */
     private function filterSpaces(string $iban): string
     {
         $search = [
@@ -165,5 +161,4 @@ trait CollectsAccounts
 
         return str_replace($search, '', $iban);
     }
-
 }

@@ -36,15 +36,10 @@ use GuzzleHttp\Exception\GuzzleException;
  */
 class ListConnectionsRequest extends Request
 {
-    /** @var string */
     public string $customer;
 
     /**
      * ListConnectionsRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -55,7 +50,6 @@ class ListConnectionsRequest extends Request
     }
 
     /**
-     * @inheritDoc
      * @throws GuzzleException
      */
     public function get(): Response
@@ -66,6 +60,7 @@ class ListConnectionsRequest extends Request
                 'customer_id' => $this->customer,
             ]
         );
+
         try {
             $response = $this->authenticatedGet();
         } catch (ImporterErrorException $e) {
@@ -76,17 +71,11 @@ class ListConnectionsRequest extends Request
         return new ListConnectionsResponse($response['data']);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

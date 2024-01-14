@@ -26,10 +26,7 @@ namespace App\Services\Nordigen\Model;
 
 use App\Rules\Iban;
 use Carbon\Carbon;
-use DateTimeInterface;
-use JsonException;
 use Ramsey\Uuid\Uuid;
-use Validator;
 
 /**
  * Class Transaction
@@ -91,9 +88,7 @@ class Transaction
     /**
      * Creates a transaction from a downloaded array.
      *
-     * @param $array
-     *
-     * @return self
+     * @param mixed $array
      */
     public static function fromArray($array): self
     {
@@ -108,6 +103,16 @@ class Transaction
             $array['bookingDate'],
             config('app.timezone')
         ) : null;
+
+        // overrule with "bookingDateTime" if present:
+        if(array_key_exists('bookingDateTime', $array)) {
+            $object->bookingDate = Carbon::createFromFormat(
+                '!Y-m-d\TH:i:s.uP',
+                $array['bookingDateTime'],
+                config('app.timezone')
+            );
+        }
+
         $object->key                                    = trim($array['key'] ?? '');
         $object->checkId                                = trim($array['checkId'] ?? '');
         $object->creditorAgent                          = trim($array['creditorAgent'] ?? '');
@@ -134,7 +139,7 @@ class Transaction
         ) : null;
 
         // undocumented values
-        $object->endToEndId = trim($array['endToEndId'] ?? ''); // from Rabobank NL
+        $object->endToEndId                             = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
         if ('' === $object->transactionId) {
@@ -154,34 +159,34 @@ class Transaction
         }
 
         // add "pending" or "booked" if it exists.
-        $key = (string)$array['key'];
+        $key                                            = (string)$array['key'];
         if ('' !== $key) {
             $object->tags[] = $key;
         }
 
-
         // array values:
-        $object->creditorAccountIban     = trim($array['creditorAccount']['iban'] ?? '');
-        $object->creditorAccountBban     = trim($array['creditorAccount']['bban'] ?? '');
-        $object->creditorAccountCurrency = trim($array['creditorAccount']['currency'] ?? '');
+        $object->creditorAccountIban                    = trim($array['creditorAccount']['iban'] ?? '');
+        $object->creditorAccountBban                    = trim($array['creditorAccount']['bban'] ?? '');
+        $object->creditorAccountCurrency                = trim($array['creditorAccount']['currency'] ?? '');
 
-        $object->debtorAccountIban     = trim($array['debtorAccount']['iban'] ?? '');
-        $object->debtorAccountBban     = trim($array['debtorAccount']['bban'] ?? '');
-        $object->debtorAccountCurrency = trim($array['debtorAccount']['currency'] ?? '');
+        $object->debtorAccountIban                      = trim($array['debtorAccount']['iban'] ?? '');
+        $object->debtorAccountBban                      = trim($array['debtorAccount']['bban'] ?? '');
+        $object->debtorAccountCurrency                  = trim($array['debtorAccount']['currency'] ?? '');
 
-        $object->transactionAmount = trim($array['transactionAmount']['amount'] ?? '');
-        $object->currencyCode      = trim($array['transactionAmount']['currency'] ?? '');
+        $object->transactionAmount                      = trim($array['transactionAmount']['amount'] ?? '');
+        $object->currencyCode                           = trim($array['transactionAmount']['currency'] ?? '');
 
         // other fields:
-        $object->accountIdentifier = '';
+        $object->accountIdentifier                      = '';
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash = hash('sha256', (string)microtime());
+            $hash                  = hash('sha256', (string)microtime());
+
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
                 app('log')->warning('Generated random transaction ID from array!');
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
             $object->transactionId = (string)Uuid::uuid5(config('importer.namespace'), $hash);
@@ -192,20 +197,18 @@ class Transaction
     }
 
     /**
-     * @param array $array
-     *
      * @return static
      */
     public static function fromLocalArray(array $array): self
     {
-        $object = new self();
+        $object                                         = new self();
 
         $object->tags                                   = [];
         $object->additionalInformation                  = $array['additional_information'];
         $object->additionalInformationStructured        = $array['additional_information_structured'];
         $object->balanceAfterTransaction                = Balance::fromLocalArray($array['balance_after_transaction']);
         $object->bankTransactionCode                    = $array['bank_transaction_code'];
-        $object->bookingDate                            = Carbon::createFromFormat(DateTimeInterface::W3C, $array['booking_date']);
+        $object->bookingDate                            = Carbon::createFromFormat(\DateTimeInterface::W3C, $array['booking_date']);
         $object->checkId                                = $array['check_id'];
         $object->creditorAgent                          = $array['creditor_agent'];
         $object->creditorId                             = $array['creditor_id'];
@@ -225,7 +228,7 @@ class Transaction
         $object->transactionId                          = $array['transaction_id'];
         $object->ultimateCreditor                       = $array['ultimate_creditor'];
         $object->ultimateDebtor                         = $array['ultimate_debtor'];
-        $object->valueDate                              = Carbon::createFromFormat(DateTimeInterface::W3C, $array['value_date']);
+        $object->valueDate                              = Carbon::createFromFormat(\DateTimeInterface::W3C, $array['value_date']);
         $object->transactionAmount                      = $array['transaction_amount']['amount'];
         $object->currencyCode                           = $array['transaction_amount']['currency'];
         $object->accountIdentifier                      = $array['account_identifier'];
@@ -236,26 +239,27 @@ class Transaction
         }
 
         // undocumented values:
-        $object->endToEndId = $array['end_to_end_id'];
+        $object->endToEndId                             = $array['end_to_end_id'];
 
         // TODO copy paste code.
-        $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
-        $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
+        $object->debtorAccountIban                      = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
+        $object->creditorAccountIban                    = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
 
-        $object->debtorAccountBban   = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
-        $object->creditorAccountBban = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
+        $object->debtorAccountBban                      = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
+        $object->creditorAccountBban                    = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
 
-        $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
-        $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
+        $object->debtorAccountCurrency                  = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
+        $object->creditorAccountCurrency                = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
 
-        //$object-> = $array[''];
+        // $object-> = $array[''];
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash = hash('sha256', (string)microtime());
+            $hash                  = hash('sha256', (string)microtime());
+
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
             $object->transactionId = (string)Uuid::uuid5(config('importer.namespace'), $hash);
@@ -264,9 +268,6 @@ class Transaction
         return $object;
     }
 
-    /**
-     * @return Carbon
-     */
     public function getDate(): Carbon
     {
         if (null !== $this->bookingDate) {
@@ -286,8 +287,6 @@ class Transaction
 
     /**
      * Return transaction description, which depends on the values in the object:
-     *
-     * @return string
      */
     public function getDescription(): string
     {
@@ -322,8 +321,6 @@ class Transaction
 
     /**
      * Return IBAN of the destination account
-     *
-     * @return string|null
      */
     public function getDestinationIban(): ?string
     {
@@ -331,7 +328,7 @@ class Transaction
         if ('' !== $this->creditorAccountIban) {
             $data      = ['iban' => $this->creditorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
-            $validator = Validator::make($data, $rules);
+            $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
                 app('log')->warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
 
@@ -349,14 +346,13 @@ class Transaction
 
     /**
      * Return name of the destination account
-     *
-     * @return string|null
      */
     public function getDestinationName(): ?string
     {
         app('log')->debug(__METHOD__);
         if ('' !== $this->ultimateCreditor) {
             app('log')->debug(sprintf('Destination name is "%s" (ultimateCreditor)', $this->ultimateCreditor));
+
             return $this->ultimateCreditor;
         }
         if ('' !== $this->creditorName) {
@@ -371,8 +367,6 @@ class Transaction
 
     /**
      * Return IBAN of the destination account
-     *
-     * @return string|null
      */
     public function getDestinationNumber(): ?string
     {
@@ -389,8 +383,6 @@ class Transaction
 
     /**
      * Returns notes based on info in the transaction.
-     *
-     * @return string
      */
     public function getNotes(): string
     {
@@ -406,8 +398,6 @@ class Transaction
 
     /**
      * Return IBAN of the source account.
-     *
-     * @return string|null
      */
     public function getSourceIban(): ?string
     {
@@ -415,7 +405,7 @@ class Transaction
         if ('' !== $this->debtorAccountIban) {
             $data      = ['iban' => $this->debtorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
-            $validator = Validator::make($data, $rules);
+            $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
                 app('log')->warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));
 
@@ -433,8 +423,6 @@ class Transaction
 
     /**
      * Return name of the source account.
-     *
-     * @return string|null
      */
     public function getSourceName(): ?string
     {
@@ -456,8 +444,6 @@ class Transaction
 
     /**
      * Return account number of the source account.
-     *
-     * @return string|null
      */
     public function getSourceNumber(): ?string
     {
@@ -472,9 +458,6 @@ class Transaction
         return null;
     }
 
-    /**
-     * @return Carbon|null
-     */
     public function getValueDate(): ?Carbon
     {
         if (null !== $this->valueDate) {
@@ -490,12 +473,10 @@ class Transaction
     /**
      * Call this "toLocalArray" because we want to confusion with "fromArray", which is really based
      * on Nordigen information. Likewise, there is also "fromLocalArray".
-     *
-     * @return array
      */
     public function toLocalArray(): array
     {
-        $return = [
+        return [
             'additional_information'                    => $this->additionalInformation,
             'additional_information_structured'         => $this->additionalInformationStructured,
             'balance_after_transaction'                 => $this->balanceAfterTransaction->toLocalArray(),
@@ -540,17 +521,10 @@ class Transaction
             // undocumented values:
             'end_to_end_id'                             => $this->endToEndId,
         ];
-
-        return $return;
     }
 
-    /**
-     * @return string
-     */
     public function getTransactionId(): string
     {
         return trim(preg_replace('/\s+/', ' ', $this->transactionId));
     }
-
-
 }

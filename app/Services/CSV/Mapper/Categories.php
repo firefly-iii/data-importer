@@ -38,7 +38,6 @@ class Categories implements MapperInterface
     /**
      * Get map of objects.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     public function getMap(): array
@@ -55,9 +54,11 @@ class Categories implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download categories: %s', $e->getMessage()));
         }
+
         /** @var Category $category */
         foreach ($response as $category) {
             $result[$category->id] = sprintf('%s', $category->name);

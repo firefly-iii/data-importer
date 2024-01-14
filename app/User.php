@@ -44,6 +44,7 @@ class User extends Authenticatable
         = [
             'email_verified_at' => 'datetime',
         ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -53,6 +54,7 @@ class User extends Authenticatable
         = [
             'name', 'email', 'password',
         ];
+
     /**
      * The attributes that should be hidden for arrays.
      *

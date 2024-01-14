@@ -46,9 +46,6 @@ class ServiceController extends Controller
         $this->middleware(ServiceControllerMiddleware::class);
     }
 
-    /**
-     * @return JsonResponse
-     */
     public function validateNordigen(): JsonResponse
     {
         $validator = new NordigenValidator();
@@ -66,11 +63,6 @@ class ServiceController extends Controller
         return response()->json(['result' => 'OK']);
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
     public function validateSpectre(Request $request): JsonResponse
     {
         $validator = new SpectreValidator();

@@ -35,17 +35,11 @@ abstract class AbstractTask implements TaskInterface
     protected Account             $account;
     protected TransactionCurrency $transactionCurrency;
 
-    /**
-     * @param  Account  $account
-     */
     public function setAccount(Account $account): void
     {
         $this->account = $account;
     }
 
-    /**
-     * @param  TransactionCurrency  $transactionCurrency
-     */
     public function setTransactionCurrency(TransactionCurrency $transactionCurrency): void
     {
         $this->transactionCurrency = $transactionCurrency;

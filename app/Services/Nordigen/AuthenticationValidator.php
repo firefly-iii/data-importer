@@ -37,9 +37,6 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     use IsRunningCli;
 
-    /**
-     * @inheritDoc
-     */
     public function validate(): AuthenticationStatus
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));

@@ -24,19 +24,13 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-use UnexpectedValueException;
-
 /**
  * Class ConverterService
  */
 class ConverterService
 {
     /**
-     * @param  string  $class
-     * @param  mixed  $value
-     * @param  string|null  $configuration
-     *
-     * @return mixed
+     * @param mixed $value
      */
     public static function convert(string $class, $value, ?string $configuration): mixed
     {
@@ -53,14 +47,10 @@ class ConverterService
 
             return $object->convert($value);
         }
-        throw new UnexpectedValueException(sprintf('No such converter: "%s"', $class));
+
+        throw new \UnexpectedValueException(sprintf('No such converter: "%s"', $class));
     }
 
-    /**
-     * @param  string  $class
-     *
-     * @return bool
-     */
     public static function exists(string $class): bool
     {
         $name = self::fullName($class);
@@ -68,11 +58,6 @@ class ConverterService
         return class_exists($name);
     }
 
-    /**
-     * @param  string  $class
-     *
-     * @return string
-     */
     public static function fullName(string $class): string
     {
         return sprintf('App\\Services\\CSV\\Converter\\%s', $class);

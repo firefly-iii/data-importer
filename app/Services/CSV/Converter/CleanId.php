@@ -32,10 +32,9 @@ class CleanId implements ConverterInterface
     /**
      * Convert a value.
      *
-     * @param $value
+     * @param mixed $value
      *
-     * @return int|null
-     *
+     * @return null|int
      */
     public function convert($value)
     {
@@ -47,10 +46,6 @@ class CleanId implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

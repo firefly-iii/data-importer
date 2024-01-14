@@ -48,13 +48,9 @@ class Account
     /**
      * Account constructor.
      */
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
-     * @param array $data
-     *
      * @return static
      */
     public static function fromArray(array $data): self

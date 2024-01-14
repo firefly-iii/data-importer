@@ -38,7 +38,6 @@ class Budgets implements MapperInterface
     /**
      * Get map of objects.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     public function getMap(): array
@@ -55,10 +54,10 @@ class Budgets implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download budgets: %s', $e->getMessage()));
         }
-
 
         /** @var Budget $budget */
         foreach ($response as $budget) {

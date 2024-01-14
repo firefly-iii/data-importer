@@ -39,10 +39,6 @@ class PutRefreshConnectionRequest extends Request
 
     /**
      * ListCustomersRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -52,22 +48,11 @@ class PutRefreshConnectionRequest extends Request
         $this->setUrl('connections/%s/refresh');
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function get(): Response
-    {
-    }
+    public function get(): Response {}
+
+    public function post(): Response {}
 
     /**
-     * @inheritDoc
-     */
-    public function post(): Response
-    {
-    }
-
-    /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function put(): Response
@@ -84,9 +69,6 @@ class PutRefreshConnectionRequest extends Request
         return new PutRefreshConnectionResponse($response['data']);
     }
 
-    /**
-     * @param string $connection
-     */
     public function setConnection(string $connection): void
     {
         $this->connection = $connection;

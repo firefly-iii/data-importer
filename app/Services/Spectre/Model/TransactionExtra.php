@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Model;
 
 use Carbon\Carbon;
-use Exception;
 
 /**
  * Class TransactionExtra
@@ -65,16 +64,12 @@ class TransactionExtra
     /**
      * TransactionExtra constructor.
      *
-     * @throws Exception
+     * @throws \Exception
      */
     private function __construct() {}
 
     /**
      * TransactionExtra constructor.
-     *
-     * @param array $data
-     *
-     * @return TransactionExtra
      */
     public static function fromArray(array $data): self
     {
@@ -112,57 +107,36 @@ class TransactionExtra
         return $model;
     }
 
-    /**
-     * @return string|null
-     */
     public function getAdditional(): ?string
     {
         return $this->additional;
     }
 
-    /**
-     * @return string|null
-     */
     public function getInformation(): ?string
     {
         return $this->information;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayee(): ?string
     {
         return $this->payee;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayeeInformation(): ?string
     {
         return $this->payeeInformation;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayer(): ?string
     {
         return $this->payer;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPayerInformation(): ?string
     {
         return $this->payerInformation;
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [

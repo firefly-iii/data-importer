@@ -27,20 +27,12 @@ namespace App\Services\CSV\File;
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
 use League\Csv\Reader;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class FileReader
  */
 class FileReader
 {
-    /**
-     * @param  string  $content
-     * @param  bool  $convert
-     *
-     * @return Reader
-     */
     public static function getReaderFromContent(string $content, bool $convert = false): Reader
     {
         if (true === $convert) {
@@ -56,10 +48,6 @@ class FileReader
 
     /**
      * Get a CSV file reader and fill it with data from CSV file.
-     *
-     * @param  bool  $convert
-     *
-     * @return Reader
      */
     public static function getReaderFromSession(bool $convert = false): Reader
     {

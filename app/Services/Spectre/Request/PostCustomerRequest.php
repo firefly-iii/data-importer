@@ -33,15 +33,10 @@ use App\Services\Spectre\Response\PostCustomerResponse;
  */
 class PostCustomerRequest extends Request
 {
-    /** @var string */
     public string $identifier;
 
     /**
      * PostCustomerRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -51,16 +46,12 @@ class PostCustomerRequest extends Request
         $this->setUrl('customers');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         // Implement get() method.
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      * @throws ImporterErrorException
      */
@@ -69,7 +60,7 @@ class PostCustomerRequest extends Request
         if ('' === $this->identifier) {
             throw new ImporterErrorException('No identifier for PostCustomerRequest');
         }
-        $data = [
+        $data     = [
             'data' => [
                 'identifier' => $this->identifier,
             ],
@@ -80,9 +71,6 @@ class PostCustomerRequest extends Request
         return new PostCustomerResponse($response['data']);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

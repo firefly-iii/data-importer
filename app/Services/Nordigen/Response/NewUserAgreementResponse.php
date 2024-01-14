@@ -36,9 +36,6 @@ class NewUserAgreementResponse extends Response
     public string $institutionId;
     public int    $maxHistoricalDays;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->id                = $data['id'];

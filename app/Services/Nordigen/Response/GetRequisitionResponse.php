@@ -35,9 +35,6 @@ class GetRequisitionResponse extends Response
     public array  $accounts;
     public string $id;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->id       = $data['id'];

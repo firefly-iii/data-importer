@@ -35,8 +35,6 @@ class Bank
     public int    $transactionTotalDays;
 
     /**
-     * @param  array  $array
-     *
      * @return static
      */
     public static function fromArray(array $array): self

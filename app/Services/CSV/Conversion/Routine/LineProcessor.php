@@ -47,8 +47,6 @@ class LineProcessor
 
     /**
      * LineProcessor constructor.
-     *
-     * @param  Configuration  $configuration
      */
     public function __construct(Configuration $configuration)
     {
@@ -61,11 +59,6 @@ class LineProcessor
         $this->dateFormat = $configuration->getDate();
     }
 
-    /**
-     * @param  array  $lines
-     *
-     * @return array
-     */
     public function processCSVLines(array $lines): array
     {
         $processed = [];
@@ -75,6 +68,7 @@ class LineProcessor
 
         foreach ($lines as $index => $line) {
             app('log')->debug(sprintf('Now processing CSV line #%d/#%d', $index + 1, $count));
+
             try {
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
@@ -96,15 +90,11 @@ class LineProcessor
      * For example, if you map role "budget-name" with value "groceries" to 1,
      * then that should become the budget-id. Not the name.
      *
-     * @param  int  $column
-     * @param  int  $mapped
-     *
-     * @return string
      * @throws ImporterErrorException
      */
     private function getRoleForColumn(int $column, int $mapped): string
     {
-        $role = $this->roles[$column] ?? '_ignore';
+        $role                           = $this->roles[$column] ?? '_ignore';
         if (0 === $mapped) {
             app('log')->debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
 
@@ -115,10 +105,9 @@ class LineProcessor
             // ignore the mapping.
             app('log')->debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
 
-
             return $role;
         }
-        $roleMapping = [
+        $roleMapping                    = [
             'account-id'            => 'account-id',
             'account-name'          => 'account-id',
             'account-iban'          => 'account-id',
@@ -143,7 +132,7 @@ class LineProcessor
         if (!isset($roleMapping[$role])) {
             throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
         }
-        $newRole = $roleMapping[$role];
+        $newRole                        = $roleMapping[$role];
         if ($newRole !== $role) {
             app('log')->debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
         }
@@ -161,16 +150,13 @@ class LineProcessor
      * Convert each raw CSV to a set of ColumnValue objects, which hold as much info
      * as we can cram into it. These new lines can be imported later on.
      *
-     * @param  array  $line
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function process(array $line): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $count  = count($line);
-        $return = [];
+        $count       = count($line);
+        $return      = [];
         foreach ($line as $columnIndex => $value) {
             app('log')->debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
             $value        = trim($value);
@@ -178,29 +164,31 @@ class LineProcessor
             app('log')->debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
             if ('_ignore' === $originalRole) {
                 app('log')->debug(sprintf('Ignore column #%d because role is "_ignore".', $columnIndex + 1));
+
                 continue;
             }
             if ('' === $value) {
                 app('log')->debug(sprintf('Ignore column #%d because value is "".', $columnIndex + 1));
+
                 continue;
             }
 
             // is a mapped value present?
-            $mapped = $this->mapping[$columnIndex][$value] ?? 0;
+            $mapped       = $this->mapping[$columnIndex][$value] ?? 0;
             app('log')->debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
             app('log')->debug(sprintf('Value is %s', var_export($value, true)));
             // app('log')->debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
-            $role        = $this->getRoleForColumn($columnIndex, $mapped);
-            $appendValue = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
+            $role         = $this->getRoleForColumn($columnIndex, $mapped);
+            $appendValue  = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
 
             if (null === $appendValue) {
                 $appendValue = false;
             }
 
-            //app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
+            // app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
-            $columnValue = new ColumnValue();
+            $columnValue  = new ColumnValue();
             $columnValue->setValue($value);
             $columnValue->setRole($role);
             $columnValue->setAppendValue($appendValue);
@@ -213,7 +201,7 @@ class LineProcessor
                 $columnValue->setConfiguration($this->dateFormat);
             }
 
-            $return[] = $columnValue;
+            $return[]     = $columnValue;
         }
         // add a special column value for the "source"
         $columnValue = new ColumnValue();
@@ -221,7 +209,7 @@ class LineProcessor
         $columnValue->setMappedValue(0);
         $columnValue->setAppendValue(false);
         $columnValue->setRole('original-source');
-        $return[] = $columnValue;
+        $return[]    = $columnValue;
         app('log')->debug(sprintf('Added column #%d to denote the original source.', count($return)));
 
         return $return;

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
@@ -39,11 +40,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use JsonException;
-use League\Flysystem\FilesystemException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Storage;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class SubmitController
@@ -52,8 +49,7 @@ class SubmitController extends Controller
 {
     use RestoresConfiguration;
 
-    protected const DISK_NAME = 'jobs';
-
+    protected const string DISK_NAME = 'jobs';
 
     /**
      * StartController constructor.
@@ -71,15 +67,18 @@ class SubmitController extends Controller
     public function index()
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $mainTitle = 'Submit the data';
-
-        // get configuration object.
+        $mainTitle     = 'Submit the data';
+        $statusManager = new SubmissionStatusManager();
         $configuration = $this->restoreConfiguration();
+        $flow          = $configuration->getFlow();
         $jobBackUrl    = route('back.conversion');
 
-        // job ID may be in session:
-        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $flow       = $configuration->getFlow();
+        // submission job ID may be in session:
+        $identifier    = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
+        // if null, create a new one:
+        if (null === $identifier) {
+            $identifier = $statusManager->generateIdentifier();
+        }
 
         // validate flow
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -95,30 +94,30 @@ class SubmitController extends Controller
         return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
+        $identifier           = $request->get('identifier');
         if (null === $identifier) {
-            app('log')->error('Identifier is NULL');
+            app('log')->error('Start: Identifier is NULL');
             $status         = new SubmissionStatus();
             $status->status = SubmissionStatus::SUBMISSION_ERRORED;
 
             return response()->json($status->toArray());
         }
-        $configuration   = $this->restoreConfiguration();
-        $routine         = new RoutineManager($identifier);
-        $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);
-        $disk            = Storage::disk(self::DISK_NAME);
-        $fileName        = sprintf('%s.json', $identifier);
+        $configuration        = $this->restoreConfiguration();
+        $routine              = new RoutineManager($identifier);
+        app('log')->error('Start: Find import job status.');
+        $importJobStatus      = SubmissionStatusManager::startOrFindSubmission($identifier);
+
+        // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
+        $conversionIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $disk                 = \Storage::disk(self::DISK_NAME);
+        $fileName             = sprintf('%s.json', $conversionIdentifier);
 
         // get files from disk:
         if (!$disk->has($fileName)) {
+            Log::error(sprintf('The file "%s" does not exist on the "%s" disk.', $fileName, self::DISK_NAME));
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
 
@@ -129,7 +128,8 @@ class SubmitController extends Controller
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
+        } catch (FileNotFoundException|\JsonException $e) {
+            Log::error(sprintf('The file "%s" on "%s" disk contains error: %s', $fileName, self::DISK_NAME, $e->getMessage()));
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
 
@@ -142,6 +142,7 @@ class SubmitController extends Controller
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
+
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
@@ -157,35 +158,20 @@ class SubmitController extends Controller
         // set config as complete.
         session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
 
-
-        //            // if configured, send report!
-        //            // TODO make event handler.
-        //            $log
-        //                = [
-        //                'messages' => $routine->getAllMessages(),
-        //                'warnings' => $routine->getAllWarnings(),
-        //                'errors'   => $routine->getAllErrors(),
-        //            ];
-        //
-        //            $send = config('mail.enable_mail_report');
-        //            app('log')->debug('Log log', $log);
-        //            if (true === $send) {
-        //                app('log')->debug('SEND MAIL');
-        //                Mail::to(config('mail.destination'))->send(new ImportFinished($log));
-        //            }
-
+        event(
+            new ImportedTransactions(
+                array_merge($routine->getAllMessages()),
+                array_merge($routine->getAllWarnings()),
+                array_merge($routine->getAllErrors())
+            )
+        );
 
         return response()->json($importJobStatus->toArray());
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
     public function status(Request $request): JsonResponse
     {
-        $identifier = $request->get('identifier');
+        $identifier      = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             app('log')->warning('Identifier is NULL.');

@@ -32,18 +32,9 @@ use App\Services\Shared\Configuration\Configuration;
  */
 interface RoutineManagerInterface
 {
-    /**
-     * @return string
-     */
     public function getIdentifier(): string;
 
-    /**
-     * @param  Configuration  $configuration
-     */
     public function setConfiguration(Configuration $configuration): void;
 
-    /**
-     *
-     */
     public function start(): array;
 }

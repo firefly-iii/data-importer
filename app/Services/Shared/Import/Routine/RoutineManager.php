@@ -41,9 +41,6 @@ class RoutineManager
     private InfoCollector $infoCollector;
     private array         $transactions;
 
-    /**
-     * @param  string  $identifier
-     */
     public function __construct(string $identifier)
     {
         $this->identifier   = $identifier;
@@ -53,33 +50,21 @@ class RoutineManager
         $this->allErrors    = [];
     }
 
-    /**
-     * @return array
-     */
     public function getAllErrors(): array
     {
         return $this->allErrors;
     }
 
-    /**
-     * @return array
-     */
     public function getAllMessages(): array
     {
         return $this->allMessages;
     }
 
-    /**
-     * @return array
-     */
     public function getAllWarnings(): array
     {
         return $this->allWarnings;
     }
 
-    /**
-     * @param  Configuration  $configuration
-     */
     public function setConfiguration(Configuration $configuration): void
     {
         $this->infoCollector = new InfoCollector();
@@ -90,9 +75,6 @@ class RoutineManager
         app('log')->debug('Created APISubmitter in RoutineManager');
     }
 
-    /**
-     * @param  array  $transactions
-     */
     public function setTransactions(array $transactions): void
     {
         $this->transactions = $transactions;
@@ -100,7 +82,6 @@ class RoutineManager
     }
 
     /**
-     *
      * @throws ImporterErrorException
      */
     public function start(): void
@@ -108,14 +89,16 @@ class RoutineManager
         app('log')->debug('Start of shared import routine.');
 
         app('log')->debug('First collect account information from Firefly III.');
-        $accountInfo = $this->infoCollector->collectAccountTypes();
+        $accountInfo       = $this->infoCollector->collectAccountTypes();
 
         app('log')->debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
         $this->apiSubmitter->setAccountInfo($accountInfo);
+        $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->processTransactions($this->transactions);
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
         $this->allErrors   = $this->apiSubmitter->getErrors();
+        app('log')->debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d', count($this->allMessages), count($this->allWarnings), count($this->allErrors)));
     }
 }

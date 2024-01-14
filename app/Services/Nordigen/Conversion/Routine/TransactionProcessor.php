@@ -49,10 +49,6 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
-    /**
-     * @return array
-     * @throws ImporterErrorException
-     */
     public function download(): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -62,21 +58,21 @@ class TransactionProcessor
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
-
         if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        $accounts = array_keys($this->configuration->getAccounts());
+        $accounts        = array_keys($this->configuration->getAccounts());
 
-        $return = [];
+        $return          = [];
         app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
-            $account = (string)$account;
+            $account          = (string)$account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             app('log')->debug('Will also download information on the account for debug purposes.');
-            $object = new Account();
+            $object           = new Account();
             $object->setIdentifier($account);
+
             try {
                 AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
@@ -90,50 +86,51 @@ class TransactionProcessor
                 if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
                     $this->addError(0, $e->json['detail']);
                 }
+                $return[$account] = [];
 
-                return [];
+                continue;
             }
             app('log')->debug('Done downloading information for debug purposes.');
 
-            $accessToken = TokenManager::getAccessToken();
-            $url         = config('nordigen.url');
-            $request     = new GetTransactionsRequest($url, $accessToken, $account);
+            try {
+                $accessToken = TokenManager::getAccessToken();
+            } catch (ImporterErrorException $e) {
+                $this->addError(0, $e->getMessage());
+                $return[$account] = [];
+
+                continue;
+            }
+            $url              = config('nordigen.url');
+            $request          = new GetTransactionsRequest($url, $accessToken, $account);
             $request->setTimeOut(config('importer.connection.timeout'));
-            /** @var GetTransactionsResponse $transactions */
+
+            // @var GetTransactionsResponse $transactions
             try {
                 $transactions = $request->get();
             } catch (ImporterHttpException $e) {
                 $this->addError(0, $e->getMessage());
-                throw new ImporterErrorException($e->getMessage(), 0, $e);
+                $return[$account] = [];
+
+                continue;
             }
             $return[$account] = $this->filterTransactions($transactions);
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
         app('log')->debug('Done with download');
+
         return $return;
     }
 
-    /**
-     * @param Configuration $configuration
-     */
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
     }
 
-    /**
-     * @param string $identifier
-     */
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
     }
 
-    /**
-     * @param GetTransactionsResponse $transactions
-     *
-     * @return array
-     */
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
         app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
@@ -145,7 +142,7 @@ class TransactionProcessor
         }
         $return = [];
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
                 app('log')->debug(
@@ -155,6 +152,7 @@ class TransactionProcessor
                         $this->notBefore->format(self::DATE_TIME_FORMAT)
                     )
                 );
+
                 continue;
             }
             if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
@@ -170,14 +168,19 @@ class TransactionProcessor
             }
             // add error if amount is zero:
             if (0 === bccomp('0', $transaction->transactionAmount)) {
-                $this->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
-                                                          $transaction->transactionId, $transaction->getSourceName(), $transaction->getDestinationName(), $transaction->getDescription()));
+                $this->addWarning(0, sprintf(
+                    'Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
+                    $transaction->transactionId,
+                    $transaction->getSourceName(),
+                    $transaction->getDestinationName(),
+                    $transaction->getDescription()
+                ));
                 app('log')->debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
+
                 continue;
             }
 
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT),));
-
+            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
 
             $return[] = $transaction;
         }

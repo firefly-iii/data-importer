@@ -39,9 +39,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
-use JsonException;
-use Str;
-use Throwable;
 
 /**
  * Class TokenController
@@ -51,12 +48,11 @@ class TokenController extends Controller
     /**
      * The user ends up here when they come back from Firefly III.
      *
-     * @param  Request  $request
+     * @return Application|Factory|\Illuminate\Contracts\View\View|Redirector|RedirectResponse
      *
-     * @return Application|Factory|\Illuminate\Contracts\View\View|RedirectResponse|Redirector
      * @throws ImporterErrorException
      * @throws GuzzleException
-     * @throws Throwable
+     * @throws \Throwable
      */
     public function callback(Request $request)
     {
@@ -71,11 +67,12 @@ class TokenController extends Controller
         if ($state !== (string)$request->state) {
             app('log')->error(sprintf('State according to session: "%s"', $state));
             app('log')->error(sprintf('State returned in request : "%s"', $request->state));
+
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
         }
         // always POST to the base URL, never the vanity URL.
-        $finalURL = sprintf('%s/oauth/token', $baseURL);
-        $params   = [
+        $finalURL     = sprintf('%s/oauth/token', $baseURL);
+        $params       = [
             'form_params' => [
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $clientId,
@@ -88,10 +85,11 @@ class TokenController extends Controller
         app('log')->debug('Params for access token', $params);
         app('log')->debug(sprintf('Will contact "%s" for a token.', $finalURL));
 
-        $opts = [
+        $opts         = [
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
         ];
+
         try {
             $response = (new Client($opts))->post($finalURL, $params);
         } catch (ClientException|RequestException $e) {
@@ -100,7 +98,7 @@ class TokenController extends Controller
                 $body = (string)$e->getResponse()->getBody();
                 app('log')->error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
                 app('log')->error(sprintf('Response from server: "%s"', $body));
-                //app('log')->error($e->getTraceAsString());
+                // app('log')->error($e->getTraceAsString());
             }
 
             return view('error')->with('message', $e->getMessage())->with('body', $body);
@@ -108,10 +106,11 @@ class TokenController extends Controller
 
         try {
             $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             app('log')->error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             app('log')->error(sprintf('Response from server: "%s"', (string)$response->getBody()));
-            //app('log')->error($e->getTraceAsString());
+
+            // app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
         }
         app('log')->debug('Response', $data);
@@ -128,13 +127,11 @@ class TokenController extends Controller
     /**
      * This method will check if Firefly III accepts the access_token from the cookie
      * and the base URL (also from the cookie). The base_url is NEVER the vanity URL.§
-     *
-     * @return JsonResponse
      */
     public function doValidate(): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $response = ['result' => 'OK', 'message' => null];
+        $response    = ['result' => 'OK', 'message' => null];
 
         // get values from secret manager:
         $url         = SecretManager::getBaseUrl();
@@ -145,19 +142,21 @@ class TokenController extends Controller
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
 
         app('log')->debug(sprintf('Now trying to authenticate with Firefly III at %s', $url));
+
         try {
             $result = $infoRequest->get();
         } catch (ApiHttpException $e) {
             app('log')->notice(sprintf('Could NOT authenticate with Firefly III at %s', $url));
             app('log')->error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
+
             return response()->json(['result' => 'NOK', 'message' => $e->getMessage()]);
         }
         // -1 = OK (minimum is smaller)
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum = (string)config('importer.minimum_version');
-        $compare = version_compare($minimum, $result->version);
+        $minimum     = (string)config('importer.minimum_version');
+        $compare     = version_compare($minimum, $result->version);
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',
@@ -165,7 +164,7 @@ class TokenController extends Controller
                 $minimum
             );
             app('log')->error(sprintf('Could not link to Firefly III: %s', $errorMessage));
-            $response = ['result' => 'NOK', 'message' => $errorMessage];
+            $response     = ['result' => 'NOK', 'message' => $errorMessage];
         }
         app('log')->debug('Result is', $response);
 
@@ -179,13 +178,11 @@ class TokenController extends Controller
      * 2. Has client ID + URL. Will send user to Firefly III for permission.
      * 3. Has either 1 of those. Will show user some input form.
      *
-     * @param  Request  $request
-     *
-     * @return Application|Factory|RedirectResponse|Redirector|View
+     * @return Application|Factory|Redirector|RedirectResponse|View
      */
     public function index(Request $request)
     {
-        $pageTitle = 'Data importer';
+        $pageTitle   = 'Data importer';
         app('log')->debug(sprintf('Now at %s', __METHOD__));
 
         $accessToken = SecretManager::getAccessToken();
@@ -219,7 +216,7 @@ class TokenController extends Controller
         }
 
         // Option 3: either is empty, ask for client ID and/or base URL:
-        $clientId = 0 === $clientId ? '' : $clientId;
+        $clientId    = 0 === $clientId ? '' : $clientId;
 
         return view('token.client_id', compact('baseUrl', 'clientId', 'pageTitle'));
     }
@@ -228,14 +225,12 @@ class TokenController extends Controller
      * User submits the client ID + optionally the base URL.
      * Whatever happens, we redirect the user to Firefly III and beg for permission.
      *
-     * @param  Request  $request
-     *
-     * @return Application|RedirectResponse|Redirector
+     * @return Application|Redirector|RedirectResponse
      */
     public function submitClientId(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $data = $request->validate(
+        $data              = $request->validate(
             [
                 'client_id' => 'required|numeric|min:1|max:65536',
                 'base_url'  => 'url',
@@ -252,9 +247,9 @@ class TokenController extends Controller
         $data['client_id'] = (int)$data['client_id'];
 
         // grab base URL from config first, otherwise from submitted data:
-        $baseURL = config('importer.url');
+        $baseURL           = config('importer.url');
         app('log')->debug(sprintf('[a] Base URL is "%s"', $baseURL));
-        $vanityURL = $baseURL;
+        $vanityURL         = $baseURL;
 
         app('log')->debug(sprintf('[b] Vanity URL is now "%s"', $vanityURL));
 
@@ -280,23 +275,15 @@ class TokenController extends Controller
 
     /**
      * This method forwards the user to Firefly III. Some parameters are stored in the user's session.
-     *
-     * @param  Request  $request
-     * @param  string  $baseURL
-     * @param  string  $vanityURL
-     * @param  int  $clientId
-     *
-     * @return RedirectResponse
      */
     private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, int $clientId): RedirectResponse
     {
-        $baseURL   = rtrim($baseURL, '/');
-        $vanityURL = rtrim($vanityURL, '/');
-
+        $baseURL       = rtrim($baseURL, '/');
+        $vanityURL     = rtrim($vanityURL, '/');
 
         app('log')->debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state        = Str::random(40);
-        $codeVerifier = Str::random(128);
+        $state         = \Str::random(40);
+        $codeVerifier  = \Str::random(128);
         $request->session()->put('state', $state);
         $request->session()->put('code_verifier', $codeVerifier);
         $request->session()->put('form_client_id', $clientId);
@@ -315,7 +302,7 @@ class TokenController extends Controller
         ];
         $query         = http_build_query($params);
         // we redirect the user to the vanity URL, which is the same as the base_url, unless the user actually set a vanity URL.
-        $finalURL = sprintf('%s/oauth/authorize?', $vanityURL);
+        $finalURL      = sprintf('%s/oauth/authorize?', $vanityURL);
         app('log')->debug('Query parameters are', $params);
         app('log')->debug(sprintf('Now redirecting to "%s" (params omitted)', $finalURL));
 

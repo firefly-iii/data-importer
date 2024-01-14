@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /*
  * FileContentSherlock.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -22,7 +24,6 @@
 
 namespace App\Services\Shared\File;
 
-use Exception;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
 
@@ -49,7 +50,7 @@ class FileContentSherlock
             app('log')->debug('CAMT.053 Check on file: positive');
 
             return 'camt';
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             app('log')->debug('CAMT.053 Check on file: negative');
             app('log')->debug($e->getMessage());
         }
@@ -62,14 +63,15 @@ class FileContentSherlock
         if (null === $content) {
             return 'unknown';
         }
+
         try {
             $this->camtReader->readString($content);
             app('log')->debug('CAMT.053 Check of content: positive');
 
             return 'camt';
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             app('log')->debug('CAMT.053 Check of content: negative');
-            //app('log')->debug($e->getMessage());
+            // app('log')->debug($e->getMessage());
         }
 
         return 'csv';

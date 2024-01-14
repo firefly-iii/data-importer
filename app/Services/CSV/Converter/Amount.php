@@ -29,11 +29,6 @@ namespace App\Services\CSV\Converter;
  */
 class Amount implements ConverterInterface
 {
-    /**
-     * @param  string  $amount
-     *
-     * @return string
-     */
     public static function negative(string $amount): string
     {
         if (1 === bccomp($amount, '0')) {
@@ -43,11 +38,6 @@ class Amount implements ConverterInterface
         return $amount;
     }
 
-    /**
-     * @param  string  $amount
-     *
-     * @return string
-     */
     public static function positive(string $amount): string
     {
         if (-1 === bccomp($amount, '0')) {
@@ -61,9 +51,7 @@ class Amount implements ConverterInterface
      * Some people, when confronted with a problem, think "I know, I'll use regular expressions." Now they have two problems.
      * - Jamie Zawinski.
      *
-     * @param $value
-     *
-     * @return string
+     * @param mixed $value
      */
     public function convert($value): string
     {
@@ -72,9 +60,9 @@ class Amount implements ConverterInterface
         }
 
         app('log')->debug(sprintf('Start with amount "%s"', $value));
-        $original = $value;
-        $value    = $this->stripAmount((string)$value);
-        $decimal  = null;
+        $original  = $value;
+        $value     = $this->stripAmount((string)$value);
+        $decimal   = null;
 
         if ($this->decimalIsDot($value)) {
             $decimal = '.';
@@ -128,20 +116,12 @@ class Amount implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 
     /**
      * Check if the value has a dot or comma on an alternative place,
      * catching strings like ",1" or ".5".
-     *
-     * @param  string  $value
-     *
-     * @return bool
      */
     private function alternativeDecimalSign(string $value): bool
     {
@@ -153,10 +133,6 @@ class Amount implements ConverterInterface
 
     /**
      * Helper function to see if the decimal separator is a comma.
-     *
-     * @param  string  $value
-     *
-     * @return bool
      */
     private function decimalIsComma(string $value): bool
     {
@@ -177,10 +153,6 @@ class Amount implements ConverterInterface
 
     /**
      * Helper function to see if the decimal separator is a dot.
-     *
-     * @param  string  $value
-     *
-     * @return bool
      */
     private function decimalIsDot(string $value): bool
     {
@@ -192,16 +164,12 @@ class Amount implements ConverterInterface
 
     /**
      * Search from the left for decimal sign.
-     *
-     * @param  string  $value
-     *
-     * @return string|null
      */
     private function findFromLeft(string $value): ?string
     {
         $decimal = null;
         app('log')->debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
-        $res = strrpos($value, '.');
+        $res     = strrpos($value, '.');
         if (false !== $res) {
             // blandly assume this is the one.
             app('log')->debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
@@ -214,10 +182,6 @@ class Amount implements ConverterInterface
     /**
      * Returns the alternative decimal point used, such as a dot or a comma,
      * from strings like ",1" or "0.5".
-     *
-     * @param  string  $value
-     *
-     * @return string
      */
     private function getAlternativeDecimalSign(string $value): string
     {
@@ -230,11 +194,6 @@ class Amount implements ConverterInterface
     /**
      * Replaces other characters like thousand separators with nothing to make the decimal separator the only special
      * character in the string.
-     *
-     * @param  string  $decimal
-     * @param  string  $value
-     *
-     * @return string
      */
     private function replaceDecimal(string $decimal, string $value): string
     {
@@ -242,18 +201,14 @@ class Amount implements ConverterInterface
         if (',' === $decimal) {
             $search = ['.', ' '];
         }
-        $value = str_replace($search, '', $value);
+        $value  = str_replace($search, '', $value);
 
-        /** @noinspection CascadeStringReplacementInspection */
+        // @noinspection CascadeStringReplacementInspection
         return str_replace(',', '.', $value);
     }
 
     /**
      * Strip amount from weird characters.
-     *
-     * @param  string  $value
-     *
-     * @return string
      */
     private function stripAmount(string $value): string
     {
@@ -269,7 +224,7 @@ class Amount implements ConverterInterface
         if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
             $str = '-'.substr($str, 1, $len - 2);
         }
-        $str = trim($str);
+        $str   = trim($str);
 
         app('log')->debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 

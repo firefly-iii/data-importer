@@ -25,9 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Authentication;
 
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-
 /**
  * Class SecretManager
  */
@@ -36,11 +33,8 @@ class SecretManager
     public const APP_ID = 'spectre_app_id';
     public const SECRET = 'spectre_secret';
 
-
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     *
-     * @return string
      */
     public static function getAppId(): string
     {
@@ -49,25 +43,13 @@ class SecretManager
 
             return (string)config('spectre.app_id');
         }
-        return (string)session()->get(self::APP_ID);
-    }
 
-    /**
-     * Will verify if the user has a Spectre App ID (in a cookie)
-     * TODO is a cookie the best place?
-     *
-     * @return bool
-     */
-    private static function hasAppId(): bool
-    {
-        return '' !== (string)session()->get(self::APP_ID);
+        return (string)session()->get(self::APP_ID);
     }
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
      * TODO is a cookie the best place?
-     *
-     * @return string
      */
     public static function getSecret(): string
     {
@@ -76,26 +58,13 @@ class SecretManager
 
             return (string)config('spectre.secret');
         }
-        return (string)session()->get(self::SECRET);
-    }
 
-    /**
-     * Will verify if the user has a Spectre App ID (in a cookie)
-     *
-     * @return bool
-     */
-    private static function hasSecret(): bool
-    {
-        return '' !== (string)session()->get(self::SECRET);
+        return (string)session()->get(self::SECRET);
     }
 
     /**
      * Store app ID.
      * TODO is a cookie the best place?
-     *
-     * @param string $appId
-     *
-     * @return void
      */
     public static function saveAppId(string $appId): void
     {
@@ -105,13 +74,26 @@ class SecretManager
     /**
      * Store access token in a cookie.
      * TODO is a cookie the best place?
-     *
-     * @param string $secret
-     *
-     * @return void
      */
     public static function saveSecret(string $secret): void
     {
         session()->put(self::SECRET, $secret);
+    }
+
+    /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     * TODO is a cookie the best place?
+     */
+    private static function hasAppId(): bool
+    {
+        return '' !== (string)session()->get(self::APP_ID);
+    }
+
+    /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     */
+    private static function hasSecret(): bool
+    {
+        return '' !== (string)session()->get(self::SECRET);
     }
 }

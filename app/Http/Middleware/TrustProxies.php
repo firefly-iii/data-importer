@@ -45,17 +45,16 @@ class TrustProxies extends Middleware
           RequestAlias::HEADER_X_FORWARDED_PORT |
           RequestAlias::HEADER_X_FORWARDED_PROTO |
           RequestAlias::HEADER_X_FORWARDED_AWS_ELB;
+
     /**
      * The trusted proxies for this application.
      *
-     * @var array|string|null
+     * @var null|array|string
      */
     protected $proxies;
 
     /**
      * TrustProxies constructor.
-     *
-     * @param  Repository  $config
      */
     public function __construct(Repository $config)
     {

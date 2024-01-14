@@ -29,11 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class EmptyDescription extends AbstractTask
 {
-    /**
-     * @param  array  $group
-     *
-     * @return array
-     */
     public function process(array $group): array
     {
         foreach ($group['transactions'] as $index => $transaction) {
@@ -45,8 +40,6 @@ class EmptyDescription extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -55,22 +48,15 @@ class EmptyDescription extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
         return true;
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function processDescription(array $transaction): array
     {
-        $transaction['description'] = $transaction['description'] ?? '';
+        $transaction['description'] ??= '';
         if ('' === $transaction['description']) {
             $transaction['description'] = '(empty description)';
         }

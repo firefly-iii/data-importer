@@ -25,22 +25,15 @@ declare(strict_types=1);
 namespace App\Http\Request;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class Request.
  *
  * @codeCoverageIgnore
- *
  */
 class Request extends FormRequest
 {
-    /**
-     * @param  string|null  $value
-     *
-     * @return bool
-     */
     public function convertBoolean(?string $value): bool
     {
         if (null === $value) {
@@ -55,10 +48,6 @@ class Request extends FormRequest
 
     /**
      * Return integer value.
-     *
-     * @param  string  $field
-     *
-     * @return int
      */
     public function convertToInteger(string $field): int
     {
@@ -67,10 +56,6 @@ class Request extends FormRequest
 
     /**
      * Return string value.
-     *
-     * @param  string  $field
-     *
-     * @return string
      */
     public function convertToString(string $field): string
     {
@@ -79,10 +64,6 @@ class Request extends FormRequest
 
     /**
      * Parse to integer
-     *
-     * @param  string|null  $string
-     *
-     * @return int|null
      */
     public function integerFromValue(?string $string): ?int
     {
@@ -98,10 +79,6 @@ class Request extends FormRequest
 
     /**
      * Return integer value, or NULL when it's not set.
-     *
-     * @param  string  $field
-     *
-     * @return int|null
      */
     public function nullableInteger(string $field): ?int
     {
@@ -119,10 +96,6 @@ class Request extends FormRequest
 
     /**
      * Return string value, or NULL if empty.
-     *
-     * @param  string  $field
-     *
-     * @return string|null
      */
     public function nullableString(string $field): ?string
     {
@@ -135,10 +108,6 @@ class Request extends FormRequest
 
     /**
      * Parse and clean a string.
-     *
-     * @param  string|null  $string
-     *
-     * @return string|null
      */
     public function stringFromValue(?string $string): ?string
     {
@@ -152,17 +121,14 @@ class Request extends FormRequest
 
     /**
      * Return date or NULL.
-     *
-     * @param  string  $field
-     *
-     * @return Carbon|null
      */
     protected function getCarbonDate(string $field): ?Carbon
     {
         $result = null;
+
         try {
             $result = $this->get($field) ? new Carbon($this->get($field)) : null;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             app('log')->debug(sprintf('Exception when parsing date. Not interesting: %s', $e->getMessage()));
         }
 

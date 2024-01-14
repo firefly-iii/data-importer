@@ -35,14 +35,13 @@ use Psr\Container\NotFoundExceptionInterface;
 class Token
 {
     /**
-     * @return string
      * @throws ImporterErrorException
      */
     public static function getAccessToken(): string
     {
         try {
             $value = session()->get(Constants::SESSION_ACCESS_TOKEN);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             throw new ImporterErrorException('No valid access token value.');
         }
         if (null === $value) {
@@ -57,14 +56,13 @@ class Token
     }
 
     /**
-     * @return string
      * @throws ImporterErrorException
      */
     public static function getURL(): string
     {
         try {
             $value = session()->get(Constants::SESSION_BASE_URL);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             throw new ImporterErrorException('No valid base URL value.');
         }
         if (null === $value) {
@@ -79,14 +77,13 @@ class Token
     }
 
     /**
-     * @return string
      * @throws ImporterErrorException
      */
     public static function getVanityURL(): string
     {
         try {
             $value = session()->get(Constants::SESSION_VANITY_URL);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             throw new ImporterErrorException('No valid vanity URL value.');
         }
         if (null === $value) {

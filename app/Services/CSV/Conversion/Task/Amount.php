@@ -29,11 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class Amount extends AbstractTask
 {
-    /**
-     * @param array $group
-     *
-     * @return array
-     */
     public function process(array $group): array
     {
         foreach ($group['transactions'] as $index => $transaction) {
@@ -45,8 +40,6 @@ class Amount extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -55,23 +48,16 @@ class Amount extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
         return false;
     }
 
-    /**
-     * @param array $transaction
-     *
-     * @return array
-     */
     private function processAmount(array $transaction): array
     {
         app('log')->debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
-        $amount = null;
+        $amount                = null;
         if (null === $amount && $this->validAmount((string)$transaction['amount'])) {
             app('log')->debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
@@ -107,7 +93,7 @@ class Amount extends AbstractTask
         if (array_key_exists('foreign_amount', $transaction)) {
             $transaction['foreign_amount'] = (string)$transaction['foreign_amount'];
         }
-        $amount = (string)$amount;
+        $amount                = (string)$amount;
         if ('' === $amount) {
             app('log')->error('Amount is EMPTY. This will give problems further ahead.', $transaction);
             unset($transaction['amount_modifier']);
@@ -115,7 +101,7 @@ class Amount extends AbstractTask
             return $transaction;
         }
         // modify amount:
-        $amount = bcmul($amount, $transaction['amount_modifier']);
+        $amount                = bcmul($amount, $transaction['amount_modifier']);
 
         app('log')->debug(sprintf('Amount is now %s.', $amount));
 
@@ -143,11 +129,6 @@ class Amount extends AbstractTask
         return $transaction;
     }
 
-    /**
-     * @param string $amount
-     *
-     * @return bool
-     */
     private function validAmount(string $amount): bool
     {
         if ('' === $amount) {

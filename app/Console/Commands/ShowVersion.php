@@ -37,17 +37,16 @@ final class ShowVersion extends Command
      * @var string
      */
     protected $description = 'Echoes the current version and some debug info.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'importer:version';
+    protected $signature   = 'importer:version';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {

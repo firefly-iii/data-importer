@@ -1,6 +1,5 @@
 <?php
 
-
 /*
  * CollectsAccounts.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -49,7 +48,6 @@ use Illuminate\Support\Facades\Cache;
 trait CollectsAccounts
 {
     /**
-     * @return array
      * @throws ApiHttpException
      */
     protected function getFireflyIIIAccounts(): array
@@ -61,7 +59,7 @@ trait CollectsAccounts
             Constants::LIABILITIES    => [],
         ];
 
-        $request = new GetAccountsRequest($url, $token);
+        $request  = new GetAccountsRequest($url, $token);
         $request->setType(GetAccountsRequest::ASSET);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -73,13 +71,14 @@ trait CollectsAccounts
         }
 
         // also get liabilities
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetAccountsRequest($url, $token);
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
+        $request  = new GetAccountsRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::LIABILITIES);
         $response = $request->get();
+
         /** @var Account $account */
         foreach ($response as $account) {
             $accounts[Constants::LIABILITIES][$account->id] = $account;
@@ -91,10 +90,7 @@ trait CollectsAccounts
     /**
      * List Nordigen accounts with account details, balances, and 2 transactions (if present)
      *
-     * @param  Configuration  $configuration
-     *
-     * @return array
-     * @throws ImporterErrorException|AgreementExpiredException
+     * @throws AgreementExpiredException|ImporterErrorException
      */
     protected function getNordigenAccounts(Configuration $configuration): array
     {
@@ -114,25 +110,26 @@ trait CollectsAccounts
             return $return;
         }
         // get banks and countries
-        $accessToken = TokenManager::getAccessToken();
-        $url         = config('nordigen.url');
-        $request     = new ListAccountsRequest($url, $identifier, $accessToken);
+        $accessToken  = TokenManager::getAccessToken();
+        $url          = config('nordigen.url');
+        $request      = new ListAccountsRequest($url, $identifier, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
-        /** @var ListAccountsResponse $response */
+
+        // @var ListAccountsResponse $response
         try {
             $response = $request->get();
         } catch (ImporterErrorException|ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
-        $total  = count($response);
-        $return = [];
-        $cache  = [];
+        $total        = count($response);
+        $return       = [];
+        $cache        = [];
         app('log')->debug(sprintf('Found %d Nordigen accounts.', $total));
 
         /** @var NordigenAccount $account */
         foreach ($response as $index => $account) {
             app('log')->debug(
-                sprintf('[%d/%d] Now collecting information for account %s', ($index + 1), $total, $account->getIdentifier()),
+                sprintf('[%d/%d] Now collecting information for account %s', $index + 1, $total, $account->getIdentifier()),
                 $account->toLocalArray()
             );
             $account  = AccountInformationCollector::collectInformation($account);
@@ -145,9 +142,6 @@ trait CollectsAccounts
     }
 
     /**
-     * @param  Configuration  $configuration
-     *
-     * @return array
      * @throws GuzzleException
      * @throws ImporterHttpException
      */
@@ -159,8 +153,9 @@ trait CollectsAccounts
         $secret                  = SpectreSecretManager::getSecret();
         $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
         $spectreList->connection = $configuration->getConnection();
+
         /** @var GetAccountsResponse $spectreAccounts */
-        $spectreAccounts = $spectreList->get();
+        $spectreAccounts         = $spectreList->get();
         foreach ($spectreAccounts as $account) {
             $return[] = $account;
         }

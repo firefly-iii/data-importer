@@ -57,7 +57,6 @@ class GenerateTransactions
     }
 
     /**
-     *
      * @throws ApiHttpException
      */
     public function collectTargetAccounts(): void
@@ -72,42 +71,39 @@ class GenerateTransactions
         app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
-    /**
-     * @param array $spectre
-     *
-     * @return array
-     */
     public function getTransactions(array $spectre): array
     {
         $return = [];
+
         /** @var Transaction $entry */
         foreach ($spectre as $entry) {
             $return[] = $this->generateTransaction($entry);
             // TODO error handling at this point.
         }
 
-        //$this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));
+        // $this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));
 
         return $return;
     }
 
-    /**
-     * @param Transaction $entry
-     *
-     * @return array
-     */
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
+    }
+
     private function generateTransaction(Transaction $entry): array
     {
         app('log')->debug('Original Spectre transaction', $entry->toArray());
-        $description      = $entry->getDescription();
-        $spectreAccountId = $entry->getAccountId();
-        $madeOn           = $entry->getMadeOn()->toW3cString();
-        $amount           = $entry->getAmount();
+        $description              = $entry->getDescription();
+        $spectreAccountId         = $entry->getAccountId();
+        $madeOn                   = $entry->getMadeOn()->toW3cString();
+        $amount                   = $entry->getAmount();
 
         // extra information from the "extra" array. May be NULL.
-        $notes = trim(sprintf('%s %s', $entry->extra->getInformation(), $entry->extra->getAdditional()));
+        $notes                    = trim(sprintf('%s %s', $entry->extra->getInformation(), $entry->extra->getAdditional()));
 
-        $transaction = [
+        $transaction              = [
             'type'              => 'withdrawal', // reverse
             'date'              => str_replace('T', ' ', substr($madeOn, 0, 19)),
             'datetime'          => $madeOn, // not used in API, only for transaction filtering.
@@ -123,7 +119,7 @@ class GenerateTransactions
             'notes'             => $notes,
         ];
 
-        $return = [
+        $return                   = [
             'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
@@ -131,9 +127,7 @@ class GenerateTransactions
 
         if ($this->configuration->isIgnoreSpectreCategories()) {
             app('log')->debug('Remove Spectre categories and tags.');
-            unset($transaction['tags']);
-            unset($transaction['category_name']);
-            unset($transaction['category_id']);
+            unset($transaction['tags'], $transaction['category_name'], $transaction['category_id']);
         }
 
         // amount is positive?
@@ -154,19 +148,11 @@ class GenerateTransactions
         return $return;
     }
 
-    /**
-     * @param Transaction $entry
-     * @param array       $transaction
-     * @param string      $amount
-     * @param string      $spectreAccountId
-     *
-     * @return array
-     */
     private function processPositiveTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
     {
         // amount is positive: deposit or transfer. Spectre account is destination
-        $transaction['type']   = 'deposit';
-        $transaction['amount'] = $amount;
+        $transaction['type']           = 'deposit';
+        $transaction['amount']         = $amount;
 
         // destination is Spectre
         $transaction['destination_id'] = (int)$this->accounts[$spectreAccountId];
@@ -174,16 +160,16 @@ class GenerateTransactions
         // source is the other side (name!)
         // payee is the destination, payer is the source.
         // since we know the destination already, we're looking for the payer here:
-        $transaction['source_name'] = $entry->getPayer() ?? '(unknown source account)';
-        $transaction['source_iban'] = $entry->getPayerIban() ?? '';
+        $transaction['source_name']    = $entry->getPayer() ?? '(unknown source account)';
+        $transaction['source_iban']    = $entry->getPayerIban() ?? '';
 
         app('log')->debug(sprintf('processPositiveTransaction: source_name = "%s", source_iban = "%s"', $transaction['source_name'], $transaction['source_iban']));
 
         // check if the source IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
-        $iban        = $transaction['source_iban'];
-        $accountType = $this->targetTypes[$iban] ?? 'unknown';
-        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        $iban                          = $transaction['source_iban'];
+        $accountType                   = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId                     = $this->targetAccounts[$iban] ?? 0;
         app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
 
         if ('unknown' !== $accountType) {
@@ -197,28 +183,20 @@ class GenerateTransactions
             $transaction['source_id'] = (int)$accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getPayer(), (string)$entry->getPayerIban());
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getPayer(), (string)$entry->getPayerIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
     }
 
-    /**
-     * @param Transaction $entry
-     * @param array       $transaction
-     * @param string      $amount
-     * @param string      $spectreAccountId
-     *
-     * @return array
-     */
     private function processNegativeTransaction(Transaction $entry, array $transaction, string $amount, string $spectreAccountId): array
     {
         // amount is negative: withdrawal or transfer.
-        $transaction['amount'] = bcmul($amount, '-1');
+        $transaction['amount']           = bcmul($amount, '-1');
 
         // source is Spectre:
-        $transaction['source_id'] = (int)$this->accounts[$spectreAccountId];
+        $transaction['source_id']        = (int)$this->accounts[$spectreAccountId];
 
         // dest is shop. Payee / payer is reverse from the other one.
         $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
@@ -228,9 +206,9 @@ class GenerateTransactions
 
         // check if the destination IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
-        $iban        = $transaction['destination_iban'];
-        $accountType = $this->targetTypes[$iban] ?? 'unknown';
-        $accountId   = $this->targetAccounts[$iban] ?? 0;
+        $iban                            = $transaction['destination_iban'];
+        $accountType                     = $this->targetTypes[$iban] ?? 'unknown';
+        $accountId                       = $this->targetAccounts[$iban] ?? 0;
         app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
         if ('unknown' !== $accountType) {
             if ('asset' === $accountType) {
@@ -244,19 +222,10 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
+        $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
         return $transaction;
-    }
-
-    /**
-     * @param Configuration $configuration
-     */
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
     }
 }

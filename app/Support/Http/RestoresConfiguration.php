@@ -28,19 +28,15 @@ namespace App\Support\Http;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 trait RestoresConfiguration
 {
     /**
      * Restore configuration from session and drive.
-     *
-     * @return Configuration
      */
     protected function restoreConfiguration(): Configuration
     {
-        $configuration = Configuration::make();
+        $configuration  = Configuration::make();
         if (session()->has(Constants::CONFIGURATION)) {
             $configuration = Configuration::fromArray(session()->get(Constants::CONFIGURATION) ?? []);
         }

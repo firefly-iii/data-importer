@@ -37,9 +37,6 @@ class NewRequisitionResponse extends Response
     public string $reference;
     public string $status;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->id        = $data['id'];

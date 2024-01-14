@@ -46,7 +46,7 @@ class NavController extends Controller
     }
 
     /**
-     * @return Application|RedirectResponse|Redirector
+     * @return Application|Redirector|RedirectResponse
      */
     public function toConversion()
     {
@@ -57,7 +57,7 @@ class NavController extends Controller
     }
 
     /**
-     * @return Application|RedirectResponse|Redirector
+     * @return Application|Redirector|RedirectResponse
      */
     public function toRoles()
     {

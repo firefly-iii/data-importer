@@ -29,23 +29,18 @@ namespace App\Services\Spectre\Model;
  */
 class Customer
 {
-    /** @var string */
     public string $id;
-    /** @var string */
+
     public string $identifier;
-    /** @var string */
+
     public string $secret;
 
     /**
      * Customer constructor.
      */
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     /**
-     * @param array $data
-     *
      * @return static
      */
     public static function fromArray(array $data): self

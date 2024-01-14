@@ -30,6 +30,4 @@ namespace App\Services\Shared\Authentication;
  *
  * Class TokenManager
  */
-class TokenManager
-{
-}
+class TokenManager {}

@@ -30,11 +30,14 @@ namespace App\Services\Shared\Conversion;
 class ConversionStatus
 {
     /** @var string */
-    public const CONVERSION_DONE = 'conv_done';
+    public const CONVERSION_DONE    = 'conv_done';
+
     /** @var string */
     public const CONVERSION_ERRORED = 'conv_errored';
+
     /** @var string */
     public const CONVERSION_RUNNING = 'conv_running';
+
     /** @var string */
     public const CONVERSION_WAITING = 'waiting_to_start';
     public array  $errors;
@@ -54,8 +57,6 @@ class ConversionStatus
     }
 
     /**
-     * @param  array  $array
-     *
      * @return static
      */
     public static function fromArray(array $array): self
@@ -69,9 +70,6 @@ class ConversionStatus
         return $config;
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [

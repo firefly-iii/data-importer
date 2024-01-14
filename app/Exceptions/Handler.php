@@ -28,7 +28,6 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 /**
  * Class Handler
@@ -45,6 +44,7 @@ class Handler extends ExceptionHandler
             'password',
             'password_confirmation',
         ];
+
     /**
      * A list of the exception types that are not reported.
      *
@@ -52,17 +52,16 @@ class Handler extends ExceptionHandler
      */
     protected $dontReport
         = [
-            //
         ];
 
     /**
-     * @param  Request  $request
-     * @param  Throwable  $e
+     * @param Request $request
      *
-     * @return JsonResponse|\Illuminate\Http\Response|Response
-     * @throws Throwable
+     * @return \Illuminate\Http\Response|JsonResponse|Response
+     *
+     * @throws \Throwable
      */
-    public function render($request, Throwable $e)
+    public function render($request, \Throwable $e)
     {
         if ($e instanceof ImporterErrorException || $e instanceof ImporterHttpException) {
             $isDebug = config('app.debug');

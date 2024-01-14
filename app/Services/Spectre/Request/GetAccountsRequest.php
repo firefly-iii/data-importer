@@ -38,13 +38,8 @@ class GetAccountsRequest extends Request
 {
     public string $connection;
 
-
     /**
      * ListConnectionsRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -56,7 +51,6 @@ class GetAccountsRequest extends Request
     }
 
     /**
-     * @inheritDoc
      * @throws GuzzleException
      */
     public function get(): Response
@@ -67,6 +61,7 @@ class GetAccountsRequest extends Request
                 'connection_id' => $this->connection,
             ]
         );
+
         try {
             $response = $this->authenticatedGet();
         } catch (ImporterErrorException $e) {
@@ -77,17 +72,11 @@ class GetAccountsRequest extends Request
         return new GetAccountsResponse($response['data']);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

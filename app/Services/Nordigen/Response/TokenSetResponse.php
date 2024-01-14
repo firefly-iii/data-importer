@@ -36,13 +36,10 @@ class TokenSetResponse extends Response
     public int    $refreshExpires;
     public string $refreshToken;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
-        $this->accessToken  = $data['access'];
-        $this->refreshToken = $data['refresh'];
+        $this->accessToken    = $data['access'];
+        $this->refreshToken   = $data['refresh'];
 
         $this->accessExpires  = time() + $data['access_expires'];
         $this->refreshExpires = time() + $data['refresh_expires'];

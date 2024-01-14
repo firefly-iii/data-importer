@@ -25,12 +25,10 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use Exception;
-
 /**
  * Class AgreementExpiredException
  */
-class AgreementExpiredException extends Exception
+class AgreementExpiredException extends \Exception
 {
-    public array $json;
+    public array $json = [];
 }

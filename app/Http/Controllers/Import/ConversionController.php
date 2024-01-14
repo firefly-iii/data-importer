@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
-use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
@@ -39,10 +38,6 @@ use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use JsonException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Storage;
 
 /**
  * Class ConversionController
@@ -64,20 +59,18 @@ class ConversionController extends Controller
     }
 
     /**
-     *
      * @throws ImporterErrorException
      */
     public function index()
     {
-        //app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $mainTitle = 'Convert the data';
+        // app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $mainTitle     = 'Convert the data';
 
         // create configuration:
         $configuration = $this->restoreConfiguration();
 
-
         app('log')->debug('Will now verify configuration content.');
-        $jobBackUrl = route('back.mapping');
+        $jobBackUrl    = route('back.mapping');
         if (0 === count($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
@@ -96,17 +89,17 @@ class ConversionController extends Controller
         //        }
 
         // job ID may be in session:
-        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $routine    = null;
-        $flow       = $configuration->getFlow();
+        $identifier    = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $routine       = null;
+        $flow          = $configuration->getFlow();
         app('log')->debug('Will redirect to submission after conversion.');
-        $nextUrl = route('008-submit.index');
+        $nextUrl       = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
-        /** @var RoutineManagerInterface $routine */
+        // @var RoutineManagerInterface $routine
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
@@ -135,7 +128,7 @@ class ConversionController extends Controller
         }
 
         // may be a new identifier! Yay!
-        $identifier = $routine->getIdentifier();
+        $identifier    = $routine->getIdentifier();
 
         app('log')->debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
@@ -146,24 +139,19 @@ class ConversionController extends Controller
         return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl'));
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier    = $request->get('identifier');
-        $configuration = $this->restoreConfiguration();
-        $routine       = null;
+        $identifier      = $request->get('identifier');
+        $configuration   = $this->restoreConfiguration();
+        $routine         = null;
 
         // now create the right class:
-        $flow = $configuration->getFlow();
+        $flow            = $configuration->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
-        /** @var RoutineManagerInterface $routine */
+        // @var RoutineManagerInterface $routine
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
@@ -190,6 +178,7 @@ class ConversionController extends Controller
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
+
         try {
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
@@ -208,10 +197,11 @@ class ConversionController extends Controller
         }
         app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk            = \Storage::disk(self::DISK_NAME);
+
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
             app('log')->error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
@@ -219,7 +209,6 @@ class ConversionController extends Controller
             return response()->json($importJobStatus->toArray());
         }
         app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
-
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
@@ -231,15 +220,10 @@ class ConversionController extends Controller
         return response()->json($importJobStatus->toArray());
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function status(Request $request): JsonResponse
     {
         //        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
+        $identifier      = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             app('log')->warning('Identifier is NULL.');

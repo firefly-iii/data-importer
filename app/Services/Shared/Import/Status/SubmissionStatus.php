@@ -27,10 +27,10 @@ namespace App\Services\Shared\Import\Status;
 
 class SubmissionStatus
 {
-    public const SUBMISSION_DONE    = 'submission_done';
-    public const SUBMISSION_ERRORED = 'submission_errored';
-    public const SUBMISSION_RUNNING = 'submission_running';
-    public const SUBMISSION_WAITING = 'waiting_to_start';
+    public const string SUBMISSION_DONE    = 'submission_done';
+    public const string SUBMISSION_ERRORED = 'submission_errored';
+    public const string SUBMISSION_RUNNING = 'submission_running';
+    public const string SUBMISSION_WAITING = 'waiting_to_start';
     public array  $errors;
     public array  $messages;
     public string $status;
@@ -48,8 +48,6 @@ class SubmissionStatus
     }
 
     /**
-     * @param  array  $array
-     *
      * @return static
      */
     public static function fromArray(array $array): self
@@ -63,9 +61,6 @@ class SubmissionStatus
         return $config;
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         return [

@@ -34,8 +34,6 @@ class Iban implements Rule
 {
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
     public function message(): string
     {
@@ -45,10 +43,8 @@ class Iban implements Rule
     /**
      * Determine if the given value is a valid IBAN.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     *
-     * @return bool
+     * @param string $attribute
+     * @param mixed  $value
      */
     public function passes($attribute, $value): bool
     {

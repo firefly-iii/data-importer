@@ -26,8 +26,6 @@ namespace App\Services\CSV\Converter;
 
 use Carbon\Carbon;
 use Carbon\Language;
-use Exception;
-use InvalidArgumentException;
 
 /**
  * Class Date
@@ -45,16 +43,15 @@ class Date implements ConverterInterface
     {
         $this->dateFormat        = 'Y-m-d';
         $this->dateLocale        = 'en';
-        $this->dateFormatPattern = '/(?:('.implode("|", array_keys(Language::all())).')\:)?(.+)/';
+        $this->dateFormatPattern = '/(?:('.implode('|', array_keys(Language::all())).')\:)?(.+)/';
     }
 
     /**
      * Convert a value.
      *
-     * @param $value
+     * @param mixed $value
      *
      * @return string
-     *
      */
     public function convert($value)
     {
@@ -72,11 +69,13 @@ class Date implements ConverterInterface
         }
         if ('' !== $string) {
             app('log')->debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
+
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
-            } catch (InvalidArgumentException|Exception $e) {
+            } catch (\Exception|\InvalidArgumentException $e) {
                 app('log')->error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
                 app('log')->debug('Date parsing error, will return today instead.');
+
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
             }
         }
@@ -86,19 +85,12 @@ class Date implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
     public function setConfiguration(string $configuration): void
     {
         [$this->dateLocale, $this->dateFormat] = $this->splitLocaleFormat($configuration);
     }
 
-    /**
-     * @param  string  $format
-     *
-     * @return array
-     */
     public function splitLocaleFormat(string $format): array
     {
         $currentDateLocale       = 'en';

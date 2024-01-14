@@ -1,6 +1,5 @@
 <?php
 
-
 /*
  * ImportServiceAccount.php
  * Copyright (c) 2023 james@firefly-iii.org
@@ -41,24 +40,20 @@ class ImportServiceAccount
     public string $status;
     public array  $extra;
 
-    /**
-     * @param array $accounts
-     *
-     * @return array
-     */
     public static function convertNordigenArray(array $accounts): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $return = [];
+
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
-            $iban = $account->getIban();
+            $iban     = $account->getIban();
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
 
-            $current = self::fromArray(
+            $current  = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getFullName(),
@@ -76,6 +71,7 @@ class ImportServiceAccount
                     ],
                 ]
             );
+
             /** @var Balance $balance */
             foreach ($account->getBalances() as $balance) {
                 $key                  = sprintf('Balance (%s) (%s)', $balance->type, $balance->currency);
@@ -87,17 +83,13 @@ class ImportServiceAccount
         return $return;
     }
 
-    /**
-     * @param array $spectre
-     *
-     * @return array
-     */
     public static function convertSpectreArray(array $spectre): array
     {
         $return = [];
+
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban = (string)$account->iban;
+            $iban     = (string)$account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
@@ -123,14 +115,12 @@ class ImportServiceAccount
     }
 
     /**
-     * @param array $array
-     *
      * @return $this
      */
     public static function fromArray(array $array): self
     {
         app('log')->debug('Create generic account from', $array);
-        $iban = (string)($array['iban'] ?? '');
+        $iban                  = (string)($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';

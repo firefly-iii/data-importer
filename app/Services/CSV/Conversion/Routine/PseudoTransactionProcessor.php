@@ -52,8 +52,6 @@ class PseudoTransactionProcessor
     /**
      * PseudoTransactionProcessor constructor.
      *
-     * @param  int|null  $defaultAccountId
-     *
      * @throws ImporterErrorException
      */
     public function __construct(?int $defaultAccountId)
@@ -63,20 +61,16 @@ class PseudoTransactionProcessor
         $this->getDefaultCurrency();
     }
 
-    /**
-     * @param  array  $lines
-     *
-     * @return array
-     */
     public function processPseudo(array $lines): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $count     = count($lines);
         $processed = [];
         app('log')->info(sprintf('Converting %d line(s) into transactions.', $count));
+
         /** @var array $line */
         foreach ($lines as $index => $line) {
-            app('log')->info(sprintf('Now processing line %d/%d.', ($index + 1), $count));
+            app('log')->info(sprintf('Now processing line %d/%d.', $index + 1, $count));
             $processed[] = $this->processPseudoLine($line);
             // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
         }
@@ -86,8 +80,6 @@ class PseudoTransactionProcessor
     }
 
     /**
-     * @param  int|null  $accountId
-     *
      * @throws ImporterErrorException
      */
     private function getDefaultAccount(?int $accountId): void
@@ -96,15 +88,17 @@ class PseudoTransactionProcessor
         $token = SecretManager::getAccessToken();
 
         if (null !== $accountId) {
-            $accountRequest = new GetAccountRequest($url, $token);
+            $accountRequest       = new GetAccountRequest($url, $token);
             $accountRequest->setVerify(config('importer.connection.verify'));
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
-            /** @var GetAccountResponse $result */
+
+            // @var GetAccountResponse $result
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
                 app('log')->error($e->getMessage());
+
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
             $this->defaultAccount = $result->getAccount();
@@ -116,10 +110,10 @@ class PseudoTransactionProcessor
      */
     private function getDefaultCurrency(): void
     {
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
 
-        $prefRequest = new GetPreferenceRequest($url, $token);
+        $prefRequest     = new GetPreferenceRequest($url, $token);
         $prefRequest->setVerify(config('importer.connection.verify'));
         $prefRequest->setTimeOut(config('importer.connection.timeout'));
         $prefRequest->setName('currencyPreference');
@@ -129,6 +123,7 @@ class PseudoTransactionProcessor
             $response = $prefRequest->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException('Could not load the users currency preference.');
         }
         $code            = $response->getPreference()->stringData ?? 'EUR';
@@ -136,21 +131,18 @@ class PseudoTransactionProcessor
         $currencyRequest->setVerify(config('importer.connection.verify'));
         $currencyRequest->setTimeOut(config('importer.connection.timeout'));
         $currencyRequest->setCode($code);
+
         try {
             /** @var GetCurrencyResponse $result */
             $result                = $currencyRequest->get();
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException(sprintf('The default currency ("%s") could not be loaded.', $code));
         }
     }
 
-    /**
-     * @param  array  $line
-     *
-     * @return array
-     */
     private function processPseudoLine(array $line): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -165,7 +157,7 @@ class PseudoTransactionProcessor
                 $object->setTransactionCurrency($this->defaultCurrency);
             }
 
-            $line = $object->process($line);
+            $line   = $object->process($line);
         }
         app('log')->debug('Final transaction: ', $line);
 

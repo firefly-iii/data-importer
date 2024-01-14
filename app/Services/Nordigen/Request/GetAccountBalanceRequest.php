@@ -37,11 +37,6 @@ class GetAccountBalanceRequest extends Request
 {
     private string $identifier;
 
-    /**
-     * @param  string  $url
-     * @param  string  $token
-     * @param  string  $identifier
-     */
     public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
@@ -52,8 +47,6 @@ class GetAccountBalanceRequest extends Request
     }
 
     /**
-     * @inheritDoc
-     * @return Response
      * @throws AgreementExpiredException
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -65,33 +58,21 @@ class GetAccountBalanceRequest extends Request
         return new ArrayResponse($array);
     }
 
-    /**
-     * @return string
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
     }
 
-    /**
-     * @param  string  $identifier
-     */
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // TODO: Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // TODO: Implement put() method.

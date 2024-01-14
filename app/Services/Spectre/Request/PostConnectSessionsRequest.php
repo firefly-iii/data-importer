@@ -38,10 +38,6 @@ class PostConnectSessionsRequest extends Request
 
     /**
      * PostConnectSessionsRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -51,21 +47,17 @@ class PostConnectSessionsRequest extends Request
         $this->setUrl('connect_sessions/create');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         // Implement get() method.
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function post(): Response
     {
-        $body = [
+        $body     = [
             'data' => [
                 'customer_id' => $this->customer,
                 'consent'     => [
@@ -78,7 +70,6 @@ class PostConnectSessionsRequest extends Request
                 'attempt'     => [
                     'return_to' => $this->url,
                 ],
-
             ],
         ];
 
@@ -87,9 +78,6 @@ class PostConnectSessionsRequest extends Request
         return new PostConnectSessionResponse($response['data']);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.

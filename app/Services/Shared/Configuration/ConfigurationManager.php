@@ -24,6 +24,4 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
-class ConfigurationManager
-{
-}
+class ConfigurationManager {}

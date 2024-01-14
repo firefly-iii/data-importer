@@ -31,12 +31,8 @@ use App\Services\Shared\Response\Response;
  */
 class PostConnectSessionResponse extends Response
 {
-    /** @var string */
     public string $connect_url;
 
-    /**
-     * @inheritDoc
-     */
     public function __construct(array $data)
     {
         $this->connect_url = (string)$data['connect_url'];

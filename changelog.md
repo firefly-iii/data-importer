@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.4.1 - 2024-01-15
+
+### Added
+- Nordigen supports "bookingDateTime"
+
+### Fixed
+- [Issue 8267](https://github.com/firefly-iii/firefly-iii/issues/8267) Fix reference to variable
+- [Issue 8294](https://github.com/firefly-iii/firefly-iii/issues/8294) [issue 8355](https://github.com/firefly-iii/firefly-iii/issues/8355) Null pointer fixed
+- [Issue 8293](https://github.com/firefly-iii/firefly-iii/issues/8293) Don't stop importing when one connection has no transactions
+- [Issue 8344](https://github.com/firefly-iii/firefly-iii/issues/8344) The UI will report progress again
+- [Issue 8355](https://github.com/firefly-iii/firefly-iii/issues/8355) Foreign amounts would not be imported
+- Fix log levels in papertrail configuration
+- The UI will email reports again
+
 ## 1.4.0 - 2023-12-18
 
 > ⚠️⚠️ This release required **PHP 8.3.0** and will not work on earlier releases of PHP ⚠️⚠️
@@ -544,7 +558,7 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 
 First release of the data importer.
 
-## 0.0.0 - 2021-xx-xx
+## v0.0.0 - 2021-xx-xx
 
 ### Added
 - Initial release.

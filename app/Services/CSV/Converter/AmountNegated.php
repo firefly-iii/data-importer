@@ -32,9 +32,7 @@ class AmountNegated implements ConverterInterface
     /**
      * Negate amount.
      *
-     * @param $value
-     *
-     * @return string
+     * @param mixed $value
      */
     public function convert($value): string
     {
@@ -47,10 +45,6 @@ class AmountNegated implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

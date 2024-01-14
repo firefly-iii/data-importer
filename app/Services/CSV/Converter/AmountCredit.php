@@ -32,15 +32,14 @@ class AmountCredit implements ConverterInterface
     /**
      * Convert an amount, always return positive.
      *
-     * @param $value
-     *
-     * @return string
+     * @param mixed $value
      */
     public function convert($value): string
     {
         if (null === $value || '' === $value) {
             return '';
         }
+
         /** @var ConverterInterface $converter */
         $converter = app(Amount::class);
         $result    = $converter->convert($value);
@@ -50,10 +49,6 @@ class AmountCredit implements ConverterInterface
 
     /**
      * Add extra configuration parameters.
-     *
-     * @param  string  $configuration
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

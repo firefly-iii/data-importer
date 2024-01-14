@@ -38,10 +38,6 @@ class GetTransactionsRequest extends Request
 
     /**
      * GetTransactionsRequest constructor.
-     *
-     * @param string $url
-     * @param string $appId
-     * @param string $secret
      */
     public function __construct(string $url, string $appId, string $secret)
     {
@@ -51,9 +47,6 @@ class GetTransactionsRequest extends Request
         $this->setUrl('transactions');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         $hasNextPage  = true;
@@ -69,7 +62,7 @@ class GetTransactionsRequest extends Request
                     'from_id'       => $nextId,
                 ]
             );
-            $response = $this->authenticatedGet();
+            $response    = $this->authenticatedGet();
 
             // count entries:
             app('log')->debug(sprintf('Found %d entries in data-array', count($response['data'])));
@@ -91,17 +84,11 @@ class GetTransactionsRequest extends Request
         return new GetTransactionsResponse($transactions);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         // TODO: Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // TODO: Implement put() method.

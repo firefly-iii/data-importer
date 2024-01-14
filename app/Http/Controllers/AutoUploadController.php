@@ -30,26 +30,19 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
 
-/**
- *
- */
 class AutoUploadController extends Controller
 {
     use AutoImports;
     use HaveAccess;
     use VerifyJSON;
 
-    /**
-     * @inheritDoc
-     */
-    public function error($string, $verbosity = null)
+    public function error($string, $verbosity = null): void
     {
         app('log')->error($string);
         $this->line($string);
     }
 
     /**
-     *
      * @throws ImporterErrorException
      */
     public function index(AutoUploadRequest $request)
@@ -58,18 +51,18 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret       = (string)($request->get('secret') ?? '');
-        $systemSecret = (string)config('importer.auto_import_secret');
+        $secret         = (string)($request->get('secret') ?? '');
+        $systemSecret   = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $access = $this->haveAccess();
+        $access         = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
         }
 
-        $json = $request->file('json');
+        $json           = $request->file('json');
         $importable     = $request->file('importable');
         $importablePath = (string) $importable?->getPathname();
 
@@ -84,24 +77,24 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param      $string
-     * @param  null  $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
-    public function info($string, $verbosity = null)
+    public function info($string, $verbosity = null): void
     {
         $this->line($string);
     }
 
-    public function line(string $string)
+    public function line(string $string): void
     {
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
     /**
-     * @param      $string
-     * @param  null  $verbosity
+     * @param null  $verbosity
+     * @param mixed $string
      */
-    public function warn($string, $verbosity = null)
+    public function warn($string, $verbosity = null): void
     {
         $this->line($string);
     }

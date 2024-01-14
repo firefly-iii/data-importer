@@ -34,23 +34,18 @@ use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
 trait HaveAccess
 {
     /**
-     * @param      $string
-     * @param null $verbosity
-     *
-     * @return void
+     * @param null  $verbosity
+     * @param mixed $string
      */
     abstract public function error($string, $verbosity = null);
 
-    /**
-     * @return bool
-     */
     private function haveAccess(): bool
     {
-        $url   = (string)config('importer.url');
-        $token = (string)config('importer.access_token');
+        $url             = (string)config('importer.url');
+        $token           = (string)config('importer.access_token');
 
         // grab token from authentication header.
-        $headerToken = (string)request()->header('Authorization');
+        $headerToken     = (string)request()->header('Authorization');
         if ('' !== $headerToken) {
             $token = str_replace('Bearer ', '', $headerToken);
             $this->line('Overrule token with token from Authorization heade r.');
@@ -59,7 +54,7 @@ trait HaveAccess
         $this->line(sprintf('Trying to connect to %s...', $url));
         $this->line(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
-        $request = new SystemInformationRequest($url, $token);
+        $request         = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -78,7 +73,7 @@ trait HaveAccess
             $reportedVersion = substr($reportedVersion, 1);
         }
         $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
-        $compare = version_compare($reportedVersion, config('importer.minimum_version'));
+        $compare         = version_compare($reportedVersion, config('importer.minimum_version'));
         if (-1 === $compare) {
             $this->error(sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
 
@@ -88,11 +83,6 @@ trait HaveAccess
         return true;
     }
 
-    /**
-     * @param string $path
-     *
-     * @return bool
-     */
     private function isAllowedPath(string $path): bool
     {
         $error = 'No valid paths in IMPORT_DIR_ALLOWLIST, cannot continue.';

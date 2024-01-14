@@ -22,8 +22,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Shared\Conversion;
+namespace App\Services\Shared\Submission;
 
+use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,7 +54,6 @@ trait ProgressInformation
 
     final public function setIdentifier(string $identifier): void
     {
-        Log::debug(sprintf('Set identifier to "%s"', $identifier));
         $this->identifier = $identifier;
     }
 
@@ -65,7 +65,7 @@ trait ProgressInformation
         $this->errors[$index][] = $error;
 
         // write errors to disk
-        RoutineStatusManager::addError($this->identifier, $index, $error);
+        SubmissionStatusManager::addError($this->identifier, $index, $error);
     }
 
     final protected function addMessage(int $index, string $message): void
@@ -76,7 +76,7 @@ trait ProgressInformation
         $this->messages[$index][] = $message;
 
         // write message
-        RoutineStatusManager::addMessage($this->identifier, $index, $message);
+        SubmissionStatusManager::addMessage($this->identifier, $index, $message);
     }
 
     final protected function addWarning(int $index, string $warning): void
@@ -87,6 +87,6 @@ trait ProgressInformation
         $this->warnings[$index][] = $warning;
 
         // write warning
-        RoutineStatusManager::addWarning($this->identifier, $index, $warning);
+        SubmissionStatusManager::addWarning($this->identifier, $index, $warning);
     }
 }

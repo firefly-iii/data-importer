@@ -34,11 +34,6 @@ class GetTransactionsRequest extends Request
 {
     private string $identifier;
 
-    /**
-     * @param  string  $url
-     * @param  string  $token
-     * @param  string  $identifier
-     */
     public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
@@ -48,51 +43,40 @@ class GetTransactionsRequest extends Request
         $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response
     {
         $response = $this->authenticatedGet();
         $keys     = ['booked', 'pending'];
         $return   = [];
-        $count = 0;
+        $count    = 0;
         foreach ($keys as $key) {
             if (array_key_exists($key, $response['transactions'])) {
                 $set    = $response['transactions'][$key];
                 $set    = array_map(function (array $value) use ($key) {
                     $value['key'] = $key;
+
                     return $value;
                 }, $set);
                 $count += count($set);
                 $return = array_merge($return, $set);
             }
         }
-        $total = count($return);
+        $total    = count($return);
         app('log')->debug(sprintf('Downloaded [%d:%d] transactions', $count, $total));
 
         return new GetTransactionsResponse($return);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         //  Implement post() method.
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response
     {
         // Implement put() method.
     }
 
-    /**
-     * @param  string  $identifier
-     */
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;

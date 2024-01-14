@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '1.4.0',
+    'version'                 => '1.4.1',
     'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
         'file'     => 'File',
@@ -44,7 +44,7 @@ return [
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
-    'minimum_version'         => '6.1.0',
+    'minimum_version'         => '6.1.6',
     'cache_api_calls'         => false,
     'ignored_files'           => ['.gitignore'],
     'tracker_site_id'         => env('TRACKER_SITE_ID', ''),
@@ -93,5 +93,4 @@ return [
         'ISO-8859-16',
         'Windows-1251',
     ],
-
 ];

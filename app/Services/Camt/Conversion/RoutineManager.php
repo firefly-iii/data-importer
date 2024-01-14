@@ -37,8 +37,6 @@ use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Exception\InvalidMessageException;
 use Genkgo\Camt\Reader;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoutineManager
@@ -56,9 +54,6 @@ class RoutineManager implements RoutineManagerInterface
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
 
-    /**
-     *
-     */
     public function __construct(?string $identifier)
     {
         app('log')->debug('Constructed CAMT RoutineManager');
@@ -75,7 +70,6 @@ class RoutineManager implements RoutineManagerInterface
     }
 
     /**
-     * @inheritDoc
      * @throws ImporterErrorException
      */
     public function setConfiguration(Configuration $configuration): void
@@ -86,32 +80,22 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionMapper    = new TransactionMapper($configuration);
     }
 
-    /**
-     * @param string $content
-     */
     public function setContent(string $content): void
     {
         $this->content = $content;
     }
 
-    /**
-     * @param bool $forceCli
-     */
     public function setForceCli(bool $forceCli): void
     {
         $this->forceCli = $forceCli;
     }
 
-    /**
-     * @inheritDoc
-     * @return array
-     */
     public function start(): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // get XML file
-        $camtMessage = $this->getCamtMessage();
+        $camtMessage        = $this->getCamtMessage();
         if (null === $camtMessage) {
             app('log')->error('The CAMT object is NULL, probably due to a previous error');
             $this->addError(0, 'The CAMT object is NULL, probably due to a previous error');
@@ -124,13 +108,13 @@ class RoutineManager implements RoutineManagerInterface
             return [];
         }
         // get raw messages
-        $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
+        $rawTransactions    = $this->transactionExtractor->extractTransactions($camtMessage);
 
         // get intermediate result (still needs processing like mapping etc)
         $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
 
         // put the result into firefly iii compatible arrays (and replace mapping when necessary)
-        $transactions = $this->transactionMapper->map($pseudoTransactions);
+        $transactions       = $this->transactionMapper->map($pseudoTransactions);
 
         if (0 === count($transactions)) {
             app('log')->error('No transactions found in CAMT file');
@@ -139,6 +123,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
+
             return [];
         }
 
@@ -149,14 +134,12 @@ class RoutineManager implements RoutineManagerInterface
         return $transactions;
     }
 
-    /**
-     * @return Message|null
-     */
     private function getCamtMessage(): ?Message
     {
         app('log')->debug('Now in getCamtMessage');
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
+
         try {
             // check if CLI or not and read as appropriate:
             if ('' !== $this->content) {
@@ -170,16 +153,13 @@ class RoutineManager implements RoutineManagerInterface
             app('log')->error('Conversion error in RoutineManager::getCamtMessage');
             app('log')->error($e->getMessage());
             $this->addError(0, sprintf('Could not convert CAMT.053 file: %s', $e->getMessage()));
+
             return null;
         }
 
         return $camtMessage;
     }
 
-
-    /**
-     * @param int $count
-     */
     private function mergeErrors(int $count): void
     {
         $this->allErrors = $this->mergeArrays(
@@ -188,13 +168,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionConverter->getErrors(),
                 $this->transactionExtractor->getErrors(),
                 $this->transactionMapper->getErrors(),
-            ], $count);
-
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -203,12 +181,11 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionConverter->getMessages(),
                 $this->transactionExtractor->getMessages(),
                 $this->transactionMapper->getMessages(),
-            ], $count);
+            ],
+            $count
+        );
     }
 
-    /**
-     * @param int $count
-     */
     private function mergeWarnings(int $count): void
     {
         $this->allWarnings = $this->mergeArrays(
@@ -217,6 +194,8 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionConverter->getWarnings(),
                 $this->transactionExtractor->getWarnings(),
                 $this->transactionMapper->getWarnings(),
-            ], $count);
+            ],
+            $count
+        );
     }
 }

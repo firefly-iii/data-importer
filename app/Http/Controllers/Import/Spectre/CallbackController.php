@@ -33,9 +33,6 @@ use Illuminate\Http\RedirectResponse;
  */
 class CallbackController extends Controller
 {
-    /**
-     *
-     */
     public function index(): RedirectResponse
     {
         // get all the connections the user has.

@@ -32,11 +32,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class EmptyAccounts extends AbstractTask
 {
-    /**
-     * @param  array  $group
-     *
-     * @return array
-     */
     public function process(array $group): array
     {
         app('log')->debug('Now in EmptyAccounts::process()');
@@ -51,8 +46,6 @@ class EmptyAccounts extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -61,19 +54,12 @@ class EmptyAccounts extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
         return false;
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function processTransaction(array $transaction): array
     {
         app('log')->debug('Now in EmptyAccounts::processTransaction()');

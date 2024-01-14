@@ -44,14 +44,8 @@ class PostNewTokenRequest extends Request
         $this->key        = $key;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get(): Response {}
 
-    /**
-     * @inheritDoc
-     */
     public function post(): Response
     {
         $url    = sprintf('%s/%s', config('nordigen.url'), 'api/v2/token/new/');
@@ -74,16 +68,14 @@ class PostNewTokenRequest extends Request
             );
         } catch (GuzzleException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
-        $body = (string)$res->getBody();
-        $json = json_decode($body, true, JSON_THROW_ON_ERROR);
+        $body   = (string)$res->getBody();
+        $json   = json_decode($body, true, JSON_THROW_ON_ERROR);
 
         return new TokenSetResponse($json);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function put(): Response {}
 }

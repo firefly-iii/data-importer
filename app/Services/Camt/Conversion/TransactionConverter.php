@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services\Camt\Conversion;
 
@@ -13,9 +15,6 @@ class TransactionConverter
 
     private Configuration $configuration;
 
-    /**
-     * @param Configuration $configuration
-     */
     public function __construct(Configuration $configuration)
     {
         app('log')->debug('Constructed TransactionConverter.');
@@ -23,16 +22,14 @@ class TransactionConverter
     }
 
     /**
-     * @param array $transactions
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     public function convert(array $transactions): array
     {
-        $total = count($transactions);
+        $total  = count($transactions);
         app('log')->debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
         $result = [];
+
         /** @var Transaction $transaction */
         foreach ($transactions as $index => $transaction) {
             app('log')->debug(sprintf('[%d/%d] Now working on transaction.', $index + 1, $total));
@@ -45,9 +42,6 @@ class TransactionConverter
     }
 
     /**
-     * @param Transaction $transaction
-     *
-     * @return array
      * @throws ImporterErrorException
      */
     private function convertSingle(Transaction $transaction): array
@@ -64,13 +58,13 @@ class TransactionConverter
         $fieldNames       = array_keys(config('camt.fields'));
         $result['splits'] = $count;
 
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $count; ++$i) {
             // loop all available roles, see if they're configured and if so, get the associated field from the transaction.
             // some roles can be configured multiple times, so the $current array may hold multiple values.
             // the final response to this may be to join these fields or only use the last one.
-            $current = [];
+            $current                  = [];
             foreach ($fieldNames as $field) {
-                $role = $allRoles[$field] ?? '_ignore';
+                $role  = $allRoles[$field] ?? '_ignore';
                 if ('_ignore' !== $role) {
                     app('log')->debug(sprintf('Field "%s" was given role "%s".', $field, $role));
                 }
@@ -80,7 +74,7 @@ class TransactionConverter
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
-                    $current[$role] = $current[$role] ?? [
+                    $current[$role] ??= [
                         'data'    => [],
                         'mapping' => [],
                     ];
@@ -94,6 +88,7 @@ class TransactionConverter
             $result['transactions'][] = $current;
         }
         app('log')->debug(sprintf('Pseudo-transaction is: %s', json_encode($result)));
+
         return $result;
     }
 
@@ -101,5 +96,4 @@ class TransactionConverter
     {
         return array_unique(array_values($this->configuration->getRoles()));
     }
-
 }

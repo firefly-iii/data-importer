@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Services\Camt\Conversion;
 
@@ -13,32 +15,26 @@ class TransactionExtractor
     use ProgressInformation;
     private Configuration $configuration;
 
-    /**
-     * @param  Configuration  $configuration
-     */
     public function __construct(Configuration $configuration)
     {
         app('log')->debug('Now in TransactionExtractor.');
         $this->configuration = $configuration;
     }
 
-    /**
-     * @param  Message  $message
-     * @return array
-     */
     public function extractTransactions(Message $message): array
     {
         app('log')->debug('Now in extractTransactions.');
         // get transactions from XML file
         $transactions = [];
         $statements   = $message->getRecords();
-        $totalCount = count($statements);
+        $totalCount   = count($statements);
+
         /**
-         * @var int $index
+         * @var int           $index
          * @var CamtStatement $statement
          */
         foreach ($statements as $i => $statement) { // -> Level B
-            $entries = $statement->getEntries();
+            $entries    = $statement->getEntries();
             $entryCount = count($entries);
             app('log')->debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i + 1, $totalCount, $entryCount));
             foreach ($entries as $ii => $entry) { // -> Level C
@@ -74,5 +70,4 @@ class TransactionExtractor
 
         return $transactions;
     }
-
 }

@@ -32,10 +32,9 @@ class Steam
     /**
      * Convert a value.
      *
-     * @param $value
+     * @param mixed $value
      *
      * @return mixed
-     *
      */
     public function cleanString($value): string
     {
@@ -93,11 +92,6 @@ class Steam
         return trim(str_replace($search, "\x20", $value));
     }
 
-    /**
-     * @param $value
-     *
-     * @return string
-     */
     public function cleanStringAndNewlines($value): string
     {
         $string = $this->cleanString($value);
@@ -105,11 +99,6 @@ class Steam
         return trim(str_replace("\n", '', $string));
     }
 
-    /**
-     * @param  string  $iban
-     *
-     * @return string
-     */
     public function filterAllSpaces(string $iban): string
     {
         $search = [

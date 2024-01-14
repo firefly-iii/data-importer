@@ -32,8 +32,6 @@ class HealthcheckController extends Controller
 {
     /**
      * Sends 'OK' info when app is alive
-     *
-     * @return Response
      */
     public function check(): Response
     {

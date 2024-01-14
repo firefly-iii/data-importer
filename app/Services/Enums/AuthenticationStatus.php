@@ -29,10 +29,9 @@ use Spatie\Enum\Enum;
 
 /**
  * Class AuthenticationStatus
+ *
  * @method static self authenticated()
  * @method static self nodata()
  * @method static self error()
  */
-class AuthenticationStatus extends Enum
-{
-}
+class AuthenticationStatus extends Enum {}

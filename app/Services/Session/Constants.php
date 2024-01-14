@@ -30,64 +30,64 @@ namespace App\Services\Session;
 class Constants
 {
     // constants to remember Nordigen access token, refresh token and validity:
-    public const ASSET_ACCOUNTS = 'assets';
-    public const CONFIGURATION                 = 'configuration';
-    public const CONFIG_COMPLETE_INDICATOR     = 'config_complete';
-    public const CONFIG_FILE_PATHS = 'config_file_paths';
+    public const string ASSET_ACCOUNTS                = 'assets';
+    public const string CONFIGURATION                 = 'configuration';
+    public const string CONFIG_COMPLETE_INDICATOR     = 'config_complete';
+    public const string CONFIG_FILE_PATHS             = 'config_file_paths';
 
     // session value constants:
-    public const CONNECTION_SELECTED_INDICATOR = 'connection_selected_ind';
-    public const CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
-    public const CONVERSION_JOB_IDENTIFIER = 'conversion_job_id';
-    public const FLOW_COOKIE               = 'flow';
+    public const string CONNECTION_SELECTED_INDICATOR = 'connection_selected_ind';
+    public const string CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
+    public const string CONVERSION_JOB_IDENTIFIER     = 'conversion_job_id';
+    public const string FLOW_COOKIE                   = 'flow';
 
     // upload config values:
-    public const HAS_UPLOAD                = 'has_uploaded_file';
-    public const IMPORT_FILE_PATHS = 'upload_file_paths';
+    public const string HAS_UPLOAD                    = 'has_uploaded_file';
+    public const string IMPORT_FILE_PATHS             = 'upload_file_paths';
 
     // cookie name to remember the flow:
-    public const IMPORT_JOB_IDENTIFIER     = 'import_job_id';
+    public const string IMPORT_JOB_IDENTIFIER         = 'import_job_id';
 
     // stores the configuration array
-    public const LIABILITIES    = 'liabilities';
+    public const string LIABILITIES                   = 'liabilities';
 
     // if the user is done with specific steps:
-    public const MAPPING_COMPLETE_INDICATOR  = 'mapping_config_complete';
-    public const NORDIGEN_ACCESS_EXPIRY_TIME = 'nordigen_access_expiry_time';
-    public const NORDIGEN_ACCESS_TOKEN = 'nordigen_access_token';
-    public const NORDIGEN_REFRESH_EXPIRY_TIME = 'nordigen_refresh_expiry_time';
-    public const NORDIGEN_REFRESH_TOKEN   = 'nordigen_refresh_token';
-    public const READY_FOR_CONVERSION     = 'ready_for_conversion';
-    public const READY_FOR_SUBMISSION     = 'ready_for_submission';
-    public const REQUISITION_PRESENT      = 'requisition_present';
-    public const REQUISITION_REFERENCE    = 'requisition_reference';
+    public const string MAPPING_COMPLETE_INDICATOR    = 'mapping_config_complete';
+    public const string NORDIGEN_ACCESS_EXPIRY_TIME   = 'nordigen_access_expiry_time';
+    public const string NORDIGEN_ACCESS_TOKEN         = 'nordigen_access_token';
+    public const string NORDIGEN_REFRESH_EXPIRY_TIME  = 'nordigen_refresh_expiry_time';
+    public const string NORDIGEN_REFRESH_TOKEN        = 'nordigen_refresh_token';
+    public const string READY_FOR_CONVERSION          = 'ready_for_conversion';
+    public const string READY_FOR_SUBMISSION          = 'ready_for_submission';
+    public const string REQUISITION_PRESENT           = 'requisition_present';
+    public const string REQUISITION_REFERENCE         = 'requisition_reference';
 
     // spectre specific steps:
-    public const ROLES_COMPLETE_INDICATOR = 'role_config_complete';
+    public const string ROLES_COMPLETE_INDICATOR      = 'role_config_complete';
 
     // nordigen specific steps
-    public const SELECTED_BANK_COUNTRY    = 'selected_bank_country';
+    public const string SELECTED_BANK_COUNTRY         = 'selected_bank_country';
 
     // nordigen specific constants
-    public const SESSION_NORDIGEN_ID      = 'nordigen_id';
+    public const string SESSION_NORDIGEN_ID           = 'nordigen_id';
 
     // constants for data conversion job:
-    public const SESSION_NORDIGEN_KEY     = 'nordigen_key';
-    public const SESSION_SPECTRE_APP_ID = 'spectre_app_id';
+    public const string SESSION_NORDIGEN_KEY          = 'nordigen_key';
+    public const string SESSION_SPECTRE_APP_ID        = 'spectre_app_id';
 
     // specific variables for the ability to upload multiple (config) files at once
-    public const SESSION_SPECTRE_SECRET = 'spectre_secret';
-    public const SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
+    public const string SESSION_SPECTRE_SECRET        = 'spectre_secret';
+    public const string SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
 
     // other variables
-    public const UPLOAD_CONFIG_FILE = 'config_file_path';
-    public const UPLOAD_DATA_FILE   = 'data_file_path';
+    public const string UPLOAD_CONFIG_FILE            = 'config_file_path';
+    public const string UPLOAD_DATA_FILE              = 'data_file_path';
 
     // session variable names:
-    public const SESSION_ACCESS_TOKEN = 'session_token';
-    public const SESSION_BASE_URL = 'base_url';
-    public const SESSION_VANITY_URL = 'vanity_url';
+    public const string SESSION_ACCESS_TOKEN          = 'session_token';
+    public const string SESSION_BASE_URL              = 'base_url';
+    public const string SESSION_VANITY_URL            = 'vanity_url';
 
-    public const SESSION_CLIENT_ID = 'client_id';
-    public const SESSION_REFRESH_TOKEN = 'refresh_token';
+    public const string SESSION_CLIENT_ID             = 'client_id';
+    public const string SESSION_REFRESH_TOKEN         = 'refresh_token';
 }

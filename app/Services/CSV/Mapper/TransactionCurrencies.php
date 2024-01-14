@@ -38,14 +38,13 @@ class TransactionCurrencies implements MapperInterface
     /**
      * Get map of objects.
      *
-     * @return array
      * @throws ImporterErrorException
      */
     public function getMap(): array
     {
-        $result = [];
-        $url    = SecretManager::getBaseUrl();
-        $token  = SecretManager::getAccessToken();
+        $result  = [];
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
 
         $request = new GetCurrenciesRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
@@ -55,9 +54,11 @@ class TransactionCurrencies implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             //            app('log')->error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download currencies: %s', $e->getMessage()));
         }
+
         /** @var TransactionCurrency $currency */
         foreach ($response as $currency) {
             $result[$currency->id] = sprintf('%s (%s)', $currency->name, $currency->code);

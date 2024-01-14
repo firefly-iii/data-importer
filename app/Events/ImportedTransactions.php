@@ -40,26 +40,18 @@ class ImportedTransactions
     public array $messages;
     public array $warnings;
 
-    /**
-     * @param  array  $messages
-     * @param  array  $warnings
-     * @param  array  $errors
-     */
     public function __construct(array $messages, array $warnings, array $errors)
     {
         app('log')->debug('Created event ImportedTransactions with filtering (2)');
 
         // filter messages:
         $this->messages = $this->filterArray('message(s)', $messages);
-        $this->warnings = $this->filterArray('warning(s)',$warnings);
+        $this->warnings = $this->filterArray('warning(s)', $warnings);
         $this->errors   = $this->filterArray('error(s)', $errors);
     }
 
     /**
-     * @param  array  $collection
-     *
      * @string $title
-     * @return array
      */
     private function filterArray(string $title, array $collection): array
     {
@@ -71,7 +63,7 @@ class ImportedTransactions
                 $line = (string)$line;
                 if ('' !== $line) {
                     $newSet[] = $line;
-                    $count++;
+                    ++$count;
                 }
             }
             if (count($newSet) > 0) {

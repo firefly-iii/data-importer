@@ -29,11 +29,6 @@ namespace App\Services\CSV\Conversion\Task;
  */
 class Currency extends AbstractTask
 {
-    /**
-     * @param  array  $group
-     *
-     * @return array
-     */
     public function process(array $group): array
     {
         foreach ($group['transactions'] as $index => $transaction) {
@@ -45,8 +40,6 @@ class Currency extends AbstractTask
 
     /**
      * Returns true if the task requires the default account.
-     *
-     * @return bool
      */
     public function requiresDefaultAccount(): bool
     {
@@ -55,19 +48,12 @@ class Currency extends AbstractTask
 
     /**
      * Returns true if the task requires the default currency of the user.
-     *
-     * @return bool
      */
     public function requiresTransactionCurrency(): bool
     {
         return true;
     }
 
-    /**
-     * @param  array  $transaction
-     *
-     * @return array
-     */
     private function processCurrency(array $transaction): array
     {
         if (
