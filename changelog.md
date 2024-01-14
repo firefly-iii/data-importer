@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.4.1 - 2024-01-15
+
+### Added
+- Initial release.
+
+### Changed
+- Initial release.
+
+### Deprecated
+- Initial release.
+
+### Removed
+- Initial release.
+
+### Fixed
+- Initial release.
+
+### Security
+- Initial release.
+
+
+
 ## 1.4.0 - 2023-12-18
 
 > ⚠️⚠️ This release required **PHP 8.3.0** and will not work on earlier releases of PHP ⚠️⚠️
@@ -544,7 +566,7 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 
 First release of the data importer.
 
-## 0.0.0 - 2021-xx-xx
+## v0.0.0 - 2021-xx-xx
 
 ### Added
 - Initial release.
