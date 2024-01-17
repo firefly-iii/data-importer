@@ -102,15 +102,16 @@ trait AutoImports
             } catch (ImporterErrorException $e) {
                 app('log')->error(sprintf('Could not complete import from file "%s".', $file));
                 app('log')->error($e->getMessage());
-                // report has already been sent. Reset errors and continue.
-                $this->conversionErrors   = [];
-                $this->conversionMessages = [];
-                $this->conversionWarnings = [];
-                $this->importErrors       = [];
-                $this->importMessages     = [];
-                $this->importWarnings     = [];
             }
+            // report has already been sent. Reset errors and continue.
+            $this->conversionErrors   = [];
+            $this->conversionMessages = [];
+            $this->conversionWarnings = [];
+            $this->importErrors       = [];
+            $this->importMessages     = [];
+            $this->importWarnings     = [];
         }
+
     }
 
     private function getExtension(string $file): string
