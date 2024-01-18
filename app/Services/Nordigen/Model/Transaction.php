@@ -26,6 +26,7 @@ namespace App\Services\Nordigen\Model;
 
 use App\Rules\Iban;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -93,24 +94,24 @@ class Transaction
     public static function fromArray($array): self
     {
         app('log')->debug('Nordigen transaction from array', $array);
-        $object                                         = new self();
-        $object->tags                                   = [];
-        $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
-        $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
-        $object->bankTransactionCode                    = trim($array['bankTransactionCode'] ?? '');
-        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat(
+        $object                                  = new self();
+        $object->tags                            = [];
+        $object->additionalInformation           = trim($array['additionalInformation'] ?? '');
+        $object->additionalInformationStructured = trim($array['additionalInformationStructured'] ?? '');
+        $object->bankTransactionCode             = trim($array['bankTransactionCode'] ?? '');
+        $object->bookingDate                     = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat(
             '!Y-m-d',
             $array['bookingDate'],
             config('app.timezone')
         ) : null;
 
         // overrule with "bookingDateTime" if present:
-        if(array_key_exists('bookingDateTime', $array)) {
-            $object->bookingDate = Carbon::createFromFormat(
-                '!Y-m-d\TH:i:s.uP',
-                $array['bookingDateTime'],
-                config('app.timezone')
-            );
+        if (array_key_exists('bookingDateTime', $array)) {
+            try {
+                $object->bookingDate = Carbon::parse($array['bookingDateTime'], config('app.timezone'));
+            } catch (InvalidFormatException $e) {
+                app('log')->error(sprintf('Could not parse bookingDateTime "%s": %s', $array['bookingDateTime'], $e->getMessage()));
+            }
         }
 
         $object->key                                    = trim($array['key'] ?? '');
@@ -139,7 +140,7 @@ class Transaction
         ) : null;
 
         // undocumented values
-        $object->endToEndId                             = trim($array['endToEndId'] ?? ''); // from Rabobank NL
+        $object->endToEndId = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
         if ('' === $object->transactionId) {
@@ -159,29 +160,29 @@ class Transaction
         }
 
         // add "pending" or "booked" if it exists.
-        $key                                            = (string)$array['key'];
+        $key = (string)$array['key'];
         if ('' !== $key) {
             $object->tags[] = $key;
         }
 
         // array values:
-        $object->creditorAccountIban                    = trim($array['creditorAccount']['iban'] ?? '');
-        $object->creditorAccountBban                    = trim($array['creditorAccount']['bban'] ?? '');
-        $object->creditorAccountCurrency                = trim($array['creditorAccount']['currency'] ?? '');
+        $object->creditorAccountIban     = trim($array['creditorAccount']['iban'] ?? '');
+        $object->creditorAccountBban     = trim($array['creditorAccount']['bban'] ?? '');
+        $object->creditorAccountCurrency = trim($array['creditorAccount']['currency'] ?? '');
 
-        $object->debtorAccountIban                      = trim($array['debtorAccount']['iban'] ?? '');
-        $object->debtorAccountBban                      = trim($array['debtorAccount']['bban'] ?? '');
-        $object->debtorAccountCurrency                  = trim($array['debtorAccount']['currency'] ?? '');
+        $object->debtorAccountIban     = trim($array['debtorAccount']['iban'] ?? '');
+        $object->debtorAccountBban     = trim($array['debtorAccount']['bban'] ?? '');
+        $object->debtorAccountCurrency = trim($array['debtorAccount']['currency'] ?? '');
 
-        $object->transactionAmount                      = trim($array['transactionAmount']['amount'] ?? '');
-        $object->currencyCode                           = trim($array['transactionAmount']['currency'] ?? '');
+        $object->transactionAmount = trim($array['transactionAmount']['amount'] ?? '');
+        $object->currencyCode      = trim($array['transactionAmount']['currency'] ?? '');
 
         // other fields:
-        $object->accountIdentifier                      = '';
+        $object->accountIdentifier = '';
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
@@ -201,7 +202,7 @@ class Transaction
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                                         = new self();
+        $object = new self();
 
         $object->tags                                   = [];
         $object->additionalInformation                  = $array['additional_information'];
@@ -239,23 +240,23 @@ class Transaction
         }
 
         // undocumented values:
-        $object->endToEndId                             = $array['end_to_end_id'];
+        $object->endToEndId = $array['end_to_end_id'];
 
         // TODO copy paste code.
-        $object->debtorAccountIban                      = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
-        $object->creditorAccountIban                    = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
+        $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
+        $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
 
-        $object->debtorAccountBban                      = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
-        $object->creditorAccountBban                    = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
+        $object->debtorAccountBban   = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
+        $object->creditorAccountBban = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
 
-        $object->debtorAccountCurrency                  = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
-        $object->creditorAccountCurrency                = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
+        $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
+        $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
 
         // $object-> = $array[''];
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
