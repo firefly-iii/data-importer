@@ -50,7 +50,6 @@ class TransactionProcessor
     private ?Carbon       $notBefore;
 
     /**
-     * @return array
      * @throws ImporterErrorException
      */
     public function download(): array

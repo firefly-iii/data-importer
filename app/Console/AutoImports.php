@@ -111,7 +111,6 @@ trait AutoImports
             $this->importMessages     = [];
             $this->importWarnings     = [];
         }
-
     }
 
     private function getExtension(string $file): string

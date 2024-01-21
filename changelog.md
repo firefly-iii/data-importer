@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.4.2 - 2024-01-22
+
+### Added
+- [Issue 8391](https://github.com/firefly-iii/firefly-iii/issues/8391) (Add OCI Labels to Docker Images) reported by @mytlogos
+
+### Fixed
+- [Issue 8367](https://github.com/orgs/firefly-iii/discussions/8367) Bad type error, reported by @quotary
+- [Issue 8389](https://github.com/firefly-iii/firefly-iii/issues/8389) (Data Importer stops Autoimport of multiple Nordigen/GoCardless files if one has zero transactions) reported by @rerobade
+- [Issue 8404](https://github.com/firefly-iii/firefly-iii/issues/8404) (Data importer confuses thousands separator for decimal separator when decimal separator is missing.) reported by @nonsavant
+- [Issue 8408](https://github.com/firefly-iii/firefly-iii/issues/8408) (Importing camt.053 file fails during conversion step) reported by @ltouroumov
+- [Issue 8414](https://github.com/firefly-iii/firefly-iii/issues/8414) (Getting `Unexpected data found.` trying to import via GoCardless/Nordigen) reported by @dabeeeenster
+
 ## v1.4.1 - 2024-01-15
 
 ### Added
