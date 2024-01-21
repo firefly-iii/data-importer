@@ -499,25 +499,58 @@ class TransactionMapper
                     break;
 
                 case 'amount':
-                    $current['amount']       = null;
+                    // #8367 default amount = 0
+                    $current['amount']       = 0;
+                    app('log')->debug(sprintf('Start with amount at zero ("%s")', $current['amount']));
                     if ('group' === $groupHandling || 'split' === $groupHandling) {
+                        app('log')->debug(sprintf('Group handling is "%s"', $groupHandling));
                         // if multiple values, use biggest (... at index 0?)
                         // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
                         foreach ($data['data'] as $amount) {
-                            if (abs($current['amount']) < abs($amount) || null === $current['amount']) {
+                            if (null === $amount) {
+                                // #8367 skip null values
+                                continue;
+                            }
+                            if (is_string($amount)) {
+                                $amount = (float)$amount;
+                            }
+                            if (abs($current['amount']) < abs($amount)) {
+                                app('log')->debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $current['amount']));
                                 $current['amount'] = $amount;
                             }
                         }
                     }
                     if ('single' === $groupHandling) {
+                        app('log')->debug(sprintf('Group handling is "%s"', $groupHandling));
                         // if multiple values, use smallest (... at index 1?)
                         foreach ($data['data'] as $amount) {
+                            // #8367 skip null values
+                            if (null === $amount) {
+                                app('log')->debug('Amount is NULL, continue.');
+
+                                continue;
+                            }
+                            if (is_string($amount)) {
+                                $amount = (float)$amount;
+                            }
+                            app('log')->debug(sprintf('Amount is %s.', var_export($amount, true)));
                             // check for null first, should prevent null pointers in abs()
-                            if (null === $current['amount'] && null !== $amount && abs($current['amount']) > abs($amount)) {
+                            if (abs($current['amount'])
+                                < abs($amount)) {
+                                app('log')->debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $current['amount']));
                                 $current['amount'] = $amount;
                             }
                         }
                     }
+                    if (0 === bccomp('0', (string)$current['amount'])) {
+                        app('log')->debug('Amount is ZERO, set to NULL');
+                        $current['amount'] = null;
+                    }
+                    if (null !== $current['amount'] && 0 !== bccomp('0', (string)$current['amount']) && !is_string($current['amount'])) {
+                        app('log')->debug(sprintf('Amount is %s, turn into string', var_export($current['amount'], true)));
+                        $current['amount'] = (string)$current['amount'];
+                    }
+                    app('log')->debug(sprintf('Final amount is "%s"', $current['amount']));
 
                     break;
 

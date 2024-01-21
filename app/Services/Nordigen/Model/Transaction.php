@@ -26,6 +26,7 @@ namespace App\Services\Nordigen\Model;
 
 use App\Rules\Iban;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -105,12 +106,12 @@ class Transaction
         ) : null;
 
         // overrule with "bookingDateTime" if present:
-        if(array_key_exists('bookingDateTime', $array)) {
-            $object->bookingDate = Carbon::createFromFormat(
-                '!Y-m-d\TH:i:s.uP',
-                $array['bookingDateTime'],
-                config('app.timezone')
-            );
+        if (array_key_exists('bookingDateTime', $array)) {
+            try {
+                $object->bookingDate = Carbon::parse($array['bookingDateTime'], config('app.timezone'));
+            } catch (InvalidFormatException $e) {
+                app('log')->error(sprintf('Could not parse bookingDateTime "%s": %s', $array['bookingDateTime'], $e->getMessage()));
+            }
         }
 
         $object->key                                    = trim($array['key'] ?? '');

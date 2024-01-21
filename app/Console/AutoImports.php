@@ -38,7 +38,6 @@ use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use League\Flysystem\FilesystemException;
 
 /**
  * Trait AutoImports
@@ -98,7 +97,19 @@ trait AutoImports
     {
         /** @var string $file */
         foreach ($files as $file) {
-            $this->importFile($directory, $file);
+            try {
+                $this->importFile($directory, $file);
+            } catch (ImporterErrorException $e) {
+                app('log')->error(sprintf('Could not complete import from file "%s".', $file));
+                app('log')->error($e->getMessage());
+            }
+            // report has already been sent. Reset errors and continue.
+            $this->conversionErrors   = [];
+            $this->conversionMessages = [];
+            $this->conversionWarnings = [];
+            $this->importErrors       = [];
+            $this->importMessages     = [];
+            $this->importWarnings     = [];
         }
     }
 
@@ -415,9 +426,6 @@ trait AutoImports
         }
     }
 
-    /**
-     * @throws FilesystemException
-     */
     private function startImport(Configuration $configuration): void
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));

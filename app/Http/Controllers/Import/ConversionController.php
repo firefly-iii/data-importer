@@ -108,7 +108,7 @@ class ConversionController extends Controller
             }
             if ('camt' === $contentType) {
                 app('log')->debug('Create CAMT routine manager.');
-                $routine = new CAMTRoutineManager($identifier);
+                $routine = new CamtRoutineManager($identifier);
             }
         }
         if ('nordigen' === $flow) {
@@ -158,7 +158,7 @@ class ConversionController extends Controller
                 $routine = new CSVRoutineManager($identifier);
             }
             if ('camt' === $contentType) {
-                $routine = new CAMTRoutineManager($identifier); // why do we need this one?
+                $routine = new CamtRoutineManager($identifier); // why do we need this one?
             }
         }
         if ('nordigen' === $flow) {

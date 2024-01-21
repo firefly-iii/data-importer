@@ -81,7 +81,9 @@ class Amount implements ConverterInterface
 
         // decimal character still null? Search from the left for '.',',' or ' '.
         if (null === $decimal) {
-            $decimal = $this->findFromLeft($value);
+            // See issue #8404
+            // $decimal = $this->findFromLeft($value);
+            app('log')->debug('Disabled "findFromLeft" because it happens more often that "1.000" is thousand than "1.000" is 1 with three zeroes.');
         }
 
         // if decimal is dot, replace all comma's and spaces with nothing

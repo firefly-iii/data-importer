@@ -49,6 +49,9 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
+    /**
+     * @throws ImporterErrorException
+     */
     public function download(): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
