@@ -18,7 +18,7 @@ jobs:
           extensions: bcmath, intl
         env:
           update: true
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Install dependencies
