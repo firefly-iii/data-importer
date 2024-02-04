@@ -77,6 +77,5 @@ final class AmountTest extends TestCase
 
         // the original problem from issue #8404
         self::assertSame('1000', $amount->convert('1.000'));
-
     }
 }
