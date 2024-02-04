@@ -48,7 +48,8 @@ class Amount implements ConverterInterface
     }
 
     /**
-     * Some people, when confronted with a problem, think "I know, I'll use regular expressions." Now they have two problems.
+     * Some people, when confronted with a problem, think "I know, I'll use regular expressions." Now they have two
+     * problems.
      * - Jamie Zawinski.
      *
      * @param mixed $value
@@ -60,9 +61,10 @@ class Amount implements ConverterInterface
         }
 
         app('log')->debug(sprintf('Start with amount "%s"', $value));
-        $original  = $value;
-        $value     = $this->stripAmount((string)$value);
-        $decimal   = null;
+        $original    = $value;
+        $value       = $this->stripAmount((string)$value);
+        $decimal     = null;
+        $thousandSep = null;
 
         if ($this->decimalIsDot($value)) {
             $decimal = '.';
@@ -77,13 +79,60 @@ class Amount implements ConverterInterface
         // decimal character is null? find out if "0.1" or ".1" or "0,1" or ",1"
         if ($this->alternativeDecimalSign($value)) {
             $decimal = $this->getAlternativeDecimalSign($value);
+            app('log')->debug(sprintf('Decimal character in "%s" seems to be "%s".', $value, $decimal));
+        }
+
+        // string ends with a dash? strip it
+        if (str_ends_with($value, '-') ) {
+            $trail = substr($value, -1);
+            $value = substr($value, 0, -1);
+            app('log')->debug(sprintf('Removed trailing character "%s", results in "%s".', $trail, $value));
+        }
+
+        // string ends with dot or comma? strip it.
+        if (str_ends_with($value, '.') || str_ends_with($value, ',')) {
+            $trail = substr($value, -1);
+            $value = substr($value, 0, -1);
+            app('log')->debug(sprintf('Removed trailing decimal character "%s", results in "%s".', $trail, $value));
+        }
+
+        // some shitty banks decided that "25.00000" is a normal way to write down numbers.
+        // five decimals in the export, WHY
+        if (null === $decimal) {
+            app('log')->debug('No decimal point, try to find a dot.');
+            $index = strripos($value, '.');
+            if (false === $index) {
+                app('log')->debug('No decimal point, try to find a comma.');
+                $index = strpos($value, ',');
+                if (false === $index) {
+                    app('log')->debug('Found neither, continue.');
+                }
+            }
+            if (false !== $index) {
+                $len = strlen($value);
+                $pos = $len - $index;
+                app('log')->debug(sprintf('Found decimal point at position %d, length of string is %d, diff is %d.', $index, $len, $pos));
+                if (4 === $pos) {
+                    if (',' === $value[$index]) {
+                        app('log')->debug('Thousands separator seems to be a comma, decimal separator must be a dot.');
+                        $decimal = '.';
+                    }
+                    if ('.' === $value[$index]) {
+                        app('log')->debug('Thousands separator seems to be a dot, decimal separator must be a comma.');
+                        $decimal = ',';
+                    }
+                }
+                if (4 !== $pos) {
+                    app('log')->debug('Decimal point is not at position 4, so probably not a thousands separator.');
+                }
+            }
         }
 
         // decimal character still null? Search from the left for '.',',' or ' '.
         if (null === $decimal) {
             // See issue #8404
-            // $decimal = $this->findFromLeft($value);
-            app('log')->debug('Disabled "findFromLeft" because it happens more often that "1.000" is thousand than "1.000" is 1 with three zeroes.');
+            $decimal = $this->findFromLeft($value);
+            //app('log')->debug('Disabled "findFromLeft" because it happens more often that "1.000" is thousand than "1.000" is 1 with three zeroes.');
         }
 
         // if decimal is dot, replace all comma's and spaces with nothing
@@ -99,7 +148,7 @@ class Amount implements ConverterInterface
             app('log')->debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
         if (str_starts_with($value, '.')) {
-            $value = '0'.$value;
+            $value = '0' . $value;
         }
 
         if (is_numeric($value)) {
@@ -171,7 +220,7 @@ class Amount implements ConverterInterface
     {
         $decimal = null;
         app('log')->debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
-        $res     = strrpos($value, '.');
+        $res = strrpos($value, '.');
         if (false !== $res) {
             // blandly assume this is the one.
             app('log')->debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
@@ -203,7 +252,7 @@ class Amount implements ConverterInterface
         if (',' === $decimal) {
             $search = ['.', ' '];
         }
-        $value  = str_replace($search, '', $value);
+        $value = str_replace($search, '', $value);
 
         // @noinspection CascadeStringReplacementInspection
         return str_replace(',', '.', $value);
@@ -224,9 +273,9 @@ class Amount implements ConverterInterface
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen($str);
         if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
-            $str = '-'.substr($str, 1, $len - 2);
+            $str = '-' . substr($str, 1, $len - 2);
         }
-        $str   = trim($str);
+        $str = trim($str);
 
         app('log')->debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 

@@ -48,12 +48,35 @@ final class AmountTest extends TestCase
         self::assertSame('1', $amount->convert(1));
         self::assertSame('1', $amount->convert('1'));
         self::assertSame('1.0', $amount->convert('1.0'));
-
-        self::assertSame('1000.000000000000', $amount->convert('1000,-'));
+        self::assertSame('1000', $amount->convert('1000,-'));
+        self::assertSame('1000', $amount->convert('EUR 1000,-'));
+        self::assertSame('1000', $amount->convert('€ 1000,-'));
+        self::assertSame('1000', $amount->convert('1.000,-'));
+        self::assertSame('1000', $amount->convert('EUR 1.000,-'));
+        self::assertSame('1000', $amount->convert('€ 1.000,-'));
         self::assertSame('1000.00', $amount->convert('1000,00'));
         self::assertSame('1000.00', $amount->convert('1.000,00'));
         self::assertSame('1000', $amount->convert('1.000,'));
         self::assertSame('1000', $amount->convert('1.000'));
         self::assertSame('1.00', $amount->convert('1.00'));
+
+        // new tests
+        self::assertSame('25.00000', $amount->convert('25.00000'));
+        self::assertSame('251.000000', $amount->convert('251.000000'));
+        self::assertSame('2502.0000000', $amount->convert('2502.0000000'));
+
+        self::assertSame('2530000000', $amount->convert('2.530.000.000,'));
+        self::assertSame('254.0000000', $amount->convert('254.0000000'));
+        self::assertSame('255.000000000', $amount->convert('255.000000000'));
+
+        self::assertSame('1256.0000000', $amount->convert('1,256.0000000'));
+        self::assertSame('1001257.0000000', $amount->convert('1,001,257.0000000'));
+
+        // the original problem from issue #8482
+        self::assertSame('25.00000', $amount->convert('25.00000'));
+
+        // the original problem from issue #8404
+        self::assertSame('1000', $amount->convert('1.000'));
+
     }
 }
