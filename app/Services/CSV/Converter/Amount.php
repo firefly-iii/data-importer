@@ -83,7 +83,7 @@ class Amount implements ConverterInterface
         }
 
         // string ends with a dash? strip it
-        if (str_ends_with($value, '-') ) {
+        if (str_ends_with($value, '-')) {
             $trail = substr($value, -1);
             $value = substr($value, 0, -1);
             app('log')->debug(sprintf('Removed trailing character "%s", results in "%s".', $trail, $value));
@@ -132,7 +132,7 @@ class Amount implements ConverterInterface
         if (null === $decimal) {
             // See issue #8404
             $decimal = $this->findFromLeft($value);
-            //app('log')->debug('Disabled "findFromLeft" because it happens more often that "1.000" is thousand than "1.000" is 1 with three zeroes.');
+            // app('log')->debug('Disabled "findFromLeft" because it happens more often that "1.000" is thousand than "1.000" is 1 with three zeroes.');
         }
 
         // if decimal is dot, replace all comma's and spaces with nothing
@@ -148,7 +148,7 @@ class Amount implements ConverterInterface
             app('log')->debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
         if (str_starts_with($value, '.')) {
-            $value = '0' . $value;
+            $value = '0'.$value;
         }
 
         if (is_numeric($value)) {
@@ -158,7 +158,7 @@ class Amount implements ConverterInterface
         }
         // @codeCoverageIgnoreStart
         app('log')->debug(sprintf('Final value is: "%s"', $value));
-        $formatted = sprintf('%01.12f', $value);
+        $formatted   = sprintf('%01.12f', $value);
         app('log')->debug(sprintf('Is formatted to : "%s"', $formatted));
 
         return $formatted;
@@ -220,7 +220,7 @@ class Amount implements ConverterInterface
     {
         $decimal = null;
         app('log')->debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
-        $res = strrpos($value, '.');
+        $res     = strrpos($value, '.');
         if (false !== $res) {
             // blandly assume this is the one.
             app('log')->debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
@@ -252,7 +252,7 @@ class Amount implements ConverterInterface
         if (',' === $decimal) {
             $search = ['.', ' '];
         }
-        $value = str_replace($search, '', $value);
+        $value  = str_replace($search, '', $value);
 
         // @noinspection CascadeStringReplacementInspection
         return str_replace(',', '.', $value);
@@ -273,9 +273,9 @@ class Amount implements ConverterInterface
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen($str);
         if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
-            $str = '-' . substr($str, 1, $len - 2);
+            $str = '-'.substr($str, 1, $len - 2);
         }
-        $str = trim($str);
+        $str   = trim($str);
 
         app('log')->debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 

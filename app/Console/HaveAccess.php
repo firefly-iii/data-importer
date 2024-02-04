@@ -72,9 +72,16 @@ trait HaveAccess
         if (str_starts_with($reportedVersion, 'v')) {
             $reportedVersion = substr($reportedVersion, 1);
         }
-        $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
+        if (str_starts_with($reportedVersion, 'v')) {
+            $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
+        }
+        if (str_starts_with($reportedVersion, 'develop')) {
+            $this->line(sprintf('Connected to Firefly III %s', $reportedVersion));
+            $this->warn('You are connected to a development version of Firefly III.');
+        }
+
         $compare         = version_compare($reportedVersion, config('importer.minimum_version'));
-        if (-1 === $compare) {
+        if (-1 === $compare && !str_starts_with($reportedVersion, 'develop')) {
             $this->error(sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
 
             return false;

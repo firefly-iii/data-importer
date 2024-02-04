@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.3 - 2024-02-05
+
+### Changed
+- The data importer can connect to nightly builds of Firefly III, which self-report as version `develop/YYYY-MM-DD`.
+
+### Fixed
+- [Discussion 8482](https://github.com/orgs/firefly-iii/discussions/8482) (Why is the importer turning 25.00000 into 2,500,000?) started by @jerrac
+
 ## v1.4.2 - 2024-01-22
 
 ### Added
