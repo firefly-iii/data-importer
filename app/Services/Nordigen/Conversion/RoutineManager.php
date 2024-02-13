@@ -91,6 +91,7 @@ class RoutineManager implements RoutineManagerInterface
     public function start(): array
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
+        app('log')->debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
 
         // get transactions from Nordigen
         app('log')->debug('Call transaction processor download.');
