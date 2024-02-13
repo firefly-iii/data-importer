@@ -25,7 +25,7 @@ declare(strict_types=1);
 return [
     'id'                    => env('NORDIGEN_ID', ''),
     'key'                   => env('NORDIGEN_KEY', ''),
-    'url'                   => 'https://ob.nordigen.com',
+    'url'                   => 'https://bankaccountdata.gocardless.com',
     'use_sandbox'           => env('NORDIGEN_SANDBOX', false),
     'unique_column_options' => [
         'external-id'            => 'External identifier',
