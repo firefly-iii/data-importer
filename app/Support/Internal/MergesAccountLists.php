@@ -105,7 +105,7 @@ trait MergesAccountLists
 
             if (1 === count($filteredByNumber)) {
                 app('log')->debug(sprintf('Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")', $iban, $number, $filteredByNumber[0]->id, $filteredByNumber[0]->name));
-                $entry['firefly_iii_accounts'] = array_merge($filteredByNumber, $filteredByCurrency);
+                $entry['firefly_iii_accounts'] = array_unique(array_merge($filteredByNumber, $filteredByCurrency), SORT_REGULAR);
                 $return[]                      = $entry;
 
                 continue;
