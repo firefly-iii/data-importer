@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.4.4 - 2024-02-18
+
+### Fixed
+- [Issue 8534](https://github.com/firefly-iii/firefly-iii/issues/8534) (Data Importer ignoring relevant Nordigen error.) reported by @miguelangel-nubla
+- [Issue 8541](https://github.com/firefly-iii/firefly-iii/issues/8541) (new gocardless connection string, old string will be deprecated) reported by @siemdejong
+- [PR 529](https://github.com/firefly-iii/data-importer/pull/529) (Fixed a small issue with a label targeting the wrong input) by @moritzgloeckl
+- [PR 531](https://github.com/firefly-iii/data-importer/pull/531) (Update Nordigen base url) by @JcMinarro
+
 ## 1.4.3 - 2024-02-05
 
 ### Changed

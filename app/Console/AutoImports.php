@@ -90,11 +90,10 @@ trait AutoImports
         return $return;
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function importFiles(string $directory, array $files): void
+    private function importFiles(string $directory, array $files): bool
     {
+        $return = true;
+
         /** @var string $file */
         foreach ($files as $file) {
             try {
@@ -102,6 +101,7 @@ trait AutoImports
             } catch (ImporterErrorException $e) {
                 app('log')->error(sprintf('Could not complete import from file "%s".', $file));
                 app('log')->error($e->getMessage());
+                $return = false;
             }
             // report has already been sent. Reset errors and continue.
             $this->conversionErrors   = [];
@@ -111,6 +111,8 @@ trait AutoImports
             $this->importMessages     = [];
             $this->importWarnings     = [];
         }
+
+        return $return;
     }
 
     private function getExtension(string $file): string

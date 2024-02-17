@@ -157,6 +157,13 @@ class TokenController extends Controller
 
         $minimum     = (string)config('importer.minimum_version');
         $compare     = version_compare($minimum, $result->version);
+
+        if(str_starts_with($result->version, 'develop')) {
+            // overrule compare, because the user is running a develop version
+            app('log')->warning(sprintf('You are connecting to a development version of Firefly III (%s). This may not work as expected.', $result->version));
+            $compare = -1;
+        }
+
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',
