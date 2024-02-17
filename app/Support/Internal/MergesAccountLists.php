@@ -101,18 +101,16 @@ trait MergesAccountLists
             ];
 
             $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
+            $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
 
             if (1 === count($filteredByNumber)) {
                 app('log')->debug(sprintf('Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")', $iban, $number, $filteredByNumber[0]->id, $filteredByNumber[0]->name));
-                $entry['firefly_iii_accounts'] = $filteredByNumber;
+                $entry['firefly_iii_accounts'] = array_merge($filteredByNumber, $filteredByCurrency);
                 $return[]                      = $entry;
 
                 continue;
             }
             app('log')->debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', count($filteredByNumber), $iban));
-
-            // only currency?
-            $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
 
             if (count($filteredByCurrency) > 0) {
                 app('log')->debug(sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency %s.', $account->name, count($filteredByCurrency), $currency));
