@@ -60,6 +60,7 @@ class Transaction
         $model->id           = (string)$data['id'];
         $model->mode         = $data['mode'];
         $model->status       = $data['status'];
+        // "The date when the transaction was made"
         $model->madeOn       = new Carbon($data['made_on']);
         $model->amount       = (string)$data['amount'];
         $model->currencyCode = $data['currency_code'];

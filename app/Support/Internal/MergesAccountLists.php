@@ -33,10 +33,12 @@ trait MergesAccountLists
 {
     protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
     {
+        // FIXME this check should also check the number of the account.
         if ('' === $iban) {
             return [];
         }
         $result = [];
+        // TODO check if this the correct merge type.
         $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
 
         /** @var Account $account */
@@ -89,34 +91,19 @@ trait MergesAccountLists
 
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
-            app('log')->debug(
-                sprintf(
-                    'Working on generic account "%s": "%s" ("%s", "%s")',
-                    $account->name,
-                    $account->id,
-                    $account->iban,
-                    $account->bban
-                )
-            );
-            $iban                          = $account->iban;
-            $number                        = $account->bban;
-            $currency                      = $account->currencyCode;
-            $entry                         = [
+            app('log')->debug(sprintf('Working on generic account "%s": "%s" ("%s", "%s")', $account->name, $account->id, $account->iban, $account->bban));
+
+            $iban     = $account->iban;
+            $number   = $account->bban;
+            $currency = $account->currencyCode;
+            $entry    = [
                 'import_account' => $account,
             ];
 
-            $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
+            $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
 
             if (1 === count($filteredByNumber)) {
-                app('log')->debug(
-                    sprintf(
-                        'Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")',
-                        $iban,
-                        $number,
-                        $filteredByNumber[0]->id,
-                        $filteredByNumber[0]->name
-                    )
-                );
+                app('log')->debug(sprintf('Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")', $iban, $number, $filteredByNumber[0]->id, $filteredByNumber[0]->name));
                 $entry['firefly_iii_accounts'] = $filteredByNumber;
                 $return[]                      = $entry;
 
@@ -125,12 +112,10 @@ trait MergesAccountLists
             app('log')->debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', count($filteredByNumber), $iban));
 
             // only currency?
-            $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
+            $filteredByCurrency = $this->filterByCurrency($fireflyIII, $currency);
 
             if (count($filteredByCurrency) > 0) {
-                app('log')->debug(
-                    sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency %s.', $account->name, count($filteredByCurrency), $currency)
-                );
+                app('log')->debug(sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency %s.', $account->name, count($filteredByCurrency), $currency));
                 $entry['firefly_iii_accounts'] = $filteredByCurrency;
                 $return[]                      = $entry;
 

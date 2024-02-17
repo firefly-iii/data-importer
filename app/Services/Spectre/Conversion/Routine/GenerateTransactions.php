@@ -119,6 +119,17 @@ class GenerateTransactions
             'notes'             => $notes,
         ];
 
+        // add time, post_date and post_time to transaction
+        if($entry->extra->getPostingDate() !== null) {
+            $transaction['book_date'] = $entry->extra->getPostingDate()->toW3cString();
+        }
+        if($entry->extra->getPostingTime() !== null) {
+            $transaction['notes'] .= sprintf("\n\npost_time: %s", $entry->extra->getPostingTime());
+        }
+        if($entry->extra->getTime() !== null) {
+            $transaction['notes'] .= sprintf("\n\ntime: %s", $entry->extra->getTime());
+        }
+
         $return                   = [
             'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),

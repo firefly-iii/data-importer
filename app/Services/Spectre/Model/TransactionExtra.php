@@ -77,9 +77,12 @@ class TransactionExtra
         $model->id                       = $data['id'] ?? null;
         $model->recordNumber             = $data['record_number'] ?? null;
         $model->information              = $data['information'] ?? null;
+        // "Time when the transaction was made."
         $model->time                     = array_key_exists('time', $data) ? new Carbon($data['time']) : null;
+        // "Date when the transaction appears in statement."
         $model->postingDate              = array_key_exists('posting_date', $data) ? new Carbon($data['posting_date']) : null;
-        $model->postingTime              = array_key_exists('posting_time', $data) ? new Carbon($data['posting_time']) : null;
+        // "Time in HH:MM:SS format, representing time when the transaction appears in statement."
+        $model->postingTime              = array_key_exists('posting_time', $data) ? $data['posting_time'] : null;
         $model->accountNumber            = $data['account_number'] ?? null;
         $model->originalAmount           = isset($data['original_amount']) ? (string)$data['original_amount'] : null;
         $model->originalCurrencyCode     = $data['original_currency_code'] ?? null;
@@ -103,6 +106,11 @@ class TransactionExtra
         $model->unitPrice                = $data['unit_price'] ?? null;
         $model->accountBalanceSnapshot   = array_key_exists('account_balance_snapshot', $data) ? (string)$data['account_balance_snapshot'] : null;
         $model->categorizationConfidence = array_key_exists('categorization_confidence', $data) ? (string)$data['categorization_confidence'] : null;
+
+        // if has posting time, then set this time in the posting date?
+        app('log')->debug(sprintf('Time is         "%s"', ($data['time'] ?? '')));
+        app('log')->debug(sprintf('Posting date is "%s"', ($data['posting_date'] ?? '')));
+        app('log')->debug(sprintf('Posting time is "%s"', ($data['posting_time'] ?? '')));
 
         return $model;
     }
@@ -143,7 +151,7 @@ class TransactionExtra
             'id'                        => $this->id,
             'time'                      => $this->time ? $this->time->toW3cString() : '',
             'posting_date'              => $this->postingDate ? $this->postingDate->toW3cString() : '',
-            'posting_time'              => $this->postingTime ? $this->postingTime->toW3cString() : '',
+            'posting_time'              => $this->postingTime,
             'record_number'             => $this->recordNumber,
             'information'               => $this->information,
             'account_number'            => $this->accountNumber,
@@ -171,4 +179,21 @@ class TransactionExtra
             'categorization_confidence' => $this->categorizationConfidence,
         ];
     }
+
+    public function getPostingDate(): ?Carbon
+    {
+        return $this->postingDate;
+    }
+
+    public function getPostingTime(): ?Carbon
+    {
+        return $this->postingTime;
+    }
+
+    public function getTime(): ?Carbon
+    {
+        return $this->time;
+    }
+
+
 }
