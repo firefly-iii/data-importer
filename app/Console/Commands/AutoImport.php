@@ -85,6 +85,7 @@ final class AutoImport extends Command
             return 1;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+
         try {
             $result = $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {

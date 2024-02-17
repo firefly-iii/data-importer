@@ -164,7 +164,6 @@ class TokenController extends Controller
             $compare = -1;
         }
 
-
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',

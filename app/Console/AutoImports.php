@@ -93,6 +93,7 @@ trait AutoImports
     private function importFiles(string $directory, array $files): bool
     {
         $return = true;
+
         /** @var string $file */
         foreach ($files as $file) {
             try {
@@ -110,6 +111,7 @@ trait AutoImports
             $this->importMessages     = [];
             $this->importWarnings     = [];
         }
+
         return $return;
     }
 

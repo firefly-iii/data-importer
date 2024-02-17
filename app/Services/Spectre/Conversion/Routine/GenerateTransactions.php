@@ -120,13 +120,13 @@ class GenerateTransactions
         ];
 
         // add time, post_date and post_time to transaction
-        if($entry->extra->getPostingDate() !== null) {
+        if(null !== $entry->extra->getPostingDate()) {
             $transaction['book_date'] = $entry->extra->getPostingDate()->toW3cString();
         }
-        if($entry->extra->getPostingTime() !== null) {
+        if(null !== $entry->extra->getPostingTime()) {
             $transaction['notes'] .= sprintf("\n\npost_time: %s", $entry->extra->getPostingTime());
         }
-        if($entry->extra->getTime() !== null) {
+        if(null !== $entry->extra->getTime()) {
             $transaction['notes'] .= sprintf("\n\ntime: %s", $entry->extra->getTime());
         }
 
