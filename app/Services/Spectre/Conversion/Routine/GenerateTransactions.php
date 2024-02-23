@@ -86,12 +86,6 @@ class GenerateTransactions
         return $return;
     }
 
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
-    }
-
     private function generateTransaction(Transaction $entry): array
     {
         app('log')->debug('Original Spectre transaction', $entry->toArray());
@@ -120,13 +114,13 @@ class GenerateTransactions
         ];
 
         // add time, post_date and post_time to transaction
-        if(null !== $entry->extra->getPostingDate()) {
+        if (null !== $entry->extra->getPostingDate()) {
             $transaction['book_date'] = $entry->extra->getPostingDate()->toW3cString();
         }
-        if(null !== $entry->extra->getPostingTime()) {
+        if (null !== $entry->extra->getPostingTime()) {
             $transaction['notes'] .= sprintf("\n\npost_time: %s", $entry->extra->getPostingTime());
         }
-        if(null !== $entry->extra->getTime()) {
+        if (null !== $entry->extra->getTime()) {
             $transaction['notes'] .= sprintf("\n\ntime: %s", $entry->extra->getTime());
         }
 
@@ -233,10 +227,16 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
+        $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getPayee(), (string)$entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
         return $transaction;
+    }
+
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
     }
 }

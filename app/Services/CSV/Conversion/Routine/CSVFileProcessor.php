@@ -107,16 +107,6 @@ class CSVFileProcessor
         $this->delimiter = $map[$delimiter] ?? ',';
     }
 
-    public function setHasHeaders(bool $hasHeaders): void
-    {
-        $this->hasHeaders = $hasHeaders;
-    }
-
-    public function setReader(Reader $reader): void
-    {
-        $this->reader = $reader;
-    }
-
     /**
      * Loop all records from CSV file.
      *
@@ -144,6 +134,22 @@ class CSVFileProcessor
         }
 
         return $updatedRecords;
+    }
+
+    /**
+     * Do a first sanity check on whatever comes out of the CSV file.
+     */
+    private function sanitize(array $line): array
+    {
+        $lineValues = array_values($line);
+        array_walk(
+            $lineValues,
+            static function ($element) {
+                return trim(str_replace('&nbsp;', ' ', (string)$element));
+            }
+        );
+
+        return $lineValues;
     }
 
     /**
@@ -177,19 +183,13 @@ class CSVFileProcessor
         return $return;
     }
 
-    /**
-     * Do a first sanity check on whatever comes out of the CSV file.
-     */
-    private function sanitize(array $line): array
+    public function setHasHeaders(bool $hasHeaders): void
     {
-        $lineValues = array_values($line);
-        array_walk(
-            $lineValues,
-            static function ($element) {
-                return trim(str_replace('&nbsp;', ' ', (string)$element));
-            }
-        );
+        $this->hasHeaders = $hasHeaders;
+    }
 
-        return $lineValues;
+    public function setReader(Reader $reader): void
+    {
+        $this->reader = $reader;
     }
 }

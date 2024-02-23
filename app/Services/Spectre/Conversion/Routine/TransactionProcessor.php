@@ -41,6 +41,7 @@ use Carbon\Carbon;
 class TransactionProcessor
 {
     use ProgressInformation;
+
     private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
     private string        $downloadIdentifier;
@@ -94,16 +95,6 @@ class TransactionProcessor
         }
 
         return $final;
-    }
-
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-    }
-
-    public function setDownloadIdentifier(string $downloadIdentifier): void
-    {
-        $this->downloadIdentifier = $downloadIdentifier;
     }
 
     /**
@@ -165,5 +156,15 @@ class TransactionProcessor
         app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
+    }
+
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
+
+    public function setDownloadIdentifier(string $downloadIdentifier): void
+    {
+        $this->downloadIdentifier = $downloadIdentifier;
     }
 }

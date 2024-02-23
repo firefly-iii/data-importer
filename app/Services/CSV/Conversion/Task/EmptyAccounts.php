@@ -44,22 +44,6 @@ class EmptyAccounts extends AbstractTask
         return $group;
     }
 
-    /**
-     * Returns true if the task requires the default account.
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return false;
-    }
-
     private function processTransaction(array $transaction): array
     {
         app('log')->debug('Now in EmptyAccounts::processTransaction()');
@@ -84,5 +68,21 @@ class EmptyAccounts extends AbstractTask
         }
 
         return $transaction;
+    }
+
+    /**
+     * Returns true if the task requires the default account.
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
     }
 }

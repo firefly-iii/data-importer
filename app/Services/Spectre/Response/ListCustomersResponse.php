@@ -52,7 +52,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Count elements of an object.
      *
-     * @see  https://php.net/manual/en/countable.count.php
+     * @see   https://php.net/manual/en/countable.count.php
      *
      * @return int The custom count as an integer.
      *             </p>
@@ -69,7 +69,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Return the current element.
      *
-     * @see  https://php.net/manual/en/iterator.current.php
+     * @see   https://php.net/manual/en/iterator.current.php
      * @since 5.0.0
      */
     public function current(): Customer
@@ -80,7 +80,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Return the key of the current element.
      *
-     * @see  https://php.net/manual/en/iterator.key.php
+     * @see   https://php.net/manual/en/iterator.key.php
      * @since 5.0.0
      */
     public function key(): int
@@ -91,7 +91,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Move forward to next element.
      *
-     * @see  https://php.net/manual/en/iterator.next.php
+     * @see   https://php.net/manual/en/iterator.next.php
      * @since 5.0.0
      */
     public function next(): void
@@ -102,7 +102,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Rewind the Iterator to the first element.
      *
-     * @see  https://php.net/manual/en/iterator.rewind.php
+     * @see   https://php.net/manual/en/iterator.rewind.php
      * @since 5.0.0
      */
     public function rewind(): void
@@ -113,7 +113,7 @@ class ListCustomersResponse extends Response implements \Iterator, \Countable
     /**
      * Checks if current position is valid.
      *
-     * @see  https://php.net/manual/en/iterator.valid.php
+     * @see   https://php.net/manual/en/iterator.valid.php
      *
      * @return bool The return value will be casted to boolean and then evaluated.
      *              Returns true on success or false on failure.

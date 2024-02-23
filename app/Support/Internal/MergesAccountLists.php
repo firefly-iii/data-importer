@@ -31,56 +31,10 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 
 trait MergesAccountLists
 {
-    protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
-    {
-        // FIXME this check should also check the number of the account.
-        if ('' === $iban) {
-            return [];
-        }
-        $result = [];
-        // TODO check if this the correct merge type.
-        $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
-
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
-                $result[] = $account;
-            }
-        }
-
-        return $result;
-    }
-
-    protected function filterByCurrency(array $fireflyIII, string $currency): array
-    {
-        if ('' === $currency) {
-            return [];
-        }
-        $result = [];
-        $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
-
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($currency === $account->currencyCode) {
-                $result[] = $account;
-            }
-        }
-
-        return $result;
-    }
-
     protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
     {
         app('log')->debug('Now merging Nordigen account lists.');
         $generic = ImportServiceAccount::convertNordigenArray($nordigen);
-
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
-    }
-
-    protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
-    {
-        app('log')->debug('Now merging Spectre account lists.');
-        $generic = ImportServiceAccount::convertSpectreArray($spectre);
 
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
@@ -125,5 +79,51 @@ trait MergesAccountLists
         }
 
         return $return;
+    }
+
+    protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
+    {
+        // FIXME this check should also check the number of the account.
+        if ('' === $iban) {
+            return [];
+        }
+        $result = [];
+        // TODO check if this the correct merge type.
+        $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
+
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
+                $result[] = $account;
+            }
+        }
+
+        return $result;
+    }
+
+    protected function filterByCurrency(array $fireflyIII, string $currency): array
+    {
+        if ('' === $currency) {
+            return [];
+        }
+        $result = [];
+        $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
+
+        /** @var Account $account */
+        foreach ($all as $account) {
+            if ($currency === $account->currencyCode) {
+                $result[] = $account;
+            }
+        }
+
+        return $result;
+    }
+
+    protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
+    {
+        app('log')->debug('Now merging Spectre account lists.');
+        $generic = ImportServiceAccount::convertSpectreArray($spectre);
+
+        return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
 }

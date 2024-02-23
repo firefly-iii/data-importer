@@ -84,69 +84,6 @@ class LineProcessor
     }
 
     /**
-     * If the value in the column is mapped to a certain ID,
-     * the column where this ID must be placed will change.
-     *
-     * For example, if you map role "budget-name" with value "groceries" to 1,
-     * then that should become the budget-id. Not the name.
-     *
-     * @throws ImporterErrorException
-     */
-    private function getRoleForColumn(int $column, int $mapped): string
-    {
-        $role                           = $this->roles[$column] ?? '_ignore';
-        if (0 === $mapped) {
-            app('log')->debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
-
-            return $role;
-        }
-        if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
-            // if the mapping has been filled in already by a role with a higher priority,
-            // ignore the mapping.
-            app('log')->debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
-
-            return $role;
-        }
-        $roleMapping                    = [
-            'account-id'            => 'account-id',
-            'account-name'          => 'account-id',
-            'account-iban'          => 'account-id',
-            'account-number'        => 'account-id',
-            'bill-id'               => 'bill-id',
-            'bill-name'             => 'bill-id',
-            'budget-id'             => 'budget-id',
-            'budget-name'           => 'budget-id',
-            'currency-id'           => 'currency-id',
-            'currency-name'         => 'currency-id',
-            'currency-code'         => 'currency-id',
-            'currency-symbol'       => 'currency-id',
-            'category-id'           => 'category-id',
-            'category-name'         => 'category-id',
-            'foreign-currency-id'   => 'foreign-currency-id',
-            'foreign-currency-code' => 'foreign-currency-id',
-            'opposing-id'           => 'opposing-id',
-            'opposing-name'         => 'opposing-id',
-            'opposing-iban'         => 'opposing-id',
-            'opposing-number'       => 'opposing-id',
-        ];
-        if (!isset($roleMapping[$role])) {
-            throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
-        }
-        $newRole                        = $roleMapping[$role];
-        if ($newRole !== $role) {
-            app('log')->debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
-        }
-
-        // also store the $mapped values in a "mappedValues" array.
-        // used to validate whatever has been set as mapping
-        $this->mappedValues[$newRole][] = $mapped;
-        $this->mappedValues[$newRole]   = array_unique($this->mappedValues[$newRole]);
-        app('log')->debug(sprintf('Values mapped to role "%s" are: ', $newRole), $this->mappedValues[$newRole]);
-
-        return $newRole;
-    }
-
-    /**
      * Convert each raw CSV to a set of ColumnValue objects, which hold as much info
      * as we can cram into it. These new lines can be imported later on.
      *
@@ -213,5 +150,68 @@ class LineProcessor
         app('log')->debug(sprintf('Added column #%d to denote the original source.', count($return)));
 
         return $return;
+    }
+
+    /**
+     * If the value in the column is mapped to a certain ID,
+     * the column where this ID must be placed will change.
+     *
+     * For example, if you map role "budget-name" with value "groceries" to 1,
+     * then that should become the budget-id. Not the name.
+     *
+     * @throws ImporterErrorException
+     */
+    private function getRoleForColumn(int $column, int $mapped): string
+    {
+        $role                           = $this->roles[$column] ?? '_ignore';
+        if (0 === $mapped) {
+            app('log')->debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
+
+            return $role;
+        }
+        if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
+            // if the mapping has been filled in already by a role with a higher priority,
+            // ignore the mapping.
+            app('log')->debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
+
+            return $role;
+        }
+        $roleMapping                    = [
+            'account-id'            => 'account-id',
+            'account-name'          => 'account-id',
+            'account-iban'          => 'account-id',
+            'account-number'        => 'account-id',
+            'bill-id'               => 'bill-id',
+            'bill-name'             => 'bill-id',
+            'budget-id'             => 'budget-id',
+            'budget-name'           => 'budget-id',
+            'currency-id'           => 'currency-id',
+            'currency-name'         => 'currency-id',
+            'currency-code'         => 'currency-id',
+            'currency-symbol'       => 'currency-id',
+            'category-id'           => 'category-id',
+            'category-name'         => 'category-id',
+            'foreign-currency-id'   => 'foreign-currency-id',
+            'foreign-currency-code' => 'foreign-currency-id',
+            'opposing-id'           => 'opposing-id',
+            'opposing-name'         => 'opposing-id',
+            'opposing-iban'         => 'opposing-id',
+            'opposing-number'       => 'opposing-id',
+        ];
+        if (!isset($roleMapping[$role])) {
+            throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
+        }
+        $newRole                        = $roleMapping[$role];
+        if ($newRole !== $role) {
+            app('log')->debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
+        }
+
+        // also store the $mapped values in a "mappedValues" array.
+        // used to validate whatever has been set as mapping
+        $this->mappedValues[$newRole][] = $mapped;
+        $this->mappedValues[$newRole]   = array_unique($this->mappedValues[$newRole]);
+        app('log')->debug(sprintf('Values mapped to role "%s" are: ', $newRole), $this->mappedValues[$newRole]);
+
+        return $newRole;
     }
 }

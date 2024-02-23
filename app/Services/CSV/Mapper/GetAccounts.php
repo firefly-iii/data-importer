@@ -77,6 +77,17 @@ trait GetAccounts
         return $result;
     }
 
+    private function toArray(GetAccountsResponse $list): array
+    {
+        $return = [];
+        foreach ($list as $account) {
+            app('log')->debug(sprintf('Downloaded account: %s', json_encode($account->toArray())));
+            $return[] = $account;
+        }
+
+        return $return;
+    }
+
     /**
      * Returns a combined list of asset accounts and all liability accounts.
      *
@@ -205,16 +216,5 @@ trait GetAccounts
         }
 
         return $result;
-    }
-
-    private function toArray(GetAccountsResponse $list): array
-    {
-        $return = [];
-        foreach ($list as $account) {
-            app('log')->debug(sprintf('Downloaded account: %s', json_encode($account->toArray())));
-            $return[] = $account;
-        }
-
-        return $return;
     }
 }

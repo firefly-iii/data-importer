@@ -51,36 +51,6 @@ abstract class Request
      */
     abstract public function get(): Response;
 
-    public function getBase(): string
-    {
-        return $this->base;
-    }
-
-    public function setBase(string $base): void
-    {
-        $this->base = $base;
-    }
-
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    public function setToken(string $token): void
-    {
-        $this->token = $token;
-    }
-
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
     /**
      * @throws ImporterHttpException
      */
@@ -201,6 +171,47 @@ abstract class Request
         return $json;
     }
 
+    public function getBase(): string
+    {
+        return $this->base;
+    }
+
+    public function setBase(string $base): void
+    {
+        $this->base = $base;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
+
+    private function getClient(): Client
+    {
+        // config here
+
+        return new Client(
+            [
+                'connect_timeout' => $this->timeOut,
+            ]
+        );
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    public function setToken(string $token): void
+    {
+        $this->token = $token;
+    }
+
     /**
      * @throws GuzzleException
      * @throws ImporterHttpException
@@ -243,16 +254,5 @@ abstract class Request
         }
 
         return $json;
-    }
-
-    private function getClient(): Client
-    {
-        // config here
-
-        return new Client(
-            [
-                'connect_timeout' => $this->timeOut,
-            ]
-        );
     }
 }

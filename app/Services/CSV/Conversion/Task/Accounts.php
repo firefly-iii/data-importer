@@ -32,7 +32,6 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException as GrumpyApiHttpE
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\AccountType;
 use GrumpyDictator\FFIIIApiSupport\Request\GetSearchAccountRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 
 /**
  * Class Accounts
@@ -54,400 +53,6 @@ class Accounts extends AbstractTask
         }
 
         return $group;
-    }
-
-    /**
-     * Returns true if the task requires the default account.
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function findAccount(array $array, ?Account $defaultAccount): array
-    {
-        app('log')->debug('Now in findAccount', $array);
-        if (null === $defaultAccount) {
-            app('log')->debug('findAccount() default account is NULL.');
-        }
-        if (null !== $defaultAccount) {
-            app('log')->debug(sprintf('Default account is #%d ("%s")', $defaultAccount->id, $defaultAccount->name));
-        }
-
-        $result = null;
-        // if the ID is set, at least search for the ID.
-        if (is_int($array['id']) && $array['id'] > 0) {
-            app('log')->debug('Will search by ID field.');
-            $result = $this->findById((string)$array['id']);
-        }
-        if (null !== $result) {
-            $return = $result->toArray();
-            app('log')->debug('Result of findById is not null, returning:', $return);
-
-            return $return;
-        }
-        if(array_key_exists('id', $array) && null === $array['id']) {
-            app('log')->debug('ID field is NULL, will not search for it.');
-        }
-
-        // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string)$array['iban']) {
-            app('log')->debug('Will search by IBAN.');
-            $transactionType = (string)($array['transaction_type'] ?? null);
-            $result          = $this->findByIban((string)$array['iban'], $transactionType);
-        }
-        if (null !== $result) {
-            $return = $result->toArray();
-            app('log')->debug('Result of findByIBAN is not null, returning:', $return);
-
-            return $return;
-        }
-        if(array_key_exists('iban', $array) && null === $array['iban']) {
-            app('log')->debug('IBAN field is NULL, will not search for it.');
-        }
-        // If the IBAN search result is NULL, but the IBAN itself is not null,
-        // data importer will return an array with the IBAN (and optionally the name).
-
-        // if the account number is set, search for the account number.
-        if (isset($array['number']) && '' !== (string)$array['number']) {
-            app('log')->debug('Search by account number.');
-            $transactionType = (string)($array['transaction_type'] ?? null);
-            $result          = $this->findByNumber((string)$array['number'], $transactionType);
-        }
-        if (null !== $result) {
-            $return = $result->toArray();
-            app('log')->debug('Result of findByNumber is not null, returning:', $return);
-
-            return $return;
-        }
-        if(array_key_exists('number', $array) && null === $array['number']) {
-            app('log')->debug('Number field is NULL, will not search for it.');
-        }
-
-        // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string)$array['name']) {
-            app('log')->debug('Search by name.');
-            $result = $this->findByName((string)$array['name']);
-        }
-        if (null !== $result) {
-            $return = $result->toArray();
-            app('log')->debug('Result of findByName is not null, returning:', $return);
-
-            return $return;
-        }
-        if(array_key_exists('name', $array) && null === $array['name']) {
-            app('log')->debug('Name field is NULL, will not search for it.');
-        }
-
-        app('log')->debug('Found no account or haven\'t searched for one because of missing data.');
-
-        // append an empty type to the array for consistency's sake.
-        $array['type'] ??= null;
-        $array['bic']  ??= null;
-
-        // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string)$array['name']) {
-            app('log')->debug('At least the array with account-info has some name info, return that.', $array);
-
-            return $array;
-        }
-
-        // Return ID or IBAN if not null
-        if ('' !== (string)$array['iban']) {
-            app('log')->debug('At least the with account-info has some IBAN info, return that.', $array);
-
-            return $array;
-        }
-
-        // if the default account is not NULL, return that one instead:
-        if (null !== $defaultAccount) {
-            $default = $defaultAccount->toArray();
-            app('log')->debug('At least the default account is not null, so will return that:', $default);
-
-            return $default;
-        }
-        app('log')->debug('The default account is NULL, so will return what we started with: ', $array);
-
-        return $array;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function findByIban(string $iban, string $transactionType): ?Account
-    {
-        app('log')->debug(sprintf('Going to search account with IBAN "%s"', $iban));
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setField('iban');
-        $request->setQuery($iban);
-
-        // @var GetAccountsResponse $response
-        try {
-            $response = $request->get();
-        } catch (GrumpyApiHttpException $e) {
-            throw new ImporterErrorException($e->getMessage());
-        }
-        if (0 === count($response)) {
-            app('log')->debug('Found NOTHING in findbyiban.');
-
-            return null;
-        }
-
-        if (1 === count($response)) {
-            // @var Account $account
-            try {
-                $account = $response->current();
-            } catch (ApiException $e) {
-                throw new ImporterErrorException($e->getMessage());
-            }
-            // catch impossible combination "expense" with "deposit"
-            if ('expense' === $account->type && 'deposit' === $transactionType) {
-                app('log')->debug(
-                    sprintf(
-                        'Out of cheese error (IBAN). Found Found %s account #%d based on IBAN "%s". But not going to use expense/deposit combi.',
-                        $account->type,
-                        $account->id,
-                        $iban
-                    )
-                );
-                app('log')->debug('Firefly III will have to make the correct decision.');
-
-                return null;
-            }
-            app('log')->debug(sprintf('[a] Found %s account #%d based on IBAN "%s"', $account->type, $account->id, $iban));
-
-            // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
-            if (in_array($account->type, ['expense', 'revenue'], true)) {
-                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
-
-                return null;
-            }
-
-            return $account;
-        }
-
-        if (2 === count($response)) {
-            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
-
-            return null;
-        }
-        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
-
-        return null;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function findById(string $value): ?Account
-    {
-        app('log')->debug(sprintf('Going to search account with ID "%s"', $value));
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setField('id');
-        $request->setQuery($value);
-
-        // @var GetAccountsResponse $response
-        try {
-            $response = $request->get();
-        } catch (GrumpyApiHttpException $e) {
-            throw new ImporterErrorException($e->getMessage());
-        }
-        if (1 === count($response)) {
-            // @var Account $account
-            try {
-                $account = $response->current();
-            } catch (ApiException $e) {
-                throw new ImporterErrorException($e->getMessage());
-            }
-
-            app('log')->debug(sprintf('[a] Found %s account #%d based on ID "%s"', $account->type, $account->id, $value));
-
-            return $account;
-        }
-
-        app('log')->debug('Found NOTHING in findById.');
-
-        return null;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function findByName(string $name): ?Account
-    {
-        app('log')->debug(sprintf('Going to search account with name "%s"', $name));
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setField('name');
-        $request->setQuery($name);
-
-        // @var GetAccountsResponse $response
-        try {
-            $response = $request->get();
-        } catch (GrumpyApiHttpException $e) {
-            throw new ImporterErrorException($e->getMessage());
-        }
-        if (0 === count($response)) {
-            app('log')->debug('Found NOTHING in findbyname.');
-
-            return null;
-        }
-
-        /** @var Account $account */
-        foreach ($response as $account) {
-            if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
-                && strtolower($account->name) === strtolower($name)) {
-                app('log')->debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
-
-                return $account;
-            }
-        }
-        app('log')->debug(
-            sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name)
-        );
-
-        return null;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function findByNumber(string $accountNumber, string $transactionType): ?Account
-    {
-        app('log')->debug(sprintf('Going to search account with account number "%s"', $accountNumber));
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetSearchAccountRequest($url, $token);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setField('number');
-        $request->setQuery($accountNumber);
-
-        // @var GetAccountsResponse $response
-        try {
-            $response = $request->get();
-        } catch (GrumpyApiHttpException $e) {
-            throw new ImporterErrorException($e->getMessage());
-        }
-        if (0 === count($response)) {
-            app('log')->debug('Found NOTHING in findbynumber.');
-
-            return null;
-        }
-
-        if (1 === count($response)) {
-            // @var Account $account
-            try {
-                $account = $response->current();
-            } catch (ApiException $e) {
-                throw new ImporterErrorException($e->getMessage());
-            }
-            // catch impossible combination "expense" with "deposit"
-            if ('expense' === $account->type && 'deposit' === $transactionType) {
-                app('log')->debug(
-                    sprintf(
-                        'Out of cheese error (account number). Found Found %s account #%d based on account number "%s". But not going to use expense/deposit combi.',
-                        $account->type,
-                        $account->id,
-                        $accountNumber
-                    )
-                );
-                app('log')->debug('Firefly III will have to make the correct decision.');
-
-                return null;
-            }
-            app('log')->debug(sprintf('[a] Found %s account #%d based on account number "%s"', $account->type, $account->id, $accountNumber));
-
-            // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
-            if (in_array($account->type, ['expense', 'revenue'], true)) {
-                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the account number.');
-
-                return null;
-            }
-
-            return $account;
-        }
-
-        if (2 === count($response)) {
-            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
-
-            return null;
-        }
-        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
-
-        return null;
-    }
-
-    private function getDestinationArray(array $transaction): array
-    {
-        return [
-            'transaction_type' => $transaction['type'],
-            'id'               => $transaction['destination_id'],
-            'name'             => $transaction['destination_name'],
-            'iban'             => $transaction['destination_iban'] ?? null,
-            'number'           => $transaction['destination_number'] ?? null,
-            'bic'              => $transaction['destination_bic'] ?? null,
-            'direction'        => 'destination',
-        ];
-    }
-
-    private function getSourceArray(array $transaction): array
-    {
-        return [
-            'transaction_type' => $transaction['type'],
-            'id'               => $transaction['source_id'],
-            'name'             => $transaction['source_name'],
-            'iban'             => $transaction['source_iban'] ?? null,
-            'number'           => $transaction['source_number'] ?? null,
-            'bic'              => $transaction['source_bic'] ?? null,
-            'direction'        => 'source',
-        ];
-    }
-
-    /**
-     * Basic check for currency info.
-     */
-    private function hasAllAmountInformation(array $transaction): bool
-    {
-        return
-            array_key_exists('amount', $transaction)
-            && array_key_exists('foreign_amount', $transaction)
-            && (array_key_exists('foreign_currency_code', $transaction) || array_key_exists('foreign_currency_id', $transaction))
-            && (array_key_exists('currency_code', $transaction) || array_key_exists('currency_id', $transaction));
-    }
-
-    private function hasAllCurrencies(array $transaction): bool
-    {
-        $transaction['foreign_currency_code'] ??= '';
-        $transaction['currency_code']         ??= '';
-        $transaction['amount']                ??= '';
-        $transaction['foreign_amount']        ??= '';
-
-        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
-               && '' !== (string)$transaction['amount']
-               && '' !== (string)$transaction['foreign_amount'];
     }
 
     /**
@@ -632,9 +237,358 @@ class Accounts extends AbstractTask
         return $transaction;
     }
 
-    private function setDestination(array $transaction, array $source): array
+    private function getSourceArray(array $transaction): array
     {
-        return $this->setTransactionAccount('destination', $transaction, $source);
+        return [
+            'transaction_type' => $transaction['type'],
+            'id'               => $transaction['source_id'],
+            'name'             => $transaction['source_name'],
+            'iban'             => $transaction['source_iban'] ?? null,
+            'number'           => $transaction['source_number'] ?? null,
+            'bic'              => $transaction['source_bic'] ?? null,
+            'direction'        => 'source',
+        ];
+    }
+
+    private function getDestinationArray(array $transaction): array
+    {
+        return [
+            'transaction_type' => $transaction['type'],
+            'id'               => $transaction['destination_id'],
+            'name'             => $transaction['destination_name'],
+            'iban'             => $transaction['destination_iban'] ?? null,
+            'number'           => $transaction['destination_number'] ?? null,
+            'bic'              => $transaction['destination_bic'] ?? null,
+            'direction'        => 'destination',
+        ];
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function findAccount(array $array, ?Account $defaultAccount): array
+    {
+        app('log')->debug('Now in findAccount', $array);
+        if (null === $defaultAccount) {
+            app('log')->debug('findAccount() default account is NULL.');
+        }
+        if (null !== $defaultAccount) {
+            app('log')->debug(sprintf('Default account is #%d ("%s")', $defaultAccount->id, $defaultAccount->name));
+        }
+
+        $result = null;
+        // if the ID is set, at least search for the ID.
+        if (is_int($array['id']) && $array['id'] > 0) {
+            app('log')->debug('Will search by ID field.');
+            $result = $this->findById((string)$array['id']);
+        }
+        if (null !== $result) {
+            $return = $result->toArray();
+            app('log')->debug('Result of findById is not null, returning:', $return);
+
+            return $return;
+        }
+        if (array_key_exists('id', $array) && null === $array['id']) {
+            app('log')->debug('ID field is NULL, will not search for it.');
+        }
+
+        // if the IBAN is set, search for the IBAN.
+        if (isset($array['iban']) && '' !== (string)$array['iban']) {
+            app('log')->debug('Will search by IBAN.');
+            $transactionType = (string)($array['transaction_type'] ?? null);
+            $result          = $this->findByIban((string)$array['iban'], $transactionType);
+        }
+        if (null !== $result) {
+            $return = $result->toArray();
+            app('log')->debug('Result of findByIBAN is not null, returning:', $return);
+
+            return $return;
+        }
+        if (array_key_exists('iban', $array) && null === $array['iban']) {
+            app('log')->debug('IBAN field is NULL, will not search for it.');
+        }
+        // If the IBAN search result is NULL, but the IBAN itself is not null,
+        // data importer will return an array with the IBAN (and optionally the name).
+
+        // if the account number is set, search for the account number.
+        if (isset($array['number']) && '' !== (string)$array['number']) {
+            app('log')->debug('Search by account number.');
+            $transactionType = (string)($array['transaction_type'] ?? null);
+            $result          = $this->findByNumber((string)$array['number'], $transactionType);
+        }
+        if (null !== $result) {
+            $return = $result->toArray();
+            app('log')->debug('Result of findByNumber is not null, returning:', $return);
+
+            return $return;
+        }
+        if (array_key_exists('number', $array) && null === $array['number']) {
+            app('log')->debug('Number field is NULL, will not search for it.');
+        }
+
+        // find by name, return only if it's an asset or liability account.
+        if (isset($array['name']) && '' !== (string)$array['name']) {
+            app('log')->debug('Search by name.');
+            $result = $this->findByName((string)$array['name']);
+        }
+        if (null !== $result) {
+            $return = $result->toArray();
+            app('log')->debug('Result of findByName is not null, returning:', $return);
+
+            return $return;
+        }
+        if (array_key_exists('name', $array) && null === $array['name']) {
+            app('log')->debug('Name field is NULL, will not search for it.');
+        }
+
+        app('log')->debug('Found no account or haven\'t searched for one because of missing data.');
+
+        // append an empty type to the array for consistency's sake.
+        $array['type'] ??= null;
+        $array['bic']  ??= null;
+
+        // Return ID or name if not null
+        if (null !== $array['id'] || '' !== (string)$array['name']) {
+            app('log')->debug('At least the array with account-info has some name info, return that.', $array);
+
+            return $array;
+        }
+
+        // Return ID or IBAN if not null
+        if ('' !== (string)$array['iban']) {
+            app('log')->debug('At least the with account-info has some IBAN info, return that.', $array);
+
+            return $array;
+        }
+
+        // if the default account is not NULL, return that one instead:
+        if (null !== $defaultAccount) {
+            $default = $defaultAccount->toArray();
+            app('log')->debug('At least the default account is not null, so will return that:', $default);
+
+            return $default;
+        }
+        app('log')->debug('The default account is NULL, so will return what we started with: ', $array);
+
+        return $array;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function findById(string $value): ?Account
+    {
+        app('log')->debug(sprintf('Going to search account with ID "%s"', $value));
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchAccountRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setField('id');
+        $request->setQuery($value);
+
+        // @var GetAccountsResponse $response
+        try {
+            $response = $request->get();
+        } catch (GrumpyApiHttpException $e) {
+            throw new ImporterErrorException($e->getMessage());
+        }
+        if (1 === count($response)) {
+            // @var Account $account
+            try {
+                $account = $response->current();
+            } catch (ApiException $e) {
+                throw new ImporterErrorException($e->getMessage());
+            }
+
+            app('log')->debug(sprintf('[a] Found %s account #%d based on ID "%s"', $account->type, $account->id, $value));
+
+            return $account;
+        }
+
+        app('log')->debug('Found NOTHING in findById.');
+
+        return null;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function findByIban(string $iban, string $transactionType): ?Account
+    {
+        app('log')->debug(sprintf('Going to search account with IBAN "%s"', $iban));
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchAccountRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setField('iban');
+        $request->setQuery($iban);
+
+        // @var GetAccountsResponse $response
+        try {
+            $response = $request->get();
+        } catch (GrumpyApiHttpException $e) {
+            throw new ImporterErrorException($e->getMessage());
+        }
+        if (0 === count($response)) {
+            app('log')->debug('Found NOTHING in findbyiban.');
+
+            return null;
+        }
+
+        if (1 === count($response)) {
+            // @var Account $account
+            try {
+                $account = $response->current();
+            } catch (ApiException $e) {
+                throw new ImporterErrorException($e->getMessage());
+            }
+            // catch impossible combination "expense" with "deposit"
+            if ('expense' === $account->type && 'deposit' === $transactionType) {
+                app('log')->debug(
+                    sprintf(
+                        'Out of cheese error (IBAN). Found Found %s account #%d based on IBAN "%s". But not going to use expense/deposit combi.',
+                        $account->type,
+                        $account->id,
+                        $iban
+                    )
+                );
+                app('log')->debug('Firefly III will have to make the correct decision.');
+
+                return null;
+            }
+            app('log')->debug(sprintf('[a] Found %s account #%d based on IBAN "%s"', $account->type, $account->id, $iban));
+
+            // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
+            if (in_array($account->type, ['expense', 'revenue'], true)) {
+                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the IBAN.');
+
+                return null;
+            }
+
+            return $account;
+        }
+
+        if (2 === count($response)) {
+            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
+
+            return null;
+        }
+        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
+
+        return null;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function findByNumber(string $accountNumber, string $transactionType): ?Account
+    {
+        app('log')->debug(sprintf('Going to search account with account number "%s"', $accountNumber));
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchAccountRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setField('number');
+        $request->setQuery($accountNumber);
+
+        // @var GetAccountsResponse $response
+        try {
+            $response = $request->get();
+        } catch (GrumpyApiHttpException $e) {
+            throw new ImporterErrorException($e->getMessage());
+        }
+        if (0 === count($response)) {
+            app('log')->debug('Found NOTHING in findbynumber.');
+
+            return null;
+        }
+
+        if (1 === count($response)) {
+            // @var Account $account
+            try {
+                $account = $response->current();
+            } catch (ApiException $e) {
+                throw new ImporterErrorException($e->getMessage());
+            }
+            // catch impossible combination "expense" with "deposit"
+            if ('expense' === $account->type && 'deposit' === $transactionType) {
+                app('log')->debug(
+                    sprintf(
+                        'Out of cheese error (account number). Found Found %s account #%d based on account number "%s". But not going to use expense/deposit combi.',
+                        $account->type,
+                        $account->id,
+                        $accountNumber
+                    )
+                );
+                app('log')->debug('Firefly III will have to make the correct decision.');
+
+                return null;
+            }
+            app('log')->debug(sprintf('[a] Found %s account #%d based on account number "%s"', $account->type, $account->id, $accountNumber));
+
+            // to fix issue #4293, Firefly III will ignore this account if it's an expense or a revenue account.
+            if (in_array($account->type, ['expense', 'revenue'], true)) {
+                app('log')->debug('[a] Data importer will pretend not to have found anything. Firefly III must handle the account number.');
+
+                return null;
+            }
+
+            return $account;
+        }
+
+        if (2 === count($response)) {
+            app('log')->debug('Found 2 results, Firefly III will have to make the correct decision.');
+
+            return null;
+        }
+        app('log')->debug(sprintf('Found %d result(s), Firefly III will have to make the correct decision.', count($response)));
+
+        return null;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function findByName(string $name): ?Account
+    {
+        app('log')->debug(sprintf('Going to search account with name "%s"', $name));
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchAccountRequest($url, $token);
+        $request->setVerify(config('importer.connection.verify'));
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setField('name');
+        $request->setQuery($name);
+
+        // @var GetAccountsResponse $response
+        try {
+            $response = $request->get();
+        } catch (GrumpyApiHttpException $e) {
+            throw new ImporterErrorException($e->getMessage());
+        }
+        if (0 === count($response)) {
+            app('log')->debug('Found NOTHING in findbyname.');
+
+            return null;
+        }
+
+        /** @var Account $account */
+        foreach ($response as $account) {
+            if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
+                && strtolower($account->name) === strtolower($name)) {
+                app('log')->debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
+
+                return $account;
+            }
+        }
+        app('log')->debug(
+            sprintf('Found %d account(s) searching for "%s" but not going to use them. Firefly III must handle the values.', count($response), $name)
+        );
+
+        return null;
     }
 
     private function setSource(array $transaction, array $source): array
@@ -651,6 +605,23 @@ class Accounts extends AbstractTask
         $transaction[sprintf('%s_bic', $direction)]    = $account['bic'];
 
         return $transaction;
+    }
+
+    private function setDestination(array $transaction, array $source): array
+    {
+        return $this->setTransactionAccount('destination', $transaction, $source);
+    }
+
+    /**
+     * Basic check for currency info.
+     */
+    private function hasAllAmountInformation(array $transaction): bool
+    {
+        return
+            array_key_exists('amount', $transaction)
+            && array_key_exists('foreign_amount', $transaction)
+            && (array_key_exists('foreign_currency_code', $transaction) || array_key_exists('foreign_currency_id', $transaction))
+            && (array_key_exists('currency_code', $transaction) || array_key_exists('currency_id', $transaction));
     }
 
     private function swapCurrencyInformation(array $transaction): array
@@ -680,5 +651,33 @@ class Accounts extends AbstractTask
         }
 
         return $transaction;
+    }
+
+    private function hasAllCurrencies(array $transaction): bool
+    {
+        $transaction['foreign_currency_code'] ??= '';
+        $transaction['currency_code']         ??= '';
+        $transaction['amount']                ??= '';
+        $transaction['foreign_amount']        ??= '';
+
+        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
+               && '' !== (string)$transaction['amount']
+               && '' !== (string)$transaction['foreign_amount'];
+    }
+
+    /**
+     * Returns true if the task requires the default account.
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
     }
 }

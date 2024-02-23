@@ -34,7 +34,6 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrencyRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetPreferenceRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PreferenceResponse;
 
@@ -59,24 +58,6 @@ class PseudoTransactionProcessor
         $this->tasks = config('csv.transaction_tasks');
         $this->getDefaultAccount($defaultAccountId);
         $this->getDefaultCurrency();
-    }
-
-    public function processPseudo(array $lines): array
-    {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $count     = count($lines);
-        $processed = [];
-        app('log')->info(sprintf('Converting %d line(s) into transactions.', $count));
-
-        /** @var array $line */
-        foreach ($lines as $index => $line) {
-            app('log')->info(sprintf('Now processing line %d/%d.', $index + 1, $count));
-            $processed[] = $this->processPseudoLine($line);
-            // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
-        }
-        app('log')->info(sprintf('Done converting %d line(s) into transactions.', $count));
-
-        return $processed;
     }
 
     /**
@@ -141,6 +122,24 @@ class PseudoTransactionProcessor
 
             throw new ImporterErrorException(sprintf('The default currency ("%s") could not be loaded.', $code));
         }
+    }
+
+    public function processPseudo(array $lines): array
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $count     = count($lines);
+        $processed = [];
+        app('log')->info(sprintf('Converting %d line(s) into transactions.', $count));
+
+        /** @var array $line */
+        foreach ($lines as $index => $line) {
+            app('log')->info(sprintf('Now processing line %d/%d.', $index + 1, $count));
+            $processed[] = $this->processPseudoLine($line);
+            // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
+        }
+        app('log')->info(sprintf('Done converting %d line(s) into transactions.', $count));
+
+        return $processed;
     }
 
     private function processPseudoLine(array $line): array

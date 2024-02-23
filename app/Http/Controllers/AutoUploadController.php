@@ -36,12 +36,6 @@ class AutoUploadController extends Controller
     use HaveAccess;
     use VerifyJSON;
 
-    public function error($string, $verbosity = null): void
-    {
-        app('log')->error($string);
-        $this->line($string);
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -64,7 +58,7 @@ class AutoUploadController extends Controller
 
         $json           = $request->file('json');
         $importable     = $request->file('importable');
-        $importablePath = (string) $importable?->getPathname();
+        $importablePath = (string)$importable?->getPathname();
 
         try {
             $this->importUpload((string)$json?->getPathname(), $importablePath);
@@ -76,6 +70,17 @@ class AutoUploadController extends Controller
         return ' ';
     }
 
+    public function error($string, $verbosity = null): void
+    {
+        app('log')->error($string);
+        $this->line($string);
+    }
+
+    public function line(string $string): void
+    {
+        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+    }
+
     /**
      * @param null  $verbosity
      * @param mixed $string
@@ -83,11 +88,6 @@ class AutoUploadController extends Controller
     public function info($string, $verbosity = null): void
     {
         $this->line($string);
-    }
-
-    public function line(string $string): void
-    {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
     /**

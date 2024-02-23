@@ -60,11 +60,11 @@ class PostNewRequisitionRequest extends Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array
                 = [
-                    'redirect'       => route('010-build-link.callback'),
-                    'institution_id' => $this->bank,
-                    'reference'      => $this->reference,
-                    'agreement'      => $this->agreement,
-                ];
+                'redirect'       => route('010-build-link.callback'),
+                'institution_id' => $this->bank,
+                'reference'      => $this->reference,
+                'agreement'      => $this->agreement,
+            ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);

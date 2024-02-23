@@ -34,11 +34,11 @@ class ImportServiceAccount
 {
     public string $bban;
     public string $currencyCode;
+    public array  $extra;
     public string $iban;
     public string $id;
     public string $name;
     public string $status;
-    public array  $extra;
 
     public static function convertNordigenArray(array $accounts): array
     {
@@ -83,6 +83,29 @@ class ImportServiceAccount
         return $return;
     }
 
+    /**
+     * @return $this
+     */
+    public static function fromArray(array $array): self
+    {
+        app('log')->debug('Create generic account from', $array);
+        $iban                  = (string)($array['iban'] ?? '');
+        if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+            app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+            $iban = '';
+        }
+        $account               = new self();
+        $account->id           = $array['id'];
+        $account->name         = $array['name'];
+        $account->iban         = $iban;
+        $account->bban         = $array['bban'];
+        $account->currencyCode = $array['currency_code'];
+        $account->status       = $array['status'];
+        $account->extra        = $array['extra'];
+
+        return $account;
+    }
+
     public static function convertSpectreArray(array $spectre): array
     {
         $return = [];
@@ -112,28 +135,5 @@ class ImportServiceAccount
         }
 
         return $return;
-    }
-
-    /**
-     * @return $this
-     */
-    public static function fromArray(array $array): self
-    {
-        app('log')->debug('Create generic account from', $array);
-        $iban                  = (string)($array['iban'] ?? '');
-        if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
-            app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
-            $iban = '';
-        }
-        $account               = new self();
-        $account->id           = $array['id'];
-        $account->name         = $array['name'];
-        $account->iban         = $iban;
-        $account->bban         = $array['bban'];
-        $account->currencyCode = $array['currency_code'];
-        $account->status       = $array['status'];
-        $account->extra        = $array['extra'];
-
-        return $account;
     }
 }

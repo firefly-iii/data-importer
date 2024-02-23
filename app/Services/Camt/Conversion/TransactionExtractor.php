@@ -13,6 +13,7 @@ use Genkgo\Camt\DTO\Message;
 class TransactionExtractor
 {
     use ProgressInformation;
+
     private Configuration $configuration;
 
     public function __construct(Configuration $configuration)
@@ -37,7 +38,7 @@ class TransactionExtractor
             $entries    = $statement->getEntries();
             $entryCount = count($entries);
             app('log')->debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i + 1, $totalCount, $entryCount));
-            foreach ($entries as $ii => $entry) { // -> Level C
+            foreach ($entries as $ii => $entry) {                // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 app('log')->debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
                 if (0 === $count) {

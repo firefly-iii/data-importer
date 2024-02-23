@@ -103,18 +103,18 @@ class AutoImportController extends Controller
         echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
     }
 
+    public function error($string, $verbosity = null): void
+    {
+        app('log')->error($string);
+        $this->line($string);
+    }
+
     /**
      * @param null  $verbosity
      * @param mixed $string
      */
     public function warn($string, $verbosity = null): void
     {
-        $this->line($string);
-    }
-
-    public function error($string, $verbosity = null): void
-    {
-        app('log')->error($string);
         $this->line($string);
     }
 }

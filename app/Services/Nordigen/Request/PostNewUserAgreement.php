@@ -61,10 +61,10 @@ class PostNewUserAgreement extends Request
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $array
                 = [
-                    'institution_id'        => $this->bank,
-                    'max_historical_days'   => $this->maxHistoricalDays,
-                    'access_valid_for_days' => $this->accessValidForDays,
-                ];
+                'institution_id'        => $this->bank,
+                'max_historical_days'   => $this->maxHistoricalDays,
+                'access_valid_for_days' => $this->accessValidForDays,
+            ];
 
         $result = $this->authenticatedJsonPost($array);
         app('log')->debug('Returned from POST: ', $result);

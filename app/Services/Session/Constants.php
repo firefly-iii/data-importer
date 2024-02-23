@@ -69,25 +69,24 @@ class Constants
     public const string SELECTED_BANK_COUNTRY         = 'selected_bank_country';
 
     // nordigen specific constants
-    public const string SESSION_NORDIGEN_ID           = 'nordigen_id';
+    public const string SESSION_ACCESS_TOKEN          = 'session_token';
 
     // constants for data conversion job:
-    public const string SESSION_NORDIGEN_KEY          = 'nordigen_key';
-    public const string SESSION_SPECTRE_APP_ID        = 'spectre_app_id';
+    public const string SESSION_BASE_URL              = 'base_url';
+    public const string SESSION_CLIENT_ID             = 'client_id';
 
     // specific variables for the ability to upload multiple (config) files at once
-    public const string SESSION_SPECTRE_SECRET        = 'spectre_secret';
-    public const string SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
+    public const string SESSION_NORDIGEN_ID           = 'nordigen_id';
+    public const string SESSION_NORDIGEN_KEY          = 'nordigen_key';
 
     // other variables
-    public const string UPLOAD_CONFIG_FILE            = 'config_file_path';
-    public const string UPLOAD_DATA_FILE              = 'data_file_path';
+    public const string SESSION_REFRESH_TOKEN         = 'refresh_token';
+    public const string SESSION_SPECTRE_APP_ID        = 'spectre_app_id';
 
     // session variable names:
-    public const string SESSION_ACCESS_TOKEN          = 'session_token';
-    public const string SESSION_BASE_URL              = 'base_url';
+    public const string SESSION_SPECTRE_SECRET        = 'spectre_secret';
     public const string SESSION_VANITY_URL            = 'vanity_url';
-
-    public const string SESSION_CLIENT_ID             = 'client_id';
-    public const string SESSION_REFRESH_TOKEN         = 'refresh_token';
+    public const string SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
+    public const string UPLOAD_CONFIG_FILE            = 'config_file_path';
+    public const string UPLOAD_DATA_FILE              = 'data_file_path';
 }
