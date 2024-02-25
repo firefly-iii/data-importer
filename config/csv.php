@@ -567,10 +567,10 @@ return [
     ],
     'search_modifier'       => [
         'note'               => 'notes_are',
-        'external-id'        => 'external_id',
-        'external_id'        => 'external_id',
-        'description'        => 'description_id',
-        'internal_reference' => 'internal_reference',
-        'internal-reference' => 'internal_reference',
+        'external-id'        => 'external_id_is',
+        'external_id'        => 'external_id_is',
+        'description'        => 'description_is',
+        'internal_reference' => 'internal_reference_is',
+        'internal-reference' => 'internal_reference_is',
     ],
 ];
