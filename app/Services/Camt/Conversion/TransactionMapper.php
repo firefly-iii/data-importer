@@ -509,7 +509,7 @@ class TransactionMapper
                 app('log')->debug(sprintf('Now working on key "%s".', $key));
                 // try to find the account
                 if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
-                    $foundDirection = $this->getAccountType($suffix, $current[$key], $lessThanZero);
+                    $foundDirection = $this->getAccountType($suffix, (string) $current[$key], $lessThanZero);
                     app('log')->debug(
                         sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection)
                     );
