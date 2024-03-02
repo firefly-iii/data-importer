@@ -25,7 +25,7 @@
                             {% if '' != baseUrl %}
                                 In order to get access to your Firefly III installation at <a
                                 href="{{ baseUrl }}">{{ baseUrl }}</a>
-                                {% if '' == vanityUrl %}
+                                {% if '' != vanityUrl %}
                                     (<a href="{{ vanityUrl }}">{{ vanityUrl }}</a>)
                                 {% endif %}
                                 , you will need to submit a valid Client ID. This is a number.
