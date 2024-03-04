@@ -75,7 +75,7 @@
         "php": ">=8.3",
         "ext-bcmath": "*",
         "ext-json": "*",
-        "doctrine/dbal": "^3.0",
+        "doctrine/dbal": "^3.8",
         "firefly-iii/api-support-classes": "@dev",
         "guzzlehttp/guzzle": "^7.0",
         "laravel/framework": "^10.45",
