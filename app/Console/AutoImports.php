@@ -112,9 +112,8 @@ trait AutoImports
         $configJsonExists = file_exists(sprintf("%s/bulkconfig.json", $directory));
 
         if (!file_exists($fullJson)) {
-            $this->error(sprintf('config json exists: %s',$configJsonExists));
             if($configJsonExists){
-                $this->error(sprintf('Found \'bulkconfig.json\''));
+                $this->line(sprintf('Found \'bulkconfig.json\''));
                 return true;
             }
             $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with file "%s". This file will be ignored.', $fullJson, $file));
