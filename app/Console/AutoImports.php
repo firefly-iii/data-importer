@@ -109,8 +109,15 @@ trait AutoImports
         $short    = substr($file, 0, -4);
         $jsonFile = sprintf('%s.json', $short);
         $fullJson = sprintf('%s/%s', $directory, $jsonFile);
+        $configJsonExists = file_exists(sprintf("%s/bulkconfig.json", $directory));
+
         if (!file_exists($fullJson)) {
-            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with CSV file "%s". CSV file will be ignored.', $fullJson, $file));
+            $this->error(sprintf('config json exists: %s',$configJsonExists));
+            if($configJsonExists){
+                $this->error(sprintf('Found \'bulkconfig.json\''));
+                return true;
+            }
+            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with file "%s". This file will be ignored.', $fullJson, $file));
 
             return false;
         }
@@ -177,6 +184,17 @@ trait AutoImports
         if ('xml' === $this->getExtension($file)) {
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
+
+        $configJsonFile = sprintf("%s/bulkconfig.json", $directory);
+        $configJsonExists = file_exists($configJsonFile);
+        $jsonFileExists = file_exists($jsonFile);
+
+        // Should never happen
+        if(!$jsonFileExists && !$configJsonExists){
+            $this->error(sprintf('No json found! Checked for both "%s" and "%s"'), $jsonFile, $configJsonFile);
+        }
+
+        $jsonFile = $jsonFileExists ? $jsonFile : $configJsonFile;
 
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
