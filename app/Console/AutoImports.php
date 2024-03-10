@@ -109,19 +109,35 @@ trait AutoImports
         $short    = substr($file, 0, -4);
         $jsonFile = sprintf('%s.json', $short);
         $fullJson = sprintf('%s/%s', $directory, $jsonFile);
-        $configJsonExists = file_exists(sprintf("%s/bulkconfig.json", $directory));
 
         if (!file_exists($fullJson)) {
-            if($configJsonExists){
-                $this->line(sprintf('Found \'bulkconfig.json\''));
+            $hasFallbackConfig = $this->hasFallbackConfig($directory);
+            if ($hasFallbackConfig) {
+                $this->line('Found fallback configuration file, which will be used for this file.');
+
                 return true;
             }
-            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with file "%s". This file will be ignored.', $fullJson, $file));
+            $this->warn(sprintf('Cannot find JSON file "%s" nor fallback file expected to go with file "%s". This file will be ignored.', $jsonFile, $file));
 
             return false;
         }
 
         return true;
+    }
+
+    private function hasFallbackConfig(string $directory): bool
+    {
+        if (false === config('importer.fallback_in_dir')) {
+            return false;
+        }
+        $configJsonFile = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
+        if (file_exists($configJsonFile) && is_readable($configJsonFile)) {
+            $content = file_get_contents($configJsonFile);
+
+            return json_validate($content);
+        }
+
+        return false;
     }
 
     /**
@@ -171,8 +187,9 @@ trait AutoImports
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile = sprintf('%s/%s', $directory, $file);
-        $jsonFile       = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $importableFile    = sprintf('%s/%s', $directory, $file);
+        $jsonFile          = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $fallbackJsonFile  = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
 
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.
@@ -183,30 +200,28 @@ trait AutoImports
         if ('xml' === $this->getExtension($file)) {
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
+        $jsonFileExists    = file_exists($jsonFile);
+        $hasFallbackConfig = $this->hasFallbackConfig($directory);
 
-        $configJsonFile = sprintf("%s/bulkconfig.json", $directory);
-        $configJsonExists = file_exists($configJsonFile);
-        $jsonFileExists = file_exists($jsonFile);
-
-        // Should never happen
-        if(!$jsonFileExists && !$configJsonExists){
-            $this->error(sprintf('No json found! Checked for both "%s" and "%s"'), $jsonFile, $configJsonFile);
+        // Should not happen
+        if (!$jsonFileExists && !$hasFallbackConfig) {
+            $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
         }
 
-        $jsonFile = $jsonFileExists ? $jsonFile : $configJsonFile;
+        $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
 
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
         // do JSON check
-        $jsonResult     = $this->verifyJSON($jsonFile);
+        $jsonResult        = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
 
             return;
         }
-        $configuration  = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
