@@ -170,7 +170,7 @@ class UploadController extends Controller
                     // This one is for you: 🤦‍♀️
                     $eol     = $this->detectEOL($content);
                     if ("\r" === $eol) {
-                        app('log')->error('You bank is dumb. Tell them to fix their CSV files.');
+                        app('log')->error('Your bank is dumb. Tell them to fix their CSV files.');
                         $content = str_replace("\r", "\n", $content);
                     }
                 }
