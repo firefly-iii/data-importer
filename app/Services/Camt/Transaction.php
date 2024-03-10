@@ -389,7 +389,7 @@ class Transaction
     /**
      * @return null|Creditor|Debtor
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): null|RelatedParty
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): ?RelatedParty
     {
         app('log')->debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();

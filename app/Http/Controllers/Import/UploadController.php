@@ -144,7 +144,7 @@ class UploadController extends Controller
      * @throws FilesystemException
      * @throws ImporterErrorException
      */
-    private function processUploadedFile(string $flow, MessageBag $errors, null|UploadedFile $file): MessageBag
+    private function processUploadedFile(string $flow, MessageBag $errors, ?UploadedFile $file): MessageBag
     {
         if (null === $file && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
@@ -272,7 +272,7 @@ class UploadController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    private function processSelection(MessageBag $errors, string $selection, null|UploadedFile $file): MessageBag
+    private function processSelection(MessageBag $errors, string $selection, ?UploadedFile $file): MessageBag
     {
         if (null === $file && '' !== $selection) {
             app('log')->debug('User selected a config file from the store.');
