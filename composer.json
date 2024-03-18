@@ -78,7 +78,7 @@
         "doctrine/dbal": "^3.8",
         "firefly-iii/api-support-classes": "@dev",
         "guzzlehttp/guzzle": "^7.0",
-        "laravel/framework": "^10.45",
+        "laravel/framework": "^10.48",
         "laravel/tinker": "^2.0",
         "league/csv": "9.*",
         "rcrowe/twigbridge": "^0.14.2",
