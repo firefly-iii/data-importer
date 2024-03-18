@@ -96,7 +96,7 @@
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^7.0",
-        "nunomaduro/larastan": "^2.0",
+        "nunomaduro/larastan": "^2.9",
         "phpstan/extension-installer": "*",
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-deprecation-rules": "^1.0",
