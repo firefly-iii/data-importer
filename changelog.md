@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.5 - 2024-03-21
+
+### Added
+- Added the option to add a "fallback" configuration file for directory imports, by @Call-Me-G-Now. See the [documentation](https://docs.firefly-iii.org/how-to/data-importer/advanced/post/#importing-a-local-directory) for more info.
+- Client side file type validation by @Call-Me-G-Now
+
+### Changed
+- Better list of currencies in the configuration screen, by @patricksindelka
+
+### Fixed
+- [Issue 8574](https://github.com/firefly-iii/firefly-iii/issues/8574) (Importing camt.053 file fails during conversion step ) reported by @laeckerv
+- [Issue 8582](https://github.com/firefly-iii/firefly-iii/issues/8582) (CSV importer uses "contains" to detect duplicates in External ID) reported by @RobinWeitzel
+- [Issue 8583](https://github.com/firefly-iii/firefly-iii/issues/8583) (Importing camt.053 file fails during conversion step when Statement Account IBAN  is mapped) reported by @laeckerv
+- [Issue 8607](https://github.com/firefly-iii/firefly-iii/issues/8607) (Data Importer Vanity URL with Docker not being shown) reported by @Jademalo
+- Typo in debug logs by @Call-Me-G-Now
+
 ## v1.4.4 - 2024-02-18
 
 ### Fixed
