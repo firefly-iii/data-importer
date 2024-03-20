@@ -38,6 +38,7 @@ class Configuration
     private string $connection;
     private string $contentType;
     private bool   $conversion;
+    private string $customTag;
     private string $date;
     private string $dateNotAfter;
     private string $dateNotBefore;
@@ -45,7 +46,6 @@ class Configuration
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
     private int    $defaultAccount;
-    private string $customTag;
 
     // nordigen configuration
     private string $delimiter;
@@ -161,6 +161,153 @@ class Configuration
     }
 
     /**
+     * @return $this
+     */
+    public static function fromFile(array $data): self
+    {
+        app('log')->debug('Now in Configuration::fromFile. Data is omitted and will not be printed.');
+        $version = $data['version'] ?? 1;
+        if (1 === $version) {
+            app('log')->debug('v1, going for classic.');
+
+            return self::fromClassicFile($data);
+        }
+        if (2 === $version) {
+            app('log')->debug('v2 config file!');
+
+            return self::fromVersionTwo($data);
+        }
+        if (3 === $version) {
+            app('log')->debug('v3 config file!');
+
+            return self::fromVersionThree($data);
+        }
+
+        throw new \UnexpectedValueException(sprintf('Configuration file version "%s" cannot be parsed.', $version));
+    }
+
+    /**
+     * @return static
+     */
+    private static function fromClassicFile(array $data): self
+    {
+        $delimiters                          = config('csv.delimiters_reversed');
+        $classicRoleNames                    = config('csv.classic_roles');
+        $object                              = new self();
+        $object->headers                     = $data['has-headers'] ?? false;
+        $object->date                        = $data['date-format'] ?? $object->date;
+        $object->delimiter                   = $delimiters[$data['delimiter']] ?? 'comma';
+        $object->defaultAccount              = $data['import-account'] ?? $object->defaultAccount;
+        $object->rules                       = $data['apply-rules'] ?? true;
+        $object->flow                        = $data['flow'] ?? 'file';
+        $object->contentType                 = $data['content_type'] ?? 'csv';
+        $object->customTag                   = $data['custom_tag'] ?? '';
+
+        // camt settings
+        $object->groupedTransactionHandling  = $data['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress    = $data['use_entire_opposing_address'] ?? false;
+
+        // other settings (are not in v1 anyway)
+        $object->dateRange                   = $data['date_range'] ?? 'all';
+        $object->dateRangeNumber             = $data['date_range_number'] ?? 30;
+        $object->dateRangeUnit               = $data['date_range_unit'] ?? 'd';
+        $object->dateNotBefore               = $data['date_not_before'] ?? '';
+        $object->dateNotAfter                = $data['date_not_after'] ?? '';
+
+        // spectre settings (are not in v1 anyway)
+        $object->identifier                  = $data['identifier'] ?? '0';
+        $object->connection                  = $data['connection'] ?? '0';
+        $object->ignoreSpectreCategories     = $data['ignore_spectre_categories'] ?? false;
+
+        // nordigen settings (are not in v1 anyway)
+        $object->nordigenCountry             = $data['nordigen_country'] ?? '';
+        $object->nordigenBank                = $data['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions        = $data['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays             = $data['nordigen_max_days'] ?? '90';
+
+        // settings for spectre + nordigen (are not in v1 anyway)
+        $object->mapAllData                  = $data['map_all_data'] ?? false;
+        $object->accounts                    = $data['accounts'] ?? [];
+
+        $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
+
+        if (isset($data['ignore_duplicates']) && true === $data['ignore_duplicates']) {
+            app('log')->debug('Will ignore duplicates.');
+            $object->ignoreDuplicateTransactions = true;
+            $object->duplicateDetectionMethod    = 'classic';
+        }
+
+        if (isset($data['ignore_duplicates']) && false === $data['ignore_duplicates']) {
+            app('log')->debug('Will NOT ignore duplicates.');
+            $object->ignoreDuplicateTransactions = false;
+            $object->duplicateDetectionMethod    = 'none';
+        }
+
+        if (isset($data['ignore_lines']) && true === $data['ignore_lines']) {
+            app('log')->debug('Will ignore duplicate lines.');
+            $object->ignoreDuplicateLines = true;
+        }
+
+        // array values
+        $object->specifics                   = [];
+        $object->roles                       = [];
+        $object->doMapping                   = [];
+        $object->mapping                     = [];
+        $object->accounts                    = [];
+
+        // utf8
+        $object->conversion                  = $data['conversion'] ?? false;
+
+        // loop roles from classic file:
+        $roles                               = $data['column-roles'] ?? [];
+        foreach ($roles as $index => $role) {
+            // some roles have been given a new name some time in the past.
+            $role   = $classicRoleNames[$role] ?? $role;
+            $config = config(sprintf('csv.import_roles.%s', $role));
+            if (null !== $config) {
+                $object->roles[$index] = $role;
+            }
+            if (null === $config) {
+                app('log')->warn(sprintf('There is no config for "%s"!', $role));
+            }
+        }
+        ksort($object->roles);
+
+        // loop do mapping from classic file.
+        $doMapping                           = $data['column-do-mapping'] ?? [];
+        foreach ($doMapping as $index => $map) {
+            $index                     = (int)$index;
+            $object->doMapping[$index] = $map;
+        }
+        ksort($object->doMapping);
+
+        // loop mapping from classic file.
+        $mapping                             = $data['column-mapping-config'] ?? [];
+        foreach ($mapping as $index => $map) {
+            $index                   = (int)$index;
+            $object->mapping[$index] = $map;
+        }
+        ksort($object->mapping);
+
+        // set version to latest version and return.
+        $object->version                     = self::VERSION;
+
+        if ('csv' === $object->flow) {
+            $object->flow = 'file';
+        }
+
+        return $object;
+    }
+
+    /**
+     * @return static
+     */
+    private static function fromVersionTwo(array $data): self
+    {
+        return self::fromArray($data);
+    }
+
+    /**
      * @return static
      */
     public static function fromArray(array $array): self
@@ -248,29 +395,14 @@ class Configuration
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public static function fromFile(array $data): self
+    private static function fromVersionThree(array $data): self
     {
-        app('log')->debug('Now in Configuration::fromFile. Data is omitted and will not be printed.');
-        $version = $data['version'] ?? 1;
-        if (1 === $version) {
-            app('log')->debug('v1, going for classic.');
+        $object            = self::fromArray($data);
+        $object->specifics = [];
 
-            return self::fromClassicFile($data);
-        }
-        if (2 === $version) {
-            app('log')->debug('v2 config file!');
-
-            return self::fromVersionTwo($data);
-        }
-        if (3 === $version) {
-            app('log')->debug('v3 config file!');
-
-            return self::fromVersionThree($data);
-        }
-
-        throw new \UnexpectedValueException(sprintf('Configuration file version "%s" cannot be parsed.', $version));
+        return $object;
     }
 
     /**
@@ -372,6 +504,11 @@ class Configuration
         $this->nordigenRequisitions[$key] = $identifier;
     }
 
+    public function clearRequisitions(): void
+    {
+        $this->nordigenRequisitions = [];
+    }
+
     public function getAccounts(): array
     {
         return $this->accounts;
@@ -400,6 +537,11 @@ class Configuration
     public function setContentType(string $contentType): void
     {
         $this->contentType = $contentType;
+    }
+
+    public function getCustomTag(): string
+    {
+        return $this->customTag;
     }
 
     public function getDate(): string
@@ -475,11 +617,6 @@ class Configuration
     public function getIdentifier(): string
     {
         return $this->identifier;
-    }
-
-    public function clearRequisitions(): void
-    {
-        $this->nordigenRequisitions = [];
     }
 
     public function setIdentifier(string $identifier): void
@@ -622,6 +759,17 @@ class Configuration
         return $this->useEntireOpposingAddress;
     }
 
+    /**
+     * Return the array but drop some potentially massive arrays.
+     */
+    public function toSessionArray(): array
+    {
+        $array = $this->toArray();
+        unset($array['mapping'], $array['do_mapping'], $array['roles']);
+
+        return $array;
+    }
+
     public function toArray(): array
     {
         $array                                  = [
@@ -688,17 +836,6 @@ class Configuration
         return $array;
     }
 
-    /**
-     * Return the array but drop some potentially massive arrays.
-     */
-    public function toSessionArray(): array
-    {
-        $array = $this->toArray();
-        unset($array['mapping'], $array['do_mapping'], $array['roles']);
-
-        return $array;
-    }
-
     public function updateDateRange(): void
     {
         app('log')->debug('Now in updateDateRange()');
@@ -744,11 +881,6 @@ class Configuration
         }
     }
 
-    public function getCustomTag(): string
-    {
-        return $this->customTag;
-    }
-
     private static function calcDateNotBefore(string $unit, int $number): ?string
     {
         $functions = [
@@ -767,137 +899,5 @@ class Configuration
         app('log')->error(sprintf('Could not parse date setting. Unknown key "%s"', $unit));
 
         return null;
-    }
-
-    /**
-     * @return static
-     */
-    private static function fromClassicFile(array $data): self
-    {
-        $delimiters                          = config('csv.delimiters_reversed');
-        $classicRoleNames                    = config('csv.classic_roles');
-        $object                              = new self();
-        $object->headers                     = $data['has-headers'] ?? false;
-        $object->date                        = $data['date-format'] ?? $object->date;
-        $object->delimiter                   = $delimiters[$data['delimiter']] ?? 'comma';
-        $object->defaultAccount              = $data['import-account'] ?? $object->defaultAccount;
-        $object->rules                       = $data['apply-rules'] ?? true;
-        $object->flow                        = $data['flow'] ?? 'file';
-        $object->contentType                 = $data['content_type'] ?? 'csv';
-        $object->customTag                   = $data['custom_tag'] ?? '';
-
-        // camt settings
-        $object->groupedTransactionHandling  = $data['grouped_transaction_handling'] ?? 'single';
-        $object->useEntireOpposingAddress    = $data['use_entire_opposing_address'] ?? false;
-
-        // other settings (are not in v1 anyway)
-        $object->dateRange                   = $data['date_range'] ?? 'all';
-        $object->dateRangeNumber             = $data['date_range_number'] ?? 30;
-        $object->dateRangeUnit               = $data['date_range_unit'] ?? 'd';
-        $object->dateNotBefore               = $data['date_not_before'] ?? '';
-        $object->dateNotAfter                = $data['date_not_after'] ?? '';
-
-        // spectre settings (are not in v1 anyway)
-        $object->identifier                  = $data['identifier'] ?? '0';
-        $object->connection                  = $data['connection'] ?? '0';
-        $object->ignoreSpectreCategories     = $data['ignore_spectre_categories'] ?? false;
-
-        // nordigen settings (are not in v1 anyway)
-        $object->nordigenCountry             = $data['nordigen_country'] ?? '';
-        $object->nordigenBank                = $data['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions        = $data['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays             = $data['nordigen_max_days'] ?? '90';
-
-        // settings for spectre + nordigen (are not in v1 anyway)
-        $object->mapAllData                  = $data['map_all_data'] ?? false;
-        $object->accounts                    = $data['accounts'] ?? [];
-
-        $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
-
-        if (isset($data['ignore_duplicates']) && true === $data['ignore_duplicates']) {
-            app('log')->debug('Will ignore duplicates.');
-            $object->ignoreDuplicateTransactions = true;
-            $object->duplicateDetectionMethod    = 'classic';
-        }
-
-        if (isset($data['ignore_duplicates']) && false === $data['ignore_duplicates']) {
-            app('log')->debug('Will NOT ignore duplicates.');
-            $object->ignoreDuplicateTransactions = false;
-            $object->duplicateDetectionMethod    = 'none';
-        }
-
-        if (isset($data['ignore_lines']) && true === $data['ignore_lines']) {
-            app('log')->debug('Will ignore duplicate lines.');
-            $object->ignoreDuplicateLines = true;
-        }
-
-        // array values
-        $object->specifics                   = [];
-        $object->roles                       = [];
-        $object->doMapping                   = [];
-        $object->mapping                     = [];
-        $object->accounts                    = [];
-
-        // utf8
-        $object->conversion                  = $data['conversion'] ?? false;
-
-        // loop roles from classic file:
-        $roles                               = $data['column-roles'] ?? [];
-        foreach ($roles as $index => $role) {
-            // some roles have been given a new name some time in the past.
-            $role   = $classicRoleNames[$role] ?? $role;
-            $config = config(sprintf('csv.import_roles.%s', $role));
-            if (null !== $config) {
-                $object->roles[$index] = $role;
-            }
-            if (null === $config) {
-                app('log')->warn(sprintf('There is no config for "%s"!', $role));
-            }
-        }
-        ksort($object->roles);
-
-        // loop do mapping from classic file.
-        $doMapping                           = $data['column-do-mapping'] ?? [];
-        foreach ($doMapping as $index => $map) {
-            $index                     = (int)$index;
-            $object->doMapping[$index] = $map;
-        }
-        ksort($object->doMapping);
-
-        // loop mapping from classic file.
-        $mapping                             = $data['column-mapping-config'] ?? [];
-        foreach ($mapping as $index => $map) {
-            $index                   = (int)$index;
-            $object->mapping[$index] = $map;
-        }
-        ksort($object->mapping);
-
-        // set version to latest version and return.
-        $object->version                     = self::VERSION;
-
-        if ('csv' === $object->flow) {
-            $object->flow = 'file';
-        }
-
-        return $object;
-    }
-
-    /**
-     * @return static
-     */
-    private static function fromVersionThree(array $data): self
-    {
-        $object            = self::fromArray($data);
-        $object->specifics = [];
-
-        return $object;
-    }
-
-    /**
-     * @return static
-     */
-    private static function fromVersionTwo(array $data): self
-    {
-        return self::fromArray($data);
     }
 }

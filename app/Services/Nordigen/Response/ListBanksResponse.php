@@ -58,10 +58,27 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
         $this->collection = new Collection(array_values($this->countries));
     }
 
+    private function processCountries(array $bank): void
+    {
+        foreach ($bank['countries'] as $code) {
+            if (!isset($this->countries[$code])) {
+                $this->countries[$code] = new Country($code, new Collection());
+            }
+        }
+    }
+
+    private function addToCountries(Bank $object, array $countries): void
+    {
+        /** @var string $code */
+        foreach ($countries as $code) {
+            $this->countries[$code]->addBank($object);
+        }
+    }
+
     /**
      * Count elements of an object.
      *
-     * @see  https://php.net/manual/en/countable.count.php
+     * @see   https://php.net/manual/en/countable.count.php
      *
      * @return int The custom count as an integer.
      *             </p>
@@ -78,7 +95,7 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     /**
      * Return the current element.
      *
-     * @see  https://php.net/manual/en/iterator.current.php
+     * @see   https://php.net/manual/en/iterator.current.php
      * @since 5.0.0
      */
     public function current(): Country
@@ -89,7 +106,7 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     /**
      * Return the key of the current element.
      *
-     * @see  https://php.net/manual/en/iterator.key.php
+     * @see   https://php.net/manual/en/iterator.key.php
      * @since 5.0.0
      */
     public function key(): int
@@ -100,7 +117,7 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     /**
      * Move forward to next element.
      *
-     * @see  https://php.net/manual/en/iterator.next.php
+     * @see   https://php.net/manual/en/iterator.next.php
      * @since 5.0.0
      */
     public function next(): void
@@ -111,7 +128,7 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     /**
      * Rewind the Iterator to the first element.
      *
-     * @see  https://php.net/manual/en/iterator.rewind.php
+     * @see   https://php.net/manual/en/iterator.rewind.php
      * @since 5.0.0
      */
     public function rewind(): void
@@ -122,7 +139,7 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     /**
      * Checks if current position is valid.
      *
-     * @see  https://php.net/manual/en/iterator.valid.php
+     * @see   https://php.net/manual/en/iterator.valid.php
      *
      * @return bool The return value will be casted to boolean and then evaluated.
      *              Returns true on success or false on failure.
@@ -132,22 +149,5 @@ class ListBanksResponse extends Response implements \Iterator, \Countable
     public function valid(): bool
     {
         return $this->collection->has($this->position);
-    }
-
-    private function addToCountries(Bank $object, array $countries): void
-    {
-        /** @var string $code */
-        foreach ($countries as $code) {
-            $this->countries[$code]->addBank($object);
-        }
-    }
-
-    private function processCountries(array $bank): void
-    {
-        foreach ($bank['countries'] as $code) {
-            if (!isset($this->countries[$code])) {
-                $this->countries[$code] = new Country($code, new Collection());
-            }
-        }
     }
 }

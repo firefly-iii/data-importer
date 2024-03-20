@@ -30,7 +30,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Request\ListAccountsRequest;
-use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;

@@ -43,6 +43,11 @@ class GetTransactionsRequest extends Request
         $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
     }
 
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
     public function get(): Response
     {
         $response = $this->authenticatedGet();
@@ -57,7 +62,7 @@ class GetTransactionsRequest extends Request
 
                     return $value;
                 }, $set);
-                $count += count($set);
+                $count  += count($set);
                 $return = array_merge($return, $set);
             }
         }
@@ -75,10 +80,5 @@ class GetTransactionsRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 }

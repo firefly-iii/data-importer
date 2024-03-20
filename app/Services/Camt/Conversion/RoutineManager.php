@@ -160,19 +160,6 @@ class RoutineManager implements RoutineManagerInterface
         return $camtMessage;
     }
 
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionConverter->getErrors(),
-                $this->transactionExtractor->getErrors(),
-                $this->transactionMapper->getErrors(),
-            ],
-            $count
-        );
-    }
-
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -194,6 +181,19 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionConverter->getWarnings(),
                 $this->transactionExtractor->getWarnings(),
                 $this->transactionMapper->getWarnings(),
+            ],
+            $count
+        );
+    }
+
+    private function mergeErrors(int $count): void
+    {
+        $this->allErrors = $this->mergeArrays(
+            [
+                $this->getErrors(),
+                $this->transactionConverter->getErrors(),
+                $this->transactionExtractor->getErrors(),
+                $this->transactionMapper->getErrors(),
             ],
             $count
         );

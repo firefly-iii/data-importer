@@ -145,6 +145,21 @@ class TransactionExtra
         return $this->payerInformation;
     }
 
+    public function getPostingDate(): ?Carbon
+    {
+        return $this->postingDate;
+    }
+
+    public function getPostingTime(): ?Carbon
+    {
+        return $this->postingTime;
+    }
+
+    public function getTime(): ?Carbon
+    {
+        return $this->time;
+    }
+
     public function toArray(): array
     {
         return [
@@ -178,20 +193,5 @@ class TransactionExtra
             'account_balance_snapshot'  => $this->accountBalanceSnapshot,
             'categorization_confidence' => $this->categorizationConfidence,
         ];
-    }
-
-    public function getPostingDate(): ?Carbon
-    {
-        return $this->postingDate;
-    }
-
-    public function getPostingTime(): ?Carbon
-    {
-        return $this->postingTime;
-    }
-
-    public function getTime(): ?Carbon
-    {
-        return $this->time;
     }
 }

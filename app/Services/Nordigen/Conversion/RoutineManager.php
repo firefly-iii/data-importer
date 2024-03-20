@@ -113,7 +113,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // collect errors from transactionProcessor.
         $total        = 0;
-        foreach($nordigen as $transactions) {
+        foreach ($nordigen as $transactions) {
             $total += count($transactions);
         }
         if (0 === $total) {
@@ -167,19 +167,6 @@ class RoutineManager implements RoutineManagerInterface
         return $filtered;
     }
 
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionFilter->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-            ],
-            $count
-        );
-    }
-
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -188,6 +175,19 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getMessages(),
                 $this->transactionGenerator->getMessages(),
                 $this->transactionProcessor->getMessages(),
+            ],
+            $count
+        );
+    }
+
+    private function mergeWarnings(int $count): void
+    {
+        $this->allWarnings = $this->mergeArrays(
+            [
+                $this->getWarnings(),
+                $this->transactionFilter->getWarnings(),
+                $this->transactionGenerator->getWarnings(),
+                $this->transactionProcessor->getWarnings(),
             ],
             $count
         );

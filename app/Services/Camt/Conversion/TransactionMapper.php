@@ -50,280 +50,6 @@ class TransactionMapper
         return $result;
     }
 
-    private function accountDetailsEmpty(string $direction, array $current): bool
-    {
-        $noId     = '' === ($current[sprintf('%s_id', $direction)] ?? '');
-        $noIban   = '' === ($current[sprintf('%s_iban', $direction)] ?? '');
-        $noNumber = '' === ($current[sprintf('%s_number', $direction)] ?? '');
-        $noName   = '' === ($current[sprintf('%s_name', $direction)] ?? '');
-
-        return $noId && $noIban && $noNumber && $noName;
-    }
-
-    private function determineTransactionType(array $current): array
-    {
-        app('log')->debug('Determine transaction type.');
-        $directions      = ['source', 'destination'];
-        $accountType     = [];
-        $lessThanZero    = 1 === bccomp('0', $current['amount']);
-        app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
-
-        foreach ($directions as $direction) {
-            app('log')->debug(sprintf('Now working on direction "%s".', $direction));
-            $accountType[$direction]  = null;
-            $accountTypeKey           = sprintf('%s_type', $direction);
-            $current[$accountTypeKey] = '';
-            foreach ($this->accountIdentificationSuffixes as $suffix) {
-                $key = sprintf('%s_%s', $direction, $suffix);
-                app('log')->debug(sprintf('Now working on key "%s".', $key));
-                // try to find the account
-                if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
-                    $foundDirection = $this->getAccountType($suffix, $current[$key], $lessThanZero);
-                    app('log')->debug(
-                        sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection)
-                    );
-                    // should this overrule any existing account type? Since we work down from ID,
-                    // if it's already known it should not be overruled.
-                    if (null === $foundDirection && null !== $accountType[$direction]) {
-                        app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
-                    }
-                    if (null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
-                        app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%s".', $foundDirection, $direction, $accountType[$direction]));
-                        $accountType[$direction]  = $foundDirection;
-                        $current[$accountTypeKey] = $foundDirection;
-                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
-                    }
-                    if (null === $accountType[$direction]) {
-                        app('log')->debug(sprintf('accountType[%s] is set to found direction "%s"', $direction, $foundDirection));
-                        $accountType[$direction]  = $foundDirection;
-                        $current[$accountTypeKey] = $foundDirection;
-                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
-                    }
-                }
-            }
-        }
-
-        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/fxirefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
-        $sourceIsNull    = null === $accountType['source'];
-        $sourceIsAsset   = 'asset' === $accountType['source'];
-        $sourceIsRevenue = 'revenue' === $accountType['source'];
-        $destIsAsset     = 'asset' === $accountType['destination'];
-        $destIsExpense   = 'expense' === $accountType['destination'];
-        $sourceIsExpense = 'expense' === $accountType['source'];
-        $destIsRevenue   = 'revenue' === $accountType['destination'];
-        $destIsNull      = null === $accountType['destination'];
-
-        switch (true) {
-            case $sourceIsAsset && $destIsExpense && $lessThanZero:
-            case $sourceIsAsset && $destIsNull && $lessThanZero:
-                // there is no expense account, but the account was found under revenue, so we assume this is a withdrawal with a non-existing expense account
-            case $sourceIsAsset && $destIsRevenue && $lessThanZero:
-                app('log')->debug('Based on types, this is a withdrawal');
-                $current['type']             = 'withdrawal';
-
-                break;
-
-            case $sourceIsAsset && $destIsRevenue && !$lessThanZero:
-            case $sourceIsAsset && $destIsNull && !$lessThanZero:
-            case $sourceIsNull && $destIsAsset:
-            case $sourceIsRevenue && $destIsAsset:
-            case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
-                app('log')->debug('Based on types, this is a deposit');
-                $current['type']             = 'deposit';
-
-                break;
-
-            case $sourceIsAsset && $destIsAsset:
-                app('log')->debug('Based on types, this is a transfer');
-                $current['type']             = 'transfer'; // line 382 / 383
-
-                break;
-
-            case $sourceIsExpense && $destIsExpense:
-                app('log')->warning('Both types are expense. Impossible. Lets make source_type = "" and type="withdrawal"');
-                $current['source_type']      = '';
-                $current['type']             = 'withdrawal';
-
-                break;
-
-            case $sourceIsRevenue && $destIsRevenue:
-                app('log')->warning('Both types are revenue. Impossible. Lets make destination_type = "" and type="deposit"');
-                $current['destination_type'] = '';
-                $current['type']             = 'deposit';
-
-                break;
-
-            case $sourceIsExpense && $destIsNull:
-                app('log')->warning('The source is "expense" but the destination is a new account. Weird! Lets make source_type = "" and type="withdrawal"');
-                $current['source_type']      = '';
-                $current['type']             = 'withdrawal';
-
-                break;
-
-            case $sourceIsExpense && $destIsAsset:
-                app('log')->warning('The source is "expense" but the destination is an asset. Weird! Lets make source_type = "" and type="deposit"');
-                $current['source_type']      = '';
-                $current['type']             = 'deposit';
-
-                break;
-
-            default:
-                app('log')->error(
-                    sprintf(
-                        'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
-                        $accountType['source'] ?: null,
-                        $accountType['destination'] ?: null
-                    )
-                );                               // 285
-                $current['type']             = 'withdrawal'; // line 382 / 383
-
-                break;
-        }
-
-        // default back to withdrawal.
-        return $current;
-    }
-
-    private function getAccountId($direction, $current): string
-    {
-        app('log')->debug('getAccountId');
-        foreach ($this->accountIdentificationSuffixes as $suffix) {
-            $field = sprintf('%s_%s', $direction, $suffix);
-            if (array_key_exists($field, $current)) {
-                // there is a value...
-                foreach ($this->allAccounts as $account) {
-                    // so we check all accounts for a match
-                    if ($current[$field] === $account->{$suffix}) {
-                        // we have a match
-
-                        // only select accounts that are suitable for the type of transaction
-                        if ($current['amount'] > 0) {
-                            // seems a deposit or transfer
-                            if (in_array($account->type, ['asset', 'revenue'], true)) {
-                                return (string)$account->id;
-                            }
-                        }
-
-                        if ($current['amount'] < 0) {
-                            // seems a withtrawal or transfer
-                            if (in_array($account->type, ['asset', 'expense'], true)) {
-                                return (string)$account->id;
-                            }
-                        }
-                        app('log')->warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
-
-                        return (string)$account->id;
-                    }
-                }
-                // app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
-            }
-            // app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
-        }
-
-        return '';
-    }
-
-    private function getAccountType(string $field, string $value, bool $lessThanZero): ?string
-    {
-        $count    = 0;
-        $result   = null;
-        $hitField = null; // the field on which we found a match.
-        foreach ($this->allAccounts as $account) {
-            // we have a match!
-            if ((string)$account->{$field} === (string)$value) {
-                // never found a match before!
-                if (0 === $count) {
-                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $field));
-                    $result   = $account->type;
-                    $hitField = $field;
-                    ++$count;
-                }
-                // we found a match before, and it's different too.
-                if (0 !== $count && $account->type !== $result) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
-                    // the previous result always trumps the current result because the order of accountIdentificationSuffixes
-                    app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $field, $value, $result));
-                    ++$count;
-                }
-                // we found a match before and it's different. But the data importer has found both "revenue" AND "expense" accounts. What to do?
-                $set = [$account->type, $result];
-                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && $lessThanZero) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
-                    app('log')->debug('Because amount is less than zero, we assume "expense" is the correct type.');
-                    $result = 'expense';
-
-                    ++$count;
-                }
-                // we found a match before and it's different. But: previous result was "expense", current result is "revenue"
-                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && !$lessThanZero) {
-                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
-                    app('log')->debug('Because amount is more than zero, we assume "revenue" is the correct type.');
-                    $result = 'revenue';
-
-                    ++$count;
-                }
-            }
-        }
-        if (null === $result) {
-            app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s", or skipped because unsure.', $field, $value));
-        }
-
-        return $result;
-    }
-
-    /**
-     * This function takes the value in $data['data'], which is for example the account
-     * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
-     * the value "ShrtBankName" to "Short Bank Name".
-     *
-     * If there is a mapping the value will be replaced. If there is not, no replacement will take place.
-     * Either way, the new value will be placed in the correct place in $current.
-     *
-     * Example results:
-     * source_iban = something
-     * destination_number = 12345
-     * source_id = 5
-     */
-    private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
-    {
-        // bravely assume there's just one value in the array:
-        $fieldValue = implode('', $data['data']);
-
-        // replace with mapping, if mapping exists.
-        if (array_key_exists($fieldValue, $data['mapping'])) {
-            $key           = sprintf('%s_id', $direction);
-            $current[$key] = $data['mapping'][$fieldValue];
-        }
-
-        // leave original value if no mapping exists.
-        if (!array_key_exists($fieldValue, $data['mapping'])) {
-            // $direction is either 'source' or 'destination'
-            // $fieldName is 'id', 'iban','name' or 'number'
-            $key           = sprintf('%s_%s', $direction, $fieldName);
-            $current[$key] = $fieldValue;
-        }
-
-        return $current;
-    }
-
-    private function mapCurrency(mixed $current, string $type, array $data): array
-    {
-        $code = implode('', $data['data']);
-        // replace with mapping
-        if (array_key_exists($code, $data['mapping'])) {
-            $key           = sprintf('%s_id', $type);
-            $current[$key] = $data['mapping'][$code];
-        }
-
-        // leave original IBAN
-        if (!array_key_exists($code, $data['mapping'])) {
-            $key           = sprintf('%s_code', $type);
-            $current[$key] = $code;
-        }
-
-        return $current;
-    }
-
     private function mapTransactionGroup(array $transaction): array
     {
         // make a new transaction:
@@ -565,6 +291,59 @@ class TransactionMapper
     }
 
     /**
+     * This function takes the value in $data['data'], which is for example the account
+     * name or the account IBAN. It will check if there is a mapping for this value, mapping for example
+     * the value "ShrtBankName" to "Short Bank Name".
+     *
+     * If there is a mapping the value will be replaced. If there is not, no replacement will take place.
+     * Either way, the new value will be placed in the correct place in $current.
+     *
+     * Example results:
+     * source_iban = something
+     * destination_number = 12345
+     * source_id = 5
+     */
+    private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
+    {
+        // bravely assume there's just one value in the array:
+        $fieldValue = implode('', $data['data']);
+
+        // replace with mapping, if mapping exists.
+        if (array_key_exists($fieldValue, $data['mapping'])) {
+            $key           = sprintf('%s_id', $direction);
+            $current[$key] = $data['mapping'][$fieldValue];
+        }
+
+        // leave original value if no mapping exists.
+        if (!array_key_exists($fieldValue, $data['mapping'])) {
+            // $direction is either 'source' or 'destination'
+            // $fieldName is 'id', 'iban','name' or 'number'
+            $key           = sprintf('%s_%s', $direction, $fieldName);
+            $current[$key] = $fieldValue;
+        }
+
+        return $current;
+    }
+
+    private function mapCurrency(mixed $current, string $type, array $data): array
+    {
+        $code = implode('', $data['data']);
+        // replace with mapping
+        if (array_key_exists($code, $data['mapping'])) {
+            $key           = sprintf('%s_id', $type);
+            $current[$key] = $data['mapping'][$code];
+        }
+
+        // leave original IBAN
+        if (!array_key_exists($code, $data['mapping'])) {
+            $key           = sprintf('%s_code', $type);
+            $current[$key] = $code;
+        }
+
+        return $current;
+    }
+
+    /**
      * A transaction has a bunch of minimal requirements. This method checks if they are met.
      *
      * It will also correct the transaction type (if possible).
@@ -574,6 +353,18 @@ class TransactionMapper
         app('log')->debug('Start of sanityCheck');
         // no amount?
         if (!array_key_exists('amount', $current)) {
+            app('log')->error('Array has no amount information, cannot fix.');
+
+            return null;
+        }
+        if ('' === $current['amount']) {
+            app('log')->error('Array has empty amount information, cannot fix.');
+
+            return null;
+        }
+        if (null === $current['amount']) {
+            app('log')->error('Array has NULL amount information, cannot fix.');
+
             return null;
         }
 
@@ -600,11 +391,6 @@ class TransactionMapper
 
         $current                         = $this->determineTransactionType($current);
         app('log')->debug(sprintf('Transaction type is %s', $current['type']));
-
-        // no amount?
-        if (!array_key_exists('amount', $current)) {
-            return null;
-        }
 
         // the type is a withdrawal, but we did not recognize the type of the source account.
         // if that did not succeed we did not FIND the source account, and must fall back
@@ -659,6 +445,16 @@ class TransactionMapper
         return $current;
     }
 
+    private function accountDetailsEmpty(string $direction, array $current): bool
+    {
+        $noId     = '' === ($current[sprintf('%s_id', $direction)] ?? '');
+        $noIban   = '' === ($current[sprintf('%s_iban', $direction)] ?? '');
+        $noNumber = '' === ($current[sprintf('%s_number', $direction)] ?? '');
+        $noName   = '' === ($current[sprintf('%s_name', $direction)] ?? '');
+
+        return $noId && $noIban && $noNumber && $noName;
+    }
+
     private function swapAccounts(array $currentTransaction): array
     {
         app('log')->debug('swapAccounts');
@@ -693,6 +489,217 @@ class TransactionMapper
         }
 
         return $return;
+    }
+
+    private function determineTransactionType(array $current): array
+    {
+        app('log')->debug('Determine transaction type.');
+        $directions      = ['source', 'destination'];
+        $accountType     = [];
+        $lessThanZero    = 1 === bccomp('0', $current['amount']);
+        app('log')->debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
+
+        foreach ($directions as $direction) {
+            app('log')->debug(sprintf('Now working on direction "%s".', $direction));
+            $accountType[$direction]  = null;
+            $accountTypeKey           = sprintf('%s_type', $direction);
+            $current[$accountTypeKey] = '';
+            foreach ($this->accountIdentificationSuffixes as $suffix) {
+                $key = sprintf('%s_%s', $direction, $suffix);
+                app('log')->debug(sprintf('Now working on key "%s".', $key));
+                // try to find the account
+                if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
+                    $foundDirection = $this->getAccountType($suffix, (string) $current[$key], $lessThanZero);
+                    app('log')->debug(
+                        sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection)
+                    );
+                    // should this overrule any existing account type? Since we work down from ID,
+                    // if it's already known it should not be overruled.
+                    if (null === $foundDirection && null !== $accountType[$direction]) {
+                        app('log')->debug(sprintf('Found direction is null, but accountType[%s] is not null, so we skip.', $direction));
+                    }
+                    if (null !== $foundDirection && null !== $accountType[$direction] && $foundDirection !== $accountType[$direction]) {
+                        app('log')->debug(sprintf('Found direction "%s" overrules accountType[%s] "%s".', $foundDirection, $direction, $accountType[$direction]));
+                        $accountType[$direction]  = $foundDirection;
+                        $current[$accountTypeKey] = $foundDirection;
+                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
+                    }
+                    if (null === $accountType[$direction]) {
+                        app('log')->debug(sprintf('accountType[%s] is set to found direction "%s"', $direction, $foundDirection));
+                        $accountType[$direction]  = $foundDirection;
+                        $current[$accountTypeKey] = $foundDirection;
+                        app('log')->debug(sprintf('"%s" = "%s"', $accountTypeKey, $foundDirection));
+                    }
+                }
+            }
+        }
+
+        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/fxirefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+        $sourceIsNull    = null === $accountType['source'];
+        $sourceIsAsset   = 'asset' === $accountType['source'];
+        $sourceIsRevenue = 'revenue' === $accountType['source'];
+        $destIsAsset     = 'asset' === $accountType['destination'];
+        $destIsExpense   = 'expense' === $accountType['destination'];
+        $sourceIsExpense = 'expense' === $accountType['source'];
+        $destIsRevenue   = 'revenue' === $accountType['destination'];
+        $destIsNull      = null === $accountType['destination'];
+
+        switch (true) {
+            case $sourceIsAsset && $destIsExpense && $lessThanZero:
+            case $sourceIsAsset && $destIsNull && $lessThanZero:
+                // there is no expense account, but the account was found under revenue, so we assume this is a withdrawal with a non-existing expense account
+            case $sourceIsAsset && $destIsRevenue && $lessThanZero:
+                app('log')->debug('Based on types, this is a withdrawal');
+                $current['type']             = 'withdrawal';
+
+                break;
+
+            case $sourceIsAsset && $destIsRevenue && !$lessThanZero:
+            case $sourceIsAsset && $destIsNull && !$lessThanZero:
+            case $sourceIsNull && $destIsAsset:
+            case $sourceIsRevenue && $destIsAsset:
+            case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
+                app('log')->debug('Based on types, this is a deposit');
+                $current['type']             = 'deposit';
+
+                break;
+
+            case $sourceIsAsset && $destIsAsset:
+                app('log')->debug('Based on types, this is a transfer');
+                $current['type']             = 'transfer'; // line 382 / 383
+
+                break;
+
+            case $sourceIsExpense && $destIsExpense:
+                app('log')->warning('Both types are expense. Impossible. Lets make source_type = "" and type="withdrawal"');
+                $current['source_type']      = '';
+                $current['type']             = 'withdrawal';
+
+                break;
+
+            case $sourceIsRevenue && $destIsRevenue:
+                app('log')->warning('Both types are revenue. Impossible. Lets make destination_type = "" and type="deposit"');
+                $current['destination_type'] = '';
+                $current['type']             = 'deposit';
+
+                break;
+
+            case $sourceIsExpense && $destIsNull:
+                app('log')->warning('The source is "expense" but the destination is a new account. Weird! Lets make source_type = "" and type="withdrawal"');
+                $current['source_type']      = '';
+                $current['type']             = 'withdrawal';
+
+                break;
+
+            case $sourceIsExpense && $destIsAsset:
+                app('log')->warning('The source is "expense" but the destination is an asset. Weird! Lets make source_type = "" and type="deposit"');
+                $current['source_type']      = '';
+                $current['type']             = 'deposit';
+
+                break;
+
+            default:
+                app('log')->error(
+                    sprintf(
+                        'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
+                        $accountType['source'] ?: null,
+                        $accountType['destination'] ?: null
+                    )
+                );                               // 285
+                $current['type']             = 'withdrawal'; // line 382 / 383
+
+                break;
+        }
+
+        // default back to withdrawal.
+        return $current;
+    }
+
+    private function getAccountType(string $field, string $value, bool $lessThanZero): ?string
+    {
+        $count    = 0;
+        $result   = null;
+        $hitField = null; // the field on which we found a match.
+        foreach ($this->allAccounts as $account) {
+            // we have a match!
+            if ((string)$account->{$field} === (string)$value) {
+                // never found a match before!
+                if (0 === $count) {
+                    app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $field));
+                    $result   = $account->type;
+                    $hitField = $field;
+                    ++$count;
+                }
+                // we found a match before, and it's different too.
+                if (0 !== $count && $account->type !== $result) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
+                    // the previous result always trumps the current result because the order of accountIdentificationSuffixes
+                    app('log')->debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $field, $value, $result));
+                    ++$count;
+                }
+                // we found a match before and it's different. But the data importer has found both "revenue" AND "expense" accounts. What to do?
+                $set = [$account->type, $result];
+                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && $lessThanZero) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
+                    app('log')->debug('Because amount is less than zero, we assume "expense" is the correct type.');
+                    $result = 'expense';
+
+                    ++$count;
+                }
+                // we found a match before and it's different. But: previous result was "expense", current result is "revenue"
+                if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && !$lessThanZero) {
+                    app('log')->warning(sprintf('Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!', $value, $result, $field, $account->type, $hitField));
+                    app('log')->debug('Because amount is more than zero, we assume "revenue" is the correct type.');
+                    $result = 'revenue';
+
+                    ++$count;
+                }
+            }
+        }
+        if (null === $result) {
+            app('log')->debug(sprintf('Unable to recognize the account type of "%s" "%s", or skipped because unsure.', $field, $value));
+        }
+
+        return $result;
+    }
+
+    private function getAccountId($direction, $current): string
+    {
+        app('log')->debug('getAccountId');
+        foreach ($this->accountIdentificationSuffixes as $suffix) {
+            $field = sprintf('%s_%s', $direction, $suffix);
+            if (array_key_exists($field, $current)) {
+                // there is a value...
+                foreach ($this->allAccounts as $account) {
+                    // so we check all accounts for a match
+                    if ($current[$field] === $account->{$suffix}) {
+                        // we have a match
+
+                        // only select accounts that are suitable for the type of transaction
+                        if ($current['amount'] > 0) {
+                            // seems a deposit or transfer
+                            if (in_array($account->type, ['asset', 'revenue'], true)) {
+                                return (string)$account->id;
+                            }
+                        }
+
+                        if ($current['amount'] < 0) {
+                            // seems a withtrawal or transfer
+                            if (in_array($account->type, ['asset', 'expense'], true)) {
+                                return (string)$account->id;
+                            }
+                        }
+                        app('log')->warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
+
+                        return (string)$account->id;
+                    }
+                }
+                // app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));
+            }
+            // app('log')->warning(sprintf('There is no field for "%s" in the transaction',$direction));
+        }
+
+        return '';
     }
 
     private function validAccountInfo(string $direction, array $current): bool

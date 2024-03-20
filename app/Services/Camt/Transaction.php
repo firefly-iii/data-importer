@@ -55,16 +55,27 @@ class Transaction
         return count($this->levelD);
     }
 
+    public function getCurrencyCode(int $index): string
+    {
+        // TODO loop level D for the date that belongs to the index
+        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+    }
+
     public function getAmount(int $index): string
     {
         // TODO loop level D for the date that belongs to the index
         return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
 
-    public function getCurrencyCode(int $index): string
+    private function getDecimalAmount(?Money $money): string
     {
-        // TODO loop level D for the date that belongs to the index
-        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+        if (null === $money) {
+            return '';
+        }
+        $currencies            = new ISOCurrencies();
+        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
+
+        return $moneyDecimalFormatter->format($money);
     }
 
     public function getDate(int $index): string
@@ -375,46 +386,10 @@ class Transaction
         }
     }
 
-    private function generateAddressLine(Address $address = null): string
-    {
-        return implode(', ', $address->getAddressLines());
-    }
-
-    private function getDecimalAmount(?Money $money): string
-    {
-        if (null === $money) {
-            return '';
-        }
-        $currencies            = new ISOCurrencies();
-        $moneyDecimalFormatter = new DecimalMoneyFormatter($currencies);
-
-        return $moneyDecimalFormatter->format($money);
-    }
-
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
-    {
-        $opposingName = '';
-        // TODO make depend on configuration
-        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
-            // there is no "name", so use the address instead
-            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
-        }
-        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
-            // there is a name
-            $opposingName = $relatedParty->getRelatedPartyType()->getName();
-            // but maybe you want also the entire address
-            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', '.$addressLine;
-            }
-        }
-
-        return $opposingName;
-    }
-
     /**
      * @return null|Creditor|Debtor
      */
-    private function getOpposingParty(EntryTransactionDetail $transactionDetail): null|RelatedParty
+    private function getOpposingParty(EntryTransactionDetail $transactionDetail): ?RelatedParty
     {
         app('log')->debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
@@ -445,5 +420,30 @@ class Transaction
         app('log')->debug('getOpposingParty(), no opposing party found, return NULL.');
 
         return null;
+    }
+
+    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
+    {
+        $opposingName = '';
+        // TODO make depend on configuration
+        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
+            // there is no "name", so use the address instead
+            $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
+        }
+        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
+            // there is a name
+            $opposingName = $relatedParty->getRelatedPartyType()->getName();
+            // but maybe you want also the entire address
+            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+                $opposingName .= ', '.$addressLine;
+            }
+        }
+
+        return $opposingName;
+    }
+
+    private function generateAddressLine(Address $address = null): string
+    {
+        return implode(', ', $address->getAddressLines());
     }
 }

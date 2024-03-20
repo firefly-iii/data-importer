@@ -78,20 +78,31 @@ class RoleController extends Controller
         throw new ImporterErrorException(sprintf('Cannot handle file type "%s"', $contentType));
     }
 
-    public function postIndex(RolesPostRequest $request): RedirectResponse
+    private function csvIndex(Request $request, Configuration $configuration): View
     {
-        // the request object must be able to handle all file types.
-        $configuration = $this->restoreConfiguration();
-        $contentType   = $configuration->getContentType();
+        $mainTitle           = 'Role definition';
+        $subTitle            = 'Configure the role of each column in your file';
 
-        if ('csv' === $contentType) {
-            return $this->csvPostIndex($request, $configuration);
-        }
-        if ('camt' === $contentType) {
-            return $this->camtPostIndex($request, $configuration);
-        }
+        // get columns from file
+        $content             = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $columns             = RoleService::getColumns($content, $configuration);
+        $examples            = RoleService::getExampleData($content, $configuration);
 
-        throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
+        // submit mapping from config.
+        $mapping             = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+
+        // roles
+        $roles               = config('csv.import_roles');
+        ksort($roles);
+
+        // configuration (if it is set)
+        $configuredRoles     = $configuration->getRoles();
+        $configuredDoMapping = $configuration->getDoMapping();
+
+        return view(
+            'import.005-roles.index-csv',
+            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
+        );
     }
 
     private function camtIndex(Request $request, Configuration $configuration): View
@@ -179,69 +190,33 @@ class RoleController extends Controller
         );
     }
 
-    /**
-     * TODO is basically the same as the CSV processor.
-     */
-    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    private function getFieldsForLevel(string $level): array
     {
-        $data           = $request->getAllForFile();
-        $needsMapping   = $this->needMapping($data['do_mapping']);
-        $configuration->setRoles($data['roles']);
-        $configuration->setDoMapping($data['do_mapping']);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // then this is the new, full array:
-        $fullArray      = $configuration->toArray();
-
-        // and it can be saved on disk:
-        $configFileName = StorageService::storeArray($fullArray);
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // this is a new config file name.
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set role config as complete.
-        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-
-        // redirect to mapping thing.
-        if (true === $needsMapping) {
-            return redirect()->route('006-mapping.index');
+        $allFields = config('camt.fields');
+        $return    = [];
+        foreach ($allFields as $title => $field) {
+            if ($level === $field['level']) {
+                $return[$title] = $field;
+            }
         }
-        // otherwise, store empty mapping, and continue:
-        // set map config as complete.
-        session()->put(Constants::READY_FOR_CONVERSION, true);
 
-        return redirect()->route('007-convert.index');
+        return $return;
     }
 
-    private function csvIndex(Request $request, Configuration $configuration): View
+    public function postIndex(RolesPostRequest $request): RedirectResponse
     {
-        $mainTitle           = 'Role definition';
-        $subTitle            = 'Configure the role of each column in your file';
+        // the request object must be able to handle all file types.
+        $configuration = $this->restoreConfiguration();
+        $contentType   = $configuration->getContentType();
 
-        // get columns from file
-        $content             = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-        $columns             = RoleService::getColumns($content, $configuration);
-        $examples            = RoleService::getExampleData($content, $configuration);
+        if ('csv' === $contentType) {
+            return $this->csvPostIndex($request, $configuration);
+        }
+        if ('camt' === $contentType) {
+            return $this->camtPostIndex($request, $configuration);
+        }
 
-        // submit mapping from config.
-        $mapping             = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-
-        // roles
-        $roles               = config('csv.import_roles');
-        ksort($roles);
-
-        // configuration (if it is set)
-        $configuredRoles     = $configuration->getRoles();
-        $configuredDoMapping = $configuration->getDoMapping();
-
-        return view(
-            'import.005-roles.index-csv',
-            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
-        );
+        throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
     }
 
     private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
@@ -279,19 +254,6 @@ class RoleController extends Controller
         return redirect()->route('007-convert.index');
     }
 
-    private function getFieldsForLevel(string $level): array
-    {
-        $allFields = config('camt.fields');
-        $return    = [];
-        foreach ($allFields as $title => $field) {
-            if ($level === $field['level']) {
-                $return[$title] = $field;
-            }
-        }
-
-        return $return;
-    }
-
     /**
      * Will tell you if any role needs mapping.
      */
@@ -305,5 +267,43 @@ class RoleController extends Controller
         }
 
         return $need;
+    }
+
+    /**
+     * TODO is basically the same as the CSV processor.
+     */
+    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    {
+        $data           = $request->getAllForFile();
+        $needsMapping   = $this->needMapping($data['do_mapping']);
+        $configuration->setRoles($data['roles']);
+        $configuration->setDoMapping($data['do_mapping']);
+
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+
+        // then this is the new, full array:
+        $fullArray      = $configuration->toArray();
+
+        // and it can be saved on disk:
+        $configFileName = StorageService::storeArray($fullArray);
+        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // this is a new config file name.
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+
+        // set role config as complete.
+        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
+
+        // redirect to mapping thing.
+        if (true === $needsMapping) {
+            return redirect()->route('006-mapping.index');
+        }
+        // otherwise, store empty mapping, and continue:
+        // set map config as complete.
+        session()->put(Constants::READY_FOR_CONVERSION, true);
+
+        return redirect()->route('007-convert.index');
     }
 }

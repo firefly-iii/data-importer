@@ -38,22 +38,6 @@ class Amount extends AbstractTask
         return $group;
     }
 
-    /**
-     * Returns true if the task requires the default account.
-     */
-    public function requiresDefaultAccount(): bool
-    {
-        return false;
-    }
-
-    /**
-     * Returns true if the task requires the default currency of the user.
-     */
-    public function requiresTransactionCurrency(): bool
-    {
-        return false;
-    }
-
     private function processAmount(array $transaction): array
     {
         app('log')->debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
@@ -142,5 +126,21 @@ class Amount extends AbstractTask
         }
 
         return true;
+    }
+
+    /**
+     * Returns true if the task requires the default account.
+     */
+    public function requiresDefaultAccount(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Returns true if the task requires the default currency of the user.
+     */
+    public function requiresTransactionCurrency(): bool
+    {
+        return false;
     }
 }

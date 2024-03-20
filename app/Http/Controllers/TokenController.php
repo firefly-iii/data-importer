@@ -158,7 +158,7 @@ class TokenController extends Controller
         $minimum     = (string)config('importer.minimum_version');
         $compare     = version_compare($minimum, $result->version);
 
-        if(str_starts_with($result->version, 'develop')) {
+        if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
             app('log')->warning(sprintf('You are connecting to a development version of Firefly III (%s). This may not work as expected.', $result->version));
             $compare = -1;
@@ -229,6 +229,42 @@ class TokenController extends Controller
     }
 
     /**
+     * This method forwards the user to Firefly III. Some parameters are stored in the user's session.
+     */
+    private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, int $clientId): RedirectResponse
+    {
+        $baseURL       = rtrim($baseURL, '/');
+        $vanityURL     = rtrim($vanityURL, '/');
+
+        app('log')->debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
+        $state         = \Str::random(40);
+        $codeVerifier  = \Str::random(128);
+        $request->session()->put('state', $state);
+        $request->session()->put('code_verifier', $codeVerifier);
+        $request->session()->put('form_client_id', $clientId);
+        $request->session()->put('form_base_url', $baseURL);
+        $request->session()->put('form_vanity_url', $vanityURL);
+
+        $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
+        $params        = [
+            'client_id'             => $clientId,
+            'redirect_uri'          => route('token.callback'),
+            'response_type'         => 'code',
+            'scope'                 => '',
+            'state'                 => $state,
+            'code_challenge'        => $codeChallenge,
+            'code_challenge_method' => 'S256',
+        ];
+        $query         = http_build_query($params);
+        // we redirect the user to the vanity URL, which is the same as the base_url, unless the user actually set a vanity URL.
+        $finalURL      = sprintf('%s/oauth/authorize?', $vanityURL);
+        app('log')->debug('Query parameters are', $params);
+        app('log')->debug(sprintf('Now redirecting to "%s" (params omitted)', $finalURL));
+
+        return redirect($finalURL.$query);
+    }
+
+    /**
      * User submits the client ID + optionally the base URL.
      * Whatever happens, we redirect the user to Firefly III and beg for permission.
      *
@@ -278,41 +314,5 @@ class TokenController extends Controller
 
         // return request for permission:
         return $this->redirectForPermission($request, $baseURL, $vanityURL, $data['client_id']);
-    }
-
-    /**
-     * This method forwards the user to Firefly III. Some parameters are stored in the user's session.
-     */
-    private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, int $clientId): RedirectResponse
-    {
-        $baseURL       = rtrim($baseURL, '/');
-        $vanityURL     = rtrim($vanityURL, '/');
-
-        app('log')->debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state         = \Str::random(40);
-        $codeVerifier  = \Str::random(128);
-        $request->session()->put('state', $state);
-        $request->session()->put('code_verifier', $codeVerifier);
-        $request->session()->put('form_client_id', $clientId);
-        $request->session()->put('form_base_url', $baseURL);
-        $request->session()->put('form_vanity_url', $vanityURL);
-
-        $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
-        $params        = [
-            'client_id'             => $clientId,
-            'redirect_uri'          => route('token.callback'),
-            'response_type'         => 'code',
-            'scope'                 => '',
-            'state'                 => $state,
-            'code_challenge'        => $codeChallenge,
-            'code_challenge_method' => 'S256',
-        ];
-        $query         = http_build_query($params);
-        // we redirect the user to the vanity URL, which is the same as the base_url, unless the user actually set a vanity URL.
-        $finalURL      = sprintf('%s/oauth/authorize?', $vanityURL);
-        app('log')->debug('Query parameters are', $params);
-        app('log')->debug(sprintf('Now redirecting to "%s" (params omitted)', $finalURL));
-
-        return redirect($finalURL.$query);
     }
 }

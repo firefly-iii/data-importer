@@ -77,46 +77,6 @@ abstract class Request
         $this->timeOut = $timeOut;
     }
 
-    public function getBase(): string
-    {
-        return $this->base;
-    }
-
-    public function setBase(string $base): void
-    {
-        $this->base = $base;
-    }
-
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
-    public function getAppId(): string
-    {
-        return $this->appId;
-    }
-
-    public function setAppId(string $appId): void
-    {
-        $this->appId = $appId;
-    }
-
-    public function getSecret(): string
-    {
-        return $this->secret;
-    }
-
-    public function setSecret(string $secret): void
-    {
-        $this->secret = $secret;
-    }
-
     /**
      * @throws GuzzleException
      * @throws ImporterErrorException
@@ -195,6 +155,57 @@ abstract class Request
         }
 
         return $json;
+    }
+
+    public function getBase(): string
+    {
+        return $this->base;
+    }
+
+    public function setBase(string $base): void
+    {
+        $this->base = $base;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
+
+    private function getClient(): Client
+    {
+        // config here
+
+        return new Client(
+            [
+                'connect_timeout' => $this->timeOut,
+            ]
+        );
+    }
+
+    public function getAppId(): string
+    {
+        return $this->appId;
+    }
+
+    public function setAppId(string $appId): void
+    {
+        $this->appId = $appId;
+    }
+
+    public function getSecret(): string
+    {
+        return $this->secret;
+    }
+
+    public function setSecret(string $secret): void
+    {
+        $this->secret = $secret;
     }
 
     /**
@@ -389,16 +400,5 @@ abstract class Request
         $json['ResponseStatusCode'] = $statusCode;
 
         return $json;
-    }
-
-    private function getClient(): Client
-    {
-        // config here
-
-        return new Client(
-            [
-                'connect_timeout' => $this->timeOut,
-            ]
-        );
     }
 }

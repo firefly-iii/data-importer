@@ -38,6 +38,19 @@ class Currency extends AbstractTask
         return $group;
     }
 
+    private function processCurrency(array $transaction): array
+    {
+        if (
+            (0 === $transaction['currency_id'] || null === $transaction['currency_id'])
+            && (null === $transaction['currency_code'] || '' === $transaction['currency_code'])) {
+            $transaction['currency_id']   = $this->transactionCurrency->id;
+            $transaction['currency_code'] = null;
+            app('log')->debug(sprintf('Set currency to %d because it was NULL or empty.', $this->transactionCurrency->id));
+        }
+
+        return $transaction;
+    }
+
     /**
      * Returns true if the task requires the default account.
      */
@@ -52,18 +65,5 @@ class Currency extends AbstractTask
     public function requiresTransactionCurrency(): bool
     {
         return true;
-    }
-
-    private function processCurrency(array $transaction): array
-    {
-        if (
-            (0 === $transaction['currency_id'] || null === $transaction['currency_id'])
-            && (null === $transaction['currency_code'] || '' === $transaction['currency_code'])) {
-            $transaction['currency_id']   = $this->transactionCurrency->id;
-            $transaction['currency_code'] = null;
-            app('log')->debug(sprintf('Set currency to %d because it was NULL or empty.', $this->transactionCurrency->id));
-        }
-
-        return $transaction;
     }
 }

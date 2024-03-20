@@ -60,19 +60,18 @@ class Transaction
     public string $key;
     public string $mandateId;
     public string $proprietaryBank;
-
-    public array $tags;
+    public string $purposeCode;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
-    public string $purposeCode;
     public string $remittanceInformationStructured;
     public array  $remittanceInformationStructuredArray;
+    public string $remittanceInformationUnstructured;
 
     // creditorAccount is an array, but saved as strings:
     // iban, currency
-    public string $remittanceInformationUnstructured;
     public array  $remittanceInformationUnstructuredArray;
+    public array  $tags;
     public string $transactionAmount;
 
     // transactionAmount is an array, but is saved as strings
@@ -320,6 +319,11 @@ class Transaction
         return $description;
     }
 
+    public function getTransactionId(): string
+    {
+        return trim(preg_replace('/\s+/', ' ', $this->transactionId));
+    }
+
     /**
      * Return IBAN of the destination account
      */
@@ -522,10 +526,5 @@ class Transaction
             // undocumented values:
             'end_to_end_id'                             => $this->endToEndId,
         ];
-    }
-
-    public function getTransactionId(): string
-    {
-        return trim(preg_replace('/\s+/', ' ', $this->transactionId));
     }
 }

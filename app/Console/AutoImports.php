@@ -90,6 +90,71 @@ trait AutoImports
         return $return;
     }
 
+    private function getExtension(string $file): string
+    {
+        $parts = explode('.', $file);
+        if (1 === count($parts)) {
+            return '';
+        }
+
+        return strtolower($parts[count($parts) - 1]);
+    }
+
+    /**
+     * This method only works on files with an extension with exactly three letters
+     * (ie. "csv", "xml").
+     */
+    private function hasJsonConfiguration(string $directory, string $file): bool
+    {
+        $short    = substr($file, 0, -4);
+        $jsonFile = sprintf('%s.json', $short);
+        $fullJson = sprintf('%s/%s', $directory, $jsonFile);
+
+        if (!file_exists($fullJson)) {
+            $hasFallbackConfig = $this->hasFallbackConfig($directory);
+            if ($hasFallbackConfig) {
+                $this->line('Found fallback configuration file, which will be used for this file.');
+
+                return true;
+            }
+            $this->warn(sprintf('Cannot find JSON file "%s" nor fallback file expected to go with file "%s". This file will be ignored.', $jsonFile, $file));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function hasFallbackConfig(string $directory): bool
+    {
+        if (false === config('importer.fallback_in_dir')) {
+            return false;
+        }
+        $configJsonFile = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
+        if (file_exists($configJsonFile) && is_readable($configJsonFile)) {
+            $content = file_get_contents($configJsonFile);
+
+            return json_validate($content);
+        }
+
+        return false;
+    }
+
+    /**
+     * TODO this function must be more universal.
+     */
+    private function hasCsvFile(string $directory, string $file): bool
+    {
+        $short    = substr($file, 0, -5);
+        $csvFile  = sprintf('%s.csv', $short);
+        $fullJson = sprintf('%s/%s', $directory, $csvFile);
+        if (!file_exists($fullJson)) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function importFiles(string $directory, array $files): bool
     {
         $return = true;
@@ -115,49 +180,6 @@ trait AutoImports
         return $return;
     }
 
-    private function getExtension(string $file): string
-    {
-        $parts = explode('.', $file);
-        if (1 === count($parts)) {
-            return '';
-        }
-
-        return strtolower($parts[count($parts) - 1]);
-    }
-
-    /**
-     * TODO this function must be more universal.
-     */
-    private function hasCsvFile(string $directory, string $file): bool
-    {
-        $short    = substr($file, 0, -5);
-        $csvFile  = sprintf('%s.csv', $short);
-        $fullJson = sprintf('%s/%s', $directory, $csvFile);
-        if (!file_exists($fullJson)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * This method only works on files with an extension with exactly three letters
-     * (ie. "csv", "xml").
-     */
-    private function hasJsonConfiguration(string $directory, string $file): bool
-    {
-        $short    = substr($file, 0, -4);
-        $jsonFile = sprintf('%s.json', $short);
-        $fullJson = sprintf('%s/%s', $directory, $jsonFile);
-        if (!file_exists($fullJson)) {
-            $this->warn(sprintf('Can\'t find JSON file "%s" expected to go with CSV file "%s". CSV file will be ignored.', $fullJson, $file));
-
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -165,8 +187,9 @@ trait AutoImports
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile = sprintf('%s/%s', $directory, $file);
-        $jsonFile       = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $importableFile    = sprintf('%s/%s', $directory, $file);
+        $jsonFile          = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $fallbackJsonFile  = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
 
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.
@@ -177,19 +200,28 @@ trait AutoImports
         if ('xml' === $this->getExtension($file)) {
             $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
         }
+        $jsonFileExists    = file_exists($jsonFile);
+        $hasFallbackConfig = $this->hasFallbackConfig($directory);
+
+        // Should not happen
+        if (!$jsonFileExists && !$hasFallbackConfig) {
+            $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
+        }
+
+        $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
 
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
         // do JSON check
-        $jsonResult     = $this->verifyJSON($jsonFile);
+        $jsonResult        = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
 
             return;
         }
-        $configuration  = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
@@ -233,98 +265,6 @@ trait AutoImports
                 array_merge($this->conversionErrors, $this->importErrors)
             )
         );
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function importUpload(string $jsonFile, string $importableFile): void
-    {
-        // do JSON check
-        $jsonResult    = $this->verifyJSON($jsonFile);
-        if (false === $jsonResult) {
-            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
-            $this->error($message);
-
-            return;
-        }
-        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
-        $configuration->updateDateRange();
-
-        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
-
-        // this is it!
-        $this->startConversion($configuration, $importableFile);
-        $this->reportConversion();
-
-        // crash here if the conversion failed.
-        if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-
-            throw new ImporterErrorException('Too many errors in the data conversion.');
-        }
-
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        $this->startImport($configuration);
-        $this->reportImport();
-
-        $this->line('Done!');
-        event(
-            new ImportedTransactions(
-                array_merge($this->conversionMessages, $this->importMessages),
-                array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors)
-            )
-        );
-    }
-
-    private function reportConversion(): void
-    {
-        $list = [
-            'info'  => $this->conversionMessages,
-            'warn'  => $this->conversionWarnings,
-            'error' => $this->conversionErrors,
-        ];
-        foreach ($list as $func => $set) {
-            /**
-             * @var int   $index
-             * @var array $messages
-             */
-            foreach ($set as $index => $messages) {
-                if (count($messages) > 0) {
-                    foreach ($messages as $message) {
-                        $this->{$func}(sprintf('Conversion index (%s) %d: %s', $func, $index, $message)); // @phpstan-ignore-line
-                    }
-                }
-            }
-        }
-    }
-
-    private function reportImport(): void
-    {
-        $list = [
-            'info'  => $this->importMessages,
-            'warn'  => $this->importWarnings,
-            'error' => $this->importErrors,
-        ];
-
-        $this->info(sprintf('There are %d message(s)', count($this->importMessages)));
-        $this->info(sprintf('There are %d warning(s)', count($this->importWarnings)));
-        $this->info(sprintf('There are %d error(s)', count($this->importErrors)));
-
-        foreach ($list as $func => $set) {
-            /**
-             * @var int   $index
-             * @var array $messages
-             */
-            foreach ($set as $index => $messages) {
-                if (count($messages) > 0) {
-                    foreach ($messages as $message) {
-                        $this->{$func}(sprintf('Import index %d: %s', $index, $message)); // @phpstan-ignore-line
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -428,6 +368,28 @@ trait AutoImports
         }
     }
 
+    private function reportConversion(): void
+    {
+        $list = [
+            'info'  => $this->conversionMessages,
+            'warn'  => $this->conversionWarnings,
+            'error' => $this->conversionErrors,
+        ];
+        foreach ($list as $func => $set) {
+            /**
+             * @var int   $index
+             * @var array $messages
+             */
+            foreach ($set as $index => $messages) {
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $this->{$func}(sprintf('Conversion index (%s) %d: %s', $func, $index, $message)); // @phpstan-ignore-line
+                    }
+                }
+            }
+        }
+    }
+
     private function startImport(Configuration $configuration): void
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
@@ -499,5 +461,75 @@ trait AutoImports
         $this->importMessages = $routine->getAllMessages();
         $this->importWarnings = $routine->getAllWarnings();
         $this->importErrors   = $routine->getAllErrors();
+    }
+
+    private function reportImport(): void
+    {
+        $list = [
+            'info'  => $this->importMessages,
+            'warn'  => $this->importWarnings,
+            'error' => $this->importErrors,
+        ];
+
+        $this->info(sprintf('There are %d message(s)', count($this->importMessages)));
+        $this->info(sprintf('There are %d warning(s)', count($this->importWarnings)));
+        $this->info(sprintf('There are %d error(s)', count($this->importErrors)));
+
+        foreach ($list as $func => $set) {
+            /**
+             * @var int   $index
+             * @var array $messages
+             */
+            foreach ($set as $index => $messages) {
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) {
+                        $this->{$func}(sprintf('Import index %d: %s', $index, $message)); // @phpstan-ignore-line
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function importUpload(string $jsonFile, string $importableFile): void
+    {
+        // do JSON check
+        $jsonResult    = $this->verifyJSON($jsonFile);
+        if (false === $jsonResult) {
+            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
+            $this->error($message);
+
+            return;
+        }
+        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration->updateDateRange();
+
+        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
+
+        // this is it!
+        $this->startConversion($configuration, $importableFile);
+        $this->reportConversion();
+
+        // crash here if the conversion failed.
+        if (0 !== count($this->conversionErrors)) {
+            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+
+            throw new ImporterErrorException('Too many errors in the data conversion.');
+        }
+
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        $this->startImport($configuration);
+        $this->reportImport();
+
+        $this->line('Done!');
+        event(
+            new ImportedTransactions(
+                array_merge($this->conversionMessages, $this->importMessages),
+                array_merge($this->conversionWarnings, $this->importWarnings),
+                array_merge($this->conversionErrors, $this->importErrors)
+            )
+        );
     }
 }

@@ -38,6 +38,16 @@ class EmptyDescription extends AbstractTask
         return $group;
     }
 
+    private function processDescription(array $transaction): array
+    {
+        $transaction['description'] ??= '';
+        if ('' === $transaction['description']) {
+            $transaction['description'] = '(empty description)';
+        }
+
+        return $transaction;
+    }
+
     /**
      * Returns true if the task requires the default account.
      */
@@ -52,15 +62,5 @@ class EmptyDescription extends AbstractTask
     public function requiresTransactionCurrency(): bool
     {
         return true;
-    }
-
-    private function processDescription(array $transaction): array
-    {
-        $transaction['description'] ??= '';
-        if ('' === $transaction['description']) {
-            $transaction['description'] = '(empty description)';
-        }
-
-        return $transaction;
     }
 }

@@ -55,44 +55,49 @@ class TokenManager
         return $token;
     }
 
-    public static function getFreshAccessToken(): void
-    {
-        exit(__METHOD__);
-    }
-
     /**
-     * get new token set and store in session
-     *
-     * @throws ImporterHttpException
+     * @throws ImporterErrorException
      */
-    public static function getNewTokenSet(string $identifier, string $key): void
-    {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $client = new PostNewTokenRequest($identifier, $key);
-        $client->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var TokenSetResponse $result */
-        $result = $client->post();
-
-        // store in session:
-        session()->put(Constants::NORDIGEN_ACCESS_TOKEN, $result->accessToken);
-        session()->put(Constants::NORDIGEN_REFRESH_TOKEN, $result->refreshToken);
-
-        session()->put(Constants::NORDIGEN_ACCESS_EXPIRY_TIME, $result->accessExpires);
-        session()->put(Constants::NORDIGEN_REFRESH_EXPIRY_TIME, $result->refreshExpires);
-    }
-
-    public static function hasExpiredRefreshToken(): bool
+    public static function validateAllTokens(): void
     {
         // app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // is there a valid access and refresh token?
+        if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
+            return;
+        }
+
+        if (self::hasExpiredRefreshToken()) {
+            // refresh!
+            self::getFreshAccessToken();
+        }
+
+        // get complete set!
+        try {
+            $identifier = SecretManager::getId();
+            $key        = SecretManager::getKey();
+            self::getNewTokenSet($identifier, $key);
+        } catch (ImporterHttpException $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+    }
+
+    public static function hasValidRefreshToken(): bool
+    {
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            app('log')->debug('No refresh token, so return false.');
+            app('log')->debug(sprintf('Now at %s', __METHOD__));
+            app('log')->debug('No Nordigen refresh token, so return false.');
 
             return false;
         }
 
-        exit(__METHOD__);
+        try {
+            $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+            $tokenValidity = 0;
+        }
+
+        return time() < $tokenValidity;
     }
 
     public static function hasValidAccessToken(): bool
@@ -123,48 +128,43 @@ class TokenManager
         return true;
     }
 
-    public static function hasValidRefreshToken(): bool
+    public static function hasExpiredRefreshToken(): bool
     {
+        // app('log')->debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            app('log')->debug(sprintf('Now at %s', __METHOD__));
-            app('log')->debug('No Nordigen refresh token, so return false.');
+            app('log')->debug('No refresh token, so return false.');
 
             return false;
         }
 
-        try {
-            $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-            $tokenValidity = 0;
-        }
+        exit(__METHOD__);
+    }
 
-        return time() < $tokenValidity;
+    public static function getFreshAccessToken(): void
+    {
+        exit(__METHOD__);
     }
 
     /**
-     * @throws ImporterErrorException
+     * get new token set and store in session
+     *
+     * @throws ImporterHttpException
      */
-    public static function validateAllTokens(): void
+    public static function getNewTokenSet(string $identifier, string $key): void
     {
-        // app('log')->debug(sprintf('Now at %s', __METHOD__));
-        // is there a valid access and refresh token?
-        if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
-            return;
-        }
+        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        $client = new PostNewTokenRequest($identifier, $key);
+        $client->setTimeOut(config('importer.connection.timeout'));
 
-        if (self::hasExpiredRefreshToken()) {
-            // refresh!
-            self::getFreshAccessToken();
-        }
+        /** @var TokenSetResponse $result */
+        $result = $client->post();
 
-        // get complete set!
-        try {
-            $identifier = SecretManager::getId();
-            $key        = SecretManager::getKey();
-            self::getNewTokenSet($identifier, $key);
-        } catch (ImporterHttpException $e) {
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
+        // store in session:
+        session()->put(Constants::NORDIGEN_ACCESS_TOKEN, $result->accessToken);
+        session()->put(Constants::NORDIGEN_REFRESH_TOKEN, $result->refreshToken);
+
+        session()->put(Constants::NORDIGEN_ACCESS_EXPIRY_TIME, $result->accessExpires);
+        session()->put(Constants::NORDIGEN_REFRESH_EXPIRY_TIME, $result->refreshExpires);
     }
 }

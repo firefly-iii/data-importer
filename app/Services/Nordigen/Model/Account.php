@@ -117,14 +117,14 @@ class Account
         $this->balances[] = $balance;
     }
 
-    public function getBban(): string
-    {
-        return $this->bban;
-    }
-
     public function getBalances(): array
     {
         return $this->balances;
+    }
+
+    public function getBban(): string
+    {
+        return $this->bban;
     }
 
     public function setBban(string $bban): void
@@ -172,16 +172,6 @@ class Account
         $this->details = $details;
     }
 
-    public function getDisplayName(): string
-    {
-        return $this->displayName;
-    }
-
-    public function setDisplayName(string $displayName): void
-    {
-        $this->displayName = $displayName;
-    }
-
     public function getFullName(): string
     {
         app('log')->debug('Account::getFullName()');
@@ -208,6 +198,36 @@ class Account
         app('log')->warning('Account::getFullName(): no field with name, return "(no name)"');
 
         return '(no name)';
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(string $displayName): void
+    {
+        $this->displayName = $displayName;
+    }
+
+    public function getOwnerName(): string
+    {
+        return $this->ownerName;
+    }
+
+    public function setOwnerName(string $ownerName): void
+    {
+        $this->ownerName = $ownerName;
     }
 
     public function getIban(): string
@@ -250,16 +270,6 @@ class Account
         $this->msisdn = $msisdn;
     }
 
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
     public function getOwnerAddressUnstructured(): array
     {
         return $this->ownerAddressUnstructured;
@@ -268,16 +278,6 @@ class Account
     public function setOwnerAddressUnstructured(array $ownerAddressUnstructured): void
     {
         $this->ownerAddressUnstructured = $ownerAddressUnstructured;
-    }
-
-    public function getOwnerName(): string
-    {
-        return $this->ownerName;
-    }
-
-    public function setOwnerName(string $ownerName): void
-    {
-        $this->ownerName = $ownerName;
     }
 
     public function getProduct(): string

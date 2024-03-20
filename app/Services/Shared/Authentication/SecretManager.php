@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace App\Services\Shared\Authentication;
 
 use App\Services\Session\Constants;
-use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Class SecretManager
@@ -47,6 +46,14 @@ class SecretManager
         return session()->get(Constants::SESSION_ACCESS_TOKEN);
     }
 
+    /**
+     * Will verify if the user has an access token (in a cookie)
+     */
+    private static function hasAccessToken(): bool
+    {
+        return session()->has(Constants::SESSION_ACCESS_TOKEN) && '' !== session()->get(Constants::SESSION_ACCESS_TOKEN);
+    }
+
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
@@ -56,6 +63,14 @@ class SecretManager
         }
 
         return (string)session()->get(Constants::SESSION_BASE_URL);
+    }
+
+    /**
+     * Will verify if the user has an base URL defined (in a cookie)
+     */
+    private static function hasBaseUrl(): bool
+    {
+        return session()->has(Constants::SESSION_BASE_URL) && '' !== session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -70,6 +85,14 @@ class SecretManager
         }
 
         return (int)session()->get(Constants::SESSION_CLIENT_ID);
+    }
+
+    /**
+     * Will verify if the user has an client ID defined
+     */
+    private static function hasClientId(): bool
+    {
+        return session()->has(Constants::SESSION_CLIENT_ID) && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getVanityUrl(): string
@@ -87,6 +110,14 @@ class SecretManager
     }
 
     /**
+     * Will verify if the user has a vanity URL defined
+     */
+    private static function hasVanityUrl(): bool
+    {
+        return session()->has(Constants::SESSION_VANITY_URL) && '' !== session()->get(Constants::SESSION_VANITY_URL);
+    }
+
+    /**
      * Will return true if the session / cookies hold valid secrets (access token, URLs)
      */
     public static function hasValidSecrets(): bool
@@ -98,6 +129,16 @@ class SecretManager
         }
 
         return true;
+    }
+
+    /**
+     * Will verify if the user has a refresh token
+     *
+     * @see self::hasAccessToken
+     */
+    private static function hasRefreshToken(): bool
+    {
+        return session()->has(Constants::SESSION_REFRESH_TOKEN) && '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
     }
 
     /**
@@ -130,47 +171,5 @@ class SecretManager
     public static function saveVanityUrl(string $url): void
     {
         session()->put(Constants::SESSION_VANITY_URL, $url);
-    }
-
-    /**
-     * Will verify if the user has an access token (in a cookie)
-     */
-    private static function hasAccessToken(): bool
-    {
-        return session()->has(Constants::SESSION_ACCESS_TOKEN) && '' !== session()->get(Constants::SESSION_ACCESS_TOKEN);
-    }
-
-    /**
-     * Will verify if the user has an base URL defined (in a cookie)
-     */
-    private static function hasBaseUrl(): bool
-    {
-        return session()->has(Constants::SESSION_BASE_URL) && '' !== session()->get(Constants::SESSION_BASE_URL);
-    }
-
-    /**
-     * Will verify if the user has an client ID defined
-     */
-    private static function hasClientId(): bool
-    {
-        return session()->has(Constants::SESSION_CLIENT_ID) && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
-    }
-
-    /**
-     * Will verify if the user has a refresh token
-     *
-     * @see self::hasAccessToken
-     */
-    private static function hasRefreshToken(): bool
-    {
-        return session()->has(Constants::SESSION_REFRESH_TOKEN) && '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
-    }
-
-    /**
-     * Will verify if the user has a vanity URL defined
-     */
-    private static function hasVanityUrl(): bool
-    {
-        return session()->has(Constants::SESSION_VANITY_URL) && '' !== session()->get(Constants::SESSION_VANITY_URL);
     }
 }

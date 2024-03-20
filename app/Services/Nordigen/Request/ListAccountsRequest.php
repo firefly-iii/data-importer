@@ -46,6 +46,11 @@ class ListAccountsRequest extends Request
         $this->setUrl(sprintf('api/v2/requisitions/%s/', $identifier));
     }
 
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
+    }
+
     /**
      * @throws AgreementExpiredException
      * @throws ImporterErrorException
@@ -66,10 +71,5 @@ class ListAccountsRequest extends Request
     public function put(): Response
     {
         // Implement put() method.
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 }

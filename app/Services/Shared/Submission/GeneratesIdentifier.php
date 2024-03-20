@@ -33,11 +33,6 @@ trait GeneratesIdentifier
     protected string $identifier;
     private string   $diskName = 'submission-routines';
 
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
     public function generateIdentifier(): string
     {
         app('log')->debug('Going to generate submission routine identifier.');
@@ -52,5 +47,10 @@ trait GeneratesIdentifier
         app('log')->info(sprintf('Job identifier is "%s"', $generatedId));
 
         return $generatedId;
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
     }
 }

@@ -75,24 +75,18 @@ final class UpgradeImportConfigurations extends Command
         return 0;
     }
 
-    private function getExtension(string $name): string
+    private function processRoot(string $directory): void
     {
-        $parts = explode('.', $name);
+        $dir   = new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS);
+        $files = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
 
-        return $parts[count($parts) - 1];
-    }
-
-    private function isValidJson(string $content): bool
-    {
-        if ('' === $content) {
-            return false;
+        /**
+         * @var string       $name
+         * @var \SplFileInfo $object
+         */
+        foreach ($files as $name => $object) {
+            $this->processFile($name);
         }
-        $json = json_decode($content, true);
-        if (false === $json) {
-            return false;
-        }
-
-        return true;
     }
 
     private function processFile(string $name): void
@@ -114,17 +108,23 @@ final class UpgradeImportConfigurations extends Command
         file_put_contents($name, json_encode($newJson, JSON_PRETTY_PRINT));
     }
 
-    private function processRoot(string $directory): void
+    private function getExtension(string $name): string
     {
-        $dir   = new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS);
-        $files = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
+        $parts = explode('.', $name);
 
-        /**
-         * @var string       $name
-         * @var \SplFileInfo $object
-         */
-        foreach ($files as $name => $object) {
-            $this->processFile($name);
+        return $parts[count($parts) - 1];
+    }
+
+    private function isValidJson(string $content): bool
+    {
+        if ('' === $content) {
+            return false;
         }
+        $json = json_decode($content, true);
+        if (false === $json) {
+            return false;
+        }
+
+        return true;
     }
 }

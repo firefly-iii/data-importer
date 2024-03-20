@@ -84,24 +84,6 @@ class DebugController extends Controller
         );
     }
 
-    /**
-     * Some common combinations.
-     */
-    protected function errorReporting(int $value): string // get configuration
-    {
-        $array = [
-            -1                                                             => 'ALL errors',
-            E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED                  => 'E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED',
-            E_ALL                                                          => 'E_ALL',
-            E_ALL & ~E_DEPRECATED & ~E_STRICT                              => 'E_ALL & ~E_DEPRECATED & ~E_STRICT',
-            E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
-            E_ALL & ~E_NOTICE & ~E_STRICT                                  => 'E_ALL & ~E_NOTICE & ~E_STRICT',
-            E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
-        ];
-
-        return $array[$value] ?? (string)$value;
-    }
-
     private function getTable(): string
     {
         $system = $this->getSystemInfo();
@@ -147,6 +129,24 @@ class DebugController extends Controller
             'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
             'bcscale'        => bcscale(),
         ];
+    }
+
+    /**
+     * Some common combinations.
+     */
+    protected function errorReporting(int $value): string // get configuration
+    {
+        $array = [
+            -1                                                             => 'ALL errors',
+            E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED                  => 'E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED',
+            E_ALL                                                          => 'E_ALL',
+            E_ALL & ~E_DEPRECATED & ~E_STRICT                              => 'E_ALL & ~E_DEPRECATED & ~E_STRICT',
+            E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
+            E_ALL & ~E_NOTICE & ~E_STRICT                                  => 'E_ALL & ~E_NOTICE & ~E_STRICT',
+            E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
+        ];
+
+        return $array[$value] ?? (string)$value;
     }
 
     private function getUserInfo(): array

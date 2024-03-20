@@ -155,20 +155,6 @@ class RoutineManager implements RoutineManagerInterface
         return $transactions;
     }
 
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->csvFileProcessor->getErrors(),
-                $this->lineProcessor->getErrors(),
-                $this->columnValueConverter->getErrors(),
-                $this->pseudoTransactionProcessor->getErrors(),
-            ],
-            $count
-        );
-    }
-
     private function mergeMessages(int $count): void
     {
         $this->allMessages = $this->mergeArrays(
@@ -192,6 +178,20 @@ class RoutineManager implements RoutineManagerInterface
                 $this->lineProcessor->getWarnings(),
                 $this->columnValueConverter->getWarnings(),
                 $this->pseudoTransactionProcessor->getWarnings(),
+            ],
+            $count
+        );
+    }
+
+    private function mergeErrors(int $count): void
+    {
+        $this->allErrors = $this->mergeArrays(
+            [
+                $this->getErrors(),
+                $this->csvFileProcessor->getErrors(),
+                $this->lineProcessor->getErrors(),
+                $this->columnValueConverter->getErrors(),
+                $this->pseudoTransactionProcessor->getErrors(),
             ],
             $count
         );

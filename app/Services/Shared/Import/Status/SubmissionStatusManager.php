@@ -37,6 +37,7 @@ use Psr\Container\NotFoundExceptionInterface;
 class SubmissionStatusManager
 {
     use GeneratesIdentifier;
+
     protected const string DISK_NAME = 'submission-routines';
 
     public static function addError(string $identifier, int $index, string $error): void
@@ -60,6 +61,20 @@ class SubmissionStatusManager
                 app('log')->error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
+            app('log')->error($e->getMessage());
+        }
+    }
+
+    private static function storeSubmissionStatus(string $identifier, SubmissionStatus $status): void
+    {
+        app('log')->debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
+        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
+        $disk = \Storage::disk(self::DISK_NAME);
+
+        try {
+            $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        } catch (\JsonException $e) {
+            // do nothing
             app('log')->error($e->getMessage());
         }
     }
@@ -176,19 +191,5 @@ class SubmissionStatusManager
         app('log')->debug('Return status.', $status->toArray());
 
         return $status;
-    }
-
-    private static function storeSubmissionStatus(string $identifier, SubmissionStatus $status): void
-    {
-        app('log')->debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
-        app('log')->debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
-        $disk = \Storage::disk(self::DISK_NAME);
-
-        try {
-            $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        } catch (\JsonException $e) {
-            // do nothing
-            app('log')->error($e->getMessage());
-        }
     }
 }

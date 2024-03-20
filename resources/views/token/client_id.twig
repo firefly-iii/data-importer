@@ -24,7 +24,11 @@
                         <p class="card-text">
                             {% if '' != baseUrl %}
                                 In order to get access to your Firefly III installation at <a
-                                href="{{ baseUrl }}">{{ baseUrl }}</a>, you will need to submit a valid Client ID. This is a number.
+                                href="{{ baseUrl }}">{{ baseUrl }}</a>
+                                {% if '' != vanityUrl %}
+                                    (<a href="{{ vanityUrl }}">{{ vanityUrl }}</a>)
+                                {% endif %}
+                                , you will need to submit a valid Client ID. This is a number.
                             {% else %}
                                 In order to get access to your Firefly III installation, you will need to submit a valid Client ID. This is a number.
                             {% endif %}

@@ -107,7 +107,7 @@ class RoutineManager implements RoutineManagerInterface
 
         $converted    = $this->transactionGenerator->getTransactions($transactions);
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
-        if(0 === count($converted)) {
+        if (0 === count($converted)) {
             $this->addError(0, 'No transactions were converted, probably zero found at Spectre.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
@@ -124,19 +124,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->mergeErrors(count($transactions));
 
         return $filtered;
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionFilter->getErrors(),
-                $this->transactionProcessor->getErrors(),
-                $this->transactionGenerator->getErrors(),
-            ],
-            $count
-        );
     }
 
     private function mergeMessages(int $count): void
@@ -160,6 +147,19 @@ class RoutineManager implements RoutineManagerInterface
                 $this->transactionFilter->getWarnings(),
                 $this->transactionProcessor->getWarnings(),
                 $this->transactionGenerator->getWarnings(),
+            ],
+            $count
+        );
+    }
+
+    private function mergeErrors(int $count): void
+    {
+        $this->allErrors = $this->mergeArrays(
+            [
+                $this->getErrors(),
+                $this->transactionFilter->getErrors(),
+                $this->transactionProcessor->getErrors(),
+                $this->transactionGenerator->getErrors(),
             ],
             $count
         );

@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
-use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -38,7 +37,6 @@ use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 
 /**
  * Class GenerateTransactions.
@@ -48,6 +46,7 @@ class GenerateTransactions
     use CollectsAccounts;
     use DuplicateSafetyCatch;
     use ProgressInformation;
+
     public const string NUMBER_FORMAT = 'nr_%s';
 
     private array         $accounts;
@@ -149,10 +148,105 @@ class GenerateTransactions
         return $return;
     }
 
-    public function setConfiguration(Configuration $configuration): void
+    /**
+     * TODO function is way too complex.
+     *
+     * @throws ImporterHttpException
+     */
+    private function generateTransaction(string $accountId, Transaction $entry): array
     {
-        $this->configuration = $configuration;
-        $this->accounts      = $configuration->getAccounts();
+        app('log')->debug(sprintf('Nordigen transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
+
+        $return                   = [
+            'apply_rules'             => $this->configuration->isRules(),
+            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
+            'transactions'            => [],
+        ];
+        $valueDate                = $entry->getValueDate();
+        $transaction              = [
+            'type'                   => 'withdrawal',
+            'date'                   => $entry->getDate()->toW3cString(),
+            'datetime'               => $entry->getDate()->toW3cString(),
+            'amount'                 => $entry->transactionAmount,
+            'description'            => $entry->getDescription(),
+            'payment_date'           => null === $valueDate ? '' : $valueDate->format('Y-m-d'),
+            'order'                  => 0,
+            'currency_code'          => $entry->currencyCode,
+            'tags'                   => $entry->tags,
+            'category_name'          => null,
+            'category_id'            => null,
+            'notes'                  => $entry->getNotes(),
+            'external_id'            => $entry->getTransactionId(),
+            'internal_reference'     => $entry->accountIdentifier,
+            'additional-information' => $entry->additionalInformation,
+        ];
+
+        if (1 === bccomp($entry->transactionAmount, '0')) {
+            app('log')->debug('Amount is positive: assume transfer or deposit.');
+            $transaction = $this->appendPositiveAmountInfo($accountId, $transaction, $entry);
+        }
+
+        if (-1 === bccomp($entry->transactionAmount, '0')) {
+            app('log')->debug('Amount is negative: assume transfer or withdrawal.');
+            $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
+        }
+        $return['transactions'][] = $transaction;
+        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->getTransactionId()), $transaction);
+
+        return $return;
+    }
+
+    /**
+     * Handle transaction information when the amount is positive, and this is probably a deposit or a transfer.
+     *
+     * @throws ImporterHttpException
+     */
+    private function appendPositiveAmountInfo(string $accountId, array $transaction, Transaction $entry): array
+    {
+        // amount is positive: deposit or transfer. Nordigen account is the destination
+        $transaction['type']           = 'deposit';
+        $transaction['amount']         = $entry->transactionAmount;
+
+        // destination is a Nordigen account (has to be!)
+        $transaction['destination_id'] = (int)$this->accounts[$accountId];
+        app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
+
+        // append source iban and number (if present)
+        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
+
+        // TODO clean up mapping
+        $mappedId                      = null;
+        if (isset($transaction['source_name'])) {
+            app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
+            $mappedId = $this->getMappedAccountId($transaction['source_name']);
+        }
+        if (null === $mappedId) {
+            app('log')->debug('Its not mapped by the user.');
+        }
+
+        if (null !== $mappedId && 0 !== $mappedId) {
+            app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['source_name'], $mappedId));
+            $mappedType               = $this->getMappedAccountType($mappedId);
+            $originalSourceName       = $transaction['source_name'];
+            $transaction['source_id'] = $mappedId;
+
+            // catch error here:
+            try {
+                $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
+                app('log')->debug(sprintf('Transaction type seems to be %s', $transaction['type']));
+            } catch (ImporterErrorException $e) {
+                app('log')->error($e->getMessage());
+                app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
+                unset($transaction['source_id']);
+                $transaction['source_name'] = $originalSourceName;
+            }
+        }
+
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getSourceName(), (string)$entry->getSourceIban());
+
+        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
+
+        return $transaction;
     }
 
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
@@ -251,6 +345,87 @@ class GenerateTransactions
         return $transaction;
     }
 
+    private function getMappedAccountId(string $name): ?int
+    {
+        if (isset($this->configuration->getMapping()['accounts'][$name])) {
+            return (int)$this->configuration->getMapping()['accounts'][$name];
+        }
+
+        return null;
+    }
+
+    /**
+     * TODO Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
+     *
+     * @throws ImporterHttpException
+     */
+    private function getMappedAccountType(int $mappedId): string
+    {
+        if (!isset($this->configuration->getAccountTypes()[$mappedId])) {
+            app('log')->warning(sprintf('Cannot find account type for Firefly III account #%d.', $mappedId));
+            $accountType             = $this->getAccountType($mappedId);
+            $accountTypes            = $this->configuration->getAccountTypes();
+            $accountTypes[$mappedId] = $accountType;
+            $this->configuration->setAccountTypes($accountTypes);
+
+            app('log')->debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $accountType));
+
+            return $accountType;
+        }
+        $type = $this->configuration->getAccountTypes()[$mappedId] ?? 'expense';
+        app('log')->debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $type));
+
+        return $type;
+    }
+
+    /**
+     * @throws ImporterHttpException
+     */
+    private function getAccountType(int $accountId): string
+    {
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
+        app('log')->debug(sprintf('Going to download account #%d', $accountId));
+        $request = new GetAccountRequest($url, $token);
+        $request->setId($accountId);
+
+        // @var GetAccountResponse $result
+        try {
+            $result = $request->get();
+        } catch (ApiHttpException $e) {
+            throw new ImporterHttpException($e->getMessage(), 0, $e);
+        }
+        $type    = $result->getAccount()->type;
+
+        app('log')->debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
+
+        return $type;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function getTransactionType(string $source, string $destination): string
+    {
+        $combination = sprintf('%s-%s', $source, $destination);
+
+        switch ($combination) {
+            default:
+                throw new ImporterErrorException(sprintf('Unknown combination: %s and %s', $source, $destination));
+
+            case 'asset-liabilities':
+            case 'asset-expense':
+                return 'withdrawal';
+
+            case 'asset-asset':
+                return 'transfer';
+
+            case 'liabilities-asset':
+            case 'revenue-asset':
+                return 'deposit';
+        }
+    }
+
     /**
      * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.
      *
@@ -299,57 +474,10 @@ class GenerateTransactions
         return $transaction;
     }
 
-    /**
-     * Handle transaction information when the amount is positive, and this is probably a deposit or a transfer.
-     *
-     * @throws ImporterHttpException
-     */
-    private function appendPositiveAmountInfo(string $accountId, array $transaction, Transaction $entry): array
+    public function setConfiguration(Configuration $configuration): void
     {
-        // amount is positive: deposit or transfer. Nordigen account is the destination
-        $transaction['type']           = 'deposit';
-        $transaction['amount']         = $entry->transactionAmount;
-
-        // destination is a Nordigen account (has to be!)
-        $transaction['destination_id'] = (int)$this->accounts[$accountId];
-        app('log')->debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
-
-        // append source iban and number (if present)
-        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
-
-        // TODO clean up mapping
-        $mappedId                      = null;
-        if (isset($transaction['source_name'])) {
-            app('log')->debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
-            $mappedId = $this->getMappedAccountId($transaction['source_name']);
-        }
-        if (null === $mappedId) {
-            app('log')->debug('Its not mapped by the user.');
-        }
-
-        if (null !== $mappedId && 0 !== $mappedId) {
-            app('log')->debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['source_name'], $mappedId));
-            $mappedType               = $this->getMappedAccountType($mappedId);
-            $originalSourceName       = $transaction['source_name'];
-            $transaction['source_id'] = $mappedId;
-
-            // catch error here:
-            try {
-                $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
-                app('log')->debug(sprintf('Transaction type seems to be %s', $transaction['type']));
-            } catch (ImporterErrorException $e) {
-                app('log')->error($e->getMessage());
-                app('log')->info('Will not use mapped ID, Firefly III account is of the wrong type.');
-                unset($transaction['source_id']);
-                $transaction['source_name'] = $originalSourceName;
-            }
-        }
-
-        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getSourceName(), (string)$entry->getSourceIban());
-
-        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
-
-        return $transaction;
+        $this->configuration = $configuration;
+        $this->accounts      = $configuration->getAccounts();
     }
 
     private function filterSpaces(string $iban): string
@@ -404,134 +532,5 @@ class GenerateTransactions
         ];
 
         return str_replace($search, '', $iban);
-    }
-
-    /**
-     * TODO function is way too complex.
-     *
-     * @throws ImporterHttpException
-     */
-    private function generateTransaction(string $accountId, Transaction $entry): array
-    {
-        app('log')->debug(sprintf('Nordigen transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
-
-        $return                   = [
-            'apply_rules'             => $this->configuration->isRules(),
-            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [],
-        ];
-        $valueDate                = $entry->getValueDate();
-        $transaction              = [
-            'type'                   => 'withdrawal',
-            'date'                   => $entry->getDate()->toW3cString(),
-            'datetime'               => $entry->getDate()->toW3cString(),
-            'amount'                 => $entry->transactionAmount,
-            'description'            => $entry->getDescription(),
-            'payment_date'           => null === $valueDate ? '' : $valueDate->format('Y-m-d'),
-            'order'                  => 0,
-            'currency_code'          => $entry->currencyCode,
-            'tags'                   => $entry->tags,
-            'category_name'          => null,
-            'category_id'            => null,
-            'notes'                  => $entry->getNotes(),
-            'external_id'            => $entry->getTransactionId(),
-            'internal_reference'     => $entry->accountIdentifier,
-            'additional-information' => $entry->additionalInformation,
-        ];
-
-        if (1 === bccomp($entry->transactionAmount, '0')) {
-            app('log')->debug('Amount is positive: assume transfer or deposit.');
-            $transaction = $this->appendPositiveAmountInfo($accountId, $transaction, $entry);
-        }
-
-        if (-1 === bccomp($entry->transactionAmount, '0')) {
-            app('log')->debug('Amount is negative: assume transfer or withdrawal.');
-            $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
-        }
-        $return['transactions'][] = $transaction;
-        app('log')->debug(sprintf('Parsed Nordigen transaction "%s".', $entry->getTransactionId()), $transaction);
-
-        return $return;
-    }
-
-    /**
-     * @throws ImporterHttpException
-     */
-    private function getAccountType(int $accountId): string
-    {
-        $token   = SecretManager::getAccessToken();
-        $url     = SecretManager::getBaseUrl();
-        app('log')->debug(sprintf('Going to download account #%d', $accountId));
-        $request = new GetAccountRequest($url, $token);
-        $request->setId($accountId);
-
-        // @var GetAccountResponse $result
-        try {
-            $result = $request->get();
-        } catch (ApiHttpException $e) {
-            throw new ImporterHttpException($e->getMessage(), 0, $e);
-        }
-        $type    = $result->getAccount()->type;
-
-        app('log')->debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
-
-        return $type;
-    }
-
-    private function getMappedAccountId(string $name): ?int
-    {
-        if (isset($this->configuration->getMapping()['accounts'][$name])) {
-            return (int)$this->configuration->getMapping()['accounts'][$name];
-        }
-
-        return null;
-    }
-
-    /**
-     * TODO Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
-     *
-     * @throws ImporterHttpException
-     */
-    private function getMappedAccountType(int $mappedId): string
-    {
-        if (!isset($this->configuration->getAccountTypes()[$mappedId])) {
-            app('log')->warning(sprintf('Cannot find account type for Firefly III account #%d.', $mappedId));
-            $accountType             = $this->getAccountType($mappedId);
-            $accountTypes            = $this->configuration->getAccountTypes();
-            $accountTypes[$mappedId] = $accountType;
-            $this->configuration->setAccountTypes($accountTypes);
-
-            app('log')->debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $accountType));
-
-            return $accountType;
-        }
-        $type = $this->configuration->getAccountTypes()[$mappedId] ?? 'expense';
-        app('log')->debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $type));
-
-        return $type;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function getTransactionType(string $source, string $destination): string
-    {
-        $combination = sprintf('%s-%s', $source, $destination);
-
-        switch ($combination) {
-            default:
-                throw new ImporterErrorException(sprintf('Unknown combination: %s and %s', $source, $destination));
-
-            case 'asset-liabilities':
-            case 'asset-expense':
-                return 'withdrawal';
-
-            case 'asset-asset':
-                return 'transfer';
-
-            case 'liabilities-asset':
-            case 'revenue-asset':
-                return 'deposit';
-        }
     }
 }

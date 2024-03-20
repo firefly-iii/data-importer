@@ -58,27 +58,6 @@ class Token
     /**
      * @throws ImporterErrorException
      */
-    public static function getURL(): string
-    {
-        try {
-            $value = session()->get(Constants::SESSION_BASE_URL);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-            throw new ImporterErrorException('No valid base URL value.');
-        }
-        if (null === $value) {
-            // fall back to config:
-            $value = (string)config('importer.url');
-        }
-        if ('' === (string)$value) {
-            throw new ImporterErrorException('No valid base URL value.');
-        }
-
-        return (string)$value;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
     public static function getVanityURL(): string
     {
         try {
@@ -94,6 +73,27 @@ class Token
         }
         if ('' === (string)$value) {
             throw new ImporterErrorException('No valid vanity URL value.');
+        }
+
+        return (string)$value;
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    public static function getURL(): string
+    {
+        try {
+            $value = session()->get(Constants::SESSION_BASE_URL);
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+            throw new ImporterErrorException('No valid base URL value.');
+        }
+        if (null === $value) {
+            // fall back to config:
+            $value = (string)config('importer.url');
+        }
+        if ('' === (string)$value) {
+            throw new ImporterErrorException('No valid base URL value.');
         }
 
         return (string)$value;

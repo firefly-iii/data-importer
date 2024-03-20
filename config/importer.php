@@ -23,13 +23,15 @@
 declare(strict_types=1);
 
 return [
-    'version'                 => '1.4.4',
+    'version'                 => '1.4.5',
     'flows'                   => ['nordigen', 'spectre', 'file'],
     'flow_titles'             => [
         'file'     => 'File',
         'nordigen' => 'GoCardless',
         'spectre'  => 'Spectre',
     ],
+    'fallback_in_dir'         => env('FALLBACK_IN_DIR', false),
+    'fallback_configuration'  => '_fallback.json',
     'import_dir_allowlist'    => explode(',', env('IMPORT_DIR_ALLOWLIST', '')),
     'auto_import_secret'      => env('AUTO_IMPORT_SECRET', ''),
     'can_post_autoimport'     => env('CAN_POST_AUTOIMPORT', false),
@@ -44,7 +46,7 @@ return [
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
-    'minimum_version'         => '6.1.9',
+    'minimum_version'         => '6.1.11',
     'cache_api_calls'         => false,
     'ignored_files'           => ['.gitignore'],
     'tracker_site_id'         => env('TRACKER_SITE_ID', ''),

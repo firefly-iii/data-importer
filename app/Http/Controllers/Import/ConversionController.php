@@ -32,7 +32,6 @@ use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
-use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;

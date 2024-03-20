@@ -29,6 +29,13 @@ namespace App\Support;
  */
 class Steam
 {
+    public function cleanStringAndNewlines($value): string
+    {
+        $string = $this->cleanString($value);
+
+        return trim(str_replace("\n", '', $string));
+    }
+
     /**
      * Convert a value.
      *
@@ -90,13 +97,6 @@ class Steam
         ];
 
         return trim(str_replace($search, "\x20", $value));
-    }
-
-    public function cleanStringAndNewlines($value): string
-    {
-        $string = $this->cleanString($value);
-
-        return trim(str_replace("\n", '', $string));
     }
 
     public function filterAllSpaces(string $iban): string

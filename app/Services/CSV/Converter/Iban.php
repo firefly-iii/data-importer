@@ -29,6 +29,27 @@ namespace App\Services\CSV\Converter;
  */
 class Iban implements ConverterInterface
 {
+    /**
+     * Convert a value.
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    public function convert($value)
+    {
+        if (self::isValidIban($value)) {
+            // strip spaces from IBAN and make upper case.
+            $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
+            app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
+
+            return trim($result);
+        }
+        app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
+
+        return '';
+    }
+
     public static function isValidIban(string $value): bool
     {
         app('log')->debug(sprintf('isValidIBAN("%s")', $value));
@@ -79,27 +100,6 @@ class Iban implements ConverterInterface
         }
 
         return 1 === (int)$checksum;
-    }
-
-    /**
-     * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return string
-     */
-    public function convert($value)
-    {
-        if (self::isValidIban($value)) {
-            // strip spaces from IBAN and make upper case.
-            $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
-            app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
-
-            return trim($result);
-        }
-        app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
-
-        return '';
     }
 
     /**
