@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "63728a9cf28646e70a3756fdab4e68d3",
+    "content-hash": "595cfb354622ff01824e961f9e03adb6",
     "packages": [
         {
             "name": "brick/math",
@@ -1025,16 +1025,16 @@
         },
         {
             "name": "genkgo/camt",
-            "version": "2.6.2",
+            "version": "2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/genkgo/camt.git",
-                "reference": "77b39a0928e329e87619fdfa6074237f771c9f17"
+                "reference": "08ff6d7acf1597b25ec8416f21bec9671a5dbf61"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/genkgo/camt/zipball/77b39a0928e329e87619fdfa6074237f771c9f17",
-                "reference": "77b39a0928e329e87619fdfa6074237f771c9f17",
+                "url": "https://api.github.com/repos/genkgo/camt/zipball/08ff6d7acf1597b25ec8416f21bec9671a5dbf61",
+                "reference": "08ff6d7acf1597b25ec8416f21bec9671a5dbf61",
                 "shasum": ""
             },
             "require": {
@@ -1063,9 +1063,9 @@
             "description": "Library to read CAMT files (XML containing bank statements).",
             "support": {
                 "issues": "https://github.com/genkgo/camt/issues",
-                "source": "https://github.com/genkgo/camt/tree/2.6.2"
+                "source": "https://github.com/genkgo/camt/tree/2.7.0"
             },
-            "time": "2023-12-12T14:09:40+00:00"
+            "time": "2024-03-22T03:06:27+00:00"
         },
         {
             "name": "graham-campbell/result-type",
