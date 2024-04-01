@@ -4,7 +4,6 @@
 [![License][license-shield]][license-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Donate][donate-shield]][donate-url]
-[![huntr][hack-shield]][hack-url]
 
 <!-- PROJECT LOGO -->
 <br />
@@ -94,7 +93,7 @@ Do you want to contact me? You can email me at [james@firefly-iii.org](mailto:ja
 
 - [GitHub Discussions](https://github.com/firefly-iii/firefly-iii/discussions/) for questions and support
 - [Gitter.im](https://gitter.im/firefly-iii/firefly-iii) for a good chat and a quick answer
-- [GitHub Issues](https://github.com/firefly-iii/firefly-iii/issues) for bugs and issues
+- [GitHub Issues](https://github.com/firefly-iii/firefly-iii/issues) for bugs and issues. Issues are collected centrally, in the [Firefly III repository](https://github.com/firefly-iii/firefly-iii).
 - <a rel="me" href="https://fosstodon.org/@ff3">Mastodon</a> for news and updates
 
 <!-- END OF HELP TEXT -->
