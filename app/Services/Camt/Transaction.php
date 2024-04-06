@@ -163,11 +163,11 @@ class Transaction
 
             case 'entryValueDate':
                 // always the same, since its level C.
-                return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+                return (string)$this->levelC->getValueDate()?->format(self::TIME_FORMAT);
 
             case 'entryBookingDate':
                 // always the same, since its level C.
-                return (string)$this->levelC->getBookingDate()->format(self::TIME_FORMAT);
+                return (string)$this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
 
             case 'entryBtcDomainCode':
                 $return          = '';
