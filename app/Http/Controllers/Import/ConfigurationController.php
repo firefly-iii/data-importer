@@ -146,7 +146,7 @@ class ConfigurationController extends Controller
 
         $dateObj           = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
-        $date              = Carbon::make('1984-09-17')->locale($locale);
+        $date              = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
