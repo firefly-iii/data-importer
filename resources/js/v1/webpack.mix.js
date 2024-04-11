@@ -1,6 +1,6 @@
 /*
  * webpack.mix.js
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2024 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
  * (https://github.com/firefly-iii/data-importer).
@@ -41,5 +41,5 @@ mix.webpackConfig({
                       }
                   });
 
-mix.js('resources/js/submit.js', 'public/js').vue({ version: 2 });
-mix.js('resources/js/convert.js', 'public/js').vue({ version: 2 });
+mix.js('submit.js', '../../public/js').vue({ version: 2 });
+mix.js('convert.js', '../../public/js').vue({ version: 2 });
