@@ -48,7 +48,7 @@ let index = function () {
 
         },
         showJobMessages() {
-            return this.messages.messages.length > 0 || this.messages.warnings.length > 0 || this.messages.errors.length > 0;
+            return Object.values(this.messages.messages).length > 0 || Object.values(this.messages.warnings).length > 0 || Object.values(this.messages.errors).length > 0;
         },
         showStartButton() {
             return('init' === this.pageStatus.status || 'waiting_to_start' === this.pageStatus.status) && false === this.pageStatus.triedToStart && false === this.post.errored;
@@ -155,7 +155,7 @@ let index = function () {
                     setTimeout(function () {
                         console.log('Do redirect!')
                         this.redirectToImport();
-                    }.bind(this), 4000);
+                    }.bind(this), 2000);
                     return;
                 }
                 if ('conv_errored' === this.pageStatus.status) {

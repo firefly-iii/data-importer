@@ -46,7 +46,7 @@ let index = function () {
 
         },
         showJobMessages() {
-            return this.messages.messages.length > 0 || this.messages.warnings.length > 0 || this.messages.errors.length > 0;
+            return Object.values(this.messages.messages).length > 0 || Object.values(this.messages.warnings).length > 0 || Object.values(this.messages.errors).length > 0;
         },
         showStartButton() {
             return('init' === this.pageStatus.status || 'waiting_to_start' === this.pageStatus.status) && false === this.pageStatus.triedToStart && false === this.post.errored;
@@ -118,8 +118,8 @@ let index = function () {
                 }
 
                 // process messages, warnings and errors:
-                this.messages.errors = response.data.errors;
-                this.messages.warnings = response.data.warnings;
+                this.messages.errors = Object.values(response.data.errors);
+                this.messages.warnings = Object.values(response.data.warnings);
                 this.messages.messages = response.data.messages;
 
                 // job has not started yet. Let's wait.
@@ -144,10 +144,6 @@ let index = function () {
                 if ('submission_done' === this.pageStatus.status) {
                     console.log('Job is done!');
                     this.post.done = true;
-                    setTimeout(function () {
-                        console.log('Do redirect!')
-                        this.redirectToImport();
-                    }.bind(this), 4000);
                     return;
                 }
                 if ('submission_errored' === this.pageStatus.status) {
