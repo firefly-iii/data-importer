@@ -13,3 +13,6 @@ yarn-error.log
 
 # ignore v1 node modules
 resources/js/v1/node_modules
+
+# ignore v2 node modules
+resources/js/v2/node_modules
