@@ -83,7 +83,7 @@
                                             ><span class="fas fa-cog fa-spin"></span></button>
                                     <button x-show="!loadingFunctions.file && importFunctions.file" class="btn btn-info" value="file" name="flow"
                                             >Import file</button>
-                                    <button x-show="!loadingFunctions.file && !importFunctions.file" class="btn btn-danger disabled"  value="file" name="flow"
+                                    <button x-show="!loadingFunctions.file && !importFunctions.file" class="btn text-white btn-danger disabled"  value="file" name="flow"
                                             disabled
                                     ><em class="fa-solid fa-face-dizzy"></em></button>
 
@@ -101,7 +101,7 @@
                                     ><span class="fas fa-cog fa-spin"></span></button>
                                     <button x-show="!loadingFunctions.gocardless && importFunctions.gocardless" class="btn btn-info" value="nordigen" name="flow"
                                     >Import from GoCardless</button>
-                                    <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn btn-danger disabled"  value="nordigen" name="flow"
+                                    <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn text-white btn-danger disabled"  value="nordigen" name="flow"
                                             disabled
                                     ><em class="fa-solid fa-face-dizzy"></em></button>
                                 </div>
@@ -114,11 +114,11 @@
                                 </div>
                                 <div class="card-body">
                                     <p class="text-danger" x-text="errors.spectre" x-show="'' !== errors.spectre"></p>
-                                    <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="file" name="flow" disabled="disabled"
+                                    <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
                                     ><span class="fas fa-cog fa-spin"></span></button>
-                                    <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="file" name="flow"
+                                    <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="spectre" name="flow"
                                     >Import from Spectre</button>
-                                    <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger disabled"  value="file" name="flow"
+                                    <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger text-white disabled"  value="spectre" name="flow"
                                             disabled
                                     ><em class="fa-solid fa-face-dizzy"></em></button>
                                 </div>
@@ -146,7 +146,7 @@
                             has to stay the same when you simply refresh the page.
                         </p>
                         <p>
-                            <a class="btn btn-danger btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
+                            <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
                                data-bs-placement="top"
                                title="This button resets your progress">Start over</a>
                         </p>

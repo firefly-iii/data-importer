@@ -64,7 +64,8 @@ class SelectionController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $countries     = config('nordigen.countries');
-        $mainTitle     = 'Selection';
+        $mainTitle     = 'Select your country and bank';
+        $pageTitle = 'Select your country and bank';
         $subTitle      = 'Select your country and the bank you wish to use.';
         $configuration = $this->restoreConfiguration();
 
@@ -96,7 +97,7 @@ class SelectionController extends Controller
             throw new ImporterErrorException($response->message);
         }
 
-        return view('import.009-selection.index', compact('mainTitle', 'subTitle', 'response', 'countries', 'configuration'));
+        return view('import.009-selection.index', compact('mainTitle','pageTitle', 'subTitle', 'response', 'countries', 'configuration'));
     }
 
     /**

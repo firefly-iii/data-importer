@@ -1,5 +1,5 @@
 /*
- * index.js
+ * gocardless.js
  * Copyright (c) 2024 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -22,40 +22,22 @@
 import '../../boot/bootstrap.js';
 
 
-let index = function () {
+let gocardless = function () {
     return {
-        loadingParsedDate: true,
-        dateFormat: 'Y-m-d',
-        parsedDateFormat: 'hello',
-        dateRange: '',
-        detectionMethod: '',
+        selectedCountry: 'XX',
+        selectedBank: '',
         functionName() {
 
         },
-        getParsedDate() {
-            this.loadingParsedDate = true;
-            const parseUrl = './import/php_date';
-            window.axios.get(parseUrl, {params: {format: this.dateFormat}}).then((response) => {
-                this.parsedDateFormat = response.data.result;
-                this.loadingParsedDate = false;
-            }).catch((error) => {
-                this.parsedDateFormat = ':(';
-                this.loadingParsedDate = false;
-            });
-        },
         init() {
-            this.dateRange = document.querySelector('#date-range-helper').dataset.dateRange;
-            this.detectionMethod = document.querySelector('#detection-method-helper').dataset.method;
-            this.dateFormat = document.querySelector('#date-format-helper').dataset.dateFormat;
-            console.log('detection method', this.detectionMethod);
-            this.getParsedDate();
+            console.log('hello gocardless');
         },
     }
 }
 
 
 function loadPage() {
-    Alpine.data('index', () => index());
+    Alpine.data('gocardless', () => gocardless());
     Alpine.start();
 }
 
