@@ -44,6 +44,7 @@ return [
     'expect_secure_url'       => env('EXPECT_SECURE_URL', false),
     'is_external'             => env('IS_EXTERNAL', false),
     'ignore_duplicate_errors' => env('IGNORE_DUPLICATE_ERRORS', false),
+    'ignore_not_found_transactions' => env('IGNORE_NOT_FOUND_TRANSACTIONS', false),
     'namespace'               => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'               => env('USE_CACHE', false),
     'minimum_version'         => '6.1.11',

@@ -41,6 +41,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetTransactionsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTagResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTransactionResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ApiSubmitter
@@ -234,19 +235,25 @@ class ApiSubmitter
             $isDeleted = false;
             $body      = $request->getResponseBody();
             $json      = json_decode($body, true);
-            app('log')->error($e->getMessage());
             // before we complain, first check what the error is:
             if (is_array($json) && array_key_exists('message', $json)) {
                 if (str_contains($json['message'], '200032')) {
                     $isDeleted = true;
                 }
             }
-            if (true === $isDeleted) {
+            if (true === $isDeleted && false === config('importer.ignore_not_found_transactions')) {
                 $this->addWarning($index, 'The transaction was created, but deleted by a rule.');
+                app('log')->error($e->getMessage());
+
+                return $return;
+            }
+            if (true === $isDeleted && true === config('importer.ignore_not_found_transactions')) {
+                Log::info('The transaction was deleted by a rule, but this is ignored by the importer.');
 
                 return $return;
             }
             $message   = sprintf('Submission HTTP error: %s', e($e->getMessage()));
+            app('log')->error($e->getMessage());
             $this->addError($index, $message);
 
             return $return;
