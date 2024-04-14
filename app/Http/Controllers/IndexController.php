@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Http\Request;

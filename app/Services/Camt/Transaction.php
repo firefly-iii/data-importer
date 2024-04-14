@@ -442,7 +442,7 @@ class Transaction
         return $opposingName;
     }
 
-    private function generateAddressLine(Address $address = null): string
+    private function generateAddressLine(?Address $address = null): string
     {
         return implode(', ', $address->getAddressLines());
     }
