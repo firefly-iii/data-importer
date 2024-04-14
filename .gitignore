@@ -16,3 +16,6 @@ resources/js/v1/node_modules
 
 # ignore v2 node modules
 resources/js/v2/node_modules
+
+# ignore generated files.
+public/build
