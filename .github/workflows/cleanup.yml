@@ -58,7 +58,8 @@ jobs:
             // because we track the duration of runs over time
 
             const workflows = [
-              'cleanup.yml'
+              'cleanup.yml',
+              'release.yml'
             ]
 
             let runs_to_delete = [];
