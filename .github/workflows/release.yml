@@ -40,7 +40,7 @@ jobs:
           extensions: mbstring, intl, zip, bcmath
       - name: Cleanup changelog
         id: cleanup-changelog
-        uses: JC5/firefly-iii-dev@v40
+        uses: JC5/firefly-iii-dev@main
         with:
           action: 'ff3:changelog'
           output: ''
@@ -49,7 +49,7 @@ jobs:
           GH_TOKEN: ${{ secrets.CHANGELOG_TOKEN }}
       - name: Extract changelog
         id: extract-changelog
-        uses: JC5/firefly-iii-dev@v40
+        uses: JC5/firefly-iii-dev@main
         with:
           action: 'ff3:extract-changelog'
           output: 'output'
@@ -58,7 +58,7 @@ jobs:
           GH_TOKEN: ""
       - name: Replace version
         id: replace-version
-        uses: JC5/firefly-iii-dev@v40
+        uses: JC5/firefly-iii-dev@main
         with:
           action: 'ff3:version'
           output: ''
@@ -68,7 +68,7 @@ jobs:
           FF_III_VERSION: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
       - name: Code cleanup
         id: code-cleanup
-        uses: JC5/firefly-iii-dev@v40
+        uses: JC5/firefly-iii-dev@main
         with:
           action: 'ff3:code'
           output: ''
