@@ -83,8 +83,6 @@ use Illuminate\Support\Str;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
-use TwigBridge\Facade\Twig;
-use TwigBridge\ServiceProvider;
 
 return [
     /*
@@ -244,9 +242,6 @@ return [
         ValidationServiceProvider::class,
         ViewServiceProvider::class,
 
-        // Package Service Providers...
-        ServiceProvider::class,
-
         // Application Service Providers...
         AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
@@ -303,7 +298,6 @@ return [
         'URL'          => URL::class,
         'Validator'    => Validator::class,
         'View'         => View::class,
-        'Twig'         => Twig::class,
         'Steam'        => Steam::class,
     ],
 ];
