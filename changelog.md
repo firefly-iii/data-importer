@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.5.0 - 2024-04-21
+
+### Added
+- The data importer has a release flow just like Firefly III, dropping generated JS files and other dependencies from the repository.
+- #8665
+- #8691
+
+### Changed
+- Rewrote front-end layout to AlpineJS + Laravel Blade, moving away from Twig + Vue.
+- Some rules in the PR template
+
+### Fixed
+- #8709
+- #8736
+- #8771
+- [PR 575](https://github.com/firefly-iii/data-importer/pull/575) (Update `.env.example`, `ASSET_URL` moved, example given) by @stevewasiura
+
 ## 1.4.5 - 2024-03-21
 
 ### Added
