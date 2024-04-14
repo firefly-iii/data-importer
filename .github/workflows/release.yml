@@ -86,6 +86,11 @@ jobs:
           composer update --no-dev --no-scripts --no-plugins -q
           sudo chown -R runner:docker resources/lang
           .ci/phpcs.sh
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
       - name: Release
         run: |
           # do some configuration
@@ -149,6 +154,10 @@ jobs:
           echo 'Sha sum ...'
           sha256sum -b $zipName > $zipName.sha256
           sha256sum -b $tarName > $tarName.sha256
+
+          # add signatures:
+          gpg --armor --detach-sign $zipName
+          gpg --armor --detach-sign $tarName
 
           # create a development (nightly) release:
           if [[ "develop" == "$version" ]]; then
