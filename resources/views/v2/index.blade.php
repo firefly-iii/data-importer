@@ -3,14 +3,25 @@
     <div class="container" x-data="index">
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
-                <h1>Firefly III Data Importer, v{{ $version }}</h1>
+                <h1>Firefly III Data Importer,
+                    @if(str_starts_with($version, 'develop'))
+                        {{ $version }}
+                    @else
+                        v{{ $version }}
+                    @endif
+                </h1>
             </div>
         </div>
         <div class="row mt-3">
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
-                        Firefly III Data Importer, v{{ $version }}
+                        Firefly III Data Importer,
+                        @if(str_starts_with($version, 'develop'))
+                            {{ $version }}
+                        @else
+                            v{{ $version }}
+                        @endif
                     </div>
                     <div class="card-body">
                         <p class="card-text">

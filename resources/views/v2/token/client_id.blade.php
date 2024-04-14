@@ -3,7 +3,14 @@
     <div class="container">
         <div class="row mt-4">
             <div class="col-lg-10 offset-lg-1">
-                <h1>Firefly III Data Import Tool, v{{ $version }}</h1>
+                <h1>Firefly III Data Import Tool,
+                    @if(str_starts_with($version, 'develop'))
+                        {{ $version }}
+                    @else
+                        v{{ $version }}
+                    @endif
+
+                </h1>
             </div>
         </div>
         <div class="row mt-3">

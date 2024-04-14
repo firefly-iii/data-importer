@@ -47,6 +47,6 @@ Go to Firefly III
 @endif
 
 Enjoy!<br>
-Firefly III Data Importer, v{{ config('importer.version')  }}
+Firefly III Data Importer, @if(str_starts_with($version, 'develop')){{ $version }} @else v{{ $version }}@endif
 
 @endcomponent
