@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 $paths = [realpath(base_path('resources/views/v2'))];
 
 if ('v1' === env('DATA_IMPORTER_LAYOUT')) {
