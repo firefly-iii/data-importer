@@ -159,11 +159,6 @@ jobs:
           gpg --armor --detach-sign $zipName
           gpg --armor --detach-sign $tarName
 
-          # add signatures to new release
-          ls
-
-          exit 1
-
           # create a development (nightly) release:
           if [[ "develop" == "$version" ]]; then
             echo 'Develop release.'
@@ -194,6 +189,10 @@ jobs:
             gh release upload $releaseName $zipName.sha256
             gh release upload $releaseName $tarName.sha256
 
+            # add signatures to release
+            gh release upload $releaseName $zipName.asc
+            gh release upload $releaseName $tarName.asc
+
             # get current HEAD and add as file to the release
             HEAD=$(git rev-parse HEAD)
             echo $HEAD > HEAD.txt
@@ -220,6 +219,10 @@ jobs:
             # add sha256 sums to release
             gh release upload $releaseName $zipName.sha256
             gh release upload $releaseName $tarName.sha256
+
+            # add signatures to release
+            gh release upload $releaseName $zipName.asc
+            gh release upload $releaseName $tarName.asc
 
             # get current HEAD and add as file to the release
             HEAD=$(git rev-parse HEAD)
