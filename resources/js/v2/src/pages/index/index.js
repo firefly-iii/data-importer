@@ -53,6 +53,8 @@ let index = function () {
             let tokenPageUrl = './token';
             window.axios.get(validateUrl).then((response) => {
                 let message = response.data.result;
+                console.log('message is ', message)
+
                 if ('OK' === message) {
                     this.loadingFunctions.file = false;
                     this.importFunctions.file = true;
@@ -68,7 +70,7 @@ let index = function () {
                 this.importFunctions.spectre = false;
 
                 this.pageProperties.connectionError = true;
-                this.pageProperties.connectionErrorMessage = data.message;
+                this.pageProperties.connectionErrorMessage = response.data.message;
             }).catch((error) => {
                 this.loadingFunctions.file = false;
                 this.loadingFunctions.gocardless = false;
@@ -80,9 +82,12 @@ let index = function () {
                 this.pageProperties.connectionError = true;
                 this.pageProperties.connectionErrorMessage = error;
             }).finally(() => {
-                this.checkSpectreConnection();
-                this.checkGoCardlessConnection();
+                if(false === this.pageProperties.connectionError) {
+                    this.checkSpectreConnection();
+                    this.checkGoCardlessConnection();
+                }
             });
+
         },
         checkSpectreConnection() {
             let validateUrl = './validate/spectre';
@@ -97,7 +102,9 @@ let index = function () {
                 this.importFunctions.spectre = false;
                 this.errors.spectre = 'The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.';
             }).catch((error) => {
-
+                this.loadingFunctions.spectre = false;
+                this.importFunctions.spectre = false;
+                this.errors.spectre = 'The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.';
             });
         },
         checkGoCardlessConnection() {
@@ -113,7 +120,9 @@ let index = function () {
                 this.importFunctions.gocardless = false;
                 this.errors.gocardless = 'The GoCardless API is configured incorrectly and cannot be used to import data.';
             }).catch((error) => {
-
+                this.loadingFunctions.gocardless = false;
+                this.importFunctions.gocardless = false;
+                this.errors.gocardless = 'The GoCardless API is configured incorrectly and cannot be used to import data.';
             });
         }
     }

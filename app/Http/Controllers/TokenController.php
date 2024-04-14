@@ -225,7 +225,12 @@ class TokenController extends Controller
         // Option 3: either is empty, ask for client ID and/or base URL:
         $clientId    = 0 === $clientId ? '' : $clientId;
 
-        return view('token.client_id', compact('baseUrl', 'clientId', 'pageTitle'));
+        // if the vanity url is the same as the base url, just give this view an empty string
+        if($vanityUrl === $baseUrl) {
+            $vanityUrl = '';
+        }
+
+        return view('token.client_id', compact('baseUrl','vanityUrl', 'clientId', 'pageTitle'));
     }
 
     /**

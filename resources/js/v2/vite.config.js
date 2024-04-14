@@ -48,19 +48,11 @@ export default defineConfig({
                 'src/sass/app.scss',
 
                 // index
-                'src/pages/index/index.js',
-
-                // configuration
                 'src/pages/configuration/index.js',
-
-                // selection
-                'src/pages/selection/gocardless.js',
-
-                // conversion
                 'src/pages/conversion/index.js',
-
-                // submission
-                'src/pages/submission/index.js',
+                'src/pages/index/index.js',
+                'src/pages/selection/gocardless.js',
+                'src/pages/submit/index.js',
             ],
             publicDirectory: '../../../public',
             refresh: true
