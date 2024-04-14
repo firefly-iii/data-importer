@@ -85,6 +85,10 @@ class Transaction
     // undocumented fields
     public ?Carbon $valueDate;
 
+    // new fields
+
+    public string $merchantCategoryCode;
+
     /**
      * Creates a transaction from a downloaded array.
      *
@@ -93,12 +97,12 @@ class Transaction
     public static function fromArray($array): self
     {
         app('log')->debug('Nordigen transaction from array', $array);
-        $object                                         = new self();
-        $object->tags                                   = [];
-        $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
-        $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
-        $object->bankTransactionCode                    = trim($array['bankTransactionCode'] ?? '');
-        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat(
+        $object                                  = new self();
+        $object->tags                            = [];
+        $object->additionalInformation           = trim($array['additionalInformation'] ?? '');
+        $object->additionalInformationStructured = trim($array['additionalInformationStructured'] ?? '');
+        $object->bankTransactionCode             = trim($array['bankTransactionCode'] ?? '');
+        $object->bookingDate                     = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat(
             '!Y-m-d',
             $array['bookingDate'],
             config('app.timezone')
@@ -124,6 +128,7 @@ class Transaction
         $object->entryReference                         = trim($array['entryReference'] ?? '');
         $object->mandateId                              = trim($array['mandateId'] ?? '');
         $object->proprietaryBank                        = trim($array['proprietaryBank'] ?? '');
+        $object->merchantCategoryCode                   = trim($array['merchantCategoryCode'] ?? '');
         $object->purposeCode                            = trim($array['purposeCode'] ?? '');
         $object->remittanceInformationStructured        = trim($array['remittanceInformationStructured'] ?? '');
         $object->remittanceInformationStructuredArray   = $array['remittanceInformationStructuredArray'] ?? [];
@@ -139,7 +144,7 @@ class Transaction
         ) : null;
 
         // undocumented values
-        $object->endToEndId                             = trim($array['endToEndId'] ?? ''); // from Rabobank NL
+        $object->endToEndId = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
         if ('' === $object->transactionId) {
@@ -148,7 +153,7 @@ class Transaction
 
         // models:
         if (array_key_exists('balanceAfterTransaction', $array) && is_array($array['balanceAfterTransaction'])) {
-            $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction'] ?? []);
+            $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction']);
         }
         if (array_key_exists('balanceAfterTransaction', $array) && !is_array($array['balanceAfterTransaction'])) {
             app('log')->warning(sprintf('balanceAfterTransaction is not an array: %s', $array['balanceAfterTransaction']));
@@ -159,29 +164,35 @@ class Transaction
         }
 
         // add "pending" or "booked" if it exists.
-        $key                                            = (string)$array['key'];
+        $key = (string)$array['key'];
         if ('' !== $key) {
             $object->tags[] = $key;
         }
 
+        // add merchant category code, if it exists:
+        $merchantCode = (string)($array['merchant_category_code'] ?? '');
+        if ('' !== $merchantCode) {
+            $object->tags[] = $merchantCode;
+        }
+
         // array values:
-        $object->creditorAccountIban                    = trim($array['creditorAccount']['iban'] ?? '');
-        $object->creditorAccountBban                    = trim($array['creditorAccount']['bban'] ?? '');
-        $object->creditorAccountCurrency                = trim($array['creditorAccount']['currency'] ?? '');
+        $object->creditorAccountIban     = trim($array['creditorAccount']['iban'] ?? '');
+        $object->creditorAccountBban     = trim($array['creditorAccount']['bban'] ?? '');
+        $object->creditorAccountCurrency = trim($array['creditorAccount']['currency'] ?? '');
 
-        $object->debtorAccountIban                      = trim($array['debtorAccount']['iban'] ?? '');
-        $object->debtorAccountBban                      = trim($array['debtorAccount']['bban'] ?? '');
-        $object->debtorAccountCurrency                  = trim($array['debtorAccount']['currency'] ?? '');
+        $object->debtorAccountIban     = trim($array['debtorAccount']['iban'] ?? '');
+        $object->debtorAccountBban     = trim($array['debtorAccount']['bban'] ?? '');
+        $object->debtorAccountCurrency = trim($array['debtorAccount']['currency'] ?? '');
 
-        $object->transactionAmount                      = trim($array['transactionAmount']['amount'] ?? '');
-        $object->currencyCode                           = trim($array['transactionAmount']['currency'] ?? '');
+        $object->transactionAmount = trim($array['transactionAmount']['amount'] ?? '');
+        $object->currencyCode      = trim($array['transactionAmount']['currency'] ?? '');
 
         // other fields:
-        $object->accountIdentifier                      = '';
+        $object->accountIdentifier = '';
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
@@ -201,7 +212,7 @@ class Transaction
      */
     public static function fromLocalArray(array $array): self
     {
-        $object                                         = new self();
+        $object = new self();
 
         $object->tags                                   = [];
         $object->additionalInformation                  = $array['additional_information'];
@@ -214,6 +225,7 @@ class Transaction
         $object->creditorId                             = $array['creditor_id'];
         $object->creditorName                           = $array['creditor_name'];
         $object->currencyExchange                       = $array['currency_exchange'];
+        $object->merchantCategoryCode                   = $array['merchant_category_code'];
         $object->debtorAgent                            = $array['debtor_agent'];
         $object->debtorName                             = $array['debtor_name'];
         $object->entryReference                         = $array['entry_reference'];
@@ -239,23 +251,23 @@ class Transaction
         }
 
         // undocumented values:
-        $object->endToEndId                             = $array['end_to_end_id'];
+        $object->endToEndId = $array['end_to_end_id'];
 
         // TODO copy paste code.
-        $object->debtorAccountIban                      = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
-        $object->creditorAccountIban                    = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
+        $object->debtorAccountIban   = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
+        $object->creditorAccountIban = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
 
-        $object->debtorAccountBban                      = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
-        $object->creditorAccountBban                    = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
+        $object->debtorAccountBban   = array_key_exists('bban', $array['debtor_account']) ? $array['debtor_account']['bban'] : '';
+        $object->creditorAccountBban = array_key_exists('bban', $array['creditor_account']) ? $array['creditor_account']['bban'] : '';
 
-        $object->debtorAccountCurrency                  = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
-        $object->creditorAccountCurrency                = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
+        $object->debtorAccountCurrency   = array_key_exists('currency', $array['debtor_account']) ? $array['debtor_account']['currency'] : '';
+        $object->creditorAccountCurrency = array_key_exists('currency', $array['creditor_account']) ? $array['creditor_account']['currency'] : '';
 
         // $object-> = $array[''];
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
@@ -494,6 +506,7 @@ class Transaction
             'currency_exchange'                         => $this->currencyExchange,
             'debtor_agent'                              => $this->debtorAgent,
             'tags'                                      => $this->tags,
+            'merchant_category_code'                    => $this->merchantCategoryCode,
             'debtor_name'                               => $this->debtorName,
             'entry_reference'                           => $this->entryReference,
             'key'                                       => $this->key,
