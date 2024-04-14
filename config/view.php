@@ -22,11 +22,11 @@
 
 declare(strict_types=1);
 
-$paths = [realpath(base_path('resources/views/v1'))];
-if ('v2' === env('DATA_IMPORTER_LAYOUT')) {
-    $paths = [
-        realpath(base_path('resources/views/v2')),
-        realpath(base_path('resources/views'))];
+
+$paths = [realpath(base_path('resources/views/v2'))];
+
+if ('v1' === env('DATA_IMPORTER_LAYOUT')) {
+    $paths = [realpath(base_path('resources/views/v1'))];
 }
 
 return [
@@ -40,7 +40,7 @@ return [
     | the usual Laravel view path has already been registered for you.
     |
     */
-    'layout'   => env('DATA_IMPORTER_LAYOUT', 'v1'),
+    'layout'   => env('DATA_IMPORTER_LAYOUT', 'v2'),
     'paths'    => $paths,
 
     /*
