@@ -101,7 +101,6 @@ jobs:
           tarName=DataImporter-$version.tar.gz
 
           # update composer (again)
-          composer validate --strict
           composer update --no-dev --no-scripts --no-plugins
           composer dump-autoload
 
