@@ -1,6 +1,5 @@
 {
     "workspaces": [
-        "resources/js/v1",
         "resources/js/v2"
     ]
 }

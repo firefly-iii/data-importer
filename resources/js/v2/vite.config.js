@@ -67,8 +67,8 @@ export default defineConfig({
             usePolling: true,
         },
         https: {
-            key: fs.readFileSync(`/sites/vm/tls-certificates/wildcard.sd.internal.key`),
-            cert: fs.readFileSync(`/sites/vm/tls-certificates/wildcard.sd.internal.crt`),
+            //key: fs.readFileSync(`/sites/vm/tls-certificates/wildcard.sd.internal.key`),
+            //cert: fs.readFileSync(`/sites/vm/tls-certificates/wildcard.sd.internal.crt`),
         },
 
         host: 'firefly-data.sd.internal',
