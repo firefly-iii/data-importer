@@ -159,6 +159,11 @@ jobs:
           gpg --armor --detach-sign $zipName
           gpg --armor --detach-sign $tarName
 
+          # add signatures to new release
+          ls
+
+          exit 1
+
           # create a development (nightly) release:
           if [[ "develop" == "$version" ]]; then
             echo 'Develop release.'
@@ -166,7 +171,7 @@ jobs:
             rm output.txt
             echo "Weekly development release of the Firefly III Data Importer with the latest fixes, translations and features. Docker users can find this release under the \`develop\` tag." >> output.txt
             echo "" >> output.txt
-            echo "This release was created on **$(date +'%Y-%m-%d')** and may contain unexpected bugs. Data loss is rare but is not impossible." >> output.txt
+            echo "This release was created on **$(date +'%Y-%m-%d')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key]()." >> output.txt
             echo "" >> output.txt
             echo "* Please read the installation instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/data-importer/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/installation/self-managed/)" >> output.txt
             echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/upgrade/self-managed/)" >> output.txt
