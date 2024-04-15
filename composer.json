@@ -98,7 +98,7 @@
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-deprecation-rules": "^1.0",
         "phpstan/phpstan-strict-rules": "^1.5",
-        "phpunit/phpunit": "^10.5",
+        "phpunit/phpunit": "^11.1",
         "roave/security-advisories": "dev-master",
         "thecodingmachine/phpstan-strict-rules": "^1.0"
     },
