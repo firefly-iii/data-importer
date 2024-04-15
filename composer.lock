@@ -6932,16 +6932,16 @@
         },
         {
             "name": "larastan/larastan",
-            "version": "v2.9.3",
+            "version": "v2.9.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/larastan/larastan.git",
-                "reference": "20d7c9db4c56957ae05c5c8b1194c9e9e587e83b"
+                "reference": "3e7b1217c0021c29727a6df078830d4ef908f3bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/larastan/larastan/zipball/20d7c9db4c56957ae05c5c8b1194c9e9e587e83b",
-                "reference": "20d7c9db4c56957ae05c5c8b1194c9e9e587e83b",
+                "url": "https://api.github.com/repos/larastan/larastan/zipball/3e7b1217c0021c29727a6df078830d4ef908f3bf",
+                "reference": "3e7b1217c0021c29727a6df078830d4ef908f3bf",
                 "shasum": ""
             },
             "require": {
@@ -7010,7 +7010,7 @@
             ],
             "support": {
                 "issues": "https://github.com/larastan/larastan/issues",
-                "source": "https://github.com/larastan/larastan/tree/v2.9.3"
+                "source": "https://github.com/larastan/larastan/tree/v2.9.4"
             },
             "funding": [
                 {
@@ -7030,7 +7030,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2024-04-06T19:59:58+00:00"
+            "time": "2024-04-14T14:47:58+00:00"
         },
         {
             "name": "laravel/ui",
