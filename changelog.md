@@ -2,7 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.5.0 - 2024-04-21
+## 1.5.1 - 2024-04-18
+
+### Fixed
+- #8798
+- Fix an issue with default currency selection.
+
+## 1.5.0 - 2024-04-18
 
 ### Added
 - The data importer has a release flow just like Firefly III, dropping generated JS files and other dependencies from the repository.
