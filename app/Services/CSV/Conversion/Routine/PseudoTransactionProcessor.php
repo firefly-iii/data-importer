@@ -36,6 +36,7 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetCurrencyRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetPreferenceRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PreferenceResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class PseudoTransactionProcessor
@@ -94,24 +95,10 @@ class PseudoTransactionProcessor
         $url             = SecretManager::getBaseUrl();
         $token           = SecretManager::getAccessToken();
 
-        $prefRequest     = new GetPreferenceRequest($url, $token);
-        $prefRequest->setVerify(config('importer.connection.verify'));
-        $prefRequest->setTimeOut(config('importer.connection.timeout'));
-        $prefRequest->setName('currencyPreference');
-
-        try {
-            /** @var PreferenceResponse $response */
-            $response = $prefRequest->get();
-        } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
-
-            throw new ImporterErrorException('Could not load the users currency preference.');
-        }
-        $code            = $response->getPreference()->stringData ?? 'EUR';
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
         $currencyRequest->setTimeOut(config('importer.connection.timeout'));
-        $currencyRequest->setCode($code);
+        $currencyRequest->setCode('default');
 
         try {
             /** @var GetCurrencyResponse $result */
@@ -120,8 +107,9 @@ class PseudoTransactionProcessor
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
 
-            throw new ImporterErrorException(sprintf('The default currency ("%s") could not be loaded.', $code));
+            throw new ImporterErrorException('The default currency could not be loaded.');
         }
+        Log::debug(sprintf('Currency found, default currency is assumed to be "%s" (#%d)', $this->defaultCurrency->code, $this->defaultCurrency->id));
     }
 
     public function processPseudo(array $lines): array
