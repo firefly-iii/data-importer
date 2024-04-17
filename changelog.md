@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.5.1 - 2024-04-18
 
 ### Fixed
-- #8798
+- [Issue 8798](https://github.com/firefly-iii/firefly-iii/issues/8798) (Undefined variable $version) reported by @JC5
 - Fix an issue with default currency selection.
 
 ## 1.5.0 - 2024-04-18

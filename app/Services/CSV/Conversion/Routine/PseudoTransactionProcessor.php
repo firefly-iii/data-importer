@@ -33,9 +33,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrencyRequest;
-use GrumpyDictator\FFIIIApiSupport\Request\GetPreferenceRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
-use GrumpyDictator\FFIIIApiSupport\Response\PreferenceResponse;
 use Illuminate\Support\Facades\Log;
 
 /**

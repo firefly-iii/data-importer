@@ -50,7 +50,7 @@ class ImportReportMail extends Mailable
     {
         $this->time     = date('Y-m-d \@ H:i:s');
         $this->url      = (string)config('importer.url');
-        $this->version = config('importer.version');
+        $this->version  = config('importer.version');
         if ('' !== (string)config('importer.vanity_url')) {
             $this->url = (string)config('importer.vanity_url');
         }
