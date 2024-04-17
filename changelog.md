@@ -6,17 +6,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - The data importer has a release flow just like Firefly III, dropping generated JS files and other dependencies from the repository.
-- #8665
-- #8691
+- [Issue 8665](https://github.com/firefly-iii/firefly-iii/issues/8665) (API exception if transaction is deleted by rule) reported by @Medformatik
+- [Issue 8691](https://github.com/firefly-iii/firefly-iii/issues/8691) (Import gocardless "merchantCategoryCode") reported by @tboby
 
 ### Changed
 - Rewrote front-end layout to AlpineJS + Laravel Blade, moving away from Twig + Vue.
 - Some rules in the PR template
 
 ### Fixed
-- #8709
-- #8736
-- #8771
+- [Discussion 8709](https://github.com/orgs/firefly-iii/discussions/8709) (Data importer imports duplicates of deleted transactions when detection is set to external id) started by @kesot
+- [Issue 8736](https://github.com/firefly-iii/firefly-iii/issues/8736) (Error importing CAMT.053 XML with data-importer) reported by @Gamesh
+- [Issue 8771](https://github.com/firefly-iii/firefly-iii/issues/8771) (Typo on Data Importer log) reported by @jemtz-deleon
 - [PR 575](https://github.com/firefly-iii/data-importer/pull/575) (Update `.env.example`, `ASSET_URL` moved, example given) by @stevewasiura
 
 ## 1.4.5 - 2024-03-21
