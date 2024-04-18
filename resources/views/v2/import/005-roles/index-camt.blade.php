@@ -114,7 +114,7 @@
                                                         @if(true === $field['mappable'])
                                                             <label for="do_mapping_{{ $field['title'] }}">
                                                                 <input type="checkbox" name="do_mapping[{{ $field['title'] }}]" id="do_mapping_{{ $field['title'] }}"
-                                                                          @if($doMapping[$field['title']]) checked="checked" @endif
+                                                                          @if(($doMapping[$field['title']] ?? false)) checked="checked" @endif
                                                                        value="1"/>
                                                             </label>
                                                         @endif
