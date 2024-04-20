@@ -507,12 +507,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/JC5/api-support-classes.git",
-                "reference": "66aae53ba06abca315fb894f19547b7328d07088"
+                "reference": "ada5c825fe4af80c8f6bf8111490065d9374c4c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/66aae53ba06abca315fb894f19547b7328d07088",
-                "reference": "66aae53ba06abca315fb894f19547b7328d07088",
+                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/ada5c825fe4af80c8f6bf8111490065d9374c4c9",
+                "reference": "ada5c825fe4af80c8f6bf8111490065d9374c4c9",
                 "shasum": ""
             },
             "require": {
@@ -606,7 +606,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2024-04-11T04:22:55+00:00"
+            "time": "2024-04-20T06:44:27+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -8451,12 +8451,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "16afe68c1b79917b4e8d8222a39ca4db31b63377"
+                "reference": "a6fb2a760c95f45ccb6a412599770061c330c624"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/16afe68c1b79917b4e8d8222a39ca4db31b63377",
-                "reference": "16afe68c1b79917b4e8d8222a39ca4db31b63377",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/a6fb2a760c95f45ccb6a412599770061c330c624",
+                "reference": "a6fb2a760c95f45ccb6a412599770061c330c624",
                 "shasum": ""
             },
             "conflict": {
@@ -9028,7 +9028,7 @@
                 "t3s/content-consent": "<1.0.3|>=2,<2.0.2",
                 "tastyigniter/tastyigniter": "<3.3",
                 "tcg/voyager": "<=1.4",
-                "tecnickcom/tcpdf": "<6.7.4",
+                "tecnickcom/tcpdf": "<=6.7.4",
                 "terminal42/contao-tablelookupwizard": "<3.3.5",
                 "thelia/backoffice-default-template": ">=2.1,<2.1.2",
                 "thelia/thelia": ">=2.1,<2.1.3",
@@ -9191,7 +9191,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-18T17:04:22+00:00"
+            "time": "2024-04-19T20:04:33+00:00"
         },
         {
             "name": "sebastian/cli-parser",

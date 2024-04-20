@@ -49,6 +49,8 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
+    private array $accounts;
+
     /**
      * @throws ImporterErrorException
      */
@@ -57,6 +59,7 @@ class TransactionProcessor
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
+        $this->accounts = [];
         if ('' !== $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
@@ -75,9 +78,9 @@ class TransactionProcessor
             app('log')->debug('Will also download information on the account for debug purposes.');
             $object           = new Account();
             $object->setIdentifier($account);
-
+            $fullInfo = null;
             try {
-                AccountInformationCollector::collectInformation($object);
+                $fullInfo = AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
                 $this->addError(
                     0,
@@ -94,6 +97,9 @@ class TransactionProcessor
                 continue;
             }
             app('log')->debug('Done downloading information for debug purposes.');
+            if(null !== $fullInfo) {
+                $this->accounts[] = $fullInfo;
+            }
 
             try {
                 $accessToken = TokenManager::getAccessToken();
@@ -191,4 +197,11 @@ class TransactionProcessor
     {
         $this->configuration = $configuration;
     }
+
+    public function getAccounts(): array
+    {
+        return $this->accounts;
+    }
+
+
 }

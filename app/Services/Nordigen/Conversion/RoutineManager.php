@@ -205,4 +205,9 @@ class RoutineManager implements RoutineManagerInterface
             $count
         );
     }
+
+    #[\Override] public function getServiceAccounts(): array
+    {
+        return $this->transactionProcessor->getAccounts();
+    }
 }

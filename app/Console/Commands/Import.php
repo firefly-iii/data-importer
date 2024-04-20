@@ -129,6 +129,8 @@ final class Import extends Command
         $this->line('--------');
         $this->line('Running...');
 
+
+
         // first do conversion based on the file:
         $this->startConversion($configuration, $file);
         $this->reportConversion();
@@ -143,6 +145,8 @@ final class Import extends Command
             $this->reportImport();
             $this->line('Done!');
         }
+
+        $this->reportBalanceDifferences($configuration);
 
         event(
             new ImportedTransactions(
