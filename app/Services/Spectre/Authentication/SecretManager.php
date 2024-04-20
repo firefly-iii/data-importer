@@ -41,10 +41,10 @@ class SecretManager
         if (!self::hasAppId()) {
             app('log')->debug('No Spectre App ID in hasAppId() session, will return config variable.');
 
-            return (string)config('spectre.app_id');
+            return (string) config('spectre.app_id');
         }
 
-        return (string)session()->get(self::APP_ID);
+        return (string) session()->get(self::APP_ID);
     }
 
     /**
@@ -53,7 +53,7 @@ class SecretManager
      */
     private static function hasAppId(): bool
     {
-        return '' !== (string)session()->get(self::APP_ID);
+        return '' !== (string) session()->get(self::APP_ID);
     }
 
     /**
@@ -65,10 +65,10 @@ class SecretManager
         if (!self::hasSecret()) {
             app('log')->debug('No Spectre secret in hasSecret(), will return config variable.');
 
-            return (string)config('spectre.secret');
+            return (string) config('spectre.secret');
         }
 
-        return (string)session()->get(self::SECRET);
+        return (string) session()->get(self::SECRET);
     }
 
     /**
@@ -76,7 +76,7 @@ class SecretManager
      */
     private static function hasSecret(): bool
     {
-        return '' !== (string)session()->get(self::SECRET);
+        return '' !== (string) session()->get(self::SECRET);
     }
 
     /**

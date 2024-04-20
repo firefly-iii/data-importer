@@ -276,7 +276,7 @@ class Configuration
         // loop do mapping from classic file.
         $doMapping                           = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
-            $index                     = (int)$index;
+            $index                     = (int) $index;
             $object->doMapping[$index] = $map;
         }
         ksort($object->doMapping);
@@ -284,7 +284,7 @@ class Configuration
         // loop mapping from classic file.
         $mapping                             = $data['column-mapping-config'] ?? [];
         foreach ($mapping as $index => $map) {
-            $index                   = (int)$index;
+            $index                   = (int) $index;
             $object->mapping[$index] = $map;
         }
         ksort($object->mapping);

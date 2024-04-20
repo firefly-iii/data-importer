@@ -45,11 +45,10 @@ class TransactionProcessor
 
     /** @var string */
     private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    private array $accounts;
     private Configuration $configuration;
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
-
-    private array $accounts;
 
     /**
      * @throws ImporterErrorException
@@ -73,7 +72,7 @@ class TransactionProcessor
         $return          = [];
         app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
-            $account          = (string)$account;
+            $account          = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             app('log')->debug('Will also download information on the account for debug purposes.');
             $object           = new Account();
@@ -87,10 +86,10 @@ class TransactionProcessor
                     0,
                     'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
-                if (array_key_exists('summary', $e->json) && '' !== (string)$e->json['summary']) {
+                if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
                     $this->addError(0, $e->json['summary']);
                 }
-                if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
+                if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
                     $this->addError(0, $e->json['detail']);
                 }
                 $return[$account] = [];
@@ -129,6 +128,11 @@ class TransactionProcessor
         app('log')->debug('Done with download');
 
         return $return;
+    }
+
+    public function getAccounts(): array
+    {
+        return $this->accounts;
     }
 
     public function setIdentifier(string $identifier): void
@@ -197,10 +201,5 @@ class TransactionProcessor
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
-    }
-
-    public function getAccounts(): array
-    {
-        return $this->accounts;
     }
 }

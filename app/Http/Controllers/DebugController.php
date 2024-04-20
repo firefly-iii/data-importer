@@ -104,7 +104,7 @@ class DebugController extends Controller
             if (file_exists('/var/www/counter-main.txt')) {
                 $build = trim(file_get_contents('/var/www/counter-main.txt'));
             }
-            if ('' !== (string)env('BASE_IMAGE_BUILD')) {
+            if ('' !== (string) env('BASE_IMAGE_BUILD')) {
                 $baseBuild = env('BASE_IMAGE_BUILD');
             }
         }
@@ -126,7 +126,7 @@ class DebugController extends Controller
         return [
             'debug'          => var_export(config('app.debug'), true),
             'display_errors' => ini_get('display_errors'),
-            'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
+            'reporting'      => $this->errorReporting((int) ini_get('error_reporting')),
             'bcscale'        => bcscale(),
         ];
     }
@@ -146,7 +146,7 @@ class DebugController extends Controller
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 
-        return $array[$value] ?? (string)$value;
+        return $array[$value] ?? (string) $value;
     }
 
     private function getUserInfo(): array

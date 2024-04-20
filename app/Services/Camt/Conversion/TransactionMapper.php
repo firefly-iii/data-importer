@@ -238,7 +238,7 @@ class TransactionMapper
                                 continue;
                             }
                             if (is_string($amount)) {
-                                $amount = (float)$amount;
+                                $amount = (float) $amount;
                             }
                             if (abs($current['amount']) < abs($amount)) {
                                 app('log')->debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $current['amount']));
@@ -257,7 +257,7 @@ class TransactionMapper
                                 continue;
                             }
                             if (is_string($amount)) {
-                                $amount = (float)$amount;
+                                $amount = (float) $amount;
                             }
                             app('log')->debug(sprintf('Amount is %s.', var_export($amount, true)));
                             // check for null first, should prevent null pointers in abs()
@@ -268,13 +268,13 @@ class TransactionMapper
                             }
                         }
                     }
-                    if (0 === bccomp('0', (string)$current['amount'])) {
+                    if (0 === bccomp('0', (string) $current['amount'])) {
                         app('log')->debug('Amount is ZERO, set to NULL');
                         $current['amount'] = null;
                     }
-                    if (null !== $current['amount'] && 0 !== bccomp('0', (string)$current['amount']) && !is_string($current['amount'])) {
+                    if (null !== $current['amount'] && 0 !== bccomp('0', (string) $current['amount']) && !is_string($current['amount'])) {
                         app('log')->debug(sprintf('Amount is %s, turn into string', var_export($current['amount'], true)));
-                        $current['amount'] = (string)$current['amount'];
+                        $current['amount'] = (string) $current['amount'];
                     }
                     app('log')->debug(sprintf('Final amount is "%s"', $current['amount']));
 
@@ -396,14 +396,14 @@ class TransactionMapper
         // if that did not succeed we did not FIND the source account, and must fall back
         // on the default account.
         $overruleAccount                 = false;
-        if ('withdrawal' === $current['type'] && '' === (string)$current['source_type']) {
+        if ('withdrawal' === $current['type'] && '' === (string) $current['source_type']) {
             $current['source_id'] = $this->configuration->getDefaultAccount();
             unset($current['source_name'], $current['source_iban']);
             app('log')->warning(sprintf('Withdrawal, but did not recognize the type of the source account. It will be replaced with the default account (#%d).', $current['source_id']));
             $overruleAccount      = true;
         }
         // same for deposit:
-        if ('deposit' === $current['type'] && '' === (string)$current['destination_type']) {
+        if ('deposit' === $current['type'] && '' === (string) $current['destination_type']) {
             $current['destination_id'] = $this->configuration->getDefaultAccount();
             unset($current['destination_name'], $current['destination_iban']);
             app('log')->warning(sprintf('Deposit, but did not recognize the destination account. It will be replaced with the default account (#%d).', $current['destination_id']));
@@ -424,7 +424,7 @@ class TransactionMapper
             app('log')->warning('Did not find a description in the transaction, added "(no description)"');
             $current['description'] = '(no description)';
         }
-        if (array_key_exists('description', $current) && '' === (string)$current['description']) {
+        if (array_key_exists('description', $current) && '' === (string) $current['description']) {
             app('log')->warning('Did not find a description in the transaction, added "(no description)"');
             $current['description'] = '(no description)';
         }
@@ -434,7 +434,7 @@ class TransactionMapper
             app('log')->warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
             $current['date'] = date('Y-m-d');
         }
-        if (array_key_exists('date', $current) && '' === (string)$current['date']) {
+        if (array_key_exists('date', $current) && '' === (string) $current['date']) {
             app('log')->warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
             $current['date'] = date('Y-m-d');
         }
@@ -508,7 +508,7 @@ class TransactionMapper
                 $key = sprintf('%s_%s', $direction, $suffix);
                 app('log')->debug(sprintf('Now working on key "%s".', $key));
                 // try to find the account
-                if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
+                if (array_key_exists($key, $current) && '' !== (string) $current[$key]) {
                     $foundDirection = $this->getAccountType($suffix, (string) $current[$key], $lessThanZero);
                     app('log')->debug(
                         sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection)
@@ -622,7 +622,7 @@ class TransactionMapper
         $hitField = null; // the field on which we found a match.
         foreach ($this->allAccounts as $account) {
             // we have a match!
-            if ((string)$account->{$field} === (string)$value) {
+            if ((string) $account->{$field} === (string) $value) {
                 // never found a match before!
                 if (0 === $count) {
                     app('log')->debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $field));
@@ -679,19 +679,19 @@ class TransactionMapper
                         if ($current['amount'] > 0) {
                             // seems a deposit or transfer
                             if (in_array($account->type, ['asset', 'revenue'], true)) {
-                                return (string)$account->id;
+                                return (string) $account->id;
                             }
                         }
 
                         if ($current['amount'] < 0) {
                             // seems a withtrawal or transfer
                             if (in_array($account->type, ['asset', 'expense'], true)) {
-                                return (string)$account->id;
+                                return (string) $account->id;
                             }
                         }
                         app('log')->warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
 
-                        return (string)$account->id;
+                        return (string) $account->id;
                     }
                 }
                 // app('log')->warning(sprintf('Unable to map an account for "%s"',$current[$field]));

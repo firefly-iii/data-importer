@@ -74,11 +74,11 @@ class ColumnValue
     {
         if (0 !== $this->mappedValue) {
             // @noinspection UnnecessaryCastingInspection
-            return (int)$this->mappedValue;
+            return (int) $this->mappedValue;
         }
 
         // run converter on data:
-        $converterClass = (string)config(sprintf('csv.import_roles.%s.converter', $this->role));
+        $converterClass = (string) config(sprintf('csv.import_roles.%s.converter', $this->role));
         app('log')->debug(sprintf('getParsedValue will run "%s"', $converterClass));
 
         return ConverterService::convert($converterClass, $this->value, $this->configuration);

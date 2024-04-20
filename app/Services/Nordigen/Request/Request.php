@@ -123,7 +123,7 @@ abstract class Request
             // if app can get response, parse it.
             $json            = [];
             if (method_exists($e, 'getResponse')) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
             if (array_key_exists('summary', $json) && str_ends_with($json['summary'], 'has expired')) {
@@ -143,9 +143,9 @@ abstract class Request
             // return body, class must handle this
             app('log')->error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
-            $body = (string)$res->getBody();
+            $body = (string) $res->getBody();
         }
-        $body ??= (string)$res->getBody();
+        $body ??= (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -244,7 +244,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body    = (string)$res->getBody();
+        $body    = (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);

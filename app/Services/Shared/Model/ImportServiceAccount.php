@@ -89,7 +89,7 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         app('log')->debug('Create generic account from', $array);
-        $iban                  = (string)($array['iban'] ?? '');
+        $iban                  = (string) ($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
@@ -112,7 +112,7 @@ class ImportServiceAccount
 
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban     = (string)$account->iban;
+            $iban     = (string) $account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';

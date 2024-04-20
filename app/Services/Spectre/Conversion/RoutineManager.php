@@ -72,6 +72,12 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
+    #[\Override]
+    public function getServiceAccounts(): array
+    {
+        return [];
+    }
+
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
@@ -163,11 +169,5 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
-    }
-
-    #[\Override]
-    public function getServiceAccounts(): array
-    {
-        return [];
     }
 }

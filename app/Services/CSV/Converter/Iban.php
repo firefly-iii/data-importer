@@ -99,7 +99,7 @@ class Iban implements ConverterInterface
             $checksum = 2;
         }
 
-        return 1 === (int)$checksum;
+        return 1 === (int) $checksum;
     }
 
     /**

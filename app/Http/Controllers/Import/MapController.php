@@ -157,7 +157,7 @@ class MapController extends Controller
 
         // get columns from file
         $content         = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-        $delimiter       = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+        $delimiter       = (string) config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
 
         $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
 
@@ -317,8 +317,8 @@ class MapController extends Controller
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $opposing[] = (string)array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
-                $opposing[] = (string)array_key_exists('source_name', $row) ? $row['source_name'] : '';
+                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
+                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
             }
         }
         $filtered           = array_filter(
@@ -352,7 +352,7 @@ class MapController extends Controller
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
+                $categories[] = (string) (array_key_exists('category_name', $row) ? $row['category_name'] : '');
             }
         }
         $filtered           = array_filter(
@@ -391,7 +391,7 @@ class MapController extends Controller
             foreach ($column as $valueIndex => $value) {
                 $mappedValue = $mapping[$columnIndex][$valueIndex] ?? null;
                 if (null !== $mappedValue && 0 !== $mappedValue && '0' !== $mappedValue) {
-                    $data[$columnIndex][$value] = (int)$mappedValue;
+                    $data[$columnIndex][$value] = (int) $mappedValue;
                 }
             }
         }

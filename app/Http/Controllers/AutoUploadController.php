@@ -45,8 +45,8 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret         = (string)($request->get('secret') ?? '');
-        $systemSecret   = (string)config('importer.auto_import_secret');
+        $secret         = (string) ($request->get('secret') ?? '');
+        $systemSecret   = (string) config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
@@ -58,10 +58,10 @@ class AutoUploadController extends Controller
 
         $json           = $request->file('json');
         $importable     = $request->file('importable');
-        $importablePath = (string)$importable?->getPathname();
+        $importablePath = (string) $importable?->getPathname();
 
         try {
-            $this->importUpload((string)$json?->getPathname(), $importablePath);
+            $this->importUpload((string) $json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));

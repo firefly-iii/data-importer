@@ -45,7 +45,7 @@ class Steam
      */
     public function cleanString($value): string
     {
-        $value  = (string)$value;
+        $value  = (string) $value;
         $search = [
             "\u{0001}", // start of heading
             "\u{0002}", // start of text

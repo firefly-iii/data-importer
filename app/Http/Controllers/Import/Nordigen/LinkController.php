@@ -128,7 +128,7 @@ class LinkController extends Controller
      */
     public function callback(Request $request)
     {
-        $reference     = (string)$request->get('ref');
+        $reference     = (string) $request->get('ref');
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         app('log')->debug(sprintf('Reference is "%s"', $reference));
 

@@ -39,8 +39,8 @@ class ImportReportMail extends Mailable
     public array  $errors;
     public array  $messages;
     public string $time;
-    public string $version;
     public string $url;
+    public string $version;
     public array  $warnings;
 
     /**
@@ -49,10 +49,10 @@ class ImportReportMail extends Mailable
     public function __construct(array $log)
     {
         $this->time     = date('Y-m-d \@ H:i:s');
-        $this->url      = (string)config('importer.url');
+        $this->url      = (string) config('importer.url');
         $this->version  = config('importer.version');
-        if ('' !== (string)config('importer.vanity_url')) {
-            $this->url = (string)config('importer.vanity_url');
+        if ('' !== (string) config('importer.vanity_url')) {
+            $this->url = (string) config('importer.vanity_url');
         }
         $this->errors   = $log['errors'] ?? [];
         $this->warnings = $log['warnings'] ?? [];
@@ -66,8 +66,8 @@ class ImportReportMail extends Mailable
      */
     public function build()
     {
-        $address = (string)config('mail.from.address');
-        $name    = (string)config('mail.from.name');
+        $address = (string) config('mail.from.address');
+        $name    = (string) config('mail.from.name');
 
         return $this->from($address, $name)->markdown('emails.import.report');
     }

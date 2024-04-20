@@ -59,35 +59,34 @@ class Transaction
     public string $entryReference;
     public string $key;
     public string $mandateId;
+    public string $merchantCategoryCode;
     public string $proprietaryBank;
-    public string $purposeCode;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
+    public string $purposeCode;
     public string $remittanceInformationStructured;
     public array  $remittanceInformationStructuredArray;
-    public string $remittanceInformationUnstructured;
 
     // creditorAccount is an array, but saved as strings:
     // iban, currency
+    public string $remittanceInformationUnstructured;
     public array  $remittanceInformationUnstructuredArray;
     public array  $tags;
-    public string $transactionAmount;
 
     // transactionAmount is an array, but is saved as strings
     // amount, currency
+    public string $transactionAmount;
     public string $transactionId;
-    public string $ultimateCreditor;
 
     // my own custom fields
-    public string $ultimateDebtor;
+    public string $ultimateCreditor;
 
     // undocumented fields
-    public ?Carbon $valueDate;
+    public string $ultimateDebtor;
 
     // new fields
-
-    public string $merchantCategoryCode;
+    public ?Carbon $valueDate;
 
     /**
      * Creates a transaction from a downloaded array.
@@ -164,13 +163,13 @@ class Transaction
         }
 
         // add "pending" or "booked" if it exists.
-        $key                                            = (string)$array['key'];
+        $key                                            = (string) $array['key'];
         if ('' !== $key) {
             $object->tags[] = $key;
         }
 
         // add merchant category code, if it exists:
-        $merchantCode                                   = (string)($array['merchant_category_code'] ?? '');
+        $merchantCode                                   = (string) ($array['merchant_category_code'] ?? '');
         if ('' !== $merchantCode) {
             $object->tags[] = $merchantCode;
         }
@@ -192,7 +191,7 @@ class Transaction
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash                  = hash('sha256', (string) microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
@@ -200,7 +199,7 @@ class Transaction
             } catch (\JsonException $e) {
                 app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = (string)Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
         }
         app('log')->debug(sprintf('Downloaded transaction with ID "%s"', $object->transactionId));
 
@@ -267,14 +266,14 @@ class Transaction
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string)microtime());
+            $hash                  = hash('sha256', (string) microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
             } catch (\JsonException $e) {
                 app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = (string)Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
         }
 
         return $object;

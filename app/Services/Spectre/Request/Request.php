@@ -114,7 +114,7 @@ abstract class Request
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
-            $body = method_exists($e, 'getResponse') ? (string)$e->getResponse()->getBody() : '';
+            $body = method_exists($e, 'getResponse') ? (string) $e->getResponse()->getBody() : '';
 
             throw new ImporterErrorException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
         }
@@ -122,9 +122,9 @@ abstract class Request
             // return body, class must handle this
             app('log')->error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
-            $body = (string)$res->getBody();
+            $body = (string) $res->getBody();
         }
-        $body ??= (string)$res->getBody();
+        $body ??= (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -284,7 +284,7 @@ abstract class Request
         } catch (\JsonException $e) {
             app('log')->error($e->getMessage());
         }
-        if ('{}' !== (string)$body) {
+        if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
 
@@ -339,7 +339,7 @@ abstract class Request
         } catch (\JsonException $e) {
             app('log')->error($e->getMessage());
         }
-        if ('{}' !== (string)$body) {
+        if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
 
@@ -357,7 +357,7 @@ abstract class Request
                 $json                       = [];
 
                 try {
-                    $json = json_decode((string)$e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
+                    $json = json_decode((string) $e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
                 } catch (\JsonException $e) {
                     app('log')->error($e->getMessage());
                 }
@@ -368,7 +368,7 @@ abstract class Request
             }
             app('log')->error($e->getMessage());
             if (null !== $response) {
-                app('log')->error((string)$e->getResponse()->getBody());
+                app('log')->error((string) $e->getResponse()->getBody());
             }
 
             throw new ImporterHttpException(sprintf('Request Exception: %s', $e->getMessage()));

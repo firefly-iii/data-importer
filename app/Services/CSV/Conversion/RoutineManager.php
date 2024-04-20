@@ -72,6 +72,12 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
+    #[\Override]
+    public function getServiceAccounts(): array
+    {
+        return [];
+    }
+
     /**
      * @throws ImporterErrorException
      */
@@ -195,11 +201,5 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
-    }
-
-    #[\Override]
-    public function getServiceAccounts(): array
-    {
-        return [];
     }
 }

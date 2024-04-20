@@ -35,11 +35,11 @@ trait HaveAccess
 {
     private function haveAccess(): bool
     {
-        $url             = (string)config('importer.url');
-        $token           = (string)config('importer.access_token');
+        $url             = (string) config('importer.url');
+        $token           = (string) config('importer.access_token');
 
         // grab token from authentication header.
-        $headerToken     = (string)request()->header('Authorization');
+        $headerToken     = (string) request()->header('Authorization');
         if ('' !== $headerToken) {
             $token = str_replace('Bearer ', '', $headerToken);
             $this->line('Overrule token with token from Authorization header.');

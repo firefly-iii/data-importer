@@ -38,7 +38,7 @@ class CleanInteger implements ConverterInterface
      */
     public function convert($value)
     {
-        return (int)$value;
+        return (int) $value;
     }
 
     /**

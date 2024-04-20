@@ -60,7 +60,7 @@ class ImportedTransactions
         foreach ($collection as $index => $set) {
             $newSet = [];
             foreach ($set as $line) {
-                $line = (string)$line;
+                $line = (string) $line;
                 if ('' !== $line) {
                     $newSet[] = $line;
                     ++$count;

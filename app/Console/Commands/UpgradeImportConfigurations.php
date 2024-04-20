@@ -57,7 +57,7 @@ final class UpgradeImportConfigurations extends Command
      */
     public function handle(): int
     {
-        $directory = (string)$this->argument('directory'); // @phpstan-ignore-line
+        $directory = (string) $this->argument('directory'); // @phpstan-ignore-line
 
         if (!file_exists($directory)) {
             $this->error(sprintf('"%s" does not exist.', $directory));
@@ -95,7 +95,7 @@ final class UpgradeImportConfigurations extends Command
             return;
         }
         $this->line(sprintf('Now processing "%s" ...', $name));
-        $content                    = (string)file_get_contents($name);
+        $content                    = (string) file_get_contents($name);
         if (!$this->isValidJson($content)) {
             $this->error('File does not contain valid JSON. Skipped.');
 

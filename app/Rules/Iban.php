@@ -48,6 +48,6 @@ class Iban implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        return IbanConverter::isValidIban((string)$value);
+        return IbanConverter::isValidIban((string) $value);
     }
 }

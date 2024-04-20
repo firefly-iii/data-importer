@@ -160,7 +160,7 @@ class GenerateTransactions
         $transaction['amount']         = $amount;
 
         // destination is Spectre
-        $transaction['destination_id'] = (int)$this->accounts[$spectreAccountId];
+        $transaction['destination_id'] = (int) $this->accounts[$spectreAccountId];
 
         // source is the other side (name!)
         // payee is the destination, payer is the source.
@@ -185,10 +185,10 @@ class GenerateTransactions
         }
         if (0 !== $accountId) {
             app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
-            $transaction['source_id'] = (int)$accountId;
+            $transaction['source_id'] = (int) $accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
-        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string)$entry->getPayer(), (string)$entry->getPayerIban());
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string) $entry->getPayer(), (string) $entry->getPayerIban());
 
         app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
@@ -201,7 +201,7 @@ class GenerateTransactions
         $transaction['amount']           = bcmul($amount, '-1');
 
         // source is Spectre:
-        $transaction['source_id']        = (int)$this->accounts[$spectreAccountId];
+        $transaction['source_id']        = (int) $this->accounts[$spectreAccountId];
 
         // dest is shop. Payee / payer is reverse from the other one.
         $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
@@ -227,7 +227,7 @@ class GenerateTransactions
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
-        $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getPayee(), (string)$entry->getPayeeIban());
+        $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
 
         app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 

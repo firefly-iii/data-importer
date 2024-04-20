@@ -65,7 +65,7 @@ final class AutoImport extends Command
             return 1;
         }
 
-        $argument  = (string)($this->argument('directory') ?? './');
+        $argument  = (string) ($this->argument('directory') ?? './');
 
         /** @phpstan-ignore-line */
         $directory = realpath($argument);

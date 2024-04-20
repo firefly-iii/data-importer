@@ -145,7 +145,7 @@ class CSVFileProcessor
         array_walk(
             $lineValues,
             static function ($element) {
-                return trim(str_replace('&nbsp;', ' ', (string)$element));
+                return trim(str_replace('&nbsp;', ' ', (string) $element));
             }
         );
 

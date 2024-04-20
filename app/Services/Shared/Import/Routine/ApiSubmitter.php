@@ -147,7 +147,7 @@ class ApiSubmitter
         $field        = 'external-id' === $field ? 'external_id' : $field;
         $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
-            $value        = (string)($transaction[$field] ?? '');
+            $value        = (string) ($transaction[$field] ?? '');
             if ('' === $value) {
                 app('log')->debug(
                     sprintf(
@@ -306,7 +306,7 @@ class ApiSubmitter
                     $group->id,
                     e($transaction->description),
                     $transaction->currencyCode,
-                    round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces) // float but only for display purposes
+                    round((float) $transaction->amount, (int) $transaction->currencyDecimalPlaces) // float but only for display purposes
                 );
                 // plus 1 to keep the count.
                 $this->addMessage($index, $message);
@@ -352,7 +352,7 @@ class ApiSubmitter
                         app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
-                if ('' === trim((string)$transaction['description'] ?? '')) {
+                if ('' === trim((string) $transaction['description'] ?? '')) {
                     $transaction['description'] = '(no description)';
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
@@ -366,8 +366,8 @@ class ApiSubmitter
     {
         if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
             app('log')->debug('Transaction has source_id/destination_id');
-            $sourceId        = (int)$transaction['source_id'];
-            $destinationId   = (int)$transaction['destination_id'];
+            $sourceId        = (int) $transaction['source_id'];
+            $destinationId   = (int) $transaction['destination_id'];
             $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
             $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
             $combi           = sprintf('%s-%s', $sourceType, $destinationType);
@@ -390,9 +390,9 @@ class ApiSubmitter
         if (3 !== count($parts)) {
             return '(unknown)';
         }
-        $index = (int)$parts[1];
+        $index = (int) $parts[1];
 
-        return (string)($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
+        return (string) ($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
     }
 
     private function isDuplicationError(string $key, string $error): bool
@@ -414,7 +414,7 @@ class ApiSubmitter
         foreach ($group->transactions as $index => $transaction) {
             // compare currency ID
             if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id']
-                && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId
+                && (int) $line['transactions'][$index]['currency_id'] !== (int) $transaction->currencyId
             ) {
                 $this->addWarning(
                     $lineIndex,
@@ -422,7 +422,7 @@ class ApiSubmitter
                         'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
                         $lineIndex,
                         $line['transactions'][$index]['currency_id'],
-                        (int)$transaction->currencyId
+                        (int) $transaction->currencyId
                     )
                 );
             }
@@ -460,7 +460,7 @@ class ApiSubmitter
             $this->createdTag = true;
         }
 
-        $groupId = (int)$groupInfo['group_id'];
+        $groupId = (int) $groupInfo['group_id'];
         app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
         $body    = [
             'transactions' => [],

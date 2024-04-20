@@ -34,9 +34,9 @@ interface RoutineManagerInterface
 {
     public function getIdentifier(): string;
 
+    public function getServiceAccounts(): array;
+
     public function setConfiguration(Configuration $configuration): void;
 
     public function start(): array;
-
-    public function getServiceAccounts(): array;
 }

@@ -50,7 +50,7 @@ class EmptyAccounts extends AbstractTask
 
         if ('withdrawal' === $transaction['type']) {
             $destName = $transaction['destination_name'] ?? '';
-            $destId   = (int)($transaction['destination_id'] ?? 0);
+            $destId   = (int) ($transaction['destination_id'] ?? 0);
             $destIban = $transaction['destination_iban'] ?? '';
             if ('' === $destName && 0 === $destId && '' === $destIban) {
                 app('log')->debug('Destination name + ID + IBAN of withdrawal are empty, set to "(no name)".');
@@ -59,7 +59,7 @@ class EmptyAccounts extends AbstractTask
         }
         if ('deposit' === $transaction['type']) {
             $sourceName = $transaction['source_name'] ?? '';
-            $sourceId   = (int)($transaction['source_id'] ?? 0);
+            $sourceId   = (int) ($transaction['source_id'] ?? 0);
             $sourceIban = $transaction['source_iban'] ?? '';
             if ('' === $sourceName && 0 === $sourceId && '' === $sourceIban) {
                 app('log')->debug('Source name + IBAN + ID of deposit are empty, set to "(no name)".');

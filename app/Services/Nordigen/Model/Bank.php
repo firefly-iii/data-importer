@@ -42,7 +42,7 @@ class Bank
         $bank                       = new self();
         $bank->id                   = $array['id'];
         $bank->name                 = $array['name'];
-        $bank->transactionTotalDays = (int)$array['transaction_total_days'];
+        $bank->transactionTotalDays = (int) $array['transaction_total_days'];
         $bank->logo                 = $array['logo'];
 
         return $bank;

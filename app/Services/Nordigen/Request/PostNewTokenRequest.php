@@ -71,7 +71,7 @@ class PostNewTokenRequest extends Request
 
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
-        $body   = (string)$res->getBody();
+        $body   = (string) $res->getBody();
         $json   = json_decode($body, true, JSON_THROW_ON_ERROR);
 
         return new TokenSetResponse($json);

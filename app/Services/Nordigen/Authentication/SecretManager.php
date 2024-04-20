@@ -44,11 +44,11 @@ class SecretManager
         if (!self::hasId()) {
             app('log')->debug('No Nordigen ID in hasId() session, will return config variable.');
 
-            return (string)config('nordigen.id');
+            return (string) config('nordigen.id');
         }
 
         try {
-            $id = (string)session()->get(self::NORDIGEN_ID);
+            $id = (string) session()->get(self::NORDIGEN_ID);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $id = '(super invalid)';
         }
@@ -62,7 +62,7 @@ class SecretManager
     private static function hasId(): bool
     {
         try {
-            $id = (string)session()->get(self::NORDIGEN_ID);
+            $id = (string) session()->get(self::NORDIGEN_ID);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $id = '';
         }
@@ -78,11 +78,11 @@ class SecretManager
         if (!self::hasKey()) {
             app('log')->debug('No Nordigen key in hasKey() session, will return config variable.');
 
-            return (string)config('nordigen.key');
+            return (string) config('nordigen.key');
         }
 
         try {
-            $key = (string)session()->get(self::NORDIGEN_KEY);
+            $key = (string) session()->get(self::NORDIGEN_KEY);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $key = '(super invalid key)';
         }
@@ -96,7 +96,7 @@ class SecretManager
     private static function hasKey(): bool
     {
         try {
-            $key = (string)session()->get(self::NORDIGEN_KEY);
+            $key = (string) session()->get(self::NORDIGEN_KEY);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
             $key = '';
         }

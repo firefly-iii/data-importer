@@ -277,87 +277,6 @@ trait AutoImports
         );
     }
 
-    private function reportBalanceDifferences(Configuration $configuration): void
-    {
-        if ('nordigen' !== $configuration->getFlow()) {
-            return;
-        }
-        $count         = count($this->importerAccounts);
-        $localAccounts = $configuration->getAccounts();
-        $url           = SecretManager::getBaseUrl();
-        $token         = SecretManager::getAccessToken();
-        Log::debug(sprintf('The importer has collected %d account(s) to report the balance difference on.', $count));
-
-        /** @var Account $account */
-        foreach ($this->importerAccounts as $account) {
-            // check if account exists:
-            if (!array_key_exists($account->getIdentifier(), $localAccounts)) {
-                Log::debug(sprintf('Nordigen account "%s" (IBAN "%s") is not being imported, so skipped.', $account->getIdentifier(), $account->getIban()));
-
-                continue;
-            }
-            // local account ID exists, we can check the balance over at Firefly III.
-            $accountId      = $localAccounts[$account->getIdentifier()];
-            $accountRequest = new GetAccountRequest($url, $token);
-            $accountRequest->setVerify(config('importer.connection.verify'));
-            $accountRequest->setTimeOut(config('importer.connection.timeout'));
-            $accountRequest->setId($accountId);
-
-            try {
-                $result = $accountRequest->get();
-            } catch (ApiHttpException $e) {
-                app('log')->error('Could not get Firefly III account for balance check. Will ignore this issue.');
-                app('log')->debug($e->getMessage());
-
-                continue;
-            }
-
-            /** @var LocalAccount $localAccount */
-            $localAccount   = $result->getAccount();
-
-            $this->reportBalanceDifference($account, $localAccount);
-        }
-    }
-
-    private function reportBalanceDifference(Account $account, LocalAccount $localAccount): void
-    {
-        Log::debug(sprintf('Report balance difference between Nordigen account "%s" and Firefly III account #%d.', $account->getIdentifier(), $localAccount->id));
-        app('log')->debug(sprintf('Nordigen account has %d balance entry (entries)', count($account->getBalances())));
-
-        /** @var Balance $balance */
-        foreach ($account->getBalances() as $index => $balance) {
-            app('log')->debug(sprintf('Now comparing balance entry #%d of %d', $index + 1, count($account->getBalances())));
-            $this->reportSingleDifference($account, $localAccount, $balance);
-        }
-    }
-
-    private function reportSingleDifference(Account $account, LocalAccount $localAccount, Balance $balance): void
-    {
-        // compare currencies, and warn if necessary.
-        if ($balance->currency !== $localAccount->currencyCode) {
-            app('log')->warning(sprintf('Nordigen account "%s" has currency %s, Firefly III account #%d uses %s.', $account->getIdentifier(), $localAccount->id, $balance->currency, $localAccount->currencyCode));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Currency mismatch', $localAccount->id));
-        }
-
-        // compare dates, warn
-        $date      = Carbon::parse($balance->date);
-        $localDate = Carbon::parse($localAccount->currentBalanceDate);
-        if (!$date->isSameDay($localDate)) {
-            app('log')->warning(sprintf('Nordigen balance is from day %s, Firefly III account from %s.', $date->format('Y-m-d'), $date->format('Y-m-d')));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Date mismatch', $localAccount->id));
-        }
-
-        // compare balance, warn (also a message)
-        app('log')->debug(sprintf('Comparing %s and %s', $balance->amount, $localAccount->currentBalance));
-        if (0 !== bccomp($balance->amount, $localAccount->currentBalance)) {
-            app('log')->warning(sprintf('Nordigen balance is %s, Firefly III balance is %s.', $balance->amount, $localAccount->currentBalance));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
-        }
-        if (0 === bccomp($balance->amount, $localAccount->currentBalance)) {
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Balance OK', $localAccount->id));
-        }
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -579,6 +498,87 @@ trait AutoImports
                     }
                 }
             }
+        }
+    }
+
+    private function reportBalanceDifferences(Configuration $configuration): void
+    {
+        if ('nordigen' !== $configuration->getFlow()) {
+            return;
+        }
+        $count         = count($this->importerAccounts);
+        $localAccounts = $configuration->getAccounts();
+        $url           = SecretManager::getBaseUrl();
+        $token         = SecretManager::getAccessToken();
+        Log::debug(sprintf('The importer has collected %d account(s) to report the balance difference on.', $count));
+
+        /** @var Account $account */
+        foreach ($this->importerAccounts as $account) {
+            // check if account exists:
+            if (!array_key_exists($account->getIdentifier(), $localAccounts)) {
+                Log::debug(sprintf('Nordigen account "%s" (IBAN "%s") is not being imported, so skipped.', $account->getIdentifier(), $account->getIban()));
+
+                continue;
+            }
+            // local account ID exists, we can check the balance over at Firefly III.
+            $accountId      = $localAccounts[$account->getIdentifier()];
+            $accountRequest = new GetAccountRequest($url, $token);
+            $accountRequest->setVerify(config('importer.connection.verify'));
+            $accountRequest->setTimeOut(config('importer.connection.timeout'));
+            $accountRequest->setId($accountId);
+
+            try {
+                $result = $accountRequest->get();
+            } catch (ApiHttpException $e) {
+                app('log')->error('Could not get Firefly III account for balance check. Will ignore this issue.');
+                app('log')->debug($e->getMessage());
+
+                continue;
+            }
+
+            /** @var LocalAccount $localAccount */
+            $localAccount   = $result->getAccount();
+
+            $this->reportBalanceDifference($account, $localAccount);
+        }
+    }
+
+    private function reportBalanceDifference(Account $account, LocalAccount $localAccount): void
+    {
+        Log::debug(sprintf('Report balance difference between Nordigen account "%s" and Firefly III account #%d.', $account->getIdentifier(), $localAccount->id));
+        app('log')->debug(sprintf('Nordigen account has %d balance entry (entries)', count($account->getBalances())));
+
+        /** @var Balance $balance */
+        foreach ($account->getBalances() as $index => $balance) {
+            app('log')->debug(sprintf('Now comparing balance entry #%d of %d', $index + 1, count($account->getBalances())));
+            $this->reportSingleDifference($account, $localAccount, $balance);
+        }
+    }
+
+    private function reportSingleDifference(Account $account, LocalAccount $localAccount, Balance $balance): void
+    {
+        // compare currencies, and warn if necessary.
+        if ($balance->currency !== $localAccount->currencyCode) {
+            app('log')->warning(sprintf('Nordigen account "%s" has currency %s, Firefly III account #%d uses %s.', $account->getIdentifier(), $localAccount->id, $balance->currency, $localAccount->currencyCode));
+            $this->line(sprintf('Balance comparison: Firefly III account #%d: Currency mismatch', $localAccount->id));
+        }
+
+        // compare dates, warn
+        $date      = Carbon::parse($balance->date);
+        $localDate = Carbon::parse($localAccount->currentBalanceDate);
+        if (!$date->isSameDay($localDate)) {
+            app('log')->warning(sprintf('Nordigen balance is from day %s, Firefly III account from %s.', $date->format('Y-m-d'), $date->format('Y-m-d')));
+            $this->line(sprintf('Balance comparison: Firefly III account #%d: Date mismatch', $localAccount->id));
+        }
+
+        // compare balance, warn (also a message)
+        app('log')->debug(sprintf('Comparing %s and %s', $balance->amount, $localAccount->currentBalance));
+        if (0 !== bccomp($balance->amount, $localAccount->currentBalance)) {
+            app('log')->warning(sprintf('Nordigen balance is %s, Firefly III balance is %s.', $balance->amount, $localAccount->currentBalance));
+            $this->line(sprintf('Balance comparison: Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
+        }
+        if (0 === bccomp($balance->amount, $localAccount->currentBalance)) {
+            $this->line(sprintf('Balance comparison: Firefly III account #%d: Balance OK', $localAccount->id));
         }
     }
 

@@ -144,7 +144,7 @@ class ConfigurationController extends Controller
         app('log')->debug(sprintf('Method %s', __METHOD__));
 
         $dateObj           = new Date();
-        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
+        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
         $date              = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
@@ -167,7 +167,7 @@ class ConfigurationController extends Controller
         $accounts      = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
-                $accounts[$identifier] = (int)$fromRequest['accounts'][$identifier];
+                $accounts[$identifier] = (int) $fromRequest['accounts'][$identifier];
             }
         }
         $configuration->setAccounts($accounts);

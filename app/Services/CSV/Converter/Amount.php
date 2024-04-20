@@ -62,7 +62,7 @@ class Amount implements ConverterInterface
 
         app('log')->debug(sprintf('Start with amount "%s"', $value));
         $original    = $value;
-        $value       = $this->stripAmount((string)$value);
+        $value       = $this->stripAmount((string) $value);
         $decimal     = null;
         $thousandSep = null;
 
@@ -176,7 +176,7 @@ class Amount implements ConverterInterface
         // have to strip the € because apparently the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
         // 2020-12-01 added "EUR" because another German bank doesn't know what a data format is.
         // This way of stripping exceptions is unsustainable.
-        $value = trim((string)str_replace(['€', 'EUR'], '', $value));
+        $value = trim((string) str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen($str);
         if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {

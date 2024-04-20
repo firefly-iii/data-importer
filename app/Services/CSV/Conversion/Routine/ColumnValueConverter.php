@@ -193,6 +193,6 @@ class ColumnValueConverter
             }
         }
 
-        return (string)$value;
+        return (string) $value;
     }
 }

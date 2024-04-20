@@ -118,7 +118,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors       = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        $errors       = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);

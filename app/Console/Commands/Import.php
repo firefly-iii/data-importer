@@ -74,8 +74,8 @@ final class Import extends Command
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $file          = (string)$this->argument('file');
-        $config        = (string)$this->argument('config'); // @phpstan-ignore-line
+        $file          = (string) $this->argument('file');
+        $config        = (string) $this->argument('config'); // @phpstan-ignore-line
 
         // validate config path:
         if ('' !== $config) {

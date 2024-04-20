@@ -81,7 +81,7 @@ class Accounts extends AbstractTask
         app('log')->debug('Source is now:', $source);
         app('log')->debug('Destination is now:', $destination);
 
-        $amount              = (string)$transaction['amount'];
+        $amount              = (string) $transaction['amount'];
         $amount              = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
@@ -133,7 +133,7 @@ class Accounts extends AbstractTask
          * some "original-field-name" values (if they exist) and hope for the best.
          */
         if (
-            'deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type'] && '' !== (string)$source['type']
+            'deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type'] && '' !== (string) $source['type']
         ) {
             app('log')->warning(
                 sprintf(
@@ -280,7 +280,7 @@ class Accounts extends AbstractTask
         // if the ID is set, at least search for the ID.
         if (is_int($array['id']) && $array['id'] > 0) {
             app('log')->debug('Will search by ID field.');
-            $result = $this->findById((string)$array['id']);
+            $result = $this->findById((string) $array['id']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -293,10 +293,10 @@ class Accounts extends AbstractTask
         }
 
         // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string)$array['iban']) {
+        if (isset($array['iban']) && '' !== (string) $array['iban']) {
             app('log')->debug('Will search by IBAN.');
-            $transactionType = (string)($array['transaction_type'] ?? null);
-            $result          = $this->findByIban((string)$array['iban'], $transactionType);
+            $transactionType = (string) ($array['transaction_type'] ?? null);
+            $result          = $this->findByIban((string) $array['iban'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -311,10 +311,10 @@ class Accounts extends AbstractTask
         // data importer will return an array with the IBAN (and optionally the name).
 
         // if the account number is set, search for the account number.
-        if (isset($array['number']) && '' !== (string)$array['number']) {
+        if (isset($array['number']) && '' !== (string) $array['number']) {
             app('log')->debug('Search by account number.');
-            $transactionType = (string)($array['transaction_type'] ?? null);
-            $result          = $this->findByNumber((string)$array['number'], $transactionType);
+            $transactionType = (string) ($array['transaction_type'] ?? null);
+            $result          = $this->findByNumber((string) $array['number'], $transactionType);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -327,9 +327,9 @@ class Accounts extends AbstractTask
         }
 
         // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string)$array['name']) {
+        if (isset($array['name']) && '' !== (string) $array['name']) {
             app('log')->debug('Search by name.');
-            $result = $this->findByName((string)$array['name']);
+            $result = $this->findByName((string) $array['name']);
         }
         if (null !== $result) {
             $return = $result->toArray();
@@ -348,14 +348,14 @@ class Accounts extends AbstractTask
         $array['bic']  ??= null;
 
         // Return ID or name if not null
-        if (null !== $array['id'] || '' !== (string)$array['name']) {
+        if (null !== $array['id'] || '' !== (string) $array['name']) {
             app('log')->debug('At least the array with account-info has some name info, return that.', $array);
 
             return $array;
         }
 
         // Return ID or IBAN if not null
-        if ('' !== (string)$array['iban']) {
+        if ('' !== (string) $array['iban']) {
             app('log')->debug('At least the with account-info has some IBAN info, return that.', $array);
 
             return $array;
@@ -660,9 +660,9 @@ class Accounts extends AbstractTask
         $transaction['amount']                ??= '';
         $transaction['foreign_amount']        ??= '';
 
-        return '' !== (string)$transaction['currency_code'] && '' !== (string)$transaction['foreign_currency_code']
-               && '' !== (string)$transaction['amount']
-               && '' !== (string)$transaction['foreign_amount'];
+        return '' !== (string) $transaction['currency_code'] && '' !== (string) $transaction['foreign_currency_code']
+               && '' !== (string) $transaction['amount']
+               && '' !== (string) $transaction['foreign_amount'];
     }
 
     /**

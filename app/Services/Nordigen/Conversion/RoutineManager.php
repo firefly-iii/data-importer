@@ -70,6 +70,12 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
     }
 
+    #[\Override]
+    public function getServiceAccounts(): array
+    {
+        return $this->transactionProcessor->getAccounts();
+    }
+
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
@@ -204,11 +210,5 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
-    }
-
-    #[\Override]
-    public function getServiceAccounts(): array
-    {
-        return $this->transactionProcessor->getAccounts();
     }
 }

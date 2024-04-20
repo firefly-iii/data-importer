@@ -58,13 +58,13 @@ class Transaction
     public function getCurrencyCode(int $index): string
     {
         // TODO loop level D for the date that belongs to the index
-        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+        return (string) $this->levelC->getAmount()->getCurrency()->getCode();
     }
 
     public function getAmount(int $index): string
     {
         // TODO loop level D for the date that belongs to the index
-        return (string)$this->getDecimalAmount($this->levelC->getAmount());
+        return (string) $this->getDecimalAmount($this->levelC->getAmount());
     }
 
     private function getDecimalAmount(?Money $money): string
@@ -81,7 +81,7 @@ class Transaction
     public function getDate(int $index): string
     {
         // TODO loop level D for the date that belongs to the index
-        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
+        return (string) $this->levelC->getValueDate()->format(self::TIME_FORMAT);
     }
 
     /**
@@ -103,22 +103,22 @@ class Transaction
                 // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
-                return (string)$this->levelA->getGroupHeader()->getMessageId();
+                return (string) $this->levelA->getGroupHeader()->getMessageId();
 
                 // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
-                return (string)$this->levelB->getId();
+                return (string) $this->levelB->getId();
 
             case 'statementCreationDate':
                 // always the same, since its level B.
-                return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
+                return (string) $this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
 
             case 'CdtDbtInd':
                 /** @var null|EntryTransactionDetail $set */
                 $set             = $this->levelD[$index];
 
-                return (string)$set?->getCreditDebitIndicator();
+                return (string) $set?->getCreditDebitIndicator();
 
             case 'statementAccountIban':
                 // always the same, since its level B.
@@ -143,37 +143,37 @@ class Transaction
 
             case 'entryAccountServicerReference':
                 // always the same, since its level C.
-                return (string)$this->levelC->getAccountServicerReference();
+                return (string) $this->levelC->getAccountServicerReference();
 
             case 'entryReference':
                 // always the same, since its level C.
-                return (string)$this->levelC->getReference();
+                return (string) $this->levelC->getReference();
 
             case 'entryAdditionalInfo':
                 // always the same, since its level C.
-                return (string)$this->levelC->getAdditionalInfo();
+                return (string) $this->levelC->getAdditionalInfo();
 
             case 'entryAmount':
                 // always the same, since its level C.
-                return (string)$this->getDecimalAmount($this->levelC->getAmount());
+                return (string) $this->getDecimalAmount($this->levelC->getAmount());
 
             case 'entryAmountCurrency':
                 // always the same, since its level C.
-                return (string)$this->levelC->getAmount()->getCurrency()->getCode();
+                return (string) $this->levelC->getAmount()->getCurrency()->getCode();
 
             case 'entryValueDate':
                 // always the same, since its level C.
-                return (string)$this->levelC->getValueDate()?->format(self::TIME_FORMAT);
+                return (string) $this->levelC->getValueDate()?->format(self::TIME_FORMAT);
 
             case 'entryBookingDate':
                 // always the same, since its level C.
-                return (string)$this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
+                return (string) $this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
 
             case 'entryBtcDomainCode':
                 $return          = '';
                 // always the same, since its level C.
                 if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
-                    $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                    $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return $return;
@@ -182,7 +182,7 @@ class Transaction
                 $return          = '';
                 // always the same, since its level C.
                 if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
-                    $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return '';
@@ -191,7 +191,7 @@ class Transaction
                 $return          = '';
                 // always the same, since its level C.
                 if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
-                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
@@ -205,7 +205,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
 
-                return (string)$info?->getReference()?->getAccountServicerReference();
+                return (string) $info?->getReference()?->getAccountServicerReference();
 
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
                 $result          = '';
@@ -279,7 +279,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
 
-                return (string)$info->getAmount()?->getCurrency()?->getCode();
+                return (string) $info->getAmount()?->getCurrency()?->getCode();
 
             case 'entryDetailBtcDomainCode':
                 // this is level D, so grab from level C or loop.
@@ -292,7 +292,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string)$info->getBankTransactionCode()->getDomain()->getCode();
+                    $return = (string) $info->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return $return;
@@ -308,7 +308,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    $return = (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return $return;
@@ -324,7 +324,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    $return = (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
@@ -341,7 +341,7 @@ class Transaction
                 if (null !== $info) {
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
                     if (is_object($opposingAccount) && IbanAccount::class === get_class($opposingAccount)) {
-                        $result = (string)$opposingAccount->getIdentification();
+                        $result = (string) $opposingAccount->getIdentification();
                     }
                 }
 
@@ -360,7 +360,7 @@ class Transaction
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
                 $class           = null !== $opposingAccount ? get_class($opposingAccount) : '';
                 if (in_array($class, $list, true)) {
-                    $result = (string)$opposingAccount->getIdentification();
+                    $result = (string) $opposingAccount->getIdentification();
                 }
 
                 return $result;
@@ -426,11 +426,11 @@ class Transaction
     {
         $opposingName = '';
         // TODO make depend on configuration
-        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
+        if ('' === (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
         }
-        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
+        if ('' !== (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address

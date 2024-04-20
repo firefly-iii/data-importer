@@ -46,10 +46,10 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $accessToken = (string)env('FIREFLY_III_ACCESS_TOKEN', '');
-        $clientId    = (string)env('FIREFLY_III_CLIENT_ID', '');
-        $baseUrl     = (string)env('FIREFLY_III_URL', '');
-        $vanityUrl   = (string)env('VANITY_URL', '');
+        $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
+        $clientId    = (string) env('FIREFLY_III_CLIENT_ID', '');
+        $baseUrl     = (string) env('FIREFLY_III_URL', '');
+        $vanityUrl   = (string) env('VANITY_URL', '');
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && '' !== $clientId) {
             echo 'You can\'t set FIREFLY_III_ACCESS_TOKEN together with FIREFLY_III_CLIENT_ID. One must remain empty.'.PHP_EOL;

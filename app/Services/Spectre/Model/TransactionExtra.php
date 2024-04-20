@@ -84,7 +84,7 @@ class TransactionExtra
         // "Time in HH:MM:SS format, representing time when the transaction appears in statement."
         $model->postingTime              = array_key_exists('posting_time', $data) ? $data['posting_time'] : null;
         $model->accountNumber            = $data['account_number'] ?? null;
-        $model->originalAmount           = isset($data['original_amount']) ? (string)$data['original_amount'] : null;
+        $model->originalAmount           = isset($data['original_amount']) ? (string) $data['original_amount'] : null;
         $model->originalCurrencyCode     = $data['original_currency_code'] ?? null;
         $model->assetCode                = $data['asset_code'] ?? null;
         $model->assetAmount              = $data['asset_amount'] ?? null;
@@ -101,11 +101,11 @@ class TransactionExtra
         $model->payerInformation         = $data['payer_information'] ?? null;
         $model->type                     = $data['type'] ?? null;
         $model->checkNumber              = $data['check_number'] ?? null;
-        $model->units                    = array_key_exists('units', $data) ? (string)$data['units'] : null;
+        $model->units                    = array_key_exists('units', $data) ? (string) $data['units'] : null;
         $model->additional               = $data['additional'] ?? null;
         $model->unitPrice                = $data['unit_price'] ?? null;
-        $model->accountBalanceSnapshot   = array_key_exists('account_balance_snapshot', $data) ? (string)$data['account_balance_snapshot'] : null;
-        $model->categorizationConfidence = array_key_exists('categorization_confidence', $data) ? (string)$data['categorization_confidence'] : null;
+        $model->accountBalanceSnapshot   = array_key_exists('account_balance_snapshot', $data) ? (string) $data['account_balance_snapshot'] : null;
+        $model->categorizationConfidence = array_key_exists('categorization_confidence', $data) ? (string) $data['categorization_confidence'] : null;
 
         // if has posting time, then set this time in the posting date?
         app('log')->debug(sprintf('Time is         "%s"', $data['time'] ?? ''));

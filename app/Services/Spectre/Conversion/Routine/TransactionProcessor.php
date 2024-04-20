@@ -56,11 +56,11 @@ class TransactionProcessor
         $this->refreshConnection();
         $this->notBefore = null;
         $this->notAfter  = null;
-        if ('' !== (string)$this->configuration->getDateNotBefore()) {
+        if ('' !== (string) $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
 
-        if ('' !== (string)$this->configuration->getDateNotAfter()) {
+        if ('' !== (string) $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
@@ -69,7 +69,7 @@ class TransactionProcessor
         app('log')->debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return          = [];
         foreach ($accounts as $account) {
-            $account               = (string)$account;
+            $account               = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
             $appId                 = SpectreSecretManager::getAppId();

@@ -57,12 +57,12 @@ class Transaction
     public static function fromArray(array $data): self
     {
         $model               = new self();
-        $model->id           = (string)$data['id'];
+        $model->id           = (string) $data['id'];
         $model->mode         = $data['mode'];
         $model->status       = $data['status'];
         // "The date when the transaction was made"
         $model->madeOn       = new Carbon($data['made_on']);
-        $model->amount       = (string)$data['amount'];
+        $model->amount       = (string) $data['amount'];
         $model->currencyCode = $data['currency_code'];
         $model->description  = $data['description'];
         $model->category     = $data['category'];
@@ -137,20 +137,20 @@ class Transaction
     {
         app('log')->debug('getPayeeIban()');
         $payee     = $this->extra->getPayee();
-        $valid     = IbanConverter::isValidIban((string)$payee);
+        $valid     = IbanConverter::isValidIban((string) $payee);
         // payee is valid IBAN:
         if ($valid) {
             app('log')->debug(sprintf('Payee IBAN is "%s", return this.', $payee));
 
-            return (string)$payee;
+            return (string) $payee;
         }
         // is not valid IBAN (also includes NULL)
         $payeeInfo = $this->extra->getPayeeInformation();
-        $valid     = IbanConverter::isValidIban((string)$payeeInfo);
+        $valid     = IbanConverter::isValidIban((string) $payeeInfo);
         if ($valid) {
             app('log')->debug(sprintf('Payee IBAN (payee information) is "%s", return this.', $payeeInfo));
 
-            return (string)$payeeInfo;
+            return (string) $payeeInfo;
         }
         app('log')->debug('Payee IBAN is "" (empty fallback), return NULL');
 
@@ -160,8 +160,8 @@ class Transaction
     public function getPayee(): ?string
     {
         app('log')->debug('getPayee()');
-        $payee     = (string)$this->extra->getPayee();
-        $payeeInfo = (string)$this->extra->getPayeeInformation();
+        $payee     = (string) $this->extra->getPayee();
+        $payeeInfo = (string) $this->extra->getPayeeInformation();
         $valid     = IbanConverter::isValidIban($payee);
 
         // if payee is IBAN, first see if payee information may be a better field:
@@ -196,20 +196,20 @@ class Transaction
     {
         app('log')->debug('getPayerIban()');
         $payer     = $this->extra->getpayer();
-        $valid     = IbanConverter::isValidIban((string)$payer);
+        $valid     = IbanConverter::isValidIban((string) $payer);
         // payer is valid IBAN:
         if ($valid) {
             app('log')->debug(sprintf('Payer IBAN is "%s", return this.', $payer));
 
-            return (string)$payer;
+            return (string) $payer;
         }
         // is not valid IBAN (also includes NULL)
         $payerInfo = $this->extra->getpayerInformation();
-        $valid     = IbanConverter::isValidIban((string)$payerInfo);
+        $valid     = IbanConverter::isValidIban((string) $payerInfo);
         if ($valid) {
             app('log')->debug(sprintf('Payer IBAN (payer information) is "%s", return thuis.', $payerInfo));
 
-            return (string)$payerInfo;
+            return (string) $payerInfo;
         }
         app('log')->debug('Payer IBAN is "" (empty fallback), return NULL');
 
@@ -219,8 +219,8 @@ class Transaction
     public function getPayer(): ?string
     {
         app('log')->debug('getPayer()');
-        $payer     = (string)$this->extra->getPayer();
-        $payerInfo = (string)$this->extra->getPayerInformation();
+        $payer     = (string) $this->extra->getPayer();
+        $payerInfo = (string) $this->extra->getPayerInformation();
         $valid     = IbanConverter::isValidIban($payer);
 
         // if payer is IBAN, first see if payer information may be a better field:
@@ -259,7 +259,7 @@ class Transaction
     public function toArray(): array
     {
         return [
-            'id'            => (string)$this->id,
+            'id'            => (string) $this->id,
             'account_id'    => $this->accountId,
             'made_on'       => $this->madeOn->toW3cString(),
             'created_at'    => $this->createdAt->toW3cString(),
@@ -268,7 +268,7 @@ class Transaction
             'status'        => $this->status,
             'amount'        => $this->amount,
             'currency_code' => $this->currencyCode,
-            'description'   => (string)$this->description,
+            'description'   => (string) $this->description,
             'category'      => $this->category,
             'duplicated'    => $this->duplicated,
             'extra'         => $this->extra->toArray(),

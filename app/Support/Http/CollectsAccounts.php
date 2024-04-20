@@ -88,14 +88,14 @@ trait CollectsAccounts
         foreach ($result as $entry) {
             app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type          = $entry->type;
-            $iban          = (string)$entry->iban;
+            $iban          = (string) $entry->iban;
             if ('' === $iban) {
                 continue;
             }
             $iban          = $this->filterSpaces($iban);
-            $number        = sprintf('%s.', (string)$entry->number);
+            $number        = sprintf('%s.', (string) $entry->number);
             if ('.' !== $number) {
-                $number       = $this->filterSpaces((string)$entry->number);
+                $number       = $this->filterSpaces((string) $entry->number);
                 $key          = sprintf('nr_%s', $number);
                 app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
                 $return[$key] = ['id' => $entry->id, 'type' => $entry->type];
