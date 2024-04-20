@@ -89,10 +89,10 @@ abstract class Request
         if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
-        $client = $this->getClient();
-        $res    = null;
-        $body   = null;
-        $json   = null;
+        $client  = $this->getClient();
+        $res     = null;
+        $body    = null;
+        $json    = null;
 
         try {
             $res = $client->request(
@@ -210,8 +210,8 @@ abstract class Request
         if ('' === $this->url) {
             throw new ImporterErrorException('No Spectre server defined');
         }
-        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
-        $headers = $this->getDefaultHeaders();
+        $fullUrl                    = sprintf('%s/%s', $this->getBase(), $this->getUrl());
+        $headers                    = $this->getDefaultHeaders();
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
@@ -224,7 +224,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
-        } catch (\Exception | GuzzleException $e) {
+        } catch (\Exception|GuzzleException $e) {
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
@@ -235,8 +235,8 @@ abstract class Request
             $body = '{}';
         }
 
-        $statusCode      = $res->getStatusCode();
-        $responseHeaders = $res->getHeaders();
+        $statusCode                 = $res->getStatusCode();
+        $responseHeaders            = $res->getHeaders();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -274,10 +274,10 @@ abstract class Request
         if ('' === $this->url) {
             throw new ImporterErrorException('No Spectre server defined');
         }
-        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
-        $headers = $this->getDefaultHeaders();
-        $opts    = ['headers' => $headers];
-        $body    = null;
+        $fullUrl                    = sprintf('%s/%s', $this->getBase(), $this->getUrl());
+        $headers                    = $this->getDefaultHeaders();
+        $opts                       = ['headers' => $headers];
+        $body                       = null;
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
@@ -293,7 +293,7 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
-        } catch (\Exception | GuzzleException $e) {
+        } catch (\Exception|GuzzleException $e) {
             app('log')->error($e->getMessage());
 
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
@@ -306,8 +306,8 @@ abstract class Request
             $body = '{}';
         }
 
-        $statusCode      = $res->getStatusCode();
-        $responseHeaders = $res->getHeaders();
+        $statusCode                 = $res->getStatusCode();
+        $responseHeaders            = $res->getHeaders();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -329,10 +329,10 @@ abstract class Request
         if ('' === $this->url) {
             throw new ImporterErrorException('No Spectre server defined');
         }
-        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
-        $headers = $this->getDefaultHeaders();
-        $opts    = ['headers' => $headers];
-        $body    = null;
+        $fullUrl                    = sprintf('%s/%s', $this->getBase(), $this->getUrl());
+        $headers                    = $this->getDefaultHeaders();
+        $opts                       = ['headers' => $headers];
+        $body                       = null;
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
@@ -347,14 +347,14 @@ abstract class Request
         try {
             $client = $this->getClient();
             $res    = $client->request('PUT', $fullUrl, $opts);
-        } catch (GuzzleException | RequestException $e) {
+        } catch (GuzzleException|RequestException $e) {
             // get response.
             $response = $e->getResponse();
             if (null !== $response && 406 === $response->getStatusCode()) {
                 // ignore it, just log it.
-                $statusCode      = $response->getStatusCode();
-                $responseHeaders = $response->getHeaders();
-                $json            = [];
+                $statusCode                 = $response->getStatusCode();
+                $responseHeaders            = $response->getHeaders();
+                $json                       = [];
 
                 try {
                     $json = json_decode((string)$e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -381,8 +381,8 @@ abstract class Request
             $body = '{}';
         }
 
-        $statusCode      = $res->getStatusCode();
-        $responseHeaders = $res->getHeaders();
+        $statusCode                 = $res->getStatusCode();
+        $responseHeaders            = $res->getHeaders();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);

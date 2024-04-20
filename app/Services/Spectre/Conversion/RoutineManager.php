@@ -164,7 +164,9 @@ class RoutineManager implements RoutineManagerInterface
             $count
         );
     }
-    #[\Override] public function getServiceAccounts(): array
+
+    #[\Override]
+    public function getServiceAccounts(): array
     {
         return [];
     }

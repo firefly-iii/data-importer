@@ -70,7 +70,7 @@ trait AutoImports
 
             return [];
         }
-        $array = scandir($directory);
+        $array  = scandir($directory);
         if (!is_array($array)) {
             $this->error(sprintf('Directory "%s" is empty or invalid.', $directory));
 
@@ -196,9 +196,9 @@ trait AutoImports
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile   = sprintf('%s/%s', $directory, $file);
-        $jsonFile         = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
-        $fallbackJsonFile = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
+        $importableFile    = sprintf('%s/%s', $directory, $file);
+        $jsonFile          = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
+        $fallbackJsonFile  = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
 
         // TODO not yet sure why the distinction is necessary.
         // TODO this may also be necessary for camt files.
@@ -217,20 +217,20 @@ trait AutoImports
             $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
         }
 
-        $jsonFile = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
+        $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
 
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
         // do JSON check
-        $jsonResult = $this->verifyJSON($jsonFile);
+        $jsonResult        = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
 
             return;
         }
-        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
@@ -293,6 +293,7 @@ trait AutoImports
             // check if account exists:
             if (!array_key_exists($account->getIdentifier(), $localAccounts)) {
                 Log::debug(sprintf('Nordigen account "%s" (IBAN "%s") is not being imported, so skipped.', $account->getIdentifier(), $account->getIban()));
+
                 continue;
             }
             // local account ID exists, we can check the balance over at Firefly III.
@@ -307,10 +308,12 @@ trait AutoImports
             } catch (ApiHttpException $e) {
                 app('log')->error('Could not get Firefly III account for balance check. Will ignore this issue.');
                 app('log')->debug($e->getMessage());
+
                 continue;
             }
+
             /** @var LocalAccount $localAccount */
-            $localAccount = $result->getAccount();
+            $localAccount   = $result->getAccount();
 
             $this->reportBalanceDifference($account, $localAccount);
         }
@@ -320,6 +323,7 @@ trait AutoImports
     {
         Log::debug(sprintf('Report balance difference between Nordigen account "%s" and Firefly III account #%d.', $account->getIdentifier(), $localAccount->id));
         app('log')->debug(sprintf('Nordigen account has %d balance entry (entries)', count($account->getBalances())));
+
         /** @var Balance $balance */
         foreach ($account->getBalances() as $index => $balance) {
             app('log')->debug(sprintf('Now comparing balance entry #%d of %d', $index + 1, count($account->getBalances())));
@@ -327,8 +331,8 @@ trait AutoImports
         }
     }
 
-    private function reportSingleDifference(Account $account, LocalAccount $localAccount, Balance $balance): void {
-
+    private function reportSingleDifference(Account $account, LocalAccount $localAccount, Balance $balance): void
+    {
         // compare currencies, and warn if necessary.
         if ($balance->currency !== $localAccount->currencyCode) {
             app('log')->warning(sprintf('Nordigen account "%s" has currency %s, Firefly III account #%d uses %s.', $account->getIdentifier(), $localAccount->id, $balance->currency, $localAccount->currencyCode));
@@ -371,7 +375,7 @@ trait AutoImports
             exit(1);
         }
 
-        $manager = null;
+        $manager                  = null;
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType) {
@@ -411,7 +415,7 @@ trait AutoImports
 
         // then push stuff into the routine:
         $manager->setConfiguration($configuration);
-        $transactions = [];
+        $transactions             = [];
 
         try {
             $transactions = $manager->start();
@@ -431,7 +435,7 @@ trait AutoImports
         }
 
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk = \Storage::disk('jobs');
+        $disk                     = \Storage::disk('jobs');
 
         try {
             $disk->put(sprintf('%s.json', $this->identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
@@ -452,7 +456,7 @@ trait AutoImports
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
         }
-        $this->importerAccounts = $manager->getServiceAccounts();
+        $this->importerAccounts   = $manager->getServiceAccounts();
     }
 
     private function reportConversion(): void
@@ -480,15 +484,15 @@ trait AutoImports
     private function startImport(Configuration $configuration): void
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $routine = new RoutineManager($this->identifier);
+        $routine              = new RoutineManager($this->identifier);
         SubmissionStatusManager::startOrFindSubmission($this->identifier);
-        $disk     = \Storage::disk('jobs');
-        $fileName = sprintf('%s.json', $this->identifier);
+        $disk                 = \Storage::disk('jobs');
+        $fileName             = sprintf('%s.json', $this->identifier);
 
         // get files from disk:
         if (!$disk->has($fileName)) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message = sprintf('File "%s" not found, cannot continue.', $fileName);
+            $message              = sprintf('File "%s" not found, cannot continue.', $fileName);
             $this->error($message);
             SubmissionStatusManager::addError($this->identifier, 0, $message);
             $this->importMessages = $routine->getAllMessages();
@@ -502,9 +506,9 @@ trait AutoImports
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException | \JsonException $e) {
+        } catch (FileNotFoundException|\JsonException $e) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message = sprintf('File "%s" could not be decoded, cannot continue..', $fileName);
+            $message              = sprintf('File "%s" could not be decoded, cannot continue..', $fileName);
             $this->error($message);
             SubmissionStatusManager::addError($this->identifier, 0, $message);
             $this->importMessages = $routine->getAllMessages();
@@ -583,7 +587,7 @@ trait AutoImports
     private function importUpload(string $jsonFile, string $importableFile): void
     {
         // do JSON check
-        $jsonResult = $this->verifyJSON($jsonFile);
+        $jsonResult    = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);

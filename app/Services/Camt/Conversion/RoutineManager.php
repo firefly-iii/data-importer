@@ -199,7 +199,8 @@ class RoutineManager implements RoutineManagerInterface
         );
     }
 
-    #[\Override] public function getServiceAccounts(): array
+    #[\Override]
+    public function getServiceAccounts(): array
     {
         return [];
     }

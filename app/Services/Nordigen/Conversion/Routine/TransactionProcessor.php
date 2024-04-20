@@ -59,7 +59,7 @@ class TransactionProcessor
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
-        $this->accounts = [];
+        $this->accounts  = [];
         if ('' !== $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
@@ -78,7 +78,8 @@ class TransactionProcessor
             app('log')->debug('Will also download information on the account for debug purposes.');
             $object           = new Account();
             $object->setIdentifier($account);
-            $fullInfo = null;
+            $fullInfo         = null;
+
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
@@ -97,7 +98,7 @@ class TransactionProcessor
                 continue;
             }
             app('log')->debug('Done downloading information for debug purposes.');
-            if(null !== $fullInfo) {
+            if (null !== $fullInfo) {
                 $this->accounts[] = $fullInfo;
             }
 
@@ -202,6 +203,4 @@ class TransactionProcessor
     {
         return $this->accounts;
     }
-
-
 }
