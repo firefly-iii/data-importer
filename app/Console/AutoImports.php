@@ -347,7 +347,8 @@ trait AutoImports
             $this->line(sprintf('Balance comparison: Firefly III account #%d: Date mismatch', $localAccount->id));
         }
 
-        // compare balance, warn (also a mesage)
+        // compare balance, warn (also a message)
+        app('log')->debug(sprintf('Comparing %s and %s', $balance->amount, $localAccount->currentBalance));
         if (0 !== bccomp($balance->amount, $localAccount->currentBalance)) {
             app('log')->warning(sprintf('Nordigen balance is %s, Firefly III balance is %s.', $balance->amount, $localAccount->currentBalance));
             $this->line(sprintf('Balance comparison: Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
