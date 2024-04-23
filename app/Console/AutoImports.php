@@ -550,7 +550,7 @@ trait AutoImports
 
         /** @var Balance $balance */
         foreach ($account->getBalances() as $index => $balance) {
-            app('log')->debug(sprintf('Now comparing balance entry "%s" (#%d of %d)',$balance->type, $index + 1, count($account->getBalances())));
+            app('log')->debug(sprintf('Now comparing balance entry "%s" (#%d of %d)', $balance->type, $index + 1, count($account->getBalances())));
             $this->reportSingleDifference($account, $localAccount, $balance);
         }
     }
@@ -568,7 +568,7 @@ trait AutoImports
         $localDate = Carbon::parse($localAccount->currentBalanceDate);
         if (!$date->isSameDay($localDate)) {
             app('log')->warning(sprintf('Nordigen balance is from day %s, Firefly III account from %s.', $date->format('Y-m-d'), $date->format('Y-m-d')));
-            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Date mismatch',$balance->type, $localAccount->id));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Date mismatch', $balance->type, $localAccount->id));
         }
 
         // compare balance, warn (also a message)
@@ -578,7 +578,7 @@ trait AutoImports
             $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $balance->type, $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
         }
         if (0 === bccomp($balance->amount, $localAccount->currentBalance)) {
-            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Balance OK',$balance->type, $localAccount->id));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Balance OK', $balance->type, $localAccount->id));
         }
     }
 

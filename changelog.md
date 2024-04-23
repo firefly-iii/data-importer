@@ -5,11 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.5.2 - 2024-04-24
 
 ### Added
-- #8769
+- [Issue 8769](https://github.com/firefly-iii/firefly-iii/issues/8769) (Perform balance check after the import) reported by @dawid-czarnecki
 
 ### Fixed
-- #8799
-- #8800
+- [Issue 8799](https://github.com/firefly-iii/firefly-iii/issues/8799) (Undefined index in CAMT role selection) reported by @beune
+- [Issue 8800](https://github.com/firefly-iii/firefly-iii/issues/8800) (Call to undefined function 'hasResponse') reported by @VanQz
 
 ## 1.5.1 - 2024-04-18
 
