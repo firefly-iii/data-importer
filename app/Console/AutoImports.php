@@ -550,7 +550,7 @@ trait AutoImports
 
         /** @var Balance $balance */
         foreach ($account->getBalances() as $index => $balance) {
-            app('log')->debug(sprintf('Now comparing balance entry #%d of %d', $index + 1, count($account->getBalances())));
+            app('log')->debug(sprintf('Now comparing balance entry "%s" (#%d of %d)',$balance->type, $index + 1, count($account->getBalances())));
             $this->reportSingleDifference($account, $localAccount, $balance);
         }
     }
@@ -560,7 +560,7 @@ trait AutoImports
         // compare currencies, and warn if necessary.
         if ($balance->currency !== $localAccount->currencyCode) {
             app('log')->warning(sprintf('Nordigen account "%s" has currency %s, Firefly III account #%d uses %s.', $account->getIdentifier(), $localAccount->id, $balance->currency, $localAccount->currencyCode));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Currency mismatch', $localAccount->id));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Currency mismatch', $balance->type, $localAccount->id));
         }
 
         // compare dates, warn
@@ -568,17 +568,17 @@ trait AutoImports
         $localDate = Carbon::parse($localAccount->currentBalanceDate);
         if (!$date->isSameDay($localDate)) {
             app('log')->warning(sprintf('Nordigen balance is from day %s, Firefly III account from %s.', $date->format('Y-m-d'), $date->format('Y-m-d')));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Date mismatch', $localAccount->id));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Date mismatch',$balance->type, $localAccount->id));
         }
 
         // compare balance, warn (also a message)
         app('log')->debug(sprintf('Comparing %s and %s', $balance->amount, $localAccount->currentBalance));
         if (0 !== bccomp($balance->amount, $localAccount->currentBalance)) {
             app('log')->warning(sprintf('Nordigen balance is %s, Firefly III balance is %s.', $balance->amount, $localAccount->currentBalance));
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Nordigen reports %s %s, Firefly III reports %s %d', $balance->type, $localAccount->id, $balance->currency, $balance->amount, $localAccount->currencyCode, $localAccount->currentBalance));
         }
         if (0 === bccomp($balance->amount, $localAccount->currentBalance)) {
-            $this->line(sprintf('Balance comparison: Firefly III account #%d: Balance OK', $localAccount->id));
+            $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Balance OK',$balance->type, $localAccount->id));
         }
     }
 
