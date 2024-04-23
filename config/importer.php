@@ -47,7 +47,7 @@ return [
     'ignore_not_found_transactions' => env('IGNORE_NOT_FOUND_TRANSACTIONS', false),
     'namespace'                     => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'                     => env('USE_CACHE', false),
-    'minimum_version'               => '6.1.11',
+    'minimum_version'               => '6.1.15',
     'cache_api_calls'               => false,
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),
