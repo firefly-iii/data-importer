@@ -1,6 +1,6 @@
 # This workflow prunes old workflow runs for an entire repository.
 
-name: Prune old builds
+name: Chore - Prune old builds
 
 permissions:
   actions: write
@@ -59,7 +59,8 @@ jobs:
 
             const workflows = [
               'cleanup.yml',
-              'release.yml'
+              'release.yml',
+              'sonarcloud.yml'
             ]
 
             let runs_to_delete = [];
