@@ -51,7 +51,10 @@ class BankDebitCredit implements ConverterInterface
             'DBIT', // https://subsembly.com/index.html (Banking4 App)
             'Charge', // not sure which bank but it's insane.
         ];
-        if (in_array(trim($value), $negative, true)) {
+        // 'Dr' should also match 'DR'
+        $negative = array_map('strtolower', $negative); // lower case for better matching
+        
+        if (in_array(strtolower(trim($value)), $negative, true)) {
             return -1;
         }
 
