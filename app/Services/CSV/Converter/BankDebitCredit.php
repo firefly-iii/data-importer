@@ -39,19 +39,22 @@ class BankDebitCredit implements ConverterInterface
     public function convert($value): int
     {
         app('log')->debug('Going to convert ', ['value' => $value]);
+
+        // Note: the array values should be all lowercase
         $negative = [
-            'D', // Old style Rabobank (NL). Short for "Debit"
-            'A', // New style Rabobank (NL). Short for "Af"
-            'DR', // https://old.reddit.com/r/FireflyIII/comments/bn2edf/generic_debitcredit_indicator/
-            'Af', // ING (NL).
-            'Debet', // Triodos (NL)
-            'Debit', // ING (EN), thx Quibus!
-            'debit', // Mint
-            'S', // Volksbank (DE), Short for "Soll"
-            'DBIT', // https://subsembly.com/index.html (Banking4 App)
-            'Charge', // not sure which bank but it's insane.
+            'd', // Old style Rabobank (NL). Short for "Debit"
+            'a', // New style Rabobank (NL). Short for "Af"
+            'dr', // https://old.reddit.com/r/FireflyIII/comments/bn2edf/generic_debitcredit_indicator/
+            'af', // ING (NL).
+            'debet', // Triodos (NL)
+            'debit', // ING (EN), thx Quibus!
+            's', // Volksbank (DE), Short for "Soll"
+            'dbit', // https://subsembly.com/index.html (Banking4 App)
+            'charge', // not sure which bank but it's insane.
         ];
-        if (in_array(trim($value), $negative, true)) {
+
+        // Lowercase the value and trim it for comparison.
+        if (in_array(strtolower(trim($value)), $negative, true)) {
             return -1;
         }
 
