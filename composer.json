@@ -95,7 +95,7 @@
         "nunomaduro/collision": "^8",
         "larastan/larastan": "^2.9",
         "phpstan/extension-installer": "*",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^1.11",
         "phpstan/phpstan-deprecation-rules": "^1.2",
         "phpstan/phpstan-strict-rules": "^1.6",
         "phpunit/phpunit": "^10.5",
