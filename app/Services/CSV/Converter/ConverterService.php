@@ -60,6 +60,6 @@ class ConverterService
 
     public static function fullName(string $class): string
     {
-        return sprintf('App\\Services\\CSV\\Converter\\%s', $class);
+        return sprintf('App\Services\CSV\Converter\%s', $class);
     }
 }
