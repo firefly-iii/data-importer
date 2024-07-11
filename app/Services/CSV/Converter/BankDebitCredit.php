@@ -50,6 +50,7 @@ class BankDebitCredit implements ConverterInterface
             'S', // Volksbank (DE), Short for "Soll"
             'DBIT', // https://subsembly.com/index.html (Banking4 App)
             'Charge', // not sure which bank but it's insane.
+            '(-)', // Banco Bolivariano in Ecuador (same opinion as above)
         ];
         if (in_array(trim($value), $negative, true)) {
             return -1;
