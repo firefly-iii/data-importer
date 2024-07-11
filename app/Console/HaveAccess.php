@@ -57,7 +57,7 @@ trait HaveAccess
             /** @var SystemInformationResponse $result */
             $result = $request->get();
         } catch (ApiHttpException $e) {
-            $this->error(sprintf('Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
+            $this->error(sprintf('ApiHttpException: Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
             $this->error(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
             return false;

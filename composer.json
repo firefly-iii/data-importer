@@ -80,8 +80,8 @@
         "laravel/framework": "^11",
         "league/csv": "9.*",
         "spatie/enum": "^3.10",
-        "symfony/http-client": "^7.0",
-        "symfony/mailgun-mailer": "^7.0",
+        "symfony/http-client": "^7.1",
+        "symfony/mailgun-mailer": "^7.1",
         "genkgo/camt": ">=2.7.0"
     },
     "require-dev": {
@@ -95,9 +95,9 @@
         "nunomaduro/collision": "^8",
         "larastan/larastan": "^2.9",
         "phpstan/extension-installer": "*",
-        "phpstan/phpstan": "^1.10",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-strict-rules": "^1.5",
+        "phpstan/phpstan": "^1.11",
+        "phpstan/phpstan-deprecation-rules": "^1.2",
+        "phpstan/phpstan-strict-rules": "^1.6",
         "phpunit/phpunit": "^10.5",
         "roave/security-advisories": "dev-master",
         "thecodingmachine/phpstan-strict-rules": "^1.0"

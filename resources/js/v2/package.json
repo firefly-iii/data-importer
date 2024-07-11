@@ -7,10 +7,10 @@
         "build": "vite build --emptyOutDir"
     },
     "devDependencies": {
-        "axios": "^1.6.4",
+        "axios": "^1.7.2",
         "laravel-vite-plugin": "^1.0",
-        "sass": "^1.75.0",
-        "vite": "^5.2",
+        "sass": "^1.77.4",
+        "vite": "^5.3",
         "vite-plugin-manifest-sri": "^0.2.0"
     },
     "dependencies": {

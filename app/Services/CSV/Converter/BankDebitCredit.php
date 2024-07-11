@@ -39,6 +39,8 @@ class BankDebitCredit implements ConverterInterface
     public function convert($value): int
     {
         app('log')->debug('Going to convert ', ['value' => $value]);
+
+        // Note: the array values should be all lowercase
         $negative = [
             'D', // Old style Rabobank (NL). Short for "Debit"
             'A', // New style Rabobank (NL). Short for "Af"
@@ -52,7 +54,9 @@ class BankDebitCredit implements ConverterInterface
             'Charge', // not sure which bank but it's insane.
             '(-)', // Banco Bolivariano in Ecuador (same opinion as above)
         ];
-        if (in_array(trim($value), $negative, true)) {
+
+        // Lowercase the value and trim it for comparison.
+        if (in_array(strtolower(trim($value)), $negative, true)) {
             return -1;
         }
 
