@@ -76,7 +76,7 @@
         "ext-bcmath": "*",
         "ext-json": "*",
         "firefly-iii/api-support-classes": "@dev",
-        "guzzlehttp/guzzle": "^7.0",
+        "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^11",
         "league/csv": "9.*",
         "spatie/enum": "^3.10",
