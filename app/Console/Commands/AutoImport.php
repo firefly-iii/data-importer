@@ -69,7 +69,7 @@ final class AutoImport extends Command
 
         /** @phpstan-ignore-line */
         $directory = realpath($argument);
-        if(false === $directory) {
+        if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));
 
             return 1;

@@ -9,8 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Case-sensitive matching on bank debit indicator, by @rajabilal555
-- #9067
-- #9044
+- [Discussion 9067](https://github.com/orgs/firefly-iii/discussions/9067) (Unable to automate: Data-importer doesn't remember which accounts spectre accounts map to.) started by @demiGod095
+- [Issue 9044](https://github.com/firefly-iii/firefly-iii/issues/9044) (Minor issue in AutoImport.php - does not catch a 'bad path' error) reported by @Terry-JF
 
 ## 1.5.2 - 2024-04-24
 
