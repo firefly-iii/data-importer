@@ -8,7 +8,7 @@
                     {{-- loop configuration --}}
                     @foreach($configuration->getAccounts() as $key => $preConfig)
                         {{-- if this account matches, pre-select dropdown. --}}
-                        @if($key === $account['import_account']->id && $preConfig === $ff3Account->id) selected="selected"
+                        @if((string) $key === (string) $account['import_account']->id && $preConfig === $ff3Account->id) selected="selected"
                     @endif
                     @endforeach
                     label="{{ $ff3Account->name }} @if($ff3Account->iban) ({{ $ff3Account->iban }}) @endif">
