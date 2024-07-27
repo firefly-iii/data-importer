@@ -393,7 +393,7 @@ class Transaction
     {
         app('log')->debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
-        $targetRelatedPartyObject = 'Genkgo\\Camt\\DTO\\Creditor';
+        $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Creditor';
 
         // get amount from "getAmount":
         $amount                   = $transactionDetail?->getAmount()?->getAmount();
@@ -407,7 +407,7 @@ class Transaction
 
         if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
             app('log')->debug('getOpposingParty(), interested in Debtor!');
-            $targetRelatedPartyObject = 'Genkgo\\Camt\\DTO\\Debtor';
+            $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Debtor';
         }
         foreach ($relatedParties as $relatedParty) {
             app('log')->debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));

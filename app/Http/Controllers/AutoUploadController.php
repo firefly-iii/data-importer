@@ -53,7 +53,7 @@ class AutoUploadController extends Controller
 
         $access         = $this->haveAccess();
         if (false === $access) {
-            throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
+            throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
         }
 
         $json           = $request->file('json');

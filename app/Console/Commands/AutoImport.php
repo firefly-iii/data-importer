@@ -60,7 +60,7 @@ final class AutoImport extends Command
     {
         $access    = $this->haveAccess();
         if (false === $access) {
-            $this->error(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
+            $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
 
             return 1;
         }
@@ -69,6 +69,11 @@ final class AutoImport extends Command
 
         /** @phpstan-ignore-line */
         $directory = realpath($argument);
+        if(false === $directory) {
+            $this->error(sprintf('Path "%s" is not a valid location.', $argument));
+
+            return 1;
+        }
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 

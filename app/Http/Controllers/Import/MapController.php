@@ -139,7 +139,7 @@ class MapController extends Controller
             $info['values']       = [];
 
             // create the "mapper" class which will get data from Firefly III.
-            $class                = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+            $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -215,7 +215,7 @@ class MapController extends Controller
             $info['values']       = [];
 
             // create the "mapper" class which will get data from Firefly III.
-            $class                = sprintf('App\\Services\\CSV\\Mapper\\%s', $info['mapper']);
+            $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -259,7 +259,7 @@ class MapController extends Controller
             $opposingName['values']       = $this->getOpposingAccounts();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class                        = sprintf('App\\Services\\CSV\\Mapper\\%s', $opposingName['mapper']);
+            $class                        = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -280,7 +280,7 @@ class MapController extends Controller
             $category['values']       = $this->getCategories();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class                    = sprintf('App\\Services\\CSV\\Mapper\\%s', $category['mapper']);
+            $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }

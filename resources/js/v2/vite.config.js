@@ -57,7 +57,7 @@ export default defineConfig({
             publicDirectory: '../../../public',
             refresh: true
         }),
-        manifestSRI(),
+        //manifestSRI(),
 
     ],
 

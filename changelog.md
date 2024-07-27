@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.5.3 - 2024-07-28
+
+### Added
+- Support for another bank's debit indicator, by @0xjams 
+
+### Fixed
+- Case-sensitive matching on bank debit indicator, by @rajabilal555
+- #9067
+- #9044
+
 ## 1.5.2 - 2024-04-24
 
 ### Added

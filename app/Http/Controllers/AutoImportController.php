@@ -66,7 +66,7 @@ class AutoImportController extends Controller
 
         $access       = $this->haveAccess();
         if (false === $access) {
-            throw new ImporterErrorException(sprintf('Could not connect to your local Firefly III instance at %s.', config('importer.url')));
+            throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }
 
         // take code from auto importer.
