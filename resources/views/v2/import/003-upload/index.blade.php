@@ -21,9 +21,15 @@
                         </p>
                         <p>
                             A configuration file is entirely <strong>optional</strong>. You can use it to pre-configure
-                            the import options. In a later
-                            stage you may even use it for automation.
+                            the import options. In a later stage you may even use it for automation.
+                            It will be generated for you by the data importer so you can download it.
                         </p>
+                        @if('simplefin' === $flow)
+                        <p>
+                            If your configuration already contains an encrypted SimpleFIN access URL, you do not need to fill in the "SimpleFIN token" field. If you are unsure,
+                            using the SimpleFIN token field will overrule whatever (if any) access URL is in your configuration file.
+                        </p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -38,6 +44,25 @@
                         <form method="post" action="{{ route('003-upload.upload') }}" accept-charset="UTF-8" id="store"
                               enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+
+                            <!-- SimpleFIN token -->
+                            @if('simplefin' === $flow)
+                                <div class="form-group row mb-3">
+                                    <label for="simplefin_token" class="col-sm-4 col-form-label">SimpleFIN token</label>
+                                    <div class="col-sm-8">
+                                        <input type="text"
+                                               class="form-control
+                                           @if($errors->has('simplefin_token')) is-invalid @endif"
+                                               id="simplefin_token" name="simplefin_token"
+                                               placeholder="SimpleFIN token"/>
+                                        @if($errors->has('simplefin_token'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('simplefin_token') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
 
                             <!-- importable FILE -->
                             @if('file' === $flow)

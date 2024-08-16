@@ -96,7 +96,7 @@ class AuthenticateController extends Controller
             }
         }
 
-        throw new ImporterErrorException('Impossible flow exception.');
+        throw new ImporterErrorException('Impossible flow exception [a].');
     }
 
     /**
@@ -135,6 +135,6 @@ class AuthenticateController extends Controller
             return redirect(route(self::AUTH_ROUTE));
         }
 
-        throw new ImporterErrorException('Impossible flow exception.');
+        throw new ImporterErrorException('Impossible flow exception [b].');
     }
 }

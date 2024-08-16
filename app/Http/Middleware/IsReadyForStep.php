@@ -60,6 +60,7 @@ trait IsReadyForStep
 
             return true;
         }
+        // TODO this flow is weird.
         if ('file' === $flow) {
             $result = $this->isReadyForFileStep();
             app('log')->debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
@@ -71,6 +72,9 @@ trait IsReadyForStep
         }
         if ('spectre' === $flow) {
             return $this->isReadyForSpectreStep();
+        }
+        if ('simplefin' === $flow) {
+            return $this->isReadyForSimpleFINStep();
         }
 
         return $this->isReadyForBasicStep();
@@ -136,6 +140,23 @@ trait IsReadyForStep
 
                 return false;
         }
+    }
+
+    private function isReadyForSimpleFINStep(): bool
+    {
+        // app('log')->debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
+            case 'authenticate':
+                // simpleFIN needs no authentication.
+                return false;
+            case 'upload-files':
+                // you can always upload SimpleFIN things
+                return true;
+
+        }
+        return false;
     }
 
     private function isReadyForNordigenStep(): bool
@@ -349,6 +370,9 @@ trait IsReadyForStep
         if ('spectre' === $flow) {
             return $this->redirectToCorrectSpectreStep();
         }
+        if ('simplefin' === $flow) {
+            return $this->redirectToCorrectSimpleFINStep();
+        }
 
         return $this->redirectToBasicStep();
     }
@@ -525,6 +549,22 @@ trait IsReadyForStep
 
                     return redirect($route);
                 }
+        }
+    }
+
+    private function redirectToCorrectSimpleFINStep(): RedirectResponse
+    {
+        app('log')->debug(sprintf('redirectToCorrectSimpleFINStep("%s")', self::STEP));
+
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
+            case 'authenticate':
+                // simple fin does not authenticate, redirect to upload step.
+                $route = route('003-upload.index');
+                app('log')->debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
+
+                return redirect($route);
         }
     }
 

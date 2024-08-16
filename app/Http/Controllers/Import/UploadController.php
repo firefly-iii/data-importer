@@ -47,6 +47,7 @@ use League\Flysystem\FilesystemException;
 class UploadController extends Controller
 {
     private string $contentType;
+    private string $configFileName;
 
     /**
      * UploadController constructor.
@@ -58,6 +59,7 @@ class UploadController extends Controller
         $this->middleware(UploadControllerMiddleware::class);
         // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType = 'unknown';
+        $this->configFileName = '';
     }
 
     /**
@@ -106,6 +108,7 @@ class UploadController extends Controller
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $importedFile = $request->file('importable_file');
         $configFile   = $request->file('config_file');
+        $simpleFINtoken = $request->get('simplefin_token');
         $flow         = $request->cookie(Constants::FLOW_COOKIE);
         $errors       = new MessageBag();
 
@@ -123,6 +126,16 @@ class UploadController extends Controller
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
+
+        if('simplefin' === $flow) {
+            // at this point we have no configuration file where we can overwrite things, so collect it first.
+            // session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+            if('' === $this->configFileName) {
+                // user has not uploaded any configuration.
+            }
+            var_dump($this->configFileName);exit;
+        }
+
 
         if ('nordigen' === $flow) {
             // redirect to country + bank selector
@@ -242,16 +255,16 @@ class UploadController extends Controller
         // upload the file to a temp directory and use it from there.
         if (0 === $errorNumber) {
             app('log')->debug('Config file uploaded.');
-            $configFileName = StorageService::storeContent(file_get_contents($file->getPathname()));
+            $this->configFileName = StorageService::storeContent(file_get_contents($file->getPathname()));
 
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+            session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
 
             // process the config file
             $success        = false;
             $configuration  = null;
 
             try {
-                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
+                $configuration = ConfigFileProcessor::convertConfigFile($this->configFileName);
                 $configuration->setContentType($this->contentType);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
                 $success       = true;
@@ -261,8 +274,8 @@ class UploadController extends Controller
             // if conversion of the config file was a success, store the new version again:
             if (true === $success) {
                 $configuration->updateDateRange();
-                $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+                $this->configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
             }
         }
 
