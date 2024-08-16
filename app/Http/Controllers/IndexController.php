@@ -94,8 +94,9 @@ class IndexController extends Controller
 
         $isDocker        = env('IS_DOCKER', false);
         $identifier      = substr(session()->getId(), 0, 10);
+        $enabled = config('importer.enabled_flows');
 
-        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker'));
+        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker','enabled'));
     }
 
     public function postIndex(Request $request): mixed

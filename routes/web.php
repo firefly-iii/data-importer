@@ -37,6 +37,7 @@ Route::get('/callback', 'TokenController@callback')->name('token.callback');
 // validate services
 Route::get('/validate/spectre', 'ServiceController@validateSpectre')->name('validate.spectre');
 Route::get('/validate/nordigen', 'ServiceController@validateNordigen')->name('validate.nordigen');
+Route::get('/validate/simplefin', 'ServiceController@validateSimpleFIN')->name('validate.simplefin');
 
 // clear session
 Route::get('/flush', 'IndexController@flush')->name('flush');

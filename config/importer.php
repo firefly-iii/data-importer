@@ -24,11 +24,18 @@ declare(strict_types=1);
 
 return [
     'version'                       => 'develop/2024-08-13',
-    'flows'                         => ['nordigen', 'spectre', 'file'],
+    'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
+    'enabled_flows'                 => [
+        'nordigen'  => true,
+        'spectre'   => true,
+        'file'      => true,
+        'simplefin' => false,
+    ],
     'flow_titles'                   => [
         'file'     => 'File',
         'nordigen' => 'GoCardless',
         'spectre'  => 'Spectre',
+        'simplefin'  => 'SimpleFIN',
     ],
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',
@@ -55,7 +62,7 @@ return [
     'vanity_url'                    => envNonEmpty('VANITY_URL'),
     'connection'                    => [
         'verify'  => env('VERIFY_TLS_SECURITY', true),
-        'timeout' => 0.0 === (float)env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float)env('CONNECTION_TIMEOUT', 31.415),
+        'timeout' => 0.0 === (float) env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float) env('CONNECTION_TIMEOUT', 31.415),
     ],
     'trusted_proxies'               => env('TRUSTED_PROXIES', ''),
     'encoding'                      => [

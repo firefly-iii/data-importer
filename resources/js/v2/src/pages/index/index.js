@@ -32,15 +32,18 @@ let index = function () {
             file: true,
             gocardless: true,
             spectre: true,
+            simplefin: true
         },
         errors: {
             spectre: '',
             gocardless: '',
+            simplefin: '',
         },
         importFunctions: {
             file: false,
             gocardless: false,
             spectre: false,
+            simplefin: false
         },
         functionName() {
 
@@ -64,10 +67,12 @@ let index = function () {
                 this.loadingFunctions.file = false;
                 this.loadingFunctions.gocardless = false;
                 this.loadingFunctions.spectre = false;
+                this.loadingFunctions.simplefin = false;
 
                 this.importFunctions.file = false;
                 this.importFunctions.gocardless = false;
                 this.importFunctions.spectre = false;
+                this.importFunctions.simplefin = false;
 
                 this.pageProperties.connectionError = true;
                 this.pageProperties.connectionErrorMessage = response.data.message;
@@ -75,16 +80,20 @@ let index = function () {
                 this.loadingFunctions.file = false;
                 this.loadingFunctions.gocardless = false;
                 this.loadingFunctions.spectre = false;
+                this.loadingFunctions.simplefin = false;
 
                 this.importFunctions.file = false;
                 this.importFunctions.gocardless = false;
                 this.importFunctions.spectre = false;
+                this.importFunctions.simplefin = false;
+
                 this.pageProperties.connectionError = true;
                 this.pageProperties.connectionErrorMessage = error;
             }).finally(() => {
                 if(false === this.pageProperties.connectionError) {
                     this.checkSpectreConnection();
                     this.checkGoCardlessConnection();
+                    this.checkSimpleFinConnection();
                 }
             });
 
@@ -105,6 +114,24 @@ let index = function () {
                 this.loadingFunctions.spectre = false;
                 this.importFunctions.spectre = false;
                 this.errors.spectre = 'The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.';
+            });
+        },
+        checkSimpleFinConnection() {
+            let validateUrl = './validate/simplefin';
+            window.axios.get(validateUrl).then((response) => {
+                let message = response.data.result;
+                if ('NODATA' === message ||  'OK' === message) {
+                    this.loadingFunctions.simplefin = false;
+                    this.importFunctions.simplefin = true;
+                    return;
+                }
+                this.loadingFunctions.simplefin = false;
+                this.importFunctions.simplefin = false;
+                this.errors.simplefin = 'Please set a valid APP_KEY to use the SimpleFIN importer.';
+            }).catch((error) => {
+                this.loadingFunctions.simplefin = false;
+                this.importFunctions.simplefin = false;
+                this.errors.simplefin = 'Please set a valid APP_KEY to use the SimpleFIN importer.';
             });
         },
         checkGoCardlessConnection() {

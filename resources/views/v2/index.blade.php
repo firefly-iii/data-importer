@@ -84,7 +84,8 @@
             <div class="row" style="margin-top:1em;" id="importers">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="row">
-                        <div class="col-lg-4">
+                        @if($enabled['file'])
+                        <div class="col-lg">
                             <div class="card">
                                 <div class="card-header">
                                     Import a file
@@ -101,7 +102,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        @endif
+                        @if($enabled['nordigen'])
+                        <div class="col-lg">
                             <div class="card">
                                 <div class="card-header">
                                     Import from GoCardless
@@ -118,7 +121,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        @endif
+                        @if($enabled['spectre'])
+                        <div class="col-lg">
                             <div class="card">
                                 <div class="card-header">
                                     Import from Spectre
@@ -135,6 +140,26 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
+                        @if($enabled['simplefin'])
+                                <div class="col-lg">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from SimpleFIN
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.simplefin" x-show="'' !== errors.simplefin"></p>
+                                            <button x-show="loadingFunctions.simplefin" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.simplefin && importFunctions.simplefin" class="btn btn-info" value="simplefin" name="flow"
+                                            >Import from SimpleFIN</button>
+                                            <button x-show="!loadingFunctions.simplefin && !importFunctions.simplefin" class="btn btn-danger text-white disabled"  value="simplefin" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                        @endif
                     </div>
                 </div>
             </div>
