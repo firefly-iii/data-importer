@@ -249,6 +249,7 @@ abstract class Request
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
         $body = (string) $res->getBody();
+        $this->logRateLimitHeaders($res);
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -262,13 +263,16 @@ abstract class Request
 
     private function logRateLimitHeaders(ResponseInterface $res): void
     {
+        app('log')->debug('Now in logRateLimitHeaders');
         $ignore  = ['server', 'date', 'content-type', 'content-length', 'connection', 'vary', 'Content-Length', 'allow', 'cache-control', 'x-frame-options', 'content-language', 'x-c-uuid', 'x-u-uuid', 'x-content-type-options', 'referrer-policy', 'client-region', 'cf-ipcountry', 'strict-transport-security', 'Via', 'Alt-Svc'];
         $headers = $res->getHeaders();
+        $count = 0;
         foreach ($headers as $header => $content) {
             if (in_array($header, $ignore, true)) {
                 continue;
             }
             app('log')->debug(sprintf('Header: %s: %s', $header, $content[0] ?? '(empty)'));
+            $count++;
         }
         // HTTP_X_RATELIMIT_LIMIT: Indicates the maximum number of allowed requests within the defined time window.
         // HTTP_X_RATELIMIT_REMAINING: Shows the number of remaining requests you can make in the current time window.
@@ -295,6 +299,8 @@ abstract class Request
         if (array_key_exists('x-ratelimit-account-success-reset', $headers)) {
             app('log')->debug(sprintf('Account success rate limit reset: %s', $headers['x-ratelimit-reset'][0]));
         }
+
+        app('log')->debug(sprintf('Have %d header(s) to show.', $count));
     }
 
 }
