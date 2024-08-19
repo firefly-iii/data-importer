@@ -148,14 +148,16 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
+
             case 'authenticate':
                 // simpleFIN needs no authentication.
                 return false;
+
             case 'upload-files':
                 // you can always upload SimpleFIN things
                 return true;
-
         }
+
         return false;
     }
 
@@ -559,6 +561,7 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
+
             case 'authenticate':
                 // simple fin does not authenticate, redirect to upload step.
                 $route = route('003-upload.index');

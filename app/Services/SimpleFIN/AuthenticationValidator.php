@@ -44,6 +44,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         if ('' === $key) {
             return AuthenticationStatus::error();
         }
+
         return AuthenticationStatus::authenticated();
     }
 }

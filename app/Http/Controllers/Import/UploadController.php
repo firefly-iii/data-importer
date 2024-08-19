@@ -58,7 +58,7 @@ class UploadController extends Controller
         app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadControllerMiddleware::class);
         // This variable is used to make sure the configuration object also knows the file type.
-        $this->contentType = 'unknown';
+        $this->contentType    = 'unknown';
         $this->configFileName = '';
     }
 
@@ -106,14 +106,14 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $importedFile = $request->file('importable_file');
-        $configFile   = $request->file('config_file');
+        $importedFile   = $request->file('importable_file');
+        $configFile     = $request->file('config_file');
         $simpleFINtoken = $request->get('simplefin_token');
-        $flow         = $request->cookie(Constants::FLOW_COOKIE);
-        $errors       = new MessageBag();
+        $flow           = $request->cookie(Constants::FLOW_COOKIE);
+        $errors         = new MessageBag();
 
         // process uploaded file (if present)
-        $errors       = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors         = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -121,21 +121,22 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors       = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
+        $errors         = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
 
-        if('simplefin' === $flow) {
+        if ('simplefin' === $flow) {
             // at this point we have no configuration file where we can overwrite things, so collect it first.
             // session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-            if('' === $this->configFileName) {
+            if ('' === $this->configFileName) {
                 // user has not uploaded any configuration.
             }
-            var_dump($this->configFileName);exit;
-        }
+            var_dump($this->configFileName);
 
+            exit;
+        }
 
         if ('nordigen' === $flow) {
             // redirect to country + bank selector
@@ -260,8 +261,8 @@ class UploadController extends Controller
             session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
 
             // process the config file
-            $success        = false;
-            $configuration  = null;
+            $success              = false;
+            $configuration        = null;
 
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($this->configFileName);
