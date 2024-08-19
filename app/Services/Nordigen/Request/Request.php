@@ -248,7 +248,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string) $res->getBody();
+        $body    = (string) $res->getBody();
         $this->logRateLimitHeaders($res);
 
         try {
@@ -266,13 +266,13 @@ abstract class Request
         app('log')->debug('Now in logRateLimitHeaders');
         $ignore  = ['server', 'date', 'content-type', 'content-length', 'connection', 'vary', 'Content-Length', 'allow', 'cache-control', 'x-frame-options', 'content-language', 'x-c-uuid', 'x-u-uuid', 'x-content-type-options', 'referrer-policy', 'client-region', 'cf-ipcountry', 'strict-transport-security', 'Via', 'Alt-Svc'];
         $headers = $res->getHeaders();
-        $count = 0;
+        $count   = 0;
         foreach ($headers as $header => $content) {
             if (in_array($header, $ignore, true)) {
                 continue;
             }
             app('log')->debug(sprintf('Header: %s: %s', $header, $content[0] ?? '(empty)'));
-            $count++;
+            ++$count;
         }
         // HTTP_X_RATELIMIT_LIMIT: Indicates the maximum number of allowed requests within the defined time window.
         // HTTP_X_RATELIMIT_REMAINING: Shows the number of remaining requests you can make in the current time window.
