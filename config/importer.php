@@ -23,7 +23,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => 'develop/2024-08-13',
+    'version'                       => 'develop/2024-08-19',
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
@@ -32,9 +32,9 @@ return [
         'simplefin' => false,
     ],
     'flow_titles'                   => [
-        'file'     => 'File',
-        'nordigen' => 'GoCardless',
-        'spectre'  => 'Spectre',
+        'file'       => 'File',
+        'nordigen'   => 'GoCardless',
+        'spectre'    => 'Spectre',
         'simplefin'  => 'SimpleFIN',
     ],
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
