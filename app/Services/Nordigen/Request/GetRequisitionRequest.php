@@ -28,6 +28,7 @@ namespace App\Services\Nordigen\Request;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Shared\Response\Response;
@@ -49,6 +50,7 @@ class GetRequisitionRequest extends Request
 
     /**
      * @throws AgreementExpiredException
+     * @throws RateLimitException
      */
     public function get(): Response
     {

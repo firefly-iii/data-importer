@@ -27,6 +27,7 @@ namespace App\Services\Nordigen\Services;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Nordigen\Request\GetAccountBalanceRequest;
@@ -97,7 +98,7 @@ class AccountInformationCollector
         } catch (AgreementExpiredException $e) {
             // need to redirect user at some point.
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
-        } catch (ImporterErrorException|ImporterHttpException $e) {
+        } catch (ImporterErrorException|ImporterHttpException|RateLimitException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
@@ -152,7 +153,13 @@ class AccountInformationCollector
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var ArrayResponse $response */
-        $response    = $request->get();
+        try {
+            $response = $request->get();
+        } catch (AgreementExpiredException $e) {
+            throw new AgreementExpiredException($e->getMessage(), 0, $e);
+        } catch (RateLimitException|ImporterHttpException|ImporterErrorException $e) {
+            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
         if (array_key_exists('balances', $response->data)) {
             foreach ($response->data['balances'] as $array) {
                 app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));

@@ -24,6 +24,10 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\AgreementExpiredException;
+use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Shared\Response\Response;
 
@@ -48,15 +52,26 @@ class GetTransactionsRequest extends Request
         $this->identifier = $identifier;
     }
 
+    /**
+     * @return Response
+     * @throws AgreementExpiredException
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws RateLimitException
+     */
     public function get(): Response
     {
         $response = $this->authenticatedGet();
         $keys     = ['booked', 'pending'];
         $return   = [];
         $count    = 0;
+        $transactions = $response['transactions'] ?? [];
+        if(!array_key_exists('transactions', $response)) {
+            var_dump($response);exit;
+        }
         foreach ($keys as $key) {
-            if (array_key_exists($key, $response['transactions'])) {
-                $set    = $response['transactions'][$key];
+            if (array_key_exists($key, $transactions)) {
+                $set    = $transactions[$key];
                 $set    = array_map(function (array $value) use ($key) {
                     $value['key'] = $key;
 

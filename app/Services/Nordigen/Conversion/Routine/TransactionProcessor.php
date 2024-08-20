@@ -27,6 +27,7 @@ namespace App\Services\Nordigen\Conversion\Routine;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
@@ -116,7 +117,7 @@ class TransactionProcessor
             // @var GetTransactionsResponse $transactions
             try {
                 $transactions = $request->get();
-            } catch (ImporterHttpException $e) {
+            } catch (ImporterHttpException|RateLimitException $e) {
                 $this->addError(0, $e->getMessage());
                 $return[$account] = [];
 

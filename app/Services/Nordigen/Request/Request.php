@@ -83,6 +83,7 @@ abstract class Request
      * @throws ImporterErrorException
      * @throws ImporterHttpException
      * @throws AgreementExpiredException
+     * @throws RateLimitException
      */
     protected function authenticatedGet(): array
     {
@@ -111,7 +112,10 @@ abstract class Request
         } catch (GuzzleException | TransferException | ClientException $e) {
             $statusCode = $e->getCode();
             if (429 === $statusCode) {
+                app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
+                $this->logRateLimitHeaders($e->getResponse());
                 $this->handleRateLimit($fullUrl, $e);
+                $this->pauseForRateLimit($e->getResponse());
                 return [];
             }
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
@@ -148,6 +152,7 @@ abstract class Request
         }
 
         $this->logRateLimitHeaders($res);
+        $this->pauseForRateLimit($res);
 
         if (200 !== $res->getStatusCode()) {
             // return body, class must handle this
@@ -270,44 +275,27 @@ abstract class Request
 
     private function logRateLimitHeaders(ResponseInterface $res): void
     {
-        app('log')->debug('Now in logRateLimitHeaders');
-        $ignore  = ['server', 'date', 'content-type', 'content-length', 'connection', 'vary', 'Content-Length', 'allow', 'cache-control', 'x-frame-options', 'content-language', 'x-c-uuid', 'x-u-uuid', 'x-content-type-options', 'referrer-policy', 'client-region', 'cf-ipcountry', 'strict-transport-security', 'Via', 'Alt-Svc'];
         $headers = $res->getHeaders();
-        $count   = 0;
-        foreach ($headers as $header => $content) {
-            if (in_array($header, $ignore, true)) {
-                continue;
-            }
-            app('log')->debug(sprintf('Header: %s: %s', $header, $content[0] ?? '(empty)'));
-            ++$count;
+        if (array_key_exists('http_x_ratelimit_limit', $headers)) {
+            app('log')->debug(sprintf('Rate limit: %s', $headers['http_x_ratelimit_limit'][0]));
         }
-        // HTTP_X_RATELIMIT_LIMIT: Indicates the maximum number of allowed requests within the defined time window.
-        // HTTP_X_RATELIMIT_REMAINING: Shows the number of remaining requests you can make in the current time window.
-        // HTTP_X_RATELIMIT_RESET
-        if (array_key_exists('x-ratelimit-limit', $headers)) {
-            app('log')->debug(sprintf('Rate limit: %s', $headers['x-ratelimit-limit'][0]));
+        if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
+            app('log')->debug(sprintf('Rate limit remaining: %s', $headers['http_x_ratelimit_remaining'][0]));
         }
-        if (array_key_exists('x-ratelimit-remaining', $headers)) {
-            app('log')->debug(sprintf('Rate limit remaining: %s', $headers['x-ratelimit-remaining'][0]));
-        }
-        if (array_key_exists('x-ratelimit-reset', $headers)) {
-            app('log')->debug(sprintf('Rate limit reset: %s', $headers['x-ratelimit-reset'][0]));
+        if (array_key_exists('http_x_ratelimit_reset', $headers)) {
+            app('log')->debug(sprintf('Rate limit reset: %s', $headers['http_x_ratelimit_reset'][0]));
         }
 
-        // HTTP_X_RATELIMIT_ACCOUNT_SUCCESS_LIMIT: Indicates the maximum number of allowed requests within the defined time window.
-        // HTTP_X_RATELIMIT_ACCOUNT_SUCCESS_REMAINING: Shows the number of remaining requests you can make in the current time window.
-        // HTTP_X_RATELIMIT_ACCOUNT_SUCCESS_RESET: Provides the time remaining in the current window.
-        if (array_key_exists('x-ratelimit-account-success-limit', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit: %s', $headers['x-ratelimit-limit'][0]));
+        if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
+            app('log')->debug(sprintf('Account success rate limit: %s', $headers['http_x_ratelimit_account_success_limit'][0]));
         }
-        if (array_key_exists('x-ratelimit-account-success-remaining', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit remaining: %s', $headers['x-ratelimit-remaining'][0]));
+        if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
+            app('log')->debug(sprintf('Account success rate limit remaining: %s', $headers['http_x_ratelimit_account_success_remaining'][0]));
         }
-        if (array_key_exists('x-ratelimit-account-success-reset', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit reset: %s', $headers['x-ratelimit-reset'][0]));
+        if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
+            app('log')->debug(sprintf('Account success rate limit reset: %s', $headers['http_x_ratelimit_account_success_reset'][0]));
         }
 
-        app('log')->debug(sprintf('Have %d header(s) to show.', $count));
     }
 
     /**
@@ -320,25 +308,27 @@ abstract class Request
      * Header: http_x_ratelimit_account_success_limit: 10
      * Header: http_x_ratelimit_account_success_remaining: 5
      * Header: http_x_ratelimit_account_success_reset: 5242
+     * @throws RateLimitException
      */
     private function pauseForRateLimit(ResponseInterface $res): void
     {
+        app('log')->debug('Now in pauseForRateLimit');
         $headers = $res->getHeaders();
 
         // first the normal rate limit:
-        $remaining   = $headers['http_x_ratelimit_remaining'] ?? 1000;
-        $reset       = (int) ($headers['http_x_ratelimit_reset'] ?? 1);
+        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? 1000);
+        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? 1);
         $resetString = $this->formatTime($reset);
         if ($remaining >= 10) {
             app('log')->debug(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 10) {
+        if ($remaining < 10 && $remaining >= 5) {
             app('log')->info(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 5) {
+        if ($remaining < 5 && $remaining >= 3) {
             app('log')->warning(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 3) {
+        if ($remaining < 3 && $remaining >= 1) {
             app('log')->error(sprintf('Rate limit: %d requests remaining, and %d before the limit resets.', $remaining, $resetString));
         }
         if ($remaining < 1) {
@@ -353,19 +343,19 @@ abstract class Request
         }
 
         // then the account success rate limit:
-        $remaining   = $headers['http_x_ratelimit_account_success_remaining'] ?? 1000;
-        $reset       = $headers['http_x_ratelimit_account_success_reset'] ?? 1;
+        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? 1000);
+        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? 1);
         $resetString = $this->formatTime($reset);
         if ($remaining >= 10) {
             app('log')->debug(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 10) {
+        if ($remaining < 10 && $remaining >= 5) {
             app('log')->info(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 5) {
+        if ($remaining < 5 && $remaining >= 3) {
             app('log')->warning(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }
-        if ($remaining < 3) {
+        if ($remaining < 3 && $remaining >= 1) {
             app('log')->error(sprintf('Account success rate limit: %d requests remaining, and %d before the limit resets.', $remaining, $resetString));
         }
         if ($remaining < 1) {
@@ -406,8 +396,10 @@ abstract class Request
 
     private function handleRateLimit(string $url, ClientException $e): void
     {
+        app('log')->debug('Now in handleRateLimit');
         // if it's an account details request, we ignore the error for now. Can do without this information.
         if (str_contains($url, 'accounts') && str_contains($url, 'details')) {
+            app('log')->debug('Its about account details');
             app('log')->warning('Rate limit reached on a request about account details. The data importer can continue.');
             $body = (string) $e->getResponse()->getBody();
             if (json_validate($body)) {
@@ -419,7 +411,22 @@ abstract class Request
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
                 app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
             }
-
+            return;
+        }
+        // if it's an account transactions request, we cannot ignore it and MUST stop.
+        if (str_contains($url, 'accounts') && str_contains($url, 'transactions')) {
+            app('log')->debug('Its about account transactions');
+            app('log')->warning('Rate limit reached on a request about account transactions. The data importer CANNOT continue.');
+            $body = (string) $e->getResponse()->getBody();
+            if (json_validate($body)) {
+                $json    = json_decode($body, true);
+                $message = $json['detail'] ?? '';
+                $re      = '/[1-9][0-9]+ seconds/m';
+                preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
+                $string      = $matches[0][0] ?? '';
+                $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
+                app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
+            }
         }
 
     }

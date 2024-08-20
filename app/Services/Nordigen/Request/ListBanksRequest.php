@@ -27,6 +27,7 @@ namespace App\Services\Nordigen\Request;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\Response\ListBanksResponse;
 use App\Services\Shared\Response\Response;
@@ -48,7 +49,7 @@ class ListBanksRequest extends Request
     }
 
     /**
-     * @throws AgreementExpiredException
+     * @throws AgreementExpiredException|RateLimitException
      */
     public function get(): Response
     {
