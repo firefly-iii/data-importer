@@ -29,6 +29,8 @@ return [
     'use_sandbox'           => env('NORDIGEN_SANDBOX', false),
     'respect_rate_limit'    => true,
     'exit_for_rate_limit'   => 'exit' === env('RESPOND_TO_GOCARDLESS_LIMIT', 'wait'),
+    'get_account_details' => env('GOCARDLESS_GET_ACCOUNT_DETAILS', false),
+    'get_balance_details' => env('GOCARDLESS_GET_BALANCE_DETAILS', false),
     'unique_column_options' => [
         'external-id'            => 'External identifier',
         'additional-information' => 'Additional information',

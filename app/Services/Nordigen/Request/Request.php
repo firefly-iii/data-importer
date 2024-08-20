@@ -343,9 +343,14 @@ abstract class Request
         }
 
         // then the account success rate limit:
-        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? 1000);
+        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -1);
         $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? 1);
         $resetString = $this->formatTime($reset);
+
+        // not all requests have account success rate limits:
+        if ($remaining < 0) {
+            return;
+        }
         if ($remaining >= 10) {
             app('log')->debug(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
         }

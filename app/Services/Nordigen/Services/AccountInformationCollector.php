@@ -53,30 +53,41 @@ class AccountInformationCollector
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
-        // FIXME: disabled because of GoCardless' rate limits.
-//        try {
-//            $detailedAccount = self::getAccountDetails($account);
-//        } catch (ImporterErrorException $e) {
-//            app('log')->error($e->getMessage());
-//            // ignore error otherwise for now.
-//            $detailedAccount->setStatus('no-info');
-//            $detailedAccount->setName('Unknown account');
-//        }
-//        $balanceAccount  = $detailedAccount;
-//
-//        try {
-//            $balanceAccount = self::getBalanceDetails($account);
-//        } catch (ImporterErrorException|ImporterHttpException $e) {
-//            app('log')->error($e->getMessage());
-//            // ignore error otherwise for now.
-//            $status = $balanceAccount->getStatus();
-//            if ('no-info' === $status) {
-//                $balanceAccount->setStatus('nothing');
-//            }
-//            if ('no-info' !== $status) {
-//                $balanceAccount->setStatus('no-balance');
-//            }
-//        }
+        if (config('nordigen.get_account_details')) {
+            try {
+                app('log')->debug('Get account details is ENABLED.');
+                $detailedAccount = self::getAccountDetails($detailedAccount);
+            } catch (ImporterErrorException $e) {
+                app('log')->error($e->getMessage());
+                // ignore error otherwise for now.
+                $detailedAccount->setStatus('no-info');
+                $detailedAccount->setName('Unknown account');
+            }
+        }
+        if (!config('nordigen.get_account_details')) {
+            app('log')->debug('Get account details is DISABLED.');
+        }
+
+        if (config('nordigen.get_balance_details')) {
+            app('log')->debug('Get account balance is ENABLED.');
+            try {
+                $detailedAccount = self::getBalanceDetails($detailedAccount);
+            } catch (ImporterErrorException | ImporterHttpException $e) {
+                app('log')->error($e->getMessage());
+                // ignore error otherwise for now.
+                $status = $detailedAccount->getStatus();
+                if ('no-info' === $status) {
+                    $detailedAccount->setStatus('nothing');
+                }
+                if ('no-info' !== $status) {
+                    $detailedAccount->setStatus('no-balance');
+                }
+            }
+        }
+        if (!config('nordigen.get_balance_details')) {
+            app('log')->debug('Get account balance is DISABLED.');
+        }
+
 
         // also collect some extra information, but don't use it right now.
         return self::getBasicDetails($detailedAccount);
@@ -89,9 +100,9 @@ class AccountInformationCollector
     {
         app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
-        $url          = config('nordigen.url');
-        $accessToken  = TokenManager::getAccessToken();
-        $request      = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
+        $url         = config('nordigen.url');
+        $accessToken = TokenManager::getAccessToken();
+        $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         // @var ArrayResponse $response
 
         try {
@@ -99,7 +110,7 @@ class AccountInformationCollector
         } catch (AgreementExpiredException $e) {
             // need to redirect user at some point.
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
-        } catch (ImporterErrorException|ImporterHttpException|RateLimitException $e) {
+        } catch (ImporterErrorException | ImporterHttpException | RateLimitException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
@@ -109,7 +120,7 @@ class AccountInformationCollector
             throw new ImporterErrorException('No account array received, perhaps rate limited.');
         }
 
-        $information  = $response->data['account'];
+        $information = $response->data['account'];
 
         app('log')->debug('getAccountDetails: Collected information for account', $information);
 
@@ -158,7 +169,7 @@ class AccountInformationCollector
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
-        } catch (RateLimitException|ImporterHttpException|ImporterErrorException $e) {
+        } catch (RateLimitException | ImporterHttpException | ImporterErrorException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         if (array_key_exists('balances', $response->data)) {
@@ -181,8 +192,8 @@ class AccountInformationCollector
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var ArrayResponse $response */
-        $response    = $request->get();
-        $array       = $response->data;
+        $response = $request->get();
+        $array    = $response->data;
         app('log')->debug('Response for basic information request:', $array);
 
         // save IBAN if not already present
