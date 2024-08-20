@@ -24,7 +24,4 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-class RateLimitException extends \Exception
-{
-
-}
+class RateLimitException extends \Exception {}

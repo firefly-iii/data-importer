@@ -93,8 +93,8 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client = $this->getClient();
-        $body   = null;
+        $client  = $this->getClient();
+        $body    = null;
 
         try {
             $res = $client->request(
@@ -109,8 +109,8 @@ abstract class Request
                     ],
                 ]
             );
-        } catch (GuzzleException | TransferException | ClientException $e) {
-            $statusCode = $e->getCode();
+        } catch (ClientException|GuzzleException|TransferException $e) {
+            $statusCode      = $e->getCode();
             if (429 === $statusCode) {
                 app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
                 $this->logRateLimitHeaders($e->getResponse());
@@ -132,7 +132,7 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json = [];
+            $json            = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
@@ -240,7 +240,7 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 
-        $client = $this->getClient();
+        $client  = $this->getClient();
 
         try {
             $res = $client->request(
@@ -259,7 +259,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string) $res->getBody();
+        $body    = (string) $res->getBody();
         $this->logRateLimitHeaders($res);
         $this->pauseForRateLimit($res);
 
@@ -367,6 +367,7 @@ abstract class Request
                 app('log')->info(sprintf('Account success rate limit reached, try to sleep %s for reset.', $resetString));
                 if ($reset > 300) {
                     app('log')->warning('Refuse to sleep for more than 5 minutes, throw exception instead.');
+
                     throw new RateLimitException(sprintf('Account success rate limit reached: %d requests left and %s before the limit resets.', $remaining, $resetString));
                 }
                 sleep($reset + 1);
@@ -376,21 +377,22 @@ abstract class Request
 
     private function formatTime(int $reset): string
     {
-        $return = '';
-        $hours  = floor($reset / 3600);
+        $return  = '';
+        $hours   = floor($reset / 3600);
         if ($hours > 0) {
             $return .= sprintf('%dh', $hours);
         }
-        $reset   = $reset - ($hours * 3600);
+        $reset -= ($hours * 3600);
         $minutes = floor($reset / 60);
         if ($minutes > 0) {
             $return .= sprintf('%dm', $minutes);
         }
-        $reset   = $reset - ($minutes * 60);
+        $reset -= ($minutes * 60);
         $seconds = $reset % 60;
         if ($seconds > 0) {
             $return .= sprintf('%ds', $seconds);
         }
+
         return $return;
     }
 
@@ -403,9 +405,9 @@ abstract class Request
             app('log')->warning('Rate limit reached on a request about account details. The data importer can continue.');
             $body = (string) $e->getResponse()->getBody();
             if (json_validate($body)) {
-                $json    = json_decode($body, true);
-                $message = $json['detail'] ?? '';
-                $re      = '/[1-9][0-9]+ seconds/m';
+                $json        = json_decode($body, true);
+                $message     = $json['detail'] ?? '';
+                $re          = '/[1-9][0-9]+ seconds/m';
                 preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
                 $string      = $matches[0][0] ?? '';
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
@@ -428,6 +430,5 @@ abstract class Request
                 app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
             }
         }
-
     }
 }

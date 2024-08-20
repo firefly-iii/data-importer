@@ -53,32 +53,33 @@ class AccountInformationCollector
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
-        try {
-            $detailedAccount = self::getAccountDetails($account);
-        } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
-            // ignore error otherwise for now.
-            $detailedAccount->setStatus('no-info');
-            $detailedAccount->setName('Unknown account');
-        }
-        $balanceAccount  = $detailedAccount;
-
-        try {
-            $balanceAccount = self::getBalanceDetails($account);
-        } catch (ImporterErrorException|ImporterHttpException $e) {
-            app('log')->error($e->getMessage());
-            // ignore error otherwise for now.
-            $status = $balanceAccount->getStatus();
-            if ('no-info' === $status) {
-                $balanceAccount->setStatus('nothing');
-            }
-            if ('no-info' !== $status) {
-                $balanceAccount->setStatus('no-balance');
-            }
-        }
+        // FIXME: disabled because of GoCardless' rate limits.
+//        try {
+//            $detailedAccount = self::getAccountDetails($account);
+//        } catch (ImporterErrorException $e) {
+//            app('log')->error($e->getMessage());
+//            // ignore error otherwise for now.
+//            $detailedAccount->setStatus('no-info');
+//            $detailedAccount->setName('Unknown account');
+//        }
+//        $balanceAccount  = $detailedAccount;
+//
+//        try {
+//            $balanceAccount = self::getBalanceDetails($account);
+//        } catch (ImporterErrorException|ImporterHttpException $e) {
+//            app('log')->error($e->getMessage());
+//            // ignore error otherwise for now.
+//            $status = $balanceAccount->getStatus();
+//            if ('no-info' === $status) {
+//                $balanceAccount->setStatus('nothing');
+//            }
+//            if ('no-info' !== $status) {
+//                $balanceAccount->setStatus('no-balance');
+//            }
+//        }
 
         // also collect some extra information, but don't use it right now.
-        return self::getBasicDetails($balanceAccount);
+        return self::getBasicDetails($detailedAccount);
     }
 
     /**
