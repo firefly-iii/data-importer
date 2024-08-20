@@ -27,6 +27,7 @@ namespace App\Services\Nordigen\Request;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -91,8 +92,8 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client  = $this->getClient();
-        $body    = null;
+        $client = $this->getClient();
+        $body   = null;
 
         try {
             $res = $client->request(
@@ -107,7 +108,7 @@ abstract class Request
                     ],
                 ]
             );
-        } catch (GuzzleException|TransferException $e) {
+        } catch (GuzzleException | TransferException $e) {
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
@@ -122,7 +123,7 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json            = [];
+            $json = [];
             if (method_exists($e, 'getResponse')) {
                 $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
@@ -229,7 +230,7 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 
-        $client  = $this->getClient();
+        $client = $this->getClient();
 
         try {
             $res = $client->request(
@@ -250,6 +251,7 @@ abstract class Request
         }
         $body = (string) $res->getBody();
         $this->logRateLimitHeaders($res);
+        $this->pauseForRateLimit($res);
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
@@ -266,7 +268,7 @@ abstract class Request
         app('log')->debug('Now in logRateLimitHeaders');
         $ignore  = ['server', 'date', 'content-type', 'content-length', 'connection', 'vary', 'Content-Length', 'allow', 'cache-control', 'x-frame-options', 'content-language', 'x-c-uuid', 'x-u-uuid', 'x-content-type-options', 'referrer-policy', 'client-region', 'cf-ipcountry', 'strict-transport-security', 'Via', 'Alt-Svc'];
         $headers = $res->getHeaders();
-        $count = 0;
+        $count   = 0;
         foreach ($headers as $header => $content) {
             if (in_array($header, $ignore, true)) {
                 continue;
@@ -301,5 +303,95 @@ abstract class Request
         }
 
         app('log')->debug(sprintf('Have %d header(s) to show.', $count));
+    }
+
+    /**
+     * @param ResponseInterface $res
+     *
+     * @return void
+     * Header: http_x_ratelimit_limit: 100
+     * Header: http_x_ratelimit_remaining: 92
+     * Header: http_x_ratelimit_reset: 1
+     * Header: http_x_ratelimit_account_success_limit: 10
+     * Header: http_x_ratelimit_account_success_remaining: 5
+     * Header: http_x_ratelimit_account_success_reset: 5242
+     */
+    private function pauseForRateLimit(ResponseInterface $res): void
+    {
+        $headers = $res->getHeaders();
+
+        // first the normal rate limit:
+        $remaining   = $headers['http_x_ratelimit_remaining'] ?? 1000;
+        $reset       = (int) ($headers['http_x_ratelimit_reset'] ?? 1);
+        $resetString = $this->formatTime($reset);
+        if ($remaining >= 10) {
+            app('log')->debug(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 10) {
+            app('log')->info(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 5) {
+            app('log')->warning(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 3) {
+            app('log')->error(sprintf('Rate limit: %d requests remaining, and %d before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 1) {
+            app('log')->critical(sprintf('Rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+            if (true === config('nordigen.exit_for_rate_limit')) {
+                throw new RateLimitException(sprintf('Rate limit reached: %d requests left and %s before the limit resets.', $remaining, $resetString));
+            }
+            if (false === config('nordigen.exit_for_rate_limit')) {
+                app('log')->info(sprintf('Rate limit reached, sleep %s for reset.', $resetString));
+                sleep($reset + 1);
+            }
+        }
+
+        // then the account success rate limit:
+        $remaining   = $headers['http_x_ratelimit_account_success_remaining'] ?? 1000;
+        $reset       = $headers['http_x_ratelimit_account_success_reset'] ?? 1;
+        $resetString = $this->formatTime($reset);
+        if ($remaining >= 10) {
+            app('log')->debug(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 10) {
+            app('log')->info(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 5) {
+            app('log')->warning(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 3) {
+            app('log')->error(sprintf('Account success rate limit: %d requests remaining, and %d before the limit resets.', $remaining, $resetString));
+        }
+        if ($remaining < 1) {
+            app('log')->critical(sprintf('Account success rate limit: %d requests remaining, and %s before the limit resets.', $remaining, $resetString));
+            if (true === config('nordigen.exit_for_rate_limit')) {
+                throw new RateLimitException(sprintf('Account success rate limit reached: %d requests left and %s before the limit resets.', $remaining, $resetString));
+            }
+            if (false === config('nordigen.exit_for_rate_limit')) {
+                app('log')->info(sprintf('Account success rate limit reached, sleep %s for reset.', $resetString));
+                sleep($reset + 1);
+            }
+        }
+    }
+
+    private function formatTime(int $reset): string
+    {
+        $return = '';
+        $hours  = floor($reset / 3600);
+        if ($hours > 0) {
+            $return .= sprintf('%dh', $hours);
+        }
+        $reset   = $reset - ($hours * 3600);
+        $minutes = floor($reset / 60);
+        if ($minutes > 0) {
+            $return .= sprintf('%dm', $minutes);
+        }
+        $reset   = $reset - ($minutes * 60);
+        $seconds = $reset % 60;
+        if ($seconds > 0) {
+            $return .= sprintf('%ds', $seconds);
+        }
+        return $return;
     }
 }

@@ -27,6 +27,8 @@ return [
     'key'                   => env('NORDIGEN_KEY', ''),
     'url'                   => 'https://bankaccountdata.gocardless.com',
     'use_sandbox'           => env('NORDIGEN_SANDBOX', false),
+    'respect_rate_limit'    => true,
+    'exit_for_rate_limit'   => 'exit' === env('RESPOND_TO_GOCARDLESS_LIMIT', 'wait'),
     'unique_column_options' => [
         'external-id'            => 'External identifier',
         'additional-information' => 'Additional information',
