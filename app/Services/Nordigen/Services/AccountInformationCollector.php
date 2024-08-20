@@ -88,7 +88,6 @@ class AccountInformationCollector
             app('log')->debug('Get account balance is DISABLED.');
         }
 
-
         // also collect some extra information, but don't use it right now.
         return self::getBasicDetails($detailedAccount);
     }
@@ -164,7 +163,7 @@ class AccountInformationCollector
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var ArrayResponse $response */
+        // @var ArrayResponse $response
         try {
             $response = $request->get();
         } catch (AgreementExpiredException $e) {

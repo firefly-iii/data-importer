@@ -116,6 +116,7 @@ abstract class Request
                 $this->logRateLimitHeaders($e->getResponse());
                 $this->handleRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse());
+
                 return [];
             }
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
@@ -295,25 +296,15 @@ abstract class Request
         if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
             app('log')->debug(sprintf('Account success rate limit reset: %s', $headers['http_x_ratelimit_account_success_reset'][0]));
         }
-
     }
 
     /**
-     * @param ResponseInterface $res
-     *
-     * @return void
-     * Header: http_x_ratelimit_limit: 100
-     * Header: http_x_ratelimit_remaining: 92
-     * Header: http_x_ratelimit_reset: 1
-     * Header: http_x_ratelimit_account_success_limit: 10
-     * Header: http_x_ratelimit_account_success_remaining: 5
-     * Header: http_x_ratelimit_account_success_reset: 5242
      * @throws RateLimitException
      */
     private function pauseForRateLimit(ResponseInterface $res): void
     {
         app('log')->debug('Now in pauseForRateLimit');
-        $headers = $res->getHeaders();
+        $headers     = $res->getHeaders();
 
         // first the normal rate limit:
         $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? 1000);
@@ -418,6 +409,7 @@ abstract class Request
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
                 app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
             }
+
             return;
         }
         // if it's an account transactions request, we cannot ignore it and MUST stop.
@@ -426,9 +418,9 @@ abstract class Request
             app('log')->warning('Rate limit reached on a request about account transactions. The data importer CANNOT continue.');
             $body = (string) $e->getResponse()->getBody();
             if (json_validate($body)) {
-                $json    = json_decode($body, true);
-                $message = $json['detail'] ?? '';
-                $re      = '/[1-9][0-9]+ seconds/m';
+                $json        = json_decode($body, true);
+                $message     = $json['detail'] ?? '';
+                $re          = '/[1-9][0-9]+ seconds/m';
                 preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
                 $string      = $matches[0][0] ?? '';
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));

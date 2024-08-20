@@ -53,7 +53,6 @@ class GetTransactionsRequest extends Request
     }
 
     /**
-     * @return Response
      * @throws AgreementExpiredException
      * @throws ImporterErrorException
      * @throws ImporterHttpException
@@ -61,13 +60,15 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
-        $response = $this->authenticatedGet();
-        $keys     = ['booked', 'pending'];
-        $return   = [];
-        $count    = 0;
+        $response     = $this->authenticatedGet();
+        $keys         = ['booked', 'pending'];
+        $return       = [];
+        $count        = 0;
         $transactions = $response['transactions'] ?? [];
-        if(!array_key_exists('transactions', $response)) {
-            var_dump($response);exit;
+        if (!array_key_exists('transactions', $response)) {
+            var_dump($response);
+
+            exit;
         }
         foreach ($keys as $key) {
             if (array_key_exists($key, $transactions)) {
@@ -81,7 +82,7 @@ class GetTransactionsRequest extends Request
                 $return = array_merge($return, $set);
             }
         }
-        $total    = count($return);
+        $total        = count($return);
         app('log')->debug(sprintf('Downloaded [%d:%d] transactions', $count, $total));
 
         return new GetTransactionsResponse($return);
