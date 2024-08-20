@@ -104,7 +104,7 @@ class AccountInformationCollector
         if (!array_key_exists('account', $response->data)) {
             app('log')->error('Missing account array', $response->data);
 
-            throw new ImporterErrorException('No account array, exit.');
+            throw new ImporterErrorException('No account array received, perhaps rate limited.');
         }
 
         $information  = $response->data['account'];

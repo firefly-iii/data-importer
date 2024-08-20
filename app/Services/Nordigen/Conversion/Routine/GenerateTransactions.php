@@ -96,7 +96,7 @@ class GenerateTransactions
             } catch (ImporterHttpException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
-            $accountInfo               = $response->data['account'];
+            $accountInfo               = $response->data['account'] ?? [];
             $set['iban']               = $accountInfo['iban'] ?? '';
             $info[$nordigenIdentifier] = $set;
             app('log')->debug(sprintf('Collected IBAN "%s" for Nordigen account "%s"', $set['iban'], $nordigenIdentifier));

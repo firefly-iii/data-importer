@@ -108,7 +108,12 @@ abstract class Request
                     ],
                 ]
             );
-        } catch (GuzzleException | TransferException $e) {
+        } catch (GuzzleException | TransferException | ClientException $e) {
+            $statusCode = $e->getCode();
+            if (429 === $statusCode) {
+                $this->handleRateLimit($fullUrl, $e);
+                return [];
+            }
             app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
@@ -249,7 +254,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body    = (string) $res->getBody();
+        $body = (string) $res->getBody();
         $this->logRateLimitHeaders($res);
         $this->pauseForRateLimit($res);
 
@@ -369,7 +374,11 @@ abstract class Request
                 throw new RateLimitException(sprintf('Account success rate limit reached: %d requests left and %s before the limit resets.', $remaining, $resetString));
             }
             if (false === config('nordigen.exit_for_rate_limit')) {
-                app('log')->info(sprintf('Account success rate limit reached, sleep %s for reset.', $resetString));
+                app('log')->info(sprintf('Account success rate limit reached, try to sleep %s for reset.', $resetString));
+                if ($reset > 300) {
+                    app('log')->warning('Refuse to sleep for more than 5 minutes, throw exception instead.');
+                    throw new RateLimitException(sprintf('Account success rate limit reached: %d requests left and %s before the limit resets.', $remaining, $resetString));
+                }
                 sleep($reset + 1);
             }
         }
@@ -393,5 +402,25 @@ abstract class Request
             $return .= sprintf('%ds', $seconds);
         }
         return $return;
+    }
+
+    private function handleRateLimit(string $url, ClientException $e): void
+    {
+        // if it's an account details request, we ignore the error for now. Can do without this information.
+        if (str_contains($url, 'accounts') && str_contains($url, 'details')) {
+            app('log')->warning('Rate limit reached on a request about account details. The data importer can continue.');
+            $body = (string) $e->getResponse()->getBody();
+            if (json_validate($body)) {
+                $json    = json_decode($body, true);
+                $message = $json['detail'] ?? '';
+                $re      = '/[1-9][0-9]+ seconds/m';
+                preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
+                $string      = $matches[0][0] ?? '';
+                $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
+                app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
+            }
+
+        }
+
     }
 }
