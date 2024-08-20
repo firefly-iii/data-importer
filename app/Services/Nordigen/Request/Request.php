@@ -249,7 +249,7 @@ abstract class Request
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string) $res->getBody();
+        $body    = (string) $res->getBody();
         $this->logRateLimitHeaders($res);
         $this->pauseForRateLimit($res);
 
@@ -274,7 +274,7 @@ abstract class Request
                 continue;
             }
             app('log')->debug(sprintf('Header: %s: %s', $header, $content[0] ?? '(empty)'));
-            $count++;
+            ++$count;
         }
         // HTTP_X_RATELIMIT_LIMIT: Indicates the maximum number of allowed requests within the defined time window.
         // HTTP_X_RATELIMIT_REMAINING: Shows the number of remaining requests you can make in the current time window.
