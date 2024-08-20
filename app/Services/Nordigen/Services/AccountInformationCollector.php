@@ -54,29 +54,29 @@ class AccountInformationCollector
         $detailedAccount = $account;
 
         // FIXME: disabled because of GoCardless' rate limits.
-//        try {
-//            $detailedAccount = self::getAccountDetails($account);
-//        } catch (ImporterErrorException $e) {
-//            app('log')->error($e->getMessage());
-//            // ignore error otherwise for now.
-//            $detailedAccount->setStatus('no-info');
-//            $detailedAccount->setName('Unknown account');
-//        }
-//        $balanceAccount  = $detailedAccount;
-//
-//        try {
-//            $balanceAccount = self::getBalanceDetails($account);
-//        } catch (ImporterErrorException|ImporterHttpException $e) {
-//            app('log')->error($e->getMessage());
-//            // ignore error otherwise for now.
-//            $status = $balanceAccount->getStatus();
-//            if ('no-info' === $status) {
-//                $balanceAccount->setStatus('nothing');
-//            }
-//            if ('no-info' !== $status) {
-//                $balanceAccount->setStatus('no-balance');
-//            }
-//        }
+        //        try {
+        //            $detailedAccount = self::getAccountDetails($account);
+        //        } catch (ImporterErrorException $e) {
+        //            app('log')->error($e->getMessage());
+        //            // ignore error otherwise for now.
+        //            $detailedAccount->setStatus('no-info');
+        //            $detailedAccount->setName('Unknown account');
+        //        }
+        //        $balanceAccount  = $detailedAccount;
+        //
+        //        try {
+        //            $balanceAccount = self::getBalanceDetails($account);
+        //        } catch (ImporterErrorException|ImporterHttpException $e) {
+        //            app('log')->error($e->getMessage());
+        //            // ignore error otherwise for now.
+        //            $status = $balanceAccount->getStatus();
+        //            if ('no-info' === $status) {
+        //                $balanceAccount->setStatus('nothing');
+        //            }
+        //            if ('no-info' !== $status) {
+        //                $balanceAccount->setStatus('no-balance');
+        //            }
+        //        }
 
         // also collect some extra information, but don't use it right now.
         return self::getBasicDetails($detailedAccount);
@@ -153,12 +153,12 @@ class AccountInformationCollector
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var ArrayResponse $response */
+        // @var ArrayResponse $response
         try {
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
-        } catch (RateLimitException|ImporterHttpException|ImporterErrorException $e) {
+        } catch (ImporterErrorException|ImporterHttpException|RateLimitException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         if (array_key_exists('balances', $response->data)) {
