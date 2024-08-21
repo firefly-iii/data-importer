@@ -387,7 +387,7 @@ abstract class Request
             app('log')->debug(sprintf('[a] %s: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
             return;
         }
-        if ($remaining < 5 && $remaining >= 1) {
+        if ($remaining >= 1) {
             app('log')->warning(sprintf('[b] %s: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
             return;
         }
