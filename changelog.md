@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.5.4 - 2024-08-22
 
 ### Added
-- #9139
+- [Issue 9139](https://github.com/firefly-iii/firefly-iii/issues/9139) (Implement rate limiting for GoCardless) reported by @JC5
 
 ## 1.5.3 - 2024-07-28
 
