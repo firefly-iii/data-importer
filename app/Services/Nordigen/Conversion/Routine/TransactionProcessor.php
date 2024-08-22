@@ -51,6 +51,8 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
+    private array $rateLimits = [];
+
     /**
      * @throws ImporterErrorException
      */
@@ -75,7 +77,6 @@ class TransactionProcessor
         foreach ($accounts as $key => $account) {
             $account          = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
-            app('log')->debug('Will also download information on the account for debug purposes.');
             $object           = new Account();
             $object->setIdentifier($account);
             $fullInfo         = null;
@@ -121,8 +122,19 @@ class TransactionProcessor
                 $this->addError(0, $e->getMessage());
                 $return[$account] = [];
 
+                // save the rate limits:
+                $this->rateLimits[$account] = [
+                    'remaining' => $request->getRemaining(),
+                    'reset'     => $request->getReset(),
+                ];
+
                 continue;
             }
+            $this->rateLimits[$account] = [
+                'remaining' => $request->getRemaining(),
+                'reset'     => $request->getReset(),
+            ];
+
             $return[$account] = $this->filterTransactions($transactions);
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
@@ -203,4 +215,11 @@ class TransactionProcessor
     {
         $this->configuration = $configuration;
     }
+
+    public function getRateLimits(): array
+    {
+        return $this->rateLimits;
+    }
+
+
 }

@@ -80,28 +80,28 @@ trait CollectsAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var GetAccountsResponse $result */
-        $result  = $request->get();
+        $result = $request->get();
         app('log')->debug(sprintf('Found %d accounts of type "%s"', count($result), $type));
-        $return  = [];
+        $return = [];
 
         /** @var Account $entry */
         foreach ($result as $entry) {
             app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
-            $type          = $entry->type;
-            $iban          = (string) $entry->iban;
+            $type = $entry->type;
+            $iban = (string) $entry->iban;
             if ('' === $iban) {
                 continue;
             }
-            $iban          = $this->filterSpaces($iban);
-            $number        = sprintf('%s.', (string) $entry->number);
+            $iban   = $this->filterSpaces($iban);
+            $number = sprintf('%s.', (string) $entry->number);
             if ('.' !== $number) {
-                $number       = $this->filterSpaces((string) $entry->number);
-                $key          = sprintf('nr_%s', $number);
+                $number = $this->filterSpaces((string) $entry->number);
+                $key    = sprintf('nr_%s', $number);
                 app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
-                $return[$key] = ['id' => $entry->id, 'type' => $entry->type];
+                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
             app('log')->debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
-            $return[$iban] = ['id' => $entry->id, 'type' => $entry->type];
+            $return[$iban] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
         }
         app('log')->debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));
 

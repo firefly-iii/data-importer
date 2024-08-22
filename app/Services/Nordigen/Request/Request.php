@@ -48,6 +48,9 @@ abstract class Request
     private string $token;
     private string $url;
 
+    private int $remaining = -1;
+    private int $reset = -1;
+
     /**
      * @throws ImporterHttpException
      */
@@ -114,7 +117,7 @@ abstract class Request
             if (429 === $statusCode) {
                 app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
                 $this->logRateLimitHeaders($e->getResponse());
-                $this->handleRateLimit($fullUrl, $e);
+                $this->reportRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse());
 
                 return [];
@@ -314,10 +317,22 @@ abstract class Request
         // then the account success rate limit:
         $remaining = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
         $reset     = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
+
+
+        // save the remaining info in the object.
+        $this->reset     = $reset;
+        if($remaining > -1) { // zero or more.
+            app('log')->debug('Save the account success limits? YES');
+            $this->remaining = $remaining;
+        }
+        if($remaining < 0) {  // less than zero.
+            app('log')->debug('Save the account success limits? NO');
+        }
+
         $this->reportAndPause('Account success limit', $remaining, $reset);
     }
 
-    private function formatTime(int $reset): string
+    public static function formatTime(int $reset): string
     {
         $return  = '';
         $hours   = floor($reset / 3600);
@@ -338,9 +353,9 @@ abstract class Request
         return $return;
     }
 
-    private function handleRateLimit(string $url, ClientException $e): void
+    private function reportRateLimit(string $url, ClientException $e): void
     {
-        app('log')->debug('Now in handleRateLimit');
+        app('log')->debug('Now in reportRateLimit');
         // if it's an account details request, we ignore the error for now. Can do without this information.
         if (str_contains($url, 'accounts') && str_contains($url, 'details')) {
             app('log')->debug('Its about account details');
@@ -353,7 +368,7 @@ abstract class Request
                 preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
                 $string      = $matches[0][0] ?? '';
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
-                app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
+                app('log')->warning(sprintf('Wait time until rate limit resets: %s', self::formatTime($secondsLeft)));
             }
 
             return;
@@ -370,7 +385,7 @@ abstract class Request
                 preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
                 $string      = $matches[0][0] ?? '';
                 $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
-                app('log')->warning(sprintf('Wait time until rate limit resets: %s', $this->formatTime($secondsLeft)));
+                app('log')->warning(sprintf('Wait time until rate limit resets: %s', self::formatTime($secondsLeft)));
             }
         }
     }
@@ -381,7 +396,7 @@ abstract class Request
             // no need to report:
             return;
         }
-        $resetString = $this->formatTime($reset);
+        $resetString = self::formatTime($reset);
         if ($remaining >= 5) {
             app('log')->debug(sprintf('[a] %s: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
 
@@ -394,7 +409,9 @@ abstract class Request
         }
 
         // extra message if error.
-        app('log')->error(sprintf('%s: Have zero requests left!', $type));
+        if($reset > 1) {
+            app('log')->error(sprintf('%s: Have zero requests left!', $type));
+        }
 
         // do exit?
         if (true === config('nordigen.exit_for_rate_limit')) {
@@ -412,4 +429,16 @@ abstract class Request
 
         throw new RateLimitException(sprintf('[d] %s reached: %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
     }
+
+    public function getRemaining(): int
+    {
+        return $this->remaining;
+    }
+
+    public function getReset(): int
+    {
+        return $this->reset;
+    }
+
+
 }
