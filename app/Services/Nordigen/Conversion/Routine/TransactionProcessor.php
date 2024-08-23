@@ -51,7 +51,7 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
-    private array $rateLimits = [];
+    private array $rateLimits      = [];
 
     /**
      * @throws ImporterErrorException
@@ -75,11 +75,11 @@ class TransactionProcessor
         $return          = [];
         app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
-            $account          = (string) $account;
+            $account                    = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
-            $object           = new Account();
+            $object                     = new Account();
             $object->setIdentifier($account);
-            $fullInfo         = null;
+            $fullInfo                   = null;
 
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object);
@@ -111,8 +111,8 @@ class TransactionProcessor
 
                 continue;
             }
-            $url              = config('nordigen.url');
-            $request          = new GetTransactionsRequest($url, $accessToken, $account);
+            $url                        = config('nordigen.url');
+            $request                    = new GetTransactionsRequest($url, $accessToken, $account);
             $request->setTimeOut(config('importer.connection.timeout'));
 
             // @var GetTransactionsResponse $transactions
@@ -138,7 +138,7 @@ class TransactionProcessor
                 'reset'     => $request->getReset(),
             ];
 
-            $return[$account] = $this->filterTransactions($transactions);
+            $return[$account]           = $this->filterTransactions($transactions);
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
         app('log')->debug('Done with download');
@@ -223,6 +223,4 @@ class TransactionProcessor
     {
         return $this->rateLimits;
     }
-
-
 }

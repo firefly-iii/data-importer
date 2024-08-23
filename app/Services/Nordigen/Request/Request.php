@@ -48,8 +48,8 @@ abstract class Request
     private string $token;
     private string $url;
 
-    private int $remaining = -1;
-    private int $reset = -1;
+    private int $remaining  = -1;
+    private int $reset      = -1;
 
     /**
      * @throws ImporterHttpException
@@ -307,25 +307,24 @@ abstract class Request
     private function pauseForRateLimit(ResponseInterface $res): void
     {
         app('log')->debug('Now in pauseForRateLimit');
-        $headers   = $res->getHeaders();
+        $headers     = $res->getHeaders();
 
         // first the normal rate limit:
-        $remaining = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
-        $reset     = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
+        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
+        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
         $this->reportAndPause('Rate limit', $remaining, $reset);
 
         // then the account success rate limit:
-        $remaining = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
-        $reset     = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
-
+        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
+        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
 
         // save the remaining info in the object.
-        $this->reset     = $reset;
-        if($remaining > -1) { // zero or more.
+        $this->reset = $reset;
+        if ($remaining > -1) { // zero or more.
             app('log')->debug('Save the account success limits? YES');
             $this->remaining = $remaining;
         }
-        if($remaining < 0) {  // less than zero.
+        if ($remaining < 0) {  // less than zero.
             app('log')->debug('Save the account success limits? NO');
         }
 
@@ -409,7 +408,7 @@ abstract class Request
         }
 
         // extra message if error.
-        if($reset > 1) {
+        if ($reset > 1) {
             app('log')->error(sprintf('%s: Have zero requests left!', $type));
         }
 
@@ -439,6 +438,4 @@ abstract class Request
     {
         return $this->reset;
     }
-
-
 }
