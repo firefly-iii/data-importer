@@ -59,11 +59,11 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(?string $identifier)
     {
-        $this->allErrors   = [];
-        $this->allWarnings = [];
-        $this->allMessages = [];
-        $this->downloaded  = [];
-        $this->rateLimits  = [];
+        $this->allErrors            = [];
+        $this->allWarnings          = [];
+        $this->allMessages          = [];
+        $this->downloaded           = [];
+        $this->rateLimits           = [];
 
         if (null === $identifier) {
             $this->generateIdentifier();
@@ -105,19 +105,13 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         app('log')->debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
 
-        /*
-         * Step 1: get transactions from GoCardless
-         */
+        // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
 
-        /*
-         * Step 2: collect rate limits from the transaction processor.
-         */
+        // Step 2: collect rate limits from the transaction processor.
         $this->collectRateLimits();
 
-        /*
-         * Step 3: Generate Firefly III-ready transactions.
-         */
+        // Step 3: Generate Firefly III-ready transactions.
         // first collect target accounts from Firefly III.
         $this->collectTargetAccounts();
 
@@ -137,7 +131,7 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
@@ -219,12 +213,11 @@ class RoutineManager implements RoutineManagerInterface
                 $message .= sprintf(' (account number %s)', $account['number']);
             }
             $message .= '. ';
-
         }
         $message .= '[Read more about GoCardless rate limits](https://docs.firefly-iii.org/totally-still-todo).';
         app('log')->debug(sprintf('Generated rate limit message: %s', $message));
-        return $message;
 
+        return $message;
     }
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
@@ -234,6 +227,7 @@ class RoutineManager implements RoutineManagerInterface
                 return $account;
             }
         }
+
         return null;
     }
 
@@ -243,6 +237,7 @@ class RoutineManager implements RoutineManagerInterface
     private function downloadFromGoCardless(): void
     {
         app('log')->debug('Call transaction processor download.');
+
         try {
             $this->downloaded = $this->transactionProcessor->download();
         } catch (ImporterErrorException $e) {
@@ -267,6 +262,7 @@ class RoutineManager implements RoutineManagerInterface
             app('log')->debug(sprintf('Rate limit for account %s: %d request(s) left, %d second(s)', $account, $rateLimit['remaining'], $rateLimit['reset']));
             if (!array_key_exists($account, $configAccounts)) {
                 app('log')->error(sprintf('Account "%s" was not found in your configuration.', $account));
+
                 continue;
             }
             $this->rateLimits[$configAccounts[$account]] = $rateLimit;
@@ -301,6 +297,7 @@ class RoutineManager implements RoutineManagerInterface
             // this seems to be some kind of default value.
             if (0 === $rateLimit['remaining'] && $rateLimit['reset'] <= 1) {
                 app('log')->debug(sprintf('Account "%s" has no interesting rate limit information.', $accountId));
+
                 continue;
             }
 
@@ -308,10 +305,11 @@ class RoutineManager implements RoutineManagerInterface
             $fireflyIIIAccount = $this->findAccountInfo($userAccounts, $accountId);
             if (null === $fireflyIIIAccount) {
                 app('log')->debug('Found NO Firefly III account to report on, will not report rate limit.');
+
                 continue;
             }
             app('log')->debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
-            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addMessage(0, $message);
             }
@@ -337,6 +335,7 @@ class RoutineManager implements RoutineManagerInterface
 
             return true;
         }
+
         return false;
     }
 
