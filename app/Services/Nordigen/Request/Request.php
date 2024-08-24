@@ -117,7 +117,7 @@ abstract class Request
             if (429 === $statusCode) {
                 app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
                 $this->logRateLimitHeaders($e->getResponse());
-                $this->reportRateLimit($fullUrl, $e);
+                //$this->reportRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse());
 
                 return [];
@@ -281,23 +281,23 @@ abstract class Request
     {
         $headers = $res->getHeaders();
         if (array_key_exists('http_x_ratelimit_limit', $headers)) {
-            app('log')->debug(sprintf('Rate limit: %s', $headers['http_x_ratelimit_limit'][0]));
+            app('log')->debug(sprintf('Rate limit: %s', trim(join(' ',$headers['http_x_ratelimit_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
-            app('log')->debug(sprintf('Rate limit remaining: %s', $headers['http_x_ratelimit_remaining'][0]));
+            app('log')->debug(sprintf('Rate limit remaining: %s', trim(join(' ',$headers['http_x_ratelimit_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_reset', $headers)) {
-            app('log')->debug(sprintf('Rate limit reset: %s', $headers['http_x_ratelimit_reset'][0]));
+            app('log')->debug(sprintf('Rate limit reset: %s', trim(join(' ',$headers['http_x_ratelimit_reset']))));
         }
 
         if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit: %s', $headers['http_x_ratelimit_account_success_limit'][0]));
+            app('log')->debug(sprintf('Account success rate limit: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit remaining: %s', $headers['http_x_ratelimit_account_success_remaining'][0]));
+            app('log')->debug(sprintf('Account success rate limit remaining: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit reset: %s', $headers['http_x_ratelimit_account_success_reset'][0]));
+            app('log')->debug(sprintf('Account success rate limit reset: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_reset']))));
         }
     }
 
@@ -357,7 +357,7 @@ abstract class Request
         app('log')->debug('Now in reportRateLimit');
         // if it's an account details request, we ignore the error for now. Can do without this information.
         if (str_contains($url, 'accounts') && str_contains($url, 'details')) {
-            app('log')->debug('Its about account details');
+            app('log')->debug('This request is about account details');
             app('log')->warning('Rate limit reached on a request about account details. The data importer can continue.');
             $body = (string) $e->getResponse()->getBody();
             if (json_validate($body)) {

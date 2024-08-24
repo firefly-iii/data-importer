@@ -311,10 +311,10 @@ class RoutineManager implements RoutineManagerInterface
             app('log')->debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
             $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
-                $this->addMessage(0, $message);
+                $this->addWarning(0, $message);
             }
             if ($rateLimit['remaining'] > 0) {
-                $this->addWarning(0, $message);
+                $this->addMessage(0, $message);
             }
         }
     }
@@ -328,7 +328,7 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $total) {
             app('log')->warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
-            $this->addError(0, 'Zero transactions found at GoCardless');
+            $this->addError(0, 'No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -344,7 +344,7 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectNordigenAccounts();
         } catch (ImporterErrorException $e) {
-            app('log')->error('Could not collect info on all Nordigen accounts, but this info isn\'t used at the moment anyway.');
+            app('log')->error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
             app('log')->error($e->getMessage());
         } catch (AgreementExpiredException $e) {
             $this->addError(0, 'The connection between your bank and GoCardless has expired.');
