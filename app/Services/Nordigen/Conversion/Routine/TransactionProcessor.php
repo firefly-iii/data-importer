@@ -120,10 +120,10 @@ class TransactionProcessor
                 $transactions = $request->get();
             } catch (ImporterHttpException|RateLimitException $e) {
                 // do not add the rate limit as an error, since it will be reported later on anyway.
-                if($e instanceof ImporterHttpException) {
+                if ($e instanceof ImporterHttpException) {
                     $this->addError(0, $e->getMessage());
                 }
-                $return[$account] = [];
+                $return[$account]           = [];
 
                 // save the rate limits:
                 $this->rateLimits[$account] = [
