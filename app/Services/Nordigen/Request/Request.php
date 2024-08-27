@@ -117,7 +117,7 @@ abstract class Request
             if (429 === $statusCode) {
                 app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
                 $this->logRateLimitHeaders($e->getResponse());
-                //$this->reportRateLimit($fullUrl, $e);
+                // $this->reportRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse());
 
                 return [];
@@ -281,23 +281,23 @@ abstract class Request
     {
         $headers = $res->getHeaders();
         if (array_key_exists('http_x_ratelimit_limit', $headers)) {
-            app('log')->debug(sprintf('Rate limit: %s', trim(join(' ',$headers['http_x_ratelimit_limit']))));
+            app('log')->debug(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
-            app('log')->debug(sprintf('Rate limit remaining: %s', trim(join(' ',$headers['http_x_ratelimit_remaining']))));
+            app('log')->debug(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_reset', $headers)) {
-            app('log')->debug(sprintf('Rate limit reset: %s', trim(join(' ',$headers['http_x_ratelimit_reset']))));
+            app('log')->debug(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
         }
 
         if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_limit']))));
+            app('log')->debug(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit remaining: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_remaining']))));
+            app('log')->debug(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
-            app('log')->debug(sprintf('Account success rate limit reset: %s', trim(join(' ',$headers['http_x_ratelimit_account_success_reset']))));
+            app('log')->debug(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
         }
     }
 
