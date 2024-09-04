@@ -418,7 +418,7 @@ abstract class Request
         }
 
         // no exit. Do sleep?
-        if ($reset < 300) {
+        if ($reset < 300 && $reset > 0) {
             app('log')->info(sprintf('%s reached, sleep %s for reset.', $type, $resetString));
             sleep($reset + 1);
 
