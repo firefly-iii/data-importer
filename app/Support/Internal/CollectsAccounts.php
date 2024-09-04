@@ -131,7 +131,7 @@ trait CollectsAccounts
                 sprintf('[%d/%d] Now collecting information for account %s', $index + 1, $total, $account->getIdentifier()),
                 $account->toLocalArray()
             );
-            $account  = AccountInformationCollector::collectInformation($account);
+            $account  = AccountInformationCollector::collectInformation($account, true);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();
         }

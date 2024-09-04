@@ -46,14 +46,14 @@ class AccountInformationCollector
     /**
      * @throws AgreementExpiredException
      */
-    public static function collectInformation(Account $account): Account
+    public static function collectInformation(Account $account, bool $overruleSettings = false): Account
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
-        if (config('nordigen.get_account_details')) {
+        if (config('nordigen.get_account_details') || $overruleSettings) {
             try {
                 app('log')->debug('Get account details is ENABLED.');
                 $detailedAccount = self::getAccountDetails($detailedAccount);
@@ -64,11 +64,9 @@ class AccountInformationCollector
                 $detailedAccount->setName('Unknown account');
             }
         }
-        if (!config('nordigen.get_account_details')) {
-            app('log')->debug('Get account details is DISABLED.');
-        }
 
-        if (config('nordigen.get_balance_details')) {
+
+        if (config('nordigen.get_balance_details') || $overruleSettings) {
             app('log')->debug('Get account balance is ENABLED.');
 
             try {
@@ -85,7 +83,12 @@ class AccountInformationCollector
                 }
             }
         }
-        if (!config('nordigen.get_balance_details')) {
+
+        if (!config('nordigen.get_account_details') && !$overruleSettings) {
+            app('log')->debug('Get account details is DISABLED.');
+        }
+
+        if (!config('nordigen.get_balance_details') && !$overruleSettings) {
             app('log')->debug('Get account balance is DISABLED.');
         }
 

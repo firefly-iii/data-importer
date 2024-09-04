@@ -82,7 +82,7 @@ class TransactionProcessor
             $fullInfo                   = null;
 
             try {
-                $fullInfo = AccountInformationCollector::collectInformation($object);
+                $fullInfo = AccountInformationCollector::collectInformation($object, false);
             } catch (AgreementExpiredException $e) {
                 $this->addError(
                     0,
