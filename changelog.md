@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.5.5 - 2024-09-05
+
+### Changed
+- Better GoCardless rate limiting reporting
+
+### Fixed
+- #9194
+
 ## 1.5.4 - 2024-08-22
 
 ### Added
