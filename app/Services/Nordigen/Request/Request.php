@@ -334,6 +334,19 @@ abstract class Request
     public static function formatTime(int $reset): string
     {
         $return  = '';
+        if($reset < 0) {
+            app('log')->warning('The reset time is negative!');
+            $return  = '-';
+            $reset = abs($reset);
+        }
+
+        // days:
+        $days    = floor($reset / 86400);
+        if ($days > 0) {
+            $return .= sprintf('%dd', $days);
+        }
+        $reset   -= ($days * 86400);
+
         $hours   = floor($reset / 3600);
         if ($hours > 0) {
             $return .= sprintf('%dh', $hours);
@@ -424,7 +437,12 @@ abstract class Request
 
             return;
         }
-        app('log')->error(sprintf('%s: Refuse to sleep for more than 5 minutes, throw exception instead.', $type));
+        if ($reset >= 300) {
+            app('log')->error(sprintf('%s: Refuse to sleep for %s, throw exception instead.', $type, $resetString));
+        }
+        if ($reset < 0) {
+            app('log')->error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
+        }
 
         throw new RateLimitException(sprintf('[d] %s reached: %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
     }
