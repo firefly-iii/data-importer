@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Better GoCardless rate limiting reporting
 
 ### Fixed
-- #9194
+- [Issue 9194](https://github.com/firefly-iii/firefly-iii/issues/9194) (data importer via gocardless EU - details of the account is not imported anymore after last two versions) reported by @fate8383
 
 ## 1.5.4 - 2024-08-22
 

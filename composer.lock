@@ -1262,16 +1262,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.21.0",
+            "version": "v11.22.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "9d9d36708d56665b12185493f684abce38ad2d30"
+                "reference": "868c75beacc47d0f361b919bbc155c0b619bf3d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/9d9d36708d56665b12185493f684abce38ad2d30",
-                "reference": "9d9d36708d56665b12185493f684abce38ad2d30",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/868c75beacc47d0f361b919bbc155c0b619bf3d5",
+                "reference": "868c75beacc47d0f361b919bbc155c0b619bf3d5",
                 "shasum": ""
             },
             "require": {
@@ -1464,7 +1464,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-08-20T15:00:52+00:00"
+            "time": "2024-09-03T15:27:15+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -7877,16 +7877,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.0",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1"
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/384af967d35b2162f69526c7276acadce534d0e1",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
                 "shasum": ""
             },
             "require": {
@@ -7931,7 +7931,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-27T09:18:05+00:00"
+            "time": "2024-09-03T19:55:22+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -8352,16 +8352,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.30",
+            "version": "10.5.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "b15524febac0153876b4ba9aab3326c2ee94c897"
+                "reference": "43e7c3e6a484e538453f89dfa6a6f308c32792da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/b15524febac0153876b4ba9aab3326c2ee94c897",
-                "reference": "b15524febac0153876b4ba9aab3326c2ee94c897",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/43e7c3e6a484e538453f89dfa6a6f308c32792da",
+                "reference": "43e7c3e6a484e538453f89dfa6a6f308c32792da",
                 "shasum": ""
             },
             "require": {
@@ -8375,7 +8375,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.1",
-                "phpunit/php-code-coverage": "^10.1.15",
+                "phpunit/php-code-coverage": "^10.1.16",
                 "phpunit/php-file-iterator": "^4.1.0",
                 "phpunit/php-invoker": "^4.0.0",
                 "phpunit/php-text-template": "^3.0.1",
@@ -8433,7 +8433,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.30"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.31"
             },
             "funding": [
                 {
@@ -8449,7 +8449,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-08-13T06:09:37+00:00"
+            "time": "2024-09-03T11:57:55+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -8457,12 +8457,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "5ddbc0bf3c8c38da3f706c8d1203f9a6a451d44d"
+                "reference": "8934624d282f87f8f60e8fd8be1197a644ea8b76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/5ddbc0bf3c8c38da3f706c8d1203f9a6a451d44d",
-                "reference": "5ddbc0bf3c8c38da3f706c8d1203f9a6a451d44d",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/8934624d282f87f8f60e8fd8be1197a644ea8b76",
+                "reference": "8934624d282f87f8f60e8fd8be1197a644ea8b76",
                 "shasum": ""
             },
             "conflict": {
@@ -8921,9 +8921,10 @@
                 "phpxmlrpc/extras": "<0.6.1",
                 "phpxmlrpc/phpxmlrpc": "<4.9.2",
                 "pi/pi": "<=2.5",
-                "pimcore/admin-ui-classic-bundle": "<=1.5.1",
+                "pimcore/admin-ui-classic-bundle": "<1.5.4",
                 "pimcore/customer-management-framework-bundle": "<4.0.6",
                 "pimcore/data-hub": "<1.2.4",
+                "pimcore/data-importer": "<1.8.9|>=1.9,<1.9.3",
                 "pimcore/demo": "<10.3",
                 "pimcore/ecommerce-framework-bundle": "<1.0.10",
                 "pimcore/perspective-editor": "<1.5.1",
@@ -9267,7 +9268,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-08-30T15:05:01+00:00"
+            "time": "2024-09-03T20:04:58+00:00"
         },
         {
             "name": "sebastian/cli-parser",
