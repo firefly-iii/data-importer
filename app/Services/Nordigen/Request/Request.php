@@ -334,10 +334,10 @@ abstract class Request
     public static function formatTime(int $reset): string
     {
         $return  = '';
-        if($reset < 0) {
+        if ($reset < 0) {
             app('log')->warning('The reset time is negative!');
-            $return  = '-';
-            $reset = abs($reset);
+            $return = '-';
+            $reset  = abs($reset);
         }
 
         // days:
