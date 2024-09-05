@@ -118,11 +118,10 @@ class TransactionProcessor
             // @var GetTransactionsResponse $transactions
             try {
                 $transactions = $request->get();
+                app('log')->debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
-                // do not add the rate limit as an error, since it will be reported later on anyway.
-                if ($e instanceof ImporterHttpException) {
-                    $this->addError(0, $e->getMessage());
-                }
+                app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
+                $this->addError(0, $e->getMessage());
                 $return[$account]           = [];
 
                 // save the rate limits:
