@@ -280,25 +280,25 @@ abstract class Request
     private function logRateLimitHeaders(ResponseInterface $res, bool $fromErrorSituation): void
     {
         $headers = $res->getHeaders();
-        $method = $fromErrorSituation ? 'error' : 'debug';
+        $method  = $fromErrorSituation ? 'error' : 'debug';
         if (array_key_exists('http_x_ratelimit_limit', $headers)) {
-            app('log')->$method(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
+            app('log')->{$method}(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
-            app('log')->$method(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
+            app('log')->{$method}(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_reset', $headers)) {
-            app('log')->$method(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
+            app('log')->{$method}(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
         }
 
         if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
-            app('log')->$method(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
+            app('log')->{$method}(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
-            app('log')->$method(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
+            app('log')->{$method}(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
-            app('log')->$method(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
+            app('log')->{$method}(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
         }
     }
 
@@ -307,8 +307,8 @@ abstract class Request
      */
     private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
     {
-        $method = $fromErrorSituation ? 'error' : 'debug';
-        app('log')->$method('Now in pauseForRateLimit');
+        $method      = $fromErrorSituation ? 'error' : 'debug';
+        app('log')->{$method}('Now in pauseForRateLimit');
         $headers     = $res->getHeaders();
 
         // first the normal rate limit:
@@ -323,11 +323,11 @@ abstract class Request
         // save the remaining info in the object.
         $this->reset = $reset;
         if ($remaining > -1) { // zero or more.
-            app('log')->$method('Save the account success limits? YES');
+            app('log')->{$method}('Save the account success limits? YES');
             $this->remaining = $remaining;
         }
         if ($remaining < 0) {  // less than zero.
-            app('log')->$method('Save the account success limits? NO');
+            app('log')->{$method}('Save the account success limits? NO');
         }
 
         $this->reportAndPause('Account success limit', $remaining, $reset, $fromErrorSituation);
@@ -445,7 +445,7 @@ abstract class Request
         if ($reset < 0) {
             app('log')->error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
         }
-        if($fromErrorSituation) {
+        if ($fromErrorSituation) {
             throw new RateLimitException(sprintf('[d] %s reached: %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
         }
     }
