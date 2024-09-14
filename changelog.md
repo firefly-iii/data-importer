@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - GoCardless rate limit could report negative time.
+- Documentation links
 
 ## 1.5.5 - 2024-09-05
 

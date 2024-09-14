@@ -214,7 +214,7 @@ class RoutineManager implements RoutineManagerInterface
             }
             $message .= '. ';
         }
-        $message .= '[Read more about GoCardless rate limits](https://docs.firefly-iii.org/totally-still-todo).';
+        $message .= '[Read more about GoCardless rate limits](https://docs.firefly-iii.org/references/faq/data-importer/salt-edge-gocardless/#i-am-rate-limited-by-gocardless).';
         app('log')->debug(sprintf('Generated rate limit message: %s', $message));
 
         return $message;
