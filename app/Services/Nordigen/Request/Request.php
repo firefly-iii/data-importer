@@ -412,12 +412,12 @@ abstract class Request
         }
         $resetString = self::formatTime($reset);
         if ($remaining >= 5) {
-            app('log')->debug(sprintf('[a] %s: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
+            app('log')->debug(sprintf('%s: %d requests left, and %s before the limit resets.', $type, $remaining, $resetString));
 
             return;
         }
         if ($remaining >= 1) {
-            app('log')->warning(sprintf('[b] %s: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
+            app('log')->warning(sprintf('%s: %d requests remaining, it will take %s for the limit to reset.', $type, $remaining, $resetString));
 
             return;
         }
@@ -429,7 +429,7 @@ abstract class Request
 
         // do exit?
         if (true === config('nordigen.exit_for_rate_limit') && $fromErrorSituation) {
-            throw new RateLimitException(sprintf('[c] %s reached: %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
+            throw new RateLimitException(sprintf('%s reached: there are %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
         }
 
         // no exit. Do sleep?
@@ -446,7 +446,7 @@ abstract class Request
             app('log')->error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
         }
         if($fromErrorSituation) {
-            throw new RateLimitException(sprintf('[d] %s reached: %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
+            throw new RateLimitException(sprintf('%s reached: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
         }
     }
 
