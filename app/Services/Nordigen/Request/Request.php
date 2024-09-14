@@ -445,7 +445,7 @@ abstract class Request
         if ($reset < 0) {
             app('log')->error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
         }
-        if($fromErrorSituation) {
+        if ($fromErrorSituation) {
             throw new RateLimitException(sprintf('%s reached: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
         }
     }
