@@ -311,6 +311,12 @@ abstract class Request
         app('log')->{$method}('Now in pauseForRateLimit');
         $headers     = $res->getHeaders();
 
+        // raw header values for debugging:
+        app('log')->debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
+        app('log')->debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
+        app('log')->debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
+        app('log')->debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
+
         // first the normal rate limit:
         $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
         $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
@@ -365,43 +371,6 @@ abstract class Request
         }
 
         return $return;
-    }
-
-    private function reportRateLimit(string $url, ClientException $e): void
-    {
-        app('log')->debug('Now in reportRateLimit');
-        // if it's an account details request, we ignore the error for now. Can do without this information.
-        if (str_contains($url, 'accounts') && str_contains($url, 'details')) {
-            app('log')->debug('This request is about account details');
-            app('log')->warning('Rate limit reached on a request about account details. The data importer can continue.');
-            $body = (string) $e->getResponse()->getBody();
-            if (json_validate($body)) {
-                $json        = json_decode($body, true);
-                $message     = $json['detail'] ?? '';
-                $re          = '/[1-9][0-9]+ seconds/m';
-                preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
-                $string      = $matches[0][0] ?? '';
-                $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
-                app('log')->warning(sprintf('Wait time until rate limit resets: %s', self::formatTime($secondsLeft)));
-            }
-
-            return;
-        }
-        // if it's an account transactions request, we cannot ignore it and MUST stop.
-        if (str_contains($url, 'accounts') && str_contains($url, 'transactions')) {
-            app('log')->debug('Its about account transactions');
-            app('log')->warning('Rate limit reached on a request about account transactions. The data importer CANNOT continue.');
-            $body = (string) $e->getResponse()->getBody();
-            if (json_validate($body)) {
-                $json        = json_decode($body, true);
-                $message     = $json['detail'] ?? '';
-                $re          = '/[1-9][0-9]+ seconds/m';
-                preg_match_all($re, $message, $matches, PREG_SET_ORDER, 0);
-                $string      = $matches[0][0] ?? '';
-                $secondsLeft = (int) trim(str_replace(' seconds', '', $string));
-                app('log')->warning(sprintf('Wait time until rate limit resets: %s', self::formatTime($secondsLeft)));
-            }
-        }
     }
 
     private function reportAndPause(string $type, int $remaining, int $reset, bool $fromErrorSituation): void
