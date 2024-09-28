@@ -123,7 +123,7 @@ trait CollectsAccounts
         $total        = count($response);
         $return       = [];
         $cache        = [];
-        app('log')->debug(sprintf('Found %d Nordigen accounts.', $total));
+        app('log')->debug(sprintf('Found %d GoCardless accounts.', $total));
 
         /** @var NordigenAccount $account */
         foreach ($response as $index => $account) {

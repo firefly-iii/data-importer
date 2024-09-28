@@ -207,7 +207,7 @@ trait IsReadyForStep
 
                 // must already have the conversion, or not ready for this step:
                 if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
-                    app('log')->debug('Nordigen: return false, not yet ready for step [2].');
+                    app('log')->debug('GoCardless: return false, not yet ready for step [2].');
 
                     return false;
                 }

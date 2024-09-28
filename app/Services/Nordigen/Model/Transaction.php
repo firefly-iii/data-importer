@@ -95,7 +95,7 @@ class Transaction
      */
     public static function fromArray($array): self
     {
-        app('log')->debug('Nordigen transaction from array', $array);
+        app('log')->debug('GoCardless transaction from array', $array);
         $object                                         = new self();
         $object->tags                                   = [];
         $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');

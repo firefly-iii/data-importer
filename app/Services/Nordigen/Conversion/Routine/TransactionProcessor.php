@@ -86,7 +86,7 @@ class TransactionProcessor
             } catch (AgreementExpiredException $e) {
                 $this->addError(
                     0,
-                    'Your Nordigen End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
+                    'Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
                 if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
                     $this->addError(0, $e->json['summary']);

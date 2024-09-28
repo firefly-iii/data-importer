@@ -111,7 +111,7 @@ class ConversionController extends Controller
             }
         }
         if ('nordigen' === $flow) {
-            app('log')->debug('Create Nordigen routine manager.');
+            app('log')->debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {

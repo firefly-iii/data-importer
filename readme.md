@@ -32,7 +32,7 @@
 
 "Firefly III" is a (self-hosted) manager for your personal finances. It can help you keep track of your expenses and income, so you can spend less and save more. The **data importer** is built to help you import transactions into Firefly III. It is separated from Firefly III for security and maintenance reasons.
 
-The data importer does not connect to your bank directly. Instead, it uses [Nordigen](https://nordigen.com/en/coverage/) and [SaltEdge](https://www.saltedge.com/products/spectre/countries) to connect to over 6000 banks worldwide. These services are free for Firefly III users, but require registration. Keep in mind these services have their own privacy and data usage policies.
+The data importer does not connect to your bank directly. Instead, it uses [GoCardless](https://gocardless.com/) and [SaltEdge](https://www.saltedge.com/products/spectre/countries) to connect to over 6000 banks worldwide. These services are free for Firefly III users, but require registration. Keep in mind these services have their own privacy and data usage policies.
 
 The data importer can import CSV files you've downloaded from your bank.
 

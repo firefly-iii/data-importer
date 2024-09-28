@@ -33,7 +33,7 @@ trait MergesAccountLists
 {
     protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
     {
-        app('log')->debug('Now merging Nordigen account lists.');
+        app('log')->debug('Now merging GoCardless account lists.');
         $generic = ImportServiceAccount::convertNordigenArray($nordigen);
 
         return $this->mergeGenericAccountList($generic, $fireflyIII);

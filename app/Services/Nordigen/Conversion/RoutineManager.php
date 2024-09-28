@@ -241,7 +241,7 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->downloaded = $this->transactionProcessor->download();
         } catch (ImporterErrorException $e) {
-            app('log')->error('Could not download transactions from Nordigen.');
+            app('log')->error('Could not download transactions from GoCardless.');
             app('log')->error($e->getMessage());
 
             // add error to current error thing:

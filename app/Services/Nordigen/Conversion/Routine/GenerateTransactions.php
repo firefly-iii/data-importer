@@ -103,7 +103,7 @@ class GenerateTransactions
             $accountInfo               = $response->data['account'] ?? [];
             $set['iban']               = $accountInfo['iban'] ?? '';
             $info[$nordigenIdentifier] = $set;
-            app('log')->debug(sprintf('Collected IBAN "%s" for Nordigen account "%s"', $set['iban'], $nordigenIdentifier));
+            app('log')->debug(sprintf('Collected IBAN "%s" for GoCardless account "%s"', $set['iban'], $nordigenIdentifier));
         }
         $this->nordigenAccountInfo = $info;
     }

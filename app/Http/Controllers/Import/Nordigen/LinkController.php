@@ -133,7 +133,7 @@ class LinkController extends Controller
         app('log')->debug(sprintf('Reference is "%s"', $reference));
 
         if ('' === $reference) {
-            throw new ImporterHttpException('The reference returned by Nordigen was unexpectedly empty.');
+            throw new ImporterHttpException('The reference returned by GoCardless was unexpectedly empty.');
         }
 
         // create a new config thing

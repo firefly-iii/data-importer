@@ -85,7 +85,7 @@ class MapController extends Controller
 
         // nordigen, spectre and others:
         if ('file' !== $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for nordigen and spectre');
+            app('log')->debug('Get mapping data for GoCardless and spectre');
             $roles = [];
             $data  = $this->getImporterMapInformation();
         }
