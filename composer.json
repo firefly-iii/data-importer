@@ -89,7 +89,7 @@
         "barryvdh/laravel-ide-helper": "^3.1",
         "ergebnis/phpstan-rules": "^2.2",
         "fakerphp/faker": "^1.4",
-        "filp/whoops": "^2.0",
+        "filp/whoops": "^2.16",
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8",
