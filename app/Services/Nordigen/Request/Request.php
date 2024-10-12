@@ -122,7 +122,7 @@ abstract class Request
 
                 return [];
             }
-            app('log')->error(sprintf('%s: %s', get_class($e), $e->getMessage()));
+            app('log')->error(sprintf('Original error: %s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
