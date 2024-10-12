@@ -51,7 +51,7 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
-    private array $rateLimits = [];
+    private array $rateLimits      = [];
 
     /**
      * @throws ImporterErrorException
@@ -70,16 +70,16 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        $accounts = array_keys($this->configuration->getAccounts());
+        $accounts        = array_keys($this->configuration->getAccounts());
 
-        $return = [];
+        $return          = [];
         app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
-            $account = (string) $account;
+            $account                    = (string) $account;
             app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
-            $object = new Account();
+            $object                     = new Account();
             $object->setIdentifier($account);
-            $fullInfo = null;
+            $fullInfo                   = null;
 
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object, false);
@@ -111,18 +111,18 @@ class TransactionProcessor
 
                 continue;
             }
-            $url     = config('nordigen.url');
-            $request = new GetTransactionsRequest($url, $accessToken, $account);
+            $url                        = config('nordigen.url');
+            $request                    = new GetTransactionsRequest($url, $accessToken, $account);
             $request->setTimeOut(config('importer.connection.timeout'));
 
             // @var GetTransactionsResponse $transactions
             try {
                 $transactions = $request->get();
                 app('log')->debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
-            } catch (ImporterHttpException | RateLimitException $e) {
+            } catch (ImporterHttpException|RateLimitException $e) {
                 app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
                 $this->addError(0, $e->getMessage());
-                $return[$account] = [];
+                $return[$account]           = [];
 
                 // save the rate limits:
                 $this->rateLimits[$account] = [
@@ -134,13 +134,14 @@ class TransactionProcessor
             } catch (AgreementExpiredException $e) {
                 app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
                 // agreement expired, whoops.
-                $return[$account] = [];
+                $return[$account]           = [];
                 $this->addError(0, $e->json['detail'] ?? 'Your EUA has expired.');
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),
                     'reset'     => $request->getReset(),
                 ];
+
                 continue;
             }
             $this->rateLimits[$account] = [
@@ -148,7 +149,7 @@ class TransactionProcessor
                 'reset'     => $request->getReset(),
             ];
 
-            $return[$account] = $this->filterTransactions($transactions);
+            $return[$account]           = $this->filterTransactions($transactions);
             app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
         app('log')->debug('Done with download');
@@ -177,7 +178,7 @@ class TransactionProcessor
         }
         $return = [];
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
                 app('log')->debug(
