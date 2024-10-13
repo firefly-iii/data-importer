@@ -313,7 +313,7 @@ class RoutineManager implements RoutineManagerInterface
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
             }
-            if ($rateLimit['remaining'] > 0) {
+            if ($rateLimit['remaining'] > 0 && $rateLimit['remaining'] <= 3) {
                 $this->addMessage(0, $message);
             }
         }
