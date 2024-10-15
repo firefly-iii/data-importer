@@ -332,7 +332,7 @@ class Transaction
 
     public function getTransactionId(): string
     {
-        return substr(trim(preg_replace('/\s+/', ' ', $this->transactionId)),0,250);
+        return substr(trim(preg_replace('/\s+/', ' ', $this->transactionId)), 0, 250);
     }
 
     /**
