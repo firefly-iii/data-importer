@@ -69,7 +69,7 @@ final class Import extends Command
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
 
-            return 1;
+            return 64;
         }
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
@@ -83,7 +83,7 @@ final class Import extends Command
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
-                return 1;
+                return 65;
             }
         }
 
@@ -93,7 +93,7 @@ final class Import extends Command
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
-                return 1;
+                return 66;
             }
         }
 
@@ -102,7 +102,7 @@ final class Import extends Command
             $this->error($message);
             app('log')->error($message);
 
-            return 1;
+            return 68;
         }
 
         $jsonResult    = $this->verifyJSON($config);
@@ -110,7 +110,7 @@ final class Import extends Command
             $message = 'The importer can\'t import: could not decode the JSON in the config file.';
             $this->error($message);
 
-            return 1;
+            return 69;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
         if ('file' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
@@ -118,7 +118,7 @@ final class Import extends Command
             $this->error($message);
             app('log')->error($message);
 
-            return 1;
+            return 70;
         }
 
         $configuration->updateDateRange();
@@ -134,8 +134,10 @@ final class Import extends Command
         $this->reportConversion();
 
         // crash here if the conversion failed.
+        $exitCode = 0;
         if (0 !== count($this->conversionErrors)) {
             $this->error('There are many errors in the data conversion. The import will stop here.');
+            $exitCode = 72;
         }
         if (0 === count($this->conversionErrors)) {
             $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
@@ -153,7 +155,10 @@ final class Import extends Command
                 array_merge($this->importErrors, $this->conversionErrors)
             )
         );
+        if(0 !== count($this->importErrors)) {
+            $exitCode = 1;
+        }
 
-        return 0;
+        return $exitCode;
     }
 }

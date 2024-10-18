@@ -62,7 +62,7 @@ final class AutoImport extends Command
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
 
-            return 1;
+            return 64;
         }
 
         $argument  = (string) ($this->argument('directory') ?? './');
@@ -72,12 +72,12 @@ final class AutoImport extends Command
         if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));
 
-            return 1;
+            return 65;
         }
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
-            return 1;
+            return 66;
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
@@ -87,18 +87,11 @@ final class AutoImport extends Command
             $this->info('To learn more about this process, read the docs:');
             $this->info('https://docs.firefly-iii.org/');
 
-            return 1;
+            return 67;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
 
-        try {
-            $result = $this->importFiles($directory, $files);
-        } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
-            $this->error(sprintf('Import exception (see the logs): %s', $e->getMessage()));
-
-            return 1;
-        }
+        $result = $this->importFiles($directory, $files);
 
         return $result ? 0 : 1;
     }
