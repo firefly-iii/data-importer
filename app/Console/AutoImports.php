@@ -165,26 +165,25 @@ trait AutoImports
     }
 
     /**
-     * TODO Since multiple files can return multiple errors, this function should return an array of errors.
-     *
      * @param string $directory
      * @param array  $files
      *
-     * @return bool
+     * @return array
      *
      */
-    private function importFiles(string $directory, array $files): bool
+    private function importFiles(string $directory, array $files): array
     {
-        $return = true;
+        $exitCodes = [];
 
         /** @var string $file */
         foreach ($files as $file) {
+            $key = sprintf('%s/%s', $directory, $file);
             try {
-                $this->importFile($directory, $file);
+                $exitCodes[$key] = $this->importFile($directory, $file);
             } catch (ImporterErrorException $e) {
                 app('log')->error(sprintf('Could not complete import from file "%s".', $file));
                 app('log')->error($e->getMessage());
-                $return = false;
+                $exitCodes[$key] = 1;
             }
             // report has already been sent. Reset errors and continue.
             $this->conversionErrors   = [];
@@ -195,13 +194,13 @@ trait AutoImports
             $this->importWarnings     = [];
         }
 
-        return $return;
+        return $exitCodes;
     }
 
     /**
      * @throws ImporterErrorException
      */
-    private function importFile(string $directory, string $file): void
+    private function importFile(string $directory, string $file): int
     {
         app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
         app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
@@ -224,6 +223,7 @@ trait AutoImports
         // Should not happen
         if (!$jsonFileExists && !$hasFallbackConfig) {
             $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
+            return 68;
         }
 
         $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
@@ -236,16 +236,15 @@ trait AutoImports
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
-
-            return;
+            return 69;
         }
         $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
-
-            return;
+            // don't report this.
+            return 0;
         }
 
         $configuration->updateDateRange();
@@ -267,8 +266,7 @@ trait AutoImports
                     array_merge($this->conversionErrors, $this->importErrors)
                 )
             );
-
-            throw new ImporterErrorException('Too many errors in the data conversion.');
+            return 72;
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
@@ -277,13 +275,20 @@ trait AutoImports
         $this->reportBalanceDifferences($configuration);
 
         $this->line('Done!');
-        event(
-            new ImportedTransactions(
-                array_merge($this->conversionMessages, $this->importMessages),
-                array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors)
-            )
-        );
+
+        // merge things:
+        $messages = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings = array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors   = array_merge($this->importErrors, $this->conversionErrors);
+        event(new ImportedTransactions($messages, $warnings, $errors));
+
+        if(count($this->importErrors) > 0) {
+            return 1;
+        }
+        if(0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+            return 73;
+        }
+        return 0;
     }
 
     /**

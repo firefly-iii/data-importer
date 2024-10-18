@@ -27,7 +27,6 @@ namespace App\Console\Commands;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
-use App\Exceptions\ImporterErrorException;
 use Illuminate\Console\Command;
 
 /**
@@ -51,21 +50,21 @@ final class AutoImport extends Command
      *
      * @var string
      */
-    protected $signature   = 'importer:auto-import {directory : The directory from which to import automatically.}';
+    protected $signature = 'importer:auto-import {directory : The directory from which to import automatically.}';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $access    = $this->haveAccess();
+        $access = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
 
             return 64;
         }
 
-        $argument  = (string) ($this->argument('directory') ?? './');
+        $argument = (string) ($this->argument('directory') ?? './');
 
         /** @phpstan-ignore-line */
         $directory = realpath($argument);
@@ -81,7 +80,7 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
-        $files     = $this->getFiles($directory);
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
@@ -91,8 +90,19 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
 
-        $result = $this->importFiles($directory, $files);
 
-        return $result ? 0 : 1;
+        $result = $this->importFiles($directory, $files);
+        $unique = array_unique($result);
+        if (1 === count($unique)) {
+            return (int) reset($result);
+        }
+        if (count($unique) > 0) {
+            $this->warn('Multiple return codes found. Some imports may have failed');
+            foreach ($result as $file => $code) {
+                $this->warn(sprintf('File %s returned code #%d', $file, $code));
+            }
+            return 1;
+        }
+        return 0;
     }
 }
