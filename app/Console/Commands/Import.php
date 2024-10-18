@@ -148,15 +148,17 @@ final class Import extends Command
 
         $this->reportBalanceDifferences($configuration);
 
-        event(
-            new ImportedTransactions(
-                array_merge($this->importMessages, $this->conversionMessages),
-                array_merge($this->importWarnings, $this->conversionWarnings),
-                array_merge($this->importErrors, $this->conversionErrors)
-            )
-        );
+        // merge things:
+        $messages = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings =        array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors =        array_merge($this->importErrors, $this->conversionErrors);
+
+        event(new ImportedTransactions($messages, $warnings, $errors));
         if(0 !== count($this->importErrors)) {
             $exitCode = 1;
+        }
+        if(0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+            $exitCode = 73;
         }
 
         return $exitCode;
