@@ -164,6 +164,15 @@ trait AutoImports
         return true;
     }
 
+    /**
+     * TODO Since multiple files can return multiple errors, this function should return an array of errors.
+     *
+     * @param string $directory
+     * @param array  $files
+     *
+     * @return bool
+     *
+     */
     private function importFiles(string $directory, array $files): bool
     {
         $return = true;
