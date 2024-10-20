@@ -46,6 +46,7 @@ class BankDebitCredit implements ConverterInterface
             'a', // New style Rabobank (NL). Short for "Af"
             'dr', // https://old.reddit.com/r/FireflyIII/comments/bn2edf/generic_debitcredit_indicator/
             'af', // ING (NL).
+            'db', // Bank BCA (ID)
             'debet', // Triodos (NL)
             'debit', // ING (EN), thx Quibus!
             's', // Volksbank (DE), Short for "Soll"
