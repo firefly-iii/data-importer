@@ -68,7 +68,7 @@ class ApiSubmitter
         $this->tag        = $this->parseTag();
         $this->tagDate    = date('Y-m-d');
         $count            = count($lines);
-        $unique           = 0;
+        $uniqueCount      = 0;
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         $this->vanityURL  = Token::getVanityURL();
@@ -85,11 +85,11 @@ class ApiSubmitter
             $unique    = $this->uniqueTransaction($index, $line);
             if (null === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
-                ++$unique;
+                $uniqueCount++;
             }
             if (true === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is unique.', $index + 1));
-                ++$unique;
+                $uniqueCount++;
             }
             if (false === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
@@ -101,7 +101,7 @@ class ApiSubmitter
         }
 
         app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
-        app('log')->info(sprintf('Actually imported and not duplicate: %d.', $count));
+        app('log')->info(sprintf('Actually imported and not duplicate: %d.', $uniqueCount));
     }
 
     private function parseTag(): string
