@@ -85,11 +85,11 @@ class ApiSubmitter
             $unique    = $this->uniqueTransaction($index, $line);
             if (null === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
-                $uniqueCount++;
+                ++$uniqueCount;
             }
             if (true === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is unique.', $index + 1));
-                $uniqueCount++;
+                ++$uniqueCount;
             }
             if (false === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
