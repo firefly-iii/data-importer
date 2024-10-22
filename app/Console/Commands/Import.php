@@ -134,7 +134,7 @@ final class Import extends Command
         $this->reportConversion();
 
         // crash here if the conversion failed.
-        $exitCode = 0;
+        $exitCode      = 0;
         if (0 !== count($this->conversionErrors)) {
             $this->error('There are many errors in the data conversion. The import will stop here.');
             $exitCode = 72;
@@ -149,15 +149,15 @@ final class Import extends Command
         $this->reportBalanceDifferences($configuration);
 
         // merge things:
-        $messages = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings =        array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors =        array_merge($this->importErrors, $this->conversionErrors);
+        $messages      = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors        = array_merge($this->importErrors, $this->conversionErrors);
 
         event(new ImportedTransactions($messages, $warnings, $errors));
-        if(0 !== count($this->importErrors)) {
+        if (0 !== count($this->importErrors)) {
             $exitCode = 1;
         }
-        if(0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+        if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
             $exitCode = 73;
         }
 

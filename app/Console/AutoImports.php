@@ -164,20 +164,14 @@ trait AutoImports
         return true;
     }
 
-    /**
-     * @param string $directory
-     * @param array  $files
-     *
-     * @return array
-     *
-     */
     private function importFiles(string $directory, array $files): array
     {
         $exitCodes = [];
 
         /** @var string $file */
         foreach ($files as $file) {
-            $key = sprintf('%s/%s', $directory, $file);
+            $key                      = sprintf('%s/%s', $directory, $file);
+
             try {
                 $exitCodes[$key] = $this->importFile($directory, $file);
             } catch (ImporterErrorException $e) {
@@ -223,6 +217,7 @@ trait AutoImports
         // Should not happen
         if (!$jsonFileExists && !$hasFallbackConfig) {
             $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
+
             return 68;
         }
 
@@ -236,6 +231,7 @@ trait AutoImports
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
+
             return 69;
         }
         $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
@@ -243,6 +239,7 @@ trait AutoImports
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
+
             // don't report this.
             return 0;
         }
@@ -266,6 +263,7 @@ trait AutoImports
                     array_merge($this->conversionErrors, $this->importErrors)
                 )
             );
+
             return 72;
         }
 
@@ -277,17 +275,18 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things:
-        $messages = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings = array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors   = array_merge($this->importErrors, $this->conversionErrors);
+        $messages          = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings          = array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors            = array_merge($this->importErrors, $this->conversionErrors);
         event(new ImportedTransactions($messages, $warnings, $errors));
 
-        if(count($this->importErrors) > 0) {
+        if (count($this->importErrors) > 0) {
             return 1;
         }
-        if(0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+        if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
             return 73;
         }
+
         return 0;
     }
 
