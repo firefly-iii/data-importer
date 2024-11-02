@@ -55,7 +55,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= "  \nThe data importer has ignored the following values in the transaction data:\n";
             $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $originalIban);
-            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";
             $transaction['notes']            = trim($transaction['notes']);
 
             unset($transaction['destination_id'], $transaction['destination_iban'], $transaction['destination_number'], $transaction['destination_name']);
@@ -93,7 +93,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= "  \nThe data importer has ignored the following values in the transaction data:\n";
             $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $originalIban);
-            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-ignored-values";
+            $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";
             $transaction['notes']       = trim($transaction['notes']);
 
             unset($transaction['source_id'], $transaction['source_iban'], $transaction['source_number'], $transaction['source_name']);
