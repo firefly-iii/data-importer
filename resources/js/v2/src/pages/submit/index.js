@@ -46,6 +46,7 @@ let index = function () {
 
         },
         showJobMessages() {
+            console.log(this.messages);
             return Object.values(this.messages.messages).length > 0 || Object.values(this.messages.warnings).length > 0 || Object.values(this.messages.errors).length > 0;
         },
         showStartButton() {
@@ -118,8 +119,8 @@ let index = function () {
                 }
 
                 // process messages, warnings and errors:
-                this.messages.errors = Object.values(response.data.errors);
-                this.messages.warnings = Object.values(response.data.warnings);
+                this.messages.errors = response.data.errors;
+                this.messages.warnings = response.data.warnings;
                 this.messages.messages = response.data.messages;
 
                 // job has not started yet. Let's wait.

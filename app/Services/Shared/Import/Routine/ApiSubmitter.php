@@ -71,6 +71,7 @@ class ApiSubmitter
         $uniqueCount      = 0;
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
+
         $this->vanityURL  = Token::getVanityURL();
 
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
@@ -223,6 +224,7 @@ class ApiSubmitter
 
     private function processTransaction(int $index, array $line): array
     {
+        $index++;
         $line    = $this->cleanupLine($line);
         $return  = [];
         $url     = SecretManager::getBaseUrl();
