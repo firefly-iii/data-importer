@@ -224,7 +224,7 @@ class ApiSubmitter
 
     private function processTransaction(int $index, array $line): array
     {
-        $index++;
+        ++$index;
         $line    = $this->cleanupLine($line);
         $return  = [];
         $url     = SecretManager::getBaseUrl();
