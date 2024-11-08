@@ -79,6 +79,11 @@ class Date implements ConverterInterface
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
             }
         }
+        if($carbon->year < 1984) {
+            app('log')->warning(sprintf('Date year is before than 1984 ("%s"), so year is set to today.', $carbon->format('Y-m-d H:i:s')));
+            $carbon->year = now()->year;
+            $carbon->startOfDay();
+        }
 
         return $carbon->format('Y-m-d H:i:s');
     }
