@@ -9,16 +9,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [Pull request 686](https://github.com/firefly-iii/data-importer/pull/686) (Add DB as Debit indicator) by @akhy
 
 ### Changed
-- #9272
-- #9357
+- [Issue 9272](https://github.com/firefly-iii/firefly-iii/issues/9272) (Update data-importer to reflect aquisition of Nordigen by Gocardless) reported by @gene1wood
+- [Issue 9357](https://github.com/firefly-iii/firefly-iii/issues/9357) (Data Importer exits with error code 1 when no transactions are found) reported by @diogotcorreia
 
 ### Fixed
 - Better error catching for rate limits from GoCardless
 - Fix link to documentation 
-- #9180
-- #9340
-- #9347
-- #9345
+- [Issue 9180](https://github.com/firefly-iii/firefly-iii/issues/9180) (Data importer - gocardless EUA is expired - print clear message instead of 500 server error) reported by @Ovenlade
+- [Issue 9340](https://github.com/firefly-iii/firefly-iii/issues/9340) (Default transaction import without year to current year) reported by @mokkun
+- [Issue 9347](https://github.com/firefly-iii/firefly-iii/issues/9347) (Importing transaction with huge external id throws error) reported by @diogotcorreia
+- [Issue 9345](https://github.com/firefly-iii/firefly-iii/issues/9345) (data importer - error lines don't match to actual lines in csv) reported by @rel-thanu
 
 ## 1.5.6 - 2024-09-15
 
