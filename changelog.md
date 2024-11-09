@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.5.7 - 2024-11-10
+
+### Added
+- Add debug information for rate limits from GoCardless
+- [Pull request 686](https://github.com/firefly-iii/data-importer/pull/686) (Add DB as Debit indicator) by @akhy
+
+### Changed
+- #9272
+- #9357
+
+### Fixed
+- Better error catching for rate limits from GoCardless
+- Fix link to documentation 
+- #9180
+- #9340
+- #9347
+- #9345
+
 ## 1.5.6 - 2024-09-15
 
 ### Changed

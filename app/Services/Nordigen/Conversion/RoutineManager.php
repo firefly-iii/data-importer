@@ -295,7 +295,8 @@ class RoutineManager implements RoutineManagerInterface
         foreach ($this->rateLimits as $accountId => $rateLimit) {
             // do not report if the remaining value is zero, but the reset time 1 or less.
             // this seems to be some kind of default value.
-            if (0 === $rateLimit['remaining'] && $rateLimit['reset'] <= 1) {
+            // change: do not report when the reset time is less than 60 seconds.
+            if ($rateLimit['reset'] <= 60) {
                 app('log')->debug(sprintf('Account "%s" has no interesting rate limit information.', $accountId));
 
                 continue;
