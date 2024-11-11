@@ -88,7 +88,7 @@
         "barryvdh/laravel-debugbar": "^3.14",
         "barryvdh/laravel-ide-helper": "^3.2",
         "ergebnis/phpstan-rules": "^2.2",
-        "fakerphp/faker": "^1.4",
+        "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.16",
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
