@@ -62,6 +62,7 @@ final class AutoImport extends Command
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
+
             return ExitCode::NO_CONNECTION->value;
         }
 
@@ -72,12 +73,14 @@ final class AutoImport extends Command
         if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));
             app('log')->error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
+
             return ExitCode::INVALID_PATH->value;
         }
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
+
             return ExitCode::NOT_ALLOWED_PATH->value;
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
@@ -89,6 +92,7 @@ final class AutoImport extends Command
             $this->info('https://docs.firefly-iii.org/');
 
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_FILES_FOUND->name));
+
             return ExitCode::NO_FILES_FOUND->value;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
@@ -105,9 +109,11 @@ final class AutoImport extends Command
                 $this->warn(sprintf('File %s returned code #%d', $file, $code));
             }
             app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
+
             return ExitCode::GENERAL_ERROR->value;
         }
         app('log')->error(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+
         return ExitCode::SUCCESS->value;
     }
 }

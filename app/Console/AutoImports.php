@@ -288,14 +288,17 @@ trait AutoImports
 
         if (count($this->importErrors) > 0 || count($this->conversionRateLimits) > 0) {
             app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
+
             return ExitCode::GENERAL_ERROR->value;
         }
         if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+
             return ExitCode::NOTHING_WAS_IMPORTED->value;
         }
 
         app('log')->error(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+
         return ExitCode::SUCCESS->value;
     }
 
