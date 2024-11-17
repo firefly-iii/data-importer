@@ -27,6 +27,7 @@ namespace App\Console\Commands;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
+use App\Enums\ExitCode;
 use Illuminate\Console\Command;
 
 /**
@@ -60,8 +61,8 @@ final class AutoImport extends Command
         $access    = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
-
-            return 64;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
+            return ExitCode::NO_CONNECTION->value;
         }
 
         $argument  = (string) ($this->argument('directory') ?? './');
@@ -70,13 +71,14 @@ final class AutoImport extends Command
         $directory = realpath($argument);
         if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));
-
-            return 65;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
+            return ExitCode::INVALID_PATH->value;
         }
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
-            return 66;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
+            return ExitCode::NOT_ALLOWED_PATH->value;
         }
         $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
@@ -86,7 +88,8 @@ final class AutoImport extends Command
             $this->info('To learn more about this process, read the docs:');
             $this->info('https://docs.firefly-iii.org/');
 
-            return 67;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_FILES_FOUND->name));
+            return ExitCode::NO_FILES_FOUND->value;
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
 
@@ -101,10 +104,10 @@ final class AutoImport extends Command
             foreach ($result as $file => $code) {
                 $this->warn(sprintf('File %s returned code #%d', $file, $code));
             }
-
-            return 1;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
+            return ExitCode::GENERAL_ERROR->value;
         }
-
-        return 0;
+        app('log')->error(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+        return ExitCode::SUCCESS->value;
     }
 }
