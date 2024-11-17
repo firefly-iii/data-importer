@@ -47,10 +47,10 @@ class ConversionStatus
      */
     public function __construct()
     {
-        $this->status   = self::CONVERSION_WAITING;
-        $this->errors   = [];
-        $this->warnings = [];
-        $this->messages = [];
+        $this->status     = self::CONVERSION_WAITING;
+        $this->errors     = [];
+        $this->warnings   = [];
+        $this->messages   = [];
         $this->rateLimits = [];
     }
 
@@ -59,11 +59,11 @@ class ConversionStatus
      */
     public static function fromArray(array $array): self
     {
-        $config           = new self();
-        $config->status   = $array['status'];
-        $config->errors   = $array['errors'] ?? [];
-        $config->warnings = $array['warnings'] ?? [];
-        $config->messages = $array['messages'] ?? [];
+        $config             = new self();
+        $config->status     = $array['status'];
+        $config->errors     = $array['errors'] ?? [];
+        $config->warnings   = $array['warnings'] ?? [];
+        $config->messages   = $array['messages'] ?? [];
         $config->rateLimits = $array['rate_limits'] ?? [];
 
         return $config;
@@ -72,10 +72,10 @@ class ConversionStatus
     public function toArray(): array
     {
         return [
-            'status'   => $this->status,
-            'errors'   => $this->errors,
-            'warnings' => $this->warnings,
-            'messages' => $this->messages,
+            'status'      => $this->status,
+            'errors'      => $this->errors,
+            'warnings'    => $this->warnings,
+            'messages'    => $this->messages,
             'rate_limits' => $this->rateLimits,
         ];
     }
