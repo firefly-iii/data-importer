@@ -58,11 +58,11 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(?string $identifier)
     {
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
-        $this->downloaded    = [];
+        $this->allErrors            = [];
+        $this->allWarnings          = [];
+        $this->allMessages          = [];
+        $this->allRateLimits        = [];
+        $this->downloaded           = [];
 
         if (null === $identifier) {
             $this->generateIdentifier();
@@ -130,7 +130,7 @@ class RoutineManager implements RoutineManagerInterface
         app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
@@ -309,7 +309,7 @@ class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             app('log')->debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
-            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
             }
