@@ -190,7 +190,7 @@ trait AutoImports
             $this->importMessages       = [];
             $this->importWarnings       = [];
         }
-        Log::debug(sprintf('Collection of exit codes: %s', join(', ', array_values($exitCodes))));
+        Log::debug(sprintf('Collection of exit codes: %s', implode(', ', array_values($exitCodes))));
 
         return $exitCodes;
     }
@@ -222,6 +222,7 @@ trait AutoImports
         if (!$jsonFileExists && !$hasFallbackConfig) {
             $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
             app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
+
             return ExitCode::CANNOT_READ_CONFIG->value;
         }
 
@@ -236,6 +237,7 @@ trait AutoImports
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
             app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
         $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
@@ -246,6 +248,7 @@ trait AutoImports
 
             // don't report this.
             app('log')->debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+
             return ExitCode::SUCCESS->value;
         }
 
@@ -270,6 +273,7 @@ trait AutoImports
                 )
             );
             app('log')->debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+
             return ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
         }
 
