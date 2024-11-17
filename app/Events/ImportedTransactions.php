@@ -39,15 +39,17 @@ class ImportedTransactions
     public array $errors;
     public array $messages;
     public array $warnings;
+    public array $rateLimits;
 
-    public function __construct(array $messages, array $warnings, array $errors)
+    public function __construct(array $messages, array $warnings, array $errors, array $rateLimits)
     {
         app('log')->debug('Created event ImportedTransactions with filtering (2)');
 
         // filter messages:
-        $this->messages = $this->filterArray('message(s)', $messages);
-        $this->warnings = $this->filterArray('warning(s)', $warnings);
-        $this->errors   = $this->filterArray('error(s)', $errors);
+        $this->messages   = $this->filterArray('message(s)', $messages);
+        $this->warnings   = $this->filterArray('warning(s)', $warnings);
+        $this->errors     = $this->filterArray('error(s)', $errors);
+        $this->rateLimits = $this->filterArray('rate limit message(s)', $rateLimits);
     }
 
     /**

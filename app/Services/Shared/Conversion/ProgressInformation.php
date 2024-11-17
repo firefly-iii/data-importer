@@ -35,10 +35,16 @@ trait ProgressInformation
     protected string $identifier;
     protected array  $messages = [];
     protected array  $warnings = [];
+    protected array  $rateLimits = [];
 
     final public function getErrors(): array
     {
         return $this->errors ?? [];
+    }
+
+    public function getRateLimits(): array
+    {
+        return $this->rateLimits ?? [];
     }
 
     final public function getMessages(): array
@@ -66,6 +72,17 @@ trait ProgressInformation
 
         // write errors to disk
         RoutineStatusManager::addError($this->identifier, $index, $error);
+    }
+
+    final protected function addRateLimit(int $index, string $message): void
+    {
+        Log::error(sprintf('[c] Add rate limit message to index #%d: %s', $index, $message));
+        $this->rateLimits         ??= [];
+        $this->rateLimits[$index] ??= [];
+        $this->rateLimits[$index][] = $message;
+
+        // write errors to disk
+        RoutineStatusManager::addRateLimit($this->identifier, $index, $message);
     }
 
     final protected function addMessage(int $index, string $message): void

@@ -153,7 +153,7 @@ final class Import extends Command
         $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
         $errors        = array_merge($this->importErrors, $this->conversionErrors);
 
-        event(new ImportedTransactions($messages, $warnings, $errors));
+        event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
         if (0 !== count($this->importErrors)) {
             $exitCode = 1;
         }

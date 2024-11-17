@@ -61,6 +61,30 @@ class RoutineStatusManager
         }
     }
 
+    public static function addRateLimit(string $identifier, int $index, string $message): void
+    {
+        $lineNo = $index + 1;
+        app('log')->debug(sprintf('Add rate limit message on index #%d (line no. %d): %s', $index, $lineNo, $message));
+
+        $disk   = \Storage::disk(self::DISK_NAME);
+
+        try {
+            if ($disk->exists($identifier)) {
+                try {
+                    $status = ConversionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                } catch (\JsonException $e) {
+                    app('log')->error($e->getMessage());
+                    $status = new ConversionStatus();
+                }
+                $status->rateLimits[$index] ??= [];
+                $status->rateLimits[$index][] = $message;
+                self::storeConversionStatus($identifier, $status);
+            }
+        } catch (FileNotFoundException $e) {
+            app('log')->error($e->getMessage());
+        }
+    }
+
     private static function storeConversionStatus(string $identifier, ConversionStatus $status): void
     {
         app('log')->debug(sprintf('Now in storeConversionStatus(%s): %s', $identifier, $status->status));

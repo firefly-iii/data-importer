@@ -162,7 +162,8 @@ class SubmitController extends Controller
             new ImportedTransactions(
                 array_merge($routine->getAllMessages()),
                 array_merge($routine->getAllWarnings()),
-                array_merge($routine->getAllErrors())
+                array_merge($routine->getAllErrors()),
+                []
             )
         );
 

@@ -55,7 +55,6 @@ class RoutineManager implements RoutineManagerInterface
     private TransactionProcessor $transactionProcessor;
 
     private array $downloaded;
-    private array $rateLimits;
 
     public function __construct(?string $identifier)
     {
@@ -315,7 +314,7 @@ class RoutineManager implements RoutineManagerInterface
                 $this->addWarning(0, $message);
             }
             if ($rateLimit['remaining'] > 0 && $rateLimit['remaining'] <= 3) {
-                $this->addMessage(0, $message);
+                $this->addRateLimit(0, $message);
             }
         }
     }

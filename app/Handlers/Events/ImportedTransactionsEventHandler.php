@@ -58,12 +58,14 @@ class ImportedTransactionsEventHandler
             'messages' => $event->messages,
             'warnings' => $event->warnings,
             'errors'   => $event->errors,
+            'rate_limits' => $event->rateLimits,
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {
             app('log')->info('Will send report message.');
             app('log')->debug(sprintf('Messages count: %s', count($event->messages)));
             app('log')->debug(sprintf('Warnings count: %s', count($event->warnings)));
             app('log')->debug(sprintf('Errors count  : %s', count($event->errors)));
+            app('log')->debug(sprintf('Rate limit message count  : %s', count($event->rateLimits)));
             app('log')->debug('If no error below this line, mail was sent!');
 
             try {

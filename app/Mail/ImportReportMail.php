@@ -42,6 +42,7 @@ class ImportReportMail extends Mailable
     public string $url;
     public string $version;
     public array  $warnings;
+    public array  $rateLimits;
 
     /**
      * Create a new message instance.
@@ -57,6 +58,7 @@ class ImportReportMail extends Mailable
         $this->errors   = $log['errors'] ?? [];
         $this->warnings = $log['warnings'] ?? [];
         $this->messages = $log['messages'] ?? [];
+        $this->rateLimits = $log['rate_limits'] ?? [];
     }
 
     /**

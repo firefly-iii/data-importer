@@ -29,21 +29,18 @@ namespace App\Services\Shared\Conversion;
  */
 class ConversionStatus
 {
-    /** @var string */
-    public const CONVERSION_DONE    = 'conv_done';
+    public const string CONVERSION_DONE    = 'conv_done';
 
-    /** @var string */
-    public const CONVERSION_ERRORED = 'conv_errored';
+    public const string CONVERSION_ERRORED = 'conv_errored';
 
-    /** @var string */
-    public const CONVERSION_RUNNING = 'conv_running';
+    public const string CONVERSION_RUNNING = 'conv_running';
 
-    /** @var string */
-    public const CONVERSION_WAITING = 'waiting_to_start';
+    public const string CONVERSION_WAITING = 'waiting_to_start';
     public array  $errors;
     public array  $messages;
     public string $status;
     public array  $warnings;
+    public array  $rateLimits;
 
     /**
      * ConversionStatus constructor.
@@ -54,6 +51,7 @@ class ConversionStatus
         $this->errors   = [];
         $this->warnings = [];
         $this->messages = [];
+        $this->rateLimits = [];
     }
 
     /**
@@ -66,6 +64,7 @@ class ConversionStatus
         $config->errors   = $array['errors'] ?? [];
         $config->warnings = $array['warnings'] ?? [];
         $config->messages = $array['messages'] ?? [];
+        $config->rateLimits = $array['rate_limits'] ?? [];
 
         return $config;
     }
@@ -77,6 +76,7 @@ class ConversionStatus
             'errors'   => $this->errors,
             'warnings' => $this->warnings,
             'messages' => $this->messages,
+            'rate_limits' => $this->rateLimits,
         ];
     }
 }

@@ -33,9 +33,19 @@
 @endforeach
 @endforeach
 
+@if(count($rateLimits) > 0)
+## Rate limit information
+@endif
+
+@foreach($rateLimits as $index => $objList)
+@foreach($objList as $message)
+- Item #{{ $index + 1 }}: {!! $message !!}
+@endforeach
+@endforeach
+
 <hr>
 
-@if(0 === count($errors) and 0 === count($messages) and 0 === count($warnings))
+@if(0 === count($errors) and 0 === count($messages) and 0 === count($warnings) and 0 === count($rateLimits))
 
 *No messages, warnings or errors: nothing to report*
 

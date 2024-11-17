@@ -29,10 +29,16 @@ trait CombinedProgressInformation
     private array $allErrors;
     private array $allMessages;
     private array $allWarnings;
+    private array $allRateLimits;
 
     final public function getAllErrors(): array
     {
         return $this->allErrors;
+    }
+
+    final public function getAllRateLimits(): array
+    {
+        return $this->allRateLimits;
     }
 
     final public function getAllMessages(): array

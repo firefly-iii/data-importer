@@ -55,6 +55,7 @@ trait AutoImports
     protected array  $conversionErrors   = [];
     protected array  $conversionMessages = [];
     protected array  $conversionWarnings = [];
+    protected array $conversionRateLimits = []; // only conversion can have rate limits.
     protected string $identifier;
     protected array  $importErrors       = [];
     protected array  $importMessages     = [];
@@ -183,6 +184,7 @@ trait AutoImports
             $this->conversionErrors   = [];
             $this->conversionMessages = [];
             $this->conversionWarnings = [];
+            $this->conversionRateLimits = [];
             $this->importErrors       = [];
             $this->importMessages     = [];
             $this->importWarnings     = [];
@@ -260,7 +262,8 @@ trait AutoImports
                 new ImportedTransactions(
                     array_merge($this->conversionMessages, $this->importMessages),
                     array_merge($this->conversionWarnings, $this->importWarnings),
-                    array_merge($this->conversionErrors, $this->importErrors)
+                    array_merge($this->conversionErrors, $this->importErrors),
+                    $this->conversionRateLimits
                 )
             );
 
@@ -278,9 +281,9 @@ trait AutoImports
         $messages          = array_merge($this->importMessages, $this->conversionMessages);
         $warnings          = array_merge($this->importWarnings, $this->conversionWarnings);
         $errors            = array_merge($this->importErrors, $this->conversionErrors);
-        event(new ImportedTransactions($messages, $warnings, $errors));
+        event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
 
-        if (count($this->importErrors) > 0) {
+        if (count($this->importErrors) > 0 || count($this->conversionRateLimits) > 0) {
             return 1;
         }
         if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
@@ -298,6 +301,7 @@ trait AutoImports
         $this->conversionMessages = [];
         $this->conversionWarnings = [];
         $this->conversionErrors   = [];
+        $this->conversionRateLimits = [];
         $flow                     = $configuration->getFlow();
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
@@ -358,6 +362,7 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionRateLimits = $manager->getAllRateLimits();
         }
         if (0 === count($transactions)) {
             app('log')->error('[a] Zero transactions!');
@@ -365,6 +370,7 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionRateLimits = $manager->getAllRateLimits();
         }
 
         // save transactions in 'jobs' directory under the same key as the conversion thing.
@@ -378,6 +384,7 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionRateLimits = $manager->getAllRateLimits();
             $transactions             = [];
         }
 
@@ -388,6 +395,7 @@ trait AutoImports
             $this->conversionMessages = $manager->getAllMessages();
             $this->conversionWarnings = $manager->getAllWarnings();
             $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionRateLimits = $manager->getAllRateLimits();
         }
         $this->importerAccounts   = $manager->getServiceAccounts();
     }
@@ -395,16 +403,21 @@ trait AutoImports
     private function reportConversion(): void
     {
         $list = [
-            'info'  => $this->conversionMessages,
-            'warn'  => $this->conversionWarnings,
-            'error' => $this->conversionErrors,
+            [$this->conversionMessages, 'info'],
+            [$this->conversionWarnings, 'warn'],
+            [$this->conversionErrors, 'error'],
+            [$this->conversionRateLimits, 'warn'],
         ];
-        foreach ($list as $func => $set) {
+        foreach ($list as $set) {
+            /** @var string $func */
+            $func = $set[1];
+            /** @var array $all */
+            $all = $set[0];
             /**
              * @var int   $index
              * @var array $messages
              */
-            foreach ($set as $index => $messages) {
+            foreach ($all as $index => $messages) {
                 if (count($messages) > 0) {
                     foreach ($messages as $message) {
                         $this->{$func}(sprintf('Conversion index (%s) %d: %s', $func, $index, $message)); // @phpstan-ignore-line
@@ -633,7 +646,8 @@ trait AutoImports
             new ImportedTransactions(
                 array_merge($this->conversionMessages, $this->importMessages),
                 array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors)
+                array_merge($this->conversionErrors, $this->importErrors),
+                $this->conversionRateLimits
             )
         );
     }
