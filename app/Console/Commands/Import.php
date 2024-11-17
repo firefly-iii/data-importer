@@ -171,7 +171,7 @@ final class Import extends Command
             $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
         }
-        if($exitCode === ExitCode::SUCCESS->value) {
+        if ($exitCode === ExitCode::SUCCESS->value) {
             app('log')->debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
         }
 
