@@ -137,10 +137,11 @@ final class Import extends Command
         $this->reportConversion();
 
         // crash here if the conversion failed.
-        $exitCode      = 0;
+        $exitCode      = ExitCode::SUCCESS->value;
         if (0 !== count($this->conversionErrors)) {
             $this->error('There are many errors in the data conversion. The import will stop here.');
             $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
         }
         if (0 === count($this->conversionErrors)) {
             $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
@@ -159,9 +160,14 @@ final class Import extends Command
         event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
         if (0 !== count($this->importErrors)) {
             $exitCode = ExitCode::GENERAL_ERROR->value;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
         }
         if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
             $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+        }
+        if($exitCode === ExitCode::SUCCESS->value) {
+            app('log')->debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
         }
 
         return $exitCode;
