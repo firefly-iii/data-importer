@@ -51,7 +51,6 @@ class TransactionProcessor
     private ?Carbon       $notAfter;
     private ?Carbon       $notBefore;
 
-
     /**
      * @throws ImporterErrorException
      */
