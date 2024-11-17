@@ -31,10 +31,10 @@ use Illuminate\Support\Facades\Log;
  */
 trait ProgressInformation
 {
-    protected array  $errors   = [];
+    protected array  $errors     = [];
     protected string $identifier;
-    protected array  $messages = [];
-    protected array  $warnings = [];
+    protected array  $messages   = [];
+    protected array  $warnings   = [];
     protected array  $rateLimits = [];
 
     final public function getErrors(): array

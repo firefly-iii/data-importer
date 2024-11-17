@@ -55,9 +55,9 @@ class ImportedTransactionsEventHandler
         }
 
         $log      = [
-            'messages' => $event->messages,
-            'warnings' => $event->warnings,
-            'errors'   => $event->errors,
+            'messages'    => $event->messages,
+            'warnings'    => $event->warnings,
+            'errors'      => $event->errors,
             'rate_limits' => $event->rateLimits,
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {

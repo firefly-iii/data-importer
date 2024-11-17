@@ -52,15 +52,15 @@ use Illuminate\Support\Facades\Log;
  */
 trait AutoImports
 {
-    protected array  $conversionErrors   = [];
-    protected array  $conversionMessages = [];
-    protected array  $conversionWarnings = [];
+    protected array  $conversionErrors    = [];
+    protected array  $conversionMessages  = [];
+    protected array  $conversionWarnings  = [];
     protected array $conversionRateLimits = []; // only conversion can have rate limits.
     protected string $identifier;
-    protected array  $importErrors       = [];
-    protected array  $importMessages     = [];
-    protected array  $importWarnings     = [];
-    protected array  $importerAccounts   = [];
+    protected array  $importErrors        = [];
+    protected array  $importMessages      = [];
+    protected array  $importWarnings      = [];
+    protected array  $importerAccounts    = [];
 
     private function getFiles(string $directory): array
     {
@@ -171,7 +171,7 @@ trait AutoImports
 
         /** @var string $file */
         foreach ($files as $file) {
-            $key                      = sprintf('%s/%s', $directory, $file);
+            $key                        = sprintf('%s/%s', $directory, $file);
 
             try {
                 $exitCodes[$key] = $this->importFile($directory, $file);
@@ -181,13 +181,13 @@ trait AutoImports
                 $exitCodes[$key] = 1;
             }
             // report has already been sent. Reset errors and continue.
-            $this->conversionErrors   = [];
-            $this->conversionMessages = [];
-            $this->conversionWarnings = [];
+            $this->conversionErrors     = [];
+            $this->conversionMessages   = [];
+            $this->conversionWarnings   = [];
             $this->conversionRateLimits = [];
-            $this->importErrors       = [];
-            $this->importMessages     = [];
-            $this->importWarnings     = [];
+            $this->importErrors         = [];
+            $this->importMessages       = [];
+            $this->importWarnings       = [];
         }
 
         return $exitCodes;
@@ -298,11 +298,11 @@ trait AutoImports
      */
     private function startConversion(Configuration $configuration, string $importableFile): void
     {
-        $this->conversionMessages = [];
-        $this->conversionWarnings = [];
-        $this->conversionErrors   = [];
+        $this->conversionMessages   = [];
+        $this->conversionWarnings   = [];
+        $this->conversionErrors     = [];
         $this->conversionRateLimits = [];
-        $flow                     = $configuration->getFlow();
+        $flow                       = $configuration->getFlow();
 
         app('log')->debug(sprintf('Now in %s', __METHOD__));
 
@@ -312,7 +312,7 @@ trait AutoImports
             exit(1);
         }
 
-        $manager                  = null;
+        $manager                    = null;
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType) {
@@ -352,52 +352,52 @@ trait AutoImports
 
         // then push stuff into the routine:
         $manager->setConfiguration($configuration);
-        $transactions             = [];
+        $transactions               = [];
 
         try {
             $transactions = $manager->start();
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
-            $this->conversionMessages = $manager->getAllMessages();
-            $this->conversionWarnings = $manager->getAllWarnings();
-            $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionMessages   = $manager->getAllMessages();
+            $this->conversionWarnings   = $manager->getAllWarnings();
+            $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
         }
         if (0 === count($transactions)) {
             app('log')->error('[a] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
-            $this->conversionMessages = $manager->getAllMessages();
-            $this->conversionWarnings = $manager->getAllWarnings();
-            $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionMessages   = $manager->getAllMessages();
+            $this->conversionWarnings   = $manager->getAllWarnings();
+            $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
         }
 
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk                     = \Storage::disk('jobs');
+        $disk                       = \Storage::disk('jobs');
 
         try {
             $disk->put(sprintf('%s.json', $this->identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
         } catch (\JsonException $e) {
             app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
-            $this->conversionMessages = $manager->getAllMessages();
-            $this->conversionWarnings = $manager->getAllWarnings();
-            $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionMessages   = $manager->getAllMessages();
+            $this->conversionWarnings   = $manager->getAllWarnings();
+            $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
-            $transactions             = [];
+            $transactions               = [];
         }
 
         if (count($transactions) > 0) {
             // set done:
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
 
-            $this->conversionMessages = $manager->getAllMessages();
-            $this->conversionWarnings = $manager->getAllWarnings();
-            $this->conversionErrors   = $manager->getAllErrors();
+            $this->conversionMessages   = $manager->getAllMessages();
+            $this->conversionWarnings   = $manager->getAllWarnings();
+            $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
         }
-        $this->importerAccounts   = $manager->getServiceAccounts();
+        $this->importerAccounts     = $manager->getServiceAccounts();
     }
 
     private function reportConversion(): void
@@ -411,8 +411,10 @@ trait AutoImports
         foreach ($list as $set) {
             /** @var string $func */
             $func = $set[1];
+
             /** @var array $all */
-            $all = $set[0];
+            $all  = $set[0];
+
             /**
              * @var int   $index
              * @var array $messages
