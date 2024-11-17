@@ -32,7 +32,6 @@ use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class Import
@@ -71,6 +70,7 @@ final class Import extends Command
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
+
             return ExitCode::NO_CONNECTION->value;
         }
 
@@ -85,6 +85,7 @@ final class Import extends Command
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
                 app('log')->error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
+
                 return ExitCode::INVALID_PATH->value;
             }
         }
@@ -95,6 +96,7 @@ final class Import extends Command
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
                 app('log')->error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
+
                 return ExitCode::NOT_ALLOWED_PATH->value;
             }
         }
@@ -104,6 +106,7 @@ final class Import extends Command
             $this->error($message);
             app('log')->error($message);
             app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
+
             return ExitCode::CANNOT_READ_CONFIG->value;
         }
 
@@ -112,6 +115,7 @@ final class Import extends Command
             $message = 'The importer can\'t import: could not decode the JSON in the config file.';
             $this->error($message);
             app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
         $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
@@ -121,6 +125,7 @@ final class Import extends Command
             app('log')->error($message);
 
             app('log')->error(sprintf('Exit code is %s.', ExitCode::IMPORTABLE_FILE_NOT_FOUND->name));
+
             return ExitCode::IMPORTABLE_FILE_NOT_FOUND->value;
         }
 
