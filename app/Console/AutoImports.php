@@ -190,6 +190,7 @@ trait AutoImports
             $this->importMessages       = [];
             $this->importWarnings       = [];
         }
+        Log::debug(sprintf('Collection of exit codes: %s', join(', ', array_values($exitCodes))));
 
         return $exitCodes;
     }
@@ -220,8 +221,8 @@ trait AutoImports
         // Should not happen
         if (!$jsonFileExists && !$hasFallbackConfig) {
             $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
-
-            return 68;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
+            return ExitCode::CANNOT_READ_CONFIG->value;
         }
 
         $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
@@ -234,8 +235,8 @@ trait AutoImports
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
-
-            return 69;
+            app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+            return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
         $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
@@ -244,7 +245,8 @@ trait AutoImports
             app('log')->warning('Almost tried to import a JSON file as a file lol. Skip it.');
 
             // don't report this.
-            return 0;
+            app('log')->debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+            return ExitCode::SUCCESS->value;
         }
 
         $configuration->updateDateRange();
@@ -256,7 +258,7 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+            $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
 
             // report about it anyway:
             event(
@@ -267,8 +269,8 @@ trait AutoImports
                     $this->conversionRateLimits
                 )
             );
-
-            return 72;
+            app('log')->debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            return ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
@@ -638,7 +640,7 @@ trait AutoImports
 
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
 
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
