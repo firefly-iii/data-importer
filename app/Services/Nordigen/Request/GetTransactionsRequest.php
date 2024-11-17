@@ -66,9 +66,7 @@ class GetTransactionsRequest extends Request
         $count        = 0;
         $transactions = $response['transactions'] ?? [];
         if (!array_key_exists('transactions', $response)) {
-            var_dump($response);
-
-            exit;
+            app('log')->error('No transactions found in response');
         }
         foreach ($keys as $key) {
             if (array_key_exists($key, $transactions)) {
