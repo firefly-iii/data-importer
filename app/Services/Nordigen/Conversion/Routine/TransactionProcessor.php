@@ -84,7 +84,7 @@ class TransactionProcessor
             } catch (AgreementExpiredException $e) {
                 $this->addError(
                     0,
-                    'Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
+                    '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
                 if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
                     $this->addError(0, $e->json['summary']);
@@ -133,7 +133,7 @@ class TransactionProcessor
                 app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
                 // agreement expired, whoops.
                 $return[$account]           = [];
-                $this->addError(0, $e->json['detail'] ?? 'Your EUA has expired.');
+                $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),

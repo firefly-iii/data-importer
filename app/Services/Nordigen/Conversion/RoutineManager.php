@@ -244,7 +244,7 @@ class RoutineManager implements RoutineManagerInterface
             app('log')->error($e->getMessage());
 
             // add error to current error thing:
-            $this->addError(0, sprintf('Could not download from GoCardless: %s', $e->getMessage()));
+            $this->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -275,7 +275,7 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->addError(0, sprintf('Error while collecting target accounts: %s', $e->getMessage()));
+            $this->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -328,7 +328,7 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $total) {
             app('log')->warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
-            $this->addError(0, 'No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
+            $this->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -347,7 +347,7 @@ class RoutineManager implements RoutineManagerInterface
             app('log')->error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
             app('log')->error($e->getMessage());
         } catch (AgreementExpiredException $e) {
-            $this->addError(0, 'The connection between your bank and GoCardless has expired.');
+            $this->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);

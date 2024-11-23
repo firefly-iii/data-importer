@@ -453,7 +453,7 @@ trait AutoImports
         // get files from disk:
         if (!$disk->has($fileName)) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message              = sprintf('File "%s" not found, cannot continue.', $fileName);
+            $message              = sprintf('[a100]: File "%s" not found, cannot continue.', $fileName);
             $this->error($message);
             SubmissionStatusManager::addError($this->identifier, 0, $message);
             $this->importMessages = $routine->getAllMessages();
@@ -469,7 +469,7 @@ trait AutoImports
             app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
         } catch (FileNotFoundException|\JsonException $e) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message              = sprintf('File "%s" could not be decoded, cannot continue..', $fileName);
+            $message              = sprintf('[a101]: File "%s" could not be decoded, cannot continue..', $fileName);
             $this->error($message);
             SubmissionStatusManager::addError($this->identifier, 0, $message);
             $this->importMessages = $routine->getAllMessages();

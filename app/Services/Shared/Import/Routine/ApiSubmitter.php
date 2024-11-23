@@ -171,7 +171,7 @@ class ApiSubmitter
                     sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult)
                 );
                 $message = sprintf(
-                    'There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).',
+                    '[a115]: There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).',
                     $field,
                     $value,
                     $this->vanityURL,
@@ -258,7 +258,7 @@ class ApiSubmitter
 
                 return $return;
             }
-            $message   = sprintf('Submission HTTP error: %s', e($e->getMessage()));
+            $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
             app('log')->error($e->getMessage());
             $this->addError($index, $message);
 
@@ -269,7 +269,7 @@ class ApiSubmitter
             foreach ($response->errors->messages() as $key => $errors) {
                 app('log')->error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
-                    $msg = sprintf('%s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
+                    $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
                         $this->addError($index, $msg);
                     }
@@ -284,7 +284,7 @@ class ApiSubmitter
             /** @var TransactionGroup $group */
             $group  = $response->getTransactionGroup();
             if (null === $group) {
-                $message = 'Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
+                $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
                 app('log')->error($message, $response->getRawData());
                 $this->addError($index, $message);
 
@@ -293,7 +293,7 @@ class ApiSubmitter
 
             // perhaps zero transactions in the array.
             if (0 === count($group->transactions)) {
-                $message = 'Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
+                $message = '[a119]: Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
                 app('log')->error($message, $response->getRawData());
                 $this->addError($index, $message);
 
@@ -495,7 +495,7 @@ class ApiSubmitter
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
             //            app('log')->error($e->getTraceAsString());
-            $this->addError(0, 'Could not store transaction: see the log files.');
+            $this->addError(0, '[a120]: Could not store transaction: see the log files.');
         }
         app('log')->debug(sprintf('Added import tag to transaction group #%d', $groupId));
     }
@@ -522,7 +522,7 @@ class ApiSubmitter
             /** @var PostTagResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
-            $message = sprintf('Could not create tag. %s', $e->getMessage());
+            $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
             app('log')->error($message);
             //            app('log')->error($e->getTraceAsString());
             $this->addError(0, $message);

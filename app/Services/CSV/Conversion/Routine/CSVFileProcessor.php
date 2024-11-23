@@ -65,7 +65,7 @@ class CSVFileProcessor
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
             // app('log')->error($e->getTraceAsString());
-            $message = sprintf('Could not set delimiter: %s', $e->getMessage());
+            $message = sprintf('[a106]: Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
 
             return [];
@@ -78,7 +78,7 @@ class CSVFileProcessor
         } catch (Exception $e) {
             app('log')->error($e->getMessage());
             //            app('log')->error($e->getTraceAsString());
-            $message = sprintf('Could not read CSV: %s', $e->getMessage());
+            $message = sprintf('[a107]: Could not read CSV: %s', $e->getMessage());
             $this->addError(0, $message);
 
             return [];
@@ -89,7 +89,7 @@ class CSVFileProcessor
         } catch (ImporterErrorException $e) {
             app('log')->error($e->getMessage());
             //            app('log')->error($e->getTraceAsString());
-            $message = sprintf('Could not parse CSV: %s', $e->getMessage());
+            $message = sprintf('[a108]: Could not parse CSV: %s', $e->getMessage());
             $this->addError(0, $message);
 
             return [];

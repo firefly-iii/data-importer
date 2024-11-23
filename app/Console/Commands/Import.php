@@ -54,7 +54,7 @@ final class Import extends Command
      *
      * @var string
      */
-    protected $signature   = 'importer:import
+    protected $signature = 'importer:import
     {config : The configuration file. }
     {file? : Optionally, the importable file you want to import}
     ';
@@ -66,7 +66,7 @@ final class Import extends Command
      */
     public function handle(): int
     {
-        $access        = $this->haveAccess();
+        $access = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
@@ -76,8 +76,8 @@ final class Import extends Command
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $file          = (string) $this->argument('file');
-        $config        = (string) $this->argument('config'); // @phpstan-ignore-line
+        $file   = (string) $this->argument('file');
+        $config = (string) $this->argument('config'); // @phpstan-ignore-line
 
         // validate config path:
         if ('' !== $config) {
@@ -110,7 +110,7 @@ final class Import extends Command
             return ExitCode::CANNOT_READ_CONFIG->value;
         }
 
-        $jsonResult    = $this->verifyJSON($config);
+        $jsonResult = $this->verifyJSON($config);
         if (false === $jsonResult) {
             $message = 'The importer can\'t import: could not decode the JSON in the config file.';
             $this->error($message);
@@ -142,11 +142,18 @@ final class Import extends Command
         $this->reportConversion();
 
         // crash here if the conversion failed.
-        $exitCode      = ExitCode::SUCCESS->value;
+        $exitCode = ExitCode::SUCCESS->value;
         if (0 !== count($this->conversionErrors)) {
-            $this->error('There are many errors in the data conversion. The import will stop here.');
-            $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
             app('log')->error(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
+            // could still be that there were simply no transactions (from GoCardless). This can result
+            // in another exit code.
+            if($this->isNothingDownloaded()) {
+                app('log')->error(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
+            }
+
+            $this->error('There are many errors in the data conversion. The import will stop here.');
         }
         if (0 === count($this->conversionErrors)) {
             $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
@@ -158,9 +165,9 @@ final class Import extends Command
         $this->reportBalanceDifferences($configuration);
 
         // merge things:
-        $messages      = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors        = array_merge($this->importErrors, $this->conversionErrors);
+        $messages = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings = array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors   = array_merge($this->importErrors, $this->conversionErrors);
 
         event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
         if (0 !== count($this->importErrors)) {
@@ -176,5 +183,19 @@ final class Import extends Command
         }
 
         return $exitCode;
+    }
+
+    private function isNothingDownloaded(): bool
+    {
+        /** @var array $errors */
+        foreach ($this->conversionErrors as $errors) {
+            /** @var string $error */
+            foreach ($errors as $error) {
+                if (str_contains($error, '[a111]')) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

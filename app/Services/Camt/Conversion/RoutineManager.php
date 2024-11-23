@@ -104,7 +104,7 @@ class RoutineManager implements RoutineManagerInterface
         $camtMessage        = $this->getCamtMessage();
         if (null === $camtMessage) {
             app('log')->error('The CAMT object is NULL, probably due to a previous error');
-            $this->addError(0, 'The CAMT object is NULL, probably due to a previous error');
+            $this->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
             // at this point there are very few (if not zero) errors from other steps in the routine.
             // Still: merge errors so they can be reported to the user:
             $this->mergeMessages(1);
@@ -124,7 +124,7 @@ class RoutineManager implements RoutineManagerInterface
 
         if (0 === count($transactions)) {
             app('log')->error('No transactions found in CAMT file');
-            $this->addError(0, 'No transactions found in CAMT file.');
+            $this->addError(0, '[a103]: No transactions found in CAMT file.');
 
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
@@ -158,7 +158,7 @@ class RoutineManager implements RoutineManagerInterface
         } catch (InvalidMessageException $e) {
             app('log')->error('Conversion error in RoutineManager::getCamtMessage');
             app('log')->error($e->getMessage());
-            $this->addError(0, sprintf('Could not convert CAMT.053 file: %s', $e->getMessage()));
+            $this->addError(0, sprintf('[a104]: Could not convert CAMT.053 file: %s', $e->getMessage()));
 
             return null;
         }
