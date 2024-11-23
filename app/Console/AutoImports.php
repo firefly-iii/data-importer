@@ -262,6 +262,15 @@ trait AutoImports
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
             $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+            app('log')->debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
+
+            // could still be that there were simply no transactions (from GoCardless). This can result
+            // in another exit code.
+            if ($this->isNothingDownloaded()) {
+                app('log')->debug(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
+            }
 
             // report about it anyway:
             event(
@@ -272,9 +281,7 @@ trait AutoImports
                     $this->conversionRateLimits
                 )
             );
-            app('log')->debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
-
-            return ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
+            return $exitCode;
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
@@ -665,5 +672,20 @@ trait AutoImports
                 $this->conversionRateLimits
             )
         );
+    }
+
+    protected function isNothingDownloaded(): bool
+    {
+        /** @var array $errors */
+        foreach ($this->conversionErrors as $errors) {
+            /** @var string $error */
+            foreach ($errors as $error) {
+                if (str_contains($error, '[a111]')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

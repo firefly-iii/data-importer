@@ -185,18 +185,5 @@ final class Import extends Command
         return $exitCode;
     }
 
-    private function isNothingDownloaded(): bool
-    {
-        /** @var array $errors */
-        foreach ($this->conversionErrors as $errors) {
-            /** @var string $error */
-            foreach ($errors as $error) {
-                if (str_contains($error, '[a111]')) {
-                    return true;
-                }
-            }
-        }
 
-        return false;
-    }
 }
