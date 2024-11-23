@@ -184,6 +184,4 @@ final class Import extends Command
 
         return $exitCode;
     }
-
-
 }
