@@ -58,11 +58,11 @@ class RoutineManager implements RoutineManagerInterface
     public function __construct(?string $identifier)
     {
         app('log')->debug('Constructed CAMT RoutineManager');
-        $this->content     = '';    // used in CLI
-        $this->allErrors   = [];
-        $this->allWarnings = [];
-        $this->allMessages = [];
-        $this->allRateLimits    = [];
+        $this->content       = '';    // used in CLI
+        $this->allErrors     = [];
+        $this->allWarnings   = [];
+        $this->allMessages   = [];
+        $this->allRateLimits = [];
         if (null === $identifier) {
             $this->generateIdentifier();
         }

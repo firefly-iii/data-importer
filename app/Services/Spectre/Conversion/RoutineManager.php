@@ -60,7 +60,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->allErrors            = [];
         $this->allWarnings          = [];
         $this->allMessages          = [];
-        $this->allRateLimits    = [];
+        $this->allRateLimits        = [];
 
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();

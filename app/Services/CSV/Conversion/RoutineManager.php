@@ -60,11 +60,11 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(?string $identifier)
     {
-        $this->forceCli    = false; // used in POST auto import
-        $this->content     = '';    // used in CLI
-        $this->allErrors   = [];
-        $this->allWarnings = [];
-        $this->allMessages = [];
+        $this->forceCli      = false; // used in POST auto import
+        $this->content       = '';    // used in CLI
+        $this->allErrors     = [];
+        $this->allWarnings   = [];
+        $this->allMessages   = [];
         $this->allRateLimits = [];
         if (null === $identifier) {
             $this->generateIdentifier();
