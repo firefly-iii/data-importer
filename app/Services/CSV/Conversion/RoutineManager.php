@@ -64,6 +64,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->allErrors   = [];
         $this->allWarnings = [];
         $this->allMessages = [];
+        $this->allRateLimits = [];
         if (null === $identifier) {
             $this->generateIdentifier();
         }
