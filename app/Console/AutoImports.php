@@ -1,4 +1,5 @@
 <?php
+
 /*
  * AutoImports.php
  * Copyright (c) 2021 james@firefly-iii.org
@@ -281,6 +282,7 @@ trait AutoImports
                     $this->conversionRateLimits
                 )
             );
+
             return $exitCode;
         }
 
