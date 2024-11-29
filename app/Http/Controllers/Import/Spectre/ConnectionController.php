@@ -77,6 +77,9 @@ class ConnectionController extends Controller
         // check if already has the correct customer:
         $hasCustomer       = false;
         $request           = new ListCustomersRequest($url, $appId, $secret);
+
+        $request->setTimeOut(config('importer.connection.timeout'));
+
         $list              = $request->get();
         $identifier        = null;
 
@@ -95,6 +98,7 @@ class ConnectionController extends Controller
         if (false === $hasCustomer) {
             // create new one
             $request             = new PostCustomerRequest($url, $appId, $secret);
+            $request->setTimeOut(config('importer.connection.timeout'));
             $request->identifier = config('spectre.customer_identifier', 'default_ff3_customer');
 
             /** @var PostCustomerResponse $customer */
@@ -121,6 +125,7 @@ class ConnectionController extends Controller
 
         app('log')->debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->customer = $identifier;
         $list              = $request->get();
 
@@ -145,6 +150,7 @@ class ConnectionController extends Controller
             $appId              = SpectreSecretManager::getAppId();
             $secret             = SpectreSecretManager::getSecret();
             $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
+            $newToken->setTimeOut(config('importer.connection.timeout'));
             $newToken->customer = $configuration->getIdentifier();
             $newToken->url      = route('011-connections.callback');
 

@@ -203,6 +203,7 @@ class ApiSubmitter
         $url            = SecretManager::getBaseUrl();
         $token          = SecretManager::getAccessToken();
         $request        = new GetSearchTransactionsRequest($url, $token);
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setQuery($query);
 
         try {

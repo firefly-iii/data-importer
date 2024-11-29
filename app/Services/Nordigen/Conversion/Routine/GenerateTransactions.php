@@ -393,6 +393,7 @@ class GenerateTransactions
         $url     = SecretManager::getBaseUrl();
         app('log')->debug(sprintf('Going to download account #%d', $accountId));
         $request = new GetAccountRequest($url, $token);
+        $request->setTimeOut(config('importer.connection.timeout'));
         $request->setId($accountId);
 
         // @var GetAccountResponse $result

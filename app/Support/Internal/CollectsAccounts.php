@@ -151,6 +151,7 @@ trait CollectsAccounts
         $appId                   = SpectreSecretManager::getAppId();
         $secret                  = SpectreSecretManager::getSecret();
         $spectreList             = new SpectreGetAccountsRequest($url, $appId, $secret);
+        $spectreList->setTimeOut(config('importer.connection.timeout'));
         $spectreList->connection = $configuration->getConnection();
 
         /** @var GetAccountsResponse $spectreAccounts */

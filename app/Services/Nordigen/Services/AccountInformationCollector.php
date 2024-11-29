@@ -107,6 +107,7 @@ class AccountInformationCollector
         $url          = config('nordigen.url');
         $accessToken  = TokenManager::getAccessToken();
         $request      = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
+        $request->setTimeOut(config('importer.connection.timeout'));
         // @var ArrayResponse $response
 
         try {
