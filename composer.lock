@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e43dbbad3f8ea5b5ed873c1cfca805d3",
+    "content-hash": "c0ae51172f310b5341c0db0705823cb7",
     "packages": [
         {
             "name": "brick/math",
@@ -6616,35 +6616,36 @@
         },
         {
             "name": "ergebnis/phpstan-rules",
-            "version": "2.4.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/phpstan-rules.git",
-                "reference": "78289a18d71adc0970e39f9d15f67f0ca7354be4"
+                "reference": "ffbc24d0d7e7b0d2b45f524753c20d83a83f66de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/phpstan-rules/zipball/78289a18d71adc0970e39f9d15f67f0ca7354be4",
-                "reference": "78289a18d71adc0970e39f9d15f67f0ca7354be4",
+                "url": "https://api.github.com/repos/ergebnis/phpstan-rules/zipball/ffbc24d0d7e7b0d2b45f524753c20d83a83f66de",
+                "reference": "ffbc24d0d7e7b0d2b45f524753c20d83a83f66de",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "nikic/php-parser": "^4.2.3 || ^5.0.0",
-                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+                "php": "~7.4.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
                 "phpstan/phpstan": "^1.10.21"
             },
             "require-dev": {
-                "doctrine/orm": "^3.3.0",
+                "doctrine/orm": "^2.20.0 || ^3.3.0",
                 "ergebnis/composer-normalize": "^2.44.0",
                 "ergebnis/license": "^2.6.0",
-                "ergebnis/php-cs-fixer-config": "^6.37.0",
-                "ergebnis/phpunit-slow-test-detector": "^2.16.1",
-                "nette/di": "^3.2.3",
+                "ergebnis/php-cs-fixer-config": "^6.39.0",
+                "ergebnis/phpunit-slow-test-detector": "^2.17.0",
+                "nette/di": "^3.1.10",
+                "nikic/php-parser": "^4.19.4",
                 "phpstan/phpstan-deprecation-rules": "^1.2.1",
                 "phpstan/phpstan-strict-rules": "^1.6.1",
-                "phpunit/phpunit": "^10.5.26",
-                "psr/container": "^2.0.2"
+                "phpunit/phpunit": "^9.6.21",
+                "psr/container": "^2.0.2",
+                "symfony/process": "^5.4.47"
             },
             "type": "phpstan-extension",
             "extra": {
@@ -6681,7 +6682,7 @@
                 "security": "https://github.com/ergebnis/phpstan-rules/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/phpstan-rules"
             },
-            "time": "2024-11-22T19:14:44+00:00"
+            "time": "2024-12-01T16:44:41+00:00"
         },
         {
             "name": "fakerphp/faker",
@@ -10254,6 +10255,6 @@
         "ext-bcmath": "*",
         "ext-json": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
