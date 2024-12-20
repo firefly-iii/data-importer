@@ -165,6 +165,12 @@ class TokenController extends Controller
             $compare = -1;
         }
 
+        if (str_starts_with($result->version, 'branch')) {
+            // overrule compare, because the user is running a develop version
+            app('log')->warning(sprintf('You are connecting to a branch version of Firefly III (%s). This may not work as expected.', $result->version));
+            $compare = -1;
+        }
+
         if (1 === $compare) {
             $errorMessage = sprintf(
                 'Your Firefly III version %s is below the minimum required version %s',
