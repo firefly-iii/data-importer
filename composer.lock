@@ -1266,16 +1266,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.35.1",
+            "version": "v11.36.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "dcfa130ede1a6fa4343dc113410963e791ad34fb"
+                "reference": "df06f5163f4550641fdf349ebc04916a61135a64"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/dcfa130ede1a6fa4343dc113410963e791ad34fb",
-                "reference": "dcfa130ede1a6fa4343dc113410963e791ad34fb",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/df06f5163f4550641fdf349ebc04916a61135a64",
+                "reference": "df06f5163f4550641fdf349ebc04916a61135a64",
                 "shasum": ""
             },
             "require": {
@@ -1296,7 +1296,7 @@
                 "guzzlehttp/uri-template": "^1.0",
                 "laravel/prompts": "^0.1.18|^0.2.0|^0.3.0",
                 "laravel/serializable-closure": "^1.3|^2.0",
-                "league/commonmark": "^2.2.1",
+                "league/commonmark": "^2.6",
                 "league/flysystem": "^3.25.1",
                 "league/flysystem-local": "^3.25.1",
                 "league/uri": "^7.5.1",
@@ -1311,7 +1311,7 @@
                 "symfony/console": "^7.0.3",
                 "symfony/error-handler": "^7.0.3",
                 "symfony/finder": "^7.0.3",
-                "symfony/http-foundation": "^7.0.3",
+                "symfony/http-foundation": "^7.2.0",
                 "symfony/http-kernel": "^7.0.3",
                 "symfony/mailer": "^7.0.3",
                 "symfony/mime": "^7.0.3",
@@ -1477,7 +1477,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-12-12T18:25:58+00:00"
+            "time": "2024-12-17T22:32:08+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -1540,16 +1540,16 @@
         },
         {
             "name": "laravel/serializable-closure",
-            "version": "v2.0.0",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/serializable-closure.git",
-                "reference": "0d8d3d8086984996df86596a86dea60398093a81"
+                "reference": "613b2d4998f85564d40497e05e89cb6d9bd1cbe8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/0d8d3d8086984996df86596a86dea60398093a81",
-                "reference": "0d8d3d8086984996df86596a86dea60398093a81",
+                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/613b2d4998f85564d40497e05e89cb6d9bd1cbe8",
+                "reference": "613b2d4998f85564d40497e05e89cb6d9bd1cbe8",
                 "shasum": ""
             },
             "require": {
@@ -1597,7 +1597,7 @@
                 "issues": "https://github.com/laravel/serializable-closure/issues",
                 "source": "https://github.com/laravel/serializable-closure"
             },
-            "time": "2024-11-19T01:38:44+00:00"
+            "time": "2024-12-16T15:26:28+00:00"
         },
         {
             "name": "league/commonmark",
@@ -1790,16 +1790,16 @@
         },
         {
             "name": "league/csv",
-            "version": "9.20.0",
+            "version": "9.20.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/csv.git",
-                "reference": "553579df208641ada6ffb450b3a151e2fcfa4f31"
+                "reference": "491d1e79e973a7370c7571dc0fe4a7241f4936ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/csv/zipball/553579df208641ada6ffb450b3a151e2fcfa4f31",
-                "reference": "553579df208641ada6ffb450b3a151e2fcfa4f31",
+                "url": "https://api.github.com/repos/thephpleague/csv/zipball/491d1e79e973a7370c7571dc0fe4a7241f4936ee",
+                "reference": "491d1e79e973a7370c7571dc0fe4a7241f4936ee",
                 "shasum": ""
             },
             "require": {
@@ -1873,7 +1873,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-13T15:49:27+00:00"
+            "time": "2024-12-18T10:11:15+00:00"
         },
         {
             "name": "league/flysystem",
@@ -2471,10 +2471,6 @@
             ],
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "3.x-dev",
-                    "dev-2.x": "2.x-dev"
-                },
                 "laravel": {
                     "providers": [
                         "Carbon\\Laravel\\ServiceProvider"
@@ -2484,6 +2480,10 @@
                     "includes": [
                         "extension.neon"
                     ]
+                },
+                "branch-alias": {
+                    "dev-2.x": "2.x-dev",
+                    "dev-master": "3.x-dev"
                 }
             },
             "autoload": {
@@ -6451,16 +6451,16 @@
         },
         {
             "name": "barryvdh/laravel-ide-helper",
-            "version": "v3.2.2",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/barryvdh/laravel-ide-helper.git",
-                "reference": "07e3bd8796f3d1414801a03d3783f9d3ec9efc08"
+                "reference": "b7675670f75914bf34afdea52a6c2fe3781f7c44"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-ide-helper/zipball/07e3bd8796f3d1414801a03d3783f9d3ec9efc08",
-                "reference": "07e3bd8796f3d1414801a03d3783f9d3ec9efc08",
+                "url": "https://api.github.com/repos/barryvdh/laravel-ide-helper/zipball/b7675670f75914bf34afdea52a6c2fe3781f7c44",
+                "reference": "b7675670f75914bf34afdea52a6c2fe3781f7c44",
                 "shasum": ""
             },
             "require": {
@@ -6529,7 +6529,7 @@
             ],
             "support": {
                 "issues": "https://github.com/barryvdh/laravel-ide-helper/issues",
-                "source": "https://github.com/barryvdh/laravel-ide-helper/tree/v3.2.2"
+                "source": "https://github.com/barryvdh/laravel-ide-helper/tree/v3.3.0"
             },
             "funding": [
                 {
@@ -6541,7 +6541,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-10-29T14:00:16+00:00"
+            "time": "2024-12-18T08:24:19+00:00"
         },
         {
             "name": "barryvdh/reflection-docblock",
@@ -6695,13 +6695,13 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-main": "3.x-dev"
-                },
                 "phpstan": {
                     "includes": [
                         "extension.neon"
                     ]
+                },
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
                 }
             },
             "autoload": {
@@ -7205,16 +7205,16 @@
         },
         {
             "name": "maximebf/debugbar",
-            "version": "v1.23.4",
+            "version": "v1.23.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/maximebf/php-debugbar.git",
-                "reference": "0815f47bdd867b816b4bf2ca1c7bd7f89e1527ca"
+                "url": "https://github.com/php-debugbar/php-debugbar.git",
+                "reference": "eeabd61a1f19ba5dcd5ac4585a477130ee03ce25"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/maximebf/php-debugbar/zipball/0815f47bdd867b816b4bf2ca1c7bd7f89e1527ca",
-                "reference": "0815f47bdd867b816b4bf2ca1c7bd7f89e1527ca",
+                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/eeabd61a1f19ba5dcd5ac4585a477130ee03ce25",
+                "reference": "eeabd61a1f19ba5dcd5ac4585a477130ee03ce25",
                 "shasum": ""
             },
             "require": {
@@ -7266,10 +7266,10 @@
                 "debugbar"
             ],
             "support": {
-                "issues": "https://github.com/maximebf/php-debugbar/issues",
-                "source": "https://github.com/maximebf/php-debugbar/tree/v1.23.4"
+                "issues": "https://github.com/php-debugbar/php-debugbar/issues",
+                "source": "https://github.com/php-debugbar/php-debugbar/tree/v1.23.5"
             },
-            "time": "2024-12-05T10:36:51+00:00"
+            "time": "2024-12-15T19:20:42+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -7982,16 +7982,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.12",
+            "version": "1.12.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "b5ae1b88f471d3fd4ba1aa0046234b5ca3776dd0"
+                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b5ae1b88f471d3fd4ba1aa0046234b5ca3776dd0",
-                "reference": "b5ae1b88f471d3fd4ba1aa0046234b5ca3776dd0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b469068840cfa031e1deaf2fa1886d00e20680f",
+                "reference": "9b469068840cfa031e1deaf2fa1886d00e20680f",
                 "shasum": ""
             },
             "require": {
@@ -8036,7 +8036,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-28T22:13:23+00:00"
+            "time": "2024-12-17T17:00:20+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -8562,12 +8562,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "233f7c395ac3b83e3c85aa304f3350bf8897aca5"
+                "reference": "4aa68d3ea343b9576b5fdebef1332f701a7bc994"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/233f7c395ac3b83e3c85aa304f3350bf8897aca5",
-                "reference": "233f7c395ac3b83e3c85aa304f3350bf8897aca5",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/4aa68d3ea343b9576b5fdebef1332f701a7bc994",
+                "reference": "4aa68d3ea343b9576b5fdebef1332f701a7bc994",
                 "shasum": ""
             },
             "conflict": {
@@ -8677,7 +8677,7 @@
                 "contao/managed-edition": "<=1.5",
                 "corveda/phpsandbox": "<1.3.5",
                 "cosenary/instagram": "<=2.3",
-                "craftcms/cms": "<=4.12.6.1|>=5,<=5.4.7.1",
+                "craftcms/cms": "<4.13.2|>=5,<5.5.2",
                 "croogo/croogo": "<4",
                 "cuyz/valinor": "<0.12",
                 "czim/file-handling": "<1.5|>=2,<2.3",
@@ -8972,7 +8972,6 @@
                 "neos/swiftmailer": "<5.4.5",
                 "netgen/tagsbundle": ">=3.4,<3.4.11|>=4,<4.0.15",
                 "nette/application": ">=2,<2.0.19|>=2.1,<2.1.13|>=2.2,<2.2.10|>=2.3,<2.3.14|>=2.4,<2.4.16|>=3,<3.0.6",
-                "nette/database": "<=3.2.4",
                 "nette/nette": ">=2,<2.0.19|>=2.1,<2.1.13",
                 "nilsteampassnet/teampass": "<3.0.10",
                 "nonfiction/nterchange": "<4.1.1",
@@ -9155,7 +9154,7 @@
                 "snipe/snipe-it": "<=7.0.13",
                 "socalnick/scn-social-auth": "<1.15.2",
                 "socialiteproviders/steam": "<1.1",
-                "spatie/browsershot": "<5.0.1",
+                "spatie/browsershot": "<5.0.2",
                 "spatie/image-optimizer": "<1.7.3",
                 "spencer14420/sp-php-email-handler": "<1",
                 "spipu/html2pdf": "<5.2.8",
@@ -9268,7 +9267,7 @@
                 "typo3fluid/fluid": ">=2,<2.0.8|>=2.1,<2.1.7|>=2.2,<2.2.4|>=2.3,<2.3.7|>=2.4,<2.4.4|>=2.5,<2.5.11|>=2.6,<2.6.10",
                 "ua-parser/uap-php": "<3.8",
                 "uasoft-indonesia/badaso": "<=2.9.7",
-                "unisharp/laravel-filemanager": "<2.6.4",
+                "unisharp/laravel-filemanager": "<2.9.1",
                 "unopim/unopim": "<0.1.5",
                 "userfrosting/userfrosting": ">=0.3.1,<4.6.3",
                 "usmanhalalit/pixie": "<1.0.3|>=2,<2.0.2",
@@ -9406,7 +9405,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-13T21:04:51+00:00"
+            "time": "2024-12-18T20:05:40+00:00"
         },
         {
             "name": "sebastian/cli-parser",
