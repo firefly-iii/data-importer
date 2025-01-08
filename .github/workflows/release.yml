@@ -79,6 +79,7 @@ jobs:
         run: |
           npm install
           npm update
+          npm i -D esbuild@0.24.0
           npm run build --workspace=v2
       - name: Run CI
         run: |
