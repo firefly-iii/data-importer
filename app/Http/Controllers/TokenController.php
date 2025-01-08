@@ -164,6 +164,11 @@ class TokenController extends Controller
             app('log')->warning(sprintf('You are connecting to a development version of Firefly III (%s). This may not work as expected.', $result->version));
             $compare = -1;
         }
+        if (str_starts_with($result->version, 'branch')) {
+            // overrule compare, because the user is running a branch version
+            app('log')->warning(sprintf('You are connecting to a branch version of Firefly III (%s). This may not work as expected.', $result->version));
+            $compare = -1;
+        }
 
         if (1 === $compare) {
             $errorMessage = sprintf(
@@ -297,25 +302,25 @@ class TokenController extends Controller
 
         // grab base URL from config first, otherwise from submitted data:
         $baseURL           = config('importer.url');
-        app('log')->debug(sprintf('[a] Base URL is "%s"', $baseURL));
+        app('log')->debug(sprintf('[a] Base URL is "%s" (based on "FIREFLY_III_URL")', $baseURL));
         $vanityURL         = $baseURL;
 
-        app('log')->debug(sprintf('[b] Vanity URL is now "%s"', $vanityURL));
+        app('log')->debug(sprintf('[b] Vanity URL is now "%s" (based on "FIREFLY_III_URL")', $vanityURL));
 
         // if the config has a vanity URL it will always overrule.
         if ('' !== (string) config('importer.vanity_url')) {
             $vanityURL = config('importer.vanity_url');
-            app('log')->debug(sprintf('[c] Vanity URL is now "%s"', $vanityURL));
+            app('log')->debug(sprintf('[c] Vanity URL is now "%s" (based on "VANITY_URL")', $vanityURL));
         }
 
         // otherwise take base URL from the submitted data:
         if (array_key_exists('base_url', $data) && '' !== $data['base_url']) {
             $baseURL = $data['base_url'];
-            app('log')->debug(sprintf('[d] Base URL is now "%s"', $baseURL));
+            app('log')->debug(sprintf('[d] Base URL is now "%s" (from POST data)', $baseURL));
         }
         if ('' === (string) $vanityURL) {
             $vanityURL = $baseURL;
-            app('log')->debug(sprintf('[e] Vanity URL is now "%s"', $vanityURL));
+            app('log')->debug(sprintf('[e] Vanity URL is now "%s" (from base URL)', $vanityURL));
         }
 
         // return request for permission:

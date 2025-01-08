@@ -26,9 +26,11 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Services\Shared\Authentication\SecretManager;
+use App\Support\RequestCache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class InfoCollector
@@ -46,17 +48,25 @@ class InfoCollector
     {
         app('log')->debug('Now in collectAccountTypes()');
         // get list of asset accounts:
-        $url      = SecretManager::getBaseUrl();
-        $token    = SecretManager::getAccessToken();
-        $return   = [];
-        $count    = 0;
+        $url    = SecretManager::getBaseUrl();
+        $token  = SecretManager::getAccessToken();
+        $cacheKey = sprintf('%s-%s', $url, 'collectAccountTypes');
+        $return = [];
+        $count  = 0;
 
-        $request  = new GetAccountsRequest($url, $token);
-        $request->setType(GetAccountsRequest::ALL);
-        $request->setVerify(config('importer.connection.verify'));
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $response = $request->get();
-
+        $inCache = RequestCache::has($cacheKey, $token);
+        if (!$inCache) {
+            Log::debug('Get response fresh!');
+            $request = new GetAccountsRequest($url, $token);
+            $request->setType(GetAccountsRequest::ALL);
+            $request->setVerify(config('importer.connection.verify'));
+            $request->setTimeOut(config('importer.connection.timeout'));
+            $response = $request->get();
+        }
+        if ($inCache) {
+            Log::debug('Get response from cache!');
+            return RequestCache::get($cacheKey, $token);
+        }
         /** @var Account $account */
         foreach ($response as $account) {
             $return[$account->id] = $account->type;
@@ -64,6 +74,7 @@ class InfoCollector
         }
         app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
 
+        RequestCache::set($cacheKey, $token, $return);
         return $return;
     }
 }

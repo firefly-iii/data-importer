@@ -29,6 +29,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Conversion\Task\AbstractTask;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\ProgressInformation;
+use App\Support\RequestCache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
@@ -65,11 +66,19 @@ class PseudoTransactionProcessor
      */
     private function getDefaultAccount(?int $accountId): void
     {
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
+        $cacheKey = sprintf('%s-%s-%s', $url, $accountId, 'getDefaultAccount');
 
         if (null !== $accountId) {
-            $accountRequest       = new GetAccountRequest($url, $token);
+            // in cache perhaps?
+            $inCache = RequestCache::has($cacheKey, $token);
+            if ($inCache) {
+                $this->defaultAccount = RequestCache::get($cacheKey, $token);
+                return;
+            }
+
+            $accountRequest = new GetAccountRequest($url, $token);
             $accountRequest->setVerify(config('importer.connection.verify'));
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
@@ -83,6 +92,7 @@ class PseudoTransactionProcessor
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
             $this->defaultAccount = $result->getAccount();
+            RequestCache::set($cacheKey, $token, $this->defaultAccount);
         }
     }
 
@@ -91,8 +101,8 @@ class PseudoTransactionProcessor
      */
     private function getDefaultCurrency(): void
     {
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
 
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
@@ -143,7 +153,7 @@ class PseudoTransactionProcessor
                 $object->setTransactionCurrency($this->defaultCurrency);
             }
 
-            $line   = $object->process($line);
+            $line = $object->process($line);
         }
         app('log')->debug('Final transaction: ', $line);
 
