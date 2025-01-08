@@ -7,6 +7,10 @@ on:
         description: 'Release "v1.2.3" or "develop"'
         required: true
         default: 'develop'
+      phpversion:
+        description: 'PHP version'
+        required: true
+        default: '8.4'
   schedule:
     - cron: '0 3 * * TUE'
 
@@ -36,7 +40,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ github.event.inputs.phpversion }}
           extensions: mbstring, intl, zip, bcmath
       - name: Cleanup changelog
         id: cleanup-changelog
