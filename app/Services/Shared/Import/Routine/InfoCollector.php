@@ -48,16 +48,16 @@ class InfoCollector
     {
         app('log')->debug('Now in collectAccountTypes()');
         // get list of asset accounts:
-        $url    = SecretManager::getBaseUrl();
-        $token  = SecretManager::getAccessToken();
+        $url      = SecretManager::getBaseUrl();
+        $token    = SecretManager::getAccessToken();
         $cacheKey = sprintf('%s-%s', $url, 'collectAccountTypes');
-        $return = [];
-        $count  = 0;
+        $return   = [];
+        $count    = 0;
 
-        $inCache = RequestCache::has($cacheKey, $token);
+        $inCache  = RequestCache::has($cacheKey, $token);
         if (!$inCache) {
             Log::debug('Get response fresh!');
-            $request = new GetAccountsRequest($url, $token);
+            $request  = new GetAccountsRequest($url, $token);
             $request->setType(GetAccountsRequest::ALL);
             $request->setVerify(config('importer.connection.verify'));
             $request->setTimeOut(config('importer.connection.timeout'));
@@ -65,8 +65,10 @@ class InfoCollector
         }
         if ($inCache) {
             Log::debug('Get response from cache!');
+
             return RequestCache::get($cacheKey, $token);
         }
+
         /** @var Account $account */
         foreach ($response as $account) {
             $return[$account->id] = $account->type;
@@ -75,6 +77,7 @@ class InfoCollector
         app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
 
         RequestCache::set($cacheKey, $token, $return);
+
         return $return;
     }
 }

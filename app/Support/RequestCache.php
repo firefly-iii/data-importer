@@ -1,4 +1,5 @@
 <?php
+
 /*
  * RequestCache.php
  * Copyright (c) 2024 james@firefly-iii.org
@@ -31,9 +32,10 @@ class RequestCache
     public static function has(string $identifier, string $token): bool
     {
         Log::debug('has key in cache?');
-        $key = self::generateKey($identifier, $token);
+        $key    = self::generateKey($identifier, $token);
         $result = cache()->has($key);
-        Log::debug(sprintf('has key "%s" in cache? %s', substr($key,0,10), $result ? 'yes' : 'no'));
+        Log::debug(sprintf('has key "%s" in cache? %s', substr($key, 0, 10), $result ? 'yes' : 'no'));
+
         return $result;
     }
 
@@ -41,6 +43,7 @@ class RequestCache
     {
         Log::debug('get!');
         $key = self::generateKey($identifier, $token);
+
         return cache()->get($key);
     }
 
@@ -51,10 +54,11 @@ class RequestCache
         cache()->forever($key, $data);
     }
 
-    private static function generateKey(string $identifier, string $token): string {
-        $hash =  hash('sha256', sprintf('%s-%s', $identifier, $token));
-        Log::debug(sprintf('generateKey("%s", "%s...") results in "%s..."', $identifier, substr($token,0,10), substr($hash,0,10)));
+    private static function generateKey(string $identifier, string $token): string
+    {
+        $hash = hash('sha256', sprintf('%s-%s', $identifier, $token));
+        Log::debug(sprintf('generateKey("%s", "%s...") results in "%s..."', $identifier, substr($token, 0, 10), substr($hash, 0, 10)));
+
         return $hash;
     }
-
 }
