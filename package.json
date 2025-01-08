@@ -1,5 +1,8 @@
 {
     "workspaces": [
         "resources/js/v2"
-    ]
+    ],
+    "devDependencies": {
+        "esbuild": "^0.24.0"
+    }
 }
