@@ -72,7 +72,7 @@
         }
     ],
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "ext-bcmath": "*",
         "ext-json": "*",
         "firefly-iii/api-support-classes": "@dev",
