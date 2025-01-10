@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## 1.6.0 - 2024-01-xx
 
 ### Fixed 
-- #9513
+- [Discussion 9513](https://github.com/orgs/firefly-iii/discussions/9513) (Importer Stuck on Configuration with no exception) started by @KasparRosin
 
 ## v1.5.7 - 2024-11-10
 

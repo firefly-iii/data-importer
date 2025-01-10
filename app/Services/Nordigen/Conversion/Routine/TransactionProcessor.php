@@ -98,7 +98,7 @@ class TransactionProcessor
                 continue;
             }
             app('log')->debug('Done downloading information for debug purposes.');
-                $this->accounts[] = $fullInfo;
+            $this->accounts[]           = $fullInfo;
 
             try {
                 $accessToken = TokenManager::getAccessToken();
