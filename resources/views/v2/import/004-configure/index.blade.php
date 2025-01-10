@@ -35,7 +35,7 @@
 
 
         <!-- user has no accounts -->
-        @if(0 === count($fireflyIIIaccounts['assets']) && 0 === count($fireflyIIIaccounts['liabilities']) && ('nordigen' === $flow || 'spectre' === $flow))
+        @if(0 === count($fireflyIIIaccounts['assets']) && 0 === count($fireflyIIIaccounts['liabilities']) )
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
