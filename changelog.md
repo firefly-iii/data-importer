@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.6.0 - 2024-01-xx
 
+### Changed
+
+Due to changes in the Docker image, the commands that use `WEB_SERVER=false` to automatically import data need another docker container. You can read more about it [in the documentation](https://docs.firefly-iii.org/how-to/data-importer/import/automated/). 
+
 ### Fixed 
 - [Discussion 9513](https://github.com/orgs/firefly-iii/discussions/9513) (Importer Stuck on Configuration with no exception) started by @KasparRosin
 

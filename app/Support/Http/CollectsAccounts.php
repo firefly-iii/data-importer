@@ -64,6 +64,48 @@ trait CollectsAccounts
         return $return;
     }
 
+    protected function collectExpenseAccounts(): array
+    {
+        app('log')->debug('Now in collectExpenseAccounts()');
+
+        try {
+            $set1 = $this->collectAccounts('expense');
+        } catch (ApiHttpException $e) {
+            app('log')->error(sprintf('Could not collect expense accounts: %s', $e->getMessage()));
+            $set1 = [];
+        }
+
+        $return = [];
+        foreach ($set1 as $key => $value) {
+            if (is_string($key) && !array_key_exists($key, $return)) {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
+    }
+
+    protected function collectRevenueAccounts(): array
+    {
+        app('log')->debug('Now in collectExpenseAccounts()');
+
+        try {
+            $set1 = $this->collectAccounts('revenue');
+        } catch (ApiHttpException $e) {
+            app('log')->error(sprintf('Could not collect revenue accounts: %s', $e->getMessage()));
+            $set1 = [];
+        }
+
+        $return = [];
+        foreach ($set1 as $key => $value) {
+            if (is_string($key) && !array_key_exists($key, $return)) {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
+    }
+
     /**
      * @throws ApiHttpException
      */
