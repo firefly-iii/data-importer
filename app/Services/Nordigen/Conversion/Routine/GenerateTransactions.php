@@ -71,8 +71,8 @@ class GenerateTransactions
         $this->targetTypes         = [];
         $this->nordigenAccountInfo = [];
         $this->userAccounts        = [];
-        $this->expenseAccounts = [];
-        $this->revenueAccounts = [];
+        $this->expenseAccounts     = [];
+        $this->revenueAccounts     = [];
         bcscale(12);
     }
 
@@ -132,13 +132,13 @@ class GenerateTransactions
         $array = $this->collectExpenseAccounts();
         foreach ($array as $number => $info) {
             $this->expenseAccounts[$number] = $info['id'];
-            $this->targetTypes[$number]    = $info['type'];
+            $this->targetTypes[$number]     = $info['type'];
         }
         // do the same for revenue accounts
         $array = $this->collectRevenueAccounts();
         foreach ($array as $number => $info) {
             $this->revenueAccounts[$number] = $info['id'];
-            $this->targetTypes[$number]    = $info['type'];
+            $this->targetTypes[$number]     = $info['type'];
         }
 
         Log::debug(sprintf('Nordigen: Collected %d target accounts.', count($this->targetAccounts)));
@@ -206,7 +206,7 @@ class GenerateTransactions
             'external_id'            => $entry->getTransactionId(),
             'internal_reference'     => $entry->accountIdentifier,
             'additional-information' => $entry->additionalInformation,
-            'bonus_tags' => [],
+            'bonus_tags'             => [],
         ];
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
@@ -219,7 +219,7 @@ class GenerateTransactions
             $transaction = $this->appendNegativeAmountInfo($accountId, $transaction, $entry);
         }
         // add tags.
-        if(count($transaction['bonus_tags']) > 0) {
+        if (count($transaction['bonus_tags']) > 0) {
             Log::debug('Original tags', $transaction['tags']);
             Log::debug('Bonus tags   ', $transaction['bonus_tags']);
             $transaction['tags'] = array_merge($transaction['tags'], $transaction['bonus_tags']);
@@ -334,11 +334,11 @@ class GenerateTransactions
         }
 
         // The data importer determines the account type based on the IBAN.
-        $accountType =(string) ( $this->targetTypes[$iban] ?? 'unknown');
+        $accountType = (string) ($this->targetTypes[$iban] ?? 'unknown');
 
         // If the IBAN is a known target account, but it's not a liability OR revenue OR expense, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
-        if($this->isAssetAccount($accountType, $iban)) {
+        if ($this->isAssetAccount($accountType, $iban)) {
             Log::debug(sprintf('Recognized "%s" (IBAN) as a Firefly III asset account so this is a transfer.', $iban));
             Log::debug(sprintf('Type of "%s" (IBAN) is a "%s".', $iban, $this->targetTypes[$iban]));
             $transaction[$idKey] = $this->targetAccounts[$iban];
@@ -346,14 +346,14 @@ class GenerateTransactions
         }
 
         // if the account type (based on IBAN only!) is a revenue or an expense, submit the name as an extra tag.
-        if($this->isExpenseOrRevenue($accountType, $iban)) {
+        if ($this->isExpenseOrRevenue($accountType, $iban)) {
             Log::debug(sprintf('Recognized "%s" (IBAN) as a Firefly III %s account.', $iban, $accountType));
             Log::debug('Add account name as extra tag.');
             $transaction['bonus_tags'][] = $name ?? sprintf('(unknown %s account)', $direction);
         }
 
         // If the IBAN is not set in the transaction, or the IBAN is not in the array of asset accounts
-        if($this->ibanIsEmpty($iban) || !array_key_exists($iban, $this->targetAccounts)) {
+        if ($this->ibanIsEmpty($iban) || !array_key_exists($iban, $this->targetAccounts)) {
             Log::debug(sprintf('"%s" is not a valid IBAN OR not recognized as Firefly III asset account, submit the name only.', $iban));
             Log::debug(sprintf('IBAN is "%s", so leave field "%s" empty.', $iban, $ibanKey));
             // The data importer will set the name as it exists in the transaction:
@@ -365,7 +365,7 @@ class GenerateTransactions
         // If the account number is a known target account, but it's not a liability, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
         $accountType = (string) ($this->targetTypes[$number] ?? 'unknown');
-        if($this->isAssetAccount($accountType, $number) && sprintf(self::NUMBER_FORMAT, '') !== $number) {
+        if ($this->isAssetAccount($accountType, $number) && sprintf(self::NUMBER_FORMAT, '') !== $number) {
             Log::debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$number];
             $transaction['type'] = 'transfer';
@@ -591,15 +591,18 @@ class GenerateTransactions
         return $this->userAccounts;
     }
 
-    private function isAssetAccount(string $accountType, string $iban): bool {
+    private function isAssetAccount(string $accountType, string $iban): bool
+    {
         return 'asset' === $accountType && '' !== $iban && array_key_exists($iban, $this->targetAccounts);
     }
 
-    private function ibanIsEmpty(string $iban): bool {
+    private function ibanIsEmpty(string $iban): bool
+    {
         return '' === $iban;
     }
 
-    private function isExpenseOrRevenue(string $accountType, string $iban):bool {
+    private function isExpenseOrRevenue(string $accountType, string $iban): bool
+    {
         return ('revenue' === $accountType || 'expense' === $accountType) && '' !== $iban && (array_key_exists($iban, $this->expenseAccounts) || array_key_exists($iban, $this->revenueAccounts));
     }
 }
