@@ -5,12 +5,31 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.6.0 - 2024-01-xx
 
+> ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
 ### Changed
 
-Due to changes in the Docker image, the commands that use `WEB_SERVER=false` to automatically import data need another docker container. You can read more about it [in the documentation](https://docs.firefly-iii.org/how-to/data-importer/import/automated/). 
+Due to changes in the Docker image, the commands that use `WEB_SERVER=false` to automatically import data need another docker container. You can read more about it [in the documentation](https://docs.firefly-iii.org/how-to/data-importer/import/automated/).
+
+- Better rate limit reporting for Nordigen
+- Better exit codes
+- Data is cached, should make the importer slightly faster
 
 ### Fixed 
+- #9484
+- #9505
 - [Discussion 9513](https://github.com/orgs/firefly-iii/discussions/9513) (Importer Stuck on Configuration with no exception) started by @KasparRosin
+- #9651
+- #9688
+
+### Added
+- Support for PHP 8.4
+- #9626
+
+### Removed
+- Support for < PHP 8.4
 
 ## v1.5.7 - 2024-11-10
 
