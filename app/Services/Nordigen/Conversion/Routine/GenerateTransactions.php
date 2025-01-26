@@ -60,7 +60,7 @@ class GenerateTransactions
     private array         $revenueAccounts;
     private array         $targetTypes;
     private array         $expenseAccountNames;
-    private array         $revenueAccountNames
+    private array         $revenueAccountNames;
 
     private array $userAccounts; // contains ALL information on Firefly III asset accounts and liabilities.
 
