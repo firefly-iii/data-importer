@@ -18,15 +18,15 @@ Due to changes in the Docker image, the commands that use `WEB_SERVER=false` to 
 - Data is cached, should make the importer slightly faster
 
 ### Fixed 
-- #9484
-- #9505
+- [Issue 9484](https://github.com/firefly-iii/firefly-iii/issues/9484) (Exit code 72 when no results are found - expecting 73) reported by @james-prince
+- [Issue 9505](https://github.com/firefly-iii/firefly-iii/issues/9505) (data-importer develop failing on CSV file) reported by @MacPaille
 - [Discussion 9513](https://github.com/orgs/firefly-iii/discussions/9513) (Importer Stuck on Configuration with no exception) started by @KasparRosin
-- #9651
-- #9688
+- [Issue 9651](https://github.com/firefly-iii/firefly-iii/issues/9651) (Data importer fails to check configured self signed CA when checking for duplicate external IDs) reported by @zebrapurring
+- [Issue 9688](https://github.com/firefly-iii/firefly-iii/issues/9688) ([Importer] Gocardless Import not using correct values for creditor) reported by @arnolicious
 
 ### Added
 - Support for PHP 8.4
-- #9626
+- [Discussion 9626](https://github.com/orgs/firefly-iii/discussions/9626) (Allow newlines in description/Add hook points to Data importer process) started by @Sobuno
 
 ### Removed
 - Support for < PHP 8.4
