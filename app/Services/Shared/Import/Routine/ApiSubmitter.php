@@ -72,7 +72,7 @@ class ApiSubmitter
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
 
-        $this->vanityURL  = Token::getVanityURL();
+        $this->vanityURL = Token::getVanityURL();
 
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 
@@ -83,7 +83,7 @@ class ApiSubmitter
         foreach ($lines as $index => $line) {
             app('log')->debug(sprintf('Now submitting transaction %d/%d', $index + 1, $count));
             // first do local duplicate transaction check (the "cell" method):
-            $unique    = $this->uniqueTransaction($index, $line);
+            $unique = $this->uniqueTransaction($index, $line);
             if (null === $unique) {
                 app('log')->debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
                 ++$uniqueCount;
@@ -113,7 +113,7 @@ class ApiSubmitter
             // return default tag:
             return sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
         }
-        $items     = [
+        $items  = [
             '%year%'        => date('Y'),
             '%month%'       => date('m'),
             '%month_full%'  => date('F'),
@@ -127,7 +127,7 @@ class ApiSubmitter
             '%datetime%'    => date('Y-m-d \@ H:i'),
             '%version%'     => config('importer.version'),
         ];
-        $result    = str_replace(array_keys($items), array_values($items), $customTag);
+        $result = str_replace(array_keys($items), array_values($items), $customTag);
         app('log')->debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
 
         return $result;
@@ -150,9 +150,10 @@ class ApiSubmitter
         $transactions = $line['transactions'] ?? [];
         $field        = $this->configuration->getUniqueColumnType();
         $field        = 'external-id' === $field ? 'external_id' : $field;
+        $field        = 'note' === $field ? 'notes' : $field;
         $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
-            $value        = (string) ($transaction[$field] ?? '');
+            $value = (string) ($transaction[$field] ?? '');
             if ('' === $value) {
                 app('log')->debug(
                     sprintf(
@@ -200,9 +201,9 @@ class ApiSubmitter
 
         app('log')->debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
 
-        $url            = SecretManager::getBaseUrl();
-        $token          = SecretManager::getAccessToken();
-        $request        = new GetSearchTransactionsRequest($url, $token);
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetSearchTransactionsRequest($url, $token);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setVerify(config('importer.connection.verify'));
         $request->setQuery($query);
@@ -218,7 +219,7 @@ class ApiSubmitter
         if (0 === $response->count()) {
             return 0;
         }
-        $first          = $response->current();
+        $first = $response->current();
         app('log')->debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
 
         return $first->id;
@@ -260,7 +261,7 @@ class ApiSubmitter
 
                 return $return;
             }
-            $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
+            $message = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
             app('log')->error($e->getMessage());
             $this->addError($index, $message);
 
@@ -284,7 +285,7 @@ class ApiSubmitter
 
         if ($response instanceof PostTransactionResponse) {
             /** @var TransactionGroup $group */
-            $group  = $response->getTransactionGroup();
+            $group = $response->getTransactionGroup();
             if (null === $group) {
                 $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
                 app('log')->error($message, $response->getRawData());
@@ -307,7 +308,7 @@ class ApiSubmitter
                 'journals' => [],
             ];
             foreach ($group->transactions as $transaction) {
-                $message                              = sprintf(
+                $message = sprintf(
                     'Created %s <a target="_blank" href="%s">#%d "%s"</a> (%s %s)',
                     $transaction->type,
                     sprintf('%s/transactions/show/%d', $this->vanityURL, $group->id),
@@ -470,7 +471,7 @@ class ApiSubmitter
 
         $groupId = (int) $groupInfo['group_id'];
         app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = [
+        $body = [
             'transactions' => [],
         ];
 
@@ -514,7 +515,7 @@ class ApiSubmitter
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        $body    = [
+        $body = [
             'tag'  => $this->tag,
             'date' => $this->tagDate,
         ];

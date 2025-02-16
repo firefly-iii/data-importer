@@ -568,6 +568,7 @@ return [
     ],
     'search_modifier'       => [
         'note'               => 'notes_are',
+        'notes'               => 'notes_are',
         'external-id'        => 'external_id_is',
         'external_id'        => 'external_id_is',
         'description'        => 'description_is',
