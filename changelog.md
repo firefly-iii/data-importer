@@ -2,8 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.6.1 - 2024-02-19
 
-## 1.6.0 - 2024-01-xx
+> ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Fixed
+
+- #9840
+
+## 1.6.0 - 2024-01-31
 
 > ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
 
