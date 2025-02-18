@@ -150,6 +150,7 @@ class ApiSubmitter
         $transactions = $line['transactions'] ?? [];
         $field        = $this->configuration->getUniqueColumnType();
         $field        = 'external-id' === $field ? 'external_id' : $field;
+        $field        = 'note' === $field ? 'notes' : $field;
         $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
             $value        = (string) ($transaction[$field] ?? '');

@@ -24,7 +24,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => '1.6.0',
+    'version'                       => 'develop/2025-02-18',
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
@@ -55,7 +55,7 @@ return [
     'ignore_not_found_transactions' => env('IGNORE_NOT_FOUND_TRANSACTIONS', false),
     'namespace'                     => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'                     => env('USE_CACHE', false),
-    'minimum_version'               => '6.2.0',
+    'minimum_version'               => '6.2.7',
     'cache_api_calls'               => false,
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),
