@@ -567,12 +567,12 @@ return [
         'internal_reference' => 'Internal reference',
     ],
     'search_modifier'       => [
-        'note'               => 'notes_are',
+        'note'                => 'notes_are',
         'notes'               => 'notes_are',
-        'external-id'        => 'external_id_is',
-        'external_id'        => 'external_id_is',
-        'description'        => 'description_is',
-        'internal_reference' => 'internal_reference_is',
-        'internal-reference' => 'internal_reference_is',
+        'external-id'         => 'external_id_is',
+        'external_id'         => 'external_id_is',
+        'description'         => 'description_is',
+        'internal_reference'  => 'internal_reference_is',
+        'internal-reference'  => 'internal_reference_is',
     ],
 ];
