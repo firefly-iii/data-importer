@@ -40,11 +40,11 @@ class TrustProxies extends Middleware
      * @var int
      */
     protected $headers
-        = RequestAlias::HEADER_X_FORWARDED_FOR |
-        RequestAlias::HEADER_X_FORWARDED_HOST |
-        RequestAlias::HEADER_X_FORWARDED_PORT |
-        RequestAlias::HEADER_X_FORWARDED_PROTO |
-        RequestAlias::HEADER_X_FORWARDED_AWS_ELB;
+        = RequestAlias::HEADER_X_FORWARDED_FOR
+        | RequestAlias::HEADER_X_FORWARDED_HOST
+        | RequestAlias::HEADER_X_FORWARDED_PORT
+        | RequestAlias::HEADER_X_FORWARDED_PROTO
+        | RequestAlias::HEADER_X_FORWARDED_AWS_ELB;
 
     /**
      * The trusted proxies for this application.
