@@ -80,22 +80,30 @@ trait AutoImports
             return [];
         }
         $files  = array_diff($array, $ignore);
-        $return = [];
+        $importableFiles = [];
+        $jsonFiles = [];
         foreach ($files as $file) {
             // import importable file with JSON companion
-            // TODO may also need to be able to detect other file types. Or: detect any file with accompanying json file
-            if ('csv' === $this->getExtension($file) && $this->hasJsonConfiguration($directory, $file)) {
-                $return[] = $file;
+            if (in_array($this->getExtension($file), ['csv', 'xml'])) {
+                $importableFiles[] = $file;
             }
 
-            if ('xml' === $this->getExtension($file) && $this->hasJsonConfiguration($directory, $file)) {
-                $return[] = $file;
+            // import JSON config files.
+            if ('json' === $this->getExtension($file)) {
+                $jsonFiles[] = $file;
             }
-
-            // import JSON with no importable file.
-            // TODO must detect json files without accompanying camt/csv/whatever file.
-            if ('json' === $this->getExtension($file) && !$this->hasCsvFile($directory, $file)) {
-                $return[] = $file;
+        }
+        $return = [];
+        foreach ($importableFiles as $importableFile) {
+            $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
+            if($jsonFile) {
+                $return[$jsonFile] = sprintf('%s/%s', $directory, $importableFile);
+            }
+        }
+        foreach ($jsonFiles as $jsonFile) {
+            $fullJson = sprintf('%s/%s', $directory, $jsonFile);
+            if (!array_key_exists($fullJson, $return)) {
+                $return[$fullJson] = $fullJson;
             }
         }
 
@@ -112,59 +120,47 @@ trait AutoImports
         return strtolower($parts[count($parts) - 1]);
     }
 
-    /**
-     * This method only works on files with an extension with exactly three letters
-     * (i.e. "csv", "xml").
-     */
-    private function hasJsonConfiguration(string $directory, string $file): bool
+    private function getExtensionLength(string $file): int
     {
-        $short    = substr($file, 0, -4);
+        $parts = explode('.', $file);
+        if (1 === count($parts)) {
+            return 0;
+        }
+        return strlen($parts[count($parts) - 1]) + 1;
+    }
+
+    private function getJsonConfiguration(string $directory, string $file): ?string
+    {
+        $extensionLength = $this->getExtensionLength($file);
+        $short    = substr($file, 0, -$extensionLength);
         $jsonFile = sprintf('%s.json', $short);
         $fullJson = sprintf('%s/%s', $directory, $jsonFile);
 
-        if (!file_exists($fullJson)) {
-            $hasFallbackConfig = $this->hasFallbackConfig($directory);
-            if ($hasFallbackConfig) {
-                $this->line('Found fallback configuration file, which will be used for this file.');
-
-                return true;
-            }
-            $this->warn(sprintf('Cannot find JSON file "%s" nor fallback file expected to go with file "%s". This file will be ignored.', $jsonFile, $file));
-
-            return false;
+        if (file_exists($fullJson)) {
+            return $fullJson;
         }
+        $fallbackConfig = $this->getFallbackConfig($directory);
+        if ($fallbackConfig) {
+            $this->line('Found fallback configuration file, which will be used for this file.');
 
-        return true;
+            return $fallbackConfig;
+        }
+        $this->warn(sprintf('Cannot find JSON file "%s" nor fallback file expected to go with file "%s". This file will be ignored.', $jsonFile, $file));
+
+        return null;
     }
 
-    private function hasFallbackConfig(string $directory): bool
+    private function getFallbackConfig(string $directory): ?string
     {
         if (false === config('importer.fallback_in_dir')) {
-            return false;
+            return null;
         }
         $configJsonFile = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
         if (file_exists($configJsonFile) && is_readable($configJsonFile)) {
-            $content = file_get_contents($configJsonFile);
-
-            return json_validate($content);
+            return $configJsonFile;
         }
 
-        return false;
-    }
-
-    /**
-     * TODO this function must be more universal.
-     */
-    private function hasCsvFile(string $directory, string $file): bool
-    {
-        $short    = substr($file, 0, -5);
-        $csvFile  = sprintf('%s.csv', $short);
-        $fullJson = sprintf('%s/%s', $directory, $csvFile);
-        if (!file_exists($fullJson)) {
-            return false;
-        }
-
-        return true;
+        return null;
     }
 
     private function importFiles(string $directory, array $files): array
@@ -172,15 +168,13 @@ trait AutoImports
         $exitCodes = [];
 
         /** @var string $file */
-        foreach ($files as $file) {
-            $key                        = sprintf('%s/%s', $directory, $file);
-
+        foreach ($files as $jsonFile => $importableFile) {
             try {
-                $exitCodes[$key] = $this->importFile($directory, $file);
+                $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
             } catch (ImporterErrorException $e) {
                 app('log')->error(sprintf('Could not complete import from file "%s".', $file));
                 app('log')->error($e->getMessage());
-                $exitCodes[$key] = 1;
+                $exitCodes[$importableFile] = 1;
             }
             // report has already been sent. Reset errors and continue.
             $this->conversionErrors     = [];
@@ -199,36 +193,8 @@ trait AutoImports
     /**
      * @throws ImporterErrorException
      */
-    private function importFile(string $directory, string $file): int
+    private function importFile(string $jsonFile, string $importableFile): int
     {
-        app('log')->debug(sprintf('ImportFile: directory "%s"', $directory));
-        app('log')->debug(sprintf('ImportFile: file      "%s"', $file));
-        $importableFile    = sprintf('%s/%s', $directory, $file);
-        $jsonFile          = sprintf('%s/%s.json', $directory, substr($file, 0, -5));
-        $fallbackJsonFile  = sprintf('%s/%s', $directory, config('importer.fallback_configuration'));
-
-        // TODO not yet sure why the distinction is necessary.
-        // TODO this may also be necessary for camt files.
-        if ('csv' === $this->getExtension($file)) {
-            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
-        }
-        // same for XML files.
-        if ('xml' === $this->getExtension($file)) {
-            $jsonFile = sprintf('%s/%s.json', $directory, substr($file, 0, -4));
-        }
-        $jsonFileExists    = file_exists($jsonFile);
-        $hasFallbackConfig = $this->hasFallbackConfig($directory);
-
-        // Should not happen
-        if (!$jsonFileExists && !$hasFallbackConfig) {
-            $this->error(sprintf('No JSON configuration found. Checked for both "%s" and "%s"', $jsonFile, $fallbackJsonFile));
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
-
-            return ExitCode::CANNOT_READ_CONFIG->value;
-        }
-
-        $jsonFile          = $jsonFileExists ? $jsonFile : $fallbackJsonFile;
-
         app('log')->debug(sprintf('ImportFile: importable "%s"', $importableFile));
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
