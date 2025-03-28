@@ -48,6 +48,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account as LocalAccount;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Trait AutoImports
@@ -138,6 +139,9 @@ trait AutoImports
 
         if (file_exists($fullJson)) {
             return $fullJson;
+        }
+        if (Storage::disk('configurations')->exists($jsonFile)){
+            return Storage::disk('configurations')->path($jsonFile);
         }
         $fallbackConfig = $this->getFallbackConfig($directory);
         if ($fallbackConfig) {
