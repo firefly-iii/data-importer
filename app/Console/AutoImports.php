@@ -67,25 +67,25 @@ trait AutoImports
 
     private function getFiles(string $directory): array
     {
-        $ignore = ['.', '..'];
+        $ignore          = ['.', '..'];
 
         if ('' === $directory) {
             $this->error(sprintf('Directory "%s" is empty or invalid.', $directory));
 
             return [];
         }
-        $array  = scandir($directory);
+        $array           = scandir($directory);
         if (!is_array($array)) {
             $this->error(sprintf('Directory "%s" is empty or invalid.', $directory));
 
             return [];
         }
-        $files  = array_diff($array, $ignore);
+        $files           = array_diff($array, $ignore);
         $importableFiles = [];
-        $jsonFiles = [];
+        $jsonFiles       = [];
         foreach ($files as $file) {
             // import importable file with JSON companion
-            if (in_array($this->getExtension($file), ['csv', 'xml'])) {
+            if (in_array($this->getExtension($file), ['csv', 'xml'], true)) {
                 $importableFiles[] = $file;
             }
 
@@ -94,10 +94,10 @@ trait AutoImports
                 $jsonFiles[] = $file;
             }
         }
-        $return = [];
+        $return          = [];
         foreach ($importableFiles as $importableFile) {
             $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
-            if($jsonFile) {
+            if ($jsonFile) {
                 $return[$jsonFile] = sprintf('%s/%s', $directory, $importableFile);
             }
         }
@@ -127,23 +127,24 @@ trait AutoImports
         if (1 === count($parts)) {
             return 0;
         }
+
         return strlen($parts[count($parts) - 1]) + 1;
     }
 
     private function getJsonConfiguration(string $directory, string $file): ?string
     {
         $extensionLength = $this->getExtensionLength($file);
-        $short    = substr($file, 0, -$extensionLength);
-        $jsonFile = sprintf('%s.json', $short);
-        $fullJson = sprintf('%s/%s', $directory, $jsonFile);
+        $short           = substr($file, 0, -$extensionLength);
+        $jsonFile        = sprintf('%s.json', $short);
+        $fullJson        = sprintf('%s/%s', $directory, $jsonFile);
 
         if (file_exists($fullJson)) {
             return $fullJson;
         }
-        if (Storage::disk('configurations')->exists($jsonFile)){
+        if (Storage::disk('configurations')->exists($jsonFile)) {
             return Storage::disk('configurations')->path($jsonFile);
         }
-        $fallbackConfig = $this->getFallbackConfig($directory);
+        $fallbackConfig  = $this->getFallbackConfig($directory);
         if ($fallbackConfig) {
             $this->line('Found fallback configuration file, which will be used for this file.');
 
@@ -171,7 +172,7 @@ trait AutoImports
     {
         $exitCodes = [];
 
-        /** @var string $file */
+        // @var string $file
         foreach ($files as $jsonFile => $importableFile) {
             try {
                 $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
@@ -203,7 +204,7 @@ trait AutoImports
         app('log')->debug(sprintf('ImportFile: JSON       "%s"', $jsonFile));
 
         // do JSON check
-        $jsonResult        = $this->verifyJSON($jsonFile);
+        $jsonResult    = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
@@ -211,7 +212,7 @@ trait AutoImports
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
-        $configuration     = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
+        $configuration = Configuration::fromArray(json_decode(file_get_contents($jsonFile), true));
 
         // sanity check. If the importableFile is a .json file, and it parses as valid json, don't import it:
         if ('file' === $configuration->getFlow() && str_ends_with(strtolower($importableFile), '.json') && $this->verifyJSON($importableFile)) {
@@ -264,9 +265,9 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things:
-        $messages          = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings          = array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors            = array_merge($this->importErrors, $this->conversionErrors);
+        $messages      = array_merge($this->importMessages, $this->conversionMessages);
+        $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
+        $errors        = array_merge($this->importErrors, $this->conversionErrors);
         event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
 
         if (count($this->importErrors) > 0 || count($this->conversionRateLimits) > 0) {
