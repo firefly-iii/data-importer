@@ -54,7 +54,7 @@ class IndexController extends Controller
             cookie(Constants::FLOW_COOKIE, ''),
         ];
         Artisan::call('cache:clear');
-        // Artisan::call('config:clear'); // disable command to try and fix 
+        // Artisan::call('config:clear'); // disable command to try and fix
 
         return redirect(route('index'))->withCookies($cookies);
     }
