@@ -28,6 +28,7 @@ namespace App\Http\Controllers;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * Class IndexController
@@ -52,8 +53,8 @@ class IndexController extends Controller
         $cookies = [
             cookie(Constants::FLOW_COOKIE, ''),
         ];
-        \Artisan::call('cache:clear');
-        \Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        // Artisan::call('config:clear'); // disable command to try and fix 
 
         return redirect(route('index'))->withCookies($cookies);
     }
