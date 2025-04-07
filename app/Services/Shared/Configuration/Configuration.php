@@ -740,6 +740,7 @@ class Configuration
 
     public function isIgnoreDuplicateTransactions(): bool
     {
+        Log::debug(sprintf('isIgnoreDuplicateTransactions(%s)', var_export($this->ignoreDuplicateTransactions, true)));
         return $this->ignoreDuplicateTransactions;
     }
 
