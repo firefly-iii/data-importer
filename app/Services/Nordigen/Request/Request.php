@@ -142,7 +142,7 @@ abstract class Request
                 $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
-            if (array_key_exists('summary', $json) && str_ends_with($json['summary'], 'has expired')) {
+            if (array_key_exists('summary', $json) && str_contains($json['summary'], 'expired')) {
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
 

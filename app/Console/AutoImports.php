@@ -244,6 +244,12 @@ trait AutoImports
                 $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             }
 
+            // could also be that the end user license agreement is expired.
+            if($this->isExpiredAgreement()) {
+                app('log')->debug(sprintf('Exit code changed to %s.', ExitCode::AGREEMENT_EXPIRED->name));
+                $exitCode = ExitCode::AGREEMENT_EXPIRED->value;
+            }
+
             // report about it anyway:
             event(
                 new ImportedTransactions(
@@ -654,6 +660,20 @@ trait AutoImports
             /** @var string $error */
             foreach ($errors as $error) {
                 if (str_contains($error, '[a111]')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    protected function isExpiredAgreement(): bool
+    {
+        /** @var array $errors */
+        foreach ($this->conversionErrors as $errors) {
+            /** @var string $error */
+            foreach ($errors as $error) {
+                if (str_contains($error, 'EUA') && str_contains($error, 'expired')) {
                     return true;
                 }
             }
