@@ -245,7 +245,7 @@ trait AutoImports
             }
 
             // could also be that the end user license agreement is expired.
-            if($this->isExpiredAgreement()) {
+            if ($this->isExpiredAgreement()) {
                 app('log')->debug(sprintf('Exit code changed to %s.', ExitCode::AGREEMENT_EXPIRED->name));
                 $exitCode = ExitCode::AGREEMENT_EXPIRED->value;
             }
@@ -667,6 +667,7 @@ trait AutoImports
 
         return false;
     }
+
     protected function isExpiredAgreement(): bool
     {
         /** @var array $errors */
