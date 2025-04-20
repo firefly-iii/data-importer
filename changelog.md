@@ -2,7 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 1.6.1 - 2024-02-19
+## v1.6.2 - 2025-04-21
+
+### Added
+- [PR 782](https://github.com/firefly-iii/data-importer/pull/782) Auto import: Honor JSON_CONFIGURATION_DIR by @yparitcher 
+
+### Fixed
+
+- #9980
+- #10099
+
+## 1.6.1 - 2025-02-19
 
 > ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
 
@@ -12,7 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - #9840
 
-## 1.6.0 - 2024-01-31
+## 1.6.0 - 2025-01-31
 
 > ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
 
