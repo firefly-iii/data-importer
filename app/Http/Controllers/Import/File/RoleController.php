@@ -36,6 +36,7 @@ use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
@@ -60,7 +61,7 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        app('log')->debug('Now in Role controller');
+        Log::debug('Now in Role controller');
         $flow          = $request->cookie(Constants::FLOW_COOKIE);
         if ('file' !== $flow) {
             exit('redirect or something');
@@ -83,9 +84,16 @@ class RoleController extends Controller
     {
         $mainTitle           = 'Role definition';
         $subTitle            = 'Configure the role of each column in your file';
+        $sessionUploadFile  = session()->get(Constants::UPLOAD_DATA_FILE);
+        if(null === $sessionUploadFile) {
+            Log::error('No data file in session, give big fat error.');
+            Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
+            throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
+        }
+
 
         // get columns from file
-        $content             = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $content             = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
         $columns             = RoleService::getColumns($content, $configuration);
         $examples            = RoleService::getExampleData($content, $configuration);
 
@@ -111,8 +119,16 @@ class RoleController extends Controller
         $mainTitle      = 'Role definition';
         $subTitle       = 'Configure the role of each field in your camt.053 file';
 
+        $sessionUploadFile  = session()->get(Constants::UPLOAD_DATA_FILE);
+
+        if(null === $sessionUploadFile) {
+            Log::error('No data file in session, give big fat error.');
+            Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
+            throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
+        }
+
         // get example data from file.
-        $content        = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
+        $content        = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
         $examples       = RoleService::getExampleDataFromCamt($content, $configuration);
         $roles          = $configuration->getRoles();
         $doMapping      = $configuration->getDoMapping();
@@ -234,12 +250,12 @@ class RoleController extends Controller
 
         // and it can be saved on disk:
         $configFileName = StorageService::storeArray($fullArray);
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // this is a new config file name.
         session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
@@ -287,12 +303,12 @@ class RoleController extends Controller
 
         // and it can be saved on disk:
         $configFileName = StorageService::storeArray($fullArray);
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // this is a new config file name.
         session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
