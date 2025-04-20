@@ -84,10 +84,11 @@ class RoleController extends Controller
     {
         $mainTitle           = 'Role definition';
         $subTitle            = 'Configure the role of each column in your file';
-        $sessionUploadFile  = session()->get(Constants::UPLOAD_DATA_FILE);
-        if(null === $sessionUploadFile) {
+        $sessionUploadFile   = session()->get(Constants::UPLOAD_DATA_FILE);
+        if (null === $sessionUploadFile) {
             Log::error('No data file in session, give big fat error.');
             Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
+
             throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
         }
 
@@ -116,36 +117,37 @@ class RoleController extends Controller
 
     private function camtIndex(Request $request, Configuration $configuration): View
     {
-        $mainTitle      = 'Role definition';
-        $subTitle       = 'Configure the role of each field in your camt.053 file';
+        $mainTitle         = 'Role definition';
+        $subTitle          = 'Configure the role of each field in your camt.053 file';
 
-        $sessionUploadFile  = session()->get(Constants::UPLOAD_DATA_FILE);
+        $sessionUploadFile = session()->get(Constants::UPLOAD_DATA_FILE);
 
-        if(null === $sessionUploadFile) {
+        if (null === $sessionUploadFile) {
             Log::error('No data file in session, give big fat error.');
             Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
+
             throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
         }
 
         // get example data from file.
-        $content        = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
-        $examples       = RoleService::getExampleDataFromCamt($content, $configuration);
-        $roles          = $configuration->getRoles();
-        $doMapping      = $configuration->getDoMapping();
+        $content           = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
+        $examples          = RoleService::getExampleDataFromCamt($content, $configuration);
+        $roles             = $configuration->getRoles();
+        $doMapping         = $configuration->getDoMapping();
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
-        $levels         = [];
-        $levels['A']    = [
+        $levels            = [];
+        $levels['A']       = [
             'title'       => trans('camt.level_A'),
             'explanation' => trans('camt.explain_A'),
             'fields'      => $this->getFieldsForLevel('A'),
         ];
-        $levels['B']    = [
+        $levels['B']       = [
             'title'       => trans('camt.level_B'),
             'explanation' => trans('camt.explain_B'),
             'fields'      => $this->getFieldsForLevel('B'),
         ];
-        $levels['C']    = [
+        $levels['C']       = [
             'title'       => trans('camt.level_C'),
             'explanation' => trans('camt.explain_C'),
             'fields'      => [
@@ -164,7 +166,7 @@ class RoleController extends Controller
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
             ],
         ];
-        $group_handling = $configuration->getGroupedTransactionHandling();
+        $group_handling    = $configuration->getGroupedTransactionHandling();
         if ('group' === $group_handling) {
             $levels['D'] = [
                 'title'       => trans('camt.level_D'),
