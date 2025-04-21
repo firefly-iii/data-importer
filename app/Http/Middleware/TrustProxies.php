@@ -27,7 +27,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Config\Repository;
 use Illuminate\Http\Middleware\TrustProxies as Middleware;
-use Symfony\Component\HttpFoundation\Request as RequestAlias;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class TrustProxies
@@ -39,12 +39,12 @@ class TrustProxies extends Middleware
      *
      * @var int
      */
-    protected $headers
-        = RequestAlias::HEADER_X_FORWARDED_FOR
-        | RequestAlias::HEADER_X_FORWARDED_HOST
-        | RequestAlias::HEADER_X_FORWARDED_PORT
-        | RequestAlias::HEADER_X_FORWARDED_PROTO
-        | RequestAlias::HEADER_X_FORWARDED_AWS_ELB;
+    protected $headers = Request::HEADER_X_FORWARDED_FOR |
+                         Request::HEADER_X_FORWARDED_HOST |
+                         Request::HEADER_X_FORWARDED_PORT |
+                         Request::HEADER_X_FORWARDED_PROTO |
+                         Request::HEADER_X_FORWARDED_PREFIX |
+                         Request::HEADER_X_FORWARDED_AWS_ELB;
 
     /**
      * The trusted proxies for this application.
