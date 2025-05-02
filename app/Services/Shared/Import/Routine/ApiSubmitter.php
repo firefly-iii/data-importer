@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Submission\ProgressInformation;
-use App\Support\Token;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionGroup;
@@ -72,7 +71,7 @@ class ApiSubmitter
         app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
 
-        $this->vanityURL  = Token::getVanityURL();
+        $this->vanityURL  = SecretManager::getVanityURL();
 
         app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 

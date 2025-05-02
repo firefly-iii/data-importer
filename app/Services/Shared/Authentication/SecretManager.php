@@ -33,25 +33,26 @@ use App\Services\Session\Constants;
 class SecretManager
 {
     /**
-     * Will return the access token. From a cookie if its there, otherwise from configuration.
+     * Will return the access token. From a cookie or header if it's there, otherwise from configuration.
      */
     public static function getAccessToken(): string
     {
-        if (!self::hasAccessToken()) {
-            app('log')->debug('No access token in hasAccessToken() session, will return config variable.');
-
-            return (string) config('importer.access_token');
+        if (session()->has(Constants::SESSION_ACCESS_TOKEN)) {
+            $token = session()->get(Constants::SESSION_ACCESS_TOKEN);
+            if ('' !== $token) {
+                return $token;
+            }
         }
 
-        return session()->get(Constants::SESSION_ACCESS_TOKEN);
-    }
+        app('log')->debug('No access token in session, will return header or config variable.');
 
-    /**
-     * Will verify if the user has an access token (in a cookie)
-     */
-    private static function hasAccessToken(): bool
-    {
-        return session()->has(Constants::SESSION_ACCESS_TOKEN) && '' !== session()->get(Constants::SESSION_ACCESS_TOKEN);
+        $token = request()?->header('Authorization', '') ?? '';
+        if (is_array($token)) {
+            $token = reset($token);
+        }
+        $token = str_replace('Bearer ', '', $token);
+
+        return $token ?: (string) config('importer.access_token');
     }
 
     public static function getBaseUrl(): string
@@ -124,7 +125,7 @@ class SecretManager
     {
         app('log')->debug(__METHOD__);
         // check for access token cookie. if not, redirect to flow to get it.
-        if (!self::hasAccessToken() && !self::hasRefreshToken() && !self::hasBaseUrl()) {
+        if ('' === self::getAccessToken() && !self::hasRefreshToken() && !self::hasBaseUrl()) {
             return false;
         }
 
