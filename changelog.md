@@ -9,8 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #9980
-- #10099
+- [Issue 9980](https://github.com/firefly-iii/firefly-iii/issues/9980) (Firefly FIDI incorrect exit code when errors received) reported by @miguelangel-nubla
+- [Issue 10099](https://github.com/firefly-iii/firefly-iii/issues/10099) (Data Importer loses Secrets from Variables after clicking "Start over") reported by @rrosenbauer
 
 ## 1.6.1 - 2025-02-19
 
@@ -20,7 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #9840
+- [Issue 9840](https://github.com/firefly-iii/firefly-iii/issues/9840) (Data Importer doesn't detect duplicates when using "notes" for the unique column) reported by @muhammad-saleh
 
 ## 1.6.0 - 2025-01-31
 
