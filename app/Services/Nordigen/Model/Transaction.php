@@ -201,7 +201,7 @@ class Transaction
             } catch (\JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = sprintf('ff3-%s', Uuid::uuid5(config('importer.namespace'), $hash));
         }
         if ('' !== $object->transactionId) {
             Log::debug('Transaction has correct transaction ID.');
