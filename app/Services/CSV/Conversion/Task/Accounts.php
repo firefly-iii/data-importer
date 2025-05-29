@@ -362,6 +362,13 @@ class Accounts extends AbstractTask
             return $array;
         }
 
+        // Return ID or number if not null
+        if ('' !== (string) $array['number']) {
+            app('log')->debug('At least the array with account-info has some account number info, return that.', $array);
+
+            return $array;
+        }
+
         // if the default account is not NULL, return that one instead:
         if (null !== $defaultAccount) {
             $default = $defaultAccount->toArray();
