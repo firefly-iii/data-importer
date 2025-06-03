@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\CSV\Converter;
 
 use App\Support\Facades\Steam;
 
 class AccountNumber implements ConverterInterface
 {
-
     public function convert($value)
     {
         $value = (string)$value;
@@ -15,7 +16,5 @@ class AccountNumber implements ConverterInterface
         return str_replace("\x20", '', Steam::cleanStringAndNewlines($value));
     }
 
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }
