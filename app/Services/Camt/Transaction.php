@@ -249,7 +249,12 @@ class Transaction
                         $return .= sprintf('%s ', $block->getAdditionalRemittanceInformation());
                     }
 
-                    // TODO also include getCreditorReferenceInformation
+                    // #8994 add info.
+                    $string = (string) $info->getRemittanceInformation()?->getCreditorReferenceInformation()?->getRef();
+                    if('' !== $string) {
+                        $return = sprintf('%s %s', $return, $string);
+                    }
+
                     return $return;
                 }
 
