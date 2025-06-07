@@ -37,6 +37,8 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
+use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use Illuminate\Support\Facades\Log;
@@ -233,6 +235,19 @@ class GenerateTransactions
             Log::debug('New tags     ', $transaction['tags']);
 
             unset($transaction['bonus_tags']);
+        }
+        // #9533 add entry reference as tag or as booking date.
+        if('' !== $entry->entryReference) {
+            if(false === strtotime($entry->entryReference)) {
+                $transaction['tags'][] = $entry->entryReference;
+            }
+            if(false !== strtotime($entry->entryReference)) {
+                try {
+                $transaction['booking_date'] = Carbon::parse($entry->entryReference)->toW3cString();
+                } catch(InvalidFormatException) {
+                    // ignore error.
+                }
+            }
         }
 
         $return['transactions'][] = $transaction;
