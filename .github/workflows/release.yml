@@ -22,26 +22,64 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Switch branch
-        run: |
-          if [[ "develop" == "$version" ]]; then
-            git checkout --track origin/develop
-            git pull
-          else
-            git config user.name github-actions
-            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git checkout --track origin/develop
-            git pull
-            git checkout main
-            git merge develop
-          fi
-        env:
-          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ github.event.inputs.phpversion }}
           extensions: mbstring, intl, zip, bcmath
+      - name: Switch and pull
+        run: |
+          #
+          # Always check out origin/develop, unless its a branch release.
+          #
+          BRANCH_TO_PULL=origin/develop
+          if [[ "$version" == branch* ]]; then
+            BRANCH_TO_PULL=origin/$version
+          fi
+
+          echo "Version is '$version', check out '$BRANCH_TO_PULL'-branch"
+
+          git checkout --track $BRANCH_TO_PULL
+          git pull
+          echo "Current branch is $(git branch --show-current)"
+        env:
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Configure Git
+        run: |
+          # do some configuration
+          sudo timedatectl set-timezone Europe/Amsterdam
+          git config user.name JC5
+          git config user.email release@firefly-iii.org
+          git config advice.addIgnoredFile false
+          git config push.autoSetupRemote true
+      - name: Lint PHP
+        run: |
+          php_lint_file()
+          {
+              local php_file="$1"
+              php -l "$php_file" &> /dev/null
+              if [ "$?" -ne 0 ]
+              then
+                  echo -e "[FAIL] $php_file"
+                  return 1
+              fi
+          }
+
+          export -f php_lint_file
+
+          find . -path ./vendor -prune -o -name '*.php' | parallel -j 4 php_lint_file {}
+
+          if [ "$?" -ne 0 ]
+          then
+              exit 1
+          fi
       - name: Cleanup changelog
         id: cleanup-changelog
         uses: JC5/firefly-iii-dev@main
@@ -51,15 +89,15 @@ jobs:
         env:
           FIREFLY_III_ROOT: /github/workspace
           GH_TOKEN: ${{ secrets.CHANGELOG_TOKEN }}
-      - name: Extract changelog
-        id: extract-changelog
+      - name: "Create THANKS.md"
+        id: thank-you
         uses: JC5/firefly-iii-dev@main
         with:
-          action: 'ff3:extract-changelog'
-          output: 'output'
+          action: 'ff3:thank-you'
+          output: ''
         env:
           FIREFLY_III_ROOT: /github/workspace
-          GH_TOKEN: ""
+          GH_TOKEN: ''
       - name: Replace version
         id: replace-version
         uses: JC5/firefly-iii-dev@main
@@ -70,6 +108,11 @@ jobs:
           FIREFLY_III_ROOT: /github/workspace
           GH_TOKEN: ""
           FF_III_VERSION: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Build JS
+        run: |
+          npm install
+          npm update
+          npm run build --workspace=v2
       - name: Code cleanup
         id: code-cleanup
         uses: JC5/firefly-iii-dev@main
@@ -79,29 +122,14 @@ jobs:
         env:
           FIREFLY_III_ROOT: /github/workspace
           GH_TOKEN: ''
-      - name: Build JS
-        run: |
-          npm install
-          npm update
-          npm run build --workspace=v2
       - name: Run CI
         run: |
           rm -rf vendor composer.lock
           composer update --no-dev --no-scripts --no-plugins -q
           sudo chown -R runner:docker resources/lang
           .ci/phpcs.sh || true
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-      - name: Release
+      - name: Calculate variables
         run: |
-          # do some configuration
-          sudo timedatectl set-timezone Europe/Amsterdam
-          git config user.name github-actions
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git config advice.addIgnoredFile false
 
           # set some variables
           releaseName=$version
@@ -109,17 +137,23 @@ jobs:
           zipName=DataImporter-$version.zip
           tarName=DataImporter-$version.tar.gz
 
-          # update composer (again)
-          composer update --no-dev --no-scripts --no-plugins
-          composer dump-autoload
-
           # if this is a develop build, slightly different variable names.
           if [[ "develop" == "$version" ]]; then
-            [[ -z $(git status --untracked-files=normal --porcelain) ]] && echo "this branch is clean, no need to push..." && exit 0;
+            #[[ -z $(git status --untracked-files=normal --porcelain) ]] && echo "this branch is clean, no need to push..." && exit 0;
             releaseName=$version-$(date +'%Y%m%d')
             originalName=$releaseName
             zipName=DataImporter-develop.zip
             tarName=DataImporter-develop.tar.gz
+          fi
+
+          # if this is a branch build, also slightly different variable names.
+          if [[ "$version" == branch* ]]; then
+            #[[ -z $(git status --untracked-files=normal --porcelain) ]] && echo "this branch is clean, no need to push..." && exit 0;
+            # branch builds overrule develop
+            releaseName=$version-$(date +'%Y%m%d')
+            originalName=$releaseName
+            zipName=DataImporter-$version.zip
+            tarName=DataImporter-$version.tar.gz
           fi
 
           # in both cases, if the release or tag already exists, add ".1" until it no longer exists.
@@ -137,23 +171,191 @@ jobs:
              tagFound=false
             fi
           done
-          echo "Will use tag and release name $releaseName."
 
+          # set some variables
+          echo "Release name is $releaseName."
+          echo "Original name is $originalName."
+          echo "Zip name is $zipName."
+          echo "Tar name is $tarName."
+
+          # create a new branch to store the difference in.
+          BRANCH_NAME=release-$(date +'%s')
+          git checkout -b $BRANCH_NAME
+
+          echo "Temporary branch name is '$BRANCH_NAME'."
+
+          # share variables with next step.
+          echo "releaseName=$releaseName" >> "$GITHUB_ENV"
+          echo "originalName=$originalName" >> "$GITHUB_ENV"
+          echo "zipName=$zipName" >> "$GITHUB_ENV"
+          echo "tarName=$tarName" >> "$GITHUB_ENV"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
+        env:
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Commit all changes
+        run: |
           # add all content, except output.txt (this contains the changelog and/or the download instructions)
-          echo 'Add all and reset output.txt'
+          echo 'Add all'
           git add -A
-          if test -f "output.txt"; then
-            git reset output.txt
-          fi
-          git commit -m "Auto commit for release '$version' on $(date +'%Y-%m-%d')" || true
+          # push to a new branch.
+          echo "Auto commit on branch '$(git branch --show-current)'."
+          git commit -m "🤖 Auto commit for release '$version' on $(date +'%Y-%m-%d')" || true
           git push
+        env:
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Extract changelog
+        id: extract-changelog
+        uses: JC5/firefly-iii-dev@main
+        with:
+          action: 'ff3:extract-changelog'
+          output: 'output'
+        env:
+          FIREFLY_III_ROOT: /github/workspace
+          GH_TOKEN: ""
+      - name: Describe new release
+        run: |
 
-          # zip and tar everything
-          echo 'Zip and tar...'
-          zip -rq $zipName . -x "*.git*" "*.ci*" "*.github*" "*node_modules*" "*output.txt*"
+          # describe the development release.
+          if [[ "develop" == "$version" ]]; then
+            echo 'Describe the latest develop release'
+            rm -f output.txt
+            touch output.txt
+            sudo chown -R runner:docker output.txt
+            echo "Weekly development release of the Firefly III Data Importer with the latest fixes and features. Docker users can find this release under the \`develop\` tag." >> output.txt
+            echo "" >> output.txt
+            echo "This release was created on **$(date +'%Y-%m-%d %H:%M')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+            echo "" >> output.txt
+            echo "* Please read the installation instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/firefly-iii/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/)" >> output.txt
+            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/self-managed/)" >> output.txt
+            echo "" >> output.txt
+            echo ":warning: Please be careful with this pre-release, as it may not work as expected." >> output.txt
+          fi
+          # describe a branch release
+          if [[ "$version" == branch* ]]; then
+            echo 'Describe a branch release'
+            rm -f output.txt
+            touch output.txt
+            sudo chown -R runner:docker output.txt
+            echo "Irregular BRANCH release of the Firefly III Data Importer. This release contains specific fixes, features or changes. Docker users can find this release under the \`$version\` tag." >> output.txt
+            echo "" >> output.txt
+            echo "This release was created on **$(date +'%Y-%m-%d %H:%M')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+            echo "" >> output.txt
+            echo "* Please read the installation instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/firefly-iii/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/)" >> output.txt
+            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/self-managed/)" >> output.txt
+            echo "" >> output.txt
+            echo ":warning: Please be careful with this branch pre-release, as it may not work as expected." >> output.txt
+          fi
+          # describe the main release
+          if [[ "develop" != "$version" ]] && [[ "$version" != branch* ]] && [[ "$version" != *alpha* ]] && [[ "$version" != *beta* ]]; then
+            echo 'Describe the latest release'
+            sudo chown -R runner:docker output.txt
+            touch output.txt
+            echo '' >> output.txt
+            echo "Welcome to release $version of the Firefly III Data Importer. It contains the the latest fixes, translations and features. Docker users can find this release under the \`latest\` tag." >> output.txt
+            echo '' >> output.txt
+            echo '### Instructions' >> output.txt
+            echo '' >> output.txt
+            echo "* Installation instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/firefly-iii/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/)" >> output.txt
+            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/self-managed/)" >> output.txt
+            echo "* The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+
+          fi
+
+          # describe alpha release
+          if [[ "$version" == *alpha* ]]; then
+            echo 'Describe an ALPHA release'
+            rm -f output.txt
+            touch output.txt
+            sudo chown -R runner:docker output.txt
+            echo "Very early ALPHA release of the Firefly III Data Importer. This release contains specific features or changes. Docker users can find this release under the \`$version\` tag." >> output.txt
+            echo '' >> output.txt
+            echo "This release was created on **$(date +'%Y-%m-%d %H:%M')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+            echo '' >> output.txt
+            echo '### Instructions' >> output.txt
+            echo '' >> output.txt
+            echo "* Installation instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/firefly-iii/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/)" >> output.txt
+            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/self-managed/)" >> output.txt
+            echo "* The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+
+          fi
+
+          # describe beta release
+          if [[ "$version" == *beta* ]]; then
+            echo 'Describe a BETA release'
+            rm -f output.txt
+            touch output.txt
+            sudo chown -R runner:docker output.txt
+            echo "Very early BETA release of the Firefly III Data Importer. This release contains specific features or changes. Docker users can find this release under the \`$version\` tag." >> output.txt
+            echo '' >> output.txt
+            echo "This release was created on **$(date +'%Y-%m-%d %H:%M')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+            echo '' >> output.txt
+            echo '### Instructions' >> output.txt
+            echo '' >> output.txt
+            echo "* Installation instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/firefly-iii/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/installation/self-managed/)" >> output.txt
+            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/firefly-iii/upgrade/self-managed/)" >> output.txt
+            echo "* The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
+
+          fi
+        env:
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Merge all into working branch
+        run: |
+          MERGE_INTO=develop
+            if [[ "$version" == branch* ]]; then
+                MERGE_INTO=$version
+            fi
+
+          echo "Merge all changes from $BRANCH_NAME back into '$MERGE_INTO' using a PR"
+          PR_URL=$(gh pr create -B $MERGE_INTO -H $BRANCH_NAME --title "🤖 Automatic PR to merge all changes into the '$MERGE_INTO' branch." --body '🤖 Created by GitHub action')
+          echo "PR URL is '$PR_URL'"
+          IFS='/' read -ra parts <<< "$PR_URL"
+          PR_NR=$(printf %s\\n "${parts[@]:(-1)}")
+          echo "PR number is '$PR_NR'"
+          gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the $MERGE_INTO branch." -d --merge
+
+          # pull the changes from the $MERGE_INTO branch.
+          git checkout $MERGE_INTO
+          git merge origin/$MERGE_INTO
+          git pull
+          git status
+          echo "Current branch '$(git branch --show-current)'."
+
+          if [[ "develop" != "$version" ]] && [[ "$version" != branch* ]]; then
+            git checkout main
+            git merge origin/main
+            git pull
+            git status
+
+            echo "Also merge everything into main since this is a release."
+            echo 'create PR'
+            PR_URL=$(gh pr create -B main -H develop --title "🤖 Automatic PR to merge all changes into the main branch." --body "🤖 Created by GitHub action")
+            echo "PR URL is '$PR_URL'"
+
+            IFS='/' read -ra parts <<< "$PR_URL"
+            PR_NR=$(printf %s\\n "${parts[@]:(-1)}")
+            echo "PR number is '$PR_NR'"
+
+            echo 'Merge PR'
+            gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the main branch." --merge
+            git checkout main
+            git merge origin/main
+            git pull
+            git status
+            echo "Current branch '$(git branch --show-current)'."
+
+          fi
+          echo "DONE!"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Create archives
+        run: |
+          echo "Create zip file $zipName"
+          zip -rq $zipName . -x "*.git*" "*.ci*" "*.github*" "*node_modules*" "*output.txt*" "*Procfile*" "*crowdin.yml*" "*sonar-project.properties*"
           touch $tarName
-          tar --exclude=$tarName --exclude=$zipName --exclude='./.git' --exclude='./.ci' --exclude='./.github' --exclude='./node_modules' --exclude='./output.txt' -czf $tarName .
 
+          echo "Create tar file $tarName"
+          tar --exclude=$tarName --exclude=$zipName --exclude='./.git' --exclude='./.ci' --exclude='./.github' --exclude='./node_modules' --exclude='./output.txt' --exclude='./Procfile' --exclude='../crowdin.yml' --exclude='./sonar-project.properties' -czf $tarName .
           # add sha256 sum
           echo 'Sha sum ...'
           sha256sum -b $zipName > $zipName.sha256
@@ -162,91 +364,100 @@ jobs:
           # add signatures:
           gpg --armor --detach-sign $zipName
           gpg --armor --detach-sign $tarName
+      - name: Create release
+        run: |
 
-          # create a development (nightly) release:
+          # create a development release:
           if [[ "develop" == "$version" ]]; then
-            echo 'Develop release.'
-            # add text to output.txt (instructions)
-            rm output.txt
-            echo "Weekly development release of the Firefly III Data Importer with the latest fixes, translations and features. Docker users can find this release under the \`develop\` tag." >> output.txt
-            echo "" >> output.txt
-            echo "This release was created on **$(date +'%Y-%m-%d')** and may contain unexpected bugs. Data loss is rare but is not impossible. The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
-            echo "" >> output.txt
-            echo "* Please read the installation instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/data-importer/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/installation/self-managed/)" >> output.txt
-            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/upgrade/self-managed/)" >> output.txt
-            echo "" >> output.txt
-            echo ":warning: Please be careful with this pre-release, as it may not work as expected." >> output.txt
+            # pull the changes from the develop branch.
+            git checkout develop
+            git merge origin/develop
+            git pull
 
             # create the release:
-            echo "Create nightly release."
-            git tag -a $releaseName -m "Nightly development release '$version' on $(date +'%Y-%m-%d')"
+            echo "Create develop release under tag '$releaseName'."
+            git tag -a $releaseName -m "🤖 Development release '$version' on $(date +'%Y-%m-%d')"
             git push origin $releaseName
+
             gh release create $releaseName -p --verify-tag \
               -t "Development release for $(date +'%Y-%m-%d')" \
+              --latest=false \
               -F output.txt
 
-            # add zip file to release.
-            gh release upload $releaseName $zipName
-            gh release upload $releaseName $tarName
-
-            # add sha256 sum to release
-            gh release upload $releaseName $zipName.sha256
-            gh release upload $releaseName $tarName.sha256
-
-            # add signatures to release
-            gh release upload $releaseName $zipName.asc
-            gh release upload $releaseName $tarName.asc
-
-            # get current HEAD and add as file to the release
-            HEAD=$(git rev-parse HEAD)
-            echo $HEAD > HEAD.txt
-            gh release upload $releaseName HEAD.txt
-          else
-            echo 'MAIN (real) release'
-            sudo chown -R runner:docker output.txt
-            # add text to output.txt (more instructions)
-            echo '' >> output.txt
-            echo '### Instructions' >> output.txt
-            echo '' >> output.txt
-            echo "* Installation instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/installation/docker/), [Portainer](https://docs.firefly-iii.org/how-to/data-importer/installation/portainer/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/installation/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/installation/self-managed/)" >> output.txt
-            echo "* Or read the upgrade instructions for [Docker](https://docs.firefly-iii.org/how-to/data-importer/upgrade/docker/), [Kubernetes](https://docs.firefly-iii.org/how-to/data-importer/upgrade/kubernetes/) or [self-managed servers](https://docs.firefly-iii.org/how-to/data-importer/upgrade/self-managed/)" >> output.txt
-            echo "* The releases are signed, and you can verify them using the [Firefly III releases PGP key](https://docs.firefly-iii.org/explanation/more-information/signatures/)." >> output.txt
-
-            echo "Create default release."
-            git tag -a $releaseName -m "Here be changelog"
-            git push origin $releaseName
-            gh release create $releaseName -F output.txt -t "$releaseName" --verify-tag
-
-            # add archive files to release
-            gh release upload $releaseName $zipName
-            gh release upload $releaseName $tarName
-
-            # add sha256 sums to release
-            gh release upload $releaseName $zipName.sha256
-            gh release upload $releaseName $tarName.sha256
-
-            # add signatures to release
-            gh release upload $releaseName $zipName.asc
-            gh release upload $releaseName $tarName.asc
-
-            # get current HEAD and add as file to the release
-            HEAD=$(git rev-parse HEAD)
-            echo $HEAD > HEAD.txt
-            gh release upload $releaseName HEAD.txt
-
-            # remove all temporary files
-            rm output.txt
-            rm HEAD.txt
-            rm $zipName
-            rm $zipName.sha256
-            rm $tarName
-            rm $tarName.sha256
-
-            # merge main back into develop
-            git checkout develop
-            git merge main
-            git push
           fi
+
+          # create a branch release:
+          if [[ "$version" == branch* ]]; then
+
+            # pull the changes from the branch-* branch.
+            git checkout $version
+            git merge origin/$version
+            git pull
+
+            # create the release:
+            echo "Create branch release."
+            git tag -a $releaseName -m "Branch release '$version' on $(date +'%Y-%m-%d')"
+            git push origin $releaseName
+
+            gh release create $releaseName -p --verify-tag \
+              -t "Branch release for $(date +'%Y-%m-%d')" \
+              --latest=false \
+              -F output.txt
+
+          fi
+
+          # Create a production release.
+          if [[ "develop" != "$version" ]] && [[ "$version" != branch* ]]; then
+            git checkout main
+            git merge origin/main
+            git pull
+            git status
+
+            echo "Create prod release."
+            git tag -a $releaseName -m "Release $version"
+            git push origin $releaseName
+
+            # do not tag as latest when alpha or beta.
+            if [[ "$version" == *alpha* ]] || [[ "$version" == *beta* ]]; then
+              echo 'Mark alpha or beta as NOT the latest.'
+              gh release create $releaseName -F output.txt -t "$releaseName" --verify-tag --latest=false
+            fi
+
+            # tag as latest when NOT alpha or beta.
+            if [[ "$version" != *alpha* ]] && [[ "$version" != *beta* ]]; then
+              echo 'Mark prod as the latest.'
+              gh release create $releaseName -F output.txt -t "$releaseName" --verify-tag --latest=true
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
+      - name: Upload artifacts
+        run: |
+          # add zip file to release.
+          gh release upload $releaseName $zipName
+          gh release upload $releaseName $tarName
+
+          # add sha256 sum to release
+          gh release upload $releaseName $zipName.sha256
+          gh release upload $releaseName $tarName.sha256
+
+          # add signatures to release
+          gh release upload $releaseName $zipName.asc
+          gh release upload $releaseName $tarName.asc
+
+          # get current HEAD and add as file to the release
+          HEAD=$(git rev-parse HEAD)
+          echo $HEAD > HEAD.txt
+          gh release upload $releaseName HEAD.txt
+
+          # remove all temporary files
+          rm -f output.txt
+          rm -f HEAD.txt
+          rm -f $zipName
+          rm -f $zipName.sha256
+          rm -f $tarName
+          rm -f $tarName.sha256
         env:
           GH_TOKEN: ${{ github.token }}
           version: ${{ github.event_name == 'schedule' && 'develop' || github.event.inputs.version }}
