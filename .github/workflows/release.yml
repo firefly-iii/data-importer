@@ -97,6 +97,7 @@ jobs:
           output: ''
         env:
           FIREFLY_III_ROOT: /github/workspace
+          DATA_IMPORTER_ROOT: /github/workspace
           GH_TOKEN: ''
       - name: Replace version
         id: replace-version
