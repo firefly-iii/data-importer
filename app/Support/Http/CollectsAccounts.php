@@ -29,17 +29,18 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
+use Illuminate\Support\Facades\Log;
 
 trait CollectsAccounts
 {
     protected function collectAllTargetAccounts(): array
     {
-        app('log')->debug('Now in collectAllTargetAccounts()');
+        Log::debug('Now in collectAllTargetAccounts()');
 
         try {
             $set1 = $this->collectAccounts('asset');
         } catch (ApiHttpException $e) {
-            app('log')->error(sprintf('Could not collect asset accounts: %s', $e->getMessage()));
+            Log::error(sprintf('Could not collect asset accounts: %s', $e->getMessage()));
             $set1 = [];
         }
 
@@ -47,7 +48,7 @@ trait CollectsAccounts
             $set2 = $this->collectAccounts('liabilities');
         } catch (ApiHttpException $e) {
             $set2 = [];
-            app('log')->error(sprintf('Could not collect liability accounts: %s', $e->getMessage()));
+            Log::error(sprintf('Could not collect liability accounts: %s', $e->getMessage()));
         }
         $return = [];
         foreach ($set1 as $key => $value) {
@@ -66,12 +67,12 @@ trait CollectsAccounts
 
     protected function collectExpenseAccounts(): array
     {
-        app('log')->debug('Now in collectExpenseAccounts()');
+        Log::debug('Now in collectExpenseAccounts()');
 
         try {
             $set1 = $this->collectAccounts('expense');
         } catch (ApiHttpException $e) {
-            app('log')->error(sprintf('Could not collect expense accounts: %s', $e->getMessage()));
+            Log::error(sprintf('Could not collect expense accounts: %s', $e->getMessage()));
             $set1 = [];
         }
 
@@ -87,12 +88,12 @@ trait CollectsAccounts
 
     protected function collectRevenueAccounts(): array
     {
-        app('log')->debug('Now in collectExpenseAccounts()');
+        Log::debug('Now in collectExpenseAccounts()');
 
         try {
             $set1 = $this->collectAccounts('revenue');
         } catch (ApiHttpException $e) {
-            app('log')->error(sprintf('Could not collect revenue accounts: %s', $e->getMessage()));
+            Log::error(sprintf('Could not collect revenue accounts: %s', $e->getMessage()));
             $set1 = [];
         }
 
@@ -111,7 +112,7 @@ trait CollectsAccounts
      */
     private function collectAccounts(string $type): array
     {
-        app('log')->debug(sprintf('Now in collectAccounts("%s")', $type));
+        Log::debug(sprintf('Now in collectAccounts("%s")', $type));
 
         // send account list request to Firefly III.
         $token   = SecretManager::getAccessToken();
@@ -123,12 +124,12 @@ trait CollectsAccounts
 
         /** @var GetAccountsResponse $result */
         $result  = $request->get();
-        app('log')->debug(sprintf('Found %d accounts of type "%s"', count($result), $type));
+        Log::debug(sprintf('Found %d accounts of type "%s"', count($result), $type));
         $return  = [];
 
         /** @var Account $entry */
         foreach ($result as $entry) {
-            app('log')->debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
+            Log::debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type          = $entry->type;
             $iban          = (string) $entry->iban;
             if ('' === $iban) {
@@ -139,13 +140,13 @@ trait CollectsAccounts
             if ('.' !== $number) {
                 $number       = $this->filterSpaces((string) $entry->number);
                 $key          = sprintf('nr_%s', $number);
-                app('log')->debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
+                Log::debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
                 $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
-            app('log')->debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
+            Log::debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
             $return[$iban] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
         }
-        app('log')->debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));
+        Log::debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));
 
         return $return;
     }

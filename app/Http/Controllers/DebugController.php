@@ -101,8 +101,13 @@ class DebugController extends Controller
         $isDocker  = env('IS_DOCKER', false);
 
         if (true === $isDocker) {
-            if (file_exists('/var/www/counter-main.txt')) {
-                $build = trim(file_get_contents('/var/www/counter-main.txt'));
+            try {
+                if (file_exists('/var/www/counter-main.txt')) {
+                    $build = trim(file_get_contents('/var/www/counter-main.txt'));
+                }
+            } catch (\Exception $e) {
+                app('log')->debug('Could not check build counter, but that\'s ok.');
+                app('log')->warning($e->getMessage());
             }
             if ('' !== (string) env('BASE_IMAGE_BUILD')) {
                 $baseBuild = env('BASE_IMAGE_BUILD');

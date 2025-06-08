@@ -80,14 +80,14 @@
         "laravel/framework": "^11",
         "league/csv": "9.*",
         "spatie/enum": "^3.10",
-        "symfony/http-client": "^7.2",
-        "symfony/mailgun-mailer": "^7.2",
-        "genkgo/camt": ">=2.9.0"
+        "symfony/http-client": "^7.3",
+        "symfony/mailgun-mailer": "^7.3",
+        "genkgo/camt": ">=2.10.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
-        "ergebnis/phpstan-rules": "^2.6",
+        "ergebnis/phpstan-rules": "^2.10",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.16",
         "laravel/ui": "^4.5",
