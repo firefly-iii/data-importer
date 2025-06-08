@@ -93,7 +93,7 @@ jobs:
         id: thank-you
         uses: JC5/firefly-iii-dev@main
         with:
-          action: 'ff3:thank-you'
+          action: 'ff3:thank-you data-importer'
           output: ''
         env:
           FIREFLY_III_ROOT: /github/workspace
