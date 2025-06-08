@@ -237,14 +237,14 @@ class GenerateTransactions
             unset($transaction['bonus_tags']);
         }
         // #9533 add entry reference as tag or as booking date.
-        if('' !== $entry->entryReference) {
-            if(false === strtotime($entry->entryReference)) {
+        if ('' !== $entry->entryReference) {
+            if (false === strtotime($entry->entryReference)) {
                 $transaction['tags'][] = $entry->entryReference;
             }
-            if(false !== strtotime($entry->entryReference)) {
+            if (false !== strtotime($entry->entryReference)) {
                 try {
-                $transaction['booking_date'] = Carbon::parse($entry->entryReference)->toW3cString();
-                } catch(InvalidFormatException) {
+                    $transaction['booking_date'] = Carbon::parse($entry->entryReference)->toW3cString();
+                } catch (InvalidFormatException) {
                     // ignore error.
                 }
             }

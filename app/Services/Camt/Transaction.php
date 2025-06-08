@@ -251,7 +251,7 @@ class Transaction
 
                     // #8994 add info.
                     $string = (string) $info->getRemittanceInformation()?->getCreditorReferenceInformation()?->getRef();
-                    if('' !== $string) {
+                    if ('' !== $string) {
                         $return = sprintf('%s %s', $return, $string);
                     }
 
