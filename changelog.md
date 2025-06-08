@@ -8,16 +8,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Add some more debug logging.
-- #8994
-- #9533
+- [Issue 8994](https://github.com/firefly-iii/firefly-iii/issues/8994) (Creditor Reference Information) reported by @fschirinzi
+- [Issue 9533](https://github.com/firefly-iii/firefly-iii/issues/9533) (Extension of GoCardess imports with tags from custom transaction fields) reported by @kondas
 
 ### Changed
 - Data Importer generated transaction IDs are prefixed with `ff3-`.
 - Account numbers have their spaces removed, for easier matching in Firefly III.
 
 ### Fixed
-- #10162
-- #10387
+- [Discussion 10162](https://github.com/orgs/firefly-iii/discussions/10162) (Reverse proxy and `X-Forwarded-Prefix` header) started by @frenchu
+- [Issue 10387](https://github.com/firefly-iii/firefly-iii/issues/10387) (Failing to import inverted transactions when there is no account name and the account number does not exist) reported by @oddstr13
 - [PR 802](https://github.com/firefly-iii/data-importer/pull/802) Ensure all token acquisition methods are the same by @grgar
 - [PR 803](https://github.com/firefly-iii/data-importer/pull/803) Ignore exception opening counter-main.txt by @grgar
 - [PR 814](https://github.com/firefly-iii/data-importer/pull/814) Consider account number uniquely identifying by @oddstr13
@@ -29,8 +29,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #9980
-- #10099
+- [Issue 9980](https://github.com/firefly-iii/firefly-iii/issues/9980) (Firefly FIDI incorrect exit code when errors received) reported by @miguelangel-nubla
+- [Issue 10099](https://github.com/firefly-iii/firefly-iii/issues/10099) (Data Importer loses Secrets from Variables after clicking "Start over") reported by @rrosenbauer
 
 ## 1.6.1 - 2025-02-19
 
@@ -40,7 +40,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #9840
+- [Issue 9840](https://github.com/firefly-iii/firefly-iii/issues/9840) (Data Importer doesn't detect duplicates when using "notes" for the unique column) reported by @muhammad-saleh
 
 ## 1.6.0 - 2025-01-31
 

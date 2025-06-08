@@ -24,7 +24,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => 'develop/2025-06-08',
+    'version'                       => '1.6.3',
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
@@ -33,10 +33,10 @@ return [
         'simplefin' => false,
     ],
     'flow_titles'                   => [
-        'file'      => 'File',
-        'nordigen'   => 'GoCardless',
+        'file'        => 'File',
+        'nordigen'    => 'GoCardless',
         'spectre'     => 'Spectre',
-        'simplefin'  => 'SimpleFIN',
+        'simplefin'   => 'SimpleFIN',
     ],
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',
