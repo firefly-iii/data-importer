@@ -2,15 +2,35 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.6.3 - 2025-06-08
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Added
+- Add some more debug logging.
+- #8994
+- #9533
+
+### Changed
+- Data Importer generated transaction IDs are prefixed with `ff3-`.
+- Account numbers have their spaces removed, for easier matching in Firefly III.
+
+### Fixed
+- #10162
+- #10387
+- [PR 802](https://github.com/firefly-iii/data-importer/pull/802) Ensure all token acquisition methods are the same by @grgar
+- [PR 803](https://github.com/firefly-iii/data-importer/pull/803) Ignore exception opening counter-main.txt by @grgar
+- [PR 814](https://github.com/firefly-iii/data-importer/pull/814) Consider account number uniquely identifying by @oddstr13
+
 ## v1.6.2 - 2025-04-21
 
 ### Added
-- [PR 782](https://github.com/firefly-iii/data-importer/pull/782) Auto import: Honor JSON_CONFIGURATION_DIR by @yparitcher 
+- [PR 782](https://github.com/firefly-iii/data-importer/pull/782) Auto import: Honor JSON_CONFIGURATION_DIR by @yparitcher
 
 ### Fixed
 
-- [Issue 9980](https://github.com/firefly-iii/firefly-iii/issues/9980) (Firefly FIDI incorrect exit code when errors received) reported by @miguelangel-nubla
-- [Issue 10099](https://github.com/firefly-iii/firefly-iii/issues/10099) (Data Importer loses Secrets from Variables after clicking "Start over") reported by @rrosenbauer
+- #9980
+- #10099
 
 ## 1.6.1 - 2025-02-19
 
@@ -20,7 +40,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- [Issue 9840](https://github.com/firefly-iii/firefly-iii/issues/9840) (Data Importer doesn't detect duplicates when using "notes" for the unique column) reported by @muhammad-saleh
+- #9840
 
 ## 1.6.0 - 2025-01-31
 
