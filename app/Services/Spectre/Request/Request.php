@@ -105,6 +105,7 @@ abstract class Request
                         'Content-Type' => 'application/json',
                         'App-id'       => $this->getAppId(),
                         'Secret'       => $this->getSecret(),
+                        'User-Agent'    => sprintf('Firefly III Spectre importer / %s / %s', config('importer.version'), config('auth.line_c')),
                     ],
                 ]
             );

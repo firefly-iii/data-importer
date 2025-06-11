@@ -109,7 +109,7 @@ abstract class Request
                         'Accept'        => 'application/json',
                         'Content-Type'  => 'application/json',
                         'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                        'user-agent'    => sprintf('Firefly III GoCardless importer / %s / %s', config('importer.version'), config('auth.line_b')),
+                        'User-Agent'    => sprintf('Firefly III GoCardless importer / %s / %s', config('importer.version'), config('auth.line_b')),
                     ],
                 ]
             );

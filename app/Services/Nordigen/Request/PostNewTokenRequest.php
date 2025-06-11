@@ -63,7 +63,7 @@ class PostNewTokenRequest extends Request
                     'headers' => [
                         'accept'       => 'application/json',
                         'content-type' => 'application/json',
-                        'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
+                        'User-Agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
                     ],
                 ]
             );
