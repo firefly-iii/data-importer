@@ -1,0 +1,15 @@
+name: Issues - Transfer issues
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transfer
+        uses: lando/transfer-issue-action@v2
+        with:
+          token: ${{ secrets.TRANSFER_ISSUE_TOKEN }}
+          router: move:firefly-iii
+          create_stub: false
