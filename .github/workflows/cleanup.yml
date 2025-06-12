@@ -60,7 +60,9 @@ jobs:
             const workflows = [
               'cleanup.yml',
               'release.yml',
-              'sonarcloud.yml'
+              'sonarcloud.yml',
+              'label.yml',
+              'transfer.yml'
             ]
 
             let runs_to_delete = [];
