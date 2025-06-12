@@ -1,4 +1,4 @@
-name: "Issue - Label issues to transfer"
+name: "Issues - Label issues to transfer"
 on:
   issues:
     types: [opened, edited]
