@@ -50,7 +50,9 @@ class SecretManager
         if (is_array($token)) {
             $token = reset($token);
         }
-        $token = str_replace('Bearer ', '', $token);
+        if(is_string($token) && str_contains($token,'Bearer ')) {
+            $token = str_replace('Bearer ', '', $token);
+        }
 
         return $token ?: (string) config('importer.access_token');
     }
