@@ -39,6 +39,9 @@ class Controller extends BaseController
     use DispatchesJobs;
     use ValidatesRequests;
 
+    // fails on PHP < 8.4
+    public protected(set) string $variable;
+
     /**
      * Controller constructor.
      */

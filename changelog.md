@@ -2,6 +2,74 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.6.3 - 2025-06-08
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Added
+- Add some more debug logging.
+- [Issue 8994](https://github.com/firefly-iii/firefly-iii/issues/8994) (Creditor Reference Information) reported by @fschirinzi
+- [Issue 9533](https://github.com/firefly-iii/firefly-iii/issues/9533) (Extension of GoCardess imports with tags from custom transaction fields) reported by @kondas
+
+### Changed
+- Data Importer generated transaction IDs are prefixed with `ff3-`.
+- Account numbers have their spaces removed, for easier matching in Firefly III.
+
+### Fixed
+- [Discussion 10162](https://github.com/orgs/firefly-iii/discussions/10162) (Reverse proxy and `X-Forwarded-Prefix` header) started by @frenchu
+- [Issue 10387](https://github.com/firefly-iii/firefly-iii/issues/10387) (Failing to import inverted transactions when there is no account name and the account number does not exist) reported by @oddstr13
+- [PR 802](https://github.com/firefly-iii/data-importer/pull/802) Ensure all token acquisition methods are the same by @grgar
+- [PR 803](https://github.com/firefly-iii/data-importer/pull/803) Ignore exception opening counter-main.txt by @grgar
+- [PR 814](https://github.com/firefly-iii/data-importer/pull/814) Consider account number uniquely identifying by @oddstr13
+
+## v1.6.2 - 2025-04-21
+
+### Added
+- [PR 782](https://github.com/firefly-iii/data-importer/pull/782) Auto import: Honor JSON_CONFIGURATION_DIR by @yparitcher
+
+### Fixed
+
+- [Issue 9980](https://github.com/firefly-iii/firefly-iii/issues/9980) (Firefly FIDI incorrect exit code when errors received) reported by @miguelangel-nubla
+- [Issue 10099](https://github.com/firefly-iii/firefly-iii/issues/10099) (Data Importer loses Secrets from Variables after clicking "Start over") reported by @rrosenbauer
+
+## 1.6.1 - 2025-02-19
+
+> ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Fixed
+
+- [Issue 9840](https://github.com/firefly-iii/firefly-iii/issues/9840) (Data Importer doesn't detect duplicates when using "notes" for the unique column) reported by @muhammad-saleh
+
+## 1.6.0 - 2025-01-31
+
+> ⚠️⚠️ This release required **PHP 8.4.0** and will not work on earlier releases of PHP ⚠️⚠️
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Changed
+
+Due to changes in the Docker image, the commands that use `WEB_SERVER=false` to automatically import data need another docker container. You can read more about it [in the documentation](https://docs.firefly-iii.org/how-to/data-importer/import/automated/).
+
+- Better rate limit reporting for Nordigen
+- Better exit codes
+- Data is cached, should make the importer slightly faster
+
+### Fixed 
+- [Issue 9484](https://github.com/firefly-iii/firefly-iii/issues/9484) (Exit code 72 when no results are found - expecting 73) reported by @james-prince
+- [Issue 9505](https://github.com/firefly-iii/firefly-iii/issues/9505) (data-importer develop failing on CSV file) reported by @MacPaille
+- [Discussion 9513](https://github.com/orgs/firefly-iii/discussions/9513) (Importer Stuck on Configuration with no exception) started by @KasparRosin
+- [Issue 9651](https://github.com/firefly-iii/firefly-iii/issues/9651) (Data importer fails to check configured self signed CA when checking for duplicate external IDs) reported by @zebrapurring
+- [Issue 9688](https://github.com/firefly-iii/firefly-iii/issues/9688) ([Importer] Gocardless Import not using correct values for creditor) reported by @arnolicious
+
+### Added
+- Support for PHP 8.4
+- [Discussion 9626](https://github.com/orgs/firefly-iii/discussions/9626) (Allow newlines in description/Add hook points to Data importer process) started by @Sobuno
+
+### Removed
+- Support for < PHP 8.4
+
 ## v1.5.7 - 2024-11-10
 
 ### Added

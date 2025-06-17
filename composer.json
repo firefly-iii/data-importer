@@ -72,7 +72,7 @@
         }
     ],
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "ext-bcmath": "*",
         "ext-json": "*",
         "firefly-iii/api-support-classes": "@dev",
@@ -80,27 +80,26 @@
         "laravel/framework": "^11",
         "league/csv": "9.*",
         "spatie/enum": "^3.10",
-        "symfony/http-client": "^7.2",
-        "symfony/mailgun-mailer": "^7.2",
-        "genkgo/camt": ">=2.8.0"
+        "symfony/http-client": "^7.3",
+        "symfony/mailgun-mailer": "^7.3",
+        "genkgo/camt": ">=2.10.0"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.14",
-        "barryvdh/laravel-ide-helper": "^3.2",
-        "ergebnis/phpstan-rules": "^2.5",
+        "barryvdh/laravel-debugbar": "^3.15",
+        "barryvdh/laravel-ide-helper": "^3.5",
+        "ergebnis/phpstan-rules": "^2.10",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.16",
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8",
-        "larastan/larastan": "^2.9",
-        "phpstan/extension-installer": "*",
-        "phpstan/phpstan": "^1.12",
-        "phpstan/phpstan-deprecation-rules": "^1.2",
-        "phpstan/phpstan-strict-rules": "^1.6",
-        "phpunit/phpunit": "^10.5",
+        "larastan/larastan": "^3",
         "roave/security-advisories": "dev-master",
-        "thecodingmachine/phpstan-strict-rules": "^1.0"
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2",
+        "phpstan/phpstan-deprecation-rules": "^2",
+        "phpstan/phpstan-strict-rules": "^2",
+        "phpunit/phpunit": "^12"
     },
     "config": {
         "optimize-autoloader": true,

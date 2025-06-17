@@ -28,6 +28,7 @@ namespace App\Services\Nordigen\Model;
 use App\Rules\Iban;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -96,7 +97,7 @@ class Transaction
      */
     public static function fromArray($array): self
     {
-        app('log')->debug('GoCardless transaction from array', $array);
+        Log::debug('GoCardless transaction from array', $array);
         $object                                         = new self();
         $object->tags                                   = [];
         $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
@@ -113,7 +114,7 @@ class Transaction
             try {
                 $object->bookingDate = Carbon::parse($array['bookingDateTime'], config('app.timezone'));
             } catch (InvalidFormatException $e) {
-                app('log')->error(sprintf('Could not parse bookingDateTime "%s": %s', $array['bookingDateTime'], $e->getMessage()));
+                Log::error(sprintf('Could not parse bookingDateTime "%s": %s', $array['bookingDateTime'], $e->getMessage()));
             }
         }
 
@@ -156,7 +157,7 @@ class Transaction
             $object->balanceAfterTransaction = Balance::createFromArray($array['balanceAfterTransaction']);
         }
         if (array_key_exists('balanceAfterTransaction', $array) && !is_array($array['balanceAfterTransaction'])) {
-            app('log')->warning(sprintf('balanceAfterTransaction is not an array: %s', $array['balanceAfterTransaction']));
+            Log::warning(sprintf('balanceAfterTransaction is not an array: %s', $array['balanceAfterTransaction']));
             $object->balanceAfterTransaction = Balance::createFromArray([]);
         }
         if (!array_key_exists('balanceAfterTransaction', $array)) {
@@ -196,13 +197,16 @@ class Transaction
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-                app('log')->warning('Generated random transaction ID from array!');
+                Log::warning('Generated random transaction ID from array!');
             } catch (\JsonException $e) {
-                app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
+                Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = sprintf('ff3-%s', Uuid::uuid5(config('importer.namespace'), $hash));
         }
-        app('log')->debug(sprintf('Downloaded transaction with ID "%s"', $object->transactionId));
+        if ('' !== $object->transactionId) {
+            Log::debug('Transaction has correct transaction ID.');
+        }
+        Log::debug(sprintf('Downloaded transaction with ID "%s"', $object->transactionId));
 
         return $object;
     }
@@ -272,7 +276,7 @@ class Transaction
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
             } catch (\JsonException $e) {
-                app('log')->error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
+                Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
             $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
         }
@@ -283,16 +287,16 @@ class Transaction
     public function getDate(): Carbon
     {
         if (null !== $this->bookingDate) {
-            app('log')->debug('Returning book date');
+            Log::debug('Returning book date');
 
             return $this->bookingDate;
         }
         if (null !== $this->valueDate) {
-            app('log')->debug('Returning value date');
+            Log::debug('Returning value date');
 
             return $this->valueDate;
         }
-        app('log')->warning('Transaction has no date, return NOW.');
+        Log::warning('Transaction has no date, return NOW.');
 
         return new Carbon(config('app.timezone'));
     }
@@ -305,27 +309,39 @@ class Transaction
         $description = '';
         if ('' !== $this->remittanceInformationUnstructured) {
             $description = $this->remittanceInformationUnstructured;
-            app('log')->debug('Description is now remittanceInformationUnstructured');
+            Log::debug('Description is now remittanceInformationUnstructured');
         }
 
         // try other values as well (Revolut)
         if ('' === $description && count($this->remittanceInformationUnstructuredArray) > 0) {
             $description = implode(' ', $this->remittanceInformationUnstructuredArray);
-            app('log')->debug('Description is now remittanceInformationUnstructuredArray');
+            Log::debug('Description is now remittanceInformationUnstructuredArray');
         }
         if ('' === $description) {
-            app('log')->debug('Description is now remittanceInformationStructured');
+            Log::debug('Description is now remittanceInformationStructured');
             $description = $this->remittanceInformationStructured;
         }
         if ('' === $description) {
-            app('log')->debug('Description is now additionalInformation');
+            Log::debug('Description is now additionalInformation');
             $description = $this->additionalInformation;
         }
         $description = trim($description);
 
         if ('' === $description) {
-            app('log')->warning(sprintf('Transaction "%s" has no description.', $this->getTransactionId()));
+            Log::warning(sprintf('Transaction "%s" has no description.', $this->getTransactionId()));
             $description = '(no description)';
+        }
+
+        return $description;
+    }
+
+    public function getCleanDescription(): string
+    {
+        $description = $this->getDescription();
+        if (str_contains("\n", $description)) {
+            // return without newlines.
+            $description = str_replace(["\n", "\t"], ' ', $description);
+            $description = preg_replace("\r", '', $description);
         }
 
         return $description;
@@ -341,22 +357,22 @@ class Transaction
      */
     public function getDestinationIban(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->creditorAccountIban) {
             $data      = ['iban' => $this->creditorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
             $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
-                app('log')->warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
+                Log::warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
 
                 return null;
             }
 
-            app('log')->debug(sprintf('Destination IBAN is "%s" (creditor)', $this->creditorAccountIban));
+            Log::debug(sprintf('Destination IBAN is "%s" (creditor)', $this->creditorAccountIban));
 
             return $this->creditorAccountIban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no destination IBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -366,18 +382,18 @@ class Transaction
      */
     public function getDestinationName(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->ultimateCreditor) {
-            app('log')->debug(sprintf('Destination name is "%s" (ultimateCreditor)', $this->ultimateCreditor));
+            Log::debug(sprintf('Destination name is "%s" (ultimateCreditor)', $this->ultimateCreditor));
 
             return $this->ultimateCreditor;
         }
         if ('' !== $this->creditorName) {
-            app('log')->debug(sprintf('Destination name is "%s" (creditorName)', $this->creditorName));
+            Log::debug(sprintf('Destination name is "%s" (creditorName)', $this->creditorName));
 
             return $this->creditorName;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination account name information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no destination account name information.', $this->getTransactionId()));
 
         return null;
     }
@@ -387,13 +403,13 @@ class Transaction
      */
     public function getDestinationNumber(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->creditorAccountBban) {
-            app('log')->debug(sprintf('Destination BBAN is "%s" (creditor)', $this->creditorAccountBban));
+            Log::debug(sprintf('Destination BBAN is "%s" (creditor)', $this->creditorAccountBban));
 
             return $this->creditorAccountBban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no destination BBAN information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no destination BBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -409,8 +425,11 @@ class Transaction
         }
 
         // room for other fields
+        if (str_contains("\n", $this->getDescription())) {
+            $notes .= "\n\n".$this->getDescription();
+        }
 
-        return $notes;
+        return trim($notes);
     }
 
     /**
@@ -418,22 +437,22 @@ class Transaction
      */
     public function getSourceIban(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->debtorAccountIban) {
             $data      = ['iban' => $this->debtorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
             $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
-                app('log')->warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));
+                Log::warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));
 
                 return null;
             }
 
-            app('log')->debug(sprintf('Source IBAN is "%s" (debtor)', $this->debtorAccountIban));
+            Log::debug(sprintf('Source IBAN is "%s" (debtor)', $this->debtorAccountIban));
 
             return $this->debtorAccountIban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source IBAN information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no source IBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -443,18 +462,18 @@ class Transaction
      */
     public function getSourceName(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->ultimateDebtor) {
-            app('log')->debug(sprintf('Source name is "%s" (ultimateDebtor)', $this->ultimateDebtor));
+            Log::debug(sprintf('Source name is "%s" (ultimateDebtor)', $this->ultimateDebtor));
 
             return $this->ultimateDebtor;
         }
         if ('' !== $this->debtorName) {
-            app('log')->debug(sprintf('Source name is "%s" (debtorName)', $this->debtorName));
+            Log::debug(sprintf('Source name is "%s" (debtorName)', $this->debtorName));
 
             return $this->debtorName;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source account name information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no source account name information.', $this->getTransactionId()));
 
         return null;
     }
@@ -464,13 +483,13 @@ class Transaction
      */
     public function getSourceNumber(): ?string
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         if ('' !== $this->debtorAccountBban) {
-            app('log')->debug(sprintf('Source BBAN is "%s" (debtor)', $this->debtorAccountBban));
+            Log::debug(sprintf('Source BBAN is "%s" (debtor)', $this->debtorAccountBban));
 
             return $this->debtorAccountBban;
         }
-        app('log')->warning(sprintf('Transaction "%s" has no source BBAN information.', $this->getTransactionId()));
+        Log::warning(sprintf('Transaction "%s" has no source BBAN information.', $this->getTransactionId()));
 
         return null;
     }
@@ -478,11 +497,11 @@ class Transaction
     public function getValueDate(): ?Carbon
     {
         if (null !== $this->valueDate) {
-            app('log')->debug('Returning value date for getValueDate');
+            Log::debug('Returning value date for getValueDate');
 
             return $this->valueDate;
         }
-        app('log')->warning('Transaction has no valueDate, return NULL.');
+        Log::warning('Transaction has no valueDate, return NULL.');
 
         return null;
     }

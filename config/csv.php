@@ -84,7 +84,7 @@ return [
      * The key is the short name for the column role. There are five values, which mean this:
      *
      * 'mappable'
-     * Whether or not the value in the CSV column can be linked to an existing value in your
+     * Whether the value in the CSV column can be linked to an existing value in your
      * Firefly database. For example: account names can be linked to existing account names you have already
      * so double entries cannot occur. This process is called "mapping". You have to make each unique value in your
      * CSV file to an existing entry in your database. For example, map all account names in your CSV file to existing
@@ -99,7 +99,7 @@ return [
      * This is the class that will actually do the pre-processing.
      *
      * 'field'
-     * I don't believe this value is used any more, but I am not sure.
+     * I don't believe this value is used anymore, but I am not sure.
      *
      * 'converter'
      * The converter is a class in app/Service/CSV/Converter that converts the given value into an object Firefly understands.
@@ -356,7 +356,7 @@ return [
             'mappable'        => true,
             'pre-process-map' => false,
             'field'           => 'asset-account-number',
-            'converter'       => 'CleanString',
+            'converter'       => 'AccountNumber',
             'mapper'          => 'AssetAccounts',
             'append_value'    => false,
         ],
@@ -364,7 +364,7 @@ return [
             'mappable'        => false,
             'pre-process-map' => false,
             'field'           => 'asset-account-bic',
-            'converter'       => 'CleanString',
+            'converter'       => 'AccountNumber',
             'append_value'    => false,
         ],
         'opposing-id'           => [
@@ -379,7 +379,7 @@ return [
             'mappable'        => false,
             'pre-process-map' => false,
             'field'           => 'opposing-account-bic',
-            'converter'       => 'CleanString',
+            'converter'       => 'AccountNumber',
             'append_value'    => false,
         ],
         'opposing-name'         => [
@@ -402,7 +402,7 @@ return [
             'mappable'        => true,
             'pre-process-map' => false,
             'field'           => 'opposing-account-number',
-            'converter'       => 'CleanString',
+            'converter'       => 'AccountNumber',
             'mapper'          => 'OpposingAccounts',
             'append_value'    => false,
         ],
@@ -567,11 +567,12 @@ return [
         'internal_reference' => 'Internal reference',
     ],
     'search_modifier'       => [
-        'note'               => 'notes_are',
-        'external-id'        => 'external_id_is',
-        'external_id'        => 'external_id_is',
-        'description'        => 'description_is',
-        'internal_reference' => 'internal_reference_is',
-        'internal-reference' => 'internal_reference_is',
+        'note'                => 'notes_are',
+        'notes'               => 'notes_are',
+        'external-id'         => 'external_id_is',
+        'external_id'         => 'external_id_is',
+        'description'         => 'description_is',
+        'internal_reference'  => 'internal_reference_is',
+        'internal-reference'  => 'internal_reference_is',
     ],
 ];

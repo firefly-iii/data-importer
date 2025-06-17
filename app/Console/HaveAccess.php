@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
@@ -37,14 +38,7 @@ trait HaveAccess
     private function haveAccess(): bool
     {
         $url             = (string) config('importer.url');
-        $token           = (string) config('importer.access_token');
-
-        // grab token from authentication header.
-        $headerToken     = (string) request()->header('Authorization');
-        if ('' !== $headerToken) {
-            $token = str_replace('Bearer ', '', $headerToken);
-            $this->line('Overrule token with token from Authorization header.');
-        }
+        $token           = SecretManager::getAccessToken();
 
         $this->line(sprintf('Trying to connect to %s...', $url));
         $this->line(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));

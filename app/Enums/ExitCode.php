@@ -39,5 +39,6 @@ enum ExitCode: int
     case CANNOT_READ_IMPORTABLE_FILE = 71;
     case TOO_MANY_ERRORS_PROCESSING  = 72;
     case NOTHING_WAS_IMPORTED        = 73;
+    case AGREEMENT_EXPIRED           = 74;
 
 }
