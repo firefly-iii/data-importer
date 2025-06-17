@@ -50,7 +50,7 @@ class SecretManager
         if (is_array($token)) {
             $token = reset($token);
         }
-        if(is_string($token) && str_contains($token,'Bearer ')) {
+        if (is_string($token) && str_contains($token, 'Bearer ')) {
             $token = str_replace('Bearer ', '', $token);
         }
 
