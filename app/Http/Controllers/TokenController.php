@@ -89,7 +89,7 @@ class TokenController extends Controller
         $opts         = [
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
-            'headers'=> [
+            'headers'         => [
                 'User-Agent' => sprintf('Mozilla/5.0 FF3-importer %s token callback', config('importer.version')),
             ],
         ];
