@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Authentication;
 
 use App\Services\Session\Constants;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class SecretManager
@@ -44,28 +45,36 @@ class SecretManager
             }
         }
 
-        app('log')->debug('No access token in session, will return header or config variable.');
+        Log::debug('No access token in session, will return header or config variable.');
 
         $token = request()?->header('Authorization', '') ?? '';
         if (is_array($token)) {
-            $token = reset($token);
+            $token = (string) reset($token);
+        }
+        if (is_string($token) && !str_contains($token, 'Bearer ')) {
+            Log::debug('Access token in header is not a Bearer token, will be ignored.');
+            $token = null;
         }
         if (is_string($token) && str_contains($token, 'Bearer ')) {
+            Log::debug('Access token in header is a Bearer token, will be used.');
             $token = str_replace('Bearer ', '', $token);
         }
-
-        return $token ?: (string) config('importer.access_token');
+        if (null === $token) {
+            Log::debug('Access token is null, use config instead.');
+            $token = (string)config('importer.access_token');
+        }
+        return (string)$token;
     }
 
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
-            app('log')->debug('No base url in getBaseUrl() session, will return config variable.');
+            Log::debug('No base url in getBaseUrl() session, will return config variable.');
 
-            return (string) config('importer.url');
+            return (string)config('importer.url');
         }
 
-        return (string) session()->get(Constants::SESSION_BASE_URL);
+        return (string)session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -82,12 +91,12 @@ class SecretManager
     public static function getClientId(): int
     {
         if (!self::hasClientId()) {
-            app('log')->debug('No client id in hasClientId() session, will return config variable.');
+            Log::debug('No client id in hasClientId() session, will return config variable.');
 
-            return (int) config('importer.client_id');
+            return (int)config('importer.client_id');
         }
 
-        return (int) session()->get(Constants::SESSION_CLIENT_ID);
+        return (int)session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     /**
@@ -101,15 +110,15 @@ class SecretManager
     public static function getVanityUrl(): string
     {
         if (!self::hasVanityUrl()) {
-            app('log')->debug('No vanity url in getVanityUrl() session, will return config variable.');
-            if ('' === (string) config('importer.vanity_url')) {
-                return (string) config('importer.url');
+            Log::debug('No vanity url in getVanityUrl() session, will return config variable.');
+            if ('' === (string)config('importer.vanity_url')) {
+                return (string)config('importer.url');
             }
 
-            return (string) config('importer.vanity_url');
+            return (string)config('importer.vanity_url');
         }
 
-        return (string) session()->get(Constants::SESSION_VANITY_URL);
+        return (string)session()->get(Constants::SESSION_VANITY_URL);
     }
 
     /**
@@ -125,7 +134,7 @@ class SecretManager
      */
     public static function hasValidSecrets(): bool
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         // check for access token cookie. if not, redirect to flow to get it.
         if ('' === self::getAccessToken() && !self::hasRefreshToken() && !self::hasBaseUrl()) {
             return false;
