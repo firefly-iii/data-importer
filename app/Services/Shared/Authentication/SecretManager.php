@@ -67,6 +67,7 @@ class SecretManager
             Log::debug('Access token is null, use config instead.');
             $token = (string)config('importer.access_token');
         }
+
         return (string)$token;
     }
 
