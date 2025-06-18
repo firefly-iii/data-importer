@@ -51,11 +51,15 @@ class SecretManager
         if (is_array($token)) {
             $token = (string) reset($token);
         }
-        if (is_string($token) && !str_contains($token, 'Bearer ')) {
+        if('' === $token) {
+            Log::debug('Access token in header is empty, will be ignored.');
+            $token = null;
+        }
+        if (is_string($token) && strlen($token) > 0 && !str_contains($token, 'Bearer ')) {
             Log::debug('Access token in header is not a Bearer token, will be ignored.');
             $token = null;
         }
-        if (is_string($token) && str_contains($token, 'Bearer ')) {
+        if (is_string($token) && strlen($token) > 0 && str_contains($token, 'Bearer ')) {
             Log::debug('Access token in header is a Bearer token, will be used.');
             $token = str_replace('Bearer ', '', $token);
         }
