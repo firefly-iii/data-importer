@@ -1,4 +1,4 @@
-<div class="d-flex align-items-start p-3 bg-dark text-light rounded mb-2 border border-secondary">
+<div class="d-flex align-items-start p-3 bg-light rounded mb-2 border border-secondary">
     <div class="form-check me-3">
         <input
             id="do_import_{{ $account['import_account']->id }}"
