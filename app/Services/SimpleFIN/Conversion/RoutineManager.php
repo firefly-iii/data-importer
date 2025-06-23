@@ -193,7 +193,8 @@ class RoutineManager implements RoutineManagerInterface
                         ]
                     );
 
-                } else {
+                }
+                if (null === $createdAccount) {
                     // Account creation failed - this is a critical error that must be reported
                     $errorMessage = sprintf(
                         'CRITICAL: Failed to create Firefly III account "%s" (type: %s, currency: %s). Cannot proceed with transaction import for this account.',

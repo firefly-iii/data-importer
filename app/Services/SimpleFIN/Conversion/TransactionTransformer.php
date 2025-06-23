@@ -74,7 +74,8 @@ class TransactionTransformer
             $type               = 'deposit';
             $sourceAccount      = $this->getCounterAccount($transactionData, $isDeposit);
             $destinationAccount = $this->getFireflyAccount($simpleFINAccountData, $accountMapping, $newAccountConfig);
-        } else {
+        }
+        if (!$isDeposit) {
             $type               = 'withdrawal';
             $sourceAccount      = $this->getFireflyAccount($simpleFINAccountData, $accountMapping, $newAccountConfig);
             $destinationAccount = $this->getCounterAccount($transactionData, $isDeposit);

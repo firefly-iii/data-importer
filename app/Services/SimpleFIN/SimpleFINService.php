@@ -55,7 +55,8 @@ class SimpleFINService
             $actualApiUrl = $this->exchangeClaimUrlForAccessUrl($token);
             $actualToken  = ''; // Access URL contains auth info
             app('log')->debug(sprintf('Successfully exchanged claim URL for access URL: %s', $actualApiUrl));
-        } else {
+        }
+        if (!$this->isBase64ClaimUrl($token)) {
             // Token is not a base64 claim URL, we need an API URL
             if (empty($apiUrl)) {
                 throw new ImporterErrorException('SimpleFIN API URL is required when token is not a base64-encoded claim URL');
@@ -122,11 +123,10 @@ class SimpleFINService
             if (is_array($accountData) && isset($accountData['id']) && is_string($accountData['id']) && $accountData['id'] === $accountId) {
                 $accountFound = true;
                 // Transactions are expected to be in $accountData['transactions'] as an array
+                $accountTransactions = [];
+
                 if (isset($accountData['transactions']) && is_array($accountData['transactions'])) {
                     $accountTransactions = $accountData['transactions'];
-                } else {
-                    // If 'transactions' key is missing or not an array, treat as no transactions.
-                    $accountTransactions = [];
                 }
 
                 break;
@@ -196,11 +196,13 @@ class SimpleFINService
                 count($accountTransactions),
                 count($filteredTransactions)
             ));
-        } else {
-            $filteredTransactions = $accountTransactions;
-        }
+            app('log')->debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (after potential filtering).', count($filteredTransactions), $accountId));
 
-        app('log')->debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (after potential filtering).', count($filteredTransactions), $accountId));
+            return $filteredTransactions;
+        }
+        $filteredTransactions = $accountTransactions;
+
+        app('log')->debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (no date filtering was applied).', count($filteredTransactions), $accountId));
 
         return $filteredTransactions;
     }
@@ -340,9 +342,11 @@ class SimpleFINService
 
         if (empty($apiUrl)) {
             $errors[] = 'SimpleFIN bridge URL is required';
-        } elseif (!filter_var($apiUrl, FILTER_VALIDATE_URL)) {
+        }
+        if (!empty($apiUrl) && !filter_var($apiUrl, FILTER_VALIDATE_URL)) {
             $errors[] = 'SimpleFIN bridge URL must be a valid URL';
-        } elseif (!str_starts_with($apiUrl, 'https://')) {
+        }
+        if (!empty($apiUrl) && !str_starts_with($apiUrl, 'https://')) {
             $errors[] = 'SimpleFIN bridge URL must use HTTPS';
         }
 

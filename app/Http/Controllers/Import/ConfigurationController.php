@@ -393,7 +393,8 @@ class ConfigurationController extends Controller
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accountValue          = (int)$fromRequest['accounts'][$identifier];
                 $accounts[$identifier] = $accountValue;
-            } else {
+            }
+            if(!array_key_exists($identifier, $fromRequest['accounts'])) {
                 app('log')->warning(
                     sprintf(
                         'Account identifier %s in do_import but not in accounts array',

@@ -386,7 +386,8 @@ class UploadController extends Controller
         if ($isDemo) {
             $simpleFINToken = config('importer.simplefin.demo_token');
             $bridgeUrl      = 'https://sfin.bridge.which.is'; // Demo mode uses known working Origin
-        } else {
+        }
+        if(!$isDemo) {
             if (empty($simpleFINToken)) {
                 $errors->add('simplefin_token', 'SimpleFIN token is required.');
             }
@@ -395,7 +396,8 @@ class UploadController extends Controller
                     'simplefin_bridge_url',
                     'Bridge URL is required for CORS Origin header.'
                 );
-            } elseif (!filter_var($bridgeUrl, FILTER_VALIDATE_URL)) {
+            }
+            if (!empty($bridgeUrl) && !filter_var($bridgeUrl, FILTER_VALIDATE_URL)) {
                 $errors->add(
                     'simplefin_bridge_url',
                     'Bridge URL must be a valid URL.'

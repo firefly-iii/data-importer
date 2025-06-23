@@ -69,9 +69,9 @@ class AccountsResponse extends SimpleFINResponse
         if (isset($data['accounts']) && is_array($data['accounts'])) {
             $this->accounts = $data['accounts'];
             app('log')->debug(sprintf('SimpleFIN AccountsResponse: Parsed %d accounts', count($this->accounts)));
-        } else {
-            app('log')->warning('SimpleFIN AccountsResponse: No accounts array found in response');
-            $this->accounts = [];
+            return;
         }
+        app('log')->warning('SimpleFIN AccountsResponse: No accounts array found in response');
+        $this->accounts = [];
     }
 }

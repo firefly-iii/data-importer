@@ -74,25 +74,26 @@ class ConversionController extends Controller
         app('log')->debug('Will now verify configuration content.');
         $flow                = $configuration->getFlow();
 
+        // default back to mapping
+        $jobBackUrl = route('back.mapping');
+
         // Set appropriate back URL based on flow
+        // SimpleFIN always goes back to configuration
         if ('simplefin' === $flow) {
-            // SimpleFIN always goes back to configuration
             $jobBackUrl = route('back.config');
             app('log')->debug('SimpleFIN: Pressing "back" will send you to configure.');
-        } elseif (0 === count($configuration->getDoMapping()) && 'file' === $flow) {
-            // no mapping, back to roles
+        }
+        // no mapping, back to roles
+        if ('simplefin' !== $flow && 0 === count($configuration->getDoMapping()) && 'file' === $flow) {
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
-        } elseif (0 === count($configuration->getMapping())) {
-            // back to mapping
+        }
+        // back to mapping
+        if ('simplefin' !== $flow && 0 === count($configuration->getMapping())) {
             app('log')->debug('Pressing "back" will send you to mapping.');
-            $jobBackUrl = route('back.mapping');
-        } else {
-            // default back to mapping
             $jobBackUrl = route('back.mapping');
         }
         // TODO option is not used atm.
-
         //        if (true === $configuration->isMapAllData()) {
         //            app('log')->debug('Pressing "back" will send you to mapping.');
         //            $jobBackUrl = route('back.mapping');

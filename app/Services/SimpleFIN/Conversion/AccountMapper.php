@@ -83,7 +83,8 @@ class AccountMapper
                             'action'               => 'map',
                         ];
                     }
-                } elseif ('create' === $mappingConfig['action']) {
+                }
+                if ('create' === $mappingConfig['action']) {
                     // Create new account
                     $fireflyAccount = $this->createFireflyAccount($simplefinAccount, $mappingConfig);
                     if ($fireflyAccount) {
@@ -95,7 +96,8 @@ class AccountMapper
                         ];
                     }
                 }
-            } else {
+            }
+            if (!isset($configuration['account_mapping'][$accountKey])) {
                 // Auto-map by searching for existing accounts
                 $fireflyAccount = $this->findMatchingFireflyAccount($simplefinAccount);
                 if ($fireflyAccount) {
@@ -105,7 +107,8 @@ class AccountMapper
                         'firefly_account_name' => $fireflyAccount->name,
                         'action'               => 'auto_map',
                     ];
-                } else {
+                }
+                if (null === $fireflyAccount) {
                     // No mapping found - will need user input
                     $mapping[$accountKey] = [
                         'simplefin_account'    => $simplefinAccount,
