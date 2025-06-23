@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Better check on Authorization header for users who use Basic Auth.
-- #5396
+- [Issue 5396](https://github.com/firefly-iii/firefly-iii/issues/5396) (Data importer: SimpleFIN) reported by @marcusds
 
 ## v1.6.3 - 2025-06-08
 
