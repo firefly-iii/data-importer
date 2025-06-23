@@ -35,6 +35,7 @@ class Configuration
 {
     public const VERSION = 3;
     private array  $accounts;
+    private array  $newAccounts;
     private bool   $addImportTag;
     private string $connection;
     private string $contentType;
@@ -70,6 +71,9 @@ class Configuration
     // camt configuration
     private bool $ignoreSpectreCategories;
     private bool $mapAllData;
+
+    // simplefin configuration
+    private bool $pendingTransactions;
 
     // date range settings
     private array  $mapping;
@@ -112,6 +116,8 @@ class Configuration
         $this->roles                       = [];
         $this->mapping                     = [];
         $this->doMapping                   = [];
+        $this->accounts                    = [];
+        $this->newAccounts                 = [];
         $this->flow                        = 'file';
         $this->contentType                 = 'csv';
         $this->customTag                   = '';
@@ -143,6 +149,9 @@ class Configuration
 
         // mapping for spectre + nordigen
         $this->mapAllData                  = false;
+
+        // simplefin configuration
+        $this->pendingTransactions         = true;
 
         // double transaction detection:
         $this->duplicateDetectionMethod    = 'classic';
@@ -342,6 +351,7 @@ class Configuration
         // settings for spectre + nordigen
         $object->mapAllData                  = $array['map_all_data'] ?? false;
         $object->accounts                    = $array['accounts'] ?? [];
+        $object->newAccounts                 = $array['new_account'] ?? [];
 
         // spectre
         $object->identifier                  = $array['identifier'] ?? '0';
@@ -392,6 +402,9 @@ class Configuration
 
         // utf8
         $object->conversion                  = $array['conversion'] ?? false;
+
+        // simplefin configuration
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
@@ -452,6 +465,7 @@ class Configuration
 
         // spectre + nordigen
         $object->accounts                    = $array['accounts'] ?? [];
+        $object->newAccounts                 = $array['new_account'] ?? [];
 
         // date range settings
         $object->dateRange                   = $array['date_range'] ?? 'all';
@@ -476,6 +490,9 @@ class Configuration
 
         // utf8 conversion
         $object->conversion                  = $array['conversion'] ?? false;
+
+        // simplefin configuration
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // flow
         $object->flow                        = $array['flow'] ?? 'file';
@@ -526,6 +543,16 @@ class Configuration
     public function setAccounts(array $accounts): void
     {
         $this->accounts = $accounts;
+    }
+
+    public function getNewAccounts(): array
+    {
+        return $this->newAccounts;
+    }
+
+    public function setNewAccounts(array $newAccounts): void
+    {
+        $this->newAccounts = $newAccounts;
     }
 
     public function getConnection(): string
@@ -698,6 +725,11 @@ class Configuration
         $this->roles = $roles;
     }
 
+    public function setPendingTransactions(bool $pendingTransactions): void
+    {
+        $this->pendingTransactions = $pendingTransactions;
+    }
+
     public function getSpecifics(): array
     {
         return $this->specifics;
@@ -711,6 +743,11 @@ class Configuration
     public function getUniqueColumnType(): string
     {
         return $this->uniqueColumnType;
+    }
+
+    public function getPendingTransactions(): bool
+    {
+        return $this->pendingTransactions;
     }
 
     public function hasSpecific(string $name): bool
@@ -817,8 +854,12 @@ class Configuration
             // mapping for spectre + nordigen
             'map_all_data'                 => $this->mapAllData,
 
+            // simplefin configuration
+            'pending_transactions'         => $this->pendingTransactions,
+
             // settings for spectre + nordigen
             'accounts'                     => $this->accounts,
+            'new_account'                  => $this->newAccounts,
 
             // date range settings:
             'date_range'                   => $this->dateRange,

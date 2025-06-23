@@ -30,13 +30,19 @@ return [
         'nordigen'  => true,
         'spectre'   => true,
         'file'      => true,
-        'simplefin' => false,
+        'simplefin' => true,
     ],
     'flow_titles'                   => [
         'file'        => 'File',
         'nordigen'    => 'GoCardless',
         'spectre'     => 'Spectre',
         'simplefin'   => 'SimpleFIN',
+    ],
+    'simplefin'                     => [
+        'demo_url'    => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
+        'demo_token'  => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
+        'bridge_url'  => env('SIMPLEFIN_BRIDGE_URL'),
+        'timeout'     => (int) env('SIMPLEFIN_TIMEOUT', 30),
     ],
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',

@@ -41,7 +41,17 @@ class NavController extends Controller
     public function toConfig()
     {
         app('log')->debug(__METHOD__);
-        session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
+
+        // For SimpleFIN flow, don't forget CONFIG_COMPLETE_INDICATOR to preserve form state
+        $sessionConfig = session()->get(Constants::CONFIGURATION);
+        $flow = null;
+        if (is_array($sessionConfig) && isset($sessionConfig['flow'])) {
+            $flow = $sessionConfig['flow'];
+        }
+
+        if ('simplefin' !== $flow) {
+            session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
+        }
 
         return redirect(route('004-configure.index').'?overruleskip=true');
     }

@@ -63,6 +63,13 @@ let index = function () {
                     this.importFunctions.file = true;
                     return;
                 }
+
+                if ('NEEDS_OAUTH' === message) {
+                    console.log('OAuth authentication required, redirecting to token page');
+                    window.location.href = tokenPageUrl;
+                    return;
+                }
+
                 // disable all
                 this.loadingFunctions.file = false;
                 this.loadingFunctions.gocardless = false;

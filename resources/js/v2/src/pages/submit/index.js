@@ -40,10 +40,31 @@ let index = function () {
             warnings: [],
             errors: [],
         },
+        progress: {
+            currentTransaction: 0,
+            totalTransactions: 0,
+            progressPercentage: 0,
+        },
         checkCount: 0,
-        maxCheckCount: 600,
+        maxCheckCount: 3600,
+        manualRefreshAvailable: false,
         functionName() {
 
+        },
+        getProgressPercentage() {
+            return this.progress.progressPercentage;
+        },
+        getProgressWidth() {
+            return this.progress.progressPercentage + '%';
+        },
+        getProgressDisplay() {
+            if (this.progress.totalTransactions === 0) {
+                return '';
+            }
+            return this.progress.currentTransaction + ' / ' + this.progress.totalTransactions + ' transactions';
+        },
+        hasProgressData() {
+            return this.progress.totalTransactions > 0;
         },
         showJobMessages() {
             console.log(this.messages);
@@ -57,6 +78,13 @@ let index = function () {
         },
         showTooManyChecks() {
             return 'too_long_checks' === this.pageStatus.status;
+        },
+        refreshStatus() {
+            console.log('Manual refresh triggered');
+            this.checkCount = 0;
+            this.manualRefreshAvailable = false;
+            this.pageStatus.status = 'submission_running';
+            this.getJobStatus();
         },
         showPostError() {
             return 'submission_errored' === this.pageStatus.status || this.post.errored
@@ -105,6 +133,7 @@ let index = function () {
             if (this.checkCount >= this.maxCheckCount) {
                 console.log('Block getJobStatus (' + this.checkCount + ')');
                 this.pageStatus.status = 'too_long_checks';
+                this.manualRefreshAvailable = true;
                 return;
             }
             const submitUrl = './import/submit/status';
@@ -122,6 +151,11 @@ let index = function () {
                 this.messages.errors = response.data.errors;
                 this.messages.warnings = response.data.warnings;
                 this.messages.messages = response.data.messages;
+
+                // process progress data:
+                this.progress.currentTransaction = response.data.currentTransaction || 0;
+                this.progress.totalTransactions = response.data.totalTransactions || 0;
+                this.progress.progressPercentage = response.data.progressPercentage || 0;
 
                 // job has not started yet. Let's wait.
                 if (false === this.pageStatus.triedToStart && 'waiting_to_start' === this.pageStatus.status) {

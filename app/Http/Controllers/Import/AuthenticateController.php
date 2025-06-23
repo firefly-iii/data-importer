@@ -96,8 +96,14 @@ class AuthenticateController extends Controller
                 return redirect(route('003-upload.index'));
             }
         }
+        if ('simplefin' === $flow) {
+            // This case should ideally be handled by middleware redirecting to upload.
+            // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
+            app('log')->warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
+            return redirect(route('003-upload.index'));
+        }
 
-        throw new ImporterErrorException('Impossible flow exception [a].');
+        throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
     }
 
     /**

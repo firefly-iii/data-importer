@@ -1,0 +1,17 @@
+[Unit]
+Description=Laravel Queue Worker
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/php artisan queue:work --timeout=1800 --tries=1 --daemon
+WorkingDirectory=%i
+Restart=on-failure
+RestartSec=10
+Environment=APP_ENV=local
+Environment=APP_DEBUG=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -35,16 +35,22 @@ class SubmissionStatus
     public array  $messages;
     public string $status;
     public array  $warnings;
+    public int    $currentTransaction;
+    public int    $totalTransactions;
+    public int    $progressPercentage;
 
     /**
      * ImportJobStatus constructor.
      */
     public function __construct()
     {
-        $this->status   = self::SUBMISSION_WAITING;
-        $this->errors   = [];
-        $this->warnings = [];
-        $this->messages = [];
+        $this->status            = self::SUBMISSION_WAITING;
+        $this->errors            = [];
+        $this->warnings          = [];
+        $this->messages          = [];
+        $this->currentTransaction = 0;
+        $this->totalTransactions  = 0;
+        $this->progressPercentage = 0;
     }
 
     /**
@@ -52,11 +58,14 @@ class SubmissionStatus
      */
     public static function fromArray(array $array): self
     {
-        $config           = new self();
-        $config->status   = $array['status'];
-        $config->errors   = $array['errors'] ?? [];
-        $config->warnings = $array['warnings'] ?? [];
-        $config->messages = $array['messages'] ?? [];
+        $config                    = new self();
+        $config->status            = $array['status'];
+        $config->errors            = $array['errors'] ?? [];
+        $config->warnings          = $array['warnings'] ?? [];
+        $config->messages          = $array['messages'] ?? [];
+        $config->currentTransaction = $array['currentTransaction'] ?? 0;
+        $config->totalTransactions  = $array['totalTransactions'] ?? 0;
+        $config->progressPercentage = $array['progressPercentage'] ?? 0;
 
         return $config;
     }
@@ -64,10 +73,13 @@ class SubmissionStatus
     public function toArray(): array
     {
         return [
-            'status'   => $this->status,
-            'errors'   => $this->errors,
-            'warnings' => $this->warnings,
-            'messages' => $this->messages,
+            'status'            => $this->status,
+            'errors'            => $this->errors,
+            'warnings'          => $this->warnings,
+            'messages'          => $this->messages,
+            'currentTransaction' => $this->currentTransaction,
+            'totalTransactions'  => $this->totalTransactions,
+            'progressPercentage' => $this->progressPercentage,
         ];
     }
 }

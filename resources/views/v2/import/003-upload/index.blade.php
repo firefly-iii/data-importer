@@ -29,6 +29,10 @@
                             If your configuration already contains an encrypted SimpleFIN access URL, you do not need to fill in the "SimpleFIN token" field. If you are unsure,
                             using the SimpleFIN token field will overrule whatever (if any) access URL is in your configuration file.
                         </p>
+                        <p>
+                            <strong>Demo Mode:</strong> You can use demo mode to test the import process with sample data before connecting your real financial accounts.
+                            Simply check the "Use demo mode" option below.
+                        </p>
                         @endif
                     </div>
                 </div>
@@ -45,9 +49,33 @@
                               enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
-                            <!-- SimpleFIN token -->
+                            <!-- SimpleFIN fields -->
                             @if('simplefin' === $flow)
+                                <!-- Demo Mode Toggle -->
                                 <div class="form-group row mb-3">
+                                    <label for="use_demo" class="col-sm-4 col-form-label">Demo Mode</label>
+                                    <div class="col-sm-8">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="use_demo" name="use_demo" value="1">
+                                            <label class="form-check-label" for="use_demo">
+                                                Use demo mode (test with sample data)
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Enable this to test the import process with SimpleFIN demo data.
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Connection Error Display -->
+                                @if($errors->has('connection'))
+                                    <div class="alert alert-danger" role="alert">
+                                        <strong>Connection Error:</strong> {{ $errors->first('connection') }}
+                                    </div>
+                                @endif
+
+                                <!-- SimpleFIN token -->
+                                <div class="form-group row mb-3" id="token-group">
                                     <label for="simplefin_token" class="col-sm-4 col-form-label">SimpleFIN token</label>
                                     <div class="col-sm-8">
                                         <input type="text"
@@ -62,6 +90,54 @@
                                         @endif
                                     </div>
                                 </div>
+
+                                <!-- SimpleFIN CORS Origin URL (Additional Options) -->
+                                <div class="form-group row mb-3" id="bridge-url-group">
+                                    <label for="simplefin_bridge_url" class="col-sm-4 col-form-label">
+                                        CORS Origin URL
+                                        <small class="text-muted">(optional)</small>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="url"
+                                               class="form-control
+                                           @if($errors->has('simplefin_bridge_url')) is-invalid @endif"
+                                               id="simplefin_bridge_url" name="simplefin_bridge_url"
+                                               placeholder="https://your-app.example.com"/>
+                                        <small class="form-text text-muted">
+                                            Enter the URL where you access this Firefly III Data Importer (e.g., https://your-domain.com). Leave blank if unsure.
+                                        </small>
+                                        @if($errors->has('simplefin_bridge_url'))
+                                            <div class="invalid-feedback">
+                                                {{ $errors->first('simplefin_bridge_url') }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const demoCheckbox = document.getElementById('use_demo');
+                                    const bridgeUrlGroup = document.getElementById('bridge-url-group');
+                                    const tokenGroup = document.getElementById('token-group');
+
+                                    function toggleSimpleFINFields() {
+                                        if (demoCheckbox.checked) {
+                                            bridgeUrlGroup.style.display = 'none';
+                                            tokenGroup.style.display = 'none';
+                                        } else {
+                                            bridgeUrlGroup.style.display = 'flex';
+                                            tokenGroup.style.display = 'flex';
+                                        }
+                                    }
+
+                                    // Initial state
+                                    toggleSimpleFINFields();
+
+                                    // Listen for changes
+                                    demoCheckbox.addEventListener('change', toggleSimpleFINFields);
+                                });
+                                </script>
+
                             @endif
 
                             <!-- importable FILE -->
@@ -134,4 +210,29 @@
             </div>
         </div>
     </div>
+
+    @if('simplefin' === $flow)
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoCheckbox = document.getElementById('use_demo');
+            const tokenGroup = document.getElementById('token-group');
+            const tokenInput = document.getElementById('simplefin_token');
+
+            function toggleDemoMode() {
+                if (demoCheckbox.checked) {
+                    tokenGroup.style.display = 'none';
+                    tokenInput.required = false;
+                } else {
+                    tokenGroup.style.display = 'flex';
+                    tokenInput.required = true;
+                }
+            }
+
+            demoCheckbox.addEventListener('change', toggleDemoMode);
+
+            // Initial state
+            toggleDemoMode();
+        });
+    </script>
+    @endif
 @endsection

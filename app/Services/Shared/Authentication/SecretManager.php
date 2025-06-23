@@ -67,7 +67,6 @@ class SecretManager
             Log::debug('Access token is null, use config instead.');
             $token = (string)config('importer.access_token');
         }
-
         return (string)$token;
     }
 
@@ -87,7 +86,8 @@ class SecretManager
      */
     private static function hasBaseUrl(): bool
     {
-        return session()->has(Constants::SESSION_BASE_URL) && '' !== session()->get(Constants::SESSION_BASE_URL);
+        return session()->has(Constants::SESSION_BASE_URL) &&
+               '' !== session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -109,7 +109,8 @@ class SecretManager
      */
     private static function hasClientId(): bool
     {
-        return session()->has(Constants::SESSION_CLIENT_ID) && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
+        return session()->has(Constants::SESSION_CLIENT_ID) &&
+            0 !== session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getVanityUrl(): string
@@ -131,7 +132,8 @@ class SecretManager
      */
     private static function hasVanityUrl(): bool
     {
-        return session()->has(Constants::SESSION_VANITY_URL) && '' !== session()->get(Constants::SESSION_VANITY_URL);
+        return session()->has(Constants::SESSION_VANITY_URL) &&
+               '' !== session()->get(Constants::SESSION_VANITY_URL);
     }
 
     /**
@@ -155,7 +157,8 @@ class SecretManager
      */
     private static function hasRefreshToken(): bool
     {
-        return session()->has(Constants::SESSION_REFRESH_TOKEN) && '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
+        return session()->has(Constants::SESSION_REFRESH_TOKEN) &&
+               '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
     }
 
     /**

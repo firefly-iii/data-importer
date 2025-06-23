@@ -34,6 +34,8 @@ use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineStatusManager;
+use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
+use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
@@ -70,15 +72,23 @@ class ConversionController extends Controller
         $configuration = $this->restoreConfiguration();
 
         app('log')->debug('Will now verify configuration content.');
-        $jobBackUrl    = route('back.mapping');
-        if (0 === count($configuration->getDoMapping()) && 'file' === $configuration->getFlow()) {
+        $flow = $configuration->getFlow();
+
+        // Set appropriate back URL based on flow
+        if ('simplefin' === $flow) {
+            // SimpleFIN always goes back to configuration
+            $jobBackUrl = route('back.config');
+            app('log')->debug('SimpleFIN: Pressing "back" will send you to configure.');
+        } elseif (0 === count($configuration->getDoMapping()) && 'file' === $flow) {
             // no mapping, back to roles
             app('log')->debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
-        }
-        if (0 === count($configuration->getMapping())) {
+        } elseif (0 === count($configuration->getMapping())) {
             // back to mapping
             app('log')->debug('Pressing "back" will send you to mapping.');
+            $jobBackUrl = route('back.mapping');
+        } else {
+            // default back to mapping
             $jobBackUrl = route('back.mapping');
         }
         // TODO option is not used atm.
@@ -119,7 +129,20 @@ class ConversionController extends Controller
             app('log')->debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
-        if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen'], true)) {
+        if ('simplefin' === $flow) {
+            app('log')->debug('Create SimpleFIN routine manager.');
+            try {
+                $routine = new SimpleFINRoutineManager($identifier);
+                app('log')->debug('SimpleFIN routine manager created successfully.');
+            } catch (\Throwable $e) {
+                app('log')->error('Failed to create SimpleFIN routine manager: ' . $e->getMessage());
+                app('log')->error('Error class: ' . get_class($e));
+                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
+                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                throw $e;
+            }
+        }
+        if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
             app('log')->debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
@@ -136,7 +159,20 @@ class ConversionController extends Controller
         session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
         app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
 
-        return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl'));
+        // Prepare new account creation data for SimpleFIN
+        $newAccountsToCreate = [];
+        if ('simplefin' === $flow) {
+            $accounts = $configuration->getAccounts();
+            $newAccounts = $configuration->getNewAccounts();
+
+            foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
+                if ('create_new' === $fireflyAccountId && isset($newAccounts[$simplefinAccountId])) {
+                    $newAccountsToCreate[$simplefinAccountId] = $newAccounts[$simplefinAccountId];
+                }
+            }
+        }
+
+        return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl', 'newAccountsToCreate'));
     }
 
     public function start(Request $request): JsonResponse
@@ -145,6 +181,55 @@ class ConversionController extends Controller
         $identifier      = $request->get('identifier');
         $configuration   = $this->restoreConfiguration();
         $routine         = null;
+
+        // Validate configuration contract for SimpleFIN before proceeding
+        if ('simplefin' === $configuration->getFlow()) {
+            $validator = new ConfigurationContractValidator();
+            $contractValidation = $validator->validateConfigurationContract($configuration);
+
+            if (!$contractValidation->isValid()) {
+                app('log')->error('SimpleFIN configuration contract validation failed during conversion start', $contractValidation->getErrors());
+                RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+
+                $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
+                return response()->json($importJobStatus->toArray());
+            }
+
+            if ($contractValidation->hasWarnings()) {
+                app('log')->warning('SimpleFIN configuration contract warnings during conversion start', $contractValidation->getWarnings());
+            }
+
+            app('log')->debug('SimpleFIN configuration contract validation successful for conversion start');
+        }
+
+        // Handle new account data for SimpleFIN
+        if ('simplefin' === $configuration->getFlow()) {
+            $newAccountData = $request->get('new_account_data', []);
+            if (!empty($newAccountData)) {
+                app('log')->debug('Updating configuration with detailed new account data', $newAccountData);
+
+                // Update the configuration with the detailed account creation data
+                $existingNewAccounts = $configuration->getNewAccounts();
+                foreach ($newAccountData as $accountId => $accountDetails) {
+                    if (isset($existingNewAccounts[$accountId])) {
+                        // Merge the detailed data with existing data
+                        $existingNewAccounts[$accountId] = array_merge(
+                            $existingNewAccounts[$accountId],
+                            [
+                                'name' => $accountDetails['name'],
+                                'type' => $accountDetails['type'],
+                                'currency' => $accountDetails['currency'],
+                                'opening_balance' => $accountDetails['opening_balance']
+                            ]
+                        );
+                    }
+                }
+                $configuration->setNewAccounts($existingNewAccounts);
+
+                // Update session with new configuration
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            }
+        }
 
         // now create the right class:
         $flow            = $configuration->getFlow();
@@ -166,6 +251,18 @@ class ConversionController extends Controller
         }
         if ('spectre' === $flow) {
             $routine = new SpectreRoutineManager($identifier);
+        }
+        if ('simplefin' === $flow) {
+            try {
+                $routine = new SimpleFINRoutineManager($identifier);
+                app('log')->debug('SimpleFIN routine manager created successfully in start method.');
+            } catch (\Throwable $e) {
+                app('log')->error('Failed to create SimpleFIN routine manager in start method: ' . $e->getMessage());
+                app('log')->error('Error class: ' . get_class($e));
+                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
+                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                throw $e;
+            }
         }
 
         if (null === $routine) {

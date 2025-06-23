@@ -84,9 +84,9 @@ class MapController extends Controller
             $data  = $this->getCamtMapInformation();
         }
 
-        // nordigen, spectre and others:
+        // nordigen, spectre, simplefin and others:
         if ('file' !== $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for GoCardless and spectre');
+            app('log')->debug('Get mapping data for GoCardless, Spectre, and SimpleFIN');
             $roles = [];
             $data  = $this->getImporterMapInformation();
         }
@@ -247,7 +247,7 @@ class MapController extends Controller
         $configuration   = $this->restoreConfiguration();
         $existingMapping = $configuration->getMapping();
         /*
-         * To map Nordigen, pretend the file has one "column" (this is based on the CSV importer after all)
+         * To map Nordigen and SimpleFIN, pretend the file has one "column" (this is based on the CSV importer after all)
          * that contains:
          * - opposing account names (this is preordained).
          */
@@ -293,6 +293,26 @@ class MapController extends Controller
             $category['mapped']       = $existingMapping[$index] ?? [];
             $data[]                   = $category;
         }
+        if ('simplefin' === $configuration->getFlow()) {
+            // index 0: expense/revenue account mapping
+            $index                        = 0;
+            $expenseRevenue               = config('csv.import_roles.opposing-name') ?? null;
+            $expenseRevenue['role']       = 'opposing-name';
+            $expenseRevenue['values']     = $this->getExpenseRevenueAccounts();
+
+            // Use ExpenseRevenueAccounts mapper for SimpleFIN
+            $class                        = 'App\\Services\\CSV\\Mapper\\ExpenseRevenueAccounts';
+            if (!class_exists($class)) {
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+            }
+            app('log')->debug(sprintf('Associated class is %s', $class));
+
+            /** @var MapperInterface $object */
+            $object                       = app($class);
+            $expenseRevenue['mapping_data'] = $object->getMap();
+            $expenseRevenue['mapped']     = $existingMapping[$index] ?? [];
+            $data[]                       = $expenseRevenue;
+        }
 
         return $data;
     }
@@ -301,8 +321,25 @@ class MapController extends Controller
     {
         app('log')->debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk               = Storage::disk(self::DISK_NAME);
-        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+
+        if (null === $downloadIdentifier) {
+            app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+            return [];
+        }
+
+        $disk = Storage::disk(self::DISK_NAME);
+
+        if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
+            app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+            return [];
+        }
+
+        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
+
+        if (null === $json) {
+            app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+            return [];
+        }
 
         try {
             $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
@@ -324,6 +361,67 @@ class MapController extends Controller
         }
         $filtered           = array_filter(
             $opposing,
+            static function (string $value) {
+                return '' !== $value;
+            }
+        );
+
+        return array_unique($filtered);
+    }
+
+    private function getExpenseRevenueAccounts(): array
+    {
+        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+
+        if (null === $downloadIdentifier) {
+            app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+            return [];
+        }
+
+        $disk = Storage::disk(self::DISK_NAME);
+
+        if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
+            app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+            return [];
+        }
+
+        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
+
+        if (null === $json) {
+            app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+            return [];
+        }
+
+        try {
+            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+        }
+        $expenseRevenue     = [];
+        $total              = count($array);
+
+        /** @var array $transaction */
+        foreach ($array as $index => $transaction) {
+            app('log')->debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
+
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                // Extract expense/revenue destination names from SimpleFIN transactions
+                $destinationName = (string) (array_key_exists('destination_name', $row) ? $row['destination_name'] : '');
+                $sourceName = (string) (array_key_exists('source_name', $row) ? $row['source_name'] : '');
+
+                // Add both source and destination names as potential expense/revenue accounts
+                if (!empty($destinationName)) {
+                    $expenseRevenue[] = $destinationName;
+                }
+                if (!empty($sourceName)) {
+                    $expenseRevenue[] = $sourceName;
+                }
+            }
+        }
+        $filtered           = array_filter(
+            $expenseRevenue,
             static function (string $value) {
                 return '' !== $value;
             }
@@ -436,9 +534,10 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-            // if nordigen, now ready for submission!
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
+            // if nordigen, spectre, or simplefin, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
+            return redirect()->route('008-submit.index');
         }
 
         return redirect()->route('007-convert.index');

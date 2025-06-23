@@ -109,6 +109,7 @@ class SubmissionStatusManager
     {
         $lineNo = $index + 1;
         app('log')->debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
+
         $disk   = \Storage::disk(self::DISK_NAME);
 
         try {
@@ -120,6 +121,34 @@ class SubmissionStatusManager
                 }
                 $status->warnings[$index] ??= [];
                 $status->warnings[$index][] = $warning;
+                self::storeSubmissionStatus($identifier, $status);
+            }
+            if (!$disk->exists($identifier)) {
+                app('log')->error(sprintf('Could not find file for job %s.', $identifier));
+            }
+        } catch (FileNotFoundException $e) {
+            app('log')->error($e->getMessage());
+        }
+    }
+
+    public static function updateProgress(string $identifier, int $currentTransaction, int $totalTransactions): void
+    {
+        app('log')->debug(sprintf('Update progress for %s: %d/%d transactions', $identifier, $currentTransaction, $totalTransactions));
+
+        $disk = \Storage::disk(self::DISK_NAME);
+
+        try {
+            if ($disk->exists($identifier)) {
+                try {
+                    $status = SubmissionStatus::fromArray(json_decode($disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
+                } catch (\JsonException $e) {
+                    $status = new SubmissionStatus();
+                }
+
+                $status->currentTransaction = $currentTransaction;
+                $status->totalTransactions = $totalTransactions;
+                $status->progressPercentage = $totalTransactions > 0 ? (int) round(($currentTransaction / $totalTransactions) * 100) : 0;
+
                 self::storeSubmissionStatus($identifier, $status);
             }
             if (!$disk->exists($identifier)) {

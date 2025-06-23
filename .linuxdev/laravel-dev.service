@@ -1,0 +1,14 @@
+[Unit]
+Description=Laravel Development Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/php artisan serve --host=127.0.0.1 --port=3000
+WorkingDirectory=%i
+Restart=on-failure
+RestartSec=5
+Environment=APP_ENV=local
+Environment=APP_DEBUG=true
+StandardOutput=journal
+StandardError=journal

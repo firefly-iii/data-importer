@@ -132,6 +132,16 @@ trait CollectsAccounts
             Log::debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type          = $entry->type;
             $iban          = (string) $entry->iban;
+
+            // For expense and revenue accounts, use account ID as key since they don't have IBANs
+            if (in_array($type, ['expense', 'revenue'], true)) {
+                $key = sprintf('id_%d', $entry->id);
+                Log::debug(sprintf('Collected %s account "%s" under key "%s"', $type, $entry->name, $key));
+                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
+                continue;
+            }
+
+            // For asset/liability accounts, continue with IBAN-based logic
             if ('' === $iban) {
                 continue;
             }

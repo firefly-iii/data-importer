@@ -29,7 +29,9 @@ use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
+use App\Jobs\ProcessImportSubmissionJob;
 use App\Services\Session\Constants;
+use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
@@ -71,7 +73,8 @@ class SubmitController extends Controller
         $statusManager = new SubmissionStatusManager();
         $configuration = $this->restoreConfiguration();
         $flow          = $configuration->getFlow();
-        $jobBackUrl    = route('back.conversion');
+        // The step immediately preceding submit (008) is always convert (007)
+        $jobBackUrl    = route('007-convert.index');
 
         // submission job ID may be in session:
         $identifier    = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
@@ -136,38 +139,37 @@ class SubmitController extends Controller
             return response()->json($importJobStatus->toArray());
         }
 
-        $routine->setTransactions($transactions);
+        // Retrieve authentication credentials for job
+        $accessToken = SecretManager::getAccessToken();
+        $baseUrl = SecretManager::getBaseUrl();
+        $vanityUrl = SecretManager::getVanityUrl();
 
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING);
-
-        // then push stuff into the routine:
-        $routine->setConfiguration($configuration);
-
-        try {
-            $routine->start();
-        } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
-
-            return response()->json($importJobStatus->toArray());
-        }
-
-        // set done:
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE);
-
-        // set config as complete.
-        session()->put(Constants::SUBMISSION_COMPLETE_INDICATOR, true);
-
-        event(
-            new ImportedTransactions(
-                array_merge($routine->getAllMessages()),
-                array_merge($routine->getAllWarnings()),
-                array_merge($routine->getAllErrors()),
-                []
-            )
+        // Set initial running status before dispatching job
+        SubmissionStatusManager::setSubmissionStatus(
+            SubmissionStatus::SUBMISSION_RUNNING,
+            $identifier
         );
 
-        return response()->json($importJobStatus->toArray());
+        // Dispatch asynchronous job for processing
+        ProcessImportSubmissionJob::dispatch(
+            $identifier,
+            $configuration,
+            $transactions,
+            $accessToken,
+            $baseUrl,
+            $vanityUrl
+        );
+
+        app('log')->debug('ProcessImportSubmissionJob dispatched', [
+            'identifier' => $identifier,
+            'transaction_count' => count($transactions)
+        ]);
+
+        // Return immediate response indicating job was dispatched
+        return response()->json([
+            'status' => 'job_dispatched',
+            'identifier' => $identifier
+        ]);
     }
 
     public function status(Request $request): JsonResponse

@@ -47,12 +47,14 @@ class IndexController extends Controller
     public function flush(): mixed
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        session()->forget([Constants::UPLOAD_DATA_FILE, Constants::UPLOAD_CONFIG_FILE, Constants::IMPORT_JOB_IDENTIFIER]);
+        session()->forget([
+            Constants::UPLOAD_DATA_FILE,
+            Constants::UPLOAD_CONFIG_FILE,
+            Constants::IMPORT_JOB_IDENTIFIER,
+        ]);
         session()->flush();
         session()->regenerate(true);
-        $cookies = [
-            cookie(Constants::FLOW_COOKIE, ''),
-        ];
+        $cookies = [cookie(Constants::FLOW_COOKIE, '')];
         Artisan::call('cache:clear');
         // Artisan::call('config:clear'); // disable command to try and fix
 
@@ -66,7 +68,7 @@ class IndexController extends Controller
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
-        $validInfo       = SecretManager::hasValidSecrets();
+        $validInfo = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             app('log')->debug('No valid secrets, redirect to token.index');
 
@@ -74,31 +76,57 @@ class IndexController extends Controller
         }
 
         // display to user the method of authentication
-        $clientId        = (string) config('importer.client_id');
-        $url             = (string) config('importer.url');
-        $pat             = false;
-        if ('' !== (string) config('importer.access_token')) {
+        $clientId = (string) config('importer.client_id');
+        $url = (string) config('importer.url');
+        $accessTokenConfig = (string) config('importer.access_token');
+
+        app('log')->debug('DEBUG: IndexController authentication detection', [
+            'client_id'           => $clientId,
+            'url'                 => $url,
+            'access_token_config' => $accessTokenConfig,
+            'access_token_empty'  => '' === $accessTokenConfig,
+        ]);
+
+        $pat = false;
+        if ('' !== $accessTokenConfig) {
             $pat = true;
         }
         $clientIdWithURL = false;
         if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
-        $URLonly         = false;
-        if ('' !== $url && '' === $clientId && '' === (string) config('importer.access_token')
-        ) {
+        $URLonly = false;
+        if ('' !== $url && '' === $clientId && '' === $accessTokenConfig) {
             $URLonly = true;
         }
-        $flexible        = false;
+        $flexible = false;
         if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
 
-        $isDocker        = env('IS_DOCKER', false);
-        $identifier      = substr(session()->getId(), 0, 10);
-        $enabled         = config('importer.enabled_flows');
+        app('log')->debug('DEBUG: IndexController authentication type flags', [
+            'pat'             => $pat,
+            'clientIdWithURL' => $clientIdWithURL,
+            'URLonly'         => $URLonly,
+            'flexible'        => $flexible,
+        ]);
 
-        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
+        $isDocker = env('IS_DOCKER', false);
+        $identifier = substr(session()->getId(), 0, 10);
+        $enabled = config('importer.enabled_flows');
+
+        return view(
+            'index',
+            compact(
+                'pat',
+                'clientIdWithURL',
+                'URLonly',
+                'flexible',
+                'identifier',
+                'isDocker',
+                'enabled'
+            )
+        );
     }
 
     public function postIndex(Request $request): mixed
@@ -107,14 +135,18 @@ class IndexController extends Controller
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {
-            app('log')->debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
-            $cookies = [
-                cookie(Constants::FLOW_COOKIE, $flow),
-            ];
+            app('log')->debug(
+                sprintf('%s is a valid flow, redirect to authenticate.', $flow)
+            );
+            $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
-            return redirect(route('002-authenticate.index'))->withCookies($cookies);
+            return redirect(route('002-authenticate.index'))->withCookies(
+                $cookies
+            );
         }
-        app('log')->debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
+        app('log')->debug(
+            sprintf('"%s" is not a valid flow, redirect to index.', $flow)
+        );
 
         return redirect(route('index'));
     }

@@ -33,8 +33,23 @@
                         </div>
                         <div x-show="showTooManyChecks()" class="card-body">
                             <p>
-                                <em class="fa-solid fa-face-dizzy"></em>
-                                The data importer has been polling for more than <span x-text="checkCount"></span> seconds. It has stopped, to prevent eternal loops.</p>
+                                <em class="fa-solid fa-clock"></em>
+                                <strong>Job Still Running</strong> - The import submission is taking longer than expected (<span x-text="checkCount"></span> seconds) but is likely still processing in the background.
+                            </p>
+                            <p>
+                                Large imports with many transactions can take 20+ minutes to complete. The automatic status checking has been paused to prevent system overload.
+                            </p>
+                            <div class="alert alert-info">
+                                <strong>What you can do:</strong>
+                                <ul class="mb-2">
+                                    <li>Click "Refresh Status" below to check if the job has completed</li>
+                                    <li>Check your Firefly III installation directly to see if transactions are appearing</li>
+                                    <li>Wait a few more minutes and try refreshing this page</li>
+                                </ul>
+                                <button x-show="manualRefreshAvailable" @click="refreshStatus()" class="btn btn-primary btn-sm">
+                                    <span class="fas fa-sync-alt"></span> Refresh Status
+                                </button>
+                            </div>
                         </div>
                         <div x-show="showPostError()" class="card-body">
                             <p class="text-danger">
@@ -51,8 +66,13 @@
                             </p>
                             <div class="progress">
                                 <div aria-valuemax="100" aria-valuemin="0"
-                                     aria-valuenow="100" class="progress-bar progress-bar-striped progress-bar-animated"
-                                     role="progressbar" style="width: 100%"></div>
+                                     :aria-valuenow="getProgressPercentage()"
+                                     :class="hasProgressData() ? 'progress-bar' : 'progress-bar progress-bar-striped progress-bar-animated'"
+                                     role="progressbar"
+                                     :style="'width: ' + getProgressWidth()"></div>
+                            </div>
+                            <div x-show="hasProgressData()" class="text-center mt-2">
+                                <small class="text-muted" x-text="getProgressDisplay()"></small>
                             </div>
                             <x-conversion-messages />
                         </div>
