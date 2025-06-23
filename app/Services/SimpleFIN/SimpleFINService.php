@@ -121,7 +121,7 @@ class SimpleFINService
             // $accountData is now an associative array from the SimpleFIN JSON response.
             // Ensure $accountData is an array and has an 'id' key before accessing.
             if (is_array($accountData) && isset($accountData['id']) && is_string($accountData['id']) && $accountData['id'] === $accountId) {
-                $accountFound = true;
+                $accountFound        = true;
                 // Transactions are expected to be in $accountData['transactions'] as an array
                 $accountTransactions = [];
 

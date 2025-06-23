@@ -57,7 +57,7 @@ class AccountsResponse extends SimpleFINResponse
 
     private function parseAccounts(): void
     {
-        $data = $this->getData();
+        $data           = $this->getData();
 
         if (empty($data)) {
             app('log')->warning('SimpleFIN AccountsResponse: No data to parse');
@@ -69,6 +69,7 @@ class AccountsResponse extends SimpleFINResponse
         if (isset($data['accounts']) && is_array($data['accounts'])) {
             $this->accounts = $data['accounts'];
             app('log')->debug(sprintf('SimpleFIN AccountsResponse: Parsed %d accounts', count($this->accounts)));
+
             return;
         }
         app('log')->warning('SimpleFIN AccountsResponse: No accounts array found in response');

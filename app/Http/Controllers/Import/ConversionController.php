@@ -75,7 +75,7 @@ class ConversionController extends Controller
         $flow                = $configuration->getFlow();
 
         // default back to mapping
-        $jobBackUrl = route('back.mapping');
+        $jobBackUrl          = route('back.mapping');
 
         // Set appropriate back URL based on flow
         // SimpleFIN always goes back to configuration

@@ -127,6 +127,7 @@ final class DemoModeTest extends TestCase
         $this->withCookie(Constants::FLOW_COOKIE, 'simplefin')
             ->post(route('003-upload.upload'), [
                 'use_demo' => '1',
-            ]);
+            ])
+        ;
     }
 }

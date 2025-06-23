@@ -387,7 +387,7 @@ class UploadController extends Controller
             $simpleFINToken = config('importer.simplefin.demo_token');
             $bridgeUrl      = 'https://sfin.bridge.which.is'; // Demo mode uses known working Origin
         }
-        if(!$isDemo) {
+        if (!$isDemo) {
             if (empty($simpleFINToken)) {
                 $errors->add('simplefin_token', 'SimpleFIN token is required.');
             }
