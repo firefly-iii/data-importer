@@ -68,7 +68,7 @@ class IndexController extends Controller
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
-        $validInfo = SecretManager::hasValidSecrets();
+        $validInfo         = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             app('log')->debug('No valid secrets, redirect to token.index');
 
@@ -76,8 +76,8 @@ class IndexController extends Controller
         }
 
         // display to user the method of authentication
-        $clientId = (string) config('importer.client_id');
-        $url = (string) config('importer.url');
+        $clientId          = (string) config('importer.client_id');
+        $url               = (string) config('importer.url');
         $accessTokenConfig = (string) config('importer.access_token');
 
         app('log')->debug('DEBUG: IndexController authentication detection', [
@@ -87,19 +87,19 @@ class IndexController extends Controller
             'access_token_empty'  => '' === $accessTokenConfig,
         ]);
 
-        $pat = false;
+        $pat               = false;
         if ('' !== $accessTokenConfig) {
             $pat = true;
         }
-        $clientIdWithURL = false;
+        $clientIdWithURL   = false;
         if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
-        $URLonly = false;
+        $URLonly           = false;
         if ('' !== $url && '' === $clientId && '' === $accessTokenConfig) {
             $URLonly = true;
         }
-        $flexible = false;
+        $flexible          = false;
         if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
@@ -111,9 +111,9 @@ class IndexController extends Controller
             'flexible'        => $flexible,
         ]);
 
-        $isDocker = env('IS_DOCKER', false);
-        $identifier = substr(session()->getId(), 0, 10);
-        $enabled = config('importer.enabled_flows');
+        $isDocker          = env('IS_DOCKER', false);
+        $identifier        = substr(session()->getId(), 0, 10);
+        $enabled           = config('importer.enabled_flows');
 
         return view(
             'index',

@@ -39,7 +39,7 @@ trait IsReadyForStep
 
     public function handle(Request $request, \Closure $next): mixed
     {
-        $result = $this->isReadyForStep($request);
+        $result   = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -107,8 +107,8 @@ trait IsReadyForStep
 
             case 'upload-files':
                 if (
-                    session()->has(Constants::HAS_UPLOAD) &&
-                    true === session()->get(Constants::HAS_UPLOAD)
+                    session()->has(Constants::HAS_UPLOAD)
+                    && true === session()->get(Constants::HAS_UPLOAD)
                 ) {
                     return false;
                 }
@@ -121,8 +121,8 @@ trait IsReadyForStep
 
             case 'define-roles':
                 if (
-                    session()->has(Constants::ROLES_COMPLETE_INDICATOR) &&
-                    true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
+                    session()->has(Constants::ROLES_COMPLETE_INDICATOR)
+                    && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
                 ) {
                     return false;
                 }
@@ -131,9 +131,9 @@ trait IsReadyForStep
 
             case 'configuration':
                 if (
-                    session()->has(Constants::CONFIG_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONFIG_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONFIG_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)
                 ) {
                     return false;
                 }
@@ -142,9 +142,9 @@ trait IsReadyForStep
 
             case 'map':
                 if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
+                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
                 ) {
                     return false;
                 }
@@ -152,15 +152,15 @@ trait IsReadyForStep
                 return true;
 
             case 'conversion':
-                $hasReadyFlag = session()->has(Constants::READY_FOR_CONVERSION);
-                $readyValue = session()->get(Constants::READY_FOR_CONVERSION);
-                $hasConfigComplete = session()->has(
+                $hasReadyFlag        = session()->has(Constants::READY_FOR_CONVERSION);
+                $readyValue          = session()->get(Constants::READY_FOR_CONVERSION);
+                $hasConfigComplete   = session()->has(
                     Constants::CONFIG_COMPLETE_INDICATOR
                 );
                 $configCompleteValue = session()->get(
                     Constants::CONFIG_COMPLETE_INDICATOR
                 );
-                $hasSimpleFINData = session()->has(
+                $hasSimpleFINData    = session()->has(
                     Constants::SIMPLEFIN_ACCOUNTS_DATA
                 );
 
@@ -176,9 +176,9 @@ trait IsReadyForStep
             case 'submit':
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     return true;
                 }
@@ -208,21 +208,21 @@ trait IsReadyForStep
                 return true;
 
             case 'configuration':
-                return session()->has(Constants::HAS_UPLOAD) &&
-                    session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
+                return session()->has(Constants::HAS_UPLOAD)
+                    && session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
 
             case 'define-roles':
                 // SimpleFIN should bypass roles if ready for conversion
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     return false;
                 }
 
                 if (
-                    session()->has(Constants::ROLES_COMPLETE_INDICATOR) &&
-                    true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
+                    session()->has(Constants::ROLES_COMPLETE_INDICATOR)
+                    && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
                 ) {
                     return false;
                 }
@@ -231,30 +231,32 @@ trait IsReadyForStep
 
             case 'map':
                 if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
+                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
                 ) {
                     return false;
                 }
 
                 // Ready for mapping if conversion is complete
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug('SimpleFIN: Conversion complete, ready for mapping');
+
                     return true;
                 }
 
                 app('log')->debug('SimpleFIN: Conversion not complete, not ready for mapping');
+
                 return false;
 
             case 'conversion':
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     return true;
                 }
@@ -265,9 +267,9 @@ trait IsReadyForStep
             case 'submit':
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     return true;
                 }
@@ -299,8 +301,8 @@ trait IsReadyForStep
 
             case 'upload-files':
                 if (
-                    session()->has(Constants::HAS_UPLOAD) &&
-                    true === session()->get(Constants::HAS_UPLOAD)
+                    session()->has(Constants::HAS_UPLOAD)
+                    && true === session()->get(Constants::HAS_UPLOAD)
                 ) {
                     return false;
                 }
@@ -310,8 +312,8 @@ trait IsReadyForStep
             case 'nordigen-selection':
                 // must have upload, that's it
                 if (
-                    session()->has(Constants::HAS_UPLOAD) &&
-                    true === session()->get(Constants::HAS_UPLOAD)
+                    session()->has(Constants::HAS_UPLOAD)
+                    && true === session()->get(Constants::HAS_UPLOAD)
                 ) {
                     return true;
                 }
@@ -321,9 +323,9 @@ trait IsReadyForStep
             case 'map':
                 // mapping must be complete, or not ready for this step.
                 if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
+                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug('Return false, not ready for step [1].');
 
@@ -332,9 +334,9 @@ trait IsReadyForStep
 
                 // conversion complete?
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug('Return true, ready for step [4].');
 
@@ -343,8 +345,8 @@ trait IsReadyForStep
 
                 // must already have the conversion, or not ready for this step:
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     app('log')->debug(
                         'GoCardless: return false, not yet ready for step [2].'
@@ -360,8 +362,8 @@ trait IsReadyForStep
             case 'nordigen-link':
                 // must have upload, thats it
                 if (
-                    session()->has(Constants::SELECTED_BANK_COUNTRY) &&
-                    true === session()->get(Constants::SELECTED_BANK_COUNTRY)
+                    session()->has(Constants::SELECTED_BANK_COUNTRY)
+                    && true === session()->get(Constants::SELECTED_BANK_COUNTRY)
                 ) {
                     return true;
                 }
@@ -370,8 +372,8 @@ trait IsReadyForStep
 
             case 'conversion':
                 if (
-                    session()->has(Constants::READY_FOR_SUBMISSION) &&
-                    true === session()->get(Constants::READY_FOR_SUBMISSION)
+                    session()->has(Constants::READY_FOR_SUBMISSION)
+                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
                 ) {
                     app('log')->debug('Return false, ready for submission.');
 
@@ -379,8 +381,8 @@ trait IsReadyForStep
                 }
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     return true;
                 }
@@ -390,8 +392,8 @@ trait IsReadyForStep
 
             case 'configuration':
                 if (
-                    session()->has(Constants::SELECTED_BANK_COUNTRY) &&
-                    true === session()->get(Constants::SELECTED_BANK_COUNTRY)
+                    session()->has(Constants::SELECTED_BANK_COUNTRY)
+                    && true === session()->get(Constants::SELECTED_BANK_COUNTRY)
                 ) {
                     return true;
                 }
@@ -401,9 +403,9 @@ trait IsReadyForStep
             case 'submit':
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     return true;
                 }
@@ -431,8 +433,8 @@ trait IsReadyForStep
 
             case 'conversion':
                 if (
-                    session()->has(Constants::READY_FOR_SUBMISSION) &&
-                    true === session()->get(Constants::READY_FOR_SUBMISSION)
+                    session()->has(Constants::READY_FOR_SUBMISSION)
+                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
                 ) {
                     app('log')->debug(
                         'Spectre: Return false, ready for submission.'
@@ -442,8 +444,8 @@ trait IsReadyForStep
                 }
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     return true;
                 }
@@ -453,8 +455,8 @@ trait IsReadyForStep
 
             case 'upload-files':
                 if (
-                    session()->has(Constants::HAS_UPLOAD) &&
-                    true === session()->get(Constants::HAS_UPLOAD)
+                    session()->has(Constants::HAS_UPLOAD)
+                    && true === session()->get(Constants::HAS_UPLOAD)
                 ) {
                     return false;
                 }
@@ -463,8 +465,8 @@ trait IsReadyForStep
 
             case 'select-connection':
                 if (
-                    session()->has(Constants::HAS_UPLOAD) &&
-                    true === session()->get(Constants::HAS_UPLOAD)
+                    session()->has(Constants::HAS_UPLOAD)
+                    && true === session()->get(Constants::HAS_UPLOAD)
                 ) {
                     return true;
                 }
@@ -473,9 +475,9 @@ trait IsReadyForStep
 
             case 'configuration':
                 if (
-                    session()->has(Constants::CONNECTION_SELECTED_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONNECTION_SELECTED_INDICATOR)
+                    session()->has(Constants::CONNECTION_SELECTED_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONNECTION_SELECTED_INDICATOR)
                 ) {
                     return true;
                 }
@@ -488,9 +490,9 @@ trait IsReadyForStep
             case 'map':
                 // mapping must be complete, or not ready for this step.
                 if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
+                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug(
                         'Spectre: Return false, not ready for step [1].'
@@ -501,9 +503,9 @@ trait IsReadyForStep
 
                 // conversion complete?
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug(
                         'Spectre: Return true, ready for step [4].'
@@ -514,8 +516,8 @@ trait IsReadyForStep
 
                 // must already have the conversion, or not ready for this step:
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     app('log')->debug(
                         'Spectre: Return false, not yet ready for step [2].'
@@ -531,9 +533,9 @@ trait IsReadyForStep
             case 'submit':
                 // if/else is in reverse!
                 if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) &&
-                    true ===
-                        session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    && true
+                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     return true;
                 }
@@ -607,25 +609,25 @@ trait IsReadyForStep
                 );
 
             case 'upload-files':
-                $route = route('004-configure.index');
+                $route             = route('004-configure.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route = route('005-roles.index');
+                $route             = route('005-roles.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -633,7 +635,7 @@ trait IsReadyForStep
             case 'conversion':
                 // Check authoritative session flow before defaulting to file-based redirection
                 $authoritativeFlow = null;
-                $sessionConfig = session()->get(Constants::CONFIGURATION);
+                $sessionConfig     = session()->get(Constants::CONFIGURATION);
                 if (is_array($sessionConfig) && isset($sessionConfig['flow'])) {
                     $authoritativeFlow = $sessionConfig['flow'];
                 }
@@ -641,24 +643,25 @@ trait IsReadyForStep
                 // If authoritative flow is SimpleFIN, redirect to configure instead of mapping
                 if ('simplefin' === $authoritativeFlow) {
                     $route = route('004-configure.index');
+
                     return redirect($route);
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'authenticate':
-                $route = route('003-upload.index');
+                $route             = route('003-upload.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 app('log')->debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -708,8 +711,8 @@ trait IsReadyForStep
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     app('log')->debug(
                         'Is ready for conversion, so send to conversion.'
@@ -730,8 +733,8 @@ trait IsReadyForStep
 
             case 'conversion':
                 if (
-                    session()->has(Constants::READY_FOR_SUBMISSION) &&
-                    true === session()->get(Constants::READY_FOR_SUBMISSION)
+                    session()->has(Constants::READY_FOR_SUBMISSION)
+                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
                 ) {
                     $route = route('008-submit.index');
                     app('log')->debug(
@@ -791,8 +794,8 @@ trait IsReadyForStep
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
                 if (
-                    session()->has(Constants::READY_FOR_CONVERSION) &&
-                    true === session()->get(Constants::READY_FOR_CONVERSION)
+                    session()->has(Constants::READY_FOR_CONVERSION)
+                    && true === session()->get(Constants::READY_FOR_CONVERSION)
                 ) {
                     app('log')->debug(
                         'Spectre: Is ready for conversion, so send to conversion.'
@@ -815,8 +818,8 @@ trait IsReadyForStep
 
             case 'conversion':
                 if (
-                    session()->has(Constants::READY_FOR_SUBMISSION) &&
-                    true === session()->get(Constants::READY_FOR_SUBMISSION)
+                    session()->has(Constants::READY_FOR_SUBMISSION)
+                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
                 ) {
                     $route = route('008-submit.index');
                     app('log')->debug(
@@ -859,6 +862,7 @@ trait IsReadyForStep
                         self::STEP
                     )
                 );
+
                 return redirect(route('003-upload.index'));
 
             case 'define-roles':
@@ -866,13 +870,14 @@ trait IsReadyForStep
                 app('log')->debug(
                     sprintf('SimpleFIN: Return redirect to "%s"', $route)
                 );
+
                 return redirect($route);
 
             case 'map':
                 // if conversion not complete yet, go there first
                 if (
-                    !session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) ||
-                    true !== session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    !session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
+                    || true !== session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
                 ) {
                     app('log')->debug(
                         'SimpleFIN: Conversion not complete, redirecting to conversion.'
@@ -881,6 +886,7 @@ trait IsReadyForStep
                     app('log')->debug(
                         sprintf('SimpleFIN: Return redirect to "%s"', $route)
                     );
+
                     return redirect($route);
                 }
                 app('log')->debug('SimpleFIN: Conversion complete, redirecting to configuration.');
@@ -889,6 +895,7 @@ trait IsReadyForStep
                 app('log')->debug(
                     sprintf('SimpleFIN: Return redirect to "%s"', $route)
                 );
+
                 return redirect($route);
 
             case 'conversion':
@@ -902,6 +909,7 @@ trait IsReadyForStep
                     )
                 );
                 $route = route('004-configure.index');
+
                 return redirect($route);
 
             case 'submit':
@@ -909,6 +917,7 @@ trait IsReadyForStep
                 app('log')->debug(
                     sprintf('SimpleFIN: Return redirect to "%s"', $route)
                 );
+
                 return redirect($route);
         }
     }

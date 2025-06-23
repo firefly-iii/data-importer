@@ -61,6 +61,7 @@ class AccountsResponse extends SimpleFINResponse
 
         if (empty($data)) {
             app('log')->warning('SimpleFIN AccountsResponse: No data to parse');
+
             return;
         }
 

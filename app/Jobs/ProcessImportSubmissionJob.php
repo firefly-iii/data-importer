@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Import\Routine\ApiSubmitter;
-use App\Services\Shared\Import\Routine\InfoCollector;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
@@ -16,18 +14,20 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class ProcessImportSubmissionJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The number of times the job may be attempted.
      *
      * @var int
      */
-    public $tries = 1;
+    public $tries   = 1;
 
     /**
      * The maximum number of seconds the job can run for.
@@ -54,12 +54,12 @@ class ProcessImportSubmissionJob implements ShouldQueue
         string $baseUrl,
         ?string $vanityUrl
     ) {
-        $this->identifier = $identifier;
+        $this->identifier    = $identifier;
         $this->configuration = $configuration;
-        $this->transactions = $transactions;
-        $this->accessToken = $accessToken;
-        $this->baseUrl = $baseUrl;
-        $this->vanityUrl = $vanityUrl;
+        $this->transactions  = $transactions;
+        $this->accessToken   = $accessToken;
+        $this->baseUrl       = $baseUrl;
+        $this->vanityUrl     = $vanityUrl;
     }
 
     /**
@@ -88,7 +88,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
         Log::info('Job authentication credentials validation', [
             'identifier'           => $this->identifier,
             'access_token_length'  => strlen($this->accessToken),
-            'access_token_preview' => substr($this->accessToken, 0, 20) . '...',
+            'access_token_preview' => substr($this->accessToken, 0, 20).'...',
             'base_url'             => $this->baseUrl,
             'vanity_url'           => $this->vanityUrl ?? 'null',
         ]);
@@ -112,9 +112,9 @@ class ProcessImportSubmissionJob implements ShouldQueue
         try {
             // Set authentication context for this job
             config([
-                       'importer.access_token' => $this->accessToken,
-                       'importer.url'          => $this->baseUrl,
-                       'importer.vanity_url'   => $this->vanityUrl ?? $this->baseUrl,
+                'importer.access_token' => $this->accessToken,
+                'importer.url'          => $this->baseUrl,
+                'importer.vanity_url'   => $this->vanityUrl ?? $this->baseUrl,
             ]);
 
             Log::debug('Authentication context set for job', [
@@ -126,7 +126,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
             // Verify config was actually set
             $verifyToken = config('importer.access_token');
-            $verifyUrl = config('importer.url');
+            $verifyUrl   = config('importer.url');
 
             Log::debug('Config verification after setting', [
                 'identifier'           => $this->identifier,
@@ -155,7 +155,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             );
 
             // Initialize routine manager and execute import
-            $routine = new RoutineManager($this->identifier);
+            $routine     = new RoutineManager($this->identifier);
             $routine->setConfiguration($this->configuration);
             $routine->setTransactions($this->transactions);
 
@@ -178,7 +178,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
                 'warnings'   => count($routine->getAllWarnings()),
                 'errors'     => count($routine->getAllErrors()),
             ]);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->identifier,
                 'error'      => $e->getMessage(),
@@ -206,7 +206,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * Handle a job failure.
      */
-    public function failed(Throwable $exception): void
+    public function failed(\Throwable $exception): void
     {
         Log::error('ProcessImportSubmissionJob marked as failed', [
             'identifier' => $this->identifier,

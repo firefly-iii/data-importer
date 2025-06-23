@@ -51,17 +51,17 @@ class ConfigurationPostRequest extends Request
         ]);
 
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport = $this->get('do_import') ?? [];
-        $accounts = $this->get('accounts') ?? [];
-        $newAccount = $this->get('new_account') ?? [];
+        $doImport          = $this->get('do_import') ?? [];
+        $accounts          = $this->get('accounts') ?? [];
+        $newAccount        = $this->get('new_account') ?? [];
 
-        $decodedDoImport = [];
-        $decodedAccounts = [];
+        $decodedDoImport   = [];
+        $decodedAccounts   = [];
         $decodedNewAccount = [];
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
-            $originalId = str_replace('_', ' ', $encodedId);
+            $originalId                   = str_replace('_', ' ', $encodedId);
             $decodedDoImport[$originalId] = $value;
             app('log')->debug('DEBUG: Decoded do_import', [
                 'encoded' => $encodedId,
@@ -72,7 +72,7 @@ class ConfigurationPostRequest extends Request
 
         // Decode accounts array keys
         foreach ($accounts as $encodedId => $value) {
-            $originalId = str_replace('_', ' ', $encodedId);
+            $originalId                   = str_replace('_', ' ', $encodedId);
             $decodedAccounts[$originalId] = $value;
             app('log')->debug('DEBUG: Decoded accounts', [
                 'encoded' => $encodedId,
@@ -83,7 +83,7 @@ class ConfigurationPostRequest extends Request
 
         // Decode new_account array keys
         foreach ($newAccount as $encodedId => $accountData) {
-            $originalId = str_replace('_', ' ', $encodedId);
+            $originalId                     = str_replace('_', ' ', $encodedId);
             $decodedNewAccount[$originalId] = $accountData;
             app('log')->debug('DEBUG: Decoded new_account', [
                 'encoded' => $encodedId,
@@ -128,41 +128,40 @@ class ConfigurationPostRequest extends Request
             ),
 
             // spectre values:
-            'connection'                 => $this->convertToString('connection'),
-            'identifier'                 => $this->convertToString('identifier'),
-            'ignore_spectre_categories'  => $this->convertBoolean(
+            'connection'                    => $this->convertToString('connection'),
+            'identifier'                    => $this->convertToString('identifier'),
+            'ignore_spectre_categories'     => $this->convertBoolean(
                 $this->get('ignore_spectre_categories')
             ),
 
             // nordigen:
-            'nordigen_country'           => $this->convertToString('nordigen_country'),
-            'nordigen_bank'              => $this->convertToString('nordigen_bank'),
-            'nordigen_max_days'          => $this->convertToString('nordigen_max_days'),
-            'nordigen_requisitions'      =>
-                json_decode(
-                    $this->convertToString('nordigen_requisitions'),
-                    true
-                ) ?? [],
+            'nordigen_country'              => $this->convertToString('nordigen_country'),
+            'nordigen_bank'                 => $this->convertToString('nordigen_bank'),
+            'nordigen_max_days'             => $this->convertToString('nordigen_max_days'),
+            'nordigen_requisitions'         => json_decode(
+                $this->convertToString('nordigen_requisitions'),
+                true
+            ) ?? [],
 
             // nordigen + spectre - with decoded account IDs
-            'do_import'                 => $decodedDoImport,
-            'accounts'                  => $decodedAccounts,
-            'new_account'               => $decodedNewAccount,
-            'map_all_data'          => $this->convertBoolean($this->get('map_all_data')),
-            'date_range'            => $this->convertToString('date_range'),
-            'date_range_number'     => $this->convertToInteger('date_range_number'),
-            'date_range_unit'       => $this->convertToString('date_range_unit'),
-            'date_not_before'       => $this->getCarbonDate('date_not_before'),
-            'date_not_after'        => $this->getCarbonDate('date_not_after'),
+            'do_import'                     => $decodedDoImport,
+            'accounts'                      => $decodedAccounts,
+            'new_account'                   => $decodedNewAccount,
+            'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),
+            'date_range'                    => $this->convertToString('date_range'),
+            'date_range_number'             => $this->convertToInteger('date_range_number'),
+            'date_range_unit'               => $this->convertToString('date_range_unit'),
+            'date_not_before'               => $this->getCarbonDate('date_not_before'),
+            'date_not_after'                => $this->getCarbonDate('date_not_after'),
 
             // utf8 conversion
-            'conversion'            => $this->convertBoolean($this->get('conversion')),
+            'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
             // camt
-            'grouped_transaction_handling' => $this->convertToString(
+            'grouped_transaction_handling'  => $this->convertToString(
                 'grouped_transaction_handling'
             ),
-            'use_entire_opposing_address'  => $this->convertBoolean(
+            'use_entire_opposing_address'   => $this->convertBoolean(
                 $this->get('use_entire_opposing_address')
             ),
         ];
@@ -170,7 +169,7 @@ class ConfigurationPostRequest extends Request
 
     public function rules(): array
     {
-        $flow = request()->cookie(Constants::FLOW_COOKIE);
+        $flow          = request()->cookie(Constants::FLOW_COOKIE);
         $columnOptions = implode(
             ',',
             array_keys(config('csv.unique_column_options'))
@@ -192,8 +191,7 @@ class ConfigurationPostRequest extends Request
             'headers'                       => 'numeric|between:0,1',
             'delimiter'                     => 'in:comma,semicolon,tab',
             'date'                          => 'between:1,25',
-            'default_account'               =>
-                'simplefin' === $flow
+            'default_account'               => 'simplefin' === $flow
                     ? 'nullable|numeric|min:1|max:100000'
                     : 'required|numeric|min:1|max:100000',
             'rules'                         => 'numeric|between:0,1',
@@ -214,10 +212,8 @@ class ConfigurationPostRequest extends Request
             // new account creation - updated to handle underscore-encoded field names
             'new_account.*.name'            => 'nullable|string|max:255',
             'new_account.*.create'          => 'nullable|string|in:0,1',
-            'new_account.*.type'            =>
-                'nullable|string|in:asset,liability,expense,revenue',
-            'new_account.*.currency'        =>
-                'nullable|string|size:3|regex:/^[A-Z]{3}$/',
+            'new_account.*.type'            => 'nullable|string|in:asset,liability,expense,revenue',
+            'new_account.*.currency'        => 'nullable|string|size:3|regex:/^[A-Z]{3}$/',
             'new_account.*.opening_balance' => 'nullable|numeric',
 
             // camt
@@ -233,20 +229,21 @@ class ConfigurationPostRequest extends Request
     {
         $validator->after(function (Validator $validator): void {
             // validate all account info
-            $flow = request()->cookie(Constants::FLOW_COOKIE);
-            $data = $validator->getData();
-            $doImport = $data['do_import'] ?? [];
+            $flow        = request()->cookie(Constants::FLOW_COOKIE);
+            $data        = $validator->getData();
+            $doImport    = $data['do_import'] ?? [];
             if (0 === count($doImport) && 'file' !== $flow) {
                 $validator
                     ->errors()
                     ->add(
                         'do_import',
                         'You must select at least one account to import from.'
-                    );
+                    )
+                ;
             }
 
             // validate new account creation data - both accounts and new_account now use encoded field names
-            $accounts = $data['accounts'] ?? [];
+            $accounts    = $data['accounts'] ?? [];
             $newAccounts = $data['new_account'] ?? [];
 
             app('log')->debug('DEBUG: withValidator account validation', [
@@ -256,7 +253,7 @@ class ConfigurationPostRequest extends Request
             ]);
 
             foreach ($accounts as $encodedAccountId => $selectedValue) {
-                if ($selectedValue === 'create_new') {
+                if ('create_new' === $selectedValue) {
                     app('log')->debug(
                         'DEBUG: Validating new account creation',
                         [
@@ -268,38 +265,38 @@ class ConfigurationPostRequest extends Request
                             'hasCreateField'   => isset(
                                 $newAccounts[$encodedAccountId]['create']
                             ),
-                            'nameValue'        =>
-                                $newAccounts[$encodedAccountId]['name'] ??
-                                'NOT_SET',
-                            'createValue'      =>
-                                $newAccounts[$encodedAccountId]['create'] ??
-                                'NOT_SET',
+                            'nameValue'        => $newAccounts[$encodedAccountId]['name']
+                                ?? 'NOT_SET',
+                            'createValue'      => $newAccounts[$encodedAccountId]['create']
+                                ?? 'NOT_SET',
                         ]
                     );
 
                     // Validate that account name is provided and create flag is set
                     // Both arrays now use encoded keys, so they should match directly
                     if (
-                        !isset($newAccounts[$encodedAccountId]['name']) ||
-                        empty(trim($newAccounts[$encodedAccountId]['name']))
+                        !isset($newAccounts[$encodedAccountId]['name'])
+                        || empty(trim($newAccounts[$encodedAccountId]['name']))
                     ) {
                         $validator
                             ->errors()
                             ->add(
                                 "new_account.{$encodedAccountId}.name",
                                 'Account name is required when creating a new account.'
-                            );
+                            )
+                        ;
                     }
                     if (
-                        !isset($newAccounts[$encodedAccountId]['create']) ||
-                        $newAccounts[$encodedAccountId]['create'] !== '1'
+                        !isset($newAccounts[$encodedAccountId]['create'])
+                        || '1' !== $newAccounts[$encodedAccountId]['create']
                     ) {
                         $validator
                             ->errors()
                             ->add(
                                 "new_account.{$encodedAccountId}.create",
                                 'Create flag must be set for new account creation.'
-                            );
+                            )
+                        ;
                     }
                 }
             }

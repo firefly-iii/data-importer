@@ -295,23 +295,23 @@ class MapController extends Controller
         }
         if ('simplefin' === $configuration->getFlow()) {
             // index 0: expense/revenue account mapping
-            $index                        = 0;
-            $expenseRevenue               = config('csv.import_roles.opposing-name') ?? null;
-            $expenseRevenue['role']       = 'opposing-name';
-            $expenseRevenue['values']     = $this->getExpenseRevenueAccounts();
+            $index                          = 0;
+            $expenseRevenue                 = config('csv.import_roles.opposing-name') ?? null;
+            $expenseRevenue['role']         = 'opposing-name';
+            $expenseRevenue['values']       = $this->getExpenseRevenueAccounts();
 
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
-            $class                        = 'App\\Services\\CSV\\Mapper\\ExpenseRevenueAccounts';
+            $class                          = 'App\Services\CSV\Mapper\ExpenseRevenueAccounts';
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             app('log')->debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
-            $object                       = app($class);
+            $object                         = app($class);
             $expenseRevenue['mapping_data'] = $object->getMap();
-            $expenseRevenue['mapped']     = $existingMapping[$index] ?? [];
-            $data[]                       = $expenseRevenue;
+            $expenseRevenue['mapped']       = $existingMapping[$index] ?? [];
+            $data[]                         = $expenseRevenue;
         }
 
         return $data;
@@ -324,20 +324,23 @@ class MapController extends Controller
 
         if (null === $downloadIdentifier) {
             app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+
             return [];
         }
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk               = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
             app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+
             return [];
         }
 
-        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
             app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+
             return [];
         }
 
@@ -376,20 +379,23 @@ class MapController extends Controller
 
         if (null === $downloadIdentifier) {
             app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+
             return [];
         }
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk               = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
             app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+
             return [];
         }
 
-        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
             app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+
             return [];
         }
 
@@ -409,7 +415,7 @@ class MapController extends Controller
             foreach ($transaction['transactions'] as $row) {
                 // Extract expense/revenue destination names from SimpleFIN transactions
                 $destinationName = (string) (array_key_exists('destination_name', $row) ? $row['destination_name'] : '');
-                $sourceName = (string) (array_key_exists('source_name', $row) ? $row['source_name'] : '');
+                $sourceName      = (string) (array_key_exists('source_name', $row) ? $row['source_name'] : '');
 
                 // Add both source and destination names as potential expense/revenue accounts
                 if (!empty($destinationName)) {
@@ -537,6 +543,7 @@ class MapController extends Controller
         if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
             // if nordigen, spectre, or simplefin, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
+
             return redirect()->route('008-submit.index');
         }
 

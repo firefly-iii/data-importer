@@ -46,15 +46,15 @@ class Account
     {
         $this->validateRequiredFields($data);
 
-        $this->org = $data['org'];
-        $this->id = $data['id'];
-        $this->name = $data['name'];
-        $this->currency = $data['currency'];
-        $this->balance = $data['balance'];
+        $this->org              = $data['org'];
+        $this->id               = $data['id'];
+        $this->name             = $data['name'];
+        $this->currency         = $data['currency'];
+        $this->balance          = $data['balance'];
         $this->availableBalance = $data['available-balance'] ?? null;
-        $this->balanceDate = $data['balance-date'];
-        $this->transactions = $data['transactions'] ?? [];
-        $this->extra = $data['extra'] ?? [];
+        $this->balanceDate      = $data['balance-date'];
+        $this->transactions     = $data['transactions'] ?? [];
+        $this->extra            = $data['extra'] ?? [];
     }
 
     public static function fromArray(array $data): self
@@ -165,15 +165,15 @@ class Account
     public function toArray(): array
     {
         return [
-            'org' => $this->org,
-            'id' => $this->id,
-            'name' => $this->name,
-            'currency' => $this->currency,
-            'balance' => $this->balance,
+            'org'               => $this->org,
+            'id'                => $this->id,
+            'name'              => $this->name,
+            'currency'          => $this->currency,
+            'balance'           => $this->balance,
             'available-balance' => $this->availableBalance,
-            'balance-date' => $this->balanceDate,
-            'transactions' => $this->transactions,
-            'extra' => $this->extra,
+            'balance-date'      => $this->balanceDate,
+            'transactions'      => $this->transactions,
+            'extra'             => $this->extra,
         ];
     }
 

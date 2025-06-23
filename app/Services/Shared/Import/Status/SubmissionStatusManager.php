@@ -146,7 +146,7 @@ class SubmissionStatusManager
                 }
 
                 $status->currentTransaction = $currentTransaction;
-                $status->totalTransactions = $totalTransactions;
+                $status->totalTransactions  = $totalTransactions;
                 $status->progressPercentage = $totalTransactions > 0 ? (int) round(($currentTransaction / $totalTransactions) * 100) : 0;
 
                 self::storeSubmissionStatus($identifier, $status);

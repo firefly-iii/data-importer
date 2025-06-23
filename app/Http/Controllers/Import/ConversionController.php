@@ -66,13 +66,13 @@ class ConversionController extends Controller
     public function index()
     {
         // app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $mainTitle     = 'Convert the data';
+        $mainTitle           = 'Convert the data';
 
         // create configuration:
-        $configuration = $this->restoreConfiguration();
+        $configuration       = $this->restoreConfiguration();
 
         app('log')->debug('Will now verify configuration content.');
-        $flow = $configuration->getFlow();
+        $flow                = $configuration->getFlow();
 
         // Set appropriate back URL based on flow
         if ('simplefin' === $flow) {
@@ -99,11 +99,11 @@ class ConversionController extends Controller
         //        }
 
         // job ID may be in session:
-        $identifier    = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $routine       = null;
-        $flow          = $configuration->getFlow();
+        $identifier          = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $routine             = null;
+        $flow                = $configuration->getFlow();
         app('log')->debug('Will redirect to submission after conversion.');
-        $nextUrl       = route('008-submit.index');
+        $nextUrl             = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -131,14 +131,16 @@ class ConversionController extends Controller
         }
         if ('simplefin' === $flow) {
             app('log')->debug('Create SimpleFIN routine manager.');
+
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
                 app('log')->debug('SimpleFIN routine manager created successfully.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager: ' . $e->getMessage());
-                app('log')->error('Error class: ' . get_class($e));
-                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
-                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                app('log')->error('Failed to create SimpleFIN routine manager: '.$e->getMessage());
+                app('log')->error('Error class: '.get_class($e));
+                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
+                app('log')->error('Stack trace: '.$e->getTraceAsString());
+
                 throw $e;
             }
         }
@@ -151,7 +153,7 @@ class ConversionController extends Controller
         }
 
         // may be a new identifier! Yay!
-        $identifier    = $routine->getIdentifier();
+        $identifier          = $routine->getIdentifier();
 
         app('log')->debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
@@ -162,7 +164,7 @@ class ConversionController extends Controller
         // Prepare new account creation data for SimpleFIN
         $newAccountsToCreate = [];
         if ('simplefin' === $flow) {
-            $accounts = $configuration->getAccounts();
+            $accounts    = $configuration->getAccounts();
             $newAccounts = $configuration->getNewAccounts();
 
             foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
@@ -184,7 +186,7 @@ class ConversionController extends Controller
 
         // Validate configuration contract for SimpleFIN before proceeding
         if ('simplefin' === $configuration->getFlow()) {
-            $validator = new ConfigurationContractValidator();
+            $validator          = new ConfigurationContractValidator();
             $contractValidation = $validator->validateConfigurationContract($configuration);
 
             if (!$contractValidation->isValid()) {
@@ -192,6 +194,7 @@ class ConversionController extends Controller
                 RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
                 $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
+
                 return response()->json($importJobStatus->toArray());
             }
 
@@ -216,10 +219,10 @@ class ConversionController extends Controller
                         $existingNewAccounts[$accountId] = array_merge(
                             $existingNewAccounts[$accountId],
                             [
-                                'name' => $accountDetails['name'],
-                                'type' => $accountDetails['type'],
-                                'currency' => $accountDetails['currency'],
-                                'opening_balance' => $accountDetails['opening_balance']
+                                'name'            => $accountDetails['name'],
+                                'type'            => $accountDetails['type'],
+                                'currency'        => $accountDetails['currency'],
+                                'opening_balance' => $accountDetails['opening_balance'],
                             ]
                         );
                     }
@@ -257,10 +260,11 @@ class ConversionController extends Controller
                 $routine = new SimpleFINRoutineManager($identifier);
                 app('log')->debug('SimpleFIN routine manager created successfully in start method.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager in start method: ' . $e->getMessage());
-                app('log')->error('Error class: ' . get_class($e));
-                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
-                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                app('log')->error('Failed to create SimpleFIN routine manager in start method: '.$e->getMessage());
+                app('log')->error('Error class: '.get_class($e));
+                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
+                app('log')->error('Stack trace: '.$e->getTraceAsString());
+
                 throw $e;
             }
         }

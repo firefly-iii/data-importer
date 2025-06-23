@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
@@ -140,9 +139,9 @@ class SubmitController extends Controller
         }
 
         // Retrieve authentication credentials for job
-        $accessToken = SecretManager::getAccessToken();
-        $baseUrl = SecretManager::getBaseUrl();
-        $vanityUrl = SecretManager::getVanityUrl();
+        $accessToken          = SecretManager::getAccessToken();
+        $baseUrl              = SecretManager::getBaseUrl();
+        $vanityUrl            = SecretManager::getVanityUrl();
 
         // Set initial running status before dispatching job
         SubmissionStatusManager::setSubmissionStatus(
@@ -161,14 +160,14 @@ class SubmitController extends Controller
         );
 
         app('log')->debug('ProcessImportSubmissionJob dispatched', [
-            'identifier' => $identifier,
-            'transaction_count' => count($transactions)
+            'identifier'        => $identifier,
+            'transaction_count' => count($transactions),
         ]);
 
         // Return immediate response indicating job was dispatched
         return response()->json([
-            'status' => 'job_dispatched',
-            'identifier' => $identifier
+            'status'     => 'job_dispatched',
+            'identifier' => $identifier,
         ]);
     }
 

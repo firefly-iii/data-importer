@@ -60,7 +60,7 @@ class UploadController extends Controller
         app('view')->share('pageTitle', 'Upload files');
         $this->middleware(UploadControllerMiddleware::class);
         // This variable is used to make sure the configuration object also knows the file type.
-        $this->contentType = 'unknown';
+        $this->contentType    = 'unknown';
         $this->configFileName = '';
     }
 
@@ -71,22 +71,22 @@ class UploadController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Upload your file(s)';
-        $subTitle = 'Start page and instructions';
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        $subTitle  = 'Start page and instructions';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         // get existing configs.
-        $disk = \Storage::disk('configurations');
+        $disk      = \Storage::disk('configurations');
         app('log')->debug(
             sprintf(
                 'Going to check directory for config files: %s',
                 config('filesystems.disks.configurations.root')
             )
         );
-        $all = $disk->files();
+        $all       = $disk->files();
 
         // remove files from list
-        $list = [];
-        $ignored = config('importer.ignored_files');
+        $list      = [];
+        $ignored   = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -116,14 +116,14 @@ class UploadController extends Controller
             'UploadController::upload() - Request All:',
             $request->all()
         );
-        $importedFile = $request->file('importable_file');
-        $configFile = $request->file('config_file');
+        $importedFile   = $request->file('importable_file');
+        $configFile     = $request->file('config_file');
         $simpleFINtoken = $request->get('simplefin_token');
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
-        $errors = new MessageBag();
+        $flow           = $request->cookie(Constants::FLOW_COOKIE);
+        $errors         = new MessageBag();
 
         // process uploaded file (if present)
-        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors         = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -131,7 +131,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors = $this->processSelection(
+        $errors         = $this->processSelection(
             $errors,
             (string) $request->get('existing_config'),
             $configFile
@@ -183,18 +183,18 @@ class UploadController extends Controller
 
             // upload the file to a temp directory and use it from there.
             if (0 === $errorNumber) {
-                $detector = new FileContentSherlock();
+                $detector          = new FileContentSherlock();
                 $this->contentType = $detector->detectContentType(
                     $file->getPathname()
                 );
-                $content = '';
+                $content           = '';
                 if ('csv' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
 
                     // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                     // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                     // This one is for you: 🤦‍♀️
-                    $eol = $this->detectEOL($content);
+                    $eol     = $this->detectEOL($content);
                     if ("\r" === $eol) {
                         app('log')->error(
                             'Your bank is dumb. Tell them to fix their CSV files.'
@@ -206,7 +206,7 @@ class UploadController extends Controller
                 if ('camt' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
                 }
-                $fileName = StorageService::storeContent($content);
+                $fileName          = StorageService::storeContent($content);
                 session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
             }
@@ -219,14 +219,14 @@ class UploadController extends Controller
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         $errors = [
-            UPLOAD_ERR_OK => 'There is no error, the file uploaded with success.',
-            UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
-            UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
-            UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.',
-            UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
+            UPLOAD_ERR_OK         => 'There is no error, the file uploaded with success.',
+            UPLOAD_ERR_INI_SIZE   => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
+            UPLOAD_ERR_FORM_SIZE  => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
+            UPLOAD_ERR_PARTIAL    => 'The uploaded file was only partially uploaded.',
+            UPLOAD_ERR_NO_FILE    => 'No file was uploaded.',
             UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
             UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk. Introduced in PHP 5.1.0.',
-            UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.',
+            UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
         ];
 
         return $errors[$error] ?? 'Unknown error';
@@ -234,14 +234,14 @@ class UploadController extends Controller
 
     private function detectEOL(string $string): string
     {
-        $eols = [
+        $eols     = [
             '\n\r' => "\n\r", // 0x0A - 0x0D - acorn BBC
             '\r\n' => "\r\n", // 0x0D - 0x0A - Windows, DOS OS/2
-            '\n' => "\n", // 0x0A -      - Unix, OSX
-            '\r' => "\r", // 0x0D -      - Apple ][, TRS80
+            '\n'   => "\n", // 0x0A -      - Unix, OSX
+            '\r'   => "\r", // 0x0D -      - Apple ][, TRS80
         ];
         $curCount = 0;
-        $curEol = '';
+        $curEol   = '';
         foreach ($eols as $eolKey => $eol) {
             $count = substr_count($string, $eol);
             app('log')->debug(
@@ -249,7 +249,7 @@ class UploadController extends Controller
             );
             if ($count > $curCount) {
                 $curCount = $count;
-                $curEol = $eol;
+                $curEol   = $eol;
                 app('log')->debug(
                     sprintf(
                         'Conclusion: "%s" is the EOL in this file.',
@@ -289,8 +289,8 @@ class UploadController extends Controller
             );
 
             // process the config file
-            $success = false;
-            $configuration = null;
+            $success              = false;
+            $configuration        = null;
 
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile(
@@ -301,7 +301,7 @@ class UploadController extends Controller
                     Constants::CONFIGURATION,
                     $configuration->toSessionArray()
                 );
-                $success = true;
+                $success       = true;
             } catch (ImporterErrorException $e) {
                 $errors->add('config_file', $e->getMessage());
             }
@@ -331,7 +331,7 @@ class UploadController extends Controller
     ): MessageBag {
         if (null === $file && '' !== $selection) {
             app('log')->debug('User selected a config file from the store.');
-            $disk = \Storage::disk('configurations');
+            $disk           = \Storage::disk('configurations');
             $configFileName = StorageService::storeContent(
                 $disk->get($selection)
             );
@@ -375,8 +375,8 @@ class UploadController extends Controller
         ]);
 
         $simpleFINToken = $request->get('simplefin_token');
-        $bridgeUrl = $request->get('simplefin_bridge_url');
-        $isDemo = $request->boolean('use_demo');
+        $bridgeUrl      = $request->get('simplefin_bridge_url');
+        $isDemo         = $request->boolean('use_demo');
         app('log')->debug('handleSimpleFINFlow() - Evaluated $isDemo:', [
             $isDemo,
         ]);
@@ -385,7 +385,7 @@ class UploadController extends Controller
 
         if ($isDemo) {
             $simpleFINToken = config('importer.simplefin.demo_token');
-            $bridgeUrl = 'https://sfin.bridge.which.is'; // Demo mode uses known working Origin
+            $bridgeUrl      = 'https://sfin.bridge.which.is'; // Demo mode uses known working Origin
         } else {
             if (empty($simpleFINToken)) {
                 $errors->add('simplefin_token', 'SimpleFIN token is required.');
@@ -413,8 +413,8 @@ class UploadController extends Controller
         try {
             $simpleFINService = app(SimpleFINService::class);
             // Use demo URL for demo mode, otherwise use empty string for claim URL token processing
-            $apiUrl = $isDemo ? config('importer.simplefin.demo_url') : '';
-            $accountsData = $simpleFINService->fetchAccountsAndInitialData(
+            $apiUrl           = $isDemo ? config('importer.simplefin.demo_url') : '';
+            $accountsData     = $simpleFINService->fetchAccountsAndInitialData(
                 $simpleFINToken,
                 $apiUrl
             );
@@ -437,8 +437,9 @@ class UploadController extends Controller
             ]);
             $errors->add(
                 'connection',
-                'Failed to connect to SimpleFIN: ' . $e->getMessage()
+                'Failed to connect to SimpleFIN: '.$e->getMessage()
             );
+
             return redirect(route('003-upload.index'))->withErrors($errors);
         }
     }

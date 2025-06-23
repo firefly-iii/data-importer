@@ -75,22 +75,22 @@ abstract class SimpleFINRequest
     {
         app('log')->debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->apiUrl, $endpoint));
 
-        $client = new Client();
+        $client  = new Client();
         $fullUrl = sprintf('%s%s', $this->apiUrl, $endpoint);
 
-        $origin = session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
+        $origin  = session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
         $options = [
             'timeout' => $this->timeOut,
             'headers' => [
-                'Accept' => 'application/json',
+                'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
-                'Origin' => $origin,
+                'Origin'       => $origin,
             ],
         ];
 
         // Only add basic auth if userinfo is not already in the apiUrl
         // and a token is provided. SimpleFIN typically uses userinfo in the Access URL.
-        if (strpos($this->apiUrl, '@') === false && !empty($this->token)) {
+        if (false === strpos($this->apiUrl, '@') && !empty($this->token)) {
             $options['auth'] = [$this->token, ''];
         }
 
@@ -104,12 +104,15 @@ abstract class SimpleFINRequest
         } catch (ClientException $e) {
             app('log')->error(sprintf('SimpleFIN ClientException: %s', $e->getMessage()));
             $this->handleClientException($e);
+
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         } catch (ServerException $e) {
             app('log')->error(sprintf('SimpleFIN ServerException: %s', $e->getMessage()));
+
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         } catch (GuzzleException $e) {
             app('log')->error(sprintf('SimpleFIN GuzzleException: %s', $e->getMessage()));
+
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         }
 
@@ -119,19 +122,23 @@ abstract class SimpleFINRequest
     private function handleClientException(ClientException $e): void
     {
         $statusCode = $e->getResponse()->getStatusCode();
-        $body = (string) $e->getResponse()->getBody();
+        $body       = (string) $e->getResponse()->getBody();
 
         app('log')->error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 
         switch ($statusCode) {
             case 401:
                 throw new ImporterErrorException('Invalid SimpleFIN token or authentication failed');
+
             case 403:
                 throw new ImporterErrorException('Access denied to SimpleFIN resource');
+
             case 404:
                 throw new ImporterErrorException('SimpleFIN resource not found');
+
             case 429:
                 throw new ImporterErrorException('SimpleFIN rate limit exceeded');
+
             default:
                 throw new ImporterErrorException(sprintf('SimpleFIN API error (HTTP %d): %s', $statusCode, $body));
         }

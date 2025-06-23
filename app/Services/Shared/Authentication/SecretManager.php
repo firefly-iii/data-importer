@@ -51,15 +51,15 @@ class SecretManager
         if (is_array($token)) {
             $token = (string) reset($token);
         }
-        if('' === $token) {
+        if ('' === $token) {
             Log::debug('Access token in header is empty, will be ignored.');
             $token = null;
         }
-        if (is_string($token) && strlen($token) > 0 && !str_contains($token, 'Bearer ')) {
+        if (is_string($token) && '' !== $token && !str_contains($token, 'Bearer ')) {
             Log::debug('Access token in header is not a Bearer token, will be ignored.');
             $token = null;
         }
-        if (is_string($token) && strlen($token) > 0 && str_contains($token, 'Bearer ')) {
+        if (is_string($token) && '' !== $token && str_contains($token, 'Bearer ')) {
             Log::debug('Access token in header is a Bearer token, will be used.');
             $token = str_replace('Bearer ', '', $token);
         }
@@ -67,6 +67,7 @@ class SecretManager
             Log::debug('Access token is null, use config instead.');
             $token = (string)config('importer.access_token');
         }
+
         return (string)$token;
     }
 
@@ -86,8 +87,8 @@ class SecretManager
      */
     private static function hasBaseUrl(): bool
     {
-        return session()->has(Constants::SESSION_BASE_URL) &&
-               '' !== session()->get(Constants::SESSION_BASE_URL);
+        return session()->has(Constants::SESSION_BASE_URL)
+               && '' !== session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -109,8 +110,8 @@ class SecretManager
      */
     private static function hasClientId(): bool
     {
-        return session()->has(Constants::SESSION_CLIENT_ID) &&
-            0 !== session()->get(Constants::SESSION_CLIENT_ID);
+        return session()->has(Constants::SESSION_CLIENT_ID)
+            && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getVanityUrl(): string
@@ -132,8 +133,8 @@ class SecretManager
      */
     private static function hasVanityUrl(): bool
     {
-        return session()->has(Constants::SESSION_VANITY_URL) &&
-               '' !== session()->get(Constants::SESSION_VANITY_URL);
+        return session()->has(Constants::SESSION_VANITY_URL)
+               && '' !== session()->get(Constants::SESSION_VANITY_URL);
     }
 
     /**
@@ -157,8 +158,8 @@ class SecretManager
      */
     private static function hasRefreshToken(): bool
     {
-        return session()->has(Constants::SESSION_REFRESH_TOKEN) &&
-               '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
+        return session()->has(Constants::SESSION_REFRESH_TOKEN)
+               && '' !== session()->get(Constants::SESSION_REFRESH_TOKEN);
     }
 
     /**

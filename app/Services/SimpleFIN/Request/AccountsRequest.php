@@ -27,7 +27,6 @@ namespace App\Services\SimpleFIN\Request;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\SimpleFIN\Response\AccountsResponse;
-use App\Services\Shared\Response\ResponseInterface as SharedResponseInterface;
 
 /**
  * Class AccountsRequest

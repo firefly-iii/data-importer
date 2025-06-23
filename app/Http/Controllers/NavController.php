@@ -44,7 +44,7 @@ class NavController extends Controller
 
         // For SimpleFIN flow, don't forget CONFIG_COMPLETE_INDICATOR to preserve form state
         $sessionConfig = session()->get(Constants::CONFIGURATION);
-        $flow = null;
+        $flow          = null;
         if (is_array($sessionConfig) && isset($sessionConfig['flow'])) {
             $flow = $sessionConfig['flow'];
         }

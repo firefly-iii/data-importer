@@ -100,6 +100,7 @@ class AuthenticateController extends Controller
             // This case should ideally be handled by middleware redirecting to upload.
             // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
             app('log')->warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
+
             return redirect(route('003-upload.index'));
         }
 

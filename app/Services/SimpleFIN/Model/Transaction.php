@@ -44,13 +44,13 @@ class Transaction
     {
         $this->validateRequiredFields($data);
 
-        $this->id = $data['id'];
-        $this->posted = $data['posted'];
-        $this->amount = $data['amount'];
-        $this->description = $data['description'];
+        $this->id           = $data['id'];
+        $this->posted       = $data['posted'];
+        $this->amount       = $data['amount'];
+        $this->description  = $data['description'];
         $this->transactedAt = $data['transacted_at'] ?? null;
-        $this->pending = $data['pending'] ?? false;
-        $this->extra = $data['extra'] ?? [];
+        $this->pending      = $data['pending'] ?? false;
+        $this->extra        = $data['extra'] ?? [];
     }
 
     public static function fromArray(array $data): self
@@ -70,7 +70,7 @@ class Transaction
 
     public function getPostedAsCarbon(): ?Carbon
     {
-        return $this->posted === 0 ? null : Carbon::createFromTimestamp($this->posted);
+        return 0 === $this->posted ? null : Carbon::createFromTimestamp($this->posted);
     }
 
     public function getAmount(): string
@@ -156,13 +156,13 @@ class Transaction
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'posted' => $this->posted,
-            'amount' => $this->amount,
-            'description' => $this->description,
+            'id'            => $this->id,
+            'posted'        => $this->posted,
+            'amount'        => $this->amount,
+            'description'   => $this->description,
             'transacted_at' => $this->transactedAt,
-            'pending' => $this->pending,
-            'extra' => $this->extra,
+            'pending'       => $this->pending,
+            'extra'         => $this->extra,
         ];
     }
 

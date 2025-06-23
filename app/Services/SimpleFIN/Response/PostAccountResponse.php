@@ -17,8 +17,6 @@ class PostAccountResponse extends Response
 
     /**
      * Response constructor.
-     *
-     * @param array $data
      */
     public function __construct(array $data)
     {
@@ -29,17 +27,11 @@ class PostAccountResponse extends Response
         $this->rawData = $data;
     }
 
-    /**
-     * @return array
-     */
     public function getRawData(): array
     {
         return $this->rawData;
     }
 
-    /**
-     * @return Account|null
-     */
     public function getAccount(): ?Account
     {
         return $this->account;

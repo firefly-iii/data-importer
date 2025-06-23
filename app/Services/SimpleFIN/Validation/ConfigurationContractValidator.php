@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Validation;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
@@ -41,18 +40,18 @@ use Illuminate\Support\Facades\Log;
  */
 class ConfigurationContractValidator
 {
-    private array $errors = [];
-    private array $warnings = [];
-    private array $existingAccounts = [];
+    private array $errors                    = [];
+    private array $warnings                  = [];
+    private array $existingAccounts          = [];
 
-    private const REQUIRED_ACCOUNT_TYPES = ['asset', 'liability', 'expense', 'revenue'];
-    private const VALID_ACCOUNT_ROLES = ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'];
-    private const VALID_LIABILITY_TYPES = ['debt', 'loan', 'mortgage'];
+    private const REQUIRED_ACCOUNT_TYPES     = ['asset', 'liability', 'expense', 'revenue'];
+    private const VALID_ACCOUNT_ROLES        = ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'];
+    private const VALID_LIABILITY_TYPES      = ['debt', 'loan', 'mortgage'];
     private const VALID_LIABILITY_DIRECTIONS = ['credit', 'debit'];
 
     public function validateConfigurationContract(Configuration $configuration): ValidationResult
     {
-        $this->errors = [];
+        $this->errors   = [];
         $this->warnings = [];
 
         Log::debug('Starting SimpleFIN configuration contract validation');
@@ -68,7 +67,7 @@ class ConfigurationContractValidator
         $this->validateImportSelections($configuration);
 
         return new ValidationResult(
-            count($this->errors) === 0,
+            0 === count($this->errors),
             $this->errors,
             $this->warnings
         );
@@ -87,6 +86,7 @@ class ConfigurationContractValidator
         $sessionData = session()->get('simplefin_accounts_data');
         if (empty($sessionData) || !is_array($sessionData)) {
             $this->addError('session.simplefin_accounts_data', 'SimpleFIN accounts data missing from session');
+
             return;
         }
 
@@ -127,6 +127,7 @@ class ConfigurationContractValidator
         $accounts = $configuration->getAccounts();
         if (empty($accounts)) {
             $this->addError('configuration.accounts', 'Account mappings cannot be empty');
+
             return;
         }
 
@@ -146,13 +147,14 @@ class ConfigurationContractValidator
     private function validateNewAccountConfigurations(Configuration $configuration): void
     {
         $newAccounts = $configuration->getNewAccounts();
-        $accounts = $configuration->getAccounts();
+        $accounts    = $configuration->getAccounts();
 
         foreach ($accounts as $simplefinId => $fireflyId) {
             if (0 === $fireflyId) {
                 // This account should be created, validate its configuration
                 if (!isset($newAccounts[$simplefinId])) {
                     $this->addError("configuration.new_account.{$simplefinId}", 'New account configuration missing for account marked for creation');
+
                     continue;
                 }
 
@@ -173,7 +175,7 @@ class ConfigurationContractValidator
         $requiredFields = ['name', 'type', 'currency', 'opening_balance'];
 
         foreach ($requiredFields as $field) {
-            if (!isset($config[$field]) || (is_string($config[$field]) && trim($config[$field]) === '')) {
+            if (!isset($config[$field]) || (is_string($config[$field]) && '' === trim($config[$field]))) {
                 $this->addError("configuration.new_account.{$simplefinId}.{$field}", "Required field '{$field}' missing or empty");
             }
         }
@@ -221,7 +223,7 @@ class ConfigurationContractValidator
             if (strlen($config['name']) > 255) {
                 $this->addError("configuration.new_account.{$simplefinId}.name", 'Account name too long (max 255 characters)');
             }
-            if (strlen(trim($config['name'])) === 0) {
+            if ('' === trim($config['name'])) {
                 $this->addError("configuration.new_account.{$simplefinId}.name", 'Account name cannot be empty');
             }
         }
@@ -235,6 +237,7 @@ class ConfigurationContractValidator
         $doImport = session()->get('do_import', []);
         if (empty($doImport)) {
             $this->addError('session.do_import', 'No accounts selected for import');
+
             return;
         }
 
@@ -260,9 +263,9 @@ class ConfigurationContractValidator
     private function addError(string $field, string $message, $value = null): void
     {
         $this->errors[] = [
-            'field' => $field,
+            'field'   => $field,
             'message' => $message,
-            'value' => $value,
+            'value'   => $value,
         ];
 
         Log::error("Configuration contract validation error: {$field} - {$message}", [
@@ -273,9 +276,9 @@ class ConfigurationContractValidator
     private function addWarning(string $field, string $message, $value = null): void
     {
         $this->warnings[] = [
-            'field' => $field,
+            'field'   => $field,
             'message' => $message,
-            'value' => $value,
+            'value'   => $value,
         ];
 
         Log::warning("Configuration contract validation warning: {$field} - {$message}", [
@@ -286,9 +289,9 @@ class ConfigurationContractValidator
     private function loadExistingAccounts(): void
     {
         try {
-            $url = SecretManager::getBaseUrl();
-            $token = SecretManager::getAccessToken();
-            $request = new GetAccountsRequest($url, $token);
+            $url      = SecretManager::getBaseUrl();
+            $token    = SecretManager::getAccessToken();
+            $request  = new GetAccountsRequest($url, $token);
             $request->setType(GetAccountsRequest::ALL);
             $request->setVerify(config('importer.connection.verify'));
             $request->setTimeOut(config('importer.connection.timeout'));
@@ -321,13 +324,14 @@ class ConfigurationContractValidator
             }
 
             // Check for exact name match (case-insensitive) and type match
-            if (strtolower($existingAccount->name) === strtolower($accountName) &&
-                $existingAccount->type === $accountType) {
+            if (strtolower($existingAccount->name) === strtolower($accountName)
+                && $existingAccount->type === $accountType) {
                 $this->addError(
                     "configuration.new_account.{$simplefinId}.name",
                     sprintf('Account "%s" of type "%s" already exists. Cannot create duplicate account.', $accountName, $accountType),
                     $accountName
                 );
+
                 return;
             }
         }
@@ -338,10 +342,6 @@ class ConfigurationContractValidator
     /**
      * Check if a single account name and type combination already exists
      * Used for AJAX duplicate checking during account creation
-     *
-     * @param string $accountName
-     * @param string $accountType
-     * @return bool
      */
     public function checkSingleAccountDuplicate(string $accountName, string $accountType): bool
     {
@@ -351,6 +351,7 @@ class ConfigurationContractValidator
         // Empty name or type cannot be duplicate
         if (empty($accountName) || empty($accountType)) {
             Log::debug('DUPLICATE_CHECK: Empty name or type provided');
+
             return false;
         }
 
@@ -363,6 +364,7 @@ class ConfigurationContractValidator
         // If loading failed, return false to avoid blocking user (graceful degradation)
         if (empty($this->existingAccounts)) {
             Log::warning('DUPLICATE_CHECK: No existing accounts loaded, cannot validate duplicates');
+
             return false;
         }
 
@@ -373,43 +375,46 @@ class ConfigurationContractValidator
             }
 
             // Check for exact name match (case-insensitive) and type match
-            if (strtolower($existingAccount->name) === strtolower($accountName) &&
-                $existingAccount->type === $accountType) {
+            if (strtolower($existingAccount->name) === strtolower($accountName)
+                && $existingAccount->type === $accountType) {
                 Log::debug('DUPLICATE_CHECK: Found duplicate account', [
                     'requested_name' => $accountName,
                     'requested_type' => $accountType,
-                    'existing_name' => $existingAccount->name,
-                    'existing_type' => $existingAccount->type
+                    'existing_name'  => $existingAccount->name,
+                    'existing_type'  => $existingAccount->type,
                 ]);
+
                 return true;
             }
         }
 
         Log::debug('DUPLICATE_CHECK: No duplicate found', [
-            'requested_name' => $accountName,
-            'requested_type' => $accountType,
-            'checked_accounts' => count($this->existingAccounts)
+            'requested_name'   => $accountName,
+            'requested_type'   => $accountType,
+            'checked_accounts' => count($this->existingAccounts),
         ]);
+
         return false;
     }
 
     public function validateFormFieldStructure(array $formData): ValidationResult
     {
-        $this->errors = [];
-        $this->warnings = [];
+        $this->errors      = [];
+        $this->warnings    = [];
 
         Log::debug('Validating SimpleFIN form field structure');
 
         // Validate expected form structure
         $expectedStructure = [
-            'do_import' => 'array',
-            'accounts' => 'array',
-            'new_account' => 'array'
+            'do_import'   => 'array',
+            'accounts'    => 'array',
+            'new_account' => 'array',
         ];
 
         foreach ($expectedStructure as $field => $expectedType) {
             if (!isset($formData[$field])) {
                 $this->addError("form.{$field}", "Required form field '{$field}' missing");
+
                 continue;
             }
 
@@ -423,6 +428,7 @@ class ConfigurationContractValidator
             foreach ($formData['new_account'] as $accountId => $accountData) {
                 if (!is_array($accountData)) {
                     $this->addError("form.new_account.{$accountId}", 'Account data must be array');
+
                     continue;
                 }
 
@@ -431,7 +437,7 @@ class ConfigurationContractValidator
         }
 
         return new ValidationResult(
-            count($this->errors) === 0,
+            0 === count($this->errors),
             $this->errors,
             $this->warnings
         );
@@ -492,19 +498,19 @@ class ValidationResult
 
     public function getErrorMessages(): array
     {
-        return array_map(fn($error) => $error['message'], $this->errors);
+        return array_map(fn ($error) => $error['message'], $this->errors);
     }
 
     public function getWarningMessages(): array
     {
-        return array_map(fn($warning) => $warning['message'], $this->warnings);
+        return array_map(fn ($warning) => $warning['message'], $this->warnings);
     }
 
     public function toArray(): array
     {
         return [
-            'valid' => $this->isValid,
-            'errors' => $this->errors,
+            'valid'    => $this->isValid,
+            'errors'   => $this->errors,
             'warnings' => $this->warnings,
         ];
     }

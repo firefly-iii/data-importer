@@ -45,6 +45,7 @@ class ExpenseRevenueAccounts implements MapperInterface
     public function getMap(): array
     {
         $accounts = $this->getExpenseRevenueAccounts();
+
         return $this->mergeExpenseRevenue($accounts);
     }
 
@@ -55,11 +56,11 @@ class ExpenseRevenueAccounts implements MapperInterface
     {
         app('log')->debug('getExpenseRevenueAccounts: Fetching expense and revenue accounts.');
 
-        $url = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url                    = SecretManager::getBaseUrl();
+        $token                  = SecretManager::getAccessToken();
 
         // Fetch all accounts since API doesn't have separate expense/revenue endpoints
-        $request = new GetAccountsRequest($url, $token);
+        $request                = new GetAccountsRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::ALL);
@@ -68,6 +69,7 @@ class ExpenseRevenueAccounts implements MapperInterface
             $response = $request->get();
         } catch (ApiHttpException $e) {
             app('log')->error($e->getMessage());
+
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
 
@@ -75,7 +77,7 @@ class ExpenseRevenueAccounts implements MapperInterface
             throw new ImporterErrorException('Could not get list of accounts.');
         }
 
-        $allAccounts = $this->toArray($response);
+        $allAccounts            = $this->toArray($response);
 
         // Filter for expense and revenue accounts only
         $expenseRevenueAccounts = array_filter($allAccounts, function (Account $account) {
@@ -107,7 +109,7 @@ class ExpenseRevenueAccounts implements MapperInterface
      */
     protected function mergeExpenseRevenue(array $accounts): array
     {
-        $result = [];
+        $result       = [];
         $invalidTypes = ['initial-balance', 'reconciliation'];
 
         /** @var Account $account */
@@ -122,10 +124,10 @@ class ExpenseRevenueAccounts implements MapperInterface
                 continue;
             }
 
-            $name = $account->name;
+            $name                         = $account->name;
 
             // Add optgroup to result
-            $group = trans(sprintf('import.account_types_%s', $account->type));
+            $group                        = trans(sprintf('import.account_types_%s', $account->type));
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }

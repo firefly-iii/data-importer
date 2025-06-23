@@ -30,10 +30,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\SimpleFIN\SimpleFINService;
-use App\Services\SimpleFIN\Conversion\AccountMapper;
-use App\Services\SimpleFIN\Conversion\TransactionTransformer;
 use App\Services\SimpleFIN\Model\Account;
-use App\Services\Storage\StorageService;
 use Illuminate\Support\Str;
 
 /**
@@ -54,10 +51,10 @@ class RoutineManager implements RoutineManagerInterface
     {
         app('log')->debug('Constructed SimpleFIN RoutineManager');
 
-        $this->identifier = $identifier ?? Str::random(16);
+        $this->identifier       = $identifier ?? Str::random(16);
         $this->simpleFINService = app(SimpleFINService::class);
-        $this->accountMapper = new AccountMapper();
-        $this->transformer = new TransactionTransformer($this->accountMapper);
+        $this->accountMapper    = new AccountMapper();
+        $this->transformer      = new TransactionTransformer($this->accountMapper);
     }
 
     /**
@@ -67,17 +64,17 @@ class RoutineManager implements RoutineManagerInterface
     {
         app('log')->debug('Now in SimpleFIN RoutineManager::start()');
 
-        $token = session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
-        $bridgeUrl = session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation
+        $token                    = session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
+        $bridgeUrl                = session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation
         $allAccountsSimpleFINData = session()->get(
             Constants::SIMPLEFIN_ACCOUNTS_DATA,
             []
         );
 
         if (
-            empty($token) ||
-            empty($bridgeUrl) ||
-            empty($allAccountsSimpleFINData)
+            empty($token)
+            || empty($bridgeUrl)
+            || empty($allAccountsSimpleFINData)
         ) {
             app('log')->error(
                 'SimpleFIN session data incomplete for conversion.',
@@ -87,14 +84,15 @@ class RoutineManager implements RoutineManagerInterface
                     'has_accounts_data' => !empty($allAccountsSimpleFINData),
                 ]
             );
+
             throw new ImporterErrorException(
                 'SimpleFIN session data (token, URL, or accounts data) not found or incomplete'
             );
         }
 
-        $transactions = [];
-        $accounts = $this->configuration->getAccounts();
-        $dateRange = $this->getDateRange();
+        $transactions             = [];
+        $accounts                 = $this->configuration->getAccounts();
+        $dateRange                = $this->getDateRange();
 
         app('log')->info('Processing SimpleFIN accounts', [
             'account_count' => count($accounts),
@@ -104,14 +102,15 @@ class RoutineManager implements RoutineManagerInterface
         foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
             // Handle account creation if requested (fireflyAccountId === 0 means "create_new")
             if (0 === $fireflyAccountId) {
-                $newAccountData =
-                    $this->configuration->getNewAccounts()[
+                $newAccountData
+                                      = $this->configuration->getNewAccounts()[
                         $simplefinAccountId
                     ] ?? null;
                 if (!$newAccountData) {
                     app('log')->error(
                         "No new account data found for SimpleFIN account: {$simplefinAccountId}"
                     );
+
                     continue;
                 }
 
@@ -120,6 +119,7 @@ class RoutineManager implements RoutineManagerInterface
                     app('log')->error(
                         "Account name is required for creating SimpleFIN account: {$simplefinAccountId}"
                     );
+
                     continue;
                 }
 
@@ -128,6 +128,7 @@ class RoutineManager implements RoutineManagerInterface
                 foreach ($allAccountsSimpleFINData as $accountData) {
                     if ($accountData['id'] === $simplefinAccountId) {
                         $simplefinAccountData = $accountData;
+
                         break;
                     }
                 }
@@ -136,11 +137,12 @@ class RoutineManager implements RoutineManagerInterface
                     app('log')->error(
                         "SimpleFIN account data not found for ID: {$simplefinAccountId}"
                     );
+
                     continue;
                 }
 
                 // Prepare account creation configuration with defaults
-                $accountConfig = [
+                $accountConfig        = [
                     'name'     => $newAccountData['name'],
                     'type'     => $newAccountData['type'] ?? 'asset',
                     'currency' => $newAccountData['currency'] ?? 'USD',
@@ -148,11 +150,11 @@ class RoutineManager implements RoutineManagerInterface
 
                 // Add opening balance if provided
                 if (
-                    !empty($newAccountData['opening_balance']) &&
-                    is_numeric($newAccountData['opening_balance'])
+                    !empty($newAccountData['opening_balance'])
+                    && is_numeric($newAccountData['opening_balance'])
                 ) {
-                    $accountConfig['opening_balance'] =
-                        $newAccountData['opening_balance'];
+                    $accountConfig['opening_balance']
+                                                           = $newAccountData['opening_balance'];
                     $accountConfig['opening_balance_date'] = date('Y-m-d');
                 }
 
@@ -162,23 +164,23 @@ class RoutineManager implements RoutineManagerInterface
                 ]);
 
                 // Create SimpleFIN Account object and create Firefly III account
-                $simplefinAccount = Account::fromArray($simplefinAccountData);
-                $accountMapper = new AccountMapper();
-                $createdAccount = $accountMapper->createFireflyAccount(
+                $simplefinAccount     = Account::fromArray($simplefinAccountData);
+                $accountMapper        = new AccountMapper();
+                $createdAccount       = $accountMapper->createFireflyAccount(
                     $simplefinAccount,
                     $accountConfig
                 );
 
                 if ($createdAccount) {
                     // Account was created immediately - update configuration
-                    $fireflyAccountId = $createdAccount->id;
-                    $updatedAccounts = $this->configuration->getAccounts();
+                    $fireflyAccountId                     = $createdAccount->id;
+                    $updatedAccounts                      = $this->configuration->getAccounts();
                     $updatedAccounts[$simplefinAccountId] = $fireflyAccountId;
                     $this->configuration->setAccounts($updatedAccounts);
 
                     // CRITICAL: Update local accounts mapping to reflect the new account ID
                     // This ensures TransactionTransformer receives the correct account ID mapping
-                    $accounts = $this->configuration->getAccounts();
+                    $accounts                             = $this->configuration->getAccounts();
 
                     app('log')->info(
                         'Successfully created new Firefly III account',
@@ -217,10 +219,11 @@ class RoutineManager implements RoutineManagerInterface
             $currentSimpleFINAccountData = null;
             foreach ($allAccountsSimpleFINData as $accountDataFromArrayInLoop) {
                 if (
-                    isset($accountDataFromArrayInLoop['id']) &&
-                    $accountDataFromArrayInLoop['id'] === $simplefinAccountId
+                    isset($accountDataFromArrayInLoop['id'])
+                    && $accountDataFromArrayInLoop['id'] === $simplefinAccountId
                 ) {
                     $currentSimpleFINAccountData = $accountDataFromArrayInLoop;
+
                     break;
                 }
             }
@@ -230,6 +233,7 @@ class RoutineManager implements RoutineManagerInterface
                     'Failed to find SimpleFIN account raw data in session for current account ID during transformation.',
                     ['simplefin_account_id_sought' => $simplefinAccountId]
                 );
+
                 // If the account data for this ID isn't found, we can't process its transactions.
                 // This might indicate an inconsistency in session data or configuration.
                 continue; // Skip to the next account in $accounts.
@@ -266,7 +270,7 @@ class RoutineManager implements RoutineManagerInterface
                         // 2. Parent SimpleFIN account data (array)
                         // 3. Full Firefly III account mapping configuration (array)
                         // 4. New account configuration data (array) - contains user-provided names
-                        $transformedTransaction = $this->transformer->transform(
+                        $transformedTransaction       = $this->transformer->transform(
                             $transactionData,
                             $currentSimpleFINAccountData, // The specific SimpleFIN account data for this transaction's parent
                             $accountMappingForTransformer, // Current mapping with actual account IDs
@@ -280,22 +284,20 @@ class RoutineManager implements RoutineManagerInterface
                         }
 
                         // Wrap transaction in group structure expected by Firefly III
-                        $transactionGroup = [
-                            'group_title' =>
-                                $transformedTransaction['description'] ??
-                                'SimpleFIN Transaction',
+                        $transactionGroup             = [
+                            'group_title'  => $transformedTransaction['description']
+                                ?? 'SimpleFIN Transaction',
                             'transactions' => [$transformedTransaction],
                         ];
 
-                        $transactions[] = $transactionGroup;
+                        $transactions[]               = $transactionGroup;
                     } catch (ImporterErrorException $e) {
                         app('log')->warning(
                             'Transaction transformation failed for a specific transaction.',
                             [
                                 'simplefin_account_id' => $simplefinAccountId,
-                                'transaction_id'       =>
-                                    isset($transactionData['id']) &&
-                                    is_scalar($transactionData['id'])
+                                'transaction_id'       => isset($transactionData['id'])
+                                    && is_scalar($transactionData['id'])
                                         ? (string)$transactionData['id']
                                         : 'unknown',
                                 'error'                => $e->getMessage(),
@@ -309,6 +311,7 @@ class RoutineManager implements RoutineManagerInterface
                     'account' => $simplefinAccountId,
                     'error'   => $e->getMessage(),
                 ]);
+
                 throw $e;
             }
         }
@@ -341,7 +344,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function getDateRange(): array
     {
-        $dateAfter = $this->configuration->getDateNotBefore();
+        $dateAfter  = $this->configuration->getDateNotBefore();
         $dateBefore = $this->configuration->getDateNotAfter();
 
         return [

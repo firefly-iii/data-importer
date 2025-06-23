@@ -46,6 +46,7 @@ class ConversionControllerMiddleware
             app('log')->debug(
                 'isReadyForStep returns true because $flow is null'
             );
+
             return true;
         }
 
@@ -57,6 +58,7 @@ class ConversionControllerMiddleware
                     var_export($result, true)
                 )
             );
+
             return $result;
         }
         if ('nordigen' === $flow) {

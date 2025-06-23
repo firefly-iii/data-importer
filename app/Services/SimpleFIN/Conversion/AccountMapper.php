@@ -45,7 +45,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 class AccountMapper
 {
     private array $fireflyAccounts = [];
-    private array $accountMapping = [];
+    private array $accountMapping  = [];
     private array $createdAccounts = [];
 
     public function __construct()
@@ -56,9 +56,6 @@ class AccountMapper
 
     /**
      * Map SimpleFIN accounts to Firefly III accounts
-     * @param array $simplefinAccounts
-     * @param array $configuration
-     * @return array
      */
     public function mapAccounts(array $simplefinAccounts, array $configuration = []): array
     {
@@ -75,26 +72,26 @@ class AccountMapper
             if (isset($configuration['account_mapping'][$accountKey])) {
                 $mappingConfig = $configuration['account_mapping'][$accountKey];
 
-                if ($mappingConfig['action'] === 'map' && isset($mappingConfig['firefly_account_id'])) {
+                if ('map' === $mappingConfig['action'] && isset($mappingConfig['firefly_account_id'])) {
                     // Map to existing account
                     $fireflyAccount = $this->getFireflyAccountById((int) $mappingConfig['firefly_account_id']);
                     if ($fireflyAccount) {
                         $mapping[$accountKey] = [
-                            'simplefin_account' => $simplefinAccount,
-                            'firefly_account_id' => $fireflyAccount->id,
+                            'simplefin_account'    => $simplefinAccount,
+                            'firefly_account_id'   => $fireflyAccount->id,
                             'firefly_account_name' => $fireflyAccount->name,
-                            'action' => 'map',
+                            'action'               => 'map',
                         ];
                     }
-                } elseif ($mappingConfig['action'] === 'create') {
+                } elseif ('create' === $mappingConfig['action']) {
                     // Create new account
                     $fireflyAccount = $this->createFireflyAccount($simplefinAccount, $mappingConfig);
                     if ($fireflyAccount) {
                         $mapping[$accountKey] = [
-                            'simplefin_account' => $simplefinAccount,
-                            'firefly_account_id' => $fireflyAccount->id,
+                            'simplefin_account'    => $simplefinAccount,
+                            'firefly_account_id'   => $fireflyAccount->id,
                             'firefly_account_name' => $fireflyAccount->name,
-                            'action' => 'create',
+                            'action'               => 'create',
                         ];
                     }
                 }
@@ -103,18 +100,18 @@ class AccountMapper
                 $fireflyAccount = $this->findMatchingFireflyAccount($simplefinAccount);
                 if ($fireflyAccount) {
                     $mapping[$accountKey] = [
-                        'simplefin_account' => $simplefinAccount,
-                        'firefly_account_id' => $fireflyAccount->id,
+                        'simplefin_account'    => $simplefinAccount,
+                        'firefly_account_id'   => $fireflyAccount->id,
                         'firefly_account_name' => $fireflyAccount->name,
-                        'action' => 'auto_map',
+                        'action'               => 'auto_map',
                     ];
                 } else {
                     // No mapping found - will need user input
                     $mapping[$accountKey] = [
-                        'simplefin_account' => $simplefinAccount,
-                        'firefly_account_id' => null,
+                        'simplefin_account'    => $simplefinAccount,
+                        'firefly_account_id'   => null,
                         'firefly_account_name' => null,
-                        'action' => 'unmapped',
+                        'action'               => 'unmapped',
                     ];
                 }
             }
@@ -129,6 +126,7 @@ class AccountMapper
     public function getAvailableFireflyAccounts(): array
     {
         $this->loadFireflyAccounts();
+
         return $this->fireflyAccounts;
     }
 
@@ -150,7 +148,7 @@ class AccountMapper
 
         // Try to search via API
         try {
-            $request = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
             $request->setQuery($simplefinAccount->getName());
             $response = $request->get();
 
@@ -170,29 +168,26 @@ class AccountMapper
 
     /**
      * Create account immediately via Firefly III API
-     * @param SimpleFINAccount $simplefinAccount
-     * @param array $config
-     * @return Account|null
      */
     public function createFireflyAccount(SimpleFINAccount $simplefinAccount, array $config): ?Account
     {
-        $accountName = $config['name'] ?? $simplefinAccount->getName();
-        $accountType = $this->determineAccountType($simplefinAccount, $config);
-        $currencyCode = $this->getCurrencyCode($simplefinAccount, $config);
+        $accountName    = $config['name'] ?? $simplefinAccount->getName();
+        $accountType    = $this->determineAccountType($simplefinAccount, $config);
+        $currencyCode   = $this->getCurrencyCode($simplefinAccount, $config);
         $openingBalance = $config['opening_balance'] ?? '0.00';
 
         app('log')->info(sprintf('Creating Firefly III account "%s" immediately via API', $accountName));
 
         try {
-            $request = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
 
             // Build account creation payload
-            $payload = [
-                'name' => $accountName,
-                'type' => $accountType,
-                'currency_code' => $currencyCode,
-                'opening_balance' => $openingBalance,
-                'active' => true,
+            $payload  = [
+                'name'              => $accountName,
+                'type'              => $accountType,
+                'currency_code'     => $currencyCode,
+                'opening_balance'   => $openingBalance,
+                'active'            => true,
                 'include_net_worth' => true,
             ];
 
@@ -202,22 +197,22 @@ class AccountMapper
             }
 
             // Add account role for asset accounts
-            if ($accountType === AccountType::ASSET) {
+            if (AccountType::ASSET === $accountType) {
                 $payload['account_role'] = $config['account_role'] ?? 'defaultAsset';
             }
 
             // Add liability-specific fields for liability accounts
             if (in_array($accountType, [AccountType::DEBT, AccountType::LOAN, AccountType::MORTGAGE, AccountType::LIABILITIES, 'liability'], true)) {
                 // Map account type to liability type
-                $liabilityTypeMap = [
-                    AccountType::DEBT => 'debt',
-                    AccountType::LOAN => 'loan',
-                    AccountType::MORTGAGE => 'mortgage',
+                $liabilityTypeMap               = [
+                    AccountType::DEBT        => 'debt',
+                    AccountType::LOAN        => 'loan',
+                    AccountType::MORTGAGE    => 'mortgage',
                     AccountType::LIABILITIES => 'debt', // Default generic liabilities to debt
-                    'liability' => 'debt', // Handle user-provided 'liability' type
+                    'liability'              => 'debt', // Handle user-provided 'liability' type
                 ];
 
-                $payload['liability_type'] = $config['liability_type'] ?? $liabilityTypeMap[$accountType] ?? 'debt';
+                $payload['liability_type']      = $config['liability_type'] ?? $liabilityTypeMap[$accountType] ?? 'debt';
                 $payload['liability_direction'] = $config['liability_direction'] ?? 'credit';
             }
 
@@ -236,6 +231,7 @@ class AccountMapper
 
             if ($response instanceof ValidationErrorResponse) {
                 app('log')->error(sprintf('Failed to create account "%s": %s', $accountName, json_encode($response->errors->toArray())));
+
                 return null;
             }
 
@@ -253,22 +249,22 @@ class AccountMapper
             }
 
             app('log')->error(sprintf('Unexpected response type when creating account "%s"', $accountName));
+
             return null;
 
         } catch (ApiHttpException $e) {
             app('log')->error(sprintf('API error creating account "%s": %s', $accountName, $e->getMessage()));
+
             return null;
         } catch (\Exception $e) {
             app('log')->error(sprintf('Unexpected error creating account "%s": %s', $accountName, $e->getMessage()));
+
             return null;
         }
     }
 
     /**
      * Determine the appropriate Firefly III account type
-     * @param SimpleFINAccount $simplefinAccount
-     * @param array $config
-     * @return string
      */
     private function determineAccountType(SimpleFINAccount $simplefinAccount, array $config): string
     {
@@ -329,17 +325,18 @@ class AccountMapper
 
         try {
             // Verify authentication context before making API calls
-            $baseUrl = SecretManager::getBaseUrl();
+            $baseUrl     = SecretManager::getBaseUrl();
             $accessToken = SecretManager::getAccessToken();
 
             if (empty($baseUrl) || empty($accessToken)) {
                 app('log')->warning('Missing authentication context for Firefly III account loading');
+
                 throw new ImporterErrorException('Authentication context not available for account loading');
             }
 
-            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request     = new GetAccountsRequest($baseUrl, $accessToken);
             $request->setType(AccountType::ASSET);
-            $response = $request->get();
+            $response    = $request->get();
 
             if ($response instanceof GetAccountsResponse) {
                 $this->fireflyAccounts = iterator_to_array($response);
@@ -347,20 +344,19 @@ class AccountMapper
             }
         } catch (ApiHttpException $e) {
             app('log')->error(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
+
             throw new ImporterErrorException(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
         }
     }
 
     /**
      * Make API call with DNS resilience retry pattern
-     * @param PostAccountRequest $request
-     * @param string $accountName
-     * @return Response
+     *
      * @throws ApiHttpException
      */
     private function makeApiCallWithRetry(PostAccountRequest $request, string $accountName): Response
     {
-        $retryDelays = [0, 2, 5]; // immediate, 2s delay, 5s delay
+        $retryDelays   = [0, 2, 5]; // immediate, 2s delay, 5s delay
         $lastException = null;
 
         foreach ($retryDelays as $attempt => $delay) {
@@ -374,13 +370,14 @@ class AccountMapper
 
             } catch (ApiHttpException $e) {
                 $lastException = $e;
-                $errorMessage = $e->getMessage();
+                $errorMessage  = $e->getMessage();
 
                 // Check if this is a DNS/connection timeout error that we should retry
-                $shouldRetry = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
+                $shouldRetry   = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
 
                 if (!$shouldRetry) {
                     app('log')->error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
+
                     throw $e;
                 }
 
@@ -395,15 +392,12 @@ class AccountMapper
 
         // All retries exhausted
         app('log')->error(sprintf('All retries exhausted for account "%s": %s', $accountName, $lastException->getMessage()));
+
         throw $lastException;
     }
 
     /**
      * Determine if an API call should be retried based on the error
-     * @param string $errorMessage
-     * @param int $attempt
-     * @param int $maxAttempts
-     * @return bool
      */
     private function shouldRetryApiCall(string $errorMessage, int $attempt, int $maxAttempts): bool
     {
@@ -421,11 +415,11 @@ class AccountMapper
             'cURL error 7',  // Couldn't connect to host
             'Failed to connect',
             'Name or service not known',
-            'Temporary failure in name resolution'
+            'Temporary failure in name resolution',
         ];
 
         foreach ($retryableErrors as $retryableError) {
-            if (stripos($errorMessage, $retryableError) !== false) {
+            if (false !== stripos($errorMessage, $retryableError)) {
                 return true;
             }
         }
@@ -435,29 +429,29 @@ class AccountMapper
 
     /**
      * Get mapping options for UI
-     * @param SimpleFINAccount $simplefinAccount
+     *
      * @return array<string,mixed>
      */
     public function getMappingOptions(SimpleFINAccount $simplefinAccount): array
     {
         $this->loadFireflyAccounts();
 
-        $options = [
-            'account_name' => $simplefinAccount->getName(),
-            'account_id' => $simplefinAccount->getId(),
-            'currency' => $simplefinAccount->getCurrency(),
-            'balance' => $simplefinAccount->getBalance(),
-            'organization' => $simplefinAccount->getOrganizationName() ?? $simplefinAccount->getOrganizationDomain(),
-            'firefly_accounts' => [],
+        $options   = [
+            'account_name'      => $simplefinAccount->getName(),
+            'account_id'        => $simplefinAccount->getId(),
+            'currency'          => $simplefinAccount->getCurrency(),
+            'balance'           => $simplefinAccount->getBalance(),
+            'organization'      => $simplefinAccount->getOrganizationName() ?? $simplefinAccount->getOrganizationDomain(),
+            'firefly_accounts'  => [],
             'suggested_account' => null,
         ];
 
         // Add all available Firefly accounts as options
         foreach ($this->fireflyAccounts as $account) {
             $options['firefly_accounts'][] = [
-                'id' => $account->id,
-                'name' => $account->name,
-                'type' => $account->type,
+                'id'            => $account->id,
+                'name'          => $account->name,
+                'type'          => $account->type,
                 'currency_code' => $account->currencyCode ?? 'USD',
             ];
         }
@@ -466,7 +460,7 @@ class AccountMapper
         $suggested = $this->findMatchingFireflyAccount($simplefinAccount);
         if ($suggested) {
             $options['suggested_account'] = [
-                'id' => $suggested->id,
+                'id'   => $suggested->id,
                 'name' => $suggested->name,
                 'type' => $suggested->type,
             ];

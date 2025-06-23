@@ -56,39 +56,41 @@ trait CollectsAccounts
             Constants::ASSET_ACCOUNTS => [],
             Constants::LIABILITIES    => [],
         ];
-        $url = null;
-        $token = null;
+        $url      = null;
+        $token    = null;
 
         try {
-            $url      = SecretManager::getBaseUrl();
-            $token    = SecretManager::getAccessToken();
+            $url               = SecretManager::getBaseUrl();
+            $token             = SecretManager::getAccessToken();
 
             if (empty($url) || empty($token)) {
                 Log::error('CollectsAccounts::getFireflyIIIAccounts - Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => empty($url), 'token_empty' => empty($token)]);
+
                 return $accounts; // Return empty accounts if auth details are missing
             }
 
             // Fetch ASSET accounts
             Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetching ASSET accounts from Firefly III.', ['url' => $url]);
-            $requestAsset  = new GetAccountsRequest($url, $token);
+            $requestAsset      = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
-            $responseAsset = $requestAsset->get();
+            $responseAsset     = $requestAsset->get();
 
             /** @var Account $account */
             foreach ($responseAsset as $account) {
                 $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account;
             }
-            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched ' . count($accounts[Constants::ASSET_ACCOUNTS]) . ' ASSET accounts.');
+            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched '.count($accounts[Constants::ASSET_ACCOUNTS]).' ASSET accounts.');
 
             // Fetch LIABILITY accounts
             // URL and token are likely the same, but re-fetching defensively or if SecretManager has internal state
-            $url      = SecretManager::getBaseUrl(); // Re-fetch in case of any state change, though unlikely
-            $token    = SecretManager::getAccessToken();
+            $url               = SecretManager::getBaseUrl(); // Re-fetch in case of any state change, though unlikely
+            $token             = SecretManager::getAccessToken();
 
             if (empty($url) || empty($token)) { // Check again, though highly unlikely to change if first call succeeded.
                 Log::error('CollectsAccounts::getFireflyIIIAccounts - Base URL or Access Token became empty before fetching LIABILITY accounts.');
+
                 return $accounts; // Return partially filled or empty accounts
             }
 
@@ -103,26 +105,27 @@ trait CollectsAccounts
             foreach ($responseLiability as $account) {
                 $accounts[Constants::LIABILITIES][$account->id] = $account;
             }
-            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched ' . count($accounts[Constants::LIABILITIES]) . ' LIABILITY accounts.');
+            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched '.count($accounts[Constants::LIABILITIES]).' LIABILITY accounts.');
 
         } catch (ApiHttpException $e) {
             Log::error('CollectsAccounts::getFireflyIIIAccounts - ApiHttpException while fetching Firefly III accounts.', [
                 'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'url' => $url, // Log URL that might have caused issue
-                'trace' => $e->getTraceAsString(),
+                'code'    => $e->getCode(),
+                'url'     => $url, // Log URL that might have caused issue
+                'trace'   => $e->getTraceAsString(),
             ]);
             // Return the (potentially partially filled) $accounts array so the app doesn't hard crash.
             // The view should handle cases where account lists are empty.
         } catch (\Exception $e) {
             Log::error('CollectsAccounts::getFireflyIIIAccounts - Generic Exception while fetching Firefly III accounts.', [
                 'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'url' => $url,
-                'trace' => $e->getTraceAsString(),
+                'code'    => $e->getCode(),
+                'url'     => $url,
+                'trace'   => $e->getTraceAsString(),
             ]);
         }
         Log::debug('CollectsAccounts::getFireflyIIIAccounts - Returning accounts structure.', $accounts);
+
         return $accounts;
     }
 

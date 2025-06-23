@@ -17,9 +17,6 @@ class PostAccountRequest extends Request
 {
     /**
      * PostAccountRequest constructor.
-     *
-     * @param string $url
-     * @param string $token
      */
     public function __construct(string $url, string $token)
     {
@@ -28,17 +25,11 @@ class PostAccountRequest extends Request
         $this->setUri('accounts');
     }
 
-    /**
-     * @return Response
-     */
     public function get(): Response
     {
         // TODO: Implement get() method.
     }
 
-    /**
-     * @return Response
-     */
     public function post(): Response
     {
         $data = $this->authenticatedPost();
@@ -56,15 +47,13 @@ class PostAccountRequest extends Request
             }
             // no data array and no error info, that's weird!
             $info = ['unknown_field' => [sprintf('Unknown error: %s', json_encode($data, 0, 16))]];
+
             return new ValidationErrorResponse($info);
         }
 
         return new PostAccountResponse($data['data'] ?? []);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function put(): Response
     {
         // TODO: Implement put() method.

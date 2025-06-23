@@ -40,7 +40,7 @@ abstract class SimpleFINResponse implements SharedResponseInterface
     public function __construct(ResponseInterface $response)
     {
         $this->statusCode = $response->getStatusCode();
-        $this->rawBody = (string) $response->getBody();
+        $this->rawBody    = (string) $response->getBody();
 
         app('log')->debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
         app('log')->debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
@@ -84,20 +84,23 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         if (empty($this->rawBody)) {
             app('log')->warning('SimpleFIN Response body is empty');
             $this->data = [];
+
             return;
         }
 
-        $decoded = json_decode($this->rawBody, true);
+        $decoded    = json_decode($this->rawBody, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (JSON_ERROR_NONE !== json_last_error()) {
             app('log')->error(sprintf('SimpleFIN JSON decode error: %s', json_last_error_msg()));
             $this->data = [];
+
             return;
         }
 
         if (!is_array($decoded)) {
             app('log')->error('SimpleFIN Response is not a valid JSON array');
             $this->data = [];
+
             return;
         }
 

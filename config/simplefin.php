@@ -38,27 +38,27 @@ return [
     | Demo Configuration
     |--------------------------------------------------------------------------
     */
-    'demo_url'              => env('SIMPLEFIN_DEMO_URL', ''),
-    'demo_token'            => env('SIMPLEFIN_DEMO_TOKEN', ''),
+    'demo_url'                        => env('SIMPLEFIN_DEMO_URL', ''),
+    'demo_token'                      => env('SIMPLEFIN_DEMO_TOKEN', ''),
 
     /*
     |--------------------------------------------------------------------------
     | Connection Settings
     |--------------------------------------------------------------------------
     */
-    'connection_timeout'    => env('SIMPLEFIN_CONNECTION_TIMEOUT', 30),
-    'request_timeout'       => env('SIMPLEFIN_REQUEST_TIMEOUT', 60),
+    'connection_timeout'              => env('SIMPLEFIN_CONNECTION_TIMEOUT', 30),
+    'request_timeout'                 => env('SIMPLEFIN_REQUEST_TIMEOUT', 60),
 
     /*
     |--------------------------------------------------------------------------
     | Transaction Processing
     |--------------------------------------------------------------------------
     */
-    'unique_column_options' => [
-        'id' => 'Transaction ID',
-        'account_id' => 'Account ID',
-        'posted' => 'Posted Date',
-        'amount' => 'Amount',
+    'unique_column_options'           => [
+        'id'          => 'Transaction ID',
+        'account_id'  => 'Account ID',
+        'posted'      => 'Posted Date',
+        'amount'      => 'Amount',
         'description' => 'Description',
     ],
 
@@ -67,12 +67,12 @@ return [
     | Account Mapping
     |--------------------------------------------------------------------------
     */
-    'account_types'         => [
-        'checking'  => 'asset',
-        'savings'   => 'asset',
-        'credit'    => 'debt',      // Credit cards are debt accounts
-        'loan'      => 'loan',      // Loans use specific loan account type
-        'mortgage'  => 'mortgage',  // Mortgages use specific mortgage account type
+    'account_types'                   => [
+        'checking'   => 'asset',
+        'savings'    => 'asset',
+        'credit'     => 'debt',      // Credit cards are debt accounts
+        'loan'       => 'loan',      // Loans use specific loan account type
+        'mortgage'   => 'mortgage',  // Mortgages use specific mortgage account type
         'investment' => 'asset',
     ],
 
@@ -81,26 +81,26 @@ return [
     | Import Settings
     |--------------------------------------------------------------------------
     */
-    'max_transactions'      => env('SIMPLEFIN_MAX_TRANSACTIONS', 10000),
-    'default_date_range'    => env('SIMPLEFIN_DEFAULT_DATE_RANGE', 90), // days
-    'enable_caching'        => env('SIMPLEFIN_ENABLE_CACHING', true),
-    'cache_duration'        => env('SIMPLEFIN_CACHE_DURATION', 3600), // seconds
+    'max_transactions'                => env('SIMPLEFIN_MAX_TRANSACTIONS', 10000),
+    'default_date_range'              => env('SIMPLEFIN_DEFAULT_DATE_RANGE', 90), // days
+    'enable_caching'                  => env('SIMPLEFIN_ENABLE_CACHING', true),
+    'cache_duration'                  => env('SIMPLEFIN_CACHE_DURATION', 3600), // seconds
 
     /*
     |--------------------------------------------------------------------------
     | Expense Account Assignment
     |--------------------------------------------------------------------------
     */
-    'smart_expense_matching' => env('SIMPLEFIN_SMART_EXPENSE_MATCHING', true),
-    'expense_matching_threshold' => env('SIMPLEFIN_EXPENSE_MATCHING_THRESHOLD', 0.7), // Restored default for better clustering
-    'auto_create_expense_accounts' => env('SIMPLEFIN_AUTO_CREATE_EXPENSE_ACCOUNTS', true),
+    'smart_expense_matching'          => env('SIMPLEFIN_SMART_EXPENSE_MATCHING', true),
+    'expense_matching_threshold'      => env('SIMPLEFIN_EXPENSE_MATCHING_THRESHOLD', 0.7), // Restored default for better clustering
+    'auto_create_expense_accounts'    => env('SIMPLEFIN_AUTO_CREATE_EXPENSE_ACCOUNTS', true),
 
     /*
     |--------------------------------------------------------------------------
     | Transaction Clustering (Clean Instances)
     |--------------------------------------------------------------------------
     */
-    'enable_transaction_clustering' => env('SIMPLEFIN_ENABLE_TRANSACTION_CLUSTERING', true),
+    'enable_transaction_clustering'   => env('SIMPLEFIN_ENABLE_TRANSACTION_CLUSTERING', true),
     'clustering_similarity_threshold' => env('SIMPLEFIN_CLUSTERING_SIMILARITY_THRESHOLD', 0.7),
 
     /*
@@ -108,6 +108,6 @@ return [
     | Error Handling
     |--------------------------------------------------------------------------
     */
-    'retry_attempts'        => env('SIMPLEFIN_RETRY_ATTEMPTS', 3),
-    'retry_delay'           => env('SIMPLEFIN_RETRY_DELAY', 1), // seconds
+    'retry_attempts'                  => env('SIMPLEFIN_RETRY_ATTEMPTS', 3),
+    'retry_delay'                     => env('SIMPLEFIN_RETRY_DELAY', 1), // seconds
 ];
