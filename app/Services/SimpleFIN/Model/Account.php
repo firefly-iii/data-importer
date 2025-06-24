@@ -32,15 +32,15 @@ use Carbon\Carbon;
  */
 class Account
 {
-    private array $org;
-    private string $id;
-    private string $name;
-    private string $currency;
-    private string $balance;
+    private array   $org;
+    private string  $id;
+    private string  $name;
+    private string  $currency;
+    private string  $balance;
     private ?string $availableBalance;
-    private int $balanceDate;
-    private array $transactions;
-    private array $extra;
+    private int     $balanceDate;
+    private array   $transactions;
+    private array   $extra;
 
     public function __construct(array $data)
     {
@@ -109,7 +109,7 @@ class Account
 
     public function getBalanceAsFloat(): float
     {
-        return (float) $this->balance;
+        return (float)$this->balance;
     }
 
     public function getAvailableBalance(): ?string
@@ -119,7 +119,7 @@ class Account
 
     public function getAvailableBalanceAsFloat(): ?float
     {
-        return $this->availableBalance ? (float) $this->availableBalance : null;
+        return null !== $this->availableBalance ? (float)$this->availableBalance : null;
     }
 
     public function getBalanceDate(): int
@@ -192,11 +192,17 @@ class Account
             throw new \InvalidArgumentException('Organization must be an array');
         }
 
-        if (!isset($data['org']['sfin-url'])) {
+        if (!array_key_exists('sfin-url', $data['org']) && null !== $data['org']['sfin-url']) {
             throw new \InvalidArgumentException('Organization must have sfin-url');
         }
 
-        if (!isset($data['org']['domain']) && !isset($data['org']['name'])) {
+
+        if (
+            !array_key_exists('domain', $data['org']) &&
+            !array_key_exists('name', $data['org']) &&
+            null !== $data['org']['domain'] &&
+            null !== $data['org']['name']
+        ) {
             throw new \InvalidArgumentException('Organization must have either domain or name');
         }
 

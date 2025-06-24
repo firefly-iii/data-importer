@@ -40,6 +40,7 @@ use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -166,16 +167,16 @@ class ConfigurationController extends Controller
                 continue;
             }
 
-            if (!array_key_exists('name', $account)) {
+            if (!array_key_exists('name', $account) || null === $account['name']) {
                 Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
                 $account['name'] = 'Unknown Account (ID: '.$account['id'].')';
             }
 
-            if (!array_key_exists('currency', $account)) {
+            if (!array_key_exists('currency', $account) || null === $account['currency']) {
                 Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
-            if (!array_key_exists('balance', $account)) {
+            if (!array_key_exists('balance', $account) || null === $account['balance']) {
                 Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
@@ -219,7 +220,7 @@ class ConfigurationController extends Controller
             $return[]                    = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
                 'name'                                             => $sfinAccountData['name'], // SimpleFIN account name
                 'id'                                               => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
-                'mapped_to'                                        => $this->getMappedTo(['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
+                'mapped_to'                                        => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
                 'type'                                             => 'source', // Indicates it's an account from the import source
                 'firefly_iii_accounts'                             => $fireflyAccounts, // Required by x-importer-account component
             ];
@@ -242,7 +243,7 @@ class ConfigurationController extends Controller
      */
     private function getMappedTo(object $importAccount, array $fireflyAccounts): ?string
     {
-        $importAccountName = $importAccount->name ?? null;
+        $importAccountName = $importAccount->name ?? null; // @phpstan-ignore-line
 
         if ('' === (string) $importAccountName || null === $importAccountName) { // same thing really.
             return null;
@@ -250,7 +251,7 @@ class ConfigurationController extends Controller
 
 
         // Check assets accounts for name match
-        if (isset($fireflyAccounts['assets']) && is_array($fireflyAccounts['assets'])) {
+        if (array_key_exists('assets', $fireflyAccounts) && is_array($fireflyAccounts['assets'])) {
             foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
                 if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
@@ -260,7 +261,7 @@ class ConfigurationController extends Controller
         }
 
         // Check liability accounts for name match
-        if (isset($fireflyAccounts['liabilities']) && is_array($fireflyAccounts['liabilities'])) {
+        if (array_key_exists('liabilities', $fireflyAccounts) && is_array($fireflyAccounts['liabilities'])) {
             foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
                 if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
@@ -295,6 +296,8 @@ class ConfigurationController extends Controller
 
         $dateObj           = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
+
+        /** @var Carbon $date */
         $date              = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);

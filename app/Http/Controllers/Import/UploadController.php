@@ -170,7 +170,7 @@ class UploadController extends Controller
                 $this->contentType = $detector->detectContentType($file->getPathname());
                 $content           = '';
                 if ('csv' === $this->contentType) {
-                    $content = file_get_contents($file->getPathname());
+                    $content = (string) file_get_contents($file->getPathname());
 
                     // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                     // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
@@ -183,7 +183,7 @@ class UploadController extends Controller
                 }
 
                 if ('camt' === $this->contentType) {
-                    $content = file_get_contents($file->getPathname());
+                    $content = (string) file_get_contents($file->getPathname());
                 }
                 $fileName          = StorageService::storeContent($content);
                 session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
@@ -225,8 +225,6 @@ class UploadController extends Controller
     }
 
     /**
-     * @param null|UploadedFile $file
-     *
      * @throws ImporterErrorException
      */
     private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
@@ -234,12 +232,12 @@ class UploadController extends Controller
         Log::debug('Config file is present.');
         $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
-            $errors->add('config_file', $errorNumber);
+            $errors->add('config_file', (string) $errorNumber);
         }
         // upload the file to a temp directory and use it from there.
         if (0 === $errorNumber) {
             Log::debug('Config file uploaded.');
-            $this->configFileName = StorageService::storeContent(file_get_contents($file->getPathname()));
+            $this->configFileName = StorageService::storeContent((string) file_get_contents($file->getPathname()));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
 
@@ -258,7 +256,7 @@ class UploadController extends Controller
             // if conversion of the config file was a success, store the new version again:
             if (true === $success) {
                 $configuration->updateDateRange();
-                $this->configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                $this->configFileName = StorageService::storeContent((string) json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
             }
         }
@@ -318,7 +316,7 @@ class UploadController extends Controller
             if ('' === $bridgeUrl) {
                 $errors->add('simplefin_bridge_url', 'Bridge URL is required for CORS Origin header.');
             }
-            if ('' !== $bridgeUrl && !filter_var($bridgeUrl, FILTER_VALIDATE_URL)) {
+            if ('' !== $bridgeUrl && false === filter_var($bridgeUrl, FILTER_VALIDATE_URL)) {
                 $errors->add('simplefin_bridge_url', 'Bridge URL must be a valid URL.');
             }
         }
@@ -342,7 +340,7 @@ class UploadController extends Controller
             session()->put(Constants::SIMPLEFIN_IS_DEMO, $isDemo);
             session()->put(Constants::HAS_UPLOAD, true);
 
-            Log::info('SimpleFIN connection established', ['account_count' => count($accountsData ?? []), 'is_demo' => $isDemo]);
+            Log::info('SimpleFIN connection established', ['account_count' => count($accountsData), 'is_demo' => $isDemo]);
 
             return redirect(route('004-configure.index'));
         } catch (ImporterErrorException $e) {

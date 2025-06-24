@@ -36,8 +36,6 @@ class TrustProxies extends Middleware
 {
     /**
      * The headers that should be used to detect proxies.
-     *
-     * @var int
      */
     protected $headers = Request::HEADER_X_FORWARDED_FOR
         | Request::HEADER_X_FORWARDED_HOST
@@ -48,15 +46,13 @@ class TrustProxies extends Middleware
 
     /**
      * The trusted proxies for this application.
-     *
-     * @var null|array|string
      */
     protected $proxies;
 
     /**
      * TrustProxies constructor.
      */
-    public function __construct(Repository $config)
+    public function __construct(Repository $config) // @phpstan-ignore-line
     {
         $trustedProxies = (string) config('trustedproxy.proxies');
         $this->proxies  = explode(',', $trustedProxies);

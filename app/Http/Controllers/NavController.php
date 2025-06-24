@@ -38,14 +38,14 @@ class NavController extends Controller
     /**
      * Return back to config
      */
-    public function toConfig()
+    public function toConfig(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
 
         // For SimpleFIN flow, don't forget CONFIG_COMPLETE_INDICATOR to preserve form state
         $sessionConfig = session()->get(Constants::CONFIGURATION);
         $flow          = null;
-        if (is_array($sessionConfig) && isset($sessionConfig['flow'])) {
+        if (is_array($sessionConfig) && array_key_exists('flow', $sessionConfig) && null !==$sessionConfig['flow']) {
             $flow = $sessionConfig['flow'];
         }
 
@@ -57,9 +57,8 @@ class NavController extends Controller
     }
 
     /**
-     * @return Application|Redirector|RedirectResponse
      */
-    public function toConversion()
+    public function toConversion(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
         session()->forget(Constants::CONVERSION_COMPLETE_INDICATOR);
@@ -68,9 +67,8 @@ class NavController extends Controller
     }
 
     /**
-     * @return Application|Redirector|RedirectResponse
      */
-    public function toRoles()
+    public function toRoles(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
         session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
@@ -81,7 +79,7 @@ class NavController extends Controller
     /**
      * Return back to index. Needs no session updates.
      */
-    public function toStart()
+    public function toStart(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
 
@@ -91,7 +89,7 @@ class NavController extends Controller
     /**
      * Return back to upload.
      */
-    public function toUpload()
+    public function toUpload(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
         session()->forget(Constants::HAS_UPLOAD);

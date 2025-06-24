@@ -61,7 +61,7 @@ class MapController extends Controller
     }
 
     /**
-     * @return Factory|View
+     * @return Factory|View|RedirectResponse
      */
     public function index()
     {
@@ -96,7 +96,7 @@ class MapController extends Controller
             // set map config as complete.
             session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
-            // if file, now ready for conversion
+            // if "file", now ready for conversion
             if ('file' === $configuration->getFlow()) {
                 app('log')->debug('Its a file, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
@@ -358,8 +358,8 @@ class MapController extends Controller
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
-                $opposing[] = (string) array_key_exists('destination_name', $row) ? $row['destination_name'] : '';
-                $opposing[] = (string) array_key_exists('source_name', $row) ? $row['source_name'] : '';
+                $opposing[] = (string) (array_key_exists('destination_name', $row) ? $row['destination_name'] : '');
+                $opposing[] = (string) (array_key_exists('source_name', $row) ? $row['source_name'] : '');
             }
         }
         $filtered           = array_filter(
@@ -426,14 +426,15 @@ class MapController extends Controller
                 }
             }
         }
-        $filtered           = array_filter(
-            $expenseRevenue,
-            static function (string $value) {
-                return '' !== $value;
-            }
-        );
+        // removed, filtering has already happened in the foreach loop above
+//        $filtered           = array_filter(
+//            $expenseRevenue,
+//            static function (string $value) {
+//                return '' !== $value;
+//            }
+//        );
 
-        return array_unique($filtered);
+        return array_unique($expenseRevenue);
     }
 
     private function getCategories(): array

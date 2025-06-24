@@ -30,6 +30,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -161,6 +162,7 @@ class TokenController extends Controller
         app('log')->debug(sprintf('Now trying to authenticate with Firefly III at %s', $url));
 
         try {
+            /** @var SystemInformationResponse $result */
             $result = $infoRequest->get();
         } catch (ApiHttpException $e) {
             app('log')->notice(sprintf('Could NOT authenticate with Firefly III at %s', $url));

@@ -37,6 +37,7 @@ use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Request\PostConnectSessionsRequest;
 use App\Services\Spectre\Request\PostCustomerRequest;
 use App\Services\Spectre\Response\ErrorResponse;
+use App\Services\Spectre\Response\ListCustomersResponse;
 use App\Services\Spectre\Response\PostConnectSessionResponse;
 use App\Services\Spectre\Response\PostCustomerResponse;
 use App\Services\Storage\StorageService;
@@ -80,6 +81,7 @@ class ConnectionController extends Controller
 
         $request->setTimeOut(config('importer.connection.timeout'));
 
+        /** @var ListCustomersResponse|ErrorResponse $list */
         $list              = $request->get();
         $identifier        = null;
 

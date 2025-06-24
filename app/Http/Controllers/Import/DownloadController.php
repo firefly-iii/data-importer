@@ -30,6 +30,7 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
+use JsonException;
 
 /**
  * Class DownloadController
@@ -38,13 +39,15 @@ class DownloadController extends Controller
 {
     use RestoresConfiguration;
 
+    /**
+     * @throws JsonException
+     */
     public function download(): Application|Response|ResponseFactory
     {
         // do something
         $configuration = $this->restoreConfiguration();
         $array         = $configuration->toArray();
-        $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
-
+        $result        = json_encode($array, JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR);
         $response      = response($result);
         $name          = sprintf('import_config_%s.json', date('Y-m-d'));
         $response->header('Content-disposition', 'attachment; filename='.$name)
@@ -54,7 +57,7 @@ class DownloadController extends Controller
             ->header('Expires', '0')
             ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->header('Pragma', 'public')
-            ->header('Content-Length', strlen($result))
+            ->header('Content-Length', (string) strlen($result))
         ;
 
         return $response;

@@ -61,7 +61,7 @@ class ConfigurationPostRequest extends Request
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
-            $originalId                   = str_replace('_', ' ', $encodedId);
+            $originalId                   = (string) str_replace('_', ' ', $encodedId);
             $decodedDoImport[$originalId] = $value;
             app('log')->debug('Decoded do_import', [
                 'encoded' => $encodedId,
@@ -72,7 +72,7 @@ class ConfigurationPostRequest extends Request
 
         // Decode accounts array keys
         foreach ($accounts as $encodedId => $value) {
-            $originalId                   = str_replace('_', ' ', $encodedId);
+            $originalId                   = (string) str_replace('_', ' ', $encodedId);
             $decodedAccounts[$originalId] = $value;
             app('log')->debug('Decoded accounts', [
                 'encoded' => $encodedId,
@@ -83,7 +83,7 @@ class ConfigurationPostRequest extends Request
 
         // Decode new_account array keys
         foreach ($newAccount as $encodedId => $accountData) {
-            $originalId                     = str_replace('_', ' ', $encodedId);
+            $originalId                     = (string) str_replace('_', ' ', $encodedId);
             $decodedNewAccount[$originalId] = $accountData;
             app('log')->debug('Decoded new_account', [
                 'encoded' => $encodedId,

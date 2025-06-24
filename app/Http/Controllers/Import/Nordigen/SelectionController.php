@@ -25,8 +25,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Nordigen;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
@@ -58,7 +60,7 @@ class SelectionController extends Controller
     /**
      * Step 9, select a country + bank.
      *
-     * @return Factory|View
+     * @return Factory|View|RedirectResponse
      */
     public function index()
     {
@@ -89,7 +91,7 @@ class SelectionController extends Controller
 
         try {
             $response = $request->get();
-        } catch (ImporterHttpException $e) {
+        } catch (RateLimitException|AgreementExpiredException|ImporterHttpException $e) { // @phpstan-ignore-line
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 

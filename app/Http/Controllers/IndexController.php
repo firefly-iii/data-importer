@@ -111,7 +111,7 @@ class IndexController extends Controller
             'flexible'        => $flexible,
         ]);
 
-        $isDocker          = env('IS_DOCKER', false);
+        $isDocker          = config('importer.docker.is_docker', false);
         $identifier        = substr(session()->getId(), 0, 10);
         $enabled           = config('importer.enabled_flows');
 

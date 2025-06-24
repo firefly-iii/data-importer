@@ -27,8 +27,10 @@ namespace App\Http\Middleware;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Trait IsReadyForStep
@@ -37,9 +39,9 @@ trait IsReadyForStep
 {
     public const TEST = 'test';
 
-    public function handle(Request $request, \Closure $next): mixed
+    public function handle(Request $request, Closure $next): mixed
     {
-        $result   = $this->isReadyForStep($request);
+        $result = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -49,30 +51,21 @@ trait IsReadyForStep
             return $redirect;
         }
 
-        throw new ImporterErrorException(
-            sprintf('Cannot handle middleware: %s', self::STEP)
-        );
+        throw new ImporterErrorException(sprintf('Cannot handle middleware: %s', self::STEP));
     }
 
     protected function isReadyForStep(Request $request): bool
     {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
-            app('log')->debug(
-                'isReadyForStep returns true because $flow is null'
-            );
+            Log::debug('isReadyForStep returns true because $flow is null');
 
             return true;
         }
         // TODO this flow is weird.
         if ('file' === $flow) {
             $result = $this->isReadyForFileStep();
-            app('log')->debug(
-                sprintf(
-                    'isReadyForFileStep: Return %s',
-                    var_export($result, true)
-                )
-            );
+            Log::debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
 
             return $result;
         }
@@ -91,25 +84,17 @@ trait IsReadyForStep
 
     private function isReadyForFileStep(): bool
     {
-        app('log')->debug(sprintf('isReadyForFileStep("%s")', self::STEP));
+        Log::debug(sprintf('isReadyForFileStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'isReadyForFileStep: Cannot handle file step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('isReadyForFileStep: Cannot handle file step "%s"', self::STEP));
 
             case 'service-validation':
                 return true;
 
             case 'upload-files':
-                if (
-                    session()->has(Constants::HAS_UPLOAD)
-                    && true === session()->get(Constants::HAS_UPLOAD)
-                ) {
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return false;
                 }
 
@@ -120,32 +105,21 @@ trait IsReadyForStep
                 return false;
 
             case 'define-roles':
-                if (
-                    session()->has(Constants::ROLES_COMPLETE_INDICATOR)
-                    && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
                 return true;
 
             case 'configuration':
-                if (
-                    session()->has(Constants::CONFIG_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
                 return true;
 
             case 'map':
-                if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
@@ -154,15 +128,9 @@ trait IsReadyForStep
             case 'conversion':
                 $hasReadyFlag        = session()->has(Constants::READY_FOR_CONVERSION);
                 $readyValue          = session()->get(Constants::READY_FOR_CONVERSION);
-                $hasConfigComplete   = session()->has(
-                    Constants::CONFIG_COMPLETE_INDICATOR
-                );
-                $configCompleteValue = session()->get(
-                    Constants::CONFIG_COMPLETE_INDICATOR
-                );
-                $hasSimpleFINData    = session()->has(
-                    Constants::SIMPLEFIN_ACCOUNTS_DATA
-                );
+                $hasConfigComplete   = session()->has(Constants::CONFIG_COMPLETE_INDICATOR);
+                $configCompleteValue = session()->get(Constants::CONFIG_COMPLETE_INDICATOR);
+                $hasSimpleFINData    = session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
 
 
                 // if/else is in reverse!
@@ -175,11 +143,187 @@ trait IsReadyForStep
 
             case 'submit':
                 // if/else is in reverse!
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    return true;
+                }
+
+                return false;
+        }
+    }
+
+    private function isReadyForNordigenStep(): bool
+    {
+        // Log::debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
+
+            case 'authenticate':
+            case 'service-validation':
+                return true;
+
+            case 'define-roles':
+                return false;
+
+            case 'upload-files':
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return false;
+                }
+
+                return true;
+
+            case 'nordigen-selection':
+                // must have upload, that's it
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return true;
+                }
+
+                return false;
+
+            case 'map':
+                // mapping must be complete, or not ready for this step.
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug('Return false, not ready for step [1].');
+
+                    return false;
+                }
+
+                // conversion complete?
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('Return true, ready for step [4].');
+
+                    return true;
+                }
+
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('GoCardless: return false, not yet ready for step [2].');
+
+                    return false;
+                }
+                // otherwise return false.
+                Log::debug('Return true, ready for step [3].');
+
+                return true;
+
+            case 'nordigen-link':
+                // must have upload, thats it
+                if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    return true;
+                }
+
+                return false;
+
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    Log::debug('Return false, ready for submission.');
+
+                    return false;
+                }
+                // if/else is in reverse!
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    return true;
+                }
+
+                // will probably never return false, but OK.
+                return false;
+
+            case 'configuration':
+                if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
+                    return true;
+                }
+
+                return false;
+
+            case 'submit':
+                // if/else is in reverse!
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    return true;
+                }
+
+                return false;
+        }
+    }
+
+    private function isReadyForSpectreStep(): bool
+    {
+        Log::debug(sprintf('isReadyForSpectreStep("%s")', self::STEP));
+
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForSpectreStep: Cannot handle Spectre step "%s"', self::STEP));
+
+            case 'service-validation':
+            case 'authenticate':
+                return true;
+
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    Log::debug('Spectre: Return false, ready for submission.');
+
+                    return false;
+                }
+                // if/else is in reverse!
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    return true;
+                }
+
+                // will probably never return false, but OK.
+                return false;
+
+            case 'upload-files':
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return false;
+                }
+
+                return true;
+
+            case 'select-connection':
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return true;
+                }
+
+                return false;
+
+            case 'configuration':
+                if (session()->has(Constants::CONNECTION_SELECTED_INDICATOR) && true === session()->get(Constants::CONNECTION_SELECTED_INDICATOR)) {
+                    return true;
+                }
+
+                return false;
+
+            case 'define-roles':
+                return false;
+
+            case 'map':
+                // mapping must be complete, or not ready for this step.
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug('Spectre: Return false, not ready for step [1].');
+
+                    return false;
+                }
+
+                // conversion complete?
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('Spectre: Return true, ready for step [4].');
+
+                    return true;
+                }
+
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Spectre: Return false, not yet ready for step [2].');
+
+                    return false;
+                }
+                // otherwise return false.
+                Log::debug('Spectre: Return true, ready for step [3].');
+
+                return true;
+
+            case 'submit':
+                // if/else is in reverse!
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
                     return true;
                 }
 
@@ -189,15 +333,10 @@ trait IsReadyForStep
 
     private function isReadyForSimpleFINStep(): bool
     {
-        // app('log')->debug(sprintf('isReadyForSimpleFINStep("%s")', self::STEP));
+        // Log::debug(sprintf('isReadyForSimpleFINStep("%s")', self::STEP));
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
 
             case 'authenticate':
                 // simpleFIN needs no authentication.
@@ -208,56 +347,39 @@ trait IsReadyForStep
                 return true;
 
             case 'configuration':
-                return session()->has(Constants::HAS_UPLOAD)
-                    && session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
+                return session()->has(Constants::HAS_UPLOAD) && session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
 
             case 'define-roles':
                 // SimpleFIN should bypass roles if ready for conversion
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
                     return false;
                 }
 
-                if (
-                    session()->has(Constants::ROLES_COMPLETE_INDICATOR)
-                    && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
                 return true;
 
             case 'map':
-                if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
                 // Ready for mapping if conversion is complete
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug('SimpleFIN: Conversion complete, ready for mapping');
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('SimpleFIN: Conversion complete, ready for mapping');
 
                     return true;
                 }
 
-                app('log')->debug('SimpleFIN: Conversion not complete, not ready for mapping');
+                Log::debug('SimpleFIN: Conversion not complete, not ready for mapping');
 
                 return false;
 
             case 'conversion':
                 // if/else is in reverse!
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
                     return true;
                 }
 
@@ -266,277 +388,7 @@ trait IsReadyForStep
 
             case 'submit':
                 // if/else is in reverse!
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    return true;
-                }
-
-                return false;
-        }
-
-        return false;
-    }
-
-    private function isReadyForNordigenStep(): bool
-    {
-        // app('log')->debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
-        switch (self::STEP) {
-            default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'isReadyForNordigenStep: Cannot handle Nordigen step "%s"',
-                        self::STEP
-                    )
-                );
-
-            case 'authenticate':
-            case 'service-validation':
-                return true;
-
-            case 'define-roles':
-                return false;
-
-            case 'upload-files':
-                if (
-                    session()->has(Constants::HAS_UPLOAD)
-                    && true === session()->get(Constants::HAS_UPLOAD)
-                ) {
-                    return false;
-                }
-
-                return true;
-
-            case 'nordigen-selection':
-                // must have upload, that's it
-                if (
-                    session()->has(Constants::HAS_UPLOAD)
-                    && true === session()->get(Constants::HAS_UPLOAD)
-                ) {
-                    return true;
-                }
-
-                return false;
-
-            case 'map':
-                // mapping must be complete, or not ready for this step.
-                if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug('Return false, not ready for step [1].');
-
-                    return false;
-                }
-
-                // conversion complete?
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug('Return true, ready for step [4].');
-
-                    return true;
-                }
-
-                // must already have the conversion, or not ready for this step:
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    app('log')->debug(
-                        'GoCardless: return false, not yet ready for step [2].'
-                    );
-
-                    return false;
-                }
-                // otherwise return false.
-                app('log')->debug('Return true, ready for step [3].');
-
-                return true;
-
-            case 'nordigen-link':
-                // must have upload, thats it
-                if (
-                    session()->has(Constants::SELECTED_BANK_COUNTRY)
-                    && true === session()->get(Constants::SELECTED_BANK_COUNTRY)
-                ) {
-                    return true;
-                }
-
-                return false;
-
-            case 'conversion':
-                if (
-                    session()->has(Constants::READY_FOR_SUBMISSION)
-                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
-                ) {
-                    app('log')->debug('Return false, ready for submission.');
-
-                    return false;
-                }
-                // if/else is in reverse!
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    return true;
-                }
-
-                // will probably never return false, but OK.
-                return false;
-
-            case 'configuration':
-                if (
-                    session()->has(Constants::SELECTED_BANK_COUNTRY)
-                    && true === session()->get(Constants::SELECTED_BANK_COUNTRY)
-                ) {
-                    return true;
-                }
-
-                return false;
-
-            case 'submit':
-                // if/else is in reverse!
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    return true;
-                }
-
-                return false;
-        }
-    }
-
-    private function isReadyForSpectreStep(): bool
-    {
-        app('log')->debug(sprintf('isReadyForSpectreStep("%s")', self::STEP));
-
-        switch (self::STEP) {
-            default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'isReadyForSpectreStep: Cannot handle Spectre step "%s"',
-                        self::STEP
-                    )
-                );
-
-            case 'service-validation':
-            case 'authenticate':
-                return true;
-
-            case 'conversion':
-                if (
-                    session()->has(Constants::READY_FOR_SUBMISSION)
-                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
-                ) {
-                    app('log')->debug(
-                        'Spectre: Return false, ready for submission.'
-                    );
-
-                    return false;
-                }
-                // if/else is in reverse!
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    return true;
-                }
-
-                // will probably never return false, but OK.
-                return false;
-
-            case 'upload-files':
-                if (
-                    session()->has(Constants::HAS_UPLOAD)
-                    && true === session()->get(Constants::HAS_UPLOAD)
-                ) {
-                    return false;
-                }
-
-                return true;
-
-            case 'select-connection':
-                if (
-                    session()->has(Constants::HAS_UPLOAD)
-                    && true === session()->get(Constants::HAS_UPLOAD)
-                ) {
-                    return true;
-                }
-
-                return false;
-
-            case 'configuration':
-                if (
-                    session()->has(Constants::CONNECTION_SELECTED_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONNECTION_SELECTED_INDICATOR)
-                ) {
-                    return true;
-                }
-
-                return false;
-
-            case 'define-roles':
-                return false;
-
-            case 'map':
-                // mapping must be complete, or not ready for this step.
-                if (
-                    session()->has(Constants::MAPPING_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug(
-                        'Spectre: Return false, not ready for step [1].'
-                    );
-
-                    return false;
-                }
-
-                // conversion complete?
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug(
-                        'Spectre: Return true, ready for step [4].'
-                    );
-
-                    return true;
-                }
-
-                // must already have the conversion, or not ready for this step:
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    app('log')->debug(
-                        'Spectre: Return false, not yet ready for step [2].'
-                    );
-
-                    return false;
-                }
-                // otherwise return false.
-                app('log')->debug('Spectre: Return true, ready for step [3].');
-
-                return true;
-
-            case 'submit':
-                // if/else is in reverse!
-                if (
-                    session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    && true
-                        === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
                     return true;
                 }
 
@@ -549,28 +401,20 @@ trait IsReadyForStep
      */
     private function isReadyForBasicStep(): bool
     {
-        app('log')->debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
+        Log::debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
 
         if (self::STEP === 'service-validation') {
             return true;
         }
 
-        throw new ImporterErrorException(
-            sprintf(
-                'isReadyForBasicStep: Cannot handle basic step "%s"',
-                self::STEP
-            )
-        );
+        throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP)); // @phpstan-ignore-line
     }
 
-    protected function redirectToCorrectStep(
-        Request $request
-    ): ?RedirectResponse {
+    protected function redirectToCorrectStep(Request $request): ?RedirectResponse
+    {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
         if (null === $flow) {
-            app('log')->debug(
-                'redirectToCorrectStep returns NULL because $flow is null'
-            );
+            Log::debug('redirectToCorrectStep returns NULL because $flow is null');
 
             return null;
         }
@@ -595,40 +439,33 @@ trait IsReadyForStep
      */
     private function redirectToCorrectFileStep(): RedirectResponse
     {
-        app('log')->debug(
-            sprintf('redirectToCorrectFileStep("%s")', self::STEP)
-        );
+        Log::debug(sprintf('redirectToCorrectFileStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToCorrectFileStep: Cannot handle file step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
 
             case 'upload-files':
-                $route             = route('004-configure.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('004-configure.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route             = route('006-mapping.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('006-mapping.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route             = route('005-roles.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('005-roles.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route             = route('007-convert.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('007-convert.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -636,7 +473,7 @@ trait IsReadyForStep
                 // Check authoritative session flow before defaulting to file-based redirection
                 $authoritativeFlow = null;
                 $sessionConfig     = session()->get(Constants::CONFIGURATION);
-                if (is_array($sessionConfig) && isset($sessionConfig['flow'])) {
+                if (is_array($sessionConfig) && array_key_exists('flow', $sessionConfig) && null !== $sessionConfig['flow']) {
                     $authoritativeFlow = $sessionConfig['flow'];
                 }
 
@@ -648,21 +485,21 @@ trait IsReadyForStep
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route             = route('006-mapping.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('006-mapping.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'authenticate':
-                $route             = route('003-upload.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('003-upload.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route             = route('007-convert.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                $route = route('007-convert.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
         }
@@ -670,23 +507,16 @@ trait IsReadyForStep
 
     private function redirectToCorrectNordigenStep(): RedirectResponse
     {
-        app('log')->debug(
-            sprintf('redirectToCorrectNordigenStep("%s")', self::STEP)
-        );
+        Log::debug(sprintf('redirectToCorrectNordigenStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
 
             case 'nordigen-selection':
                 // back to upload
                 $route = route('003-upload.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -695,7 +525,7 @@ trait IsReadyForStep
                 // assume files are uploaded, go to step 11 (connection selection)
                 // back to selection
                 $route = route('009-selection.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -703,57 +533,40 @@ trait IsReadyForStep
                 // will always push to mapping, and mapping will send them to
                 // the right step.
                 $route = route('006-mapping.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    app('log')->debug(
-                        'Is ready for conversion, so send to conversion.'
-                    );
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Is ready for conversion, so send to conversion.');
                     $route = route('007-convert.index');
-                    app('log')->debug(
-                        sprintf('Return redirect to "%s"', $route)
-                    );
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
 
                     return redirect($route);
                 }
-                app('log')->debug('Is ready for submit.');
+                Log::debug('Is ready for submit.');
                 // otherwise go to import right away
                 $route = route('008-submit.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'conversion':
-                if (
-                    session()->has(Constants::READY_FOR_SUBMISSION)
-                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
-                ) {
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
-                    app('log')->debug(
-                        sprintf('Return redirect to "%s"', $route)
-                    );
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
 
                     return redirect($route);
                 }
 
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s" [1]',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s" [1]', self::STEP));
 
             case 'submit':
                 $route = route('007-convert.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
         }
@@ -761,24 +574,17 @@ trait IsReadyForStep
 
     private function redirectToCorrectSpectreStep(): RedirectResponse
     {
-        app('log')->debug(
-            sprintf('redirectToCorrectSpectreStep("%s")', self::STEP)
-        );
+        Log::debug(sprintf('redirectToCorrectSpectreStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToCorrectSpectreStep: Cannot handle basic step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
 
             case 'upload-files':
                 // assume files are uploaded, go to step 11 (connection selection)
                 // back to selection
                 $route = route('011-connections.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -786,115 +592,77 @@ trait IsReadyForStep
                 // will always push to mapping, and mapping will send them to
                 // the right step.
                 $route = route('006-mapping.index');
-                app('log')->debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
-                if (
-                    session()->has(Constants::READY_FOR_CONVERSION)
-                    && true === session()->get(Constants::READY_FOR_CONVERSION)
-                ) {
-                    app('log')->debug(
-                        'Spectre: Is ready for conversion, so send to conversion.'
-                    );
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Spectre: Is ready for conversion, so send to conversion.');
                     $route = route('007-convert.index');
-                    app('log')->debug(
-                        sprintf('Spectre: Return redirect to "%s"', $route)
-                    );
+                    Log::debug(sprintf('Spectre: Return redirect to "%s"', $route));
 
                     return redirect($route);
                 }
-                app('log')->debug('Spectre: Is ready for submit.');
+                Log::debug('Spectre: Is ready for submit.');
                 // otherwise go to import right away
                 $route = route('008-submit.index');
-                app('log')->debug(
-                    sprintf('Spectre: Return redirect to "%s"', $route)
-                );
+                Log::debug(sprintf('Spectre: Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'conversion':
-                if (
-                    session()->has(Constants::READY_FOR_SUBMISSION)
-                    && true === session()->get(Constants::READY_FOR_SUBMISSION)
-                ) {
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
-                    app('log')->debug(
-                        sprintf('Return redirect to "%s"', $route)
-                    );
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
 
                     return redirect($route);
                 }
         }
+        throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
     }
 
     private function redirectToCorrectSimpleFINStep(): RedirectResponse
     {
-        app('log')->debug(
-            sprintf('redirectToCorrectSimpleFINStep("%s")', self::STEP)
-        );
+        Log::debug(sprintf('redirectToCorrectSimpleFINStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToCorrectSimpleFINStep: Cannot handle SimpleFIN step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToCorrectSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
 
             case 'authenticate':
                 // simple fin does not authenticate, redirect to upload step.
                 $route = route('003-upload.index');
-                app('log')->debug(
-                    sprintf('SimpleFIN: Return redirect to "%s"', $route)
-                );
+                Log::debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                app('log')->debug(
-                    sprintf(
-                        'SimpleFIN: Not ready for configuration (STEP: "%s"), redirecting to upload.',
-                        self::STEP
-                    )
-                );
+                Log::debug(sprintf('SimpleFIN: Not ready for configuration (STEP: "%s"), redirecting to upload.', self::STEP));
 
                 return redirect(route('003-upload.index'));
 
             case 'define-roles':
                 $route = route('007-convert.index');
-                app('log')->debug(
-                    sprintf('SimpleFIN: Return redirect to "%s"', $route)
-                );
+                Log::debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
                 // if conversion not complete yet, go there first
-                if (
-                    !session()->has(Constants::CONVERSION_COMPLETE_INDICATOR)
-                    || true !== session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)
-                ) {
-                    app('log')->debug(
-                        'SimpleFIN: Conversion not complete, redirecting to conversion.'
-                    );
+                if (!session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) || true !== session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('SimpleFIN: Conversion not complete, redirecting to conversion.');
                     $route = route('007-convert.index');
-                    app('log')->debug(
-                        sprintf('SimpleFIN: Return redirect to "%s"', $route)
-                    );
+                    Log::debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
 
                     return redirect($route);
                 }
-                app('log')->debug('SimpleFIN: Conversion complete, redirecting to configuration.');
+                Log::debug('SimpleFIN: Conversion complete, redirecting to configuration.');
                 // conversion complete but no mapping data yet, redirect to configuration
                 $route = route('004-configure.index');
-                app('log')->debug(
-                    sprintf('SimpleFIN: Return redirect to "%s"', $route)
-                );
+                Log::debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -902,21 +670,14 @@ trait IsReadyForStep
                 // This case is reached if isReadyForSimpleFINStep() returned false for 'conversion',
                 // meaning Constants::READY_FOR_CONVERSION was not true.
                 // The user should be redirected to the configuration step, which is the prerequisite.
-                app('log')->debug(
-                    sprintf(
-                        'SimpleFIN: Not ready for conversion (STEP: "%s"), redirecting to configuration.',
-                        self::STEP
-                    )
-                );
+                Log::debug(sprintf('SimpleFIN: Not ready for conversion (STEP: "%s"), redirecting to configuration.', self::STEP));
                 $route = route('004-configure.index');
 
                 return redirect($route);
 
             case 'submit':
                 $route = route('007-convert.index');
-                app('log')->debug(
-                    sprintf('SimpleFIN: Return redirect to "%s"', $route)
-                );
+                Log::debug(sprintf('SimpleFIN: Return redirect to "%s"', $route));
 
                 return redirect($route);
         }
@@ -927,16 +688,11 @@ trait IsReadyForStep
      */
     private function redirectToBasicStep(): RedirectResponse
     {
-        app('log')->debug(sprintf('redirectToBasicStep("%s")', self::STEP));
+        Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
 
         switch (self::STEP) {
             default:
-                throw new ImporterErrorException(
-                    sprintf(
-                        'redirectToBasicStep: Cannot handle basic step "%s"',
-                        self::STEP
-                    )
-                );
+                throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));
         }
     }
 }

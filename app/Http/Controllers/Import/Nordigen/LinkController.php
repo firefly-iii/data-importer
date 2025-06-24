@@ -34,6 +34,7 @@ use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewUserAgreement;
 use App\Services\Nordigen\Response\GetRequisitionResponse;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
+use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Support\Http\RestoresConfiguration;
@@ -59,7 +60,7 @@ class LinkController extends Controller
     /**
      * @throws ImporterHttpException
      */
-    public function build()
+    public function build(): RedirectResponse|Redirector
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
@@ -99,6 +100,7 @@ class LinkController extends Controller
         $agreementRequest->setBank($configuration->getNordigenBank());
         $agreementRequest->setAccessValidForDays('90');
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
+        /** @var NewUserAgreementResponse $agreementResponse */
         $agreementResponse = $agreementRequest->post();
 
         $request           = new PostNewRequisitionRequest($url, $accessToken);

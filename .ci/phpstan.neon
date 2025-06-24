@@ -6,7 +6,11 @@ parameters:
       enabled: false
     noParameterWithNullDefaultValue:
       enabled: false
+    noParameterWithNullableTypeDeclaration:
+      enabled: false
     noCompact:
+      enabled: false
+    noSwitch:
       enabled: false
   scanFiles:
     - ../.phpstorm.meta.php
@@ -29,6 +33,15 @@ parameters:
     -
         identifier: larastan.noEnvCallsOutsideOfConfig
         path: ../app/Console/Kernel.php
+    -
+        identifier: switch.type
+        path: ../app/Http/Middleware/IsReadyForStep.php
+    -
+        identifier: identical.alwaysFalse
+        path: ../app/Http/Middleware/IsReadyForStep.php
+    -
+        identifier: identical.alwaysTrue
+        path: ../app/Http/Middleware/IsReadyForStep.php
     - identifier: ergebnis.noNullableReturnTypeDeclaration # dont care.
     - identifier: missingType.iterableValue # not interesting enough to fix.
     - identifier: missingType.generics # not interesting enough to fix.
@@ -37,15 +50,14 @@ parameters:
     - '#expects view-string\|null, string given#'
 
     # phpstan can't handle this so we ignore them.
-    - '#Call to an undefined method Illuminate\\Http\\Request::get#'
-    - '#Call to an undefined method Illuminate\\Http\\Request::header#'
-    - '#Call to an undefined method Illuminate\\Http\\Request::cookie#'
-    - '#Call to an undefined method App\\Http\\Request\\AutoUploadRequest::#'
+    - '#Call to an undefined method Illuminate\\Http\\Request#'
+    - '#Call to an undefined method App\\Http\\Request#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::before#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::after#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::accountTypeIn#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\BelongsTo::withTrashed#'
+    - '#Call to an undefined method Illuminate\\Contracts\\Filesystem\\Filesystem::has#'
 
   # The level 8 is the highest level. original was 5
   # 7 is more than enough, higher just leaves NULL things.
