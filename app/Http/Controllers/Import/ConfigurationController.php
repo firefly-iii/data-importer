@@ -114,7 +114,7 @@ class ConfigurationController extends Controller
 
                 // save configuration in session and on disk:
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
                 // redirect to selection.
@@ -160,22 +160,22 @@ class ConfigurationController extends Controller
 
         foreach ($accountsData ?? [] as $account) {
             // Ensure the account has required SimpleFIN protocol fields
-            if (!isset($account['id']) || '' === (string)$account['id']) {
+            if (!array_key_exists('id', $account) || '' === (string)$account['id']) {
                 Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
 
                 continue;
             }
 
-            if (!isset($account['name'])) {
+            if (!array_key_exists('name', $account)) {
                 Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
                 $account['name'] = 'Unknown Account (ID: '.$account['id'].')';
             }
 
-            if (!isset($account['currency'])) {
+            if (!array_key_exists('currency', $account)) {
                 Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
-            if (!isset($account['balance'])) {
+            if (!array_key_exists('balance', $account)) {
                 Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
@@ -219,7 +219,7 @@ class ConfigurationController extends Controller
             $return[]                    = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
                 'name'                                             => $sfinAccountData['name'], // SimpleFIN account name
                 'id'                                               => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
-                'mapped_to'                                        => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
+                'mapped_to'                                        => $this->getMappedTo(['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
                 'type'                                             => 'source', // Indicates it's an account from the import source
                 'firefly_iii_accounts'                             => $fireflyAccounts, // Required by x-importer-account component
             ];
@@ -232,6 +232,7 @@ class ConfigurationController extends Controller
     /**
      * Stub for determining if an imported account is mapped to a Firefly III account.
      * TODO: Implement actual mapping logic.
+     * TODO get rid of object casting.
      *
      * @param object $importAccount   An object representing the account from the import source.
      *                                Expected to have at least 'identifier' and 'name' properties.

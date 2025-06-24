@@ -4,7 +4,12 @@ parameters:
       enabled: false
     final:
       enabled: false
+    noParameterWithNullDefaultValue:
+      enabled: false
+    noCompact:
+      enabled: false
   scanFiles:
+    - ../.phpstorm.meta.php
     - ../_ide_helper.php
   paths:
     - ../app
@@ -32,6 +37,10 @@ parameters:
     - '#expects view-string\|null, string given#'
 
     # phpstan can't handle this so we ignore them.
+    - '#Call to an undefined method Illuminate\\Http\\Request::get#'
+    - '#Call to an undefined method Illuminate\\Http\\Request::header#'
+    - '#Call to an undefined method Illuminate\\Http\\Request::cookie#'
+    - '#Call to an undefined method App\\Http\\Request\\AutoUploadRequest::#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::before#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::after#'
     - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed#'

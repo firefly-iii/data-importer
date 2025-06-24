@@ -44,6 +44,13 @@ return [
         'bridge_url'  => env('SIMPLEFIN_BRIDGE_URL'),
         'timeout'     => (int) env('SIMPLEFIN_TIMEOUT', 30),
     ],
+
+    // docker build info.
+    'docker' => [
+        'is_docker' => env('IS_DOCKER', false),
+        'base_build' => env('BASE_IMAGE_BUILD','(unknown)'),
+    ],
+
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',
     'import_dir_allowlist'          => explode(',', env('IMPORT_DIR_ALLOWLIST', '')),

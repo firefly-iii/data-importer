@@ -40,7 +40,7 @@ class AutoUploadController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(AutoUploadRequest $request)
+    public function index(AutoUploadRequest $request): string
     {
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
