@@ -52,14 +52,14 @@ class AccountsResponse extends SimpleFINResponse
 
     public function hasAccounts(): bool
     {
-        return !empty($this->accounts);
+        return count($this->accounts) > 0;
     }
 
     private function parseAccounts(): void
     {
         $data           = $this->getData();
 
-        if (empty($data)) {
+        if (0 === count($data)) {
             app('log')->warning('SimpleFIN AccountsResponse: No data to parse');
 
             return;

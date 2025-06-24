@@ -81,7 +81,7 @@ abstract class SimpleFINResponse implements SharedResponseInterface
 
     private function parseResponse(): void
     {
-        if (empty($this->rawBody)) {
+        if ('' === $this->rawBody) {
             app('log')->warning('SimpleFIN Response body is empty');
             $this->data = [];
 

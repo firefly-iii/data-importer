@@ -52,14 +52,14 @@ class TransactionsResponse extends SimpleFINResponse
 
     public function hasTransactions(): bool
     {
-        return !empty($this->transactions);
+        return count($this->transactions) > 0;
     }
 
     private function parseTransactions(): void
     {
         $data               = $this->getData();
 
-        if (empty($data)) {
+        if (0 === count($data)) {
             app('log')->warning('SimpleFIN TransactionsResponse: No data to parse');
 
             return;

@@ -84,7 +84,7 @@ class ConfigurationContractValidator
     {
         // Check for SimpleFIN accounts data in session
         $sessionData = session()->get('simplefin_accounts_data');
-        if (empty($sessionData) || !is_array($sessionData)) {
+        if (!is_array($sessionData) || 0 === count($sessionData)) {
             $this->addError('session.simplefin_accounts_data', 'SimpleFIN accounts data missing from session');
 
             return;
@@ -125,7 +125,7 @@ class ConfigurationContractValidator
     private function validateAccountMappings(Configuration $configuration): void
     {
         $accounts = $configuration->getAccounts();
-        if (empty($accounts)) {
+        if (0 === count($accounts)) {
             $this->addError('configuration.accounts', 'Account mappings cannot be empty');
 
             return;
@@ -133,7 +133,7 @@ class ConfigurationContractValidator
 
         foreach ($accounts as $simplefinId => $fireflyId) {
             // Validate SimpleFIN ID format
-            if (!is_string($simplefinId) || empty($simplefinId)) {
+            if (!is_string($simplefinId) || '' === (string)$simplefinId) {
                 $this->addError('configuration.accounts.key', 'SimpleFIN account ID must be non-empty string', $simplefinId);
             }
 
@@ -235,7 +235,7 @@ class ConfigurationContractValidator
     private function validateImportSelections(Configuration $configuration): void
     {
         $doImport = session()->get('do_import', []);
-        if (empty($doImport)) {
+        if (0 === count($doImport)) {
             $this->addError('session.do_import', 'No accounts selected for import');
 
             return;
@@ -349,20 +349,20 @@ class ConfigurationContractValidator
         $accountType = trim($accountType);
 
         // Empty name or type cannot be duplicate
-        if (empty($accountName) || empty($accountType)) {
+        if ('' === $accountName || '' === $accountType) {
             Log::debug('DUPLICATE_CHECK: Empty name or type provided');
 
             return false;
         }
 
         // Load existing accounts if not already loaded
-        if (empty($this->existingAccounts)) {
+        if (0 === count($this->existingAccounts)) {
             Log::debug('DUPLICATE_CHECK: Loading existing accounts for validation');
             $this->loadExistingAccounts();
         }
 
         // If loading failed, return false to avoid blocking user (graceful degradation)
-        if (empty($this->existingAccounts)) {
+        if (0 === count($this->existingAccounts)) {
             Log::warning('DUPLICATE_CHECK: No existing accounts loaded, cannot validate duplicates');
 
             return false;

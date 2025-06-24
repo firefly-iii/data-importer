@@ -144,7 +144,7 @@ class Account
 
     public function hasTransactions(): bool
     {
-        return !empty($this->transactions);
+        return count($this->transactions) > 0;
     }
 
     public function getExtra(): array

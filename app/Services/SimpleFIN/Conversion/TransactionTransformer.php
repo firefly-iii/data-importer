@@ -203,7 +203,7 @@ class TransactionTransformer
         if (config('simplefin.enable_transaction_clustering', true)) {
             $accountsToCheck = $isDeposit ? $this->revenueAccounts : $this->expenseAccounts;
 
-            if (empty($accountsToCheck)) {
+            if (0 === count($accountsToCheck)) {
                 $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
                 if ($clusteredAccountName) {
                     return [
@@ -279,7 +279,7 @@ class TransactionTransformer
         $cleaned  = trim($cleaned);
 
         // If we end up with an empty string, use a generic name
-        if (empty($cleaned)) {
+        if ('' === $cleaned) {
             $cleaned = 'Unknown';
         }
 
@@ -323,7 +323,7 @@ class TransactionTransformer
         $categoryFields = ['category', 'Category', 'CATEGORY', 'merchant_category', 'transaction_category'];
 
         foreach ($categoryFields as $field) {
-            if (isset($extra[$field]) && !empty($extra[$field])) {
+            if (isset($extra[$field]) && '' !== (string) $extra[$field]) {
                 return (string) $extra[$field];
             }
         }
@@ -376,13 +376,13 @@ class TransactionTransformer
             $noteFields = ['memo', 'notes', 'reference', 'check_number'];
 
             foreach ($noteFields as $field) {
-                if (isset($extra[$field]) && !empty($extra[$field])) {
+                if (isset($extra[$field]) && '' !==  (string) $extra[$field]) {
                     $notes[] = sprintf('%s: %s', ucfirst($field), $extra[$field]);
                 }
             }
         }
 
-        return empty($notes) ? null : implode("\n", $notes);
+        return 0 === count($notes) ? null : implode("\n", $notes);
     }
 
     /**
@@ -462,7 +462,7 @@ class TransactionTransformer
             $baseUrl                 = SecretManager::getBaseUrl();
             $accessToken             = SecretManager::getAccessToken();
 
-            if (empty($baseUrl) || empty($accessToken)) {
+            if ('' === $baseUrl || '' === $accessToken) {
                 app('log')->warning('Missing authentication context for account collection, skipping smart matching');
                 $this->expenseAccounts   = [];
                 $this->revenueAccounts   = [];
@@ -501,7 +501,7 @@ class TransactionTransformer
         $accountsToSearch      = $isDeposit ? $this->revenueAccounts : $this->expenseAccounts;
         $accountType           = $isDeposit ? 'revenue' : 'expense';
 
-        if (empty($accountsToSearch)) {
+        if (0 === count($accountsToSearch)) {
             app('log')->debug(sprintf('No %s accounts to search', $accountType));
 
             return null;
@@ -638,7 +638,7 @@ class TransactionTransformer
         $sanitized = trim($sanitized);
 
         // Ensure we have a non-empty description
-        if (empty($sanitized)) {
+        if ('' === $sanitized) {
             $sanitized = 'SimpleFIN Transaction';
         }
 
