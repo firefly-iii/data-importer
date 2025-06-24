@@ -31,14 +31,13 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class AutoImportController extends Controller
 {
     use AutoImports;
     use HaveAccess;
     use VerifyJSON;
-
-    private string $directory;
 
     /**
      * @throws ImporterErrorException
@@ -71,18 +70,18 @@ class AutoImportController extends Controller
         }
 
         // take code from auto importer.
-        app('log')->info(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
+        Log::info(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
 
         $files        = $this->getFiles($directory);
         if (0 === count($files)) {
             return response('');
         }
-        app('log')->info(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+        Log::info(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
 
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
@@ -91,10 +90,9 @@ class AutoImportController extends Controller
     }
 
     /**
-     * @param null  $verbosity
      * @param mixed $string
      */
-    public function info($string, $verbosity = null): void
+    public function info(mixed $string): void
     {
         $this->line($string);
     }
@@ -106,15 +104,14 @@ class AutoImportController extends Controller
 
     public function error($string, $verbosity = null): void
     {
-        app('log')->error($string);
+        Log::error($string);
         $this->line($string);
     }
 
     /**
-     * @param null  $verbosity
      * @param mixed $string
      */
-    public function warn($string, $verbosity = null): void
+    public function warn(mixed $string): void
     {
         $this->line($string);
     }

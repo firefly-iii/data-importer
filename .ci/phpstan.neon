@@ -21,6 +21,9 @@ parameters:
     - '#Dynamic call to static method#' # all the Laravel ORM things depend on this.
     - identifier: varTag.nativeType
     - identifier: varTag.type
+    -
+        identifier: larastan.noEnvCallsOutsideOfConfig
+        path: ../app/Console/Kernel.php
     - identifier: ergebnis.noNullableReturnTypeDeclaration # dont care.
     - identifier: missingType.iterableValue # not interesting enough to fix.
     - identifier: missingType.generics # not interesting enough to fix.

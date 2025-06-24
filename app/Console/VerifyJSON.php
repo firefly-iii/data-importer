@@ -28,12 +28,13 @@ namespace App\Console;
 /**
  * Trait VerifyJSON
  */
-trait VerifyJSON
+trait
+VerifyJSON
 {
     private function verifyJSON(string $file): bool
     {
         // basic check on the JSON.
-        $json = file_get_contents($file);
+        $json = (string) file_get_contents($file);
 
         try {
             json_decode($json, true, 512, JSON_THROW_ON_ERROR);
