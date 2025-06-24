@@ -32,18 +32,7 @@ use Illuminate\Console\Command;
  */
 final class ShowVersion extends Command
 {
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Echoes the current version and some debug info.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:version';
 
     /**

@@ -40,18 +40,7 @@ final class AutoImport extends Command
     use HaveAccess;
     use VerifyJSON;
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Will automatically import from the given directory and use the JSON and importable files found.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:auto-import {directory : The directory from which to import automatically.}';
 
     /**
@@ -67,9 +56,8 @@ final class AutoImport extends Command
             return ExitCode::NO_CONNECTION->value;
         }
 
-        $argument  = (string) ($this->argument('directory') ?? './');
+        $argument  = (string) ($this->argument('directory') ?? './'); // @phpstan-ignore-line
 
-        /** @phpstan-ignore-line */
         $directory = realpath($argument);
         if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));

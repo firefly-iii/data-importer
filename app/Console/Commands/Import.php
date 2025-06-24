@@ -43,18 +43,7 @@ final class Import extends Command
     use HaveAccess;
     use VerifyJSON;
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Import into Firefly III. Requires a configuration file and optionally a configuration file.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:import
     {config : The configuration file. }
     {file? : Optionally, the importable file you want to import}
@@ -102,7 +91,7 @@ final class Import extends Command
             }
         }
 
-        if (!file_exists($config) || (file_exists($config) && !is_file($config))) {
+        if (!file_exists($config) || !is_file($config)) {
             $message = sprintf('The importer can\'t import: configuration file "%s" does not exist or could not be read.', $config);
             $this->error($message);
             app('log')->error($message);
@@ -119,8 +108,8 @@ final class Import extends Command
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
-        $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
-        if ('file' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
+        $configuration = Configuration::fromArray(json_decode((string) file_get_contents($config), true));
+        if ('file' === $configuration->getFlow() && (!file_exists($file) || !is_file($file))) {
             $message = sprintf('The importer can\'t import: importable file "%s" does not exist or could not be read.', $file);
             $this->error($message);
             app('log')->error($message);
