@@ -1,4 +1,9 @@
 parameters:
+  ergebnis:
+    noExtends:
+      enabled: false
+    final:
+      enabled: false
   scanFiles:
     - ../_ide_helper.php
   paths:
