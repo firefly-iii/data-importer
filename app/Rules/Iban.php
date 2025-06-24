@@ -25,12 +25,13 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use App\Services\CSV\Converter\Iban as IbanConverter;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * IBAN rule class.
  */
-class Iban implements Rule
+class Iban implements ValidationRule
 {
     /**
      * Get the validation error message.
@@ -44,10 +45,13 @@ class Iban implements Rule
      * Determine if the given value is a valid IBAN.
      *
      * @param string $attribute
-     * @param mixed  $value
+     * @param mixed $value
      */
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return IbanConverter::isValidIban((string) $value);
+        $result = IbanConverter::isValidIban((string)$value);
+        if (!$result) {
+            $fail($this->message());
+        }
     }
 }
