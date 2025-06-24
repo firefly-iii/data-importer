@@ -44,7 +44,7 @@ class ConfigurationPostRequest extends Request
     public function getAll(): array
     {
         // Debug: Log raw form data before processing
-        app('log')->debug('DEBUG: ConfigurationPostRequest raw form data', [
+        app('log')->debug('ConfigurationPostRequest raw form data', [
             'do_import_raw'   => $this->get('do_import') ?? [],
             'accounts_raw'    => $this->get('accounts') ?? [],
             'new_account_raw' => $this->get('new_account') ?? [],
@@ -63,7 +63,7 @@ class ConfigurationPostRequest extends Request
         foreach ($doImport as $encodedId => $value) {
             $originalId                   = str_replace('_', ' ', $encodedId);
             $decodedDoImport[$originalId] = $value;
-            app('log')->debug('DEBUG: Decoded do_import', [
+            app('log')->debug('Decoded do_import', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
@@ -74,7 +74,7 @@ class ConfigurationPostRequest extends Request
         foreach ($accounts as $encodedId => $value) {
             $originalId                   = str_replace('_', ' ', $encodedId);
             $decodedAccounts[$originalId] = $value;
-            app('log')->debug('DEBUG: Decoded accounts', [
+            app('log')->debug('Decoded accounts', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
@@ -85,7 +85,7 @@ class ConfigurationPostRequest extends Request
         foreach ($newAccount as $encodedId => $accountData) {
             $originalId                     = str_replace('_', ' ', $encodedId);
             $decodedNewAccount[$originalId] = $accountData;
-            app('log')->debug('DEBUG: Decoded new_account', [
+            app('log')->debug('Decoded new_account', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
@@ -246,7 +246,7 @@ class ConfigurationPostRequest extends Request
             $accounts    = $data['accounts'] ?? [];
             $newAccounts = $data['new_account'] ?? [];
 
-            app('log')->debug('DEBUG: withValidator account validation', [
+            app('log')->debug('withValidator account validation', [
                 'accounts'    => $accounts,
                 'newAccounts' => array_keys($newAccounts),
                 'flow'        => $flow,
@@ -276,15 +276,9 @@ class ConfigurationPostRequest extends Request
                     // Both arrays now use encoded keys, so they should match directly
                     if (
                         !isset($newAccounts[$encodedAccountId]['name'])
-                        || empty(trim($newAccounts[$encodedAccountId]['name']))
+                        || '' === trim((string) $newAccounts[$encodedAccountId]['name'])
                     ) {
-                        $validator
-                            ->errors()
-                            ->add(
-                                "new_account.{$encodedAccountId}.name",
-                                'Account name is required when creating a new account.'
-                            )
-                        ;
+                        $validator->errors()->add("new_account.{$encodedAccountId}.name", 'Account name is required when creating a new account.');
                     }
                     if (
                         !isset($newAccounts[$encodedAccountId]['create'])

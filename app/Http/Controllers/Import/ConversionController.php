@@ -209,7 +209,7 @@ class ConversionController extends Controller
         // Handle new account data for SimpleFIN
         if ('simplefin' === $configuration->getFlow()) {
             $newAccountData = $request->get('new_account_data', []);
-            if (!empty($newAccountData)) {
+            if (count($newAccountData) > 0) {
                 app('log')->debug('Updating configuration with detailed new account data', $newAccountData);
 
                 // Update the configuration with the detailed account creation data

@@ -418,10 +418,10 @@ class MapController extends Controller
                 $sourceName      = (string) (array_key_exists('source_name', $row) ? $row['source_name'] : '');
 
                 // Add both source and destination names as potential expense/revenue accounts
-                if (!empty($destinationName)) {
+                if ('' !== $destinationName) {
                     $expenseRevenue[] = $destinationName;
                 }
-                if (!empty($sourceName)) {
+                if ('' !== $sourceName) {
                     $expenseRevenue[] = $sourceName;
                 }
             }

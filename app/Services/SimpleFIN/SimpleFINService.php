@@ -32,6 +32,7 @@ use App\Services\SimpleFIN\Request\AccountsRequest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class SimpleFINService
@@ -44,26 +45,26 @@ class SimpleFINService
      */
     public function fetchAccountsAndInitialData(string $token, string $apiUrl, ?Configuration $configuration = null): array
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         // Check if token is a base64-encoded claim URL
         $actualApiUrl = $apiUrl;
         $actualToken  = $token;
 
         if ($this->isBase64ClaimUrl($token)) {
-            app('log')->debug('Token appears to be a base64-encoded claim URL, processing exchange');
+            Log::debug('Token appears to be a base64-encoded claim URL, processing exchange');
             $actualApiUrl = $this->exchangeClaimUrlForAccessUrl($token);
             $actualToken  = ''; // Access URL contains auth info
-            app('log')->debug(sprintf('Successfully exchanged claim URL for access URL: %s', $actualApiUrl));
+            Log::debug(sprintf('Successfully exchanged claim URL for access URL: %s', $actualApiUrl));
         }
         if (!$this->isBase64ClaimUrl($token)) {
             // Token is not a base64 claim URL, we need an API URL
-            if (empty($apiUrl)) {
+            if ('' === $apiUrl) {
                 throw new ImporterErrorException('SimpleFIN API URL is required when token is not a base64-encoded claim URL');
             }
         }
 
-        app('log')->debug(sprintf('SimpleFIN fetching accounts from: %s', $actualApiUrl));
+        Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $actualApiUrl));
 
         $request      = new AccountsRequest();
         $request->setToken($actualToken);
@@ -78,7 +79,7 @@ class SimpleFINService
         ];
         $request->setParameters($parameters);
 
-        app('log')->debug('SimpleFIN requesting all transactions with parameters', $parameters);
+        Log::debug('SimpleFIN requesting all transactions with parameters', $parameters);
 
         $response     = $request->get();
 
@@ -88,13 +89,13 @@ class SimpleFINService
 
         $accounts     = $response->getAccounts();
 
-        if (empty($accounts)) {
-            app('log')->warning('SimpleFIN API returned no accounts');
+        if (0=== count($accounts)) {
+            Log::warning('SimpleFIN API returned no accounts');
 
             return [];
         }
 
-        app('log')->debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
+        Log::debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
 
         return $accounts;
     }
@@ -111,8 +112,8 @@ class SimpleFINService
      */
     public function fetchTransactions(array $allAccountsData, string $accountId, ?array $dateRange = null): array
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        app('log')->debug(sprintf('SimpleFIN extracting transactions for account ID: "%s" from provided data structure.', $accountId));
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('SimpleFIN extracting transactions for account ID: "%s" from provided data structure.', $accountId));
 
         $accountTransactions  = [];
         $accountFound         = false;
@@ -134,35 +135,35 @@ class SimpleFINService
         }
 
         if (!$accountFound) {
-            app('log')->warning(sprintf('Account with ID "%s" not found in provided SimpleFIN accounts data.', $accountId));
+            Log::warning(sprintf('Account with ID "%s" not found in provided SimpleFIN accounts data.', $accountId));
 
             return [];
         }
 
-        if (empty($accountTransactions)) {
-            app('log')->debug(sprintf('No transactions found internally for account ID "%s".', $accountId));
+        if (0 === count($accountTransactions)) {
+            Log::debug(sprintf('No transactions found internally for account ID "%s".', $accountId));
 
             return [];
         }
 
         // Apply date range filtering
         $filteredTransactions = [];
-        if (!empty($dateRange) && (isset($dateRange['start']) || isset($dateRange['end']))) {
+        if (is_array($dateRange) && (isset($dateRange['start']) || isset($dateRange['end']))) {
             $startDateTimestamp = null;
             $endDateTimestamp   = null;
 
-            if (isset($dateRange['start']) && !empty($dateRange['start'])) {
+            if (isset($dateRange['start']) && '' !== (string)$dateRange['start']) {
                 try {
                     $startDateTimestamp = (new \DateTime($dateRange['start'], new \DateTimeZone('UTC')))->setTime(0, 0, 0)->getTimestamp();
                 } catch (\Exception $e) {
-                    app('log')->warning('Invalid start date format for SimpleFIN transaction filtering.', ['date' => $dateRange['start'], 'error' => $e->getMessage()]);
+                    Log::warning('Invalid start date format for SimpleFIN transaction filtering.', ['date' => $dateRange['start'], 'error' => $e->getMessage()]);
                 }
             }
-            if (isset($dateRange['end']) && !empty($dateRange['end'])) {
+            if (isset($dateRange['end']) && '' !== (string)$dateRange['end']) {
                 try {
                     $endDateTimestamp = (new \DateTime($dateRange['end'], new \DateTimeZone('UTC')))->setTime(23, 59, 59)->getTimestamp();
                 } catch (\Exception $e) {
-                    app('log')->warning('Invalid end date format for SimpleFIN transaction filtering.', ['date' => $dateRange['end'], 'error' => $e->getMessage()]);
+                    Log::warning('Invalid end date format for SimpleFIN transaction filtering.', ['date' => $dateRange['end'], 'error' => $e->getMessage()]);
                 }
             }
 
@@ -171,7 +172,7 @@ class SimpleFINService
                 // Ensure $transaction is an array and has a 'posted' key before accessing.
                 if (!is_array($transaction) || !isset($transaction['posted']) || !is_numeric($transaction['posted'])) {
                     $transactionIdForLog = (is_array($transaction) && isset($transaction['id']) && is_string($transaction['id'])) ? $transaction['id'] : 'unknown';
-                    app('log')->warning('Transaction array missing, not an array, or has invalid "posted" field.', ['transaction_id' => $transactionIdForLog, 'transaction_data' => $transaction]);
+                    Log::warning('Transaction array missing, not an array, or has invalid "posted" field.', ['transaction_id' => $transactionIdForLog, 'transaction_data' => $transaction]);
 
                     continue;
                 }
@@ -189,20 +190,20 @@ class SimpleFINService
                     $filteredTransactions[] = $transaction;
                 }
             }
-            app('log')->debug(sprintf(
+            Log::debug(sprintf(
                 'Applied date filtering. Start: %s, End: %s. Original count: %d, Filtered count: %d',
                 $dateRange['start'] ?? 'N/A',
                 $dateRange['end'] ?? 'N/A',
                 count($accountTransactions),
                 count($filteredTransactions)
             ));
-            app('log')->debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (after potential filtering).', count($filteredTransactions), $accountId));
+            Log::debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (after potential filtering).', count($filteredTransactions), $accountId));
 
             return $filteredTransactions;
         }
         $filteredTransactions = $accountTransactions;
 
-        app('log')->debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (no date filtering was applied).', count($filteredTransactions), $accountId));
+        Log::debug(sprintf('SimpleFIN extracted %d transactions for account ID "%s" (no date filtering was applied).', count($filteredTransactions), $accountId));
 
         return $filteredTransactions;
     }
@@ -212,15 +213,15 @@ class SimpleFINService
      */
     public function testConnection(string $token, string $apiUrl): bool
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         try {
             $accounts = $this->fetchAccountsAndInitialData($token, $apiUrl);
-            app('log')->debug('SimpleFIN connection test successful');
+            Log::debug('SimpleFIN connection test successful');
 
             return true;
         } catch (ImporterErrorException|ImporterHttpException $e) {
-            app('log')->error(sprintf('SimpleFIN connection test failed: %s', $e->getMessage()));
+            Log::error(sprintf('SimpleFIN connection test failed: %s', $e->getMessage()));
 
             return false;
         }
@@ -261,7 +262,7 @@ class SimpleFINService
      */
     private function exchangeClaimUrlForAccessUrl(string $base64ClaimUrl): string
     {
-        app('log')->debug('Exchanging SimpleFIN claim URL for access URL');
+        Log::debug('Exchanging SimpleFIN claim URL for access URL');
 
         // Decode the base64 claim URL
         $claimUrl = base64_decode($base64ClaimUrl, true);
@@ -269,7 +270,7 @@ class SimpleFINService
             throw new ImporterErrorException('Invalid base64 encoding in SimpleFIN token');
         }
 
-        app('log')->debug(sprintf('Decoded claim URL: %s', $claimUrl));
+        Log::debug(sprintf('Decoded claim URL: %s', $claimUrl));
 
         try {
             $client    = new Client([
@@ -279,11 +280,11 @@ class SimpleFINService
 
             // Make POST request to claim URL with empty body
             // Use user-provided bridge URL as Origin header for CORS
-            $origin    = session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
-            if (empty($origin)) {
+            $origin    = (string) session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
+            if ('' === $origin) {
                 throw new ImporterErrorException('SimpleFIN bridge URL not found in session. Please provide a valid bridge URL.');
             }
-            app('log')->debug(sprintf('SimpleFIN using user-provided Origin: %s', $origin));
+            Log::debug(sprintf('SimpleFIN using user-provided Origin: %s', $origin));
 
             $response  = $client->post($claimUrl, [
                 'headers' => [
@@ -294,7 +295,7 @@ class SimpleFINService
 
             $accessUrl = (string) $response->getBody();
 
-            if (empty($accessUrl)) {
+            if ('' === $accessUrl) {
                 throw new ImporterErrorException('Empty access URL returned from SimpleFIN claim exchange');
             }
 
@@ -303,7 +304,7 @@ class SimpleFINService
                 throw new ImporterErrorException('Invalid access URL format returned from SimpleFIN claim exchange');
             }
 
-            app('log')->debug('Successfully exchanged claim URL for access URL');
+            Log::debug('Successfully exchanged claim URL for access URL');
 
             return $accessUrl;
 
@@ -311,19 +312,19 @@ class SimpleFINService
             $statusCode   = $e->getResponse()->getStatusCode();
             $responseBody = (string) $e->getResponse()->getBody();
 
-            app('log')->error(sprintf('SimpleFIN claim URL exchange failed with HTTP %d: %s', $statusCode, $e->getMessage()));
-            app('log')->error(sprintf('SimpleFIN 403 response body: %s', $responseBody));
+            Log::error(sprintf('SimpleFIN claim URL exchange failed with HTTP %d: %s', $statusCode, $e->getMessage()));
+            Log::error(sprintf('SimpleFIN 403 response body: %s', $responseBody));
 
             if (403 === $statusCode) {
                 // Log the actual response for debugging
-                app('log')->error(sprintf('DETAILED 403 ERROR - URL: %s, Response: %s', $claimUrl, $responseBody));
+                Log::error(sprintf('DETAILED 403 ERROR - URL: %s, Response: %s', $claimUrl, $responseBody));
 
                 throw new ImporterErrorException(sprintf('SimpleFIN claim URL exchange failed (403 Forbidden): %s', $responseBody ?: 'No response body available'));
             }
 
             throw new ImporterErrorException(sprintf('Failed to exchange SimpleFIN claim URL: HTTP %d error - %s', $statusCode, $responseBody ?: $e->getMessage()));
         } catch (GuzzleException $e) {
-            app('log')->error(sprintf('Failed to exchange SimpleFIN claim URL: %s', $e->getMessage()));
+            Log::error(sprintf('Failed to exchange SimpleFIN claim URL: %s', $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Failed to exchange SimpleFIN claim URL: %s', $e->getMessage()));
         }
@@ -336,17 +337,17 @@ class SimpleFINService
     {
         $errors = [];
 
-        if (empty($token)) {
+        if ('' === $token) {
             $errors[] = 'SimpleFIN token is required';
         }
 
-        if (empty($apiUrl)) {
+        if ('' ===$apiUrl) {
             $errors[] = 'SimpleFIN bridge URL is required';
         }
-        if (!empty($apiUrl) && !filter_var($apiUrl, FILTER_VALIDATE_URL)) {
+        if ('' !== $apiUrl && !filter_var($apiUrl, FILTER_VALIDATE_URL)) {
             $errors[] = 'SimpleFIN bridge URL must be a valid URL';
         }
-        if (!empty($apiUrl) && !str_starts_with($apiUrl, 'https://')) {
+        if ('' !== $apiUrl && !str_starts_with($apiUrl, 'https://')) {
             $errors[] = 'SimpleFIN bridge URL must use HTTPS';
         }
 

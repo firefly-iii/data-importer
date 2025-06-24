@@ -73,16 +73,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
         ]);
 
         // Validate authentication credentials before proceeding
-        if (empty($this->accessToken)) {
-            throw new \Exception(
-                'Access token is empty - cannot authenticate with Firefly III'
-            );
+        if ('' === $this->accessToken) {throw new \Exception('Access token is empty - cannot authenticate with Firefly III');
         }
 
-        if (empty($this->baseUrl)) {
-            throw new \Exception(
-                'Base URL is empty - cannot connect to Firefly III'
-            );
+        if ('' === $this->baseUrl) {
+            throw new \Exception('Base URL is empty - cannot connect to Firefly III');
         }
 
         Log::info('Job authentication credentials validation', [

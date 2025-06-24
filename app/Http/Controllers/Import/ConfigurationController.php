@@ -28,23 +28,26 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Services\CSV\Converter\Date;
+use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
-use App\Services\CSV\Mapper\TransactionCurrencies;
+use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use JsonException;
 
 /**
  * Class ConfigurationController
@@ -71,25 +74,20 @@ class ConfigurationController extends Controller
      */
     public function index(Request $request)
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle          = 'Configuration';
-        $subTitle           = 'Configure your import';
-        $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
-        $configuration      = $this->restoreConfiguration();
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $mainTitle     = 'Configuration';
+        $subTitle      = 'Configure your import';
+        $flow          = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+        $configuration = $this->restoreConfiguration();
 
 
         // if config says to skip it, skip it:
-        $overruleSkip       = 'true' === $request->get('overruleskip');
+        $overruleSkip = 'true' === $request->get('overruleskip');
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {
-            app('log')->debug(
-                'Skip configuration, go straight to the next step.'
-            );
+            Log::debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-            if (
-                'nordigen' === $configuration->getFlow()
-                || 'spectre' === $configuration->getFlow()
-            ) {
+            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
                 // at this point, nordigen is ready for data conversion.
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
@@ -104,83 +102,54 @@ class ConfigurationController extends Controller
         // possibilities for duplicate detection (unique columns)
 
         // also get the nordigen / spectre accounts
-        $importerAccounts   = [];
-        $uniqueColumns      = config('csv.unique_column_options');
+        $importerAccounts = [];
+        $uniqueColumns    = config('csv.unique_column_options');
         if ('nordigen' === $flow) {
             // TODO here we need to redirect to Nordigen.
             try {
                 $importerAccounts = $this->getNordigenAccounts($configuration);
             } catch (AgreementExpiredException $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
 
                 // remove thing from configuration
                 $configuration->clearRequisitions();
 
                 // save configuration in session and on disk:
-                session()->put(
-                    Constants::CONFIGURATION,
-                    $configuration->toSessionArray()
-                );
-                $configFileName = StorageService::storeContent(
-                    json_encode($configuration->toArray(), JSON_PRETTY_PRINT)
-                );
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+                $configFileName = StorageService::storeContent(json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
                 session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
                 // redirect to selection.
                 return redirect()->route('009-selection.index');
             }
             $uniqueColumns    = config('nordigen.unique_column_options');
-            $importerAccounts = $this->mergeNordigenAccountLists(
-                $importerAccounts,
-                $fireflyIIIaccounts
-            );
+            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
         if ('spectre' === $flow) {
             $importerAccounts = $this->getSpectreAccounts($configuration);
             $uniqueColumns    = config('spectre.unique_column_options');
-            $importerAccounts = $this->mergeSpectreAccountLists(
-                $importerAccounts,
-                $fireflyIIIaccounts
-            );
+            $importerAccounts = $this->mergeSpectreAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
         if ('simplefin' === $flow) {
             $importerAccounts = $this->getSimpleFINAccounts();
             $uniqueColumns    = config('simplefin.unique_column_options', ['id']);
-            $importerAccounts = $this->mergeSimpleFINAccountLists(
-                $importerAccounts,
-                $fireflyIIIaccounts
-            );
+            $importerAccounts = $this->mergeSimpleFINAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
         if ('file' === $flow) {
             // detect content type and save to config object.
             $detector = new FileContentSherlock();
-            $content  = StorageService::getContent(
-                session()->get(Constants::UPLOAD_DATA_FILE),
-                $configuration->isConversion()
-            );
+            $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
             $fileType = $detector->detectContentTypeFromContent($content);
             $configuration->setContentType($fileType);
         }
 
         // Get currency data for SimpleFIN account creation widget
-        $currencies         = $this->getCurrencies();
+        $currencies = $this->getCurrencies();
 
-        return view(
-            'import.004-configure.index',
-            compact(
-                'mainTitle',
-                'subTitle',
-                'fireflyIIIaccounts',
-                'configuration',
-                'flow',
-                'importerAccounts',
-                'uniqueColumns',
-                'currencies'
-            )
-        );
+        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     /**
@@ -193,36 +162,23 @@ class ConfigurationController extends Controller
 
         foreach ($accountsData ?? [] as $account) {
             // Ensure the account has required SimpleFIN protocol fields
-            if (!isset($account['id']) || empty($account['id'])) {
-                app('log')->warning(
-                    'SimpleFIN account data is missing a valid ID, skipping.',
-                    ['account_data' => $account]
-                );
+            if (!isset($account['id']) || '' === (string)$account['id']) {
+                Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
 
                 continue;
             }
 
             if (!isset($account['name'])) {
-                app('log')->warning(
-                    'SimpleFIN account data is missing name field, adding default.',
-                    ['account_id' => $account['id']]
-                );
-                $account['name']
-                    = 'Unknown Account (ID: '.$account['id'].')';
+                Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
+                $account['name'] = 'Unknown Account (ID: ' . $account['id'] . ')';
             }
 
             if (!isset($account['currency'])) {
-                app('log')->warning(
-                    'SimpleFIN account data is missing currency field, this may cause issues.',
-                    ['account_id' => $account['id']]
-                );
+                Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
             if (!isset($account['balance'])) {
-                app('log')->warning(
-                    'SimpleFIN account data is missing balance field, this may cause issues.',
-                    ['account_id' => $account['id']]
-                );
+                Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
             }
 
             // Preserve raw SimpleFIN protocol data structure
@@ -235,54 +191,86 @@ class ConfigurationController extends Controller
     /**
      * Merge SimpleFIN accounts with Firefly III accounts
      */
-    private function mergeSimpleFINAccountLists(
-        array $simplefinAccounts,
-        array $fireflyAccounts
-    ): array {
+    private function mergeSimpleFINAccountLists(array $simplefinAccounts, array $fireflyAccounts): array
+    {
         $return = [];
 
         foreach ($simplefinAccounts as $sfinAccountData) {
             // $sfinAccountData is raw SimpleFIN protocol data with fields:
             // ['id', 'name', 'currency', 'balance', 'balance-date', 'org', etc.]
 
-            $importAccountRepresentation = (object) [
-                'id'              => $sfinAccountData['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
-                'name'            => $sfinAccountData['name'], // Expected by getMappedTo, display in component
-                'status'          => 'active', // Expected by view for status checks
-                'currency'        => $sfinAccountData['currency'] ?? null, // SimpleFIN currency field
-                'balance'         => $sfinAccountData['balance'] ?? null, // SimpleFIN balance (numeric string)
-                'balance_date'    => $sfinAccountData['balance-date'] ?? null, // SimpleFIN balance timestamp
-                'org'             => $sfinAccountData['org'] ?? null, // SimpleFIN organization data
-                'iban'            => null, // Placeholder for consistency if component expects it
-                'extra'           => $sfinAccountData['extra'] ?? [], // SimpleFIN extra data
-                'bic'             => null, // Placeholder
-                'product'         => null, // Placeholder
-                'cashAccountType' => null, // Placeholder
-                'usage'           => null, // Placeholder
-                'resourceId'      => null, // Placeholder
-                'bban'            => null, // Placeholder
-                'ownerName'       => null, // Placeholder
+            $importAccountRepresentation = (object)['id'              => $sfinAccountData['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
+                                                    'name'            => $sfinAccountData['name'], // Expected by getMappedTo, display in component
+                                                    'status'          => 'active', // Expected by view for status checks
+                                                    'currency'        => $sfinAccountData['currency'] ?? null, // SimpleFIN currency field
+                                                    'balance'         => $sfinAccountData['balance'] ?? null, // SimpleFIN balance (numeric string)
+                                                    'balance_date'    => $sfinAccountData['balance-date'] ?? null, // SimpleFIN balance timestamp
+                                                    'org'             => $sfinAccountData['org'] ?? null, // SimpleFIN organization data
+                                                    'iban'            => null, // Placeholder for consistency if component expects it
+                                                    'extra'           => $sfinAccountData['extra'] ?? [], // SimpleFIN extra data
+                                                    'bic'             => null, // Placeholder
+                                                    'product'         => null, // Placeholder
+                                                    'cashAccountType' => null, // Placeholder
+                                                    'usage'           => null, // Placeholder
+                                                    'resourceId'      => null, // Placeholder
+                                                    'bban'            => null, // Placeholder
+                                                    'ownerName'       => null, // Placeholder
             ];
 
 
-            $return[]                    = [
-                'import_account'       => $importAccountRepresentation, // The DTO-like object for the component
-                'name'                 => $sfinAccountData['name'], // SimpleFIN account name
-                'id'                   => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
-                'mapped_to'            => $this->getMappedTo(
-                    (object) [
-                        'identifier' => $importAccountRepresentation->id,
-                        'name'       => $importAccountRepresentation->name,
-                    ],
-                    $fireflyAccounts
-                ), // getMappedTo needs 'identifier'
-                'type'                 => 'source', // Indicates it's an account from the import source
-                'firefly_iii_accounts' => $fireflyAccounts, // Required by x-importer-account component
+            $return[] = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
+                         'name'                 => $sfinAccountData['name'], // SimpleFIN account name
+                         'id'                   => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
+                         'mapped_to'            => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name,], $fireflyAccounts), // getMappedTo needs 'identifier'
+                         'type'                 => 'source', // Indicates it's an account from the import source
+                         'firefly_iii_accounts' => $fireflyAccounts, // Required by x-importer-account component
             ];
         }
 
 
         return $return;
+    }
+
+    /**
+     * Stub for determining if an imported account is mapped to a Firefly III account.
+     * TODO: Implement actual mapping logic.
+     *
+     * @param object $importAccount An object representing the account from the import source.
+     *                                Expected to have at least 'identifier' and 'name' properties.
+     * @param array $fireflyAccounts array of existing Firefly III accounts
+     *
+     * @return ?string the ID of the mapped Firefly III account, or null if not mapped
+     */
+    private function getMappedTo(object $importAccount, array $fireflyAccounts): ?string
+    {
+        $importAccountName = $importAccount->name ?? null;
+
+        if ('' === (string) $importAccountName || null === $importAccountName) { // same thing really.
+            return null;
+        }
+
+
+        // Check assets accounts for name match
+        if (isset($fireflyAccounts['assets']) && is_array($fireflyAccounts['assets'])) {
+            foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
+                $fireflyAccountName = $fireflyAccount->name ?? null;
+                if (null !== $fireflyAccountName && strlen($fireflyAccountName) > 0 && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                    return (string)$fireflyAccount->id;
+                }
+            }
+        }
+
+        // Check liability accounts for name match
+        if (isset($fireflyAccounts['liabilities']) && is_array($fireflyAccounts['liabilities'])) {
+            foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
+                $fireflyAccountName = $fireflyAccount->name ?? null;
+                if (null !== $fireflyAccountName && strlen($fireflyAccountName) > 0 && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                    return (string)$fireflyAccount->id;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -295,79 +283,20 @@ class ConfigurationController extends Controller
             $mapper = app(TransactionCurrencies::class);
 
             return $mapper->getMap();
-        } catch (\Exception $e) {
-            app('log')->error('Failed to load currencies: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Failed to load currencies: ' . $e->getMessage());
 
             return [];
         }
     }
 
-    /**
-     * Stub for determining if an imported account is mapped to a Firefly III account.
-     * TODO: Implement actual mapping logic.
-     *
-     * @param object $importAccount   An object representing the account from the import source.
-     *                                Expected to have at least 'identifier' and 'name' properties.
-     * @param array  $fireflyAccounts array of existing Firefly III accounts
-     *
-     * @return ?string the ID of the mapped Firefly III account, or null if not mapped
-     */
-    private function getMappedTo(
-        object $importAccount,
-        array $fireflyAccounts
-    ): ?string {
-        $importAccountName = $importAccount->name ?? null;
-
-        if (empty($importAccountName)) {
-            return null;
-        }
-
-        // Check assets accounts for name match
-        if (
-            isset($fireflyAccounts['assets'])
-            && is_array($fireflyAccounts['assets'])
-        ) {
-            foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
-                $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (
-                    !empty($fireflyAccountName)
-                    && trim(strtolower($fireflyAccountName))
-                        === trim(strtolower($importAccountName))
-                ) {
-                    return (string) $fireflyAccount->id;
-                }
-            }
-        }
-
-        // Check liability accounts for name match
-        if (
-            isset($fireflyAccounts['liabilities'])
-            && is_array($fireflyAccounts['liabilities'])
-        ) {
-            foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
-                $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (
-                    !empty($fireflyAccountName)
-                    && trim(strtolower($fireflyAccountName))
-                        === trim(strtolower($importAccountName))
-                ) {
-                    return (string) $fireflyAccount->id;
-                }
-            }
-        }
-
-        return null;
-    }
-
     public function phpDate(Request $request): JsonResponse
     {
-        app('log')->debug(sprintf('Method %s', __METHOD__));
+        Log::debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj           = new Date();
-        [$locale, $format] = $dateObj->splitLocaleFormat(
-            (string) $request->get('format')
-        );
-        $date              = today()->locale($locale);
+        $dateObj = new Date();
+        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
+        $date = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
@@ -375,10 +304,9 @@ class ConfigurationController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function postIndex(
-        ConfigurationPostRequest $request
-    ): RedirectResponse {
-        app('log')->debug(sprintf('Now running %s', __METHOD__));
+    public function postIndex(ConfigurationPostRequest $request): RedirectResponse
+    {
+        Log::debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.v
         $fromRequest   = $request->getAll();
         $configuration = Configuration::fromRequest($fromRequest);
@@ -388,26 +316,21 @@ class ConfigurationController extends Controller
 
         // loop accounts:
 
-        $accounts      = [];
+        $accounts = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accountValue          = (int)$fromRequest['accounts'][$identifier];
                 $accounts[$identifier] = $accountValue;
             }
             if (!array_key_exists($identifier, $fromRequest['accounts'])) {
-                app('log')->warning(
-                    sprintf(
-                        'Account identifier %s in do_import but not in accounts array',
-                        $identifier
-                    )
-                );
+                Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
             }
         }
 
         $configuration->setAccounts($accounts);
 
         // Store new account creation data
-        $newAccounts   = $fromRequest['new_account'] ?? [];
+        $newAccounts = $fromRequest['new_account'] ?? [];
         $configuration->setNewAccounts($newAccounts);
 
         // Store do_import selections in session for validation
@@ -415,47 +338,26 @@ class ConfigurationController extends Controller
 
         // Validate configuration contract for SimpleFIN
         if ('simplefin' === $configuration->getFlow()) {
-            $validator          = new ConfigurationContractValidator();
+            $validator = new ConfigurationContractValidator();
 
             // Validate form structure first
-            $formValidation     = $validator->validateFormFieldStructure(
-                $fromRequest
-            );
+            $formValidation = $validator->validateFormFieldStructure($fromRequest);
             if (!$formValidation->isValid()) {
-                app('log')->error(
-                    'SimpleFIN form validation failed',
-                    $formValidation->getErrors()
-                );
+                Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
 
-                return redirect()
-                    ->back()
-                    ->withErrors($formValidation->getErrorMessages())
-                    ->withInput()
-                ;
+                return redirect()->back()->withErrors($formValidation->getErrorMessages())->withInput();
             }
 
             // Validate complete configuration contract
-            $contractValidation = $validator->validateConfigurationContract(
-                $configuration
-            );
+            $contractValidation = $validator->validateConfigurationContract($configuration);
             if (!$contractValidation->isValid()) {
-                app('log')->error(
-                    'SimpleFIN configuration contract validation failed',
-                    $contractValidation->getErrors()
-                );
+                Log::error('SimpleFIN configuration contract validation failed', $contractValidation->getErrors());
 
-                return redirect()
-                    ->back()
-                    ->withErrors($contractValidation->getErrorMessages())
-                    ->withInput()
-                ;
+                return redirect()->back()->withErrors($contractValidation->getErrorMessages())->withInput();
             }
 
             if ($contractValidation->hasWarnings()) {
-                app('log')->warning(
-                    'SimpleFIN configuration contract warnings',
-                    $contractValidation->getWarnings()
-                );
+                Log::warning('SimpleFIN configuration contract warnings', $contractValidation->getWarnings());
             }
 
         }
@@ -464,32 +366,22 @@ class ConfigurationController extends Controller
 
         // Map data option is now user-selectable for SimpleFIN via checkbox
 
-        $json          = '{}';
+        $json = '{}';
 
         try {
-            $json = json_encode(
-                $configuration->toArray(),
-                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT
-            );
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
         StorageService::storeContent($json);
 
-        session()->put(
-            Constants::CONFIGURATION,
-            $configuration->toSessionArray()
-        );
+        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if (
-            'nordigen' === $configuration->getFlow()
-            || 'spectre' === $configuration->getFlow()
-            || 'simplefin' === $configuration->getFlow()
-        ) {
+        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
             // at this point, nordigen, spectre, and simplefin are ready for data conversion.
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }

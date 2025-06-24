@@ -286,7 +286,7 @@ class TokenController extends Controller
         // Ensure $oauthAuthorizeBaseUrl is not empty before sprintf.
         // This is a fallback in case vanity_url (derived from VANITY_URL) is empty,
         // which would indicate a configuration problem.
-        if (empty($oauthAuthorizeBaseUrl)) {
+        if ('' === $oauthAuthorizeBaseUrl) {
             $oauthAuthorizeBaseUrl = rtrim((string)config('importer.url'), '/');
         }
 

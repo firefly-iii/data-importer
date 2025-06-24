@@ -80,7 +80,7 @@ class IndexController extends Controller
         $url               = (string) config('importer.url');
         $accessTokenConfig = (string) config('importer.access_token');
 
-        app('log')->debug('DEBUG: IndexController authentication detection', [
+        app('log')->debug('IndexController authentication detection', [
             'client_id'           => $clientId,
             'url'                 => $url,
             'access_token_config' => $accessTokenConfig,
@@ -104,7 +104,7 @@ class IndexController extends Controller
             $flexible = true;
         }
 
-        app('log')->debug('DEBUG: IndexController authentication type flags', [
+        app('log')->debug('IndexController authentication type flags', [
             'pat'             => $pat,
             'clientIdWithURL' => $clientIdWithURL,
             'URLonly'         => $URLonly,
