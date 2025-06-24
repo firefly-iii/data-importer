@@ -97,7 +97,7 @@ trait AutoImports
         $return          = [];
         foreach ($importableFiles as $importableFile) {
             $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
-            if ($jsonFile) {
+            if (null !== $jsonFile) {
                 $return[$jsonFile] = sprintf('%s/%s', $directory, $importableFile);
             }
         }

@@ -46,7 +46,7 @@ let index = function () {
             progressPercentage: 0,
         },
         checkCount: 0,
-        maxCheckCount: 3600,
+        maxCheckCount: 600,
         manualRefreshAvailable: false,
         functionName() {
 
