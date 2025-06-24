@@ -60,7 +60,7 @@ class SelectionController extends Controller
     /**
      * Step 9, select a country + bank.
      *
-     * @return Factory|View|RedirectResponse
+     * @return Factory|RedirectResponse|View
      */
     public function index()
     {
@@ -91,7 +91,7 @@ class SelectionController extends Controller
 
         try {
             $response = $request->get();
-        } catch (RateLimitException|AgreementExpiredException|ImporterHttpException $e) { // @phpstan-ignore-line
+        } catch (AgreementExpiredException|ImporterHttpException|RateLimitException $e) { // @phpstan-ignore-line
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 

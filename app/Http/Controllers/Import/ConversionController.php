@@ -66,19 +66,19 @@ class ConversionController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(): View|Application|Factory
+    public function index(): Application|Factory|View
     {
         // app('log')->debug(sprintf('Now in %s', __METHOD__));
-        $mainTitle = 'Convert the data';
+        $mainTitle           = 'Convert the data';
 
         // create configuration:
-        $configuration = $this->restoreConfiguration();
+        $configuration       = $this->restoreConfiguration();
 
         app('log')->debug('Will now verify configuration content.');
-        $flow = $configuration->getFlow();
+        $flow                = $configuration->getFlow();
 
         // default back to mapping
-        $jobBackUrl = route('back.mapping');
+        $jobBackUrl          = route('back.mapping');
 
         // Set appropriate back URL based on flow
         // SimpleFIN always goes back to configuration
@@ -103,11 +103,11 @@ class ConversionController extends Controller
         //        }
 
         // job ID may be in session:
-        $identifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $routine    = null;
-        $flow       = $configuration->getFlow();
+        $identifier          = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+        $routine             = null;
+        $flow                = $configuration->getFlow();
         app('log')->debug('Will redirect to submission after conversion.');
-        $nextUrl = route('008-submit.index');
+        $nextUrl             = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -140,10 +140,10 @@ class ConversionController extends Controller
                 $routine = new SimpleFINRoutineManager($identifier);
                 app('log')->debug('SimpleFIN routine manager created successfully.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager: ' . $e->getMessage());
-                app('log')->error('Error class: ' . get_class($e));
-                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
-                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                app('log')->error('Failed to create SimpleFIN routine manager: '.$e->getMessage());
+                app('log')->error('Error class: '.get_class($e));
+                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
+                app('log')->error('Stack trace: '.$e->getTraceAsString());
 
                 throw $e;
             }
@@ -157,7 +157,7 @@ class ConversionController extends Controller
         }
 
         // may be a new identifier! Yay!
-        $identifier = $routine->getIdentifier();
+        $identifier          = $routine->getIdentifier();
 
         app('log')->debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
@@ -184,9 +184,9 @@ class ConversionController extends Controller
     public function start(Request $request): JsonResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier    = $request->get('identifier');
-        $configuration = $this->restoreConfiguration();
-        $routine       = null;
+        $identifier      = $request->get('identifier');
+        $configuration   = $this->restoreConfiguration();
+        $routine         = null;
 
         // Validate configuration contract for SimpleFIN before proceeding
         if ('simplefin' === $configuration->getFlow()) {
@@ -239,7 +239,7 @@ class ConversionController extends Controller
         }
 
         // now create the right class:
-        $flow = $configuration->getFlow();
+        $flow            = $configuration->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
@@ -264,10 +264,10 @@ class ConversionController extends Controller
                 $routine = new SimpleFINRoutineManager($identifier);
                 app('log')->debug('SimpleFIN routine manager created successfully in start method.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager in start method: ' . $e->getMessage());
-                app('log')->error('Error class: ' . get_class($e));
-                app('log')->error('Error file: ' . $e->getFile() . ':' . $e->getLine());
-                app('log')->error('Stack trace: ' . $e->getTraceAsString());
+                app('log')->error('Failed to create SimpleFIN routine manager in start method: '.$e->getMessage());
+                app('log')->error('Error class: '.get_class($e));
+                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
+                app('log')->error('Stack trace: '.$e->getTraceAsString());
 
                 throw $e;
             }
@@ -302,7 +302,7 @@ class ConversionController extends Controller
         }
         app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk = \Storage::disk(self::DISK_NAME);
+        $disk            = \Storage::disk(self::DISK_NAME);
 
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
@@ -328,7 +328,7 @@ class ConversionController extends Controller
     public function status(Request $request): JsonResponse
     {
         //        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
+        $identifier      = $request->get('identifier');
         app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             app('log')->warning('Identifier is NULL.');

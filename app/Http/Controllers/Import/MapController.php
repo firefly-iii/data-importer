@@ -61,7 +61,7 @@ class MapController extends Controller
     }
 
     /**
-     * @return Factory|View|RedirectResponse
+     * @return Factory|RedirectResponse|View
      */
     public function index()
     {
@@ -427,12 +427,12 @@ class MapController extends Controller
             }
         }
         // removed, filtering has already happened in the foreach loop above
-//        $filtered           = array_filter(
-//            $expenseRevenue,
-//            static function (string $value) {
-//                return '' !== $value;
-//            }
-//        );
+        //        $filtered           = array_filter(
+        //            $expenseRevenue,
+        //            static function (string $value) {
+        //                return '' !== $value;
+        //            }
+        //        );
 
         return array_unique($expenseRevenue);
     }

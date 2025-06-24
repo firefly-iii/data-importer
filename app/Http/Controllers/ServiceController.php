@@ -75,14 +75,17 @@ class ServiceController extends Controller
         if ($result->equals(AuthenticationStatus::error())) {
             // send user error:
             Log::error('Error: Could not validate app key.');
+
             return response()->json(['result' => 'NOK']);
         }
         if ($result->equals(AuthenticationStatus::nodata())) {
             // send user error:
             Log::error('No data: Could not validate app key.');
+
             return response()->json(['result' => 'NODATA']);
         }
         Log::info('All OK in validateSimpleFIN.');
+
         return response()->json(['result' => 'OK']);
     }
 

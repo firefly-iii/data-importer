@@ -28,8 +28,7 @@ namespace App\Console;
 /**
  * Trait VerifyJSON
  */
-trait
-VerifyJSON
+trait VerifyJSON
 {
     private function verifyJSON(string $file): bool
     {

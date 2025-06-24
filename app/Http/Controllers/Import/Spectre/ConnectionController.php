@@ -81,7 +81,7 @@ class ConnectionController extends Controller
 
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var ListCustomersResponse|ErrorResponse $list */
+        /** @var ErrorResponse|ListCustomersResponse $list */
         $list              = $request->get();
         $identifier        = null;
 
