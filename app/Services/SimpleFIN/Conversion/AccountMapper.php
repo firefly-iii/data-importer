@@ -145,7 +145,7 @@ class AccountMapper
             return strtolower($account->name) === strtolower($simplefinAccount->getName());
         });
 
-        if (!empty($matchingAccounts)) {
+        if (0 === count($matchingAccounts)) {
             return reset($matchingAccounts);
         }
 
@@ -195,7 +195,7 @@ class AccountMapper
             ];
 
             // Add opening balance date if opening balance is provided
-            if (!empty($config['opening_balance']) && is_numeric($config['opening_balance'])) {
+            if ('' !==(string)$config['opening_balance'] && is_numeric($config['opening_balance'])) {
                 $payload['opening_balance_date'] = $config['opening_balance_date'] ?? date('Y-m-d');
             }
 
@@ -220,12 +220,12 @@ class AccountMapper
             }
 
             // Add IBAN if provided
-            if (!empty($config['iban'])) {
+            if ('' !== (string)$config['iban']) {
                 $payload['iban'] = $config['iban'];
             }
 
             // Add account number if provided
-            if (!empty($config['account_number'])) {
+            if ('' !== (string)$config['account_number']) {
                 $payload['account_number'] = $config['account_number'];
             }
 
@@ -285,19 +285,19 @@ class AccountMapper
     private function getCurrencyCode(SimpleFINAccount $simplefinAccount, array $config): string
     {
         // 1. Use user-configured currency first
-        if (!empty($config['currency'])) {
+        if (0 !== count($config['currency'])) {
             return $config['currency'];
         }
 
         // 2. Fall back to SimpleFIN account currency
         $currency = $simplefinAccount->getCurrency();
         if ($simplefinAccount->isCustomCurrency()) {
-            // For custom currencies, default to user's base currency or USD
-            return 'USD'; // Could be made configurable
+            // For custom currencies, default to user's base currency or EUR
+            return 'EUR'; // Could be made configurable
         }
 
         // 3. Final fallback
-        return $currency ?: 'USD';
+        return $currency ?: 'EUR';
     }
 
     /**
@@ -455,7 +455,7 @@ class AccountMapper
                 'id'            => $account->id,
                 'name'          => $account->name,
                 'type'          => $account->type,
-                'currency_code' => $account->currencyCode ?? 'USD',
+                'currency_code' => $account->currencyCode ?? 'EUR',
             ];
         }
 

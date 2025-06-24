@@ -145,7 +145,7 @@ class RoutineManager implements RoutineManagerInterface
                 $accountConfig        = [
                     'name'     => $newAccountData['name'],
                     'type'     => $newAccountData['type'] ?? 'asset',
-                    'currency' => $newAccountData['currency'] ?? 'USD',
+                    'currency' => $newAccountData['currency'] ?? 'EUR',
                 ];
 
                 // Add opening balance if provided
