@@ -43,7 +43,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
 use League\Flysystem\FilesystemException;
-use Storage;
 
 /**
  * Class UploadController
@@ -77,13 +76,13 @@ class UploadController extends Controller
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
         // get existing configs.
-        $disk = Storage::disk('configurations');
+        $disk      = \Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all = $disk->files();
+        $all       = $disk->files();
 
         // remove files from list
-        $list    = [];
-        $ignored = config('importer.ignored_files');
+        $list      = [];
+        $ignored   = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -114,7 +113,7 @@ class UploadController extends Controller
         $errors         = new MessageBag();
 
         // process uploaded file (if present)
-        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors         = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -122,7 +121,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        $errors         = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);
@@ -176,7 +175,7 @@ class UploadController extends Controller
                     // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                     // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                     // This one is for you: 🤦‍♀️
-                    $eol = $this->detectEOL($content);
+                    $eol     = $this->detectEOL($content);
                     if ("\r" === $eol) {
                         Log::error('Your bank is dumb. Tell them to fix their CSV files.');
                         $content = str_replace("\r", "\n", $content);
@@ -186,7 +185,7 @@ class UploadController extends Controller
                 if ('camt' === $this->contentType) {
                     $content = file_get_contents($file->getPathname());
                 }
-                $fileName = StorageService::storeContent($content);
+                $fileName          = StorageService::storeContent($content);
                 session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
                 session()->put(Constants::HAS_UPLOAD, true);
             }
@@ -198,7 +197,7 @@ class UploadController extends Controller
     private function getError(int $error): string
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $errors = [UPLOAD_ERR_OK => 'There is no error, the file uploaded with success.', UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.', UPLOAD_ERR_NO_FILE => 'No file was uploaded.', UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.', UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk. Introduced in PHP 5.1.0.', UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.',];
+        $errors = [UPLOAD_ERR_OK => 'There is no error, the file uploaded with success.', UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.', UPLOAD_ERR_NO_FILE => 'No file was uploaded.', UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.', UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk. Introduced in PHP 5.1.0.', UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.'];
 
         return $errors[$error] ?? 'Unknown error';
     }
@@ -206,9 +205,9 @@ class UploadController extends Controller
     private function detectEOL(string $string): string
     {
         $eols     = ['\n\r' => "\n\r", // 0x0A - 0x0D - acorn BBC
-                     '\r\n' => "\r\n", // 0x0D - 0x0A - Windows, DOS OS/2
-                     '\n'   => "\n", // 0x0A -      - Unix, OSX
-                     '\r'   => "\r", // 0x0D -      - Apple ][, TRS80
+            '\r\n'          => "\r\n", // 0x0D - 0x0A - Windows, DOS OS/2
+            '\n'            => "\n", // 0x0A -      - Unix, OSX
+            '\r'            => "\r", // 0x0D -      - Apple ][, TRS80
         ];
         $curCount = 0;
         $curEol   = '';
@@ -245,14 +244,14 @@ class UploadController extends Controller
             session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
 
             // process the config file
-            $success       = false;
-            $configuration = null;
+            $success              = false;
+            $configuration        = null;
 
             try {
                 $configuration = ConfigFileProcessor::convertConfigFile($this->configFileName);
                 $configuration->setContentType($this->contentType);
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $success = true;
+                $success       = true;
             } catch (ImporterErrorException $e) {
                 $errors->add('config_file', $e->getMessage());
             }
@@ -274,7 +273,7 @@ class UploadController extends Controller
     {
         if (null === $file && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
+            $disk           = \Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
@@ -299,12 +298,12 @@ class UploadController extends Controller
         Log::debug('UploadController::handleSimpleFINFlow() INVOKED'); // Unique entry marker
         Log::debug('Processing SimpleFIN flow in unified controller');
         Log::debug('handleSimpleFINFlow() - Request All:', $request->all());
-        Log::debug('handleSimpleFINFlow() - Raw use_demo input:', [$request->input('use_demo'),]);
+        Log::debug('handleSimpleFINFlow() - Raw use_demo input:', [$request->input('use_demo')]);
 
         $simpleFINToken = (string)$request->get('simplefin_token');
         $bridgeUrl      = (string)$request->get('simplefin_bridge_url');
         $isDemo         = $request->boolean('use_demo');
-        Log::debug('handleSimpleFINFlow() - Evaluated $isDemo:', [$isDemo,]);
+        Log::debug('handleSimpleFINFlow() - Evaluated $isDemo:', [$isDemo]);
         Log::debug('handleSimpleFINFlow() - Bridge URL:', [$bridgeUrl]);
 
 
@@ -334,8 +333,8 @@ class UploadController extends Controller
         try {
             $simpleFINService = app(SimpleFINService::class);
             // Use demo URL for demo mode, otherwise use empty string for claim URL token processing
-            $apiUrl       = $isDemo ? config('importer.simplefin.demo_url') : '';
-            $accountsData = $simpleFINService->fetchAccountsAndInitialData($simpleFINToken, $apiUrl);
+            $apiUrl           = $isDemo ? config('importer.simplefin.demo_url') : '';
+            $accountsData     = $simpleFINService->fetchAccountsAndInitialData($simpleFINToken, $apiUrl);
 
             // Store SimpleFIN data in session for configuration step
             session()->put(Constants::SIMPLEFIN_TOKEN, $simpleFINToken);
@@ -343,12 +342,12 @@ class UploadController extends Controller
             session()->put(Constants::SIMPLEFIN_IS_DEMO, $isDemo);
             session()->put(Constants::HAS_UPLOAD, true);
 
-            Log::info('SimpleFIN connection established', ['account_count' => count($accountsData ?? []), 'is_demo' => $isDemo,]);
+            Log::info('SimpleFIN connection established', ['account_count' => count($accountsData ?? []), 'is_demo' => $isDemo]);
 
             return redirect(route('004-configure.index'));
         } catch (ImporterErrorException $e) {
-            Log::error('SimpleFIN connection failed', ['error' => $e->getMessage(),]);
-            $errors->add('connection', 'Failed to connect to SimpleFIN: ' . $e->getMessage());
+            Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
+            $errors->add('connection', 'Failed to connect to SimpleFIN: '.$e->getMessage());
 
             return redirect(route('003-upload.index'))->withErrors($errors);
         }

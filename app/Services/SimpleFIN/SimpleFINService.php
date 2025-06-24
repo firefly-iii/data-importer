@@ -89,7 +89,7 @@ class SimpleFINService
 
         $accounts     = $response->getAccounts();
 
-        if (0=== count($accounts)) {
+        if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
 
             return [];
@@ -341,7 +341,7 @@ class SimpleFINService
             $errors[] = 'SimpleFIN token is required';
         }
 
-        if ('' ===$apiUrl) {
+        if ('' === $apiUrl) {
             $errors[] = 'SimpleFIN bridge URL is required';
         }
         if ('' !== $apiUrl && !filter_var($apiUrl, FILTER_VALIDATE_URL)) {

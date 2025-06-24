@@ -40,14 +40,12 @@ use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
-use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use JsonException;
 
 /**
  * Class ConfigurationController
@@ -75,14 +73,14 @@ class ConfigurationController extends Controller
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle     = 'Configuration';
-        $subTitle      = 'Configure your import';
-        $flow          = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
-        $configuration = $this->restoreConfiguration();
+        $mainTitle          = 'Configuration';
+        $subTitle           = 'Configure your import';
+        $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+        $configuration      = $this->restoreConfiguration();
 
 
         // if config says to skip it, skip it:
-        $overruleSkip = 'true' === $request->get('overruleskip');
+        $overruleSkip       = 'true' === $request->get('overruleskip');
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {
             Log::debug('Skip configuration, go straight to the next step.');
             // set config as complete.
@@ -102,8 +100,8 @@ class ConfigurationController extends Controller
         // possibilities for duplicate detection (unique columns)
 
         // also get the nordigen / spectre accounts
-        $importerAccounts = [];
-        $uniqueColumns    = config('csv.unique_column_options');
+        $importerAccounts   = [];
+        $uniqueColumns      = config('csv.unique_column_options');
         if ('nordigen' === $flow) {
             // TODO here we need to redirect to Nordigen.
             try {
@@ -147,7 +145,7 @@ class ConfigurationController extends Controller
         }
 
         // Get currency data for SimpleFIN account creation widget
-        $currencies = $this->getCurrencies();
+        $currencies         = $this->getCurrencies();
 
         return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
@@ -170,7 +168,7 @@ class ConfigurationController extends Controller
 
             if (!isset($account['name'])) {
                 Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
-                $account['name'] = 'Unknown Account (ID: ' . $account['id'] . ')';
+                $account['name'] = 'Unknown Account (ID: '.$account['id'].')';
             }
 
             if (!isset($account['currency'])) {
@@ -200,30 +198,30 @@ class ConfigurationController extends Controller
             // ['id', 'name', 'currency', 'balance', 'balance-date', 'org', etc.]
 
             $importAccountRepresentation = (object)['id'              => $sfinAccountData['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
-                                                    'name'            => $sfinAccountData['name'], // Expected by getMappedTo, display in component
-                                                    'status'          => 'active', // Expected by view for status checks
-                                                    'currency'        => $sfinAccountData['currency'] ?? null, // SimpleFIN currency field
-                                                    'balance'         => $sfinAccountData['balance'] ?? null, // SimpleFIN balance (numeric string)
-                                                    'balance_date'    => $sfinAccountData['balance-date'] ?? null, // SimpleFIN balance timestamp
-                                                    'org'             => $sfinAccountData['org'] ?? null, // SimpleFIN organization data
-                                                    'iban'            => null, // Placeholder for consistency if component expects it
-                                                    'extra'           => $sfinAccountData['extra'] ?? [], // SimpleFIN extra data
-                                                    'bic'             => null, // Placeholder
-                                                    'product'         => null, // Placeholder
-                                                    'cashAccountType' => null, // Placeholder
-                                                    'usage'           => null, // Placeholder
-                                                    'resourceId'      => null, // Placeholder
-                                                    'bban'            => null, // Placeholder
-                                                    'ownerName'       => null, // Placeholder
+                'name'                                                => $sfinAccountData['name'], // Expected by getMappedTo, display in component
+                'status'                                              => 'active', // Expected by view for status checks
+                'currency'                                            => $sfinAccountData['currency'] ?? null, // SimpleFIN currency field
+                'balance'                                             => $sfinAccountData['balance'] ?? null, // SimpleFIN balance (numeric string)
+                'balance_date'                                        => $sfinAccountData['balance-date'] ?? null, // SimpleFIN balance timestamp
+                'org'                                                 => $sfinAccountData['org'] ?? null, // SimpleFIN organization data
+                'iban'                                                => null, // Placeholder for consistency if component expects it
+                'extra'                                               => $sfinAccountData['extra'] ?? [], // SimpleFIN extra data
+                'bic'                                                 => null, // Placeholder
+                'product'                                             => null, // Placeholder
+                'cashAccountType'                                     => null, // Placeholder
+                'usage'                                               => null, // Placeholder
+                'resourceId'                                          => null, // Placeholder
+                'bban'                                                => null, // Placeholder
+                'ownerName'                                           => null, // Placeholder
             ];
 
 
-            $return[] = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
-                         'name'                 => $sfinAccountData['name'], // SimpleFIN account name
-                         'id'                   => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
-                         'mapped_to'            => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name,], $fireflyAccounts), // getMappedTo needs 'identifier'
-                         'type'                 => 'source', // Indicates it's an account from the import source
-                         'firefly_iii_accounts' => $fireflyAccounts, // Required by x-importer-account component
+            $return[]                    = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
+                'name'                                             => $sfinAccountData['name'], // SimpleFIN account name
+                'id'                                               => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
+                'mapped_to'                                        => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
+                'type'                                             => 'source', // Indicates it's an account from the import source
+                'firefly_iii_accounts'                             => $fireflyAccounts, // Required by x-importer-account component
             ];
         }
 
@@ -235,9 +233,9 @@ class ConfigurationController extends Controller
      * Stub for determining if an imported account is mapped to a Firefly III account.
      * TODO: Implement actual mapping logic.
      *
-     * @param object $importAccount An object representing the account from the import source.
+     * @param object $importAccount   An object representing the account from the import source.
      *                                Expected to have at least 'identifier' and 'name' properties.
-     * @param array $fireflyAccounts array of existing Firefly III accounts
+     * @param array  $fireflyAccounts array of existing Firefly III accounts
      *
      * @return ?string the ID of the mapped Firefly III account, or null if not mapped
      */
@@ -254,7 +252,7 @@ class ConfigurationController extends Controller
         if (isset($fireflyAccounts['assets']) && is_array($fireflyAccounts['assets'])) {
             foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && strlen($fireflyAccountName) > 0 && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -264,7 +262,7 @@ class ConfigurationController extends Controller
         if (isset($fireflyAccounts['liabilities']) && is_array($fireflyAccounts['liabilities'])) {
             foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && strlen($fireflyAccountName) > 0 && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -283,8 +281,8 @@ class ConfigurationController extends Controller
             $mapper = app(TransactionCurrencies::class);
 
             return $mapper->getMap();
-        } catch (Exception $e) {
-            Log::error('Failed to load currencies: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Failed to load currencies: '.$e->getMessage());
 
             return [];
         }
@@ -294,9 +292,9 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj = new Date();
+        $dateObj           = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
-        $date = today()->locale($locale);
+        $date              = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
@@ -316,7 +314,7 @@ class ConfigurationController extends Controller
 
         // loop accounts:
 
-        $accounts = [];
+        $accounts      = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accountValue          = (int)$fromRequest['accounts'][$identifier];
@@ -330,7 +328,7 @@ class ConfigurationController extends Controller
         $configuration->setAccounts($accounts);
 
         // Store new account creation data
-        $newAccounts = $fromRequest['new_account'] ?? [];
+        $newAccounts   = $fromRequest['new_account'] ?? [];
         $configuration->setNewAccounts($newAccounts);
 
         // Store do_import selections in session for validation
@@ -338,10 +336,10 @@ class ConfigurationController extends Controller
 
         // Validate configuration contract for SimpleFIN
         if ('simplefin' === $configuration->getFlow()) {
-            $validator = new ConfigurationContractValidator();
+            $validator          = new ConfigurationContractValidator();
 
             // Validate form structure first
-            $formValidation = $validator->validateFormFieldStructure($fromRequest);
+            $formValidation     = $validator->validateFormFieldStructure($fromRequest);
             if (!$formValidation->isValid()) {
                 Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
 
@@ -366,11 +364,11 @@ class ConfigurationController extends Controller
 
         // Map data option is now user-selectable for SimpleFIN via checkbox
 
-        $json = '{}';
+        $json          = '{}';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             Log::error($e->getMessage());
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);

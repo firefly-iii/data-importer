@@ -195,7 +195,7 @@ class AccountMapper
             ];
 
             // Add opening balance date if opening balance is provided
-            if ('' !==(string)$config['opening_balance'] && is_numeric($config['opening_balance'])) {
+            if ('' !== (string)$config['opening_balance'] && is_numeric($config['opening_balance'])) {
                 $payload['opening_balance_date'] = $config['opening_balance_date'] ?? date('Y-m-d');
             }
 
@@ -322,7 +322,7 @@ class AccountMapper
     private function loadFireflyAccounts(): void
     {
         // Only load once
-        if (!empty($this->fireflyAccounts)) {
+        if (count($this->fireflyAccounts) > 0) {
             return;
         }
 
@@ -331,7 +331,7 @@ class AccountMapper
             $baseUrl     = SecretManager::getBaseUrl();
             $accessToken = SecretManager::getAccessToken();
 
-            if (empty($baseUrl) || empty($accessToken)) {
+            if ('' === $baseUrl || '' === $accessToken) {
                 app('log')->warning('Missing authentication context for Firefly III account loading');
 
                 throw new ImporterErrorException('Authentication context not available for account loading');
