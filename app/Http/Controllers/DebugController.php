@@ -42,8 +42,9 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
-        $now   = Carbon::now()->format('Y-m-d H:i:s e');
-        $table = $this->getTable();
+        $now        = Carbon::now()->format('Y-m-d H:i:s e');
+        $table      = $this->getTable();
+
         /** @var Logger $logger */
         $logger     = Log::driver();
         $handlers   = $logger->getHandlers();
@@ -62,7 +63,7 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|' . substr($logContent, -8192);
+            $logContent = 'Truncated from this point <----|'.substr($logContent, -8192);
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
@@ -116,8 +117,8 @@ class DebugController extends Controller
                 $baseBuild = (string)config('importer.docker.base_build');
             }
         }
-        $search  = ['~', '#'];
-        $replace = ['\~', '# '];
+        $search    = ['~', '#'];
+        $replace   = ['\~', '# '];
 
         return [
             'is_docker'   => $isDocker,
@@ -146,11 +147,11 @@ class DebugController extends Controller
     {
         $array = [
             -1                                                             => 'ALL errors',
-            E_ALL & ~E_NOTICE & ~E_DEPRECATED                  => 'E_ALL & ~E_NOTICE & ~E_DEPRECATED',
+            E_ALL & ~E_NOTICE & ~E_DEPRECATED                              => 'E_ALL & ~E_NOTICE & ~E_DEPRECATED',
             E_ALL                                                          => 'E_ALL',
-            E_ALL & ~E_DEPRECATED                              => 'E_ALL & ~E_DEPRECATED',
+            E_ALL & ~E_DEPRECATED                                          => 'E_ALL & ~E_DEPRECATED',
             E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
-            E_ALL & ~E_NOTICE                                  => 'E_ALL & ~E_NOTICE',
+            E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 

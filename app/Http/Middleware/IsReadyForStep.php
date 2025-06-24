@@ -27,7 +27,6 @@ namespace App\Http\Middleware;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
-use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,9 +38,9 @@ trait IsReadyForStep
 {
     public const TEST = 'test';
 
-    public function handle(Request $request, Closure $next): mixed
+    public function handle(Request $request, \Closure $next): mixed
     {
-        $result = $this->isReadyForStep($request);
+        $result   = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -446,25 +445,25 @@ trait IsReadyForStep
                 throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
 
             case 'upload-files':
-                $route = route('004-configure.index');
+                $route             = route('004-configure.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route = route('005-roles.index');
+                $route             = route('005-roles.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -485,20 +484,20 @@ trait IsReadyForStep
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'authenticate':
-                $route = route('003-upload.index');
+                $route             = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -621,6 +620,7 @@ trait IsReadyForStep
                     return redirect($route);
                 }
         }
+
         throw new ImporterErrorException(sprintf('redirectToCorrectSpectreStep: Cannot handle basic step "%s"', self::STEP));
     }
 

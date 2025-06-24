@@ -46,9 +46,9 @@ return [
     ],
 
     // docker build info.
-    'docker' => [
-        'is_docker' => env('IS_DOCKER', false),
-        'base_build' => env('BASE_IMAGE_BUILD','(unknown)'),
+    'docker'                        => [
+        'is_docker'  => env('IS_DOCKER', false),
+        'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
 
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
