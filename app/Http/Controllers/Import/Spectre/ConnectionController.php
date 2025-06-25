@@ -48,6 +48,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ConnectionController
@@ -119,13 +120,13 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
-        app('log')->debug('About to get connections.');
+        Log::debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->customer = $identifier;
@@ -174,7 +175,7 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 

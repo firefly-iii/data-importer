@@ -29,6 +29,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class IndexController
@@ -46,7 +47,7 @@ class IndexController extends Controller
 
     public function flush(): mixed
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget([
             Constants::UPLOAD_DATA_FILE,
             Constants::UPLOAD_CONFIG_FILE,
@@ -63,14 +64,14 @@ class IndexController extends Controller
 
     public function index(Request $request): mixed
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
         $validInfo         = SecretManager::hasValidSecrets();
         if (!$validInfo) {
-            app('log')->debug('No valid secrets, redirect to token.index');
+            Log::debug('No valid secrets, redirect to token.index');
 
             return redirect(route('token.index'));
         }
@@ -80,7 +81,7 @@ class IndexController extends Controller
         $url               = (string) config('importer.url');
         $accessTokenConfig = (string) config('importer.access_token');
 
-        app('log')->debug('IndexController authentication detection', [
+        Log::debug('IndexController authentication detection', [
             'client_id'           => $clientId,
             'url'                 => $url,
             'access_token_config' => $accessTokenConfig,
@@ -104,7 +105,7 @@ class IndexController extends Controller
             $flexible = true;
         }
 
-        app('log')->debug('IndexController authentication type flags', [
+        Log::debug('IndexController authentication type flags', [
             'pat'             => $pat,
             'clientIdWithURL' => $clientIdWithURL,
             'URLonly'         => $URLonly,
@@ -131,11 +132,11 @@ class IndexController extends Controller
 
     public function postIndex(Request $request): mixed
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {
-            app('log')->debug(
+            Log::debug(
                 sprintf('%s is a valid flow, redirect to authenticate.', $flow)
             );
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
@@ -144,7 +145,7 @@ class IndexController extends Controller
                 $cookies
             );
         }
-        app('log')->debug(
+        Log::debug(
             sprintf('"%s" is not a valid flow, redirect to index.', $flow)
         );
 

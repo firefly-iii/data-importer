@@ -67,7 +67,7 @@ class SubmitController extends Controller
      */
     public function index()
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $mainTitle     = 'Submit the data';
         $statusManager = new SubmissionStatusManager();
         $configuration = $this->restoreConfiguration();
@@ -87,21 +87,21 @@ class SubmitController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
-        app('log')->debug(sprintf('Submit (import) routine manager identifier is "%s"', $identifier));
+        Log::debug(sprintf('Submit (import) routine manager identifier is "%s"', $identifier));
 
         // store identifier in session so the status can get it.
         session()->put(Constants::IMPORT_JOB_IDENTIFIER, $identifier);
-        app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::IMPORT_JOB_IDENTIFIER));
+        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::IMPORT_JOB_IDENTIFIER));
 
         return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
     public function start(Request $request): JsonResponse
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier           = $request->get('identifier');
         if (null === $identifier) {
-            app('log')->error('Start: Identifier is NULL');
+            Log::error('Start: Identifier is NULL');
             $status         = new SubmissionStatus();
             $status->status = SubmissionStatus::SUBMISSION_ERRORED;
 
@@ -109,7 +109,7 @@ class SubmitController extends Controller
         }
         $configuration        = $this->restoreConfiguration();
         $routine              = new RoutineManager($identifier);
-        app('log')->error('Start: Find import job status.');
+        Log::error('Start: Find import job status.');
         $importJobStatus      = SubmissionStatusManager::startOrFindSubmission($identifier);
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
@@ -129,7 +129,7 @@ class SubmitController extends Controller
         try {
             $json         = $disk->get($fileName);
             $transactions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-            app('log')->debug(sprintf('Found %d transactions on the drive.', count($transactions)));
+            Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
         } catch (FileNotFoundException|\JsonException $e) {
             Log::error(sprintf('The file "%s" on "%s" disk contains error: %s', $fileName, self::DISK_NAME, $e->getMessage()));
             // TODO error in logs
@@ -159,7 +159,7 @@ class SubmitController extends Controller
             $vanityUrl
         );
 
-        app('log')->debug('ProcessImportSubmissionJob dispatched', [
+        Log::debug('ProcessImportSubmissionJob dispatched', [
             'identifier'        => $identifier,
             'transaction_count' => count($transactions),
         ]);
@@ -174,9 +174,9 @@ class SubmitController extends Controller
     public function status(Request $request): JsonResponse
     {
         $identifier      = $request->get('identifier');
-        app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+        Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
-            app('log')->warning('Identifier is NULL.');
+            Log::warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
             $fakeStatus = new SubmissionStatus();

@@ -42,6 +42,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -62,7 +63,7 @@ class LinkController extends Controller
      */
     public function build(): Redirector|RedirectResponse
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
         // create a new config thing
         $configuration     = $this->restoreConfiguration();
@@ -110,13 +111,13 @@ class LinkController extends Controller
         $request->setReference($uuid);
         $request->setAgreement($agreementResponse->id);
 
-        app('log')->debug(sprintf('Reference is "%s"', $uuid));
+        Log::debug(sprintf('Reference is "%s"', $uuid));
 
         /** @var NewRequisitionResponse $response */
         $response          = $request->post();
-        app('log')->debug(sprintf('Got a new requisition with id "%s"', $response->id));
-        app('log')->debug(sprintf('Status: %s, returned reference: "%s"', $response->status, $response->reference));
-        app('log')->debug(sprintf('Will now redirect the user to %s', $response->link));
+        Log::debug(sprintf('Got a new requisition with id "%s"', $response->id));
+        Log::debug(sprintf('Status: %s, returned reference: "%s"', $response->status, $response->reference));
+        Log::debug(sprintf('Will now redirect the user to %s', $response->link));
 
         // save config!
         $configuration->addRequisition($uuid, $response->id);
@@ -132,8 +133,8 @@ class LinkController extends Controller
     public function callback(Request $request)
     {
         $reference     = (string) $request->get('ref');
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-        app('log')->debug(sprintf('Reference is "%s"', $reference));
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Reference is "%s"', $reference));
 
         if ('' === $reference) {
             throw new ImporterHttpException('The reference returned by GoCardless was unexpectedly empty.');

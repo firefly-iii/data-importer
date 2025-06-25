@@ -30,6 +30,7 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
+use Illuminate\Support\Facades\Log;
 
 class AutoUploadController extends Controller
 {
@@ -64,7 +65,7 @@ class AutoUploadController extends Controller
         try {
             $this->importUpload((string) $json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
 
@@ -73,7 +74,7 @@ class AutoUploadController extends Controller
 
     public function error($string, $verbosity = null): void
     {
-        app('log')->error($string);
+        Log::error($string);
         $this->line($string);
     }
 

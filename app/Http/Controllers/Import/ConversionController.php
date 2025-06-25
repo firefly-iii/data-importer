@@ -43,6 +43,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ConversionController
@@ -68,13 +69,13 @@ class ConversionController extends Controller
      */
     public function index(): Application|Factory|View
     {
-        // app('log')->debug(sprintf('Now in %s', __METHOD__));
+        // Log::debug(sprintf('Now in %s', __METHOD__));
         $mainTitle           = 'Convert the data';
 
         // create configuration:
         $configuration       = $this->restoreConfiguration();
 
-        app('log')->debug('Will now verify configuration content.');
+        Log::debug('Will now verify configuration content.');
         $flow                = $configuration->getFlow();
 
         // default back to mapping
@@ -84,21 +85,21 @@ class ConversionController extends Controller
         // SimpleFIN always goes back to configuration
         if ('simplefin' === $flow) {
             $jobBackUrl = route('back.config');
-            app('log')->debug('SimpleFIN: Pressing "back" will send you to configure.');
+            Log::debug('SimpleFIN: Pressing "back" will send you to configure.');
         }
         // no mapping, back to roles
         if ('simplefin' !== $flow && 0 === count($configuration->getDoMapping()) && 'file' === $flow) {
-            app('log')->debug('Pressing "back" will send you to roles.');
+            Log::debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
         // back to mapping
         if ('simplefin' !== $flow && 0 === count($configuration->getMapping())) {
-            app('log')->debug('Pressing "back" will send you to mapping.');
+            Log::debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
         // TODO option is not used atm.
         //        if (true === $configuration->isMapAllData()) {
-        //            app('log')->debug('Pressing "back" will send you to mapping.');
+        //            Log::debug('Pressing "back" will send you to mapping.');
         //            $jobBackUrl = route('back.mapping');
         //        }
 
@@ -106,7 +107,7 @@ class ConversionController extends Controller
         $identifier          = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $routine             = null;
         $flow                = $configuration->getFlow();
-        app('log')->debug('Will redirect to submission after conversion.');
+        Log::debug('Will redirect to submission after conversion.');
         $nextUrl             = route('008-submit.index');
 
         // switch based on flow:
@@ -117,39 +118,39 @@ class ConversionController extends Controller
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
-                app('log')->debug('Create CSV routine manager.');
+                Log::debug('Create CSV routine manager.');
                 $routine = new CSVRoutineManager($identifier);
             }
             if ('camt' === $contentType) {
-                app('log')->debug('Create CAMT routine manager.');
+                Log::debug('Create CAMT routine manager.');
                 $routine = new CamtRoutineManager($identifier);
             }
         }
         if ('nordigen' === $flow) {
-            app('log')->debug('Create GoCardless routine manager.');
+            Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            app('log')->debug('Create Spectre routine manager.');
+            Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
-            app('log')->debug('Create SimpleFIN routine manager.');
+            Log::debug('Create SimpleFIN routine manager.');
 
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
-                app('log')->debug('SimpleFIN routine manager created successfully.');
+                Log::debug('SimpleFIN routine manager created successfully.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager: '.$e->getMessage());
-                app('log')->error('Error class: '.get_class($e));
-                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
-                app('log')->error('Stack trace: '.$e->getTraceAsString());
+                Log::error('Failed to create SimpleFIN routine manager: '.$e->getMessage());
+                Log::error('Error class: '.get_class($e));
+                Log::error('Error file: '.$e->getFile().':'.$e->getLine());
+                Log::error('Stack trace: '.$e->getTraceAsString());
 
                 throw $e;
             }
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
-            app('log')->debug('Will redirect to mapping after conversion.');
+            Log::debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
         if (null === $routine) {
@@ -159,11 +160,11 @@ class ConversionController extends Controller
         // may be a new identifier! Yay!
         $identifier          = $routine->getIdentifier();
 
-        app('log')->debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
+        Log::debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
         // store identifier in session so the status can get it.
         session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
-        app('log')->debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
+        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
 
         // Prepare new account creation data for SimpleFIN
         $newAccountsToCreate = [];
@@ -183,7 +184,7 @@ class ConversionController extends Controller
 
     public function start(Request $request): JsonResponse
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
         $configuration   = $this->restoreConfiguration();
         $routine         = null;
@@ -194,7 +195,7 @@ class ConversionController extends Controller
             $contractValidation = $validator->validateConfigurationContract($configuration);
 
             if (!$contractValidation->isValid()) {
-                app('log')->error('SimpleFIN configuration contract validation failed during conversion start', $contractValidation->getErrors());
+                Log::error('SimpleFIN configuration contract validation failed during conversion start', $contractValidation->getErrors());
                 RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
                 $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
@@ -203,17 +204,17 @@ class ConversionController extends Controller
             }
 
             if ($contractValidation->hasWarnings()) {
-                app('log')->warning('SimpleFIN configuration contract warnings during conversion start', $contractValidation->getWarnings());
+                Log::warning('SimpleFIN configuration contract warnings during conversion start', $contractValidation->getWarnings());
             }
 
-            app('log')->debug('SimpleFIN configuration contract validation successful for conversion start');
+            Log::debug('SimpleFIN configuration contract validation successful for conversion start');
         }
 
         // Handle new account data for SimpleFIN
         if ('simplefin' === $configuration->getFlow()) {
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
-                app('log')->debug('Updating configuration with detailed new account data', $newAccountData);
+                Log::debug('Updating configuration with detailed new account data', $newAccountData);
 
                 // Update the configuration with the detailed account creation data
                 $existingNewAccounts = $configuration->getNewAccounts();
@@ -262,12 +263,12 @@ class ConversionController extends Controller
         if ('simplefin' === $flow) {
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
-                app('log')->debug('SimpleFIN routine manager created successfully in start method.');
+                Log::debug('SimpleFIN routine manager created successfully in start method.');
             } catch (\Throwable $e) {
-                app('log')->error('Failed to create SimpleFIN routine manager in start method: '.$e->getMessage());
-                app('log')->error('Error class: '.get_class($e));
-                app('log')->error('Error file: '.$e->getFile().':'.$e->getLine());
-                app('log')->error('Stack trace: '.$e->getTraceAsString());
+                Log::error('Failed to create SimpleFIN routine manager in start method: '.$e->getMessage());
+                Log::error('Error class: '.get_class($e));
+                Log::error('Error file: '.$e->getFile().':'.$e->getLine());
+                Log::error('Stack trace: '.$e->getTraceAsString());
 
                 throw $e;
             }
@@ -287,51 +288,51 @@ class ConversionController extends Controller
         try {
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
-            app('log')->error($e->getTraceAsString());
+            Log::error($e->getMessage());
+            Log::error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());
         }
-        app('log')->debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
+        Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
-            app('log')->error('[b] Zero transactions!');
+            Log::error('[b] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());
         }
-        app('log')->debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
+        Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
         $disk            = \Storage::disk(self::DISK_NAME);
 
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
         } catch (\JsonException $e) {
-            app('log')->error(sprintf('JSON exception: %s', $e->getMessage()));
-            app('log')->error($e->getTraceAsString());
+            Log::error(sprintf('JSON exception: %s', $e->getMessage()));
+            Log::error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
             return response()->json($importJobStatus->toArray());
         }
-        app('log')->debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
+        Log::debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
         // set config as complete.
         session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-        app('log')->debug('Set conversion as complete.');
+        Log::debug('Set conversion as complete.');
 
         return response()->json($importJobStatus->toArray());
     }
 
     public function status(Request $request): JsonResponse
     {
-        //        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        //        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
-        app('log')->debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+        Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
-            app('log')->warning('Identifier is NULL.');
+            Log::warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.
             // As a fallback, return empty status
             $fakeStatus = new ConversionStatus();

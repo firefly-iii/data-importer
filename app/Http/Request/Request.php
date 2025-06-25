@@ -27,6 +27,7 @@ namespace App\Http\Request;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Request.
@@ -130,7 +131,7 @@ class Request extends FormRequest
         try {
             $result = $this->get($field) ? new Carbon($this->get($field)) : null;
         } catch (\Exception $e) {
-            app('log')->debug(sprintf('Exception when parsing date. Not interesting: %s', $e->getMessage()));
+            Log::debug(sprintf('Exception when parsing date. Not interesting: %s', $e->getMessage()));
         }
 
         return $result;

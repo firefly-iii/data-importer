@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Http\Request;
 
 use App\Services\Session\Constants;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Validator;
 
 /**
@@ -44,7 +45,7 @@ class ConfigurationPostRequest extends Request
     public function getAll(): array
     {
         // Debug: Log raw form data before processing
-        app('log')->debug('ConfigurationPostRequest raw form data', [
+        Log::debug('ConfigurationPostRequest raw form data', [
             'do_import_raw'   => $this->get('do_import') ?? [],
             'accounts_raw'    => $this->get('accounts') ?? [],
             'new_account_raw' => $this->get('new_account') ?? [],
@@ -63,7 +64,7 @@ class ConfigurationPostRequest extends Request
         foreach ($doImport as $encodedId => $value) {
             $originalId                   = (string) str_replace('_', ' ', $encodedId);
             $decodedDoImport[$originalId] = $value;
-            app('log')->debug('Decoded do_import', [
+            Log::debug('Decoded do_import', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
@@ -74,7 +75,7 @@ class ConfigurationPostRequest extends Request
         foreach ($accounts as $encodedId => $value) {
             $originalId                   = (string) str_replace('_', ' ', $encodedId);
             $decodedAccounts[$originalId] = $value;
-            app('log')->debug('Decoded accounts', [
+            Log::debug('Decoded accounts', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
@@ -85,7 +86,7 @@ class ConfigurationPostRequest extends Request
         foreach ($newAccount as $encodedId => $accountData) {
             $originalId                     = (string) str_replace('_', ' ', $encodedId);
             $decodedNewAccount[$originalId] = $accountData;
-            app('log')->debug('Decoded new_account', [
+            Log::debug('Decoded new_account', [
                 'encoded' => $encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
@@ -246,7 +247,7 @@ class ConfigurationPostRequest extends Request
             $accounts    = $data['accounts'] ?? [];
             $newAccounts = $data['new_account'] ?? [];
 
-            app('log')->debug('withValidator account validation', [
+            Log::debug('withValidator account validation', [
                 'accounts'    => $accounts,
                 'newAccounts' => array_keys($newAccounts),
                 'flow'        => $flow,
@@ -254,7 +255,7 @@ class ConfigurationPostRequest extends Request
 
             foreach ($accounts as $encodedAccountId => $selectedValue) {
                 if ('create_new' === $selectedValue) {
-                    app('log')->debug(
+                    Log::debug(
                         'DEBUG: Validating new account creation',
                         [
                             'encodedAccountId' => $encodedAccountId,

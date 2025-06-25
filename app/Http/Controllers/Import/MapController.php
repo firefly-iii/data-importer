@@ -37,6 +37,7 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -65,7 +66,7 @@ class MapController extends Controller
      */
     public function index()
     {
-        app('log')->debug('Now in mapController index');
+        Log::debug('Now in mapController index');
 
         $mainTitle     = 'Map data';
         $subTitle      = 'Map values in file to actual data in Firefly III';
@@ -74,19 +75,19 @@ class MapController extends Controller
         $roles         = [];
 
         if ('file' === $configuration->getFlow() && 'csv' === $configuration->getContentType()) {
-            app('log')->debug('Get mapping data for CSV file');
+            Log::debug('Get mapping data for CSV file');
             $roles = $configuration->getRoles();
             $data  = $this->getCSVMapInformation();
         }
         if ('file' === $configuration->getFlow() && 'camt' === $configuration->getContentType()) {
-            app('log')->debug('Get mapping data for CAMT file');
+            Log::debug('Get mapping data for CAMT file');
             $roles = $configuration->getRoles();
             $data  = $this->getCamtMapInformation();
         }
 
         // nordigen, spectre, simplefin and others:
         if ('file' !== $configuration->getFlow()) {
-            app('log')->debug('Get mapping data for GoCardless, Spectre, and SimpleFIN');
+            Log::debug('Get mapping data for GoCardless, Spectre, and SimpleFIN');
             $roles = [];
             $data  = $this->getImporterMapInformation();
         }
@@ -98,7 +99,7 @@ class MapController extends Controller
 
             // if "file", now ready for conversion
             if ('file' === $configuration->getFlow()) {
-                app('log')->debug('Its a file, also set ready for conversion.');
+                Log::debug('Its a file, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
 
@@ -134,7 +135,7 @@ class MapController extends Controller
             if (false === $mapColumn) {
                 continue;
             }
-            app('log')->debug(sprintf('Mappable role is "%s"', $role));
+            Log::debug(sprintf('Mappable role is "%s"', $role));
 
             $info['role']         = $role;
             $info['values']       = [];
@@ -144,14 +145,14 @@ class MapController extends Controller
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
-            app('log')->debug(sprintf('Associated class is %s', $class));
+            Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
             $object               = app($class);
             $info['mapping_data'] = $object->getMap();
             $info['mapped']       = $existingMapping[$index] ?? [];
 
-            app('log')->debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+            Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
 
             $data[$index]         = $info;
         }
@@ -195,22 +196,22 @@ class MapController extends Controller
             $info                 = config('camt.all_roles')[$role] ?? null;
             $mappable             = $info['mappable'] ?? false;
             if (null === $info) {
-                app('log')->warning(sprintf('Field "%s" with role "%s" does not exist.', $index, $role));
+                Log::warning(sprintf('Field "%s" with role "%s" does not exist.', $index, $role));
 
                 continue;
             }
             if (false === $mappable) {
-                app('log')->warning(sprintf('Field "%s" with role "%s" cannot be mapped.', $index, $role));
+                Log::warning(sprintf('Field "%s" with role "%s" cannot be mapped.', $index, $role));
 
                 continue;
             }
             $mapColumn            = $doMapping[$index] ?? false;
             if (false === $mapColumn) {
-                app('log')->warning(sprintf('Field "%s" with role "%s" does not have to be mapped.', $index, $role));
+                Log::warning(sprintf('Field "%s" with role "%s" does not have to be mapped.', $index, $role));
 
                 continue;
             }
-            app('log')->debug(sprintf('Field "%s" with role is "%s"', $index, $role));
+            Log::debug(sprintf('Field "%s" with role is "%s"', $index, $role));
 
             $info['role']         = $role;
             $info['values']       = [];
@@ -220,14 +221,14 @@ class MapController extends Controller
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
-            app('log')->debug(sprintf('Associated class is %s', $class));
+            Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
             $object               = app($class);
             $info['mapping_data'] = $object->getMap();
             $info['mapped']       = $existingMapping[$index] ?? [];
 
-            app('log')->debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
+            Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
 
             $data[$index]         = $info;
         }
@@ -264,7 +265,7 @@ class MapController extends Controller
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
-            app('log')->debug(sprintf('Associated class is %s', $class));
+            Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
             $object                       = app($class);
@@ -285,7 +286,7 @@ class MapController extends Controller
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
-            app('log')->debug(sprintf('Associated class is %s', $class));
+            Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
             $object                   = app($class);
@@ -305,7 +306,7 @@ class MapController extends Controller
             if (!class_exists($class)) {
                 throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
-            app('log')->debug(sprintf('Associated class is %s', $class));
+            Log::debug(sprintf('Associated class is %s', $class));
 
             /** @var MapperInterface $object */
             $object                         = app($class);
@@ -319,11 +320,11 @@ class MapController extends Controller
 
     private function getOpposingAccounts(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
 
         if (null === $downloadIdentifier) {
-            app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+            Log::warning('No conversion job identifier found in session - mapping called before conversion');
 
             return [];
         }
@@ -331,7 +332,7 @@ class MapController extends Controller
         $disk               = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
-            app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+            Log::warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
 
             return [];
         }
@@ -339,7 +340,7 @@ class MapController extends Controller
         $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
-            app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+            Log::warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
 
             return [];
         }
@@ -354,7 +355,7 @@ class MapController extends Controller
 
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction (1)', $index + 1, $total));
+            Log::debug(sprintf('[%s/%s] Parsing transaction (1)', $index + 1, $total));
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
@@ -374,11 +375,11 @@ class MapController extends Controller
 
     private function getExpenseRevenueAccounts(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
 
         if (null === $downloadIdentifier) {
-            app('log')->warning('No conversion job identifier found in session - mapping called before conversion');
+            Log::warning('No conversion job identifier found in session - mapping called before conversion');
 
             return [];
         }
@@ -386,7 +387,7 @@ class MapController extends Controller
         $disk               = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
-            app('log')->warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
+            Log::warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
 
             return [];
         }
@@ -394,7 +395,7 @@ class MapController extends Controller
         $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
-            app('log')->warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
+            Log::warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
 
             return [];
         }
@@ -409,7 +410,7 @@ class MapController extends Controller
 
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
+            Log::debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
@@ -439,7 +440,7 @@ class MapController extends Controller
 
     private function getCategories(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $disk               = Storage::disk(self::DISK_NAME);
         $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
@@ -454,7 +455,7 @@ class MapController extends Controller
 
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
-            app('log')->debug(sprintf('[%s/%s] Parsing transaction (2)', $index + 1, $total));
+            Log::debug(sprintf('[%s/%s] Parsing transaction (2)', $index + 1, $total));
 
             /** @var array $row */
             foreach ($transaction['transactions'] as $row) {
@@ -532,11 +533,11 @@ class MapController extends Controller
         // then save entire thing to a new disk file:
         // TODO write config needs helper too
         $configFileName  = StorageService::storeArray($configuration->toArray());
-        app('log')->debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
-        app('log')->debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
+        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
@@ -553,17 +554,17 @@ class MapController extends Controller
 
     private function mergeMapping(array $original, array $new): array
     {
-        app('log')->debug('Now merging disk mapping with new mapping');
+        Log::debug('Now merging disk mapping with new mapping');
         foreach ($new as $column => $mappedValues) {
-            app('log')->debug(sprintf('Now working on column "%s"', $column));
+            Log::debug(sprintf('Now working on column "%s"', $column));
             if (array_key_exists($column, $original)) {
                 foreach ($mappedValues as $name => $value) {
-                    app('log')->debug(sprintf('Updated mapping of "%s" to ID "%s"', $name, $value));
+                    Log::debug(sprintf('Updated mapping of "%s" to ID "%s"', $name, $value));
                     $original[$column][$name] = $value;
                 }
             }
             if (!array_key_exists($column, $original)) {
-                app('log')->debug('The original mapping has no map data for this column. We will set it now.');
+                Log::debug('The original mapping has no map data for this column. We will set it now.');
                 $original[$column] = $mappedValues;
             }
         }

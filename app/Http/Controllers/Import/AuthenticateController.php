@@ -40,6 +40,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Session;
 
 /**
@@ -52,7 +53,7 @@ class AuthenticateController extends Controller
     public function __construct()
     {
         parent::__construct();
-        app('log')->debug('Now in AuthenticateController, calling middleware.');
+        Log::debug('Now in AuthenticateController, calling middleware.');
         $this->middleware(AuthenticateControllerMiddleware::class);
     }
 
@@ -99,7 +100,7 @@ class AuthenticateController extends Controller
         if ('simplefin' === $flow) {
             // This case should ideally be handled by middleware redirecting to upload.
             // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
-            app('log')->warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
+            Log::warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
 
             return redirect(route('003-upload.index'));
         }

@@ -42,6 +42,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
@@ -64,7 +65,7 @@ class SelectionController extends Controller
      */
     public function index()
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $countries     = config('nordigen.countries');
         $mainTitle     = 'Select your country and bank';
         $pageTitle     = 'Select your country and bank';
@@ -107,7 +108,7 @@ class SelectionController extends Controller
      */
     public function postIndex(SelectionRequest $request)
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
         $configuration = $this->restoreConfiguration();
         $values        = $request->getAll();
@@ -127,7 +128,7 @@ class SelectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 
