@@ -1790,16 +1790,16 @@
         },
         {
             "name": "league/csv",
-            "version": "9.24.0",
+            "version": "9.24.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/csv.git",
-                "reference": "3f11e12ccd7d6dc25729056e7ce386e4084089ea"
+                "reference": "e0221a3f16aa2a823047d59fab5809d552e29bc8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/csv/zipball/3f11e12ccd7d6dc25729056e7ce386e4084089ea",
-                "reference": "3f11e12ccd7d6dc25729056e7ce386e4084089ea",
+                "url": "https://api.github.com/repos/thephpleague/csv/zipball/e0221a3f16aa2a823047d59fab5809d552e29bc8",
+                "reference": "e0221a3f16aa2a823047d59fab5809d552e29bc8",
                 "shasum": ""
             },
             "require": {
@@ -1877,7 +1877,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-06-24T19:54:25+00:00"
+            "time": "2025-06-25T14:53:51+00:00"
         },
         {
             "name": "league/flysystem",
