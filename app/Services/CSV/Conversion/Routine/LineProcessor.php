@@ -28,6 +28,7 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class LineProcessor
@@ -51,9 +52,9 @@ class LineProcessor
      */
     public function __construct(Configuration $configuration)
     {
-        app('log')->debug('Created LineProcessor()');
-        app('log')->debug('Roles', $configuration->getRoles());
-        app('log')->debug('Mapping (will not be printed)');
+        Log::debug('Created LineProcessor()');
+        Log::debug('Roles', $configuration->getRoles());
+        Log::debug('Mapping (will not be printed)');
         $this->roles      = $configuration->getRoles();
         $this->mapping    = $configuration->getMapping();
         $this->doMapping  = $configuration->getDoMapping();
@@ -65,21 +66,21 @@ class LineProcessor
         $processed = [];
         $count     = count($lines);
 
-        app('log')->info(sprintf('Now processing the data in the %d CSV lines...', $count));
+        Log::info(sprintf('Now processing the data in the %d CSV lines...', $count));
 
         foreach ($lines as $index => $line) {
-            app('log')->debug(sprintf('Now processing CSV line #%d/#%d', $index + 1, $count));
+            Log::debug(sprintf('Now processing CSV line #%d/#%d', $index + 1, $count));
 
             try {
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
-                app('log')->error($e->getMessage());
-                //                app('log')->error($e->getTraceAsString());
+                Log::error($e->getMessage());
+                //                Log::error($e->getTraceAsString());
                 $this->addError(0, $e->getMessage());
             }
         }
 
-        app('log')->info(sprintf('Done processing data in %d CSV lines...', $count));
+        Log::info(sprintf('Done processing data in %d CSV lines...', $count));
 
         return $processed;
     }
@@ -92,30 +93,30 @@ class LineProcessor
      */
     private function process(array $line): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $count       = count($line);
         $return      = [];
         foreach ($line as $columnIndex => $value) {
-            app('log')->debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
+            Log::debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
             $value        = trim($value);
             $originalRole = $this->roles[$columnIndex] ?? '_ignore';
-            app('log')->debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
+            Log::debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
             if ('_ignore' === $originalRole) {
-                app('log')->debug(sprintf('Ignore column #%d because role is "_ignore".', $columnIndex + 1));
+                Log::debug(sprintf('Ignore column #%d because role is "_ignore".', $columnIndex + 1));
 
                 continue;
             }
             if ('' === $value) {
-                app('log')->debug(sprintf('Ignore column #%d because value is "".', $columnIndex + 1));
+                Log::debug(sprintf('Ignore column #%d because value is "".', $columnIndex + 1));
 
                 continue;
             }
 
             // is a mapped value present?
             $mapped       = $this->mapping[$columnIndex][$value] ?? 0;
-            app('log')->debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
-            app('log')->debug(sprintf('Value is %s', var_export($value, true)));
-            // app('log')->debug('Local mapping (will not be printed)');
+            Log::debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
+            Log::debug(sprintf('Value is %s', var_export($value, true)));
+            // Log::debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
             $role         = $this->getRoleForColumn($columnIndex, $mapped);
             $appendValue  = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
@@ -124,7 +125,7 @@ class LineProcessor
                 $appendValue = false;
             }
 
-            // app('log')->debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
+            // Log::debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
             $columnValue  = new ColumnValue();
             $columnValue->setValue($value);
@@ -135,7 +136,7 @@ class LineProcessor
 
             // if column role is 'date', add the date config for conversion:
             if (in_array($originalRole, ['date_transaction', 'date_interest', 'date_due', 'date_payment', 'date_process', 'date_book', 'date_invoice'], true)) {
-                app('log')->debug(sprintf('Because role is %s, set date format to "%s" (via setConfiguration).', $originalRole, $this->dateFormat));
+                Log::debug(sprintf('Because role is %s, set date format to "%s" (via setConfiguration).', $originalRole, $this->dateFormat));
                 $columnValue->setConfiguration($this->dateFormat);
             }
 
@@ -148,7 +149,7 @@ class LineProcessor
         $columnValue->setAppendValue(false);
         $columnValue->setRole('original-source');
         $return[]    = $columnValue;
-        app('log')->debug(sprintf('Added column #%d to denote the original source.', count($return)));
+        Log::debug(sprintf('Added column #%d to denote the original source.', count($return)));
 
         return $return;
     }
@@ -166,14 +167,14 @@ class LineProcessor
     {
         $role                           = $this->roles[$column] ?? '_ignore';
         if (0 === $mapped) {
-            app('log')->debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
+            Log::debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
 
             return $role;
         }
         if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
             // if the mapping has been filled in already by a role with a higher priority,
             // ignore the mapping.
-            app('log')->debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
+            Log::debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
 
             return $role;
         }
@@ -204,14 +205,14 @@ class LineProcessor
         }
         $newRole                        = $roleMapping[$role];
         if ($newRole !== $role) {
-            app('log')->debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
+            Log::debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
         }
 
         // also store the $mapped values in a "mappedValues" array.
         // used to validate whatever has been set as mapping
         $this->mappedValues[$newRole][] = $mapped;
         $this->mappedValues[$newRole]   = array_unique($this->mappedValues[$newRole]);
-        app('log')->debug(sprintf('Values mapped to role "%s" are: ', $newRole), $this->mappedValues[$newRole]);
+        Log::debug(sprintf('Values mapped to role "%s" are: ', $newRole), $this->mappedValues[$newRole]);
 
         return $newRole;
     }

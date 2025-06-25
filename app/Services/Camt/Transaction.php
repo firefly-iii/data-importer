@@ -22,6 +22,7 @@ use Genkgo\Camt\DTO\ProprietaryAccount;
 use Genkgo\Camt\DTO\RelatedParty;
 use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\UPICAccount;
+use Illuminate\Support\Facades\Log;
 use Money\Currencies\ISOCurrencies;
 use Money\Formatter\DecimalMoneyFormatter;
 use Money\Money;
@@ -42,7 +43,7 @@ class Transaction
         Entry         $levelC,
         array         $levelD
     ) {
-        app('log')->debug('Constructed a CAMT Transaction');
+        Log::debug('Constructed a CAMT Transaction');
         $this->configuration = $configuration;
         $this->levelA        = $levelA;
         $this->levelB        = $levelB;
@@ -89,7 +90,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
-        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
+        Log::debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
 
         switch ($field) {
             default:
@@ -212,7 +213,7 @@ class Transaction
 
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    app('log')->debug('There is no info for this thing.');
+                    Log::debug('There is no info for this thing.');
 
                     // TODO return nothing?
                     return $result;
@@ -381,7 +382,7 @@ class Transaction
                 $info            = $this->levelD[$index];
                 $opposingParty   = $this->getOpposingParty($info);
                 if (null === $opposingParty) {
-                    app('log')->debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                    Log::debug('In entryDetailOpposingName, opposing party is NULL, return "".');
                 }
                 if (null !== $opposingParty) {
                     $result = $this->getOpposingName($opposingParty);
@@ -396,33 +397,33 @@ class Transaction
      */
     private function getOpposingParty(EntryTransactionDetail $transactionDetail): ?RelatedParty
     {
-        app('log')->debug('getOpposingParty(), interested in Creditor.');
+        Log::debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Creditor';
 
         // get amount from "getAmount":
         $amount                   = $transactionDetail?->getAmount()?->getAmount();
         if (null !== $amount) {
-            app('log')->debug(sprintf('Amount in getAmount() is "%s"', $amount));
+            Log::debug(sprintf('Amount in getAmount() is "%s"', $amount));
         }
         if (null === $amount) {
             $amount = $transactionDetail->getAmountDetails()?->getAmount();
-            app('log')->debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
+            Log::debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
         }
 
         if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
-            app('log')->debug('getOpposingParty(), interested in Debtor!');
+            Log::debug('getOpposingParty(), interested in Debtor!');
             $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Debtor';
         }
         foreach ($relatedParties as $relatedParty) {
-            app('log')->debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));
+            Log::debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));
             if (get_class($relatedParty->getRelatedPartyType()) === $targetRelatedPartyObject) {
-                app('log')->debug('This is the type we are looking for!');
+                Log::debug('This is the type we are looking for!');
 
                 return $relatedParty;
             }
         }
-        app('log')->debug('getOpposingParty(), no opposing party found, return NULL.');
+        Log::debug('getOpposingParty(), no opposing party found, return NULL.');
 
         return null;
     }

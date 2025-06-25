@@ -27,6 +27,7 @@ namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class RoutineManager
@@ -72,13 +73,13 @@ class RoutineManager
         $this->apiSubmitter->setIdentifier($this->identifier);
         $this->apiSubmitter->setConfiguration($configuration);
 
-        app('log')->debug('Created APISubmitter in RoutineManager');
+        Log::debug('Created APISubmitter in RoutineManager');
     }
 
     public function setTransactions(array $transactions): void
     {
         $this->transactions = $transactions;
-        app('log')->debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
+        Log::debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
     }
 
     /**
@@ -86,12 +87,12 @@ class RoutineManager
      */
     public function start(): void
     {
-        app('log')->debug('Start of shared import routine.');
+        Log::debug('Start of shared import routine.');
 
-        app('log')->debug('First collect account information from Firefly III.');
+        Log::debug('First collect account information from Firefly III.');
         $accountInfo       = $this->infoCollector->collectAccountTypes();
 
-        app('log')->debug('Now starting submission by calling API Submitter');
+        Log::debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
         $this->apiSubmitter->setAccountInfo($accountInfo);
         $this->apiSubmitter->setIdentifier($this->identifier);
@@ -99,6 +100,6 @@ class RoutineManager
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
         $this->allErrors   = $this->apiSubmitter->getErrors();
-        app('log')->debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d', count($this->allMessages), count($this->allWarnings), count($this->allErrors)));
+        Log::debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d', count($this->allMessages), count($this->allWarnings), count($this->allErrors)));
     }
 }

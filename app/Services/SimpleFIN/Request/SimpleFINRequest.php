@@ -33,6 +33,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\ServerException;
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -62,7 +63,7 @@ abstract class SimpleFINRequest
 
     public function setParameters(array $parameters): void
     {
-        app('log')->debug('SimpleFIN request parameters set to: ', $parameters);
+        Log::debug('SimpleFIN request parameters set to: ', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -73,7 +74,7 @@ abstract class SimpleFINRequest
 
     protected function authenticatedGet(string $endpoint): ResponseInterface
     {
-        app('log')->debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->apiUrl, $endpoint));
+        Log::debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->apiUrl, $endpoint));
 
         $client  = new Client();
         $fullUrl = sprintf('%s%s', $this->apiUrl, $endpoint);
@@ -102,16 +103,16 @@ abstract class SimpleFINRequest
         try {
             $response = $client->get($fullUrl, $options);
         } catch (ClientException $e) {
-            app('log')->error(sprintf('SimpleFIN ClientException: %s', $e->getMessage()));
+            Log::error(sprintf('SimpleFIN ClientException: %s', $e->getMessage()));
             $this->handleClientException($e);
 
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         } catch (ServerException $e) {
-            app('log')->error(sprintf('SimpleFIN ServerException: %s', $e->getMessage()));
+            Log::error(sprintf('SimpleFIN ServerException: %s', $e->getMessage()));
 
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         } catch (GuzzleException $e) {
-            app('log')->error(sprintf('SimpleFIN GuzzleException: %s', $e->getMessage()));
+            Log::error(sprintf('SimpleFIN GuzzleException: %s', $e->getMessage()));
 
             throw new ImporterHttpException($e->getMessage(), $e->getCode(), $e);
         }
@@ -124,7 +125,7 @@ abstract class SimpleFINRequest
         $statusCode = $e->getResponse()->getStatusCode();
         $body       = (string) $e->getResponse()->getBody();
 
-        app('log')->error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
+        Log::error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 
         switch ($statusCode) {
             case 401:

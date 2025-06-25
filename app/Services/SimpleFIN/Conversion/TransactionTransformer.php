@@ -28,6 +28,7 @@ namespace App\Services\SimpleFIN\Conversion;
 use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
+use Illuminate\Support\Facades\Log;
 
 // Removed SimpleFINModel imports as we now use arrays
 
@@ -58,7 +59,7 @@ class TransactionTransformer
 
         // Skip zero-amount transactions as they're invalid for Firefly III
         if (0.0 === abs($amount)) {
-            app('log')->warning('Skipping zero-amount transaction', [
+            Log::warning('Skipping zero-amount transaction', [
                 'transaction_id' => $transactionData['id'] ?? 'unknown',
                 'description'    => $transactionData['description'] ?? 'unknown',
             ]);
@@ -219,7 +220,7 @@ class TransactionTransformer
 
         // Check if automatic account creation is enabled
         if (!config('simplefin.auto_create_expense_accounts', true)) {
-            app('log')->warning(sprintf(
+            Log::warning(sprintf(
                 'Auto-creation disabled. No %s account will be created for "%s"',
                 $isDeposit ? 'revenue' : 'expense',
                 $description
@@ -240,7 +241,7 @@ class TransactionTransformer
         // Fallback: extract meaningful counter account name from description
         $counterAccountName = $this->extractCounterAccountName($description);
 
-        app('log')->info(sprintf(
+        Log::info(sprintf(
             'Creating new %s account "%s" for transaction "%s"',
             $isDeposit ? 'revenue' : 'expense',
             $counterAccountName,
@@ -449,7 +450,7 @@ class TransactionTransformer
 
         // Check if smart matching is enabled before attempting collection
         if (!config('simplefin.smart_expense_matching', true)) {
-            app('log')->debug('Smart expense matching is disabled, skipping account collection');
+            Log::debug('Smart expense matching is disabled, skipping account collection');
             $this->expenseAccounts   = [];
             $this->revenueAccounts   = [];
             $this->accountsCollected = true;
@@ -463,7 +464,7 @@ class TransactionTransformer
             $accessToken             = SecretManager::getAccessToken();
 
             if ('' === $baseUrl || '' === $accessToken) {
-                app('log')->warning('Missing authentication context for account collection, skipping smart matching');
+                Log::warning('Missing authentication context for account collection, skipping smart matching');
                 $this->expenseAccounts   = [];
                 $this->revenueAccounts   = [];
                 $this->accountsCollected = true;
@@ -471,13 +472,13 @@ class TransactionTransformer
                 return;
             }
 
-            app('log')->debug('Collecting expense accounts from Firefly III');
+            Log::debug('Collecting expense accounts from Firefly III');
             $this->expenseAccounts   = $this->collectExpenseAccounts();
 
-            app('log')->debug('Collecting revenue accounts from Firefly III');
+            Log::debug('Collecting revenue accounts from Firefly III');
             $this->revenueAccounts   = $this->collectRevenueAccounts();
 
-            app('log')->debug(sprintf(
+            Log::debug(sprintf(
                 'Collected %d expense accounts and %d revenue accounts',
                 count($this->expenseAccounts),
                 count($this->revenueAccounts)
@@ -485,8 +486,8 @@ class TransactionTransformer
 
             $this->accountsCollected = true;
         } catch (\Exception $e) {
-            app('log')->error(sprintf('Failed to collect accounts: %s', $e->getMessage()));
-            app('log')->debug('Continuing without smart expense matching due to collection failure');
+            Log::error(sprintf('Failed to collect accounts: %s', $e->getMessage()));
+            Log::debug('Continuing without smart expense matching due to collection failure');
             $this->expenseAccounts   = [];
             $this->revenueAccounts   = [];
             $this->accountsCollected = true; // Mark as collected to avoid repeated failures
@@ -502,7 +503,7 @@ class TransactionTransformer
         $accountType           = $isDeposit ? 'revenue' : 'expense';
 
         if (0 === count($accountsToSearch)) {
-            app('log')->debug(sprintf('No %s accounts to search', $accountType));
+            Log::debug(sprintf('No %s accounts to search', $accountType));
 
             return null;
         }
@@ -516,7 +517,7 @@ class TransactionTransformer
 
             // Check for exact match
             if ($normalizedAccountName === $normalizedDescription) {
-                app('log')->debug(sprintf('Exact match found: "%s" -> "%s"', $description, $account['name']));
+                Log::debug(sprintf('Exact match found: "%s" -> "%s"', $description, $account['name']));
 
                 return $account;
             }
@@ -525,7 +526,7 @@ class TransactionTransformer
         // Try fuzzy matching if no exact match found
         $bestMatch             = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
         if ($bestMatch) {
-            app('log')->debug(sprintf(
+            Log::debug(sprintf(
                 'Fuzzy match found: "%s" -> "%s" (similarity: %.2f)',
                 $description,
                 $bestMatch['account']['name'],
@@ -664,7 +665,7 @@ class TransactionTransformer
             $similarity = $this->calculateSimilarity($normalizedDescription, $cluster['normalized_name']);
 
             if ($similarity >= $threshold) {
-                app('log')->debug(sprintf(
+                Log::debug(sprintf(
                     'Clustering "%s" with existing cluster "%s" (similarity: %.2f)',
                     $description,
                     $clusterName,
@@ -689,7 +690,7 @@ class TransactionTransformer
             'created_at'      => time(),
         ];
 
-        app('log')->debug(sprintf('Created new %s cluster "%s" for "%s"', $accountType, $clusterName, $description));
+        Log::debug(sprintf('Created new %s cluster "%s" for "%s"', $accountType, $clusterName, $description));
 
         return $clusterName;
     }

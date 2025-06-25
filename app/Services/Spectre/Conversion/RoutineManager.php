@@ -36,6 +36,7 @@ use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
 use App\Services\Spectre\Conversion\Routine\TransactionProcessor;
 use App\Support\Http\CollectsAccounts;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class RoutineManager
@@ -99,7 +100,7 @@ class RoutineManager implements RoutineManagerInterface
         $transactions = $this->transactionProcessor->download();
 
         // generate Firefly III ready transactions:
-        app('log')->debug('Generating Firefly III transactions.');
+        Log::debug('Generating Firefly III transactions.');
 
         try {
             $this->transactionGenerator->collectTargetAccounts();
@@ -113,7 +114,7 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         $converted    = $this->transactionGenerator->getTransactions($transactions);
-        app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
+        Log::debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
         if (0 === count($converted)) {
             $this->addError(0, '[a123]: No transactions were converted, probably zero found at Spectre.');
             $this->mergeMessages(1);
@@ -124,7 +125,7 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         $filtered     = $this->transactionFilter->filter($converted);
-        app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
+        Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         $this->mergeMessages(count($transactions));
         $this->mergeWarnings(count($transactions));

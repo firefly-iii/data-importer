@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Response;
 
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -60,7 +61,7 @@ class AccountsResponse extends SimpleFINResponse
         $data           = $this->getData();
 
         if (0 === count($data)) {
-            app('log')->warning('SimpleFIN AccountsResponse: No data to parse');
+            Log::warning('SimpleFIN AccountsResponse: No data to parse');
 
             return;
         }
@@ -68,11 +69,11 @@ class AccountsResponse extends SimpleFINResponse
         // SimpleFIN API returns accounts in the 'accounts' array
         if (isset($data['accounts']) && is_array($data['accounts'])) {
             $this->accounts = $data['accounts'];
-            app('log')->debug(sprintf('SimpleFIN AccountsResponse: Parsed %d accounts', count($this->accounts)));
+            Log::debug(sprintf('SimpleFIN AccountsResponse: Parsed %d accounts', count($this->accounts)));
 
             return;
         }
-        app('log')->warning('SimpleFIN AccountsResponse: No accounts array found in response');
+        Log::warning('SimpleFIN AccountsResponse: No accounts array found in response');
         $this->accounts = [];
     }
 }

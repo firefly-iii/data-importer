@@ -30,6 +30,7 @@ use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class PostNewTokenRequest
@@ -68,7 +69,7 @@ class PostNewTokenRequest extends Request
                 ]
             );
         } catch (GuzzleException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }

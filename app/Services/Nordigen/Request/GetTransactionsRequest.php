@@ -31,6 +31,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Shared\Response\Response;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GetTransactionsRequest
@@ -67,7 +68,7 @@ class GetTransactionsRequest extends Request
         $count        = 0;
         $transactions = $response['transactions'] ?? [];
         if (!array_key_exists('transactions', $response)) {
-            app('log')->error('No transactions found in response');
+            Log::error('No transactions found in response');
         }
         foreach ($keys as $key) {
             if (array_key_exists($key, $transactions)) {
@@ -82,7 +83,7 @@ class GetTransactionsRequest extends Request
             }
         }
         $total        = count($return);
-        app('log')->debug(sprintf('Downloaded [%d:%d] transactions', $count, $total));
+        Log::debug(sprintf('Downloaded [%d:%d] transactions', $count, $total));
 
         return new GetTransactionsResponse($return);
     }

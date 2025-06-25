@@ -48,11 +48,11 @@ class FilterTransactions
             unset($transaction['transactions'][0]['datetime']);
 
             if (0 === (int) ($transaction['transactions'][0]['category_id'] ?? 0)) {
-                // app('log')->debug('IS NULL');
+                // Log::debug('IS NULL');
                 unset($transaction['transactions'][0]['category_id']);
             }
             $return[] = $transaction;
-            // app('log')->debug('Filtered ', $transaction);
+            // Log::debug('Filtered ', $transaction);
         }
 
         return $return;

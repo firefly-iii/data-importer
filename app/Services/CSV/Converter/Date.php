@@ -27,6 +27,7 @@ namespace App\Services\CSV\Converter;
 
 use Carbon\Carbon;
 use Carbon\Language;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Date
@@ -64,24 +65,24 @@ class Date implements ConverterInterface
         }
 
         if ('' === $string) {
-            app('log')->warning('Empty date string, so date is set to today.');
+            Log::warning('Empty date string, so date is set to today.');
             $carbon = today();
             $carbon->startOfDay();
         }
         if ('' !== $string) {
-            app('log')->debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
+            Log::debug(sprintf('Date converter is going to work on "%s" using format "%s"', $string, $this->dateFormat));
 
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
             } catch (\Exception|\InvalidArgumentException $e) {
-                app('log')->error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
-                app('log')->debug('Date parsing error, will return today instead.');
+                Log::error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
+                Log::debug('Date parsing error, will return today instead.');
 
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
             }
         }
         if ($carbon->year < 1984) {
-            app('log')->warning(sprintf('Date year is before than 1984 ("%s"), so year is set to today.', $carbon->format('Y-m-d H:i:s')));
+            Log::warning(sprintf('Date year is before than 1984 ("%s"), so year is set to today.', $carbon->format('Y-m-d H:i:s')));
             $carbon->year = now()->year;
             $carbon->startOfDay();
         }

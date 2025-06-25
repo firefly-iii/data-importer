@@ -32,6 +32,7 @@ use App\Services\Storage\StorageService;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader as CamtReader;
+use Illuminate\Support\Facades\Log;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\Reader;
@@ -83,27 +84,27 @@ class RoleService
                 $headers = $records->fetchOne();
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
 
                 throw new \InvalidArgumentException($e->getMessage());
             }
             // @codeCoverageIgnoreEnd
-            app('log')->debug('Detected file headers:', $headers);
+            Log::debug('Detected file headers:', $headers);
         }
         if (false === $configuration->isHeaders()) {
-            app('log')->debug('Role service: file has no headers');
+            Log::debug('Role service: file has no headers');
 
             try {
                 $stmt    = (new Statement())->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $count   = count($records->fetchOne());
-                app('log')->debug(sprintf('Role service: first row has %d columns', $count));
+                Log::debug(sprintf('Role service: first row has %d columns', $count));
                 for ($i = 0; $i < $count; ++$i) {
                     $headers[] = sprintf('Column #%d', $i + 1);
                 }
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
 
                 throw new \InvalidArgumentException($e->getMessage());
             }
@@ -148,7 +149,7 @@ class RoleService
             $stmt = (new Statement())->limit(self::EXAMPLE_COUNT)->offset($offset);
             // @codeCoverageIgnoreStart
         } catch (Exception $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new \InvalidArgumentException($e->getMessage());
         }

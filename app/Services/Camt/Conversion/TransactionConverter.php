@@ -8,6 +8,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Transaction;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
+use Illuminate\Support\Facades\Log;
 
 class TransactionConverter
 {
@@ -17,7 +18,7 @@ class TransactionConverter
 
     public function __construct(Configuration $configuration)
     {
-        app('log')->debug('Constructed TransactionConverter.');
+        Log::debug('Constructed TransactionConverter.');
         $this->configuration = $configuration;
     }
 
@@ -27,16 +28,16 @@ class TransactionConverter
     public function convert(array $transactions): array
     {
         $total  = count($transactions);
-        app('log')->debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
+        Log::debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
         $result = [];
 
         /** @var Transaction $transaction */
         foreach ($transactions as $index => $transaction) {
-            app('log')->debug(sprintf('[%d/%d] Now working on transaction.', $index + 1, $total));
+            Log::debug(sprintf('[%d/%d] Now working on transaction.', $index + 1, $total));
             $result[] = $this->convertSingle($transaction);
-            app('log')->debug(sprintf('[%d/%d] Now done with transaction.', $index + 1, $total));
+            Log::debug(sprintf('[%d/%d] Now done with transaction.', $index + 1, $total));
         }
-        app('log')->debug(sprintf('Done converting all %d transactions into pseudo-transactions.', $total));
+        Log::debug(sprintf('Done converting all %d transactions into pseudo-transactions.', $total));
 
         return $result;
     }
@@ -46,7 +47,7 @@ class TransactionConverter
      */
     private function convertSingle(Transaction $transaction): array
     {
-        app('log')->debug('Convert single transaction into pseudo-transaction.');
+        Log::debug('Convert single transaction into pseudo-transaction.');
         $result           = [
             'transactions' => [],
         ];
@@ -66,10 +67,10 @@ class TransactionConverter
             foreach ($fieldNames as $field) {
                 $role  = $allRoles[$field] ?? '_ignore';
                 if ('_ignore' !== $role) {
-                    app('log')->debug(sprintf('Field "%s" was given role "%s".', $field, $role));
+                    Log::debug(sprintf('Field "%s" was given role "%s".', $field, $role));
                 }
                 if ('_ignore' === $role) {
-                    app('log')->debug(sprintf('Field "%s" is ignored!', $field));
+                    Log::debug(sprintf('Field "%s" is ignored!', $field));
                 }
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
@@ -87,7 +88,7 @@ class TransactionConverter
             }
             $result['transactions'][] = $current;
         }
-        app('log')->debug(sprintf('Pseudo-transaction is: %s', json_encode($result)));
+        Log::debug(sprintf('Pseudo-transaction is: %s', json_encode($result)));
 
         return $result;
     }

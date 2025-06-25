@@ -34,6 +34,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -74,7 +75,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
-        app('log')->debug('Request parameters will be set to: ', $parameters);
+        Log::debug('Request parameters will be set to: ', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -96,7 +97,7 @@ abstract class Request
         if (0 !== count($this->parameters)) {
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
-        app('log')->debug(sprintf('authenticatedGet(%s)', $fullUrl));
+        Log::debug(sprintf('authenticatedGet(%s)', $fullUrl));
         $client  = $this->getClient();
         $body    = null;
 
@@ -116,19 +117,19 @@ abstract class Request
         } catch (ClientException|GuzzleException|TransferException $e) {
             $statusCode      = $e->getCode();
             if (429 === $statusCode) {
-                app('log')->debug(sprintf('Ran into exception: %s', get_class($e)));
+                Log::debug(sprintf('Ran into exception: %s', get_class($e)));
                 $this->logRateLimitHeaders($e->getResponse(), true);
                 // $this->reportRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse(), true);
 
                 return [];
             }
-            app('log')->error(sprintf('Original error: %s: %s', get_class($e), $e->getMessage()));
+            Log::error(sprintf('Original error: %s: %s', get_class($e), $e->getMessage()));
 
             // crash but there is a response, log it.
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $response = $e->getResponse();
-                app('log')->error(sprintf('%s', $response->getBody()->getContents()));
+                Log::error(sprintf('%s', $response->getBody()->getContents()));
             }
 
             // if no response, parse as normal error response
@@ -161,7 +162,7 @@ abstract class Request
 
         if (200 !== $res->getStatusCode()) {
             // return body, class must handle this
-            app('log')->error(sprintf('[1] Status code is %d', $res->getStatusCode()));
+            Log::error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
             $body = (string) $res->getBody();
         }
@@ -185,7 +186,7 @@ abstract class Request
             throw new ImporterHttpException(sprintf('Body is empty. [2] Status code is %d.', $res->getStatusCode()));
         }
         if (config('importer.log_return_json')) {
-            app('log')->debug('JSON', $json);
+            Log::debug('JSON', $json);
         }
 
         return $json;
@@ -238,7 +239,7 @@ abstract class Request
      */
     protected function authenticatedJsonPost(array $json): array
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
 
         if (0 !== count($this->parameters)) {
@@ -283,23 +284,23 @@ abstract class Request
         $headers = $res->getHeaders();
         $method  = $fromErrorSituation ? 'error' : 'debug';
         if (array_key_exists('http_x_ratelimit_limit', $headers)) {
-            app('log')->{$method}(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
+            Log::{$method}(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
-            app('log')->{$method}(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
+            Log::{$method}(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_reset', $headers)) {
-            app('log')->{$method}(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
+            Log::{$method}(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
         }
 
         if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
-            app('log')->{$method}(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
+            Log::{$method}(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
-            app('log')->{$method}(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
+            Log::{$method}(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
         }
         if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
-            app('log')->{$method}(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
+            Log::{$method}(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
         }
     }
 
@@ -309,14 +310,14 @@ abstract class Request
     private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
     {
         $method      = $fromErrorSituation ? 'error' : 'debug';
-        app('log')->{$method}('Now in pauseForRateLimit');
+        Log::{$method}('Now in pauseForRateLimit');
         $headers     = $res->getHeaders();
 
         // raw header values for debugging:
-        app('log')->debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
-        app('log')->debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
-        app('log')->debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
-        app('log')->debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
+        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
+        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
+        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
+        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
 
         // first the normal rate limit:
         $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
@@ -330,11 +331,11 @@ abstract class Request
         // save the remaining info in the object.
         $this->reset = $reset;
         if ($remaining > -1) { // zero or more.
-            app('log')->{$method}('Save the account success limits? YES');
+            Log::{$method}('Save the account success limits? YES');
             $this->remaining = $remaining;
         }
         if ($remaining < 0) {  // less than zero.
-            app('log')->{$method}('Save the account success limits? NO');
+            Log::{$method}('Save the account success limits? NO');
         }
 
         $this->reportAndPause('Account success limit', $remaining, $reset, $fromErrorSituation);
@@ -344,7 +345,7 @@ abstract class Request
     {
         $return  = '';
         if ($reset < 0) {
-            app('log')->warning('The reset time is negative!');
+            Log::warning('The reset time is negative!');
             $return = '-';
             $reset  = abs($reset);
         }
@@ -382,19 +383,19 @@ abstract class Request
         }
         $resetString = self::formatTime($reset);
         if ($remaining >= 5) {
-            app('log')->debug(sprintf('%s: %d requests left, and %s before the limit resets.', $type, $remaining, $resetString));
+            Log::debug(sprintf('%s: %d requests left, and %s before the limit resets.', $type, $remaining, $resetString));
 
             return;
         }
         if ($remaining >= 1) {
-            app('log')->warning(sprintf('%s: %d requests remaining, it will take %s for the limit to reset.', $type, $remaining, $resetString));
+            Log::warning(sprintf('%s: %d requests remaining, it will take %s for the limit to reset.', $type, $remaining, $resetString));
 
             return;
         }
 
         // extra message if error.
         if ($reset > 1) {
-            app('log')->error(sprintf('%s: Have zero requests left!', $type));
+            Log::error(sprintf('%s: Have zero requests left!', $type));
         }
 
         // do exit?
@@ -404,16 +405,16 @@ abstract class Request
 
         // no exit. Do sleep?
         if ($reset < 300 && $reset > 0) {
-            app('log')->info(sprintf('%s reached, sleep %s for reset.', $type, $resetString));
+            Log::info(sprintf('%s reached, sleep %s for reset.', $type, $resetString));
             sleep($reset + 1);
 
             return;
         }
         if ($reset >= 300) {
-            app('log')->error(sprintf('%s: Refuse to sleep for %s, throw exception instead.', $type, $resetString));
+            Log::error(sprintf('%s: Refuse to sleep for %s, throw exception instead.', $type, $resetString));
         }
         if ($reset < 0) {
-            app('log')->error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
+            Log::error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
         }
         if ($fromErrorSituation) {
             throw new RateLimitException(sprintf('%s reached: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));

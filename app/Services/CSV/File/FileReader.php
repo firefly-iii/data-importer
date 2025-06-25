@@ -27,6 +27,7 @@ namespace App\Services\CSV\File;
 
 use App\Services\Session\Constants;
 use App\Services\Storage\StorageService;
+use Illuminate\Support\Facades\Log;
 use League\Csv\Reader;
 
 /**
@@ -39,7 +40,7 @@ class FileReader
         if (true === $convert) {
             $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
             if (false !== $encoding && 'ASCII' !== $encoding && 'UTF-8' !== $encoding) {
-                app('log')->warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+                Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
                 $content = mb_convert_encoding($content, 'UTF-8', $encoding);
             }
         }

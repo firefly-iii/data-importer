@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Iban
  */
@@ -42,21 +44,21 @@ class Iban implements ConverterInterface
         if (self::isValidIban($value)) {
             // strip spaces from IBAN and make upper case.
             $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
-            app('log')->debug(sprintf('Converted "%s" to "%s"', $value, $result));
+            Log::debug(sprintf('Converted "%s" to "%s"', $value, $result));
 
             return trim($result);
         }
-        app('log')->info(sprintf('"%s" is not a valid IBAN.', $value));
+        Log::info(sprintf('"%s" is not a valid IBAN.', $value));
 
         return '';
     }
 
     public static function isValidIban(string $value): bool
     {
-        app('log')->debug(sprintf('isValidIBAN("%s")', $value));
+        Log::debug(sprintf('isValidIBAN("%s")', $value));
         $value   = strtoupper(trim(app('steam')->cleanStringAndNewlines($value)));
         $value   = str_replace("\x20", '', $value);
-        app('log')->debug(sprintf('Trim: isValidIBAN("%s")', $value));
+        Log::debug(sprintf('Trim: isValidIBAN("%s")', $value));
         $search  = [' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
         $replace = [
             '',
@@ -96,7 +98,7 @@ class Iban implements ConverterInterface
         try {
             $checksum = bcmod($iban, '97');
         } catch (\ValueError $e) {
-            app('log')->error(sprintf('Bad IBAN: %s', $e->getMessage()));
+            Log::error(sprintf('Bad IBAN: %s', $e->getMessage()));
             $checksum = 2;
         }
 

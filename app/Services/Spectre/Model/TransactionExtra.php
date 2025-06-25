@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Model;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TransactionExtra
@@ -109,9 +110,9 @@ class TransactionExtra
         $model->categorizationConfidence = array_key_exists('categorization_confidence', $data) ? (string) $data['categorization_confidence'] : null;
 
         // if has posting time, then set this time in the posting date?
-        app('log')->debug(sprintf('Time is         "%s"', $data['time'] ?? ''));
-        app('log')->debug(sprintf('Posting date is "%s"', $data['posting_date'] ?? ''));
-        app('log')->debug(sprintf('Posting time is "%s"', $data['posting_time'] ?? ''));
+        Log::debug(sprintf('Time is         "%s"', $data['time'] ?? ''));
+        Log::debug(sprintf('Posting date is "%s"', $data['posting_date'] ?? ''));
+        Log::debug(sprintf('Posting time is "%s"', $data['posting_time'] ?? ''));
 
         return $model;
     }

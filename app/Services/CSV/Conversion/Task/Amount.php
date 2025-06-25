@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Task;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Amount
  */
@@ -41,46 +43,46 @@ class Amount extends AbstractTask
 
     private function processAmount(array $transaction): array
     {
-        app('log')->debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
+        Log::debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
         $amount                = null;
         if (null === $amount && $this->validAmount((string) $transaction['amount'])) {
-            app('log')->debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
+            Log::debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_debit'])) {
-            app('log')->debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
+            Log::debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
             $amount = $transaction['amount_debit'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_credit'])) {
-            app('log')->debug(
+            Log::debug(
                 sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit'])
             );
             $amount = $transaction['amount_credit'];
         }
 
         if (null === $amount && $this->validAmount((string) $transaction['amount_negated'])) {
-            app('log')->debug(
+            Log::debug(
                 sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated'])
             );
             $amount = $transaction['amount_negated'];
         }
 
         if (!array_key_exists('amount_modifier', $transaction)) {
-            app('log')->debug('Missing default amount modifier: amount modifier is now "1".');
+            Log::debug('Missing default amount modifier: amount modifier is now "1".');
             $transaction['amount_modifier'] = '1';
         }
         if (array_key_exists('amount_modifier', $transaction)) {
             $transaction['amount_modifier'] = (string) $transaction['amount_modifier'];
-            app('log')->debug(sprintf('Amount modifier is "%s".', $transaction['amount_modifier']));
+            Log::debug(sprintf('Amount modifier is "%s".', $transaction['amount_modifier']));
         }
         if (array_key_exists('foreign_amount', $transaction)) {
             $transaction['foreign_amount'] = (string) $transaction['foreign_amount'];
         }
         $amount                = (string) $amount;
         if ('' === $amount) {
-            app('log')->error('Amount is EMPTY. This will give problems further ahead.', $transaction);
+            Log::error('Amount is EMPTY. This will give problems further ahead.', $transaction);
             unset($transaction['amount_modifier']);
 
             return $transaction;
@@ -88,12 +90,12 @@ class Amount extends AbstractTask
         // modify amount:
         $amount                = bcmul($amount, $transaction['amount_modifier']);
 
-        app('log')->debug(sprintf('Amount is now %s.', $amount));
+        Log::debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
         if (isset($transaction['foreign_amount'])) {
             $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
-            app('log')->debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
+            Log::debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }
 
         // unset those fields:
@@ -102,11 +104,11 @@ class Amount extends AbstractTask
 
         // depending on pos or min, also pre-set the expected type.
         if (1 === bccomp('0', $amount)) {
-            app('log')->debug(sprintf('Amount %s is negative, so this is probably a withdrawal.', $amount));
+            Log::debug(sprintf('Amount %s is negative, so this is probably a withdrawal.', $amount));
             $transaction['type'] = 'withdrawal';
         }
         if (-1 === bccomp('0', $amount)) {
-            app('log')->debug(sprintf('Amount %s is positive, so this is probably a deposit.', $amount));
+            Log::debug(sprintf('Amount %s is positive, so this is probably a deposit.', $amount));
             $transaction['type'] = 'deposit';
         }
         unset($transaction['amount_modifier']);

@@ -30,6 +30,7 @@ use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetAccountsResponse;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GetAccountsRequest
@@ -56,7 +57,7 @@ class GetAccountsRequest extends Request
      */
     public function get(): Response
     {
-        app('log')->debug('GetAccountsRequest::get()');
+        Log::debug('GetAccountsRequest::get()');
         $this->setParameters(
             [
                 'connection_id' => $this->connection,

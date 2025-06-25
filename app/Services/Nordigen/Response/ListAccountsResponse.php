@@ -29,6 +29,7 @@ use App\Services\Nordigen\Model\Account;
 use App\Services\Shared\Response\Response;
 use Countable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Iterator;
 
 /**
@@ -44,11 +45,11 @@ class ListAccountsResponse extends Response implements \Iterator, \Countable
     {
         $this->accounts   = [];
 
-        app('log')->debug('ListAccountsResponse:', $data ?? []);
+        Log::debug('ListAccountsResponse:', $data ?? []);
 
         /** @var string $account */
         foreach ($data['accounts'] as $account) {
-            app('log')->debug(sprintf('ListAccountsResponse includes account "%s"', $account));
+            Log::debug(sprintf('ListAccountsResponse includes account "%s"', $account));
             $this->accounts[] = Account::createFromIdentifier($account);
         }
         $this->collection = new Collection($this->accounts);

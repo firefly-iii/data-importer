@@ -37,6 +37,7 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TransactionProcessor
@@ -57,7 +58,7 @@ class TransactionProcessor
      */
     public function download(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
         $this->accounts  = [];
@@ -72,10 +73,10 @@ class TransactionProcessor
         $accounts        = array_keys($this->configuration->getAccounts());
 
         $return          = [];
-        app('log')->debug(sprintf('Found %d accounts to download from.', count($accounts)));
+        Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
         foreach ($accounts as $key => $account) {
             $account                    = (string) $account;
-            app('log')->debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
+            Log::debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
             $object                     = new Account();
             $object->setIdentifier($account);
             $fullInfo                   = null;
@@ -97,7 +98,7 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug('Done downloading information for debug purposes.');
+            Log::debug('Done downloading information for debug purposes.');
             $this->accounts[]           = $fullInfo;
 
             try {
@@ -115,9 +116,9 @@ class TransactionProcessor
             // @var GetTransactionsResponse $transactions
             try {
                 $transactions = $request->get();
-                app('log')->debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
+                Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
-                app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
+                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
                 $this->addError(0, $e->getMessage());
                 $return[$account]           = [];
 
@@ -129,7 +130,7 @@ class TransactionProcessor
 
                 continue;
             } catch (AgreementExpiredException $e) {
-                app('log')->debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
+                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
                 // agreement expired, whoops.
                 $return[$account]           = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
@@ -147,9 +148,9 @@ class TransactionProcessor
             ];
 
             $return[$account]           = $this->filterTransactions($transactions);
-            app('log')->debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
+            Log::debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
         }
-        app('log')->debug('Done with download');
+        Log::debug('Done with download');
 
         return $return;
     }
@@ -166,19 +167,19 @@ class TransactionProcessor
 
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        Log::info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            app('log')->info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
             $madeOn   = $transaction->getDate();
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->debug(
+                Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -189,7 +190,7 @@ class TransactionProcessor
                 continue;
             }
             if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
-                app('log')->debug(
+                Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -208,16 +209,16 @@ class TransactionProcessor
                     $transaction->getDestinationName(),
                     $transaction->getDescription()
                 ));
-                app('log')->debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
+                Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
 
                 continue;
             }
 
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
+            Log::debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
 
             $return[] = $transaction;
         }
-        app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        Log::info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }

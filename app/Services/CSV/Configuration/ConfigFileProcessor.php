@@ -29,6 +29,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ConfigFileProcessor
@@ -42,12 +43,12 @@ class ConfigFileProcessor
      */
     public static function convertConfigFile(string $fileName): Configuration
     {
-        app('log')->debug('Now in ConfigFileProcessor::convertConfigFile');
+        Log::debug('Now in ConfigFileProcessor::convertConfigFile');
 
         try {
             $content = StorageService::getContent($fileName);
         } catch (FileNotFoundException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Could not find config file: %s', $e->getMessage()));
         }
@@ -55,7 +56,7 @@ class ConfigFileProcessor
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));
         }

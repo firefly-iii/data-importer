@@ -27,6 +27,7 @@ namespace App\Services\SimpleFIN\Request;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\SimpleFIN\Response\AccountsResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AccountsRequest
@@ -38,7 +39,7 @@ class AccountsRequest extends SimpleFINRequest
      */
     public function get(): AccountsResponse
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         $response = $this->authenticatedGet('/accounts');
 

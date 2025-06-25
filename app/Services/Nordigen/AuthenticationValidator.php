@@ -30,6 +30,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AuthenticationValidator
@@ -40,7 +41,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     public function validate(): AuthenticationStatus
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         $identifier = SecretManager::getId();
         $key        = SecretManager::getKey();

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Response;
 
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -60,7 +61,7 @@ class TransactionsResponse extends SimpleFINResponse
         $data               = $this->getData();
 
         if (0 === count($data)) {
-            app('log')->warning('SimpleFIN TransactionsResponse: No data to parse');
+            Log::warning('SimpleFIN TransactionsResponse: No data to parse');
 
             return;
         }
@@ -74,11 +75,11 @@ class TransactionsResponse extends SimpleFINResponse
                 }
             }
             $this->transactions = $transactions;
-            app('log')->debug(sprintf('SimpleFIN TransactionsResponse: Parsed %d transactions', count($this->transactions)));
+            Log::debug(sprintf('SimpleFIN TransactionsResponse: Parsed %d transactions', count($this->transactions)));
 
             return;
         }
-        app('log')->warning('SimpleFIN TransactionsResponse: No accounts array found in response');
+        Log::warning('SimpleFIN TransactionsResponse: No accounts array found in response');
         $this->transactions = [];
     }
 }

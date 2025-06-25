@@ -37,6 +37,7 @@ use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
+use Illuminate\Support\Facades\Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -116,7 +117,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         // convert CSV file into raw lines (arrays)
         $this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());

@@ -34,6 +34,7 @@ use App\Services\Spectre\Request\PutRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetTransactionsResponse;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TransactionProcessor
@@ -64,13 +65,13 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        app('log')->debug('Now in download()');
+        Log::debug('Now in download()');
         $accounts        = array_keys($this->configuration->getAccounts());
-        app('log')->debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
+        Log::debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return          = [];
         foreach ($accounts as $account) {
             $account               = (string) $account;
-            app('log')->debug(sprintf('Going to download transactions for account #%s', $account));
+            Log::debug(sprintf('Going to download transactions for account #%s', $account));
             $url                   = config('spectre.url');
             $appId                 = SpectreSecretManager::getAppId();
             $secret                = SpectreSecretManager::getSecret();
@@ -111,26 +112,26 @@ class TransactionProcessor
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
         if ($response instanceof ErrorResponse) {
-            app('log')->alert('Could not refresh connection.');
-            app('log')->alert(sprintf('%s: %s', $response->class, $response->message));
+            Log::alert('Could not refresh connection.');
+            Log::alert(sprintf('%s: %s', $response->class, $response->message));
         }
     }
 
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
-        app('log')->info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
+        Log::info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
         if (null !== $this->notBefore) {
-            app('log')->info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
         if (null !== $this->notAfter) {
-            app('log')->info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
+            Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
             $madeOn   = $transaction->madeOn;
 
             if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
-                app('log')->debug(
+                Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -141,7 +142,7 @@ class TransactionProcessor
                 continue;
             }
             if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
-                app('log')->debug(
+                Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',
                         $madeOn->format(self::DATE_TIME_FORMAT),
@@ -151,10 +152,10 @@ class TransactionProcessor
 
                 continue;
             }
-            app('log')->debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
+            Log::debug(sprintf('Include transaction because date is "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
             $return[] = $transaction;
         }
-        app('log')->info(sprintf('After filtering, set is %d transaction(s)', count($return)));
+        Log::info(sprintf('After filtering, set is %d transaction(s)', count($return)));
 
         return $return;
     }

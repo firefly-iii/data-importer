@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\SimpleFIN\Response;
 
 use App\Services\Shared\Response\ResponseInterface as SharedResponseInterface;
+use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -42,8 +43,8 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         $this->statusCode = $response->getStatusCode();
         $this->rawBody    = (string) $response->getBody();
 
-        app('log')->debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
-        app('log')->debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
+        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
+        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
 
         $this->parseResponse();
     }
@@ -82,7 +83,7 @@ abstract class SimpleFINResponse implements SharedResponseInterface
     private function parseResponse(): void
     {
         if ('' === $this->rawBody) {
-            app('log')->warning('SimpleFIN Response body is empty');
+            Log::warning('SimpleFIN Response body is empty');
             $this->data = [];
 
             return;
@@ -91,20 +92,20 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         $decoded    = json_decode($this->rawBody, true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            app('log')->error(sprintf('SimpleFIN JSON decode error: %s', json_last_error_msg()));
+            Log::error(sprintf('SimpleFIN JSON decode error: %s', json_last_error_msg()));
             $this->data = [];
 
             return;
         }
 
         if (!is_array($decoded)) {
-            app('log')->error('SimpleFIN Response is not a valid JSON array');
+            Log::error('SimpleFIN Response is not a valid JSON array');
             $this->data = [];
 
             return;
         }
 
         $this->data = $decoded;
-        app('log')->debug('SimpleFIN Response parsed successfully');
+        Log::debug('SimpleFIN Response parsed successfully');
     }
 }

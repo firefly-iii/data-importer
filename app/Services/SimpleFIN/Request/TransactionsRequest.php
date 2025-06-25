@@ -28,6 +28,7 @@ namespace App\Services\SimpleFIN\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\SimpleFIN\Response\TransactionsResponse;
 use App\Services\Shared\Response\ResponseInterface as SharedResponseInterface;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TransactionsRequest
@@ -39,7 +40,7 @@ class TransactionsRequest extends SimpleFINRequest
      */
     public function get(): SharedResponseInterface
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         $response = $this->authenticatedGet('');
 

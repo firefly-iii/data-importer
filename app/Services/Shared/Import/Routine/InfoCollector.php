@@ -46,7 +46,7 @@ class InfoCollector
      */
     public function collectAccountTypes(): array
     {
-        app('log')->debug('Now in collectAccountTypes()');
+        Log::debug('Now in collectAccountTypes()');
         // get list of asset accounts:
         $url      = SecretManager::getBaseUrl();
         $token    = SecretManager::getAccessToken();
@@ -74,7 +74,7 @@ class InfoCollector
             $return[$account->id] = $account->type;
             ++$count;
         }
-        app('log')->debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
+        Log::debug(sprintf('Collected %d account(s) in collectAccountTypes()', $count));
 
         RequestCache::set($cacheKey, $token, $return);
 

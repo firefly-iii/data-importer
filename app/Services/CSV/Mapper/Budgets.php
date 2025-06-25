@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Budget;
 use GrumpyDictator\FFIIIApiSupport\Request\GetBudgetsRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Budgets
@@ -54,9 +55,9 @@ class Budgets implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
-            //            app('log')->error($e->getTraceAsString());
+            //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download budgets: %s', $e->getMessage()));
         }
 

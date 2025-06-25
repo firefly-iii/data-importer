@@ -39,6 +39,7 @@ use GrumpyDictator\FFIIIApiSupport\Request\GetSearchAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\Response;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AccountMapper
@@ -164,7 +165,7 @@ class AccountMapper
                 }
             }
         } catch (ApiHttpException $e) {
-            app('log')->warning(sprintf('Could not search for account "%s": %s', $simplefinAccount->getName(), $e->getMessage()));
+            Log::warning(sprintf('Could not search for account "%s": %s', $simplefinAccount->getName(), $e->getMessage()));
         }
 
         return null;
@@ -180,7 +181,7 @@ class AccountMapper
         $currencyCode   = $this->getCurrencyCode($simplefinAccount, $config);
         $openingBalance = $config['opening_balance'] ?? '0.00';
 
-        app('log')->info(sprintf('Creating Firefly III account "%s" immediately via API', $accountName));
+        Log::info(sprintf('Creating Firefly III account "%s" immediately via API', $accountName));
 
         try {
             $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
@@ -234,7 +235,7 @@ class AccountMapper
             $response = $this->makeApiCallWithRetry($request, $accountName);
 
             if ($response instanceof ValidationErrorResponse) {
-                app('log')->error(sprintf('Failed to create account "%s": %s', $accountName, json_encode($response->errors->toArray())));
+                Log::error(sprintf('Failed to create account "%s": %s', $accountName, json_encode($response->errors->toArray())));
 
                 return null;
             }
@@ -242,7 +243,7 @@ class AccountMapper
             if ($response instanceof PostAccountResponse) {
                 $account = $response->getAccount();
                 if ($account) {
-                    app('log')->info(sprintf('Successfully created account "%s" with ID %d', $accountName, $account->id));
+                    Log::info(sprintf('Successfully created account "%s" with ID %d', $accountName, $account->id));
 
                     // Add to our local cache
                     $this->fireflyAccounts[] = $account;
@@ -252,16 +253,16 @@ class AccountMapper
                 }
             }
 
-            app('log')->error(sprintf('Unexpected response type when creating account "%s"', $accountName));
+            Log::error(sprintf('Unexpected response type when creating account "%s"', $accountName));
 
             return null;
 
         } catch (ApiHttpException $e) {
-            app('log')->error(sprintf('API error creating account "%s": %s', $accountName, $e->getMessage()));
+            Log::error(sprintf('API error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;
         } catch (\Exception $e) {
-            app('log')->error(sprintf('Unexpected error creating account "%s": %s', $accountName, $e->getMessage()));
+            Log::error(sprintf('Unexpected error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;
         }
@@ -333,7 +334,7 @@ class AccountMapper
             $accessToken = SecretManager::getAccessToken();
 
             if ('' === $baseUrl || '' === $accessToken) {
-                app('log')->warning('Missing authentication context for Firefly III account loading');
+                Log::warning('Missing authentication context for Firefly III account loading');
 
                 throw new ImporterErrorException('Authentication context not available for account loading');
             }
@@ -344,10 +345,10 @@ class AccountMapper
 
             if ($response instanceof GetAccountsResponse) {
                 $this->fireflyAccounts = iterator_to_array($response);
-                app('log')->debug(sprintf('Loaded %d Firefly III accounts', count($this->fireflyAccounts)));
+                Log::debug(sprintf('Loaded %d Firefly III accounts', count($this->fireflyAccounts)));
             }
         } catch (ApiHttpException $e) {
-            app('log')->error(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
+            Log::error(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
         }
@@ -366,7 +367,7 @@ class AccountMapper
         foreach ($retryDelays as $attempt => $delay) {
             try {
                 if ($delay > 0) {
-                    app('log')->debug(sprintf('Retrying account creation for "%s" after %ds delay (attempt %d)', $accountName, $delay, $attempt + 1));
+                    Log::debug(sprintf('Retrying account creation for "%s" after %ds delay (attempt %d)', $accountName, $delay, $attempt + 1));
                     sleep($delay);
                 }
 
@@ -380,12 +381,12 @@ class AccountMapper
                 $shouldRetry   = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
 
                 if (!$shouldRetry) {
-                    app('log')->error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
+                    Log::error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
 
                     throw $e;
                 }
 
-                app('log')->warning(sprintf('DNS/connection error for account "%s" (attempt %d): %s', $accountName, $attempt + 1, $errorMessage));
+                Log::warning(sprintf('DNS/connection error for account "%s" (attempt %d): %s', $accountName, $attempt + 1, $errorMessage));
 
                 // If this was the last attempt, we'll throw after the loop
                 if ($attempt === count($retryDelays) - 1) {
@@ -395,7 +396,7 @@ class AccountMapper
         }
 
         // All retries exhausted
-        app('log')->error(sprintf('All retries exhausted for account "%s": %s', $accountName, $lastException->getMessage()));
+        Log::error(sprintf('All retries exhausted for account "%s": %s', $accountName, $lastException->getMessage()));
 
         throw $lastException;
     }

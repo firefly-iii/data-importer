@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Storage;
 
 use App\Exceptions\ImporterErrorException;
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\FilesystemException;
 
 /**
@@ -45,14 +46,14 @@ class StorageService
         $content  = $disk->get($name);
         $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
         if (false === $encoding) {
-            app('log')->warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
+            Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
 
             return $content;
         }
         if ('ASCII' === $encoding || 'UTF-8' === $encoding) {
             return $content;
         }
-        app('log')->warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+        Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
 
         return mb_convert_encoding($content, 'UTF-8', $encoding);
     }
@@ -68,11 +69,11 @@ class StorageService
         $fileName = hash('sha256', $json);
 
         if ($disk->has($fileName)) {
-            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
+            Log::warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
         }
 
         $disk->put($fileName, $json);
-        app('log')->debug(sprintf('storeArray: Stored %d bytes in file "%s"', strlen($json), $fileName));
+        Log::debug(sprintf('storeArray: Stored %d bytes in file "%s"', strlen($json), $fileName));
 
         return $fileName;
     }
@@ -90,11 +91,11 @@ class StorageService
         }
 
         if ($disk->has($fileName)) {
-            app('log')->warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
+            Log::warning(sprintf('Have already stored a file under key "%s", so the content is unchanged from last time.', $fileName));
         }
 
         $disk->put($fileName, $content);
-        app('log')->debug(sprintf('storeContent: Stored %d bytes in file "%s"', strlen($content), $fileName));
+        Log::debug(sprintf('storeContent: Stored %d bytes in file "%s"', strlen($content), $fileName));
 
         return $fileName;
     }

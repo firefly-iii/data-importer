@@ -31,6 +31,7 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ExpenseRevenueAccounts
@@ -54,7 +55,7 @@ class ExpenseRevenueAccounts implements MapperInterface
      */
     protected function getExpenseRevenueAccounts(): array
     {
-        app('log')->debug('getExpenseRevenueAccounts: Fetching expense and revenue accounts.');
+        Log::debug('getExpenseRevenueAccounts: Fetching expense and revenue accounts.');
 
         $url                    = SecretManager::getBaseUrl();
         $token                  = SecretManager::getAccessToken();
@@ -68,7 +69,7 @@ class ExpenseRevenueAccounts implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }
@@ -84,7 +85,7 @@ class ExpenseRevenueAccounts implements MapperInterface
             return in_array($account->type, ['expense', 'revenue'], true);
         });
 
-        app('log')->debug(sprintf('getExpenseRevenueAccounts: Found %d expense/revenue accounts', count($expenseRevenueAccounts)));
+        Log::debug(sprintf('getExpenseRevenueAccounts: Found %d expense/revenue accounts', count($expenseRevenueAccounts)));
 
         return $expenseRevenueAccounts;
     }
