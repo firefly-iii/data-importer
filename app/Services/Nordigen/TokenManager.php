@@ -143,7 +143,8 @@ class TokenManager
         exit(__METHOD__);
     }
 
-    #[NoReturn] public static function getFreshAccessToken(): void
+    #[NoReturn]
+    public static function getFreshAccessToken(): void
     {
         exit(__METHOD__);
     }

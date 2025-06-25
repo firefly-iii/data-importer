@@ -63,7 +63,7 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|'.substr($logContent, -32*1024);
+            $logContent = 'Truncated from this point <----|'.substr($logContent, -32 * 1024);
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
