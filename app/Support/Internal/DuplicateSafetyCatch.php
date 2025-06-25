@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Trait DuplicateSafetyCatch
  */
@@ -31,13 +33,13 @@ trait DuplicateSafetyCatch
 {
     public function negativeTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        app('log')->debug('Now in negativeTransactionSafetyCatch');
+        Log::debug('Now in negativeTransactionSafetyCatch');
 
         // check for columns:
         if (!array_key_exists('source_id', $transaction)
             || !array_key_exists('destination_id', $transaction)
             || !array_key_exists('type', $transaction)) {
-            app('log')->debug('negativeTransactionSafetyCatch: missing columns, cannot continue.');
+            Log::debug('negativeTransactionSafetyCatch: missing columns, cannot continue.');
 
             return $transaction;
         }
@@ -47,7 +49,7 @@ trait DuplicateSafetyCatch
         if ('transfer' === $transaction['type']
             && 0 !== $transaction['destination_id']
             && $transaction['destination_id'] === $transaction['source_id']) {
-            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            Log::warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
             $transaction['type']             = 'withdrawal';
 
             // add error message to transaction:
@@ -62,14 +64,14 @@ trait DuplicateSafetyCatch
             $transaction['destination_name'] = '(unknown destination account)';
         }
 
-        app('log')->debug('negativeTransactionSafetyCatch: did not detect a duplicate account.');
+        Log::debug('negativeTransactionSafetyCatch: did not detect a duplicate account.');
 
         return $transaction;
     }
 
     public function positiveTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        app('log')->debug('Now in positiveTransactionSafetyCatch');
+        Log::debug('Now in positiveTransactionSafetyCatch');
         // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
         // The data importer will try to correct this.
 
@@ -77,7 +79,7 @@ trait DuplicateSafetyCatch
         if (!array_key_exists('source_id', $transaction)
             || !array_key_exists('destination_id', $transaction)
             || !array_key_exists('type', $transaction)) {
-            app('log')->debug('positiveTransactionSafetyCatch: missing columns, cannot continue.');
+            Log::debug('positiveTransactionSafetyCatch: missing columns, cannot continue.');
 
             return $transaction;
         }
@@ -85,7 +87,7 @@ trait DuplicateSafetyCatch
         if ('transfer' === $transaction['type']
             && 0 !== $transaction['destination_id']
             && $transaction['destination_id'] === $transaction['source_id']) {
-            app('log')->warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
+            Log::warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
             $transaction['type']        = 'deposit';
 
             // add error message to transaction:
@@ -101,7 +103,7 @@ trait DuplicateSafetyCatch
 
             return $transaction;
         }
-        app('log')->debug('positiveTransactionSafetyCatch: did not detect a duplicate account.');
+        Log::debug('positiveTransactionSafetyCatch: did not detect a duplicate account.');
 
         return $transaction;
     }

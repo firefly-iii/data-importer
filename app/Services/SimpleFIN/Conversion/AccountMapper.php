@@ -138,7 +138,7 @@ class AccountMapper
     /**
      * Find a matching Firefly III account for a SimpleFIN account
      */
-    private function findMatchingFireflyAccount(SimpleFINAccount $simplefinAccount): ?Account
+    public function findMatchingFireflyAccount(SimpleFINAccount $simplefinAccount): ?Account
     {
         $this->loadFireflyAccounts();
 

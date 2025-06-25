@@ -136,7 +136,7 @@ trait CollectsAccounts
      */
     protected function getNordigenAccounts(Configuration $configuration): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $requisitions = $configuration->getNordigenRequisitions();
         $identifier   = array_shift($requisitions);
 
@@ -147,7 +147,7 @@ trait CollectsAccounts
             foreach ($result as $arr) {
                 $return[] = NordigenAccount::fromLocalArray($arr);
             }
-            app('log')->debug('Grab accounts from cache', $result);
+            Log::debug('Grab accounts from cache', $result);
 
             return $return;
         }
@@ -166,11 +166,11 @@ trait CollectsAccounts
         $total        = count($response);
         $return       = [];
         $cache        = [];
-        app('log')->debug(sprintf('Found %d GoCardless accounts.', $total));
+        Log::debug(sprintf('Found %d GoCardless accounts.', $total));
 
         /** @var NordigenAccount $account */
         foreach ($response as $index => $account) {
-            app('log')->debug(
+            Log::debug(
                 sprintf('[%d/%d] Now collecting information for account %s', $index + 1, $total, $account->getIdentifier()),
                 $account->toLocalArray()
             );
