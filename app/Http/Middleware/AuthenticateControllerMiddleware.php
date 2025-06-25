@@ -29,5 +29,5 @@ class AuthenticateControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'authenticate';
+    protected const string STEP = 'authenticate';
 }

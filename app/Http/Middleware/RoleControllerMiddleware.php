@@ -29,5 +29,5 @@ class RoleControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'define-roles';
+    protected const string STEP = 'define-roles';
 }

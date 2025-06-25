@@ -29,5 +29,5 @@ class ServiceControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'service-validation';
+    protected const string STEP = 'service-validation';
 }

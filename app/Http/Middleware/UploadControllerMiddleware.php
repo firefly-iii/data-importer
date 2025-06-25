@@ -32,5 +32,5 @@ class UploadControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'upload-files';
+    protected const string STEP = 'upload-files';
 }

@@ -29,5 +29,5 @@ class LinkControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'nordigen-link';
+    protected const string STEP = 'nordigen-link';
 }

@@ -31,6 +31,7 @@ use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Nordigen\Request\PostNewTokenRequest;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
+use JetBrains\PhpStorm\NoReturn;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -142,7 +143,7 @@ class TokenManager
         exit(__METHOD__);
     }
 
-    public static function getFreshAccessToken(): void
+    #[NoReturn] public static function getFreshAccessToken(): void
     {
         exit(__METHOD__);
     }

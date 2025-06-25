@@ -27,6 +27,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Session\Constants;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ConversionControllerMiddleware
@@ -35,7 +36,7 @@ class ConversionControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'conversion';
+    protected const string STEP = 'conversion';
 
     protected function isReadyForStep(Request $request): bool
     {
@@ -43,21 +44,14 @@ class ConversionControllerMiddleware
 
         // Call trait logic directly since we can't use parent:: with traits
         if (null === $flow) {
-            app('log')->debug(
-                'isReadyForStep returns true because $flow is null'
-            );
+            Log::debug('isReadyForStep returns true because $flow is null');
 
             return true;
         }
 
         if ('file' === $flow) {
             $result = $this->isReadyForFileStep();
-            app('log')->debug(
-                sprintf(
-                    'isReadyForFileStep: Return %s',
-                    var_export($result, true)
-                )
-            );
+            Log::debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
 
             return $result;
         }

@@ -29,5 +29,5 @@ class SubmitControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'submit';
+    protected const string STEP = 'submit';
 }

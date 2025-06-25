@@ -29,5 +29,5 @@ class SelectionControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'nordigen-selection';
+    protected const string STEP = 'nordigen-selection';
 }

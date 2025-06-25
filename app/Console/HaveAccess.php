@@ -29,6 +29,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\SystemInformationRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Trait HaveAccess
@@ -114,12 +115,12 @@ trait HaveAccess
                 return true;
             }
             if (str_starts_with($path, $current)) {
-                app('log')->debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
+                Log::debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
 
                 return true;
             }
         }
-        app('log')->error(sprintf('"%s" is not in the allowed paths.', $path), $paths);
+        Log::error(sprintf('"%s" is not in the allowed paths.', $path), $paths);
 
         return false;
     }

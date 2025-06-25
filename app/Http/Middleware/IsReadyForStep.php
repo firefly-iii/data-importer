@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Log;
  */
 trait IsReadyForStep
 {
-    public const TEST = 'test';
+    public const string TEST = 'test';
 
     public function handle(Request $request, \Closure $next): mixed
     {
