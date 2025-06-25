@@ -89,9 +89,6 @@ class AutoImportController extends Controller
         return response('');
     }
 
-    /**
-     * @param mixed $string
-     */
     public function info(mixed $string): void
     {
         $this->line($string);
@@ -108,9 +105,6 @@ class AutoImportController extends Controller
         $this->line($string);
     }
 
-    /**
-     * @param mixed $string
-     */
     public function warn(mixed $string): void
     {
         $this->line($string);

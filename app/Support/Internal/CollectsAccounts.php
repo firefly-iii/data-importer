@@ -88,7 +88,7 @@ trait CollectsAccounts
             $url               = SecretManager::getBaseUrl(); // Re-fetch in case of any state change, though unlikely
             $token             = SecretManager::getAccessToken();
 
-            if ('' ===$url || '' === $token) { // Check again, though highly unlikely to change if first call succeeded.
+            if ('' === $url || '' === $token) { // Check again, though highly unlikely to change if first call succeeded.
                 Log::error('CollectsAccounts::getFireflyIIIAccounts - Base URL or Access Token became empty before fetching LIABILITY accounts.');
 
                 return $accounts; // Return partially filled or empty accounts

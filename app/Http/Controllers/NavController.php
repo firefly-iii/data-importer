@@ -26,9 +26,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 
 /**
  * Class NavController
@@ -45,7 +43,7 @@ class NavController extends Controller
         // For SimpleFIN flow, don't forget CONFIG_COMPLETE_INDICATOR to preserve form state
         $sessionConfig = session()->get(Constants::CONFIGURATION);
         $flow          = null;
-        if (is_array($sessionConfig) && array_key_exists('flow', $sessionConfig) && null !==$sessionConfig['flow']) {
+        if (is_array($sessionConfig) && array_key_exists('flow', $sessionConfig) && null !== $sessionConfig['flow']) {
             $flow = $sessionConfig['flow'];
         }
 
@@ -56,8 +54,6 @@ class NavController extends Controller
         return redirect(route('004-configure.index').'?overruleskip=true');
     }
 
-    /**
-     */
     public function toConversion(): RedirectResponse
     {
         app('log')->debug(__METHOD__);
@@ -66,8 +62,6 @@ class NavController extends Controller
         return redirect(route('005-roles.index'));
     }
 
-    /**
-     */
     public function toRoles(): RedirectResponse
     {
         app('log')->debug(__METHOD__);

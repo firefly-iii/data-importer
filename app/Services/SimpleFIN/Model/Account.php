@@ -198,10 +198,10 @@ class Account
 
 
         if (
-            !array_key_exists('domain', $data['org']) &&
-            !array_key_exists('name', $data['org']) &&
-            null !== $data['org']['domain'] &&
-            null !== $data['org']['name']
+            !array_key_exists('domain', $data['org'])
+            && !array_key_exists('name', $data['org'])
+            && null !== $data['org']['domain']
+            && null !== $data['org']['name']
         ) {
             throw new \InvalidArgumentException('Organization must have either domain or name');
         }

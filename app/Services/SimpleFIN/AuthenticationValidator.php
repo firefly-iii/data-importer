@@ -47,6 +47,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
             return AuthenticationStatus::error();
         }
         Log::debug('app.key is OK, can authenticate.');
+
         return AuthenticationStatus::authenticated();
     }
 }

@@ -60,7 +60,7 @@ class LinkController extends Controller
     /**
      * @throws ImporterHttpException
      */
-    public function build(): RedirectResponse|Redirector
+    public function build(): Redirector|RedirectResponse
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
@@ -100,6 +100,7 @@ class LinkController extends Controller
         $agreementRequest->setBank($configuration->getNordigenBank());
         $agreementRequest->setAccessValidForDays('90');
         $agreementRequest->setMaxHistoricalDays($configuration->getNordigenMaxDays());
+
         /** @var NewUserAgreementResponse $agreementResponse */
         $agreementResponse = $agreementRequest->post();
 
