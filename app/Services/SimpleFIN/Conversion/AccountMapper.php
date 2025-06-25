@@ -285,8 +285,8 @@ class AccountMapper
     private function getCurrencyCode(SimpleFINAccount $simplefinAccount, array $config): string
     {
         // 1. Use user-configured currency first
-        if (0 !== count($config['currency'])) {
-            return $config['currency'];
+        if (array_key_exists('currency', $config) && '' !== (string) $config['currency']) {
+            return (string) $config['currency'];
         }
 
         // 2. Fall back to SimpleFIN account currency
