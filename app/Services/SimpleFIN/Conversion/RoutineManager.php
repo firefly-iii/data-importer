@@ -109,7 +109,7 @@ class RoutineManager implements RoutineManagerInterface
             if (0 === $fireflyAccountId) {
                 $newAccountData       = $this->configuration->getNewAccounts()[$simplefinAccountId] ?? null;
                 if (!$newAccountData) {
-                    Log::error(sprintf('No new account data found for SimpleFIN account: %s',$simplefinAccountId));
+                    Log::error(sprintf('No new account data found for SimpleFIN account: %s', $simplefinAccountId));
 
                     continue;
                 }
@@ -173,14 +173,15 @@ class RoutineManager implements RoutineManagerInterface
                 }
                 if (null === $createdAccount) {
                     // Account creation failed - this is a critical error that must be reported
-                    $errorMessage = sprintf('Failed to create Firefly III account "%s" (type: %s, currency: %s). Cannot proceed with transaction import for this account.', $accountConfig['name'], $accountConfig['type'], $accountConfig['currency']);
+                    $errorMessage   = sprintf('Failed to create Firefly III account "%s" (type: %s, currency: %s). Cannot proceed with transaction import for this account.', $accountConfig['name'], $accountConfig['type'], $accountConfig['currency']);
 
                     Log::warning($errorMessage, ['simplefin_account_id' => $simplefinAccountId, 'account_name' => $accountConfig['name'], 'account_type' => $accountConfig['type'], 'currency' => $accountConfig['currency']]);
 
                     // try to find a matching account.
                     $createdAccount = $accountMapper->findMatchingFireflyAccount($simplefinAccount);
-                    if(null ===$createdAccount) {
+                    if (null === $createdAccount) {
                         Log::error('Could also not find a matching account for SimpleFIN account.', $simplefinAccount);
+
                         throw new ImporterErrorException($errorMessage);
                     }
                 }
