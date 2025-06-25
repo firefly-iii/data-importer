@@ -40,11 +40,10 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     public function validate(): AuthenticationStatus
     {
         app('log')->debug(sprintf('Now at %s', __METHOD__));
-        return AuthenticationStatus::authenticated();
         // needs an APP key which isn't blank or zero or whatever.
         $key = (string) config('app.key');
         if ('' === $key) {
-            Log::debug('app.key is empty, cannot authenticate.');
+            Log::debug(sprintf('app.key is empty ("%s"), cannot authenticate.', $key));
             return AuthenticationStatus::error();
         }
         Log::debug('app.key is OK, can authenticate.');
