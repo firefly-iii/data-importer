@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\SimpleFIN\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\SimpleFIN\Model\Account as SimpleFINAccount;
 use App\Services\SimpleFIN\Request\PostAccountRequest;
@@ -220,12 +221,12 @@ class AccountMapper
             }
 
             // Add IBAN if provided
-            if ('' !== (string)$config['iban']) {
+            if (array_key_exists('iban', $config) &&  '' !== (string)$config['iban'] && IbanConverter::isValidIban((string)$config['iban'])) {
                 $payload['iban'] = $config['iban'];
             }
 
             // Add account number if provided
-            if ('' !== (string)$config['account_number']) {
+            if (array_key_exists('account_number', $config) && '' !== (string)$config['account_number']) {
                 $payload['account_number'] = $config['account_number'];
             }
 
