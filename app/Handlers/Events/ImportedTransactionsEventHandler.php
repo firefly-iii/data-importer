@@ -27,6 +27,7 @@ namespace App\Handlers\Events;
 
 use App\Events\ImportedTransactions;
 use App\Mail\ImportReportMail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Mailer\Exception\TransportException;
 
@@ -34,22 +35,22 @@ class ImportedTransactionsEventHandler
 {
     public function sendReportOverMail(ImportedTransactions $event): void
     {
-        app('log')->debug('Now in sendReportOverMail');
+        Log::debug('Now in sendReportOverMail');
 
         $mailer   = config('mail.default');
         $receiver = config('mail.destination');
         if ('' === $mailer) {
-            app('log')->info('No mailer configured, will not mail.');
+            Log::info('No mailer configured, will not mail.');
 
             return;
         }
         if ('' === $receiver) {
-            app('log')->info('No mail receiver configured, will not mail.');
+            Log::info('No mail receiver configured, will not mail.');
 
             return;
         }
         if (false === config('mail.enable_mail_report')) {
-            app('log')->info('Configuration does not allow mail, will not mail.');
+            Log::info('Configuration does not allow mail, will not mail.');
 
             return;
         }
@@ -61,23 +62,23 @@ class ImportedTransactionsEventHandler
             'rate_limits' => $event->rateLimits,
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {
-            app('log')->info('Will send report message.');
-            app('log')->debug(sprintf('Messages count: %s', count($event->messages)));
-            app('log')->debug(sprintf('Warnings count: %s', count($event->warnings)));
-            app('log')->debug(sprintf('Errors count  : %s', count($event->errors)));
-            app('log')->debug(sprintf('Rate limit message count  : %s', count($event->rateLimits)));
-            app('log')->debug('If no error below this line, mail was sent!');
+            Log::info('Will send report message.');
+            Log::debug(sprintf('Messages count: %s', count($event->messages)));
+            Log::debug(sprintf('Warnings count: %s', count($event->warnings)));
+            Log::debug(sprintf('Errors count  : %s', count($event->errors)));
+            Log::debug(sprintf('Rate limit message count  : %s', count($event->rateLimits)));
+            Log::debug('If no error below this line, mail was sent!');
 
             try {
                 Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
             } catch (TransportException $e) {
-                app('log')->error('Could not send mail. See error below');
-                app('log')->error($e->getMessage());
+                Log::error('Could not send mail. See error below');
+                Log::error($e->getMessage());
             }
-            app('log')->debug('If no error above this line, mail was sent!');
+            Log::debug('If no error above this line, mail was sent!');
         }
         if (0 === count($event->messages) && 0 === count($event->warnings) && 0 === count($event->errors)) {
-            app('log')->info('There is nothing to report, will not send a message.');
+            Log::info('There is nothing to report, will not send a message.');
         }
     }
 }
