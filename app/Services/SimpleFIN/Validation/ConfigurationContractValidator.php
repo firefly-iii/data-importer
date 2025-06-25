@@ -27,6 +27,7 @@ namespace App\Services\SimpleFIN\Validation;
 
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\SimpleFIN\ValidationResult;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
