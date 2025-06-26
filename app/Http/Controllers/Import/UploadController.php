@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
 use League\Flysystem\FilesystemException;
+use Storage;
 
 /**
  * Class UploadController
@@ -80,7 +81,7 @@ class UploadController extends Controller
         $simpleFinOriginUrl = config('simplefin.origin_url');
 
         // get existing configs.
-        $disk               = \Storage::disk('configurations');
+        $disk               = Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
         $all                = $disk->files();
 
@@ -275,7 +276,7 @@ class UploadController extends Controller
     {
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = \Storage::disk('configurations');
+            $disk           = Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);

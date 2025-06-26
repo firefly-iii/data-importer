@@ -25,12 +25,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\SimpleFIN\Validation;
 
+use Carbon\Carbon;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Services\SimpleFIN\Validation\ValidationResult;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
+use Override;
 
 /**
  * Class ConfigurationContractValidatorTest
@@ -46,6 +48,7 @@ final class ConfigurationContractValidatorTest extends TestCase
     private ConfigurationContractValidator $validator;
     private Configuration $mockConfiguration;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -55,6 +58,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $this->mockConfiguration = $this->createMockConfiguration();
     }
 
+    #[Override]
     protected function tearDown(): void
     {
         Session::flush();
@@ -70,8 +74,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
-        self::assertTrue($result->isValid());
-        self::assertEmpty($result->getErrors());
+        $this->assertTrue($result->isValid());
+        $this->assertEmpty($result->getErrors());
     }
 
     /**
@@ -83,9 +87,9 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result        = $this->validator->validateConfigurationContract($invalidConfig);
 
-        self::assertFalse($result->isValid());
-        self::assertNotEmpty($result->getErrors());
-        self::assertStringContainsString('SimpleFIN flow', $result->getErrorMessages()[0]);
+        $this->assertFalse($result->isValid());
+        $this->assertNotEmpty($result->getErrors());
+        $this->assertStringContainsString('SimpleFIN flow', $result->getErrorMessages()[0]);
     }
 
     /**
@@ -97,8 +101,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
-        self::assertFalse($result->isValid());
-        self::assertStringContainsString('SimpleFIN accounts data missing', $result->getErrorMessages()[0]);
+        $this->assertFalse($result->isValid());
+        $this->assertStringContainsString('SimpleFIN accounts data missing', $result->getErrorMessages()[0]);
     }
 
     /**
@@ -116,8 +120,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
-        self::assertFalse($result->isValid());
-        self::assertTrue(count($result->getErrors()) >= 4); // Missing 4 required fields
+        $this->assertFalse($result->isValid());
+        $this->assertGreaterThanOrEqual(4, count($result->getErrors())); // Missing 4 required fields
     }
 
     /**
@@ -136,8 +140,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($config);
 
-        self::assertFalse($result->isValid());
-        self::assertNotEmpty($result->getErrors());
+        $this->assertFalse($result->isValid());
+        $this->assertNotEmpty($result->getErrors());
     }
 
     /**
@@ -154,8 +158,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($config);
 
-        self::assertFalse($result->isValid());
-        self::assertStringContainsString('New account configuration missing', $result->getErrorMessages()[0]);
+        $this->assertFalse($result->isValid());
+        $this->assertStringContainsString('New account configuration missing', $result->getErrorMessages()[0]);
     }
 
     /**
@@ -178,8 +182,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($config);
 
-        self::assertFalse($result->isValid());
-        self::assertTrue(count($result->getErrors()) >= 4);
+        $this->assertFalse($result->isValid());
+        $this->assertGreaterThanOrEqual(4, count($result->getErrors()));
     }
 
     /**
@@ -203,14 +207,10 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($config);
 
-        self::assertFalse($result->isValid());
+        $this->assertFalse($result->isValid());
         $errors = $result->getErrors();
-        self::assertTrue(
-            collect($errors)->contains(fn ($error) => str_contains($error['message'], 'Liability type required'))
-        );
-        self::assertTrue(
-            collect($errors)->contains(fn ($error) => str_contains($error['message'], 'Liability direction required'))
-        );
+        $this->assertTrue(collect($errors)->contains(fn ($error) => str_contains((string) $error['message'], 'Liability type required')));
+        $this->assertTrue(collect($errors)->contains(fn ($error) => str_contains((string) $error['message'], 'Liability direction required')));
     }
 
     /**
@@ -233,8 +233,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result        = $this->validator->validateFormFieldStructure($validFormData);
 
-        self::assertTrue($result->isValid());
-        self::assertEmpty($result->getErrors());
+        $this->assertTrue($result->isValid());
+        $this->assertEmpty($result->getErrors());
     }
 
     /**
@@ -249,8 +249,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result          = $this->validator->validateFormFieldStructure($invalidFormData);
 
-        self::assertFalse($result->isValid());
-        self::assertTrue(count($result->getErrors()) >= 3); // Missing/invalid fields
+        $this->assertFalse($result->isValid());
+        $this->assertGreaterThanOrEqual(3, count($result->getErrors())); // Missing/invalid fields
     }
 
     /**
@@ -267,26 +267,26 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         // Test invalid result
         $invalidResult = new ValidationResult(false, $errors, $warnings);
-        self::assertFalse($invalidResult->isValid());
-        self::assertTrue($invalidResult->hasErrors());
-        self::assertTrue($invalidResult->hasWarnings());
-        self::assertSame(['Test error'], $invalidResult->getErrorMessages());
-        self::assertSame(['Test warning'], $invalidResult->getWarningMessages());
+        $this->assertFalse($invalidResult->isValid());
+        $this->assertTrue($invalidResult->hasErrors());
+        $this->assertTrue($invalidResult->hasWarnings());
+        $this->assertSame(['Test error'], $invalidResult->getErrorMessages());
+        $this->assertSame(['Test warning'], $invalidResult->getWarningMessages());
 
         // Test valid result
         $validResult   = new ValidationResult(true);
-        self::assertTrue($validResult->isValid());
-        self::assertFalse($validResult->hasErrors());
-        self::assertFalse($validResult->hasWarnings());
-        self::assertEmpty($validResult->getErrors());
-        self::assertEmpty($validResult->getWarnings());
+        $this->assertTrue($validResult->isValid());
+        $this->assertFalse($validResult->hasErrors());
+        $this->assertFalse($validResult->hasWarnings());
+        $this->assertEmpty($validResult->getErrors());
+        $this->assertEmpty($validResult->getWarnings());
 
         // Test toArray
         $array         = $invalidResult->toArray();
-        self::assertArrayHasKey('valid', $array);
-        self::assertArrayHasKey('errors', $array);
-        self::assertArrayHasKey('warnings', $array);
-        self::assertFalse($array['valid']);
+        $this->assertArrayHasKey('valid', $array);
+        $this->assertArrayHasKey('errors', $array);
+        $this->assertArrayHasKey('warnings', $array);
+        $this->assertFalse($array['valid']);
     }
 
     /**
@@ -310,10 +310,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($config);
 
-        self::assertFalse($result->isValid());
-        self::assertTrue(
-            collect($result->getErrors())->contains(fn ($error) => str_contains($error['message'], 'Invalid account role'))
-        );
+        $this->assertFalse($result->isValid());
+        $this->assertTrue(collect($result->getErrors())->contains(fn ($error) => str_contains((string) $error['message'], 'Invalid account role')));
     }
 
     /**
@@ -326,10 +324,8 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
-        self::assertFalse($result->isValid());
-        self::assertTrue(
-            collect($result->getErrors())->contains(fn ($error) => str_contains($error['message'], 'selected for import but not in account mappings'))
-        );
+        $this->assertFalse($result->isValid());
+        $this->assertTrue(collect($result->getErrors())->contains(fn ($error) => str_contains((string) $error['message'], 'selected for import but not in account mappings')));
     }
 
     /**
@@ -363,7 +359,7 @@ final class ConfigurationContractValidatorTest extends TestCase
                 'name'         => 'Test Account 1',
                 'currency'     => 'USD',
                 'balance'      => '1000.00',
-                'balance-date' => time(),
+                'balance-date' => Carbon::now()->getTimestamp(),
                 'org'          => ['name' => 'Test Bank'],
                 'extra'        => [],
             ],
@@ -372,7 +368,7 @@ final class ConfigurationContractValidatorTest extends TestCase
                 'name'         => 'Test Account 2',
                 'currency'     => 'USD',
                 'balance'      => '2000.00',
-                'balance-date' => time(),
+                'balance-date' => Carbon::now()->getTimestamp(),
                 'org'          => ['name' => 'Test Bank'],
                 'extra'        => [],
             ],

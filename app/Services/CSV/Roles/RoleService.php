@@ -38,6 +38,7 @@ use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use League\Csv\UnableToProcessCsv;
+use InvalidArgumentException;
 
 /**
  * Class RoleService
@@ -86,7 +87,7 @@ class RoleService
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new \InvalidArgumentException($e->getMessage());
+                throw new InvalidArgumentException($e->getMessage());
             }
             // @codeCoverageIgnoreEnd
             Log::debug('Detected file headers:', $headers);
@@ -106,7 +107,7 @@ class RoleService
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new \InvalidArgumentException($e->getMessage());
+                throw new InvalidArgumentException($e->getMessage());
             }
         }
 
@@ -151,7 +152,7 @@ class RoleService
         } catch (Exception $e) {
             Log::error($e->getMessage());
 
-            throw new \InvalidArgumentException($e->getMessage());
+            throw new InvalidArgumentException($e->getMessage());
         }
 
         /** @codeCoverageIgnoreEnd */

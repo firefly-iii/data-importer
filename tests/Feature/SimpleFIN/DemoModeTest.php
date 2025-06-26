@@ -9,6 +9,8 @@ use App\Support\Constants;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Mockery;
+use Override;
 
 /**
  * @internal
@@ -19,6 +21,7 @@ final class DemoModeTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -38,16 +41,16 @@ final class DemoModeTest extends TestCase
         ;
 
         // Check that we don't redirect back to upload (which indicates validation failure)
-        self::assertNotSame(route('003-upload.index'), $response->getTargetUrl());
+        $this->assertNotSame(route('003-upload.index'), $response->getTargetUrl());
 
         // If demo mode works correctly, we should redirect to configuration
         $response->assertRedirect(route('004-configure.index'));
 
         // Verify session data was set correctly
-        self::assertSame('demo_token_123', session(Constants::SIMPLEFIN_TOKEN));
-        self::assertSame('https://demo:demo@beta-bridge.simplefin.org/simplefin', session(Constants::SIMPLEFIN_BRIDGE_URL));
-        self::assertTrue(session(Constants::SIMPLEFIN_IS_DEMO));
-        self::assertTrue(session(Constants::HAS_UPLOAD));
+        $this->assertSame('demo_token_123', session(Constants::SIMPLEFIN_TOKEN));
+        $this->assertSame('https://demo:demo@beta-bridge.simplefin.org/simplefin', session(Constants::SIMPLEFIN_BRIDGE_URL));
+        $this->assertTrue(session(Constants::SIMPLEFIN_IS_DEMO));
+        $this->assertTrue(session(Constants::HAS_UPLOAD));
     }
 
     public function testDemoModeCheckboxValueInterpretation(): void
@@ -65,11 +68,7 @@ final class DemoModeTest extends TestCase
                 ->post(route('003-upload.upload'), $case)
             ;
 
-            self::assertNotSame(
-                route('003-upload.index'),
-                $response->getTargetUrl(),
-                'Failed for case: '.json_encode($case)
-            );
+            $this->assertNotSame(route('003-upload.index'), $response->getTargetUrl(), 'Failed for case: '.json_encode($case));
         }
     }
 
@@ -98,24 +97,24 @@ final class DemoModeTest extends TestCase
 
         // Should attempt to connect (may fail due to invalid credentials, but shouldn't fail validation)
         // The exact behavior depends on whether SimpleFINService is mocked
-        self::assertNotSame(route('003-upload.index'), $response->getTargetUrl());
+        $this->assertNotSame(route('003-upload.index'), $response->getTargetUrl());
     }
 
     public function testRequestDataLogging(): void
     {
         // Enable debug logging to capture the request data
         Log::shouldReceive('debug')
-            ->with('UploadController::upload() - Request All:', \Mockery::type('array'))
+            ->with('UploadController::upload() - Request All:', Mockery::type('array'))
             ->once()
         ;
 
         Log::shouldReceive('debug')
-            ->with('handleSimpleFINFlow() - Request All:', \Mockery::type('array'))
+            ->with('handleSimpleFINFlow() - Request All:', Mockery::type('array'))
             ->once()
         ;
 
         Log::shouldReceive('debug')
-            ->with('handleSimpleFINFlow() - Raw use_demo input:', \Mockery::type('array'))
+            ->with('handleSimpleFINFlow() - Raw use_demo input:', Mockery::type('array'))
             ->once()
         ;
 

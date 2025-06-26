@@ -29,6 +29,7 @@ use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 // Removed SimpleFINModel imports as we now use arrays
 
@@ -485,7 +486,7 @@ class TransactionTransformer
             ));
 
             $this->accountsCollected = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(sprintf('Failed to collect accounts: %s', $e->getMessage()));
             Log::debug('Continuing without smart expense matching due to collection failure');
             $this->expenseAccounts   = [];

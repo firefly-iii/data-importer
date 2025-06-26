@@ -14,6 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Exception;
+use Throwable;
 
 class ProcessImportSubmissionJob implements ShouldQueue
 {
@@ -53,11 +55,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
         // Validate authentication credentials before proceeding
         if ('' === $this->accessToken) {
-            throw new \Exception('Access token is empty - cannot authenticate with Firefly III');
+            throw new Exception('Access token is empty - cannot authenticate with Firefly III');
         }
 
         if ('' === $this->baseUrl) {
-            throw new \Exception('Base URL is empty - cannot connect to Firefly III');
+            throw new Exception('Base URL is empty - cannot connect to Firefly III');
         }
 
         Log::info('Job authentication credentials validation', [
@@ -112,13 +114,13 @@ class ProcessImportSubmissionJob implements ShouldQueue
             ]);
 
             if ($verifyToken !== $this->accessToken) {
-                throw new \Exception(
+                throw new Exception(
                     'Failed to set access token in config properly'
                 );
             }
 
             if ($verifyUrl !== $this->baseUrl) {
-                throw new \Exception(
+                throw new Exception(
                     'Failed to set base URL in config properly'
                 );
             }
@@ -153,7 +155,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
                 'warnings'   => count($routine->getAllWarnings()),
                 'errors'     => count($routine->getAllErrors()),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->identifier,
                 'error'      => $e->getMessage(),
@@ -181,7 +183,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * Handle a job failure.
      */
-    public function failed(\Throwable $exception): void
+    public function failed(Throwable $exception): void
     {
         Log::error('ProcessImportSubmissionJob marked as failed', [
             'identifier' => $this->identifier,

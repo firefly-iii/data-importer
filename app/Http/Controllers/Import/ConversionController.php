@@ -44,6 +44,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use JsonException;
+use Storage;
+use Throwable;
 
 /**
  * Class ConversionController
@@ -140,7 +143,7 @@ class ConversionController extends Controller
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
                 Log::debug('SimpleFIN routine manager created successfully.');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error(sprintf('Failed to create SimpleFIN routine manager: %s', $e->getMessage()));
                 Log::error(sprintf('Error class: %s', $e::class));
                 Log::error(sprintf('Error file: %s:%d', $e->getFile(), $e->getLine()));
@@ -264,7 +267,7 @@ class ConversionController extends Controller
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
                 Log::debug('SimpleFIN routine manager created successfully in start method.');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error(sprintf('Failed to create SimpleFIN routine manager in start method: %s', $e->getMessage()));
                 Log::error(sprintf('Error class: %s', $e::class));
                 Log::error(sprintf('Error file: %s:%d', $e->getFile(), $e->getLine()));
@@ -303,11 +306,11 @@ class ConversionController extends Controller
         }
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk            = \Storage::disk(self::DISK_NAME);
+        $disk            = Storage::disk(self::DISK_NAME);
 
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error(sprintf('JSON exception: %s', $e->getMessage()));
             Log::error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);

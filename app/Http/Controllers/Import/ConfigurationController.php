@@ -47,6 +47,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Exception;
+use JsonException;
 
 /**
  * Class ConfigurationController
@@ -283,7 +285,7 @@ class ConfigurationController extends Controller
             $mapper = app(TransactionCurrencies::class);
 
             return $mapper->getMap();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(sprintf('Failed to load currencies: %s', $e->getMessage()));
 
             return [];
@@ -372,7 +374,7 @@ class ConfigurationController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);

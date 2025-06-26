@@ -29,6 +29,8 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Override;
+use Throwable;
 
 /**
  * Class Handler
@@ -50,10 +52,10 @@ class Handler extends ExceptionHandler
      *
      * @return \Illuminate\Http\Response|JsonResponse|Response
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    #[\Override]
-    public function render($request, \Throwable $e)
+    #[Override]
+    public function render($request, Throwable $e)
     {
         if ($e instanceof ImporterErrorException || $e instanceof ImporterHttpException) {
             $isDebug = config('app.debug');

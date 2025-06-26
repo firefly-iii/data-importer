@@ -27,6 +27,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Override;
 
 /**
  * Class Kernel
@@ -45,7 +46,7 @@ class Kernel extends ConsoleKernel
     /**
      * Register the commands for the application.
      */
-    #[\Override]
+    #[Override]
     protected function commands(): void
     {
         $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
@@ -77,6 +78,6 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    #[\Override]
+    #[Override]
     protected function schedule(Schedule $schedule): void {}
 }

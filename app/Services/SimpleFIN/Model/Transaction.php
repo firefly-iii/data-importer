@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\SimpleFIN\Model;
 
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 /**
  * Class Transaction
@@ -172,28 +173,28 @@ class Transaction
 
         foreach ($requiredFields as $field) {
             if (!array_key_exists($field, $data)) {
-                throw new \InvalidArgumentException(sprintf('Missing required field: %s', $field));
+                throw new InvalidArgumentException(sprintf('Missing required field: %s', $field));
             }
         }
 
         // Validate posted is numeric
         if (!is_numeric($data['posted'])) {
-            throw new \InvalidArgumentException('Posted date must be a numeric timestamp');
+            throw new InvalidArgumentException('Posted date must be a numeric timestamp');
         }
 
         // Validate amount is numeric string
         if (!is_numeric($data['amount'])) {
-            throw new \InvalidArgumentException('Amount must be a numeric string');
+            throw new InvalidArgumentException('Amount must be a numeric string');
         }
 
         // Validate transacted_at if present
         if (isset($data['transacted_at']) && !is_numeric($data['transacted_at'])) {
-            throw new \InvalidArgumentException('Transacted at must be a numeric timestamp');
+            throw new InvalidArgumentException('Transacted at must be a numeric timestamp');
         }
 
         // Validate pending if present
         if (isset($data['pending']) && !is_bool($data['pending'])) {
-            throw new \InvalidArgumentException('Pending must be a boolean');
+            throw new InvalidArgumentException('Pending must be a boolean');
         }
     }
 }

@@ -25,10 +25,12 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Exception;
+
 /**
  * Class ImporterErrorException
  */
-class ImporterErrorException extends \Exception
+class ImporterErrorException extends Exception
 {
     public array $json;
     public int   $statusCode = 0;

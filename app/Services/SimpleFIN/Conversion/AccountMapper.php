@@ -41,6 +41,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\Response;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * Class AccountMapper
@@ -260,7 +261,7 @@ class AccountMapper
             Log::error(sprintf('API error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(sprintf('Unexpected error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;

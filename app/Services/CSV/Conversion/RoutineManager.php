@@ -40,6 +40,7 @@ use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Override;
 
 /**
  * Class RoutineManager
@@ -75,7 +76,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return [];

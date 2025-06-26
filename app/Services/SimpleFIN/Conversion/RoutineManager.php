@@ -34,6 +34,7 @@ use App\Services\SimpleFIN\Model\Account;
 use App\Services\SimpleFIN\SimpleFINService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Override;
 
 /**
  * Class RoutineManager
@@ -64,7 +65,7 @@ class RoutineManager implements RoutineManagerInterface
         return $this->identifier;
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);

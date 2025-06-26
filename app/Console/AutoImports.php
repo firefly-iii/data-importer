@@ -50,6 +50,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use JsonException;
 
 /**
  * Trait AutoImports
@@ -378,7 +379,7 @@ trait AutoImports
 
         try {
             $disk->put(sprintf('%s.json', $this->identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error(sprintf('JSON exception: %s', $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
             $this->conversionMessages   = $manager->getAllMessages();
@@ -454,7 +455,7 @@ trait AutoImports
             $json         = $disk->get($fileName);
             $transactions = json_decode((string) $json, true, 512, JSON_THROW_ON_ERROR);
             Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|\JsonException $e) {
+        } catch (FileNotFoundException|JsonException $e) {
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
             $message              = sprintf('[a101]: File "%s" could not be decoded, cannot continue..', $fileName);
             $this->error($message);

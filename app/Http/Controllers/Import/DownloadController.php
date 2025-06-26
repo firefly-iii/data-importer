@@ -31,6 +31,7 @@ use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
+use JsonException;
 
 /**
  * Class DownloadController
@@ -40,7 +41,7 @@ class DownloadController extends Controller
     use RestoresConfiguration;
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function download(): Application|Response|ResponseFactory
     {

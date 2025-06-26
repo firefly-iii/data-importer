@@ -34,7 +34,7 @@ use Iterator;
 /**
  * Class ListConnectionsResponse
  */
-class ListConnectionsResponse extends Response implements \Iterator, \Countable
+class ListConnectionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int        $position = 0;

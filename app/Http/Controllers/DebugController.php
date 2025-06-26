@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
+use Exception;
 
 class DebugController extends Controller
 {
@@ -55,7 +56,7 @@ class DebugController extends Controller
                 if (null !== $logFile) {
                     try {
                         $logContent = (string)file_get_contents($logFile);
-                    } catch (\Exception) {
+                    } catch (Exception) {
                         // @ignoreException
                     }
                 }
@@ -109,7 +110,7 @@ class DebugController extends Controller
                 if (file_exists('/var/www/counter-main.txt')) {
                     $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::debug('Could not check build counter, but that\'s ok.');
                 Log::warning($e->getMessage());
             }

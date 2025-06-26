@@ -27,6 +27,7 @@ namespace App\Services\Spectre\Model;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * Class TransactionExtra
@@ -66,7 +67,7 @@ class TransactionExtra
     /**
      * TransactionExtra constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function __construct() {}
 

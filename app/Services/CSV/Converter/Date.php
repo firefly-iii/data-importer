@@ -28,6 +28,8 @@ namespace App\Services\CSV\Converter;
 use Carbon\Carbon;
 use Carbon\Language;
 use Illuminate\Support\Facades\Log;
+use Exception;
+use InvalidArgumentException;
 
 /**
  * Class Date
@@ -74,7 +76,7 @@ class Date implements ConverterInterface
 
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
-            } catch (\Exception|\InvalidArgumentException $e) {
+            } catch (Exception|InvalidArgumentException $e) {
                 Log::error(sprintf('%s converting the date: %s', $e::class, $e->getMessage()));
                 Log::debug('Date parsing error, will return today instead.');
 

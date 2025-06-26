@@ -30,6 +30,7 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 
 /**
  * Class ConfigFileProcessor
@@ -55,7 +56,7 @@ class ConfigFileProcessor
 
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));

@@ -34,6 +34,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use DateTime;
+use DateTimeZone;
+use Exception;
 
 /**
  * Class SimpleFINService
@@ -155,15 +158,15 @@ class SimpleFINService
 
             if (isset($dateRange['start']) && '' !== (string)$dateRange['start']) {
                 try {
-                    $startDateTimestamp = new \DateTime($dateRange['start'], new \DateTimeZone('UTC'))->setTime(0, 0, 0)->getTimestamp();
-                } catch (\Exception $e) {
+                    $startDateTimestamp = new DateTime($dateRange['start'], new DateTimeZone('UTC'))->setTime(0, 0, 0)->getTimestamp();
+                } catch (Exception $e) {
                     Log::warning('Invalid start date format for SimpleFIN transaction filtering.', ['date' => $dateRange['start'], 'error' => $e->getMessage()]);
                 }
             }
             if (isset($dateRange['end']) && '' !== (string)$dateRange['end']) {
                 try {
-                    $endDateTimestamp = new \DateTime($dateRange['end'], new \DateTimeZone('UTC'))->setTime(23, 59, 59)->getTimestamp();
-                } catch (\Exception $e) {
+                    $endDateTimestamp = new DateTime($dateRange['end'], new DateTimeZone('UTC'))->setTime(23, 59, 59)->getTimestamp();
+                } catch (Exception $e) {
                     Log::warning('Invalid end date format for SimpleFIN transaction filtering.', ['date' => $dateRange['end'], 'error' => $e->getMessage()]);
                 }
             }

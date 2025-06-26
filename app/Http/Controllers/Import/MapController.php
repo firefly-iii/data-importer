@@ -41,6 +41,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use InvalidArgumentException;
+use JsonException;
 
 /**
  * Class MapController
@@ -144,7 +146,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -220,7 +222,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -264,7 +266,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                        = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -285,7 +287,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -305,7 +307,7 @@ class MapController extends Controller
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
             $class                          = ExpenseRevenueAccounts::class;
             if (!class_exists($class)) {
-                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -348,7 +350,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $opposing           = [];
@@ -401,7 +403,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $expenseRevenue     = [];
@@ -446,7 +448,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode((string) $json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $categories         = [];

@@ -39,6 +39,7 @@ use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Exception\InvalidMessageException;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 /**
  * Class RoutineManager
@@ -72,7 +73,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return [];

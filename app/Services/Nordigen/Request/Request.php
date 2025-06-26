@@ -36,6 +36,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
+use JsonException;
 
 /**
  * Class Request
@@ -170,7 +171,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException(
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
@@ -271,7 +272,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }

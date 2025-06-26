@@ -39,6 +39,6 @@ final class ExampleTest extends TestCase
      */
     public function testBasicTest(): void
     {
-        self::assertTrue(true);
+        $this->assertTrue(true);
     }
 }

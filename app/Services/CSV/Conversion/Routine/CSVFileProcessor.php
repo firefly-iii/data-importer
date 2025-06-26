@@ -33,6 +33,7 @@ use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\ResultSet;
 use League\Csv\Statement;
+use JsonException;
 
 /**
  * Class CSVFileProcessor
@@ -157,7 +158,7 @@ class CSVFileProcessor
         foreach ($array as $index => $line) {
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
-            } catch (\JsonException $e) {
+            } catch (JsonException $e) {
                 Log::error($e->getMessage());
 
                 //                Log::error($e->getTraceAsString());

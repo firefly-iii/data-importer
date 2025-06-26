@@ -34,7 +34,7 @@ use Iterator;
 /**
  * Class GetTransactionsResponse
  */
-class GetTransactionsResponse extends Response implements \Iterator, \Countable
+class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int        $position = 0;

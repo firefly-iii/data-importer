@@ -44,6 +44,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use JsonException;
 
 /**
  * Class SelectionController
@@ -127,7 +128,7 @@ class SelectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
         }
         StorageService::storeContent($json);

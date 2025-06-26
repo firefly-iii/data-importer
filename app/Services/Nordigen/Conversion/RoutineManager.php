@@ -39,6 +39,7 @@ use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use Illuminate\Support\Facades\Log;
+use Override;
 
 /**
  * Class RoutineManager
@@ -76,7 +77,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return $this->transactionProcessor->getAccounts();

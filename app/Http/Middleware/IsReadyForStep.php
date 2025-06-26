@@ -30,6 +30,7 @@ use App\Services\Session\Constants;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Closure;
 
 /**
  * Trait IsReadyForStep
@@ -38,7 +39,7 @@ trait IsReadyForStep
 {
     public const string TEST = 'test';
 
-    public function handle(Request $request, \Closure $next): mixed
+    public function handle(Request $request, Closure $next): mixed
     {
         $result   = $this->isReadyForStep($request);
         if (true === $result) {

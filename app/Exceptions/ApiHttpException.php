@@ -25,9 +25,11 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Exception;
+
 /**
  * Class ApiHttpException
  *
  * @deprecated
  */
-class ApiHttpException extends \Exception {}
+class ApiHttpException extends Exception {}

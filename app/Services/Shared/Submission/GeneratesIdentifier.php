@@ -26,6 +26,8 @@ declare(strict_types=1);
 namespace App\Services\Shared\Submission;
 
 use Illuminate\Support\Facades\Log;
+use Storage;
+use Str;
 
 /**
  * Trait GeneratesIdentifier
@@ -38,10 +40,10 @@ trait GeneratesIdentifier
     public function generateIdentifier(): string
     {
         Log::debug('Going to generate submission routine identifier.');
-        $disk             = \Storage::disk($this->diskName);
+        $disk             = Storage::disk($this->diskName);
         $count            = 0;
         do {
-            $generatedId = sprintf('submission-%s', \Str::random(12));
+            $generatedId = sprintf('submission-%s', Str::random(12));
             ++$count;
             Log::debug(sprintf('Attempt #%d results in "%s"', $count, $generatedId));
         } while ($count < 30 && $disk->exists($generatedId));
