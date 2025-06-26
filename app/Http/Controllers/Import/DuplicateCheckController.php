@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use Exception;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
@@ -54,8 +55,8 @@ class DuplicateCheckController extends Controller
     public function checkDuplicate(Request $request): JsonResponse
     {
         try {
-            $name        = trim($request->input('name', ''));
-            $type        = trim($request->input('type', ''));
+            $name        = trim((string) $request->input('name', ''));
+            $type        = trim((string) $request->input('type', ''));
 
             Log::debug('DUPLICATE_CHECK: Received request', [
                 'name'        => $name,
@@ -108,7 +109,7 @@ class DuplicateCheckController extends Controller
                 'message'     => $message,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('DUPLICATE_CHECK: Exception during duplicate check', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

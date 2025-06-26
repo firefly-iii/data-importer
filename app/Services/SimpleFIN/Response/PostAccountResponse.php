@@ -13,7 +13,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 class PostAccountResponse extends Response
 {
     private ?Account $account;
-    private array $rawData;
+    private readonly array $rawData;
 
     /**
      * Response constructor.

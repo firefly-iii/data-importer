@@ -34,9 +34,9 @@ use Iterator;
 /**
  * Class GetAccountsResponse
  */
-class GetAccountsResponse extends Response implements \Iterator, \Countable
+class GetAccountsResponse extends Response implements Iterator, Countable
 {
-    private Collection $collection;
+    private readonly Collection $collection;
 
     private int $position = 0;
 

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use JsonException;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
@@ -117,14 +118,14 @@ abstract class Request
         } catch (ClientException|GuzzleException|TransferException $e) {
             $statusCode      = $e->getCode();
             if (429 === $statusCode) {
-                Log::debug(sprintf('Ran into exception: %s', get_class($e)));
+                Log::debug(sprintf('Ran into exception: %s', $e::class));
                 $this->logRateLimitHeaders($e->getResponse(), true);
                 // $this->reportRateLimit($fullUrl, $e);
                 $this->pauseForRateLimit($e->getResponse(), true);
 
                 return [];
             }
-            Log::error(sprintf('Original error: %s: %s', get_class($e), $e->getMessage()));
+            Log::error(sprintf('Original error: %s: %s', $e::class, $e->getMessage()));
 
             // crash but there is a response, log it.
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
@@ -143,7 +144,7 @@ abstract class Request
                 $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
-            if (array_key_exists('summary', $json) && str_contains($json['summary'], 'expired')) {
+            if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
 
@@ -151,7 +152,7 @@ abstract class Request
             }
 
             // if status code is 503, the account does not exist.
-            $exception       = new ImporterErrorException(sprintf('%s: %s', get_class($e), $e->getMessage()), 0, $e);
+            $exception       = new ImporterErrorException(sprintf('%s: %s', $e::class, $e->getMessage()), 0, $e);
             $exception->json = $json;
 
             throw $exception;
@@ -170,7 +171,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException(
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
@@ -271,7 +272,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }

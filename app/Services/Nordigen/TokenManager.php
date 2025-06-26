@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen;
 
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Authentication\SecretManager;
@@ -96,11 +97,11 @@ class TokenManager
 
         try {
             $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $tokenValidity = 0;
         }
 
-        return time() < $tokenValidity;
+        return Carbon::now()->getTimestamp() < $tokenValidity;
     }
 
     public static function hasValidAccessToken(): bool
@@ -115,11 +116,11 @@ class TokenManager
 
         try {
             $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $tokenValidity = 0;
         }
         // Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
-        $result         = time() < $tokenValidity;
+        $result         = Carbon::now()->getTimestamp() < $tokenValidity;
         if (false === $result) {
             Log::debug('Nordigen token is no longer valid');
 

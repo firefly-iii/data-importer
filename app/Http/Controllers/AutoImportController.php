@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
@@ -96,7 +97,7 @@ class AutoImportController extends Controller
 
     public function line(string $string): void
     {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+        echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
     }
 
     public function error($string, $verbosity = null): void

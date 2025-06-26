@@ -114,7 +114,7 @@ trait HaveAccess
             if ($current === $path) {
                 return true;
             }
-            if (str_starts_with($path, $current)) {
+            if (str_starts_with($path, (string) $current)) {
                 Log::debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
 
                 return true;

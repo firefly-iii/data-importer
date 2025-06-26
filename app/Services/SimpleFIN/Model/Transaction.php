@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Model;
 
+use InvalidArgumentException;
 use Carbon\Carbon;
 
 /**
@@ -32,12 +33,12 @@ use Carbon\Carbon;
  */
 class Transaction
 {
-    private string $id;
-    private int $posted;
-    private string $amount;
-    private string $description;
-    private ?int $transactedAt;
-    private bool $pending;
+    private readonly string $id;
+    private readonly int $posted;
+    private readonly string $amount;
+    private readonly string $description;
+    private readonly ?int $transactedAt;
+    private readonly bool $pending;
     private array $extra;
 
     public function __construct(array $data)
@@ -110,7 +111,7 @@ class Transaction
 
     public function getTransactedAtAsCarbon(): ?Carbon
     {
-        return $this->transactedAt ? Carbon::createFromTimestamp($this->transactedAt) : null;
+        return $this->transactedAt !== null && $this->transactedAt !== 0 ? Carbon::createFromTimestamp($this->transactedAt) : null;
     }
 
     public function isPending(): bool
@@ -172,28 +173,28 @@ class Transaction
 
         foreach ($requiredFields as $field) {
             if (!array_key_exists($field, $data)) {
-                throw new \InvalidArgumentException(sprintf('Missing required field: %s', $field));
+                throw new InvalidArgumentException(sprintf('Missing required field: %s', $field));
             }
         }
 
         // Validate posted is numeric
         if (!is_numeric($data['posted'])) {
-            throw new \InvalidArgumentException('Posted date must be a numeric timestamp');
+            throw new InvalidArgumentException('Posted date must be a numeric timestamp');
         }
 
         // Validate amount is numeric string
         if (!is_numeric($data['amount'])) {
-            throw new \InvalidArgumentException('Amount must be a numeric string');
+            throw new InvalidArgumentException('Amount must be a numeric string');
         }
 
         // Validate transacted_at if present
         if (isset($data['transacted_at']) && !is_numeric($data['transacted_at'])) {
-            throw new \InvalidArgumentException('Transacted at must be a numeric timestamp');
+            throw new InvalidArgumentException('Transacted at must be a numeric timestamp');
         }
 
         // Validate pending if present
         if (isset($data['pending']) && !is_bool($data['pending'])) {
-            throw new \InvalidArgumentException('Pending must be a boolean');
+            throw new InvalidArgumentException('Pending must be a boolean');
         }
     }
 }

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Camt\Conversion;
 
+use Override;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\IsRunningCli;
@@ -72,7 +73,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return [];
@@ -105,7 +106,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // get XML file
         $camtMessage        = $this->getCamtMessage();
-        if (null === $camtMessage) {
+        if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
             // at this point there are very few (if not zero) errors from other steps in the routine.

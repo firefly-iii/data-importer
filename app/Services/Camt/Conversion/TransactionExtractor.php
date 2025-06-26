@@ -15,12 +15,9 @@ class TransactionExtractor
 {
     use ProgressInformation;
 
-    private Configuration $configuration;
-
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
         Log::debug('Now in TransactionExtractor.');
-        $this->configuration = $configuration;
     }
 
     public function extractTransactions(Message $message): array

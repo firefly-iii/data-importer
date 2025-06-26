@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Routine;
 
+use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -40,8 +41,6 @@ use League\Csv\Statement;
 class CSVFileProcessor
 {
     use ProgressInformation;
-
-    private Configuration $configuration;
     private string        $delimiter;
     private bool          $hasHeaders;
     private Reader        $reader;
@@ -49,9 +48,8 @@ class CSVFileProcessor
     /**
      * CSVFileProcessor constructor.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
-        $this->configuration = $configuration;
     }
 
     /**
@@ -75,7 +73,7 @@ class CSVFileProcessor
         Log::debug(sprintf('Offset is %d', $offset));
 
         try {
-            $stmt    = (new Statement())->offset($offset);
+            $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -146,9 +144,7 @@ class CSVFileProcessor
         $lineValues = array_values($line);
         array_walk(
             $lineValues,
-            static function ($element) {
-                return trim(str_replace('&nbsp;', ' ', (string) $element));
-            }
+            static fn($element) => trim(str_replace('&nbsp;', ' ', (string) $element))
         );
 
         return $lineValues;
@@ -164,7 +160,7 @@ class CSVFileProcessor
         foreach ($array as $index => $line) {
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
-            } catch (\JsonException $e) {
+            } catch (JsonException $e) {
                 Log::error($e->getMessage());
 
                 //                Log::error($e->getTraceAsString());

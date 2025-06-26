@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
+use Closure;
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -43,7 +44,7 @@ class Iban implements ValidationRule
     /**
      * Determine if the given value is a valid IBAN.
      */
-    public function validate(string $attribute, mixed $value, \Closure $fail): void
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $result = IbanConverter::isValidIban((string)$value);
         if (!$result) {

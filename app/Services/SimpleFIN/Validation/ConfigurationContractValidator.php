@@ -45,10 +45,10 @@ class ConfigurationContractValidator
     private array $warnings                  = [];
     private array $existingAccounts          = [];
 
-    private const REQUIRED_ACCOUNT_TYPES     = ['asset', 'liability', 'expense', 'revenue'];
-    private const VALID_ACCOUNT_ROLES        = ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'];
-    private const VALID_LIABILITY_TYPES      = ['debt', 'loan', 'mortgage'];
-    private const VALID_LIABILITY_DIRECTIONS = ['credit', 'debit'];
+    private const array REQUIRED_ACCOUNT_TYPES     = ['asset', 'liability', 'expense', 'revenue'];
+    private const array VALID_ACCOUNT_ROLES        = ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'];
+    private const array VALID_LIABILITY_TYPES      = ['debt', 'loan', 'mortgage'];
+    private const array VALID_LIABILITY_DIRECTIONS = ['credit', 'debit'];
 
     public function validateConfigurationContract(Configuration $configuration): ValidationResult
     {
@@ -108,7 +108,7 @@ class ConfigurationContractValidator
         }
 
         // Validate currency format (should be 3-letter ISO code)
-        if (isset($account['currency']) && !preg_match('/^[A-Z]{3}$/', $account['currency'])) {
+        if (isset($account['currency']) && in_array(preg_match('/^[A-Z]{3}$/', $account['currency']), [0, false], true)) {
             $this->addWarning("session.simplefin_accounts_data.{$index}.currency", 'Currency should be 3-letter ISO code', $account['currency']);
         }
 
@@ -205,7 +205,7 @@ class ConfigurationContractValidator
         }
 
         // Validate currency format
-        if (isset($config['currency']) && !preg_match('/^[A-Z]{3}$/', $config['currency'])) {
+        if (isset($config['currency']) && in_array(preg_match('/^[A-Z]{3}$/', $config['currency']), [0, false], true)) {
             $this->addError("configuration.new_account.{$simplefinId}.currency", 'Currency must be 3-letter ISO code', $config['currency']);
         }
 
@@ -215,7 +215,7 @@ class ConfigurationContractValidator
         }
 
         // Validate opening balance date format if provided
-        if (isset($config['opening_balance_date']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $config['opening_balance_date'])) {
+        if (isset($config['opening_balance_date']) && in_array(preg_match('/^\d{4}-\d{2}-\d{2}$/', $config['opening_balance_date']), [0, false], true)) {
             $this->addError("configuration.new_account.{$simplefinId}.opening_balance_date", 'Opening balance date must be YYYY-MM-DD format', $config['opening_balance_date']);
         }
 
@@ -325,7 +325,7 @@ class ConfigurationContractValidator
             }
 
             // Check for exact name match (case-insensitive) and type match
-            if (strtolower($existingAccount->name) === strtolower($accountName)
+            if (strtolower((string) $existingAccount->name) === strtolower($accountName)
                 && $existingAccount->type === $accountType) {
                 $this->addError(
                     "configuration.new_account.{$simplefinId}.name",
@@ -376,7 +376,7 @@ class ConfigurationContractValidator
             }
 
             // Check for exact name match (case-insensitive) and type match
-            if (strtolower($existingAccount->name) === strtolower($accountName)
+            if (strtolower((string) $existingAccount->name) === strtolower($accountName)
                 && $existingAccount->type === $accountType) {
                 Log::debug('DUPLICATE_CHECK: Found duplicate account', [
                     'requested_name' => $accountName,

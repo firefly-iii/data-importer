@@ -33,10 +33,7 @@ use App\Services\Shared\Response\Response;
  */
 class ArrayResponse extends Response
 {
-    public array $data;
-
-    public function __construct(array $data)
+    public function __construct(public array $data)
     {
-        $this->data = $data;
     }
 }

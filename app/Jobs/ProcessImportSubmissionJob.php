@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use Exception;
+use Throwable;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
@@ -34,32 +36,13 @@ class ProcessImportSubmissionJob implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 1800; // 30 minutes
-
-    private string $identifier;
-    private Configuration $configuration;
-    private array $transactions;
-    private string $accessToken;
-    private string $baseUrl;
-    private ?string $vanityUrl;
+    public $timeout = 1800;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(
-        string $identifier,
-        Configuration $configuration,
-        array $transactions,
-        string $accessToken,
-        string $baseUrl,
-        ?string $vanityUrl
-    ) {
-        $this->identifier    = $identifier;
-        $this->configuration = $configuration;
-        $this->transactions  = $transactions;
-        $this->accessToken   = $accessToken;
-        $this->baseUrl       = $baseUrl;
-        $this->vanityUrl     = $vanityUrl;
+    public function __construct(private string $identifier, private Configuration $configuration, private array $transactions, private string $accessToken, private string $baseUrl, private ?string $vanityUrl)
+    {
     }
 
     /**
@@ -74,11 +57,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
         // Validate authentication credentials before proceeding
         if ('' === $this->accessToken) {
-            throw new \Exception('Access token is empty - cannot authenticate with Firefly III');
+            throw new Exception('Access token is empty - cannot authenticate with Firefly III');
         }
 
         if ('' === $this->baseUrl) {
-            throw new \Exception('Base URL is empty - cannot connect to Firefly III');
+            throw new Exception('Base URL is empty - cannot connect to Firefly III');
         }
 
         Log::info('Job authentication credentials validation', [
@@ -99,7 +82,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
         Log::debug('Original config backup', [
             'identifier'            => $this->identifier,
             'original_token_length' => strlen(
-                $originalConfig['importer.access_token']
+                (string) $originalConfig['importer.access_token']
             ),
             'original_url'          => $originalConfig['importer.url'],
             'original_vanity'       => $originalConfig['importer.vanity_url'],
@@ -128,18 +111,18 @@ class ProcessImportSubmissionJob implements ShouldQueue
                 'identifier'           => $this->identifier,
                 'config_token_matches' => $verifyToken === $this->accessToken,
                 'config_url_matches'   => $verifyUrl === $this->baseUrl,
-                'config_token_length'  => strlen($verifyToken),
+                'config_token_length'  => strlen((string) $verifyToken),
                 'config_url'           => $verifyUrl,
             ]);
 
             if ($verifyToken !== $this->accessToken) {
-                throw new \Exception(
+                throw new Exception(
                     'Failed to set access token in config properly'
                 );
             }
 
             if ($verifyUrl !== $this->baseUrl) {
-                throw new \Exception(
+                throw new Exception(
                     'Failed to set base URL in config properly'
                 );
             }
@@ -174,7 +157,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
                 'warnings'   => count($routine->getAllWarnings()),
                 'errors'     => count($routine->getAllErrors()),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->identifier,
                 'error'      => $e->getMessage(),
@@ -202,7 +185,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * Handle a job failure.
      */
-    public function failed(\Throwable $exception): void
+    public function failed(Throwable $exception): void
     {
         Log::error('ProcessImportSubmissionJob marked as failed', [
             'identifier' => $this->identifier,

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class DebugController extends Controller
                 if (null !== $logFile) {
                     try {
                         $logContent = (string)file_get_contents($logFile);
-                    } catch (\Exception $e) {
+                    } catch (Exception) {
                         // @ignoreException
                     }
                 }
@@ -63,7 +64,7 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|'.substr($logContent, -32 * 1024);
+            $logContent = sprintf('Truncated from this point <----|%s',substr($logContent, -32 * 1024));
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
@@ -109,7 +110,7 @@ class DebugController extends Controller
                 if (file_exists('/var/www/counter-main.txt')) {
                     $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::debug('Could not check build counter, but that\'s ok.');
                 Log::warning($e->getMessage());
             }

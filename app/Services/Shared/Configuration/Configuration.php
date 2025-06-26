@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
+use UnexpectedValueException;
+use DateTimeInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -194,7 +196,7 @@ class Configuration
             return self::fromVersionThree($data);
         }
 
-        throw new \UnexpectedValueException(sprintf('Configuration file version "%s" cannot be parsed.', $version));
+        throw new UnexpectedValueException(sprintf('Configuration file version "%s" cannot be parsed.', $version));
     }
 
     /**
@@ -823,7 +825,7 @@ class Configuration
         $array                                  = [
             'version'                      => $this->version,
             'source'                       => sprintf('ff3-importer-%s', config('importer.version')),
-            'created_at'                   => date(\DateTimeInterface::W3C),
+            'created_at'                   => date(DateTimeInterface::W3C),
             'date'                         => $this->date,
             'default_account'              => $this->defaultAccount,
             'delimiter'                    => $this->delimiter,

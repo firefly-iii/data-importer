@@ -98,7 +98,7 @@ class LineProcessor
         $return      = [];
         foreach ($line as $columnIndex => $value) {
             Log::debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
-            $value        = trim($value);
+            $value        = trim((string) $value);
             $originalRole = $this->roles[$columnIndex] ?? '_ignore';
             Log::debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
             if ('_ignore' === $originalRole) {

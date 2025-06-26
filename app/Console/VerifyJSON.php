@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use JsonException;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -39,7 +40,7 @@ trait VerifyJSON
 
         try {
             json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
             Log::error($message);
 

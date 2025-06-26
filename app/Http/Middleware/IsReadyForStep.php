@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use Closure;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +39,7 @@ trait IsReadyForStep
 {
     public const string TEST = 'test';
 
-    public function handle(Request $request, \Closure $next): mixed
+    public function handle(Request $request, Closure $next): mixed
     {
         $result   = $this->isReadyForStep($request);
         if (true === $result) {

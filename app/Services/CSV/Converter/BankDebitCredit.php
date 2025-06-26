@@ -59,7 +59,7 @@ class BankDebitCredit implements ConverterInterface
         ];
 
         // Lowercase the value and trim it for comparison.
-        if (in_array(strtolower(trim($value)), $negative, true)) {
+        if (in_array(strtolower(trim((string) $value)), $negative, true)) {
             return -1;
         }
 

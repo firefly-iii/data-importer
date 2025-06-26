@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion;
 
+use Override;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
@@ -74,7 +75,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return [];

@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Override;
+use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,9 +52,10 @@ class Handler extends ExceptionHandler
      *
      * @return \Illuminate\Http\Response|JsonResponse|Response
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function render($request, \Throwable $e)
+    #[Override]
+    public function render($request, Throwable $e)
     {
         if ($e instanceof ImporterErrorException || $e instanceof ImporterHttpException) {
             $isDebug = config('app.debug');

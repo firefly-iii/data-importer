@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use Storage;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -80,7 +81,7 @@ class UploadController extends Controller
         $simpleFinOriginUrl = config('simplefin.origin_url');
 
         // get existing configs.
-        $disk      = \Storage::disk('configurations');
+        $disk      = Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
         $all       = $disk->files();
 
@@ -157,7 +158,7 @@ class UploadController extends Controller
      */
     private function processUploadedFile(string $flow, MessageBag $errors, ?UploadedFile $file): MessageBag
     {
-        if (null === $file && 'file' === $flow) {
+        if (!$file instanceof UploadedFile && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
 
             return $errors;
@@ -273,9 +274,9 @@ class UploadController extends Controller
      */
     private function processSelection(MessageBag $errors, string $selection, ?UploadedFile $file): MessageBag
     {
-        if (null === $file && '' !== $selection) {
+        if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = \Storage::disk('configurations');
+            $disk           = Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
@@ -349,7 +350,7 @@ class UploadController extends Controller
             return redirect(route('004-configure.index'));
         } catch (ImporterErrorException $e) {
             Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
-            $errors->add('connection', 'Failed to connect to SimpleFIN: '.$e->getMessage());
+            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s',$e->getMessage()));
 
             return redirect(route('003-upload.index'))->withErrors($errors);
         }

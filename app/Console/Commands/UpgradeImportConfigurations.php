@@ -25,6 +25,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use RecursiveDirectoryIterator;
+use FilesystemIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
 
@@ -66,12 +70,12 @@ final class UpgradeImportConfigurations extends Command
 
     private function processRoot(string $directory): void
     {
-        $dir   = new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS);
-        $files = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
+        $dir   = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
 
         /**
          * @var string       $name
-         * @var \SplFileInfo $object
+         * @var SplFileInfo $object
          */
         foreach ($files as $name => $object) {
             $this->processFile($name);

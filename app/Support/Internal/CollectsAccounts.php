@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
+use Exception;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
@@ -81,7 +82,7 @@ trait CollectsAccounts
             foreach ($responseAsset as $account) {
                 $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account;
             }
-            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched '.count($accounts[Constants::ASSET_ACCOUNTS]).' ASSET accounts.');
+            Log::debug(sprintf('CollectsAccounts::getFireflyIIIAccounts - Fetched %d asset accounts.', count($accounts[Constants::ASSET_ACCOUNTS])));
 
             // Fetch LIABILITY accounts
             // URL and token are likely the same, but re-fetching defensively or if SecretManager has internal state
@@ -105,7 +106,7 @@ trait CollectsAccounts
             foreach ($responseLiability as $account) {
                 $accounts[Constants::LIABILITIES][$account->id] = $account;
             }
-            Log::debug('CollectsAccounts::getFireflyIIIAccounts - Fetched '.count($accounts[Constants::LIABILITIES]).' LIABILITY accounts.');
+            Log::debug(sprintf('CollectsAccounts::getFireflyIIIAccounts - Fetched %d liability accounts.', count($accounts[Constants::LIABILITIES])));
 
         } catch (ApiHttpException $e) {
             Log::error('CollectsAccounts::getFireflyIIIAccounts - ApiHttpException while fetching Firefly III accounts.', [
@@ -116,7 +117,7 @@ trait CollectsAccounts
             ]);
             // Return the (potentially partially filled) $accounts array so the app doesn't hard crash.
             // The view should handle cases where account lists are empty.
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('CollectsAccounts::getFireflyIIIAccounts - Generic Exception while fetching Firefly III accounts.', [
                 'message' => $e->getMessage(),
                 'code'    => $e->getCode(),

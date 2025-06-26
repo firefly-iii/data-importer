@@ -35,10 +35,10 @@ use Iterator;
 /**
  * Class ListAccountsResponse
  */
-class ListAccountsResponse extends Response implements \Iterator, \Countable
+class ListAccountsResponse extends Response implements Iterator, Countable
 {
     private array      $accounts;
-    private Collection $collection;
+    private readonly Collection $collection;
     private int        $position = 0;
 
     public function __construct(array $data)

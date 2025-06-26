@@ -50,7 +50,7 @@ class SecretManager
 
         try {
             $id = (string) session()->get(self::NORDIGEN_ID);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $id = '(super invalid)';
         }
 
@@ -64,7 +64,7 @@ class SecretManager
     {
         try {
             $id = (string) session()->get(self::NORDIGEN_ID);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $id = '';
         }
 
@@ -84,7 +84,7 @@ class SecretManager
 
         try {
             $key = (string) session()->get(self::NORDIGEN_KEY);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $key = '(super invalid key)';
         }
 
@@ -98,7 +98,7 @@ class SecretManager
     {
         try {
             $key = (string) session()->get(self::NORDIGEN_KEY);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $key = '';
         }
 

@@ -37,7 +37,7 @@ class Connection
     public string  $customerId;
     public string  $id;
     public Carbon  $lastSuccess;
-    public ?string $nextPossibleRefreshAt;
+    public ?string $nextPossibleRefreshAt = null;
     public string  $providerCode;
     public string  $providerId;
     public string  $providerName;

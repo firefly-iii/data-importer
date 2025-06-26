@@ -21,15 +21,13 @@ class TransactionMapper
 
     private array         $accountIdentificationSuffixes;
     private array         $allAccounts;
-    private Configuration $configuration;
 
     /**
      * @throws ImporterErrorException
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
         Log::debug('Constructed TransactionMapper.');
-        $this->configuration                 = $configuration;
         $this->allAccounts                   = $this->getAllAccounts();
         $this->accountIdentificationSuffixes = ['id', 'iban', 'number', 'name'];
     }
@@ -384,7 +382,7 @@ class TransactionMapper
         }
 
         // if is positive
-        if (1 === bccomp($current['amount'], '0')) {
+        if (1 === bccomp((string) $current['amount'], '0')) {
             Log::debug('Swap accounts because amount is positive');
             // positive account is deposit (or transfer), so swap accounts.
             $current = $this->swapAccounts($current);
@@ -415,9 +413,9 @@ class TransactionMapper
         // (and they point to the same account). This sanity check must be done again. But not right now.
 
         // amount must be positive
-        if (-1 === bccomp($current['amount'], '0')) {
+        if (-1 === bccomp((string) $current['amount'], '0')) {
             // negative amount is debit (or transfer)
-            $current['amount'] = bcmul($current['amount'], '-1');
+            $current['amount'] = bcmul((string) $current['amount'], '-1');
         }
 
         // no description?
@@ -432,12 +430,12 @@ class TransactionMapper
 
         // no date?
         if (!array_key_exists('date', $current)) {
-            Log::warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
-            $current['date'] = date('Y-m-d');
+            Log::warning(sprintf('Did not find a date in the transaction, added "%s"', Carbon::now()->format('Y-m-d')));
+            $current['date'] = Carbon::now()->format('Y-m-d');
         }
         if (array_key_exists('date', $current) && '' === (string) $current['date']) {
-            Log::warning(sprintf('Did not find a date in the transaction, added "%s"', date('Y-m-d')));
-            $current['date'] = date('Y-m-d');
+            Log::warning(sprintf('Did not find a date in the transaction, added "%s"', Carbon::now()->format('Y-m-d')));
+            $current['date'] = Carbon::now()->format('Y-m-d');
         }
 
         // unset var
@@ -497,7 +495,7 @@ class TransactionMapper
         Log::debug('Determine transaction type.');
         $directions      = ['source', 'destination'];
         $accountType     = [];
-        $lessThanZero    = 1 === bccomp('0', $current['amount']);
+        $lessThanZero    = 1 === bccomp('0', (string) $current['amount']);
         Log::debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
 
         foreach ($directions as $direction) {
@@ -603,8 +601,8 @@ class TransactionMapper
                 Log::error(
                     sprintf(
                         'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
-                        $accountType['source'] ?: null,
-                        $accountType['destination'] ?: null
+                        $accountType['source'] !== null && $accountType['source'] !== '' && $accountType['source'] !== '0' ? $accountType['source'] : null,
+                        $accountType['destination'] !== null && $accountType['destination'] !== '' && $accountType['destination'] !== '0' ? $accountType['destination'] : null
                     )
                 );                               // 285
                 $current['type']             = 'withdrawal'; // line 382 / 383

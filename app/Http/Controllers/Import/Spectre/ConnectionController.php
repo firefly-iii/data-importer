@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Spectre;
 
+use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConnectionControllerMiddleware;
@@ -119,7 +120,7 @@ class ConnectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
@@ -174,7 +175,7 @@ class ConnectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
         }
         StorageService::storeContent($json);

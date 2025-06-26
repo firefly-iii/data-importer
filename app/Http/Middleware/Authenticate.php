@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use Override;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
@@ -38,6 +39,7 @@ class Authenticate extends Middleware
      *
      * @param Request $request
      */
+    #[Override]
     protected function redirectTo($request): ?string
     {
         if (!$request->expectsJson()) {

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Conversion;
 
+use Override;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
@@ -76,7 +77,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return $this->transactionProcessor->getAccounts();

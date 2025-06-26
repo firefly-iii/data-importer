@@ -91,7 +91,7 @@ abstract class SimpleFINRequest
 
         // Only add basic auth if userinfo is not already in the apiUrl
         // and a token is provided. SimpleFIN typically uses userinfo in the Access URL.
-        if (false === strpos($this->apiUrl, '@') && '' !== $this->token) {
+        if (in_array(str_contains($this->apiUrl, '@'), [0, false], true) && '' !== $this->token) {
             $options['auth'] = [$this->token, ''];
         }
 

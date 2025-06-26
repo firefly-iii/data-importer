@@ -50,7 +50,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         $secret  = SecretManager::getSecret();
 
         if ('' === $appId || '' === $secret) {
-            return AuthenticationStatus::nodata();
+            return AuthenticationStatus::NODATA;
         }
 
         $request = new ListCustomersRequest($url, $appId, $secret);
@@ -61,14 +61,14 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         } catch (ImporterHttpException $e) {
             Log::error($e->getMessage());
 
-            return AuthenticationStatus::error();
+            return AuthenticationStatus::ERROR;
         }
         if ($response instanceof ErrorResponse) {
             Log::error(sprintf('%s: %s', $response->class, $response->message));
 
-            return AuthenticationStatus::error();
+            return AuthenticationStatus::ERROR;
         }
 
-        return AuthenticationStatus::authenticated();
+        return AuthenticationStatus::AUTHENTICATED;
     }
 }

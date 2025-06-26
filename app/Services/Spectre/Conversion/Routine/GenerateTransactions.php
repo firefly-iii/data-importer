@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
+use Carbon\Carbon;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
@@ -116,13 +117,13 @@ class GenerateTransactions
         ];
 
         // add time, post_date and post_time to transaction
-        if (null !== $entry->extra->getPostingDate()) {
+        if ($entry->extra->getPostingDate() instanceof Carbon) {
             $transaction['book_date'] = $entry->extra->getPostingDate()->toW3cString();
         }
-        if (null !== $entry->extra->getPostingTime()) {
+        if ($entry->extra->getPostingTime() instanceof Carbon) {
             $transaction['notes'] .= sprintf("\n\npost_time: %s", $entry->extra->getPostingTime());
         }
-        if (null !== $entry->extra->getTime()) {
+        if ($entry->extra->getTime() instanceof Carbon) {
             $transaction['notes'] .= sprintf("\n\ntime: %s", $entry->extra->getTime());
         }
 

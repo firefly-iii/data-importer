@@ -69,7 +69,7 @@ class MapperService
         }
 
         try {
-            $stmt    = (new Statement())->offset($offset);
+            $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -87,7 +87,7 @@ class MapperService
                     continue;
                 }
                 if ('' !== $column) {
-                    $data[$columnIndex]['values'][] = trim($column);
+                    $data[$columnIndex]['values'][] = trim((string) $column);
                 }
             }
         }
@@ -163,14 +163,16 @@ class MapperService
             $splits = $transaction->countSplits();
 
             foreach (array_keys($mappableFields) as $title) {
-                if (array_key_exists($title, $data)) {
-                    if (0 !== $splits) {
-                        for ($index = 0; $index < $splits; ++$index) {
-                            $value = $transaction->getFieldByIndex($title, $index);
-                            if ('' !== $value) {
-                                $data[$title]['values'][] = $value;
-                            }
-                        }
+                if (!array_key_exists($title, $data)) {
+                    continue;
+                }
+                if (0 === $splits) {
+                    continue;
+                }
+                for ($index = 0; $index < $splits; ++$index) {
+                    $value = $transaction->getFieldByIndex($title, $index);
+                    if ('' !== $value) {
+                        $data[$title]['values'][] = $value;
                     }
                 }
             }
@@ -179,9 +181,7 @@ class MapperService
         foreach ($data as $title => $info) {
             $filtered               = array_filter(
                 $info['values'],
-                static function (string $value) {
-                    return '' !== $value;
-                }
+                static fn(string $value) => '' !== $value
             );
             $info['values']         = array_unique($filtered);
             sort($info['values']);

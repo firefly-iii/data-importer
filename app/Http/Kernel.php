@@ -94,7 +94,7 @@ class Kernel extends HttpKernel
      *
      * These middleware may be assigned to groups or used individually.
      */
-    protected $routeMiddleware
+    protected $middlewareAliases
         = [
             'auth'             => Authenticate::class,
             'auth.basic'       => AuthenticateWithBasicAuth::class,

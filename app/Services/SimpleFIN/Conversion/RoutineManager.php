@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
+use Override;
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -39,11 +41,11 @@ use Illuminate\Support\Str;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    private AccountMapper          $accountMapper;
+    private readonly AccountMapper          $accountMapper;
     private Configuration          $configuration;
-    private string                 $identifier;
-    private SimpleFINService       $simpleFINService;
-    private TransactionTransformer $transformer;
+    private readonly string                 $identifier;
+    private readonly SimpleFINService       $simpleFINService;
+    private readonly TransactionTransformer $transformer;
 
     /**
      * RoutineManager constructor.
@@ -63,7 +65,7 @@ class RoutineManager implements RoutineManagerInterface
         return $this->identifier;
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
@@ -120,16 +122,7 @@ class RoutineManager implements RoutineManagerInterface
 
                     continue;
                 }
-
-                // Find the SimpleFIN account data for account creation
-                $simplefinAccountData = null;
-                foreach ($allAccountsSimpleFINData as $accountData) {
-                    if ($accountData['id'] === $simplefinAccountId) {
-                        $simplefinAccountData = $accountData;
-
-                        break;
-                    }
-                }
+                $simplefinAccountData = array_find($allAccountsSimpleFINData, fn($accountData) => $accountData['id'] === $simplefinAccountId);
 
                 if (!$simplefinAccountData) {
                     Log::error("SimpleFIN account data not found for ID: {$simplefinAccountId}");
@@ -147,7 +140,7 @@ class RoutineManager implements RoutineManagerInterface
                 // Add opening balance if provided
                 if ('' !== (string) $newAccountData['opening_balance'] && is_numeric($newAccountData['opening_balance'])) {
                     $accountConfig['opening_balance']      = $newAccountData['opening_balance'];
-                    $accountConfig['opening_balance_date'] = date('Y-m-d');
+                    $accountConfig['opening_balance_date'] = Carbon::now()->format('Y-m-d');
                 }
 
                 Log::info('Creating new Firefly III account', ['simplefin_account_id' => $simplefinAccountId, 'account_config' => $accountConfig]);
@@ -157,7 +150,7 @@ class RoutineManager implements RoutineManagerInterface
                 $accountMapper        = new AccountMapper();
                 $createdAccount       = $accountMapper->createFireflyAccount($simplefinAccount, $accountConfig);
 
-                if (null !== $createdAccount) {
+                if ($createdAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
                     // Account was created immediately - update configuration
                     $fireflyAccountId                     = $createdAccount->id;
                     $updatedAccounts                      = $this->configuration->getAccounts();
@@ -171,7 +164,7 @@ class RoutineManager implements RoutineManagerInterface
                     Log::info('Successfully created new Firefly III account', ['simplefin_account_id' => $simplefinAccountId, 'firefly_account_id' => $fireflyAccountId, 'account_name' => $createdAccount->name, 'account_type' => $accountConfig['type'], 'currency' => $accountConfig['currency']]);
 
                 }
-                if (null === $createdAccount) {
+                if (!$createdAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
                     // Account creation failed - this is a critical error that must be reported
                     $errorMessage   = sprintf('Failed to create Firefly III account "%s" (type: %s, currency: %s). Cannot proceed with transaction import for this account.', $accountConfig['name'], $accountConfig['type'], $accountConfig['currency']);
 
@@ -179,24 +172,14 @@ class RoutineManager implements RoutineManagerInterface
 
                     // try to find a matching account.
                     $createdAccount = $accountMapper->findMatchingFireflyAccount($simplefinAccount);
-                    if (null === $createdAccount) {
+                    if (!$createdAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
                         Log::error('Could also not find a matching account for SimpleFIN account.', $simplefinAccount);
 
                         throw new ImporterErrorException($errorMessage);
                     }
                 }
             }
-
-            // Find the specific SimpleFIN account data array for the current $simplefinAccountId.
-            // $allAccountsSimpleFINData is an indexed array of account data arrays.
-            $currentSimpleFINAccountData = null;
-            foreach ($allAccountsSimpleFINData as $accountDataFromArrayInLoop) {
-                if (isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId) {
-                    $currentSimpleFINAccountData = $accountDataFromArrayInLoop;
-
-                    break;
-                }
-            }
+            $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
 
             if (null === $currentSimpleFINAccountData) {
                 Log::error('Failed to find SimpleFIN account raw data in session for current account ID during transformation.', ['simplefin_account_id_sought' => $simplefinAccountId]);

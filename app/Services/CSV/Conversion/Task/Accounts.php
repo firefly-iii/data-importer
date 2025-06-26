@@ -271,10 +271,10 @@ class Accounts extends AbstractTask
     private function findAccount(array $array, ?Account $defaultAccount): array
     {
         Log::debug('Now in findAccount', $array);
-        if (null === $defaultAccount) {
+        if (!$defaultAccount instanceof Account) {
             Log::debug('findAccount() default account is NULL.');
         }
-        if (null !== $defaultAccount) {
+        if ($defaultAccount instanceof Account) {
             Log::debug(sprintf('Default account is #%d ("%s")', $defaultAccount->id, $defaultAccount->name));
         }
 
@@ -284,7 +284,7 @@ class Accounts extends AbstractTask
             Log::debug('Will search by ID field.');
             $result = $this->findById((string) $array['id']);
         }
-        if (null !== $result) {
+        if ($result instanceof Account) {
             $return = $result->toArray();
             Log::debug('Result of findById is not null, returning:', $return);
 
@@ -300,7 +300,7 @@ class Accounts extends AbstractTask
             $transactionType = (string) ($array['transaction_type'] ?? null);
             $result          = $this->findByIban((string) $array['iban'], $transactionType);
         }
-        if (null !== $result) {
+        if ($result instanceof Account) {
             $return = $result->toArray();
             Log::debug('Result of findByIBAN is not null, returning:', $return);
 
@@ -318,7 +318,7 @@ class Accounts extends AbstractTask
             $transactionType = (string) ($array['transaction_type'] ?? null);
             $result          = $this->findByNumber((string) $array['number'], $transactionType);
         }
-        if (null !== $result) {
+        if ($result instanceof Account) {
             $return = $result->toArray();
             Log::debug('Result of findByNumber is not null, returning:', $return);
 
@@ -333,7 +333,7 @@ class Accounts extends AbstractTask
             Log::debug('Search by name.');
             $result = $this->findByName((string) $array['name']);
         }
-        if (null !== $result) {
+        if ($result instanceof Account) {
             $return = $result->toArray();
             Log::debug('Result of findByName is not null, returning:', $return);
 
@@ -371,7 +371,7 @@ class Accounts extends AbstractTask
         }
 
         // if the default account is not NULL, return that one instead:
-        if (null !== $defaultAccount) {
+        if ($defaultAccount instanceof Account) {
             $default = $defaultAccount->toArray();
             Log::debug('At least the default account is not null, so will return that:', $default);
 
@@ -587,7 +587,7 @@ class Accounts extends AbstractTask
         /** @var Account $account */
         foreach ($response as $account) {
             if (in_array($account->type, [AccountType::ASSET, AccountType::LOAN, AccountType::DEBT, AccountType::MORTGAGE], true)
-                && strtolower($account->name) === strtolower($name)) {
+                && strtolower((string) $account->name) === strtolower($name)) {
                 Log::debug(sprintf('[b] Found "%s" account #%d based on name "%s"', $account->type, $account->id, $name));
 
                 return $account;

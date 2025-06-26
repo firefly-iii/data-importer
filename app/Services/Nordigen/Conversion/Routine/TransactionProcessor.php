@@ -47,11 +47,11 @@ class TransactionProcessor
     use ProgressInformation;
 
     /** @var string */
-    private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private array         $accounts;
     private Configuration $configuration;
-    private ?Carbon       $notAfter;
-    private ?Carbon       $notBefore;
+    private ?Carbon       $notAfter = null;
+    private ?Carbon       $notBefore = null;
 
     /**
      * @throws ImporterErrorException
@@ -118,7 +118,7 @@ class TransactionProcessor
                 $transactions = $request->get();
                 Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
-                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
+                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 $this->addError(0, $e->getMessage());
                 $return[$account]           = [];
 
@@ -130,7 +130,7 @@ class TransactionProcessor
 
                 continue;
             } catch (AgreementExpiredException $e) {
-                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', get_class($e)));
+                Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
                 $return[$account]           = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
@@ -168,17 +168,17 @@ class TransactionProcessor
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
         Log::info(sprintf('Going to filter downloaded transactions. Original set length is %d', count($transactions)));
-        if (null !== $this->notBefore) {
+        if ($this->notBefore instanceof Carbon) {
             Log::info(sprintf('Will not grab transactions before "%s"', $this->notBefore->format('Y-m-d H:i:s')));
         }
-        if (null !== $this->notAfter) {
+        if ($this->notAfter instanceof Carbon) {
             Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
         $return = [];
         foreach ($transactions as $transaction) {
             $madeOn   = $transaction->getDate();
 
-            if (null !== $this->notBefore && $madeOn->lt($this->notBefore)) {
+            if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is before "%s".',
@@ -189,7 +189,7 @@ class TransactionProcessor
 
                 continue;
             }
-            if (null !== $this->notAfter && $madeOn->gt($this->notAfter)) {
+            if ($this->notAfter instanceof Carbon && $madeOn->gt($this->notAfter)) {
                 Log::debug(
                     sprintf(
                         'Skip transaction because "%s" is after "%s".',

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Configuration;
 
+use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -55,7 +56,7 @@ class ConfigFileProcessor
 
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
 
             throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));

@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use JsonException;
+use Str;
+use Throwable;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
@@ -56,7 +59,7 @@ class TokenController extends Controller
      *
      * @throws ImporterErrorException
      * @throws GuzzleException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function callback(Request $request)
     {
@@ -98,7 +101,7 @@ class TokenController extends Controller
         ];
 
         try {
-            $response = (new Client($opts))->post($finalURL, $params);
+            $response = new Client($opts)->post($finalURL, $params);
         } catch (ClientException|RequestException $e) {
             $body = $e->getMessage();
             if ($e->hasResponse()) {
@@ -113,7 +116,7 @@ class TokenController extends Controller
 
         try {
             $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             Log::error(sprintf('Response from server: "%s"', (string)$response->getBody()));
 
@@ -269,8 +272,8 @@ class TokenController extends Controller
         $vanityURL             = rtrim($vanityURL, '/');
 
         Log::debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state                 = \Str::random(40);
-        $codeVerifier          = \Str::random(128);
+        $state                 = Str::random(40);
+        $codeVerifier          = Str::random(128);
         $request->session()->put('state', $state);
         $request->session()->put('code_verifier', $codeVerifier);
         $request->session()->put('form_client_id', $clientId);
@@ -309,7 +312,7 @@ class TokenController extends Controller
         $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
-        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with($data['base_url'], 'https://')) {
+        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {
             $request->session()->flash('secure_url', 'URL must start with https://');
 
             return redirect(route('token.index'));

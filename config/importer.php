@@ -53,7 +53,7 @@ return [
 
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',
-    'import_dir_allowlist'          => explode(',', env('IMPORT_DIR_ALLOWLIST', '')),
+    'import_dir_allowlist'          => explode(',', (string) env('IMPORT_DIR_ALLOWLIST', '')),
     'auto_import_secret'            => env('AUTO_IMPORT_SECRET', ''),
     'can_post_autoimport'           => env('CAN_POST_AUTOIMPORT', false),
     'can_post_files'                => env('CAN_POST_FILES', false),

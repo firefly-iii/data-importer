@@ -10,9 +10,9 @@ namespace App\Services\SimpleFIN;
 class ValidationResult
 {
     public function __construct(
-        private bool $isValid,
-        private array $errors = [],
-        private array $warnings = []
+        private readonly bool $isValid,
+        private readonly array $errors = [],
+        private readonly array $warnings = []
     ) {}
 
     public function isValid(): bool

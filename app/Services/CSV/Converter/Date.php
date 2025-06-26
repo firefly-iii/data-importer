@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
+use Exception;
+use InvalidArgumentException;
 use Carbon\Carbon;
 use Carbon\Language;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +37,7 @@ use Illuminate\Support\Facades\Log;
 class Date implements ConverterInterface
 {
     private string $dateFormat;
-    private string $dateFormatPattern;
+    private readonly string $dateFormatPattern;
     private string $dateLocale;
 
     /**
@@ -45,7 +47,7 @@ class Date implements ConverterInterface
     {
         $this->dateFormat        = 'Y-m-d';
         $this->dateLocale        = 'en';
-        $this->dateFormatPattern = '/(?:('.implode('|', array_keys(Language::all())).')\:)?(.+)/';
+        $this->dateFormatPattern = sprintf('/(?:(%s)\:)?(.+)/', implode('|', array_keys(Language::all())));
     }
 
     /**
@@ -74,8 +76,8 @@ class Date implements ConverterInterface
 
             try {
                 $carbon = Carbon::createFromLocaleFormat($this->dateFormat, $this->dateLocale, $string);
-            } catch (\Exception|\InvalidArgumentException $e) {
-                Log::error(sprintf('%s converting the date: %s', get_class($e), $e->getMessage()));
+            } catch (Exception|InvalidArgumentException $e) {
+                Log::error(sprintf('%s converting the date: %s', $e::class, $e->getMessage()));
                 Log::debug('Date parsing error, will return today instead.');
 
                 return Carbon::today()->startOfDay()->format('Y-m-d H:i:s');
@@ -105,7 +107,7 @@ class Date implements ConverterInterface
         $dateFormatConfiguration = [];
         preg_match($this->dateFormatPattern, $format, $dateFormatConfiguration);
         if (3 === count($dateFormatConfiguration)) {
-            $currentDateLocale = $dateFormatConfiguration[1] ?: $currentDateLocale;
+            $currentDateLocale = $dateFormatConfiguration[1] !== '' && $dateFormatConfiguration[1] !== '0' ? $dateFormatConfiguration[1] : $currentDateLocale;
             $currentDateFormat = $dateFormatConfiguration[2];
         }
 

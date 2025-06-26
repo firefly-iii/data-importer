@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Routine;
 
+use UnexpectedValueException;
+use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -39,17 +41,14 @@ use Illuminate\Support\Facades\Log;
 class ColumnValueConverter
 {
     use ProgressInformation;
-
-    private Configuration $configuration;
     private array         $roleToTransaction;
 
     /**
      * ColumnValueConverter constructor.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
         $this->roleToTransaction = config('csv.role_to_transaction');
-        $this->configuration     = $configuration;
     }
 
     /**
@@ -116,7 +115,7 @@ class ColumnValueConverter
             $transactionField = $this->roleToTransaction[$role] ?? null;
             $parsedValue      = $value->getParsedValue();
             if (null === $transactionField) {
-                throw new \UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
+                throw new UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
             }
             if (null === $parsedValue) {
                 Log::debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
@@ -190,7 +189,7 @@ class ColumnValueConverter
         if (is_array($value)) {
             try {
                 return json_encode($value, JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
+            } catch (JsonException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }

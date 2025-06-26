@@ -34,9 +34,9 @@ use Iterator;
 /**
  * Class ListCustomersResponse
  */
-class ListCustomersResponse extends Response implements \Iterator, \Countable
+class ListCustomersResponse extends Response implements Iterator, Countable
 {
-    private Collection $collection;
+    private readonly Collection $collection;
     private int        $position = 0;
 
     public function __construct(array $data)

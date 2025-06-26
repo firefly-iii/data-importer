@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use Exception;
+use JsonException;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
@@ -169,7 +171,7 @@ class ConfigurationController extends Controller
 
             if (!array_key_exists('name', $account) || null === $account['name']) {
                 Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
-                $account['name'] = 'Unknown Account (ID: '.$account['id'].')';
+                $account['name'] = sprintf('Unknown Account (ID: %s)',$account['id']);
             }
 
             if (!array_key_exists('currency', $account) || null === $account['currency']) {
@@ -254,7 +256,7 @@ class ConfigurationController extends Controller
         if (array_key_exists('assets', $fireflyAccounts) && is_array($fireflyAccounts['assets'])) {
             foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string) $fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -264,7 +266,7 @@ class ConfigurationController extends Controller
         if (array_key_exists('liabilities', $fireflyAccounts) && is_array($fireflyAccounts['liabilities'])) {
             foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower($fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string) $fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -283,8 +285,8 @@ class ConfigurationController extends Controller
             $mapper = app(TransactionCurrencies::class);
 
             return $mapper->getMap();
-        } catch (\Exception $e) {
-            Log::error('Failed to load currencies: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error(sprintf('Failed to load currencies: %s',$e->getMessage()));
 
             return [];
         }
@@ -372,7 +374,7 @@ class ConfigurationController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             Log::error($e->getMessage());
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);

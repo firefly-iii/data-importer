@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use Override;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -45,6 +46,7 @@ class Kernel extends ConsoleKernel
     /**
      * Register the commands for the application.
      */
+    #[Override]
     protected function commands(): void
     {
         $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
@@ -53,14 +55,17 @@ class Kernel extends ConsoleKernel
         $vanityUrl   = (string) env('VANITY_URL', '');
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && '' !== $clientId) {
-            echo 'You can\'t set FIREFLY_III_ACCESS_TOKEN together with FIREFLY_III_CLIENT_ID. One must remain empty.'.PHP_EOL;
+            echo PHP_EOL;
+            echo 'You can\'t set FIREFLY_III_ACCESS_TOKEN together with FIREFLY_III_CLIENT_ID. One must remain empty.';
+            echo PHP_EOL;
 
             exit;
         }
         // if vanity URL is not empty, Firefly III url must also be set.
         if ('' !== $vanityUrl && '' === $baseUrl) {
-            echo 'If you set VANITY_URL you must also set FIREFLY_III_URL'.PHP_EOL;
-
+            echo PHP_EOL;
+            echo 'If you set VANITY_URL you must also set FIREFLY_III_URL';
+            echo PHP_EOL;
             exit;
         }
 
@@ -72,5 +77,6 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
+    #[Override]
     protected function schedule(Schedule $schedule): void {}
 }

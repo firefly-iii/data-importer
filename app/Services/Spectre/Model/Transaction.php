@@ -90,7 +90,7 @@ class Transaction
 
         // if the number contains "E", it's in scientific notation, so we need to convert it to a normal number first.
         if (false !== stripos($amount, 'e')) {
-            $amount = sprintf('%.12f', $amount);
+            return sprintf('%.12f', $amount);
         }
 
         return $amount;
@@ -117,7 +117,7 @@ class Transaction
             $description = trim(sprintf('%s %s', $description, app('steam')->cleanString($additional)));
         }
 
-        return trim($description);
+        return trim((string) $description);
     }
 
     public function getId(): string

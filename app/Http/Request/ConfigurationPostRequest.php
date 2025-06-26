@@ -25,9 +25,9 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
+use Illuminate\Contracts\Validation\Validator;
 use App\Services\Session\Constants;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Validator;
 
 /**
  * Class ConfigurationPostRequest

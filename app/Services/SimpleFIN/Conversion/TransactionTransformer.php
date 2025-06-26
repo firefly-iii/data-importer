@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
+use Exception;
 use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
@@ -188,7 +189,7 @@ class TransactionTransformer
 
         // Try to find existing expense or revenue account first
         $existingAccount    = $this->findExistingAccount($description, $isDeposit);
-        if ($existingAccount) {
+        if ($existingAccount !== null && $existingAccount !== []) {
             return [
                 'id'     => $existingAccount['id'],
                 'name'   => $existingAccount['name'],
@@ -206,7 +207,7 @@ class TransactionTransformer
 
             if (0 === count($accountsToCheck)) {
                 $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
-                if ($clusteredAccountName) {
+                if ($clusteredAccountName !== null && $clusteredAccountName !== '' && $clusteredAccountName !== '0') {
                     return [
                         'id'     => null,
                         'name'   => $clusteredAccountName,
@@ -274,10 +275,10 @@ class TransactionTransformer
         ];
 
         foreach ($patterns as $pattern) {
-            $cleaned = preg_replace($pattern, '', $cleaned);
+            $cleaned = preg_replace($pattern, '', (string) $cleaned);
         }
 
-        $cleaned  = trim($cleaned);
+        $cleaned  = trim((string) $cleaned);
 
         // If we end up with an empty string, use a generic name
         if ('' === $cleaned) {
@@ -286,7 +287,7 @@ class TransactionTransformer
 
         // Limit length to reasonable size
         if (strlen($cleaned) > 100) {
-            $cleaned = substr($cleaned, 0, 97).'...';
+            return substr($cleaned, 0, 97).'...';
         }
 
         return $cleaned;
@@ -399,7 +400,7 @@ class TransactionTransformer
      */
     private function generateImportHash(array $transactionData, array $simpleFINAccountData): string
     {
-        $postedTimestamp = isset($transactionData['posted']) ? (int)$transactionData['posted'] : time();
+        $postedTimestamp = isset($transactionData['posted']) ? (int)$transactionData['posted'] : Carbon::now()->getTimestamp();
         $date            = Carbon::createFromTimestamp($postedTimestamp)->format('Y-m-d');
 
         $data            = [
@@ -485,7 +486,7 @@ class TransactionTransformer
             ));
 
             $this->accountsCollected = true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(sprintf('Failed to collect accounts: %s', $e->getMessage()));
             Log::debug('Continuing without smart expense matching due to collection failure');
             $this->expenseAccounts   = [];
@@ -512,7 +513,7 @@ class TransactionTransformer
         $normalizedDescription = $this->normalizeForMatching($description);
 
         // Try exact matches first
-        foreach ($accountsToSearch as $key => $account) {
+        foreach ($accountsToSearch as $account) {
             $normalizedAccountName = $this->normalizeForMatching($account['name']);
 
             // Check for exact match
@@ -525,7 +526,7 @@ class TransactionTransformer
 
         // Try fuzzy matching if no exact match found
         $bestMatch             = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
-        if ($bestMatch) {
+        if ($bestMatch !== null && $bestMatch !== []) {
             Log::debug(sprintf(
                 'Fuzzy match found: "%s" -> "%s" (similarity: %.2f)',
                 $description,
@@ -557,14 +558,14 @@ class TransactionTransformer
         ];
 
         foreach ($patterns as $pattern) {
-            $normalized = preg_replace($pattern, '', $normalized);
+            $normalized = preg_replace($pattern, '', (string) $normalized);
         }
 
         // Remove special characters and extra spaces
-        $normalized = preg_replace('/[^a-z0-9\s]/', '', $normalized);
-        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        $normalized = preg_replace('/[^a-z0-9\s]/', '', (string) $normalized);
+        $normalized = preg_replace('/\s+/', ' ', (string) $normalized);
 
-        return trim($normalized);
+        return trim((string) $normalized);
     }
 
     /**
@@ -581,7 +582,7 @@ class TransactionTransformer
         $bestSimilarity = 0;
         $threshold      = config('simplefin.expense_matching_threshold', 0.7);
 
-        foreach ($accounts as $key => $account) {
+        foreach ($accounts as $account) {
             $normalizedAccountName = $this->normalizeForMatching($account['name']);
 
             // Calculate similarity using multiple algorithms
@@ -619,7 +620,7 @@ class TransactionTransformer
 
         // Check for substring matches (give bonus for contains)
         $substringBonus        = 0;
-        if (false !== strpos($str1, $str2) || false !== strpos($str2, $str1)) {
+        if (str_contains($str1, $str2) || str_contains($str2, $str1)) {
             $substringBonus = 0.2;
         }
 
@@ -640,7 +641,7 @@ class TransactionTransformer
 
         // Ensure we have a non-empty description
         if ('' === $sanitized) {
-            $sanitized = 'SimpleFIN Transaction';
+            return 'SimpleFIN Transaction';
         }
 
         return $sanitized;
@@ -687,7 +688,7 @@ class TransactionTransformer
             'normalized_name' => $normalizedDescription,
             'descriptions'    => [$description],
             'count'           => 1,
-            'created_at'      => time(),
+            'created_at'      => Carbon::now()->getTimestamp(),
         ];
 
         Log::debug(sprintf('Created new %s cluster "%s" for "%s"', $accountType, $clusterName, $description));
@@ -705,17 +706,17 @@ class TransactionTransformer
 
         // Further normalize for cluster naming
         $clusterName = preg_replace('/\b(payment|deposit|transfer|debit|credit|from|to)\b/i', '', $cleaned);
-        $clusterName = preg_replace('/\s+/', ' ', trim($clusterName));
+        $clusterName = preg_replace('/\s+/', ' ', trim((string) $clusterName));
 
         // Remove trailing numbers/references that could vary
-        $clusterName = preg_replace('/\s+\d+\s*$/', '', $clusterName);
-        $clusterName = preg_replace('/\s+#\w+.*$/', '', $clusterName);
+        $clusterName = preg_replace('/\s+\d+\s*$/', '', (string) $clusterName);
+        $clusterName = preg_replace('/\s+#\w+.*$/', '', (string) $clusterName);
 
         // Ensure minimum meaningful length
-        if (strlen($clusterName) < 3) {
+        if (strlen((string) $clusterName) < 3) {
             $clusterName = $cleaned; // Fall back to basic cleaning
         }
 
-        return trim($clusterName);
+        return trim((string) $clusterName);
     }
 }

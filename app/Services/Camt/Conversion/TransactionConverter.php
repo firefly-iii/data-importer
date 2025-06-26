@@ -14,12 +14,9 @@ class TransactionConverter
 {
     use ProgressInformation;
 
-    private Configuration $configuration;
-
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
         Log::debug('Constructed TransactionConverter.');
-        $this->configuration = $configuration;
     }
 
     /**

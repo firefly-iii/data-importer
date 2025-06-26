@@ -35,8 +35,8 @@ use Psr\Http\Message\ResponseInterface;
 abstract class SimpleFINResponse implements SharedResponseInterface
 {
     private array $data = [];
-    private int $statusCode;
-    private string $rawBody;
+    private readonly int $statusCode;
+    private readonly string $rawBody;
 
     public function __construct(ResponseInterface $response)
     {

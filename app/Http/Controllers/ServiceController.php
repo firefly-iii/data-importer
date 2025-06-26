@@ -54,11 +54,11 @@ class ServiceController extends Controller
         $validator = new NordigenValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if ($result->equals(AuthenticationStatus::ERROR)) {
             // send user error:
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if ($result->equals(AuthenticationStatus::NODATA)) {
             // send user error:
             return response()->json(['result' => 'NODATA']);
         }
@@ -72,13 +72,13 @@ class ServiceController extends Controller
         $validator = new SimpleFINValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if ($result->equals(AuthenticationStatus::ERROR)) {
             // send user error:
             Log::error('Error: Could not validate app key.');
 
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if ($result->equals(AuthenticationStatus::NODATA)) {
             // send user error:
             Log::error('No data: Could not validate app key.');
 
@@ -94,11 +94,11 @@ class ServiceController extends Controller
         $validator = new SpectreValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if ($result->equals(AuthenticationStatus::ERROR)) {
             // send user error:
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if ($result->equals(AuthenticationStatus::NODATA)) {
             // send user error:
             return response()->json(['result' => 'NODATA']);
         }

@@ -38,13 +38,11 @@ class RoutineManager
     private array         $allMessages;
     private array         $allWarnings;
     private ApiSubmitter  $apiSubmitter;
-    private string        $identifier;
     private InfoCollector $infoCollector;
     private array         $transactions;
 
-    public function __construct(string $identifier)
+    public function __construct(private readonly string $identifier)
     {
-        $this->identifier   = $identifier;
         $this->transactions = [];
         $this->allMessages  = [];
         $this->allWarnings  = [];

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Import\Routine;
 
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -66,7 +67,7 @@ class ApiSubmitter
     {
         $this->createdTag = false;
         $this->tag        = $this->parseTag();
-        $this->tagDate    = date('Y-m-d');
+        $this->tagDate    = Carbon::now()->format('Y-m-d');
         $count            = count($lines);
         $uniqueCount      = 0;
         Log::info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
@@ -114,20 +115,20 @@ class ApiSubmitter
         $customTag = $this->configuration->getCustomTag();
         if ('' === $customTag) {
             // return default tag:
-            return sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+            return sprintf('Data Import on %s', Carbon::now()->format('Y-m-d \@ H:i'));
         }
         $items     = [
-            '%year%'        => date('Y'),
-            '%month%'       => date('m'),
-            '%month_full%'  => date('F'),
-            '%day%'         => date('d'),
-            '%day_of_week%' => date('l'),
-            '%hour%'        => date('H'),
-            '%minute%'      => date('i'),
-            '%second%'      => date('s'),
-            '%date%'        => date('Y-m-d'),
-            '%time%'        => date('H:i'),
-            '%datetime%'    => date('Y-m-d \@ H:i'),
+            '%year%'        => Carbon::now()->format('Y'),
+            '%month%'       => Carbon::now()->format('m'),
+            '%month_full%'  => Carbon::now()->format('F'),
+            '%day%'         => Carbon::now()->format('d'),
+            '%day_of_week%' => Carbon::now()->format('l'),
+            '%hour%'        => Carbon::now()->format('H'),
+            '%minute%'      => Carbon::now()->format('i'),
+            '%second%'      => Carbon::now()->format('s'),
+            '%date%'        => Carbon::now()->format('Y-m-d'),
+            '%time%'        => Carbon::now()->format('H:i'),
+            '%datetime%'    => Carbon::now()->format('Y-m-d \@ H:i'),
             '%version%'     => config('importer.version'),
         ];
         $result    = str_replace(
@@ -238,7 +239,7 @@ class ApiSubmitter
             $json      = json_decode($body, true);
             // before we complain, first check what the error is:
             if (is_array($json) && array_key_exists('message', $json)) {
-                if (str_contains($json['message'], '200032')) {
+                if (str_contains((string) $json['message'], '200032')) {
                     $isDeleted = true;
                 }
             }

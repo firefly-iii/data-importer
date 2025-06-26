@@ -34,7 +34,7 @@ class Amount implements ConverterInterface
     public static function negative(string $amount): string
     {
         if (1 === bccomp($amount, '0')) {
-            $amount = bcmul($amount, '-1');
+            return bcmul($amount, '-1');
         }
 
         return $amount;
@@ -43,7 +43,7 @@ class Amount implements ConverterInterface
     public static function positive(string $amount): string
     {
         if (-1 === bccomp($amount, '0')) {
-            $amount = bcmul($amount, '-1');
+            return bcmul($amount, '-1');
         }
 
         return $amount;
@@ -150,7 +150,7 @@ class Amount implements ConverterInterface
             Log::debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
         if (str_starts_with($value, '.')) {
-            $value = '0'.$value;
+            $value = sprintf('0%s',$value);
         }
 
         if (is_numeric($value)) {
@@ -180,11 +180,11 @@ class Amount implements ConverterInterface
         // This way of stripping exceptions is unsustainable.
         $value = trim((string) str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
-        $len   = strlen($str);
-        if (str_starts_with($str, '(') && ')' === $str[$len - 1]) {
-            $str = '-'.substr($str, 1, $len - 2);
+        $len   = strlen((string) $str);
+        if (str_starts_with((string) $str, '(') && ')' === $str[$len - 1]) {
+            $str = sprintf('-%s',substr((string) $str, 1, $len - 2));
         }
-        $str   = trim($str);
+        $str   = trim((string) $str);
 
         Log::debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 

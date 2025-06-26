@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
+use InvalidArgumentException;
 use App\Services\Camt\Transaction;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -79,14 +80,14 @@ class RoleService
         $headers   = [];
         if (true === $configuration->isHeaders()) {
             try {
-                $stmt    = (new Statement())->limit(1)->offset(0);
+                $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $headers = $records->fetchOne();
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new \InvalidArgumentException($e->getMessage());
+                throw new InvalidArgumentException($e->getMessage());
             }
             // @codeCoverageIgnoreEnd
             Log::debug('Detected file headers:', $headers);
@@ -95,7 +96,7 @@ class RoleService
             Log::debug('Role service: file has no headers');
 
             try {
-                $stmt    = (new Statement())->limit(1)->offset(0);
+                $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
                 $count   = count($records->fetchOne());
                 Log::debug(sprintf('Role service: first row has %d columns', $count));
@@ -106,7 +107,7 @@ class RoleService
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new \InvalidArgumentException($e->getMessage());
+                throw new InvalidArgumentException($e->getMessage());
             }
         }
 
@@ -146,12 +147,12 @@ class RoleService
 
         // make statement.
         try {
-            $stmt = (new Statement())->limit(self::EXAMPLE_COUNT)->offset($offset);
+            $stmt = new Statement()->limit(self::EXAMPLE_COUNT)->offset($offset);
             // @codeCoverageIgnoreStart
         } catch (Exception $e) {
             Log::error($e->getMessage());
 
-            throw new \InvalidArgumentException($e->getMessage());
+            throw new InvalidArgumentException($e->getMessage());
         }
 
         /** @codeCoverageIgnoreEnd */
@@ -164,8 +165,8 @@ class RoleService
             $line = array_values($line);
             // $line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
             foreach ($line as $index => $cell) {
-                if (strlen($cell) > self::EXAMPLE_LENGTH) {
-                    $cell = sprintf('%s...', substr($cell, 0, self::EXAMPLE_LENGTH));
+                if (strlen((string) $cell) > self::EXAMPLE_LENGTH) {
+                    $cell = sprintf('%s...', substr((string) $cell, 0, self::EXAMPLE_LENGTH));
                 }
                 $examples[$index][] = $cell;
                 $examples[$index]   = array_unique($examples[$index]);
@@ -246,9 +247,7 @@ class RoleService
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], function (string $value) {
-                return '' !== $value;
-            });
+            $examples[$key] = array_filter($examples[$key], fn(string $value) => '' !== $value);
         }
 
         return $examples;

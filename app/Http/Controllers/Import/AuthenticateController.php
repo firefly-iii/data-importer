@@ -48,7 +48,7 @@ use Session;
  */
 class AuthenticateController extends Controller
 {
-    private const AUTH_ROUTE = '002-authenticate.index';
+    private const string AUTH_ROUTE = '002-authenticate.index';
 
     public function __construct()
     {
@@ -69,16 +69,16 @@ class AuthenticateController extends Controller
         $pageTitle = 'Authentication';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
-        $error     = \Session::get('error');
+        $error     = Session::get('error');
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator();
             $result    = $validator->validate();
-            if ($result->equals(AuthenticationStatus::nodata())) {
+            if ($result->equals(AuthenticationStatus::NODATA)) {
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
-            if ($result->equals(AuthenticationStatus::authenticated())) {
+            if ($result->equals(AuthenticationStatus::AUTHENTICATED)) {
                 return redirect(route('003-upload.index'));
             }
         }
@@ -86,14 +86,14 @@ class AuthenticateController extends Controller
         if ('nordigen' === $flow) {
             $validator = new NordigenValidator();
             $result    = $validator->validate();
-            if ($result->equals(AuthenticationStatus::nodata())) {
+            if ($result->equals(AuthenticationStatus::NODATA)) {
                 $key        = NordigenSecretManager::getKey();
                 $identifier = NordigenSecretManager::getId();
 
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
             }
-            if ($result->equals(AuthenticationStatus::authenticated())) {
+            if ($result->equals(AuthenticationStatus::AUTHENTICATED)) {
                 return redirect(route('003-upload.index'));
             }
         }

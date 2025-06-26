@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Model;
 
+use InvalidArgumentException;
 use Carbon\Carbon;
 
 /**
@@ -33,13 +34,13 @@ use Carbon\Carbon;
 class Account
 {
     private array   $org;
-    private string  $id;
-    private string  $name;
-    private string  $currency;
-    private string  $balance;
-    private ?string $availableBalance;
-    private int     $balanceDate;
-    private array   $transactions;
+    private readonly string  $id;
+    private readonly string  $name;
+    private readonly string  $currency;
+    private readonly string  $balance;
+    private readonly ?string $availableBalance;
+    private readonly int     $balanceDate;
+    private readonly array   $transactions;
     private array   $extra;
 
     public function __construct(array $data)
@@ -183,17 +184,17 @@ class Account
 
         foreach ($requiredFields as $field) {
             if (!array_key_exists($field, $data)) {
-                throw new \InvalidArgumentException(sprintf('Missing required field: %s', $field));
+                throw new InvalidArgumentException(sprintf('Missing required field: %s', $field));
             }
         }
 
         // Validate organization structure
         if (!is_array($data['org'])) {
-            throw new \InvalidArgumentException('Organization must be an array');
+            throw new InvalidArgumentException('Organization must be an array');
         }
 
         if (!array_key_exists('sfin-url', $data['org']) && null !== $data['org']['sfin-url']) {
-            throw new \InvalidArgumentException('Organization must have sfin-url');
+            throw new InvalidArgumentException('Organization must have sfin-url');
         }
 
 
@@ -203,12 +204,12 @@ class Account
             && null !== $data['org']['domain']
             && null !== $data['org']['name']
         ) {
-            throw new \InvalidArgumentException('Organization must have either domain or name');
+            throw new InvalidArgumentException('Organization must have either domain or name');
         }
 
         // Validate balance-date is numeric
         if (!is_numeric($data['balance-date'])) {
-            throw new \InvalidArgumentException('Balance date must be a numeric timestamp');
+            throw new InvalidArgumentException('Balance date must be a numeric timestamp');
         }
     }
 }

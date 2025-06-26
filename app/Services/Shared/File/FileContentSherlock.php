@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\File;
 
+use Exception;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
@@ -51,7 +52,7 @@ class FileContentSherlock
             Log::debug('CAMT.053 Check on file: positive');
 
             return 'camt';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::debug('CAMT.053 Check on file: negative');
             Log::debug($e->getMessage());
         }
@@ -70,7 +71,7 @@ class FileContentSherlock
             Log::debug('CAMT.053 Check of content: positive');
 
             return 'camt';
-        } catch (\Exception $e) {
+        } catch (Exception) {
             Log::debug('CAMT.053 Check of content: negative');
             // Log::debug($e->getMessage());
         }
