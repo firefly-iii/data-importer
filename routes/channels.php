@@ -36,5 +36,5 @@ declare(strict_types=1);
 
 Broadcast::channel(
     'App.User.{id}',
-    fn($user, $id) => (int)$user->id === (int)$id
+    fn ($user, $id) => (int)$user->id === (int)$id
 );

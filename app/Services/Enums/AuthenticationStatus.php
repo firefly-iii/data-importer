@@ -25,9 +25,9 @@ declare(strict_types=1);
 
 namespace App\Services\Enums;
 
-enum AuthenticationStatus : string
+enum AuthenticationStatus: string
 {
     case AUTHENTICATED = 'authenticated';
-    case NODATA = 'nodata';
-    case ERROR = 'error';
+    case NODATA        = 'nodata';
+    case ERROR         = 'error';
 }

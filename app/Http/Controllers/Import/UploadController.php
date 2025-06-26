@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use Storage;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -72,22 +71,22 @@ class UploadController extends Controller
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle = 'Upload your file(s)';
-        $subTitle  = 'Start page and instructions';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $mainTitle          = 'Upload your file(s)';
+        $subTitle           = 'Start page and instructions';
+        $flow               = $request->cookie(Constants::FLOW_COOKIE);
 
         // simplefin settings.
-        $simpleFinToken = config('simplefin.token');
+        $simpleFinToken     = config('simplefin.token');
         $simpleFinOriginUrl = config('simplefin.origin_url');
 
         // get existing configs.
-        $disk      = Storage::disk('configurations');
+        $disk               = \Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all       = $disk->files();
+        $all                = $disk->files();
 
         // remove files from list
-        $list      = [];
-        $ignored   = config('importer.ignored_files');
+        $list               = [];
+        $ignored            = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -96,7 +95,7 @@ class UploadController extends Controller
 
         Log::debug('List of files:', $list);
 
-        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow','simpleFinOriginUrl','simpleFinToken'));
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow', 'simpleFinOriginUrl', 'simpleFinToken'));
     }
 
     /**
@@ -276,7 +275,7 @@ class UploadController extends Controller
     {
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
+            $disk           = \Storage::disk('configurations');
             $configFileName = StorageService::storeContent($disk->get($selection));
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
@@ -350,7 +349,7 @@ class UploadController extends Controller
             return redirect(route('004-configure.index'));
         } catch (ImporterErrorException $e) {
             Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
-            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s',$e->getMessage()));
+            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
 
             return redirect(route('003-upload.index'))->withErrors($errors);
         }

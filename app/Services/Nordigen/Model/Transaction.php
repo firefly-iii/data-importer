@@ -25,9 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Model;
 
-use JsonException;
-use DateTimeInterface;
-use Validator;
 use App\Rules\Iban;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
@@ -91,7 +88,7 @@ class Transaction
     public string $ultimateDebtor;
 
     // new fields
-    public ?Carbon $valueDate = null;
+    public ?Carbon $valueDate   = null;
 
     /**
      * Creates a transaction from a downloaded array.
@@ -201,7 +198,7 @@ class Transaction
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
                 Log::warning('Generated random transaction ID from array!');
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
             $object->transactionId = sprintf('ff3-%s', Uuid::uuid5(config('importer.namespace'), $hash));
@@ -226,7 +223,7 @@ class Transaction
         $object->additionalInformationStructured        = $array['additional_information_structured'];
         $object->balanceAfterTransaction                = Balance::fromLocalArray($array['balance_after_transaction']);
         $object->bankTransactionCode                    = $array['bank_transaction_code'];
-        $object->bookingDate                            = Carbon::createFromFormat(DateTimeInterface::W3C, $array['booking_date']);
+        $object->bookingDate                            = Carbon::createFromFormat(\DateTimeInterface::W3C, $array['booking_date']);
         $object->checkId                                = $array['check_id'];
         $object->creditorAgent                          = $array['creditor_agent'];
         $object->creditorId                             = $array['creditor_id'];
@@ -247,7 +244,7 @@ class Transaction
         $object->transactionId                          = $array['transaction_id'];
         $object->ultimateCreditor                       = $array['ultimate_creditor'];
         $object->ultimateDebtor                         = $array['ultimate_debtor'];
-        $object->valueDate                              = Carbon::createFromFormat(DateTimeInterface::W3C, $array['value_date']);
+        $object->valueDate                              = Carbon::createFromFormat(\DateTimeInterface::W3C, $array['value_date']);
         $object->transactionAmount                      = $array['transaction_amount']['amount'];
         $object->currencyCode                           = $array['transaction_amount']['currency'];
         $object->accountIdentifier                      = $array['account_identifier'];
@@ -278,7 +275,7 @@ class Transaction
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
             $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
@@ -364,7 +361,7 @@ class Transaction
         if ('' !== $this->creditorAccountIban) {
             $data      = ['iban' => $this->creditorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
-            $validator = Validator::make($data, $rules);
+            $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
                 Log::warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
 
@@ -444,7 +441,7 @@ class Transaction
         if ('' !== $this->debtorAccountIban) {
             $data      = ['iban' => $this->debtorAccountIban];
             $rules     = ['iban' => ['required', new Iban()]];
-            $validator = Validator::make($data, $rules);
+            $validator = \Validator::make($data, $rules);
             if ($validator->fails()) {
                 Log::warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));
 

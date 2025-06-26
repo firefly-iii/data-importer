@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use Exception;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
@@ -109,7 +108,7 @@ class DuplicateCheckController extends Controller
                 'message'     => $message,
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('DUPLICATE_CHECK: Exception during duplicate check', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

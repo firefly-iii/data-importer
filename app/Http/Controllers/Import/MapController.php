@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use InvalidArgumentException;
 use App\Services\CSV\Mapper\ExpenseRevenueAccounts;
-use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
@@ -146,7 +144,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -222,7 +220,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -266,7 +264,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                        = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
             if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -287,7 +285,7 @@ class MapController extends Controller
             // create the "mapper" class which will get data from Firefly III.
             $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
             if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -307,7 +305,7 @@ class MapController extends Controller
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
             $class                          = ExpenseRevenueAccounts::class;
             if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
+                throw new \InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
             Log::debug(sprintf('Associated class is %s', $class));
 
@@ -350,7 +348,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $opposing           = [];
@@ -368,7 +366,7 @@ class MapController extends Controller
         }
         $filtered           = array_filter(
             $opposing,
-            static fn(string $value) => '' !== $value
+            static fn (string $value) => '' !== $value
         );
 
         return array_unique($filtered);
@@ -403,7 +401,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $expenseRevenue     = [];
@@ -448,7 +446,7 @@ class MapController extends Controller
 
         try {
             $array = json_decode((string) $json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
         $categories         = [];
@@ -465,7 +463,7 @@ class MapController extends Controller
         }
         $filtered           = array_filter(
             $categories,
-            static fn(string $value) => '' !== $value
+            static fn (string $value) => '' !== $value
         );
 
         return array_unique($filtered);

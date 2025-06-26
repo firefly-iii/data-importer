@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Model;
 
-use Exception;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -34,40 +33,40 @@ use Illuminate\Support\Facades\Log;
  */
 class TransactionExtra
 {
-    private ?string $accountBalanceSnapshot = null;
-    private ?string $accountNumber = null;
-    private ?string $additional = null;
-    private ?string $assetAmount = null;
-    private ?string $assetCode = null;
+    private ?string $accountBalanceSnapshot   = null;
+    private ?string $accountNumber            = null;
+    private ?string $additional               = null;
+    private ?string $assetAmount              = null;
+    private ?string $assetCode                = null;
     private ?string $categorizationConfidence = null;
-    private ?string $checkNumber = null;
-    private ?string $customerCategoryCode = null;
-    private ?string $customerCategoryName = null;
-    private ?string $id = null;
-    private ?string $information = null;
-    private ?string $mcc = null;
-    private ?string $originalAmount = null;
-    private ?string $originalCategory = null;
-    private ?string $originalCurrencyCode = null;
-    private ?string $originalSubCategory = null;
-    private ?string $payee = null;
-    private ?string $payeeInformation = null;
-    private ?string $payer = null;
-    private ?string $payerInformation = null;
-    private ?bool   $possibleDuplicate = null;
-    private ?Carbon $postingDate = null;
-    private ?Carbon $postingTime = null;
-    private ?string $recordNumber = null;
-    private ?array  $tags = null;
-    private ?Carbon $time = null;
-    private ?string $type = null;
-    private ?string $unitPrice = null;
-    private ?string $units = null;
+    private ?string $checkNumber              = null;
+    private ?string $customerCategoryCode     = null;
+    private ?string $customerCategoryName     = null;
+    private ?string $id                       = null;
+    private ?string $information              = null;
+    private ?string $mcc                      = null;
+    private ?string $originalAmount           = null;
+    private ?string $originalCategory         = null;
+    private ?string $originalCurrencyCode     = null;
+    private ?string $originalSubCategory      = null;
+    private ?string $payee                    = null;
+    private ?string $payeeInformation         = null;
+    private ?string $payer                    = null;
+    private ?string $payerInformation         = null;
+    private ?bool   $possibleDuplicate        = null;
+    private ?Carbon $postingDate              = null;
+    private ?Carbon $postingTime              = null;
+    private ?string $recordNumber             = null;
+    private ?array  $tags                     = null;
+    private ?Carbon $time                     = null;
+    private ?string $type                     = null;
+    private ?string $unitPrice                = null;
+    private ?string $units                    = null;
 
     /**
      * TransactionExtra constructor.
      *
-     * @throws Exception
+     * @throws \Exception
      */
     private function __construct() {}
 

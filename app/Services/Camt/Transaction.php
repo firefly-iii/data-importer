@@ -429,7 +429,7 @@ class Transaction
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
             if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= sprintf(', %s',$addressLine);
+                $opposingName .= sprintf(', %s', $addressLine);
             }
         }
 

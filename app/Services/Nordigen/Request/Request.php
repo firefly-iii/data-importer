@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
-use JsonException;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
@@ -171,7 +170,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new ImporterHttpException(
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
@@ -272,7 +271,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             // TODO error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }

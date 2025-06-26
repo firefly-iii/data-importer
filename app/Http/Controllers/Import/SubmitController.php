@@ -25,8 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use Storage;
-use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
@@ -116,7 +114,7 @@ class SubmitController extends Controller
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
         $conversionIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk                 = Storage::disk(self::DISK_NAME);
+        $disk                 = \Storage::disk(self::DISK_NAME);
         $fileName             = sprintf('%s.json', $conversionIdentifier);
 
         // get files from disk:
@@ -132,7 +130,7 @@ class SubmitController extends Controller
             $json         = $disk->get($fileName);
             $transactions = json_decode((string) $json, true, 512, JSON_THROW_ON_ERROR);
             Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
+        } catch (FileNotFoundException|\JsonException $e) {
             Log::error(sprintf('The file "%s" on "%s" disk contains error: %s', $fileName, self::DISK_NAME, $e->getMessage()));
             // TODO error in logs
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);

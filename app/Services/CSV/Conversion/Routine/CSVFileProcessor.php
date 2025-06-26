@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Conversion\Routine;
 
-use JsonException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -48,9 +47,7 @@ class CSVFileProcessor
     /**
      * CSVFileProcessor constructor.
      */
-    public function __construct(private Configuration $configuration)
-    {
-    }
+    public function __construct(private Configuration $configuration) {}
 
     /**
      * Get a reader, and start looping over each line.
@@ -144,7 +141,7 @@ class CSVFileProcessor
         $lineValues = array_values($line);
         array_walk(
             $lineValues,
-            static fn($element) => trim(str_replace('&nbsp;', ' ', (string) $element))
+            static fn ($element) => trim(str_replace('&nbsp;', ' ', (string) $element))
         );
 
         return $lineValues;
@@ -160,7 +157,7 @@ class CSVFileProcessor
         foreach ($array as $index => $line) {
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
+            } catch (\JsonException $e) {
                 Log::error($e->getMessage());
 
                 //                Log::error($e->getTraceAsString());

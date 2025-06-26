@@ -37,9 +37,7 @@ use Illuminate\Support\Facades\Log;
  */
 class PostNewTokenRequest extends Request
 {
-    public function __construct(private readonly string $identifier, private readonly string $key)
-    {
-    }
+    public function __construct(private readonly string $identifier, private readonly string $key) {}
 
     public function get(): Response {}
 

@@ -601,8 +601,8 @@ class TransactionMapper
                 Log::error(
                     sprintf(
                         'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
-                        $accountType['source'] !== null && $accountType['source'] !== '' && $accountType['source'] !== '0' ? $accountType['source'] : null,
-                        $accountType['destination'] !== null && $accountType['destination'] !== '' && $accountType['destination'] !== '0' ? $accountType['destination'] : null
+                        null !== $accountType['source'] && '' !== $accountType['source'] && '0' !== $accountType['source'] ? $accountType['source'] : null,
+                        null !== $accountType['destination'] && '' !== $accountType['destination'] && '0' !== $accountType['destination'] ? $accountType['destination'] : null
                     )
                 );                               // 285
                 $current['type']             = 'withdrawal'; // line 382 / 383
