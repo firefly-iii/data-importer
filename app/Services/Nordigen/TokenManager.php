@@ -25,12 +25,15 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen;
 
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Nordigen\Request\PostNewTokenRequest;
 use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
+use Illuminate\Support\Facades\Log;
+use JetBrains\PhpStorm\NoReturn;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -44,7 +47,7 @@ class TokenManager
      */
     public static function getAccessToken(): string
     {
-        // app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // Log::debug(sprintf('Now at %s', __METHOD__));
         self::validateAllTokens();
 
         try {
@@ -61,7 +64,7 @@ class TokenManager
      */
     public static function validateAllTokens(): void
     {
-        // app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // Log::debug(sprintf('Now at %s', __METHOD__));
         // is there a valid access and refresh token?
         if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
             return;
@@ -86,55 +89,55 @@ class TokenManager
     {
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            app('log')->debug(sprintf('Now at %s', __METHOD__));
-            app('log')->debug('No Nordigen refresh token, so return false.');
+            Log::debug(sprintf('Now at %s', __METHOD__));
+            Log::debug('No Nordigen refresh token, so return false.');
 
             return false;
         }
 
         try {
             $tokenValidity = session()->get(Constants::NORDIGEN_REFRESH_EXPIRY_TIME) ?? 0;
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $tokenValidity = 0;
         }
 
-        return time() < $tokenValidity;
+        return Carbon::now()->getTimestamp() < $tokenValidity;
     }
 
     public static function hasValidAccessToken(): bool
     {
         $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
         if (false === $hasAccessToken) {
-            app('log')->debug(sprintf('Now at %s', __METHOD__));
-            app('log')->debug('No Nordigen token is present, so no valid access token');
+            Log::debug(sprintf('Now at %s', __METHOD__));
+            Log::debug('No Nordigen token is present, so no valid access token');
 
             return false;
         }
 
         try {
             $tokenValidity = session()->get(Constants::NORDIGEN_ACCESS_EXPIRY_TIME) ?? 0;
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $tokenValidity = 0;
         }
-        // app('log')->debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
-        $result         = time() < $tokenValidity;
+        // Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
+        $result         = Carbon::now()->getTimestamp() < $tokenValidity;
         if (false === $result) {
-            app('log')->debug('Nordigen token is no longer valid');
+            Log::debug('Nordigen token is no longer valid');
 
             return false;
         }
 
-        // app('log')->debug('Nordigen token is valid.');
+        // Log::debug('Nordigen token is valid.');
 
         return true;
     }
 
     public static function hasExpiredRefreshToken(): bool
     {
-        // app('log')->debug(sprintf('Now at %s', __METHOD__));
+        // Log::debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
-            app('log')->debug('No refresh token, so return false.');
+            Log::debug('No refresh token, so return false.');
 
             return false;
         }
@@ -142,6 +145,7 @@ class TokenManager
         exit(__METHOD__);
     }
 
+    #[NoReturn]
     public static function getFreshAccessToken(): void
     {
         exit(__METHOD__);
@@ -154,7 +158,7 @@ class TokenManager
      */
     public static function getNewTokenSet(string $identifier, string $key): void
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $client = new PostNewTokenRequest($identifier, $key);
         $client->setTimeOut(config('importer.connection.timeout'));
 

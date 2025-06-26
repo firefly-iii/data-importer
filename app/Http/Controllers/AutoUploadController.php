@@ -25,11 +25,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
+use Illuminate\Support\Facades\Log;
 
 class AutoUploadController extends Controller
 {
@@ -40,7 +42,7 @@ class AutoUploadController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(AutoUploadRequest $request)
+    public function index(AutoUploadRequest $request): string
     {
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
@@ -64,7 +66,7 @@ class AutoUploadController extends Controller
         try {
             $this->importUpload((string) $json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
 
@@ -73,13 +75,13 @@ class AutoUploadController extends Controller
 
     public function error($string, $verbosity = null): void
     {
-        app('log')->error($string);
+        Log::error($string);
         $this->line($string);
     }
 
     public function line(string $string): void
     {
-        echo sprintf("%s: %s\n", date('Y-m-d H:i:s'), $string);
+        echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
     }
 
     /**

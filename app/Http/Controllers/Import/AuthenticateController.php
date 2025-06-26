@@ -40,6 +40,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Session;
 
 /**
@@ -47,12 +48,12 @@ use Session;
  */
 class AuthenticateController extends Controller
 {
-    private const AUTH_ROUTE = '002-authenticate.index';
+    private const string AUTH_ROUTE = '002-authenticate.index';
 
     public function __construct()
     {
         parent::__construct();
-        app('log')->debug('Now in AuthenticateController, calling middleware.');
+        Log::debug('Now in AuthenticateController, calling middleware.');
         $this->middleware(AuthenticateControllerMiddleware::class);
     }
 
@@ -68,16 +69,16 @@ class AuthenticateController extends Controller
         $pageTitle = 'Authentication';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
-        $error     = \Session::get('error');
+        $error     = Session::get('error');
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator();
             $result    = $validator->validate();
-            if ($result->equals(AuthenticationStatus::nodata())) {
+            if (AuthenticationStatus::NODATA === $result) {
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
-            if ($result->equals(AuthenticationStatus::authenticated())) {
+            if (AuthenticationStatus::AUTHENTICATED === $result) {
                 return redirect(route('003-upload.index'));
             }
         }
@@ -85,19 +86,26 @@ class AuthenticateController extends Controller
         if ('nordigen' === $flow) {
             $validator = new NordigenValidator();
             $result    = $validator->validate();
-            if ($result->equals(AuthenticationStatus::nodata())) {
+            if (AuthenticationStatus::NODATA === $result) {
                 $key        = NordigenSecretManager::getKey();
                 $identifier = NordigenSecretManager::getId();
 
                 // show for to enter data. save as cookie.
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
             }
-            if ($result->equals(AuthenticationStatus::authenticated())) {
+            if (AuthenticationStatus::AUTHENTICATED === $result) {
                 return redirect(route('003-upload.index'));
             }
         }
+        if ('simplefin' === $flow) {
+            // This case should ideally be handled by middleware redirecting to upload.
+            // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
+            Log::warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
 
-        throw new ImporterErrorException('Impossible flow exception [a].');
+            return redirect(route('003-upload.index'));
+        }
+
+        throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
     }
 
     /**

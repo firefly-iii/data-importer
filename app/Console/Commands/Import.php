@@ -33,6 +33,7 @@ use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Import
@@ -43,18 +44,7 @@ final class Import extends Command
     use HaveAccess;
     use VerifyJSON;
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Import into Firefly III. Requires a configuration file and optionally a configuration file.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:import
     {config : The configuration file. }
     {file? : Optionally, the importable file you want to import}
@@ -70,13 +60,13 @@ final class Import extends Command
         $access        = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
 
             return ExitCode::NO_CONNECTION->value;
         }
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $file          = (string) $this->argument('file');
         $config        = (string) $this->argument('config'); // @phpstan-ignore-line
 
@@ -85,7 +75,7 @@ final class Import extends Command
             $directory = dirname($config);
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
-                app('log')->error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
+                Log::error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
 
                 return ExitCode::INVALID_PATH->value;
             }
@@ -96,17 +86,17 @@ final class Import extends Command
             $directory = dirname($file);
             if (!$this->isAllowedPath($directory)) {
                 $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
-                app('log')->error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
+                Log::error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
 
                 return ExitCode::NOT_ALLOWED_PATH->value;
             }
         }
 
-        if (!file_exists($config) || (file_exists($config) && !is_file($config))) {
+        if (!file_exists($config) || !is_file($config)) {
             $message = sprintf('The importer can\'t import: configuration file "%s" does not exist or could not be read.', $config);
             $this->error($message);
-            app('log')->error($message);
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
+            Log::error($message);
+            Log::error(sprintf('Exit code is %s.', ExitCode::CANNOT_READ_CONFIG->name));
 
             return ExitCode::CANNOT_READ_CONFIG->value;
         }
@@ -115,17 +105,17 @@ final class Import extends Command
         if (false === $jsonResult) {
             $message = 'The importer can\'t import: could not decode the JSON in the config file.';
             $this->error($message);
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
-        $configuration = Configuration::fromArray(json_decode(file_get_contents($config), true));
-        if ('file' === $configuration->getFlow() && (!file_exists($file) || (file_exists($file) && !is_file($file)))) {
+        $configuration = Configuration::fromArray(json_decode((string) file_get_contents($config), true));
+        if ('file' === $configuration->getFlow() && (!file_exists($file) || !is_file($file))) {
             $message = sprintf('The importer can\'t import: importable file "%s" does not exist or could not be read.', $file);
             $this->error($message);
-            app('log')->error($message);
+            Log::error($message);
 
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::IMPORTABLE_FILE_NOT_FOUND->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::IMPORTABLE_FILE_NOT_FOUND->name));
 
             return ExitCode::IMPORTABLE_FILE_NOT_FOUND->value;
         }
@@ -145,12 +135,12 @@ final class Import extends Command
         // crash here if the conversion failed.
         $exitCode      = ExitCode::SUCCESS->value;
         if (0 !== count($this->conversionErrors)) {
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
             $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
             // could still be that there were simply no transactions (from GoCardless). This can result
             // in another exit code.
             if ($this->isNothingDownloaded()) {
-                app('log')->error(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                Log::error(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
                 $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             }
 
@@ -173,14 +163,14 @@ final class Import extends Command
         event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
         if (0 !== count($this->importErrors)) {
             $exitCode = ExitCode::GENERAL_ERROR->value;
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
         }
         if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
             $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
         }
         if ($exitCode === ExitCode::SUCCESS->value) {
-            app('log')->debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+            Log::debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
         }
 
         return $exitCode;

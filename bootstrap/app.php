@@ -22,6 +22,11 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use App\Exceptions\Handler;
+
 bcscale(12);
 
 if (!function_exists('envNonEmpty')) {
@@ -35,7 +40,7 @@ if (!function_exists('envNonEmpty')) {
     {
         $result = env($key, $default);
         if (is_string($result) && '' === $result) {
-            $result = $default;
+            return $default;
         }
 
         return $result;
@@ -53,7 +58,7 @@ if (!function_exists('envNonEmpty')) {
 |
 */
 
-$app = new Illuminate\Foundation\Application(
+$app = new Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
@@ -69,7 +74,7 @@ $app = new Illuminate\Foundation\Application(
 */
 
 $app->singleton(
-    Illuminate\Contracts\Http\Kernel::class,
+    Kernel::class,
     App\Http\Kernel::class
 );
 
@@ -79,8 +84,8 @@ $app->singleton(
 );
 
 $app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    App\Exceptions\Handler::class
+    ExceptionHandler::class,
+    Handler::class
 );
 
 /*

@@ -30,6 +30,7 @@ use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListConnectionsResponse;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ListConnectionsRequest
@@ -55,7 +56,7 @@ class ListConnectionsRequest extends Request
      */
     public function get(): Response
     {
-        app('log')->debug('ListConnectionsRequest::get()');
+        Log::debug('ListConnectionsRequest::get()');
         $this->setParameters(
             [
                 'customer_id' => $this->customer,

@@ -35,7 +35,7 @@
 
 
         <!-- user has no accounts -->
-        @if(0 === count($fireflyIIIaccounts['assets']) && 0 === count($fireflyIIIaccounts['liabilities']) )
+        @if(0 === count($fireflyIIIaccounts['assets']) && 0 === count($fireflyIIIaccounts['liabilities']) && $flow !== 'simplefin')
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -76,7 +76,7 @@
             </div>
         @endif
         <!-- user has accounts! -->
-        @if(count($fireflyIIIaccounts['assets']) > 0 || count($fireflyIIIaccounts['liabilities']) > 0)
+        @if(count($fireflyIIIaccounts['assets']) > 0 || count($fireflyIIIaccounts['liabilities']) > 0 || $flow === 'simplefin')
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
@@ -120,6 +120,13 @@
                                         out the documentation for this page.</a>
                                 </p>
                             @endif
+                            @if('simplefin' === $flow)
+                                <p>
+                                    Configure how your SimpleFIN accounts will be mapped to Firefly III accounts.
+                                    You can map existing accounts or create new ones during import.
+                                    Accounts marked for import will have their transactions synchronized based on your date range settings.
+                                </p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -142,6 +149,226 @@
                 @if('nordigen' === $flow || 'spectre' === $flow)
                     <input type="hidden" name="ignore_duplicate_transactions" value="1"/>
                 @endif
+
+                <!-- SimpleFIN account configuration -->
+                @if('simplefin' === $flow)
+                <!-- Hidden fields for SimpleFIN validation -->
+                <input type="hidden" name="unique_column_type" value="id">
+                <input type="hidden" name="duplicate_detection_method" value="none">
+
+                <div class="row mt-3">
+                    <div class="col-lg-10 offset-lg-1">
+                        <div class="card">
+                            <div class="card-header">
+                                SimpleFIN account configuration
+                            </div>
+                            <div class="card-body">
+                                <p>Map your SimpleFIN accounts to Firefly III accounts. You can link to existing accounts or create new ones during import.</p>
+
+                                @if(count($importerAccounts) > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:45%">SimpleFIN Account</th>
+                                                <th style="width:10%"></th>
+                                                <th style="width:45%">Firefly III Account</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($importerAccounts as $information)
+                                                <x-importer-account :account="$information" :configuration="$configuration" :currencies="$currencies" :flow="$flow"/>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @else
+                                <div class="alert alert-warning">
+                                    <strong>No SimpleFIN accounts found.</strong> Please ensure your SimpleFIN token is valid and try again.
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SimpleFIN Import Options - Consolidated -->
+                    <div class="row mt-3">
+                        <div class="col-lg-10 offset-lg-1">
+                            <div class="card">
+                                <div class="card-header">
+                                    SimpleFIN Import Options
+                                </div>
+                                <div class="card-body">
+                                    <!-- Date Range Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <label for="date_range" class="col-sm-3 col-form-label">Date range:</label>
+                                        <div class="col-sm-9">
+                                            <select name="date_range" id="date_range" class="form-control" onchange="toggleDateRangeInputs()">
+                                                <option value="all" @if($configuration->getDateRange() === 'all') selected @endif>All time</option>
+                                                <option value="dynamic" @if($configuration->getDateRange() === 'dynamic') selected @endif>Dynamic range</option>
+                                                <option value="specific" @if($configuration->getDateRange() === 'specific') selected @endif>Specific dates</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="dynamic_range_inputs" style="display: {{ $configuration->getDateRange() === 'dynamic' ? 'block' : 'none' }};">
+                                        <div class="form-group row mb-3">
+                                            <label for="date_range_number" class="col-sm-3 col-form-label">Range:</label>
+                                            <div class="col-sm-5">
+                                                <input type="number" name="date_range_number" id="date_range_number" class="form-control" value="{{ $configuration->getDateRangeNumber() ?? 30 }}" min="1">
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <select name="date_range_unit" id="date_range_unit" class="form-control">
+                                                    <option value="d" @if($configuration->getDateRangeUnit() === 'd') selected @endif>Days</option>
+                                                    <option value="w" @if($configuration->getDateRangeUnit() === 'w') selected @endif>Weeks</option>
+                                                    <option value="m" @if($configuration->getDateRangeUnit() === 'm') selected @endif>Months</option>
+                                                    <option value="y" @if($configuration->getDateRangeUnit() === 'y') selected @endif>Years</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="specific_dates_inputs" style="display: {{ $configuration->getDateRange() === 'specific' ? 'block' : 'none' }};">
+                                        <div class="form-group row mb-3">
+                                            <label for="date_not_before" class="col-sm-3 col-form-label">Start date:</label>
+                                            <div class="col-sm-9">
+                                                <input type="date" name="date_not_before" id="date_not_before" class="form-control" value="{{ $configuration->getDateNotBefore() ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group row mb-3">
+                                            <label for="date_not_after" class="col-sm-3 col-form-label">End date:</label>
+                                            <div class="col-sm-9">
+                                                <input type="date" name="date_not_after" id="date_not_after" class="form-control" value="{{ $configuration->getDateNotAfter() ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pending Transactions Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">Pending transactions</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       @if($configuration->getPendingTransactions()) checked @endif
+                                                       type="checkbox" id="pending_transactions" name="pending_transactions" value="1"
+                                                       aria-describedby="pendingTransactionsHelp">
+                                                <label class="form-check-label" for="pending_transactions">
+                                                    Include pending transactions
+                                                </label>
+                                                <small id="pendingTransactionsHelp" class="form-text text-muted">
+                                                    <br>Select to include pending (unposted) transactions in addition to posted transactions.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- De-duplication Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">De-duplication</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       @if($configuration->getDuplicateDetectionMethod() !== 'none') checked @endif
+                                                       type="checkbox" id="enable_deduplication" name="enable_deduplication" value="1"
+                                                       aria-describedby="deduplicationHelp">
+                                                <label class="form-check-label" for="enable_deduplication">
+                                                    Enable content-based de-duplication
+                                                </label>
+                                                <small id="deduplicationHelp" class="form-text text-muted">
+                                                    <br>Prevent importing duplicate transactions based on transaction content.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rules Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">Rules</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       @if($configuration->isRules()) checked @endif
+                                                       type="checkbox" id="rules" name="rules" value="1"
+                                                       aria-describedby="rulesHelp">
+                                                <label class="form-check-label" for="rules">
+                                                    Apply Firefly III rules
+                                                </label>
+                                                <small id="rulesHelp" class="form-text text-muted">
+                                                    <br>Apply your Firefly III rules to imported transactions.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Map Data Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">Map data</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       @if($configuration->isMapAllData()) checked @endif
+                                                       type="checkbox" id="map_all_data" name="map_all_data" value="1"
+                                                       aria-describedby="mapAllDataHelp">
+                                                <label class="form-check-label" for="map_all_data">
+                                                    Map transaction data
+                                                </label>
+                                                <small id="mapAllDataHelp" class="form-text text-muted">
+                                                    <br>Map expense and revenue account names for imported transactions.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Import Tag Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <div class="col-sm-3">Import tag</div>
+                                        <div class="col-sm-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       @if($configuration->isAddImportTag()) checked @endif
+                                                       type="checkbox" id="add_import_tag" name="add_import_tag" value="1"
+                                                       aria-describedby="add_import_tagHelp">
+                                                <label class="form-check-label" for="add_import_tag">
+                                                    Add import tag
+                                                </label>
+                                                <small id="add_import_tagHelp" class="form-text text-muted">
+                                                    <br>Add a tag to each imported transaction to group your import.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Custom Tag Configuration -->
+                                    <div class="form-group row mb-3">
+                                        <label for="custom_tag" class="col-sm-3 col-form-label">Custom tag</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="custom_tag" id="custom_tag" class="form-control"
+                                                   value="{{ $configuration->getCustomTag() ?? '' }}"
+                                                   aria-describedby="customTagHelp">
+                                            <small id="customTagHelp" class="form-text text-muted">
+                                                Optional custom tag to add to all imported transactions.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        function toggleDateRangeInputs() {
+                            const dateRangeType = document.getElementById('date_range').value;
+                            const dynamicInputs = document.getElementById('dynamic_range_inputs');
+                            const specificInputs = document.getElementById('specific_dates_inputs');
+
+                            dynamicInputs.style.display = (dateRangeType === 'dynamic') ? 'block' : 'none';
+                            specificInputs.style.display = (dateRangeType === 'specific') ? 'block' : 'none';
+                        }
+                        // Initialize on page load
+                        document.addEventListener('DOMContentLoaded', toggleDateRangeInputs);
+                    </script>
+                @endif
+                <!-- End of SimpleFIN Import Options -->
 
                 <!-- Account selection for Gocardless and Spectre -->
                 <!-- also date range settings -->
@@ -213,7 +440,9 @@
                                                     @endif
                                                     <!-- end of update variables -->
                                                     <x-importer-account :account="$information"
-                                                                        :configuration="$configuration"/>
+                                                                        :configuration="$configuration"
+                                                                        :currencies="$currencies"
+                                                                        :flow="$flow"/>
                                                 @endforeach
                                                 </tbody>
                                                 <caption>Select and match the
@@ -573,7 +802,10 @@
                 @endif
                 <!-- end of CSV options -->
 
+
+                <!-- duplicate detection options -->
                 <!-- generic import options -->
+                @if('simplefin' !== $flow)
                 <div class="row mt-3">
                     <div class="col-lg-10 offset-lg-1">
                         <div class="card">
@@ -681,121 +913,8 @@
                 </div>
 
                 <!-- end of generic import options -->
+                @endif
 
-                <!-- duplicate detection options -->
-                <div class="row mt-3">
-                    <div class="col-lg-10 offset-lg-1">
-                        <div class="card">
-                            <div class="card-header">
-                                Duplicate transaction detection
-                            </div>
-                            <div class="card-body">
-                                <div class="col-sm-9 offset-sm-3">
-                                    <p class="text-muted">
-                                        Firefly III can automatically detect duplicate transactions. This is pretty
-                                        foolproof. In some special cases however,
-                                        you want more control over this process. Read more about the options below in <a
-                                            href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/"
-                                            target="_blank">the documentation</a>.
-                                    </p>
-                                </div>
-
-                                @if('file' === $flow)
-                                <div class="form-group row mb-3">
-                                    <label for="X" class="col-sm-3 col-form-label">General detection options</label>
-                                    <div class="col-sm-9">
-                                        <div class="form-check">
-                                            <input class="form-check-input"
-                                                   @if($configuration->isIgnoreDuplicateLines()) checked @endif
-                                                   type="checkbox" value="1" id="ignore_duplicate_lines"
-                                                   name="ignore_duplicate_lines" aria-describedby="duplicateHelp">
-                                            <label class="form-check-label" for="ignore_duplicate_lines">
-                                                Do not import duplicate lines or entries in the importable file.
-                                            </label>
-                                            <br>
-                                            <small class="form-text text-muted" id="duplicateHelp">
-                                                Whatever method you choose ahead, it's smart to make the importer ignore
-                                                any
-                                                duplicated lines or entries in your importable file.
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <div class="form-group row mb-3">
-                                    <label for="duplicate_detection_method" class="col-sm-3 col-form-label">Detection
-                                        method</label>
-                                    <div class="col-sm-9">
-                                        <select id="duplicate_detection_method" name="duplicate_detection_method" x-model="detectionMethod"
-                                                class="form-control" aria-describedby="duplicate_detection_method_help">
-                                            <option label="No duplicate detection"
-                                                    @if('none' === $configuration->getDuplicateDetectionMethod()) selected @endif
-                                            value="none">No duplicate detection
-                                            </option>
-                                            <option label="Content-based"
-                                                    @if('classic' === $configuration->getDuplicateDetectionMethod()) selected @endif
-                                            value="classic">Content-based detection
-                                            </option>
-                                            <option label="Identifier-based"
-                                                    @if('cell' === $configuration->getDuplicateDetectionMethod()) selected @endif
-                                            value="cell">Identifier-based detection
-                                            </option>
-                                        </select>
-                                        <small id="duplicate_detection_method_help" class="form-text text-muted">
-                                            For more details on these detection method see <a
-                                                href="https://docs.firefly-iii.org/references/data-importer/duplicate-detection/"
-                                                target="_blank">the documentation</a>. If you're not sure, select
-                                            "content-based" detection.
-                                        </small>
-                                    </div>
-                                </div>
-                                @if('file' === $flow)
-                                <div class="form-group row mb-3" id="unique_column_index_holder" x-show="'cell' === detectionMethod">
-                                    <label for="unique_column_index" class="col-sm-3 col-form-label">Unique column
-                                        index</label>
-                                    <div class="col-sm-9">
-                                        <input type="number" step="1" name="unique_column_index" class="form-control"
-                                               id="unique_column_index" placeholder="Column index"
-                                               value="{{ $configuration->getUniqueColumnIndex() }}"
-                                               aria-describedby="unique_column_index_help">
-                                        <small id="unique_column_index_help" class="form-text text-muted">
-                                            This field is only relevant for the "identifier-based" detection option.
-                                            Indicate which column / field contains the unique identifier. Start counting from
-                                            zero!
-                                        </small>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <div class="form-group row" id="unique_column_type_holder" x-show="'cell' === detectionMethod">
-                                    <label for="unique_column_type" class="col-sm-3 col-form-label">Unique column
-                                        type</label>
-                                    <div class="col-sm-9">
-                                        <select id="unique_column_type" name="unique_column_type" class="form-control"
-                                                aria-describedby="unique_column_type_help">
-                                            @foreach($uniqueColumns as $columnType => $columnName)
-                                            <option label="{{ $columnName }}"
-                                                    @if($configuration->getUniqueColumnType() === $columnType) selected @endif
-                                                    value="{{ $columnType }}">{{ $columnName }}</option>
-                                            @endforeach
-                                        </select>
-
-                                        <small id="unique_column_type_help" class="form-text text-muted">
-                                            This field is only relevant for the "identifier-based" detection option.
-                                            Select
-                                            the type of value you expect in
-                                            the unique identifier. What must Firefly III search for?
-                                        </small>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- end of duplicate detection options -->
 
                 <!-- other options -->
                 <div class="row mt-3">

@@ -88,7 +88,7 @@ class PseudoTransactionProcessor
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
 
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
@@ -115,7 +115,7 @@ class PseudoTransactionProcessor
             $result                = $currencyRequest->get();
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException('The default currency could not be loaded.');
         }
@@ -124,29 +124,29 @@ class PseudoTransactionProcessor
 
     public function processPseudo(array $lines): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $count     = count($lines);
         $processed = [];
-        app('log')->info(sprintf('Converting %d line(s) into transactions.', $count));
+        Log::info(sprintf('Converting %d line(s) into transactions.', $count));
 
         /** @var array $line */
         foreach ($lines as $index => $line) {
-            app('log')->info(sprintf('Now processing line %d/%d.', $index + 1, $count));
+            Log::info(sprintf('Now processing line %d/%d.', $index + 1, $count));
             $processed[] = $this->processPseudoLine($line);
             // $this->addMessage($index, sprintf('Converted CSV line %d into a transaction.', $index + 1));
         }
-        app('log')->info(sprintf('Done converting %d line(s) into transactions.', $count));
+        Log::info(sprintf('Done converting %d line(s) into transactions.', $count));
 
         return $processed;
     }
 
     private function processPseudoLine(array $line): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         foreach ($this->tasks as $task) {
             /** @var AbstractTask $object */
             $object = app($task);
-            app('log')->debug(sprintf('Now running task %s', $task));
+            Log::debug(sprintf('Now running task %s', $task));
             if ($object->requiresDefaultAccount()) {
                 $object->setAccount($this->defaultAccount);
             }
@@ -156,7 +156,7 @@ class PseudoTransactionProcessor
 
             $line   = $object->process($line);
         }
-        app('log')->debug('Final transaction: ', $line);
+        Log::debug('Final transaction: ', $line);
 
         return $line;
     }

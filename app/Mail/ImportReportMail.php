@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -50,7 +51,7 @@ class ImportReportMail extends Mailable
      */
     public function __construct(array $log)
     {
-        $this->time       = date('Y-m-d \@ H:i:s');
+        $this->time       = Carbon::now()->format('Y-m-d \@ H:i:s');
         $this->url        = (string) config('importer.url');
         $this->version    = config('importer.version');
         if ('' !== (string) config('importer.vanity_url')) {

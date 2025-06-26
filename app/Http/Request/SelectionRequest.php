@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-use Illuminate\Validation\Validator;
+use Illuminate\Contracts\Validation\Validator;
 
 /**
  * Class SelectionRequest

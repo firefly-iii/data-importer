@@ -36,6 +36,7 @@ use App\Services\Nordigen\Request\GetAccountBasicRequest;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AccountInformationCollector
@@ -49,17 +50,17 @@ class AccountInformationCollector
      */
     public static function collectInformation(Account $account, bool $overruleSettings = false): Account
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
         if (config('nordigen.get_account_details') || $overruleSettings) {
             try {
-                app('log')->debug('Get account details is ENABLED.');
+                Log::debug('Get account details is ENABLED.');
                 $detailedAccount = self::getAccountDetails($detailedAccount);
             } catch (ImporterErrorException $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
                 // ignore error otherwise for now.
                 $detailedAccount->setStatus('no-info');
                 $detailedAccount->setName('Unknown account');
@@ -68,12 +69,12 @@ class AccountInformationCollector
 
 
         if (config('nordigen.get_balance_details') || $overruleSettings) {
-            app('log')->debug('Get account balance is ENABLED.');
+            Log::debug('Get account balance is ENABLED.');
 
             try {
                 $detailedAccount = self::getBalanceDetails($detailedAccount);
             } catch (ImporterErrorException|ImporterHttpException $e) {
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
                 // ignore error otherwise for now.
                 $status = $detailedAccount->getStatus();
                 if ('no-info' === $status) {
@@ -86,11 +87,11 @@ class AccountInformationCollector
         }
 
         if (!config('nordigen.get_account_details') && !$overruleSettings) {
-            app('log')->debug('Get account details is DISABLED.');
+            Log::debug('Get account details is DISABLED.');
         }
 
         if (!config('nordigen.get_balance_details') && !$overruleSettings) {
-            app('log')->debug('Get account balance is DISABLED.');
+            Log::debug('Get account balance is DISABLED.');
         }
 
         // also collect some extra information, but don't use it right now.
@@ -102,7 +103,7 @@ class AccountInformationCollector
      */
     protected static function getAccountDetails(Account $account): Account
     {
-        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url          = config('nordigen.url');
         $accessToken  = TokenManager::getAccessToken();
@@ -120,14 +121,14 @@ class AccountInformationCollector
         }
 
         if (!array_key_exists('account', $response->data)) {
-            app('log')->error('Missing account array', $response->data);
+            Log::error('Missing account array', $response->data);
 
             throw new ImporterErrorException('No account array received, perhaps rate limited.');
         }
 
         $information  = $response->data['account'];
 
-        app('log')->debug('getAccountDetails: Collected information for account', $information);
+        Log::debug('getAccountDetails: Collected information for account', $information);
 
         $account->setResourceId($information['resource_id'] ?? '');
         $account->setBban($information['bban'] ?? '');
@@ -162,7 +163,7 @@ class AccountInformationCollector
 
     private static function getBalanceDetails(Account $account): Account
     {
-        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
@@ -179,7 +180,7 @@ class AccountInformationCollector
         }
         if (array_key_exists('balances', $response->data)) {
             foreach ($response->data['balances'] as $array) {
-                app('log')->debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
+                Log::debug(sprintf('Added "%s" balance "%s"', $array['balanceType'], $array['balanceAmount']['amount']));
                 $account->addBalance(Balance::createFromArray($array));
             }
         }
@@ -189,7 +190,7 @@ class AccountInformationCollector
 
     private static function getBasicDetails(Account $account): Account
     {
-        app('log')->debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
+        Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
         $url         = config('nordigen.url');
         $accessToken = TokenManager::getAccessToken();
@@ -199,11 +200,11 @@ class AccountInformationCollector
         /** @var ArrayResponse $response */
         $response    = $request->get();
         $array       = $response->data;
-        app('log')->debug('Response for basic information request:', $array);
+        Log::debug('Response for basic information request:', $array);
 
         // save IBAN if not already present
         if (array_key_exists('iban', $array) && '' !== $array['iban'] && '' === $account->getIban()) {
-            app('log')->debug('Set new IBAN from basic details.');
+            Log::debug('Set new IBAN from basic details.');
             $account->setIban($array['iban']);
         }
 

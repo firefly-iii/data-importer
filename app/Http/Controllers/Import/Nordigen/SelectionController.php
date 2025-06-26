@@ -25,8 +25,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import\Nordigen;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Exceptions\RateLimitException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
@@ -40,7 +42,9 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use JsonException;
 
 /**
  * Class SelectionController
@@ -58,11 +62,11 @@ class SelectionController extends Controller
     /**
      * Step 9, select a country + bank.
      *
-     * @return Factory|View
+     * @return Factory|RedirectResponse|View
      */
     public function index()
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $countries     = config('nordigen.countries');
         $mainTitle     = 'Select your country and bank';
         $pageTitle     = 'Select your country and bank';
@@ -89,7 +93,7 @@ class SelectionController extends Controller
 
         try {
             $response = $request->get();
-        } catch (ImporterHttpException $e) {
+        } catch (AgreementExpiredException|ImporterHttpException|RateLimitException $e) { // @phpstan-ignore-line
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
@@ -105,7 +109,7 @@ class SelectionController extends Controller
      */
     public function postIndex(SelectionRequest $request)
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
         $configuration = $this->restoreConfiguration();
         $values        = $request->getAll();
@@ -124,8 +128,8 @@ class SelectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 

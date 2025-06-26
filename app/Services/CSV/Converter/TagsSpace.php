@@ -40,7 +40,7 @@ class TagsSpace implements ConverterInterface
     public function convert($value)
     {
         $string = app('steam')->cleanStringAndNewlines($value);
-        $tags   = explode(' ', $string);
+        $tags   = explode(' ', (string) $string);
 
         return array_map('trim', $tags);
     }

@@ -77,14 +77,94 @@
             </div>
         </div>
     </div>
+</div>
 
+    <!-- New Account Creation Section (SimpleFIN only) -->
+    @if('simplefin' === $flow && !empty($newAccountsToCreate))
+    <div class="row mt-3">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><span class="fas fa-plus-circle"></span> New Accounts to Create</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        The following accounts will be created in Firefly III before importing transactions.
+                        You can customize their settings below or proceed with the smart defaults.
+                    </p>
+
+                    @foreach($newAccountsToCreate as $simplefinAccountId => $accountData)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="card-title">{{ $accountData['name'] ?? 'New Account' }}</h6>
+                                        <small class="text-muted">SimpleFIN Account: {{ $simplefinAccountId }}</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form class="new-account-form" data-account-id="{{ $simplefinAccountId }}">
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Account Name:</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       name="account_name"
+                                                       value="{{ $accountData['name'] ?? '' }}"
+                                                       required>
+                                            </div>
+
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Account Type:</label>
+                                                <select class="form-control form-control-sm" name="account_type" required>
+                                                    <option value="asset" selected>Asset Account</option>
+                                                    <option value="liability">Liability Account</option>
+                                                </select>
+                                                <small class="form-text text-muted">Smart default: Asset (recommended for most accounts)</small>
+                                            </div>
+
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Currency:</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       name="account_currency"
+                                                       value="USD"
+                                                       maxlength="3"
+                                                       required>
+                                                <small class="form-text text-muted">3-letter currency code</small>
+                                            </div>
+
+                                            <div class="form-group mb-2">
+                                                <label class="form-label">Opening Balance (optional):</label>
+                                                <input type="number"
+                                                       step="0.01"
+                                                       class="form-control form-control-sm"
+                                                       name="opening_balance"
+                                                       placeholder="0.00">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <div class="alert alert-info">
+                        <small>
+                            <span class="fas fa-info-circle"></span>
+                            These accounts will be created automatically when you start the conversion process.
+                            You can modify the details above or proceed with the defaults.
+                        </small>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+    @endif
 
-        <div class="row mt-3">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="btn-group btn-group-sm">
+    <div class="row mt-3">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="btn-group btn-group-sm">
                             <a href="{{ $jobBackUrl }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span>
                                 Go back to the previous step</a>
                             <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"

@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Model;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Account
  */
@@ -175,28 +177,28 @@ class Account
 
     public function getFullName(): string
     {
-        app('log')->debug('Account::getFullName()');
+        Log::debug('Account::getFullName()');
         if ('' !== $this->getName()) {
-            app('log')->debug(sprintf('Return getName(): "%s"', $this->getName()));
+            Log::debug(sprintf('Return getName(): "%s"', $this->getName()));
 
             return $this->getName();
         }
         if ('' !== $this->getDisplayName()) {
-            app('log')->debug(sprintf('Return getDisplayName(): "%s"', $this->getDisplayName()));
+            Log::debug(sprintf('Return getDisplayName(): "%s"', $this->getDisplayName()));
 
             return $this->getDisplayName();
         }
         if ('' !== $this->getOwnerName()) {
-            app('log')->debug(sprintf('Return getOwnerName(): "%s"', $this->getOwnerName()));
+            Log::debug(sprintf('Return getOwnerName(): "%s"', $this->getOwnerName()));
 
             return $this->getOwnerName();
         }
         if ('' !== $this->getIban()) {
-            app('log')->debug(sprintf('Return getIban(): "%s"', $this->getIban()));
+            Log::debug(sprintf('Return getIban(): "%s"', $this->getIban()));
 
             return $this->getIban();
         }
-        app('log')->warning('Account::getFullName(): no field with name, return "(no name)"');
+        Log::warning('Account::getFullName(): no field with name, return "(no name)"');
 
         return '(no name)';
     }

@@ -26,9 +26,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class NavController
@@ -38,31 +37,35 @@ class NavController extends Controller
     /**
      * Return back to config
      */
-    public function toConfig()
+    public function toConfig(): RedirectResponse
     {
-        app('log')->debug(__METHOD__);
-        session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
+        Log::debug(__METHOD__);
+
+        // For SimpleFIN flow, don't forget CONFIG_COMPLETE_INDICATOR to preserve form state
+        $sessionConfig = session()->get(Constants::CONFIGURATION);
+        $flow          = null;
+        if (is_array($sessionConfig) && array_key_exists('flow', $sessionConfig) && null !== $sessionConfig['flow']) {
+            $flow = $sessionConfig['flow'];
+        }
+
+        if ('simplefin' !== $flow) {
+            session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
+        }
 
         return redirect(route('004-configure.index').'?overruleskip=true');
     }
 
-    /**
-     * @return Application|Redirector|RedirectResponse
-     */
-    public function toConversion()
+    public function toConversion(): RedirectResponse
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         session()->forget(Constants::CONVERSION_COMPLETE_INDICATOR);
 
         return redirect(route('005-roles.index'));
     }
 
-    /**
-     * @return Application|Redirector|RedirectResponse
-     */
-    public function toRoles()
+    public function toRoles(): RedirectResponse
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         session()->forget(Constants::ROLES_COMPLETE_INDICATOR);
 
         return redirect(route('005-roles.index'));
@@ -71,9 +74,9 @@ class NavController extends Controller
     /**
      * Return back to index. Needs no session updates.
      */
-    public function toStart()
+    public function toStart(): RedirectResponse
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
 
         return redirect(route('index'));
     }
@@ -81,9 +84,9 @@ class NavController extends Controller
     /**
      * Return back to upload.
      */
-    public function toUpload()
+    public function toUpload(): RedirectResponse
     {
-        app('log')->debug(__METHOD__);
+        Log::debug(__METHOD__);
         session()->forget(Constants::HAS_UPLOAD);
 
         return redirect(route('003-upload.index'));

@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+PWD=$(pwd)
+SERVICE_NAME="laravel-queue-$(basename "$PWD")"
+
+# Check if Laravel project
+if [[ ! -f "artisan" ]]; then
+    echo "Error: No artisan file found. Run from Laravel project root."
+    exit 1
+fi
+
+# Stop queue worker service
+if systemctl --user stop "$SERVICE_NAME" 2>/dev/null; then
+    echo "Laravel queue worker stopped: $SERVICE_NAME"
+else
+    echo "No queue worker service running or already stopped: $SERVICE_NAME"
+fi
+
+# Show final status
+systemctl --user status "$SERVICE_NAME" --no-pager -l || true

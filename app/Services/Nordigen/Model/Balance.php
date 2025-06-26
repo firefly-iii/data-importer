@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Model;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Balance
  */
@@ -42,7 +44,7 @@ class Balance
     public static function createFromArray(array $data): self
     {
         if (count($data) > 0) {
-            app('log')->debug('Create Balance from array', $data);
+            Log::debug('Create Balance from array', $data);
         }
         $self                     = new self();
         $self->amount             = trim($data['balanceAmount']['amount'] ?? '0');

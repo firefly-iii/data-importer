@@ -31,6 +31,7 @@ use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader as CamtReader;
+use Illuminate\Support\Facades\Log;
 use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\Statement;
@@ -48,7 +49,7 @@ class MapperService
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
     {
-        app('log')->debug('Now in getMapData');
+        Log::debug('Now in getMapData');
         // make file reader first.
         $reader = Reader::createFromString($content);
 
@@ -56,9 +57,9 @@ class MapperService
         try {
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
-            //            app('log')->error($e->getTraceAsString());
+            //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
         }
 
@@ -68,15 +69,15 @@ class MapperService
         }
 
         try {
-            $stmt    = (new Statement())->offset($offset);
+            $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterErrorException($e->getMessage());
         }
         // loop each row, apply specific:
-        app('log')->debug('Going to loop all records to collect information');
+        Log::debug('Going to loop all records to collect information');
         foreach ($records as $row) {
             // $row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
@@ -86,7 +87,7 @@ class MapperService
                     continue;
                 }
                 if ('' !== $column) {
-                    $data[$columnIndex]['values'][] = trim($column);
+                    $data[$columnIndex]['values'][] = trim((string) $column);
                 }
             }
         }
@@ -126,7 +127,7 @@ class MapperService
      */
     public static function getMapDataForCamt(Configuration $configuration, string $content, array $data): array
     {
-        app('log')->debug('Now in getMapDataForCamt');
+        Log::debug('Now in getMapDataForCamt');
 
         // make file reader first.
         $camtReader     = new CamtReader(Config::getDefault());
@@ -162,14 +163,16 @@ class MapperService
             $splits = $transaction->countSplits();
 
             foreach (array_keys($mappableFields) as $title) {
-                if (array_key_exists($title, $data)) {
-                    if (0 !== $splits) {
-                        for ($index = 0; $index < $splits; ++$index) {
-                            $value = $transaction->getFieldByIndex($title, $index);
-                            if ('' !== $value) {
-                                $data[$title]['values'][] = $value;
-                            }
-                        }
+                if (!array_key_exists($title, $data)) {
+                    continue;
+                }
+                if (0 === $splits) {
+                    continue;
+                }
+                for ($index = 0; $index < $splits; ++$index) {
+                    $value = $transaction->getFieldByIndex($title, $index);
+                    if ('' !== $value) {
+                        $data[$title]['values'][] = $value;
                     }
                 }
             }
@@ -178,9 +181,7 @@ class MapperService
         foreach ($data as $title => $info) {
             $filtered               = array_filter(
                 $info['values'],
-                static function (string $value) {
-                    return '' !== $value;
-                }
+                static fn (string $value) => '' !== $value
             );
             $info['values']         = array_unique($filtered);
             sort($info['values']);

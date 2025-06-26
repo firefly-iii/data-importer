@@ -25,9 +25,11 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Exception;
+
 /**
  * Class SpectreHttpException
  *
  * @deprecated
  */
-class SpectreHttpException extends \Exception {}
+class SpectreHttpException extends Exception {}

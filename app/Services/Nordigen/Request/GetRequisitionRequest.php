@@ -38,7 +38,7 @@ use App\Services\Shared\Response\Response;
  */
 class GetRequisitionRequest extends Request
 {
-    private string $requisitionId;
+    private readonly string $requisitionId;
 
     public function __construct(string $url, string $token, string $requisitionId)
     {

@@ -59,6 +59,7 @@ Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index
 Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
 Route::get('/import/configure/download', ['uses' => 'Import\DownloadController@download', 'as' => '004-configure.download']);
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
+Route::post('/import/check-duplicate', ['uses' => 'Import\DuplicateCheckController@checkDuplicate', 'as' => 'import.check-duplicate']);
 
 // step 5: Set column roles (CSV or other file types)
 // check : must be CSV and not config complete otherwise redirect to mapping.
@@ -93,6 +94,8 @@ Route::get('/import/link-nordigen/callback', ['uses' => 'Import\Nordigen\LinkCon
 Route::get('/import/spectre-connections', ['uses' => 'Import\Spectre\ConnectionController@index', 'as' => '011-connections.index']);
 Route::post('/import/spectre-connections/submit', ['uses' => 'Import\Spectre\ConnectionController@post', 'as' => '011-connections.post']);
 Route::get('/import/spectre-connections/callback', ['uses' => 'Import\Spectre\CallbackController@index', 'as' => '011-connections.callback']);
+
+
 
 // routes to go back to other steps (also takes care of session vars)
 Route::get('/back/start', 'NavController@toStart')->name('back.start');

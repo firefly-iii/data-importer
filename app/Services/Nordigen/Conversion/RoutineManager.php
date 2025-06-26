@@ -38,6 +38,8 @@ use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
+use Illuminate\Support\Facades\Log;
+use Override;
 
 /**
  * Class RoutineManager
@@ -75,7 +77,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return $this->transactionProcessor->getAccounts();
@@ -101,8 +103,8 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
-        app('log')->debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
+        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
 
         // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
@@ -127,11 +129,11 @@ class RoutineManager implements RoutineManagerInterface
 
         // then generate the transactions
         $transactions = $this->transactionGenerator->getTransactions($this->downloaded);
-        app('log')->debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
+        Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
         $filtered     = $this->transactionFilter->filter($transactions);
-        app('log')->debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
+        Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
         $this->mergeMessages(count($transactions));
@@ -183,7 +185,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function generateRateLimitMessage(array $account, array $rateLimit): string
     {
-        app('log')->debug('generateRateLimitMessage');
+        Log::debug('generateRateLimitMessage');
         $message = '';
         if (0 === $rateLimit['remaining'] && $rateLimit['reset'] > 1) {
             $message = sprintf('You have no requests left for bank account "%s"', $account['name']);
@@ -214,7 +216,7 @@ class RoutineManager implements RoutineManagerInterface
             $message .= '. ';
         }
         $message .= '[Read more about GoCardless rate limits](https://docs.firefly-iii.org/references/faq/data-importer/salt-edge-gocardless/#i-am-rate-limited-by-gocardless).';
-        app('log')->debug(sprintf('Generated rate limit message: %s', $message));
+        Log::debug(sprintf('Generated rate limit message: %s', $message));
 
         return $message;
     }
@@ -235,13 +237,13 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function downloadFromGoCardless(): void
     {
-        app('log')->debug('Call transaction processor download.');
+        Log::debug('Call transaction processor download.');
 
         try {
             $this->downloaded = $this->transactionProcessor->download();
         } catch (ImporterErrorException $e) {
-            app('log')->error('Could not download transactions from GoCardless.');
-            app('log')->error($e->getMessage());
+            Log::error('Could not download transactions from GoCardless.');
+            Log::error($e->getMessage());
 
             // add error to current error thing:
             $this->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
@@ -258,9 +260,9 @@ class RoutineManager implements RoutineManagerInterface
         // collect accounts from the configuration, and join them with the rate limits
         $configAccounts = $this->configuration->getAccounts();
         foreach ($this->transactionProcessor->getRateLimits() as $account => $rateLimit) {
-            app('log')->debug(sprintf('Rate limit for account %s: %d request(s) left, %d second(s)', $account, $rateLimit['remaining'], $rateLimit['reset']));
+            Log::debug(sprintf('Rate limit for account %s: %d request(s) left, %d second(s)', $account, $rateLimit['remaining'], $rateLimit['reset']));
             if (!array_key_exists($account, $configAccounts)) {
-                app('log')->error(sprintf('Account "%s" was not found in your configuration.', $account));
+                Log::error(sprintf('Account "%s" was not found in your configuration.', $account));
 
                 continue;
             }
@@ -270,7 +272,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function collectTargetAccounts(): void
     {
-        app('log')->debug('Generating Firefly III transactions.');
+        Log::debug('Generating Firefly III transactions.');
 
         try {
             $this->transactionGenerator->collectTargetAccounts();
@@ -290,25 +292,25 @@ class RoutineManager implements RoutineManagerInterface
         $userAccounts = $this->transactionGenerator->getUserAccounts();
 
         // now we can report on target limits:
-        app('log')->debug('Add message about rate limits.');
+        Log::debug('Add message about rate limits.');
         foreach ($this->rateLimits as $accountId => $rateLimit) {
             // do not report if the remaining value is zero, but the reset time 1 or less.
             // this seems to be some kind of default value.
             // change: do not report when the reset time is less than 60 seconds.
             if ($rateLimit['reset'] <= 60) {
-                app('log')->debug(sprintf('Account "%s" has no interesting rate limit information.', $accountId));
+                Log::debug(sprintf('Account "%s" has no interesting rate limit information.', $accountId));
 
                 continue;
             }
 
-            app('log')->debug(sprintf('Add message about rate limits for account %s.', $accountId));
+            Log::debug(sprintf('Add message about rate limits for account %s.', $accountId));
             $fireflyIIIAccount = $this->findAccountInfo($userAccounts, $accountId);
             if (null === $fireflyIIIAccount) {
-                app('log')->debug('Found NO Firefly III account to report on, will not report rate limit.');
+                Log::debug('Found NO Firefly III account to report on, will not report rate limit.');
 
                 continue;
             }
-            app('log')->debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
+            Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
             $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
@@ -326,7 +328,7 @@ class RoutineManager implements RoutineManagerInterface
             $total += count($transactions);
         }
         if (0 === $total) {
-            app('log')->warning('Downloaded nothing, will return nothing.');
+            Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
             $this->mergeMessages(1);
@@ -344,8 +346,8 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectNordigenAccounts();
         } catch (ImporterErrorException $e) {
-            app('log')->error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
-            app('log')->error($e->getMessage());
+            Log::error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
+            Log::error($e->getMessage());
         } catch (AgreementExpiredException $e) {
             $this->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
             $this->mergeMessages(1);

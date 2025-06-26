@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use Illuminate\Support\Facades\Log;
+use JsonException;
+
 /**
  * Trait VerifyJSON
  */
@@ -33,13 +36,13 @@ trait VerifyJSON
     private function verifyJSON(string $file): bool
     {
         // basic check on the JSON.
-        $json = file_get_contents($file);
+        $json = (string) file_get_contents($file);
 
         try {
             json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
-            app('log')->error($message);
+            Log::error($message);
 
             return false;
         }

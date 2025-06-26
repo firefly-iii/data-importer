@@ -90,4 +90,10 @@ class Constants
     public const string SUBMISSION_COMPLETE_INDICATOR = 'submission_complete';
     public const string UPLOAD_CONFIG_FILE            = 'config_file_path';
     public const string UPLOAD_DATA_FILE              = 'data_file_path';
+
+    // SimpleFIN specific constants
+    public const string SIMPLEFIN_TOKEN               = 'simplefin_token';
+    public const string SIMPLEFIN_BRIDGE_URL          = 'simplefin_bridge_url';
+    public const string SIMPLEFIN_ACCOUNTS_DATA       = 'simplefin_accounts_data';
+    public const string SIMPLEFIN_IS_DEMO             = 'simplefin_is_demo';
 }

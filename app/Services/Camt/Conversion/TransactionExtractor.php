@@ -9,22 +9,20 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\DTO\Message;
+use Illuminate\Support\Facades\Log;
 
 class TransactionExtractor
 {
     use ProgressInformation;
 
-    private Configuration $configuration;
-
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
-        app('log')->debug('Now in TransactionExtractor.');
-        $this->configuration = $configuration;
+        Log::debug('Now in TransactionExtractor.');
     }
 
     public function extractTransactions(Message $message): array
     {
-        app('log')->debug('Now in extractTransactions.');
+        Log::debug('Now in extractTransactions.');
         // get transactions from XML file
         $transactions = [];
         $statements   = $message->getRecords();
@@ -37,10 +35,10 @@ class TransactionExtractor
         foreach ($statements as $i => $statement) { // -> Level B
             $entries    = $statement->getEntries();
             $entryCount = count($entries);
-            app('log')->debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i + 1, $totalCount, $entryCount));
+            Log::debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i + 1, $totalCount, $entryCount));
             foreach ($entries as $ii => $entry) {                // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
-                app('log')->debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
+                Log::debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
                     $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
@@ -64,10 +62,10 @@ class TransactionExtractor
                         }
                     }
                 }
-                app('log')->debug(sprintf('[%d/%d] Done working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
+                Log::debug(sprintf('[%d/%d] Done working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
             }
         }
-        app('log')->debug(sprintf('Extracted %d transaction(s)', count($transactions)));
+        Log::debug(sprintf('Extracted %d transaction(s)', count($transactions)));
 
         return $transactions;
     }

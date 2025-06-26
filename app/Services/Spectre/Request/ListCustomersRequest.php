@@ -31,6 +31,7 @@ use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\ListCustomersResponse;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ListCustomersRequest
@@ -56,7 +57,7 @@ class ListCustomersRequest extends Request
         try {
             $response = $this->authenticatedGet();
         } catch (GuzzleException|ImporterErrorException|ImporterHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             // JSON thing.
             return new ErrorResponse($e->json ?? []);

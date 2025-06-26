@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
+use Illuminate\Support\Facades\Log;
+use UnexpectedValueException;
+
 /**
  * Class ConverterService
  */
@@ -41,7 +44,7 @@ class ConverterService
         if (self::exists($class)) {
             /** @var ConverterInterface $object */
             $object = app(self::fullName($class));
-            app('log')->debug(sprintf('Created converter class %s', $class));
+            Log::debug(sprintf('Created converter class %s', $class));
             if (null !== $configuration) {
                 $object->setConfiguration($configuration);
             }
@@ -49,7 +52,7 @@ class ConverterService
             return $object->convert($value);
         }
 
-        throw new \UnexpectedValueException(sprintf('No such converter: "%s"', $class));
+        throw new UnexpectedValueException(sprintf('No such converter: "%s"', $class));
     }
 
     public static function exists(string $class): bool

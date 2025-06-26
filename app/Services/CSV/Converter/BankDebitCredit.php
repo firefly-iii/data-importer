@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class BankDebitCredit
  */
@@ -39,7 +41,7 @@ class BankDebitCredit implements ConverterInterface
      */
     public function convert($value): int
     {
-        app('log')->debug('Going to convert ', ['value' => $value]);
+        Log::debug('Going to convert ', ['value' => $value]);
 
         // Note: the array values should be all lowercase
         $negative = [
@@ -57,7 +59,7 @@ class BankDebitCredit implements ConverterInterface
         ];
 
         // Lowercase the value and trim it for comparison.
-        if (in_array(strtolower(trim($value)), $negative, true)) {
+        if (in_array(strtolower(trim((string) $value)), $negative, true)) {
             return -1;
         }
 

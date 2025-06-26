@@ -84,11 +84,37 @@ let index = function () {
             this.pageStatus.status = 'waiting_to_start';
             this.postJobStart();
         },
+        collectNewAccountData() {
+            const newAccountData = {};
+            const forms = document.querySelectorAll('.new-account-form');
+
+            forms.forEach(form => {
+                const accountId = form.dataset.accountId;
+                const formData = new FormData(form);
+
+                newAccountData[accountId] = {
+                    name: formData.get('account_name'),
+                    type: formData.get('account_type'),
+                    currency: formData.get('account_currency'),
+                    opening_balance: formData.get('opening_balance') || null
+                };
+            });
+
+            return newAccountData;
+        },
         postJobStart() {
             this.triedToStart = true;
             this.post.running = true;
             const jobStartUrl = './import/convert/start';
-            window.axios.post(jobStartUrl, null,{params: {identifier: this.identifier}}).then((response) => {
+
+            // Collect new account data for SimpleFIN
+            const newAccountData = this.collectNewAccountData();
+            const postData = {
+                identifier: this.identifier,
+                new_account_data: newAccountData
+            };
+
+            window.axios.post(jobStartUrl, postData).then((response) => {
                 console.log('POST was OK');
                 this.getJobStatus();
                 this.post.running = false;

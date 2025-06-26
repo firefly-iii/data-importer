@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Response;
 
+use Carbon\Carbon;
 use App\Services\Shared\Response\Response;
 
 /**
@@ -42,7 +43,7 @@ class TokenSetResponse extends Response
         $this->accessToken    = $data['access'];
         $this->refreshToken   = $data['refresh'];
 
-        $this->accessExpires  = time() + $data['access_expires'];
-        $this->refreshExpires = time() + $data['refresh_expires'];
+        $this->accessExpires  = Carbon::now()->getTimestamp() + $data['access_expires'];
+        $this->refreshExpires = Carbon::now()->getTimestamp() + $data['refresh_expires'];
     }
 }

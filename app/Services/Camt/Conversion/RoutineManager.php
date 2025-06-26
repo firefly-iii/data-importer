@@ -38,6 +38,8 @@ use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Exception\InvalidMessageException;
 use Genkgo\Camt\Reader;
+use Illuminate\Support\Facades\Log;
+use Override;
 
 /**
  * Class RoutineManager
@@ -57,7 +59,7 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(?string $identifier)
     {
-        app('log')->debug('Constructed CAMT RoutineManager');
+        Log::debug('Constructed CAMT RoutineManager');
         $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
@@ -71,7 +73,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function getServiceAccounts(): array
     {
         return [];
@@ -100,12 +102,12 @@ class RoutineManager implements RoutineManagerInterface
 
     public function start(): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         // get XML file
         $camtMessage        = $this->getCamtMessage();
-        if (null === $camtMessage) {
-            app('log')->error('The CAMT object is NULL, probably due to a previous error');
+        if (!$camtMessage instanceof Message) {
+            Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
             // at this point there are very few (if not zero) errors from other steps in the routine.
             // Still: merge errors so they can be reported to the user:
@@ -125,7 +127,7 @@ class RoutineManager implements RoutineManagerInterface
         $transactions       = $this->transactionMapper->map($pseudoTransactions);
 
         if (0 === count($transactions)) {
-            app('log')->error('No transactions found in CAMT file');
+            Log::error('No transactions found in CAMT file');
             $this->addError(0, '[a103]: No transactions found in CAMT file.');
 
             $this->mergeMessages(1);
@@ -144,7 +146,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function getCamtMessage(): ?Message
     {
-        app('log')->debug('Now in getCamtMessage');
+        Log::debug('Now in getCamtMessage');
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
 
@@ -158,8 +160,8 @@ class RoutineManager implements RoutineManagerInterface
                 $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
             }
         } catch (InvalidMessageException $e) {
-            app('log')->error('Conversion error in RoutineManager::getCamtMessage');
-            app('log')->error($e->getMessage());
+            Log::error('Conversion error in RoutineManager::getCamtMessage');
+            Log::error($e->getMessage());
             $this->addError(0, sprintf('[a104]: Could not convert CAMT.053 file: %s', $e->getMessage()));
 
             return null;

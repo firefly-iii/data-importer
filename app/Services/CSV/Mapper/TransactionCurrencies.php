@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TransactionCurrencies
@@ -54,9 +55,9 @@ class TransactionCurrencies implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
-            //            app('log')->error($e->getTraceAsString());
+            //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download currencies: %s', $e->getMessage()));
         }
 

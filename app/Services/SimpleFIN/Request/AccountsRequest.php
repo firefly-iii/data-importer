@@ -1,7 +1,7 @@
 <?php
 
 /*
- * ManageMessages.php
+ * AccountsRequest.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -23,34 +23,26 @@
 
 declare(strict_types=1);
 
-namespace App\Console;
+namespace App\Services\SimpleFIN\Request;
+
+use App\Exceptions\ImporterHttpException;
+use App\Services\SimpleFIN\Response\AccountsResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Trait ManageMessages
+ * Class AccountsRequest
  */
-trait ManageMessages
+class AccountsRequest extends SimpleFINRequest
 {
-    protected function listMessages(string $key, array $messages): void
+    /**
+     * @throws ImporterHttpException
+     */
+    public function get(): AccountsResponse
     {
-        $functions = [
-            'ERROR'   => 'error',
-            'Warning' => 'warn',
-            'Message' => 'info',
-        ];
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
-        $func      = $functions[$key] ?? 'line';
+        $response = $this->authenticatedGet('/accounts');
 
-        if (0 !== count($messages)) {
-            /**
-             * @var int   $index
-             * @var array $error
-             */
-            foreach ($messages as $index => $list) {
-                /** @var string $line */
-                foreach ($list as $line) {
-                    $this->{$func}(sprintf('%s in line #%d: %s', $key, $index + 1, $line));
-                }
-            }
-        }
+        return new AccountsResponse($response);
     }
 }

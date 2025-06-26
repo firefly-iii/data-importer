@@ -29,5 +29,5 @@ class ConnectionControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'select-connection';
+    protected const string STEP = 'select-connection';
 }

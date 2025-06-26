@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Category;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCategoriesRequest;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Categories
@@ -54,9 +55,9 @@ class Categories implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
-            //            app('log')->error($e->getTraceAsString());
+            //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not download categories: %s', $e->getMessage()));
         }
 

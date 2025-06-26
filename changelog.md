@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.0 - 2025-06-26
+
+### Added
+- Support for SimpleFIN, developed by user 'skell'
+
+### Fixed
+- Better check on Authorization header for users who use Basic Auth.
+- [Issue 5396](https://github.com/firefly-iii/firefly-iii/issues/5396) (Data importer: SimpleFIN) reported by @marcusds, with special thanks again to skell, and all the beta testers who helped out!
+
 ## v1.6.3 - 2025-06-08
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.

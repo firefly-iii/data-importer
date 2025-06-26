@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Events;
 
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ImportedTransactions
@@ -43,7 +44,7 @@ class ImportedTransactions
 
     public function __construct(array $messages, array $warnings, array $errors, array $rateLimits)
     {
-        app('log')->debug('Created event ImportedTransactions with filtering (2)');
+        Log::debug('Created event ImportedTransactions with filtering (2)');
 
         // filter messages:
         $this->messages   = $this->filterArray('message(s)', $messages);
@@ -72,7 +73,7 @@ class ImportedTransactions
                 $newCollection[$index] = $newSet;
             }
         }
-        app('log')->debug(sprintf('Array contains %d %s', $count, $title));
+        Log::debug(sprintf('Array contains %d %s', $count, $title));
 
         return $newCollection;
     }

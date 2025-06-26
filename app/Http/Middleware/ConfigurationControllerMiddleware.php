@@ -32,5 +32,5 @@ class ConfigurationControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'configuration';
+    protected const string STEP = 'configuration';
 }

@@ -29,6 +29,7 @@ use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Spectre\Model\Account as SpectreAccount;
+use Illuminate\Support\Facades\Log;
 
 class ImportServiceAccount
 {
@@ -42,14 +43,14 @@ class ImportServiceAccount
 
     public static function convertNordigenArray(array $accounts): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $return = [];
 
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
             $iban     = $account->getIban();
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
-                app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
 
@@ -88,10 +89,10 @@ class ImportServiceAccount
      */
     public static function fromArray(array $array): self
     {
-        app('log')->debug('Create generic account from', $array);
+        Log::debug('Create generic account from', $array);
         $iban                  = (string) ($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
-            app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+            Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
         }
         $account               = new self();
@@ -114,7 +115,7 @@ class ImportServiceAccount
         foreach ($spectre as $account) {
             $iban     = (string) $account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
-                app('log')->debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
             $return[] = self::fromArray(

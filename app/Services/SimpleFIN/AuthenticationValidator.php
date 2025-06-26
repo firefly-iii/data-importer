@@ -28,6 +28,7 @@ namespace App\Services\SimpleFIN;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AuthenticationValidator
@@ -38,14 +39,17 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     public function validate(): AuthenticationStatus
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
-
+        Log::debug(sprintf('Now at %s', __METHOD__));
         // needs an APP key which isn't blank or zero or whatever.
-        $key = (string) env('APP_KEY');
-        if ('' === $key) {
-            return AuthenticationStatus::error();
-        }
+        $key = (string) config('app.key');
+        if ('' ===   $key) {
 
-        return AuthenticationStatus::authenticated();
+            Log::warning(sprintf('app.key is empty ("%s"), cannot authenticate. Return OK anyway.', $key));
+
+            return AuthenticationStatus::AUTHENTICATED;
+        }
+        Log::debug('app.key is OK, can authenticate.');
+
+        return AuthenticationStatus::AUTHENTICATED;
     }
 }

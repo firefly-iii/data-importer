@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+PWD=$(pwd)
+SERVICE_NAME="laravel-queue-$(basename "$PWD")"
+
+# Check if Laravel project
+if [[ ! -f "artisan" ]]; then
+    echo "Error: No artisan file found. Run from Laravel project root."
+    exit 1
+fi
+
+# Stop existing service if running
+systemctl --user stop "$SERVICE_NAME" 2>/dev/null || true
+
+# Start queue worker service with current directory
+systemd-run --user \
+    --unit="$SERVICE_NAME" \
+    --working-directory="$PWD" \
+    --setenv=APP_ENV=local \
+    --setenv=APP_DEBUG=true \
+    php artisan queue:work --timeout=1800 --tries=1 --daemon
+
+echo "Laravel queue worker started as user service: $SERVICE_NAME"
+echo "Stop with: systemctl --user stop $SERVICE_NAME"
+echo "Status with: systemctl --user status $SERVICE_NAME"
+echo "Logs with: journalctl --user -u $SERVICE_NAME -f"

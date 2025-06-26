@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Services\CSV\Converter\ConverterService;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ColumnValue
@@ -80,7 +81,7 @@ class ColumnValue
 
         // run converter on data:
         $converterClass = (string) config(sprintf('csv.import_roles.%s.converter', $this->role));
-        app('log')->debug(sprintf('getParsedValue will run "%s"', $converterClass));
+        Log::debug(sprintf('getParsedValue will run "%s"', $converterClass));
 
         return ConverterService::convert($converterClass, $this->value, $this->configuration);
     }

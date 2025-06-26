@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace App\Services\Camt;
 
+use Genkgo\Camt\DTO\DomainBankTransactionCode;
+use Genkgo\Camt\DTO\Account;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
@@ -22,6 +24,7 @@ use Genkgo\Camt\DTO\ProprietaryAccount;
 use Genkgo\Camt\DTO\RelatedParty;
 use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\UPICAccount;
+use Illuminate\Support\Facades\Log;
 use Money\Currencies\ISOCurrencies;
 use Money\Formatter\DecimalMoneyFormatter;
 use Money\Money;
@@ -29,25 +32,15 @@ use Money\Money;
 class Transaction
 {
     public const TIME_FORMAT = 'Y-m-d H:i:s';
-    private Configuration $configuration;
-    private Message       $levelA;
-    private Statement     $levelB;
-    private Entry         $levelC;
-    private array         $levelD;
 
     public function __construct(
-        Configuration $configuration,
-        Message       $levelA,
-        Statement     $levelB,
-        Entry         $levelC,
-        array         $levelD
+        private readonly Configuration $configuration,
+        private readonly Message       $levelA,
+        private readonly Statement     $levelB,
+        private readonly Entry         $levelC,
+        private array         $levelD
     ) {
-        app('log')->debug('Constructed a CAMT Transaction');
-        $this->configuration = $configuration;
-        $this->levelA        = $levelA;
-        $this->levelB        = $levelB;
-        $this->levelC        = $levelC;
-        $this->levelD        = $levelD;
+        Log::debug('Constructed a CAMT Transaction');
     }
 
     public function countSplits(): int
@@ -69,7 +62,7 @@ class Transaction
 
     private function getDecimalAmount(?Money $money): string
     {
-        if (null === $money) {
+        if (!$money instanceof Money) {
             return '';
         }
         $currencies            = new ISOCurrencies();
@@ -89,7 +82,7 @@ class Transaction
      */
     public function getFieldByIndex(string $field, int $index): string
     {
-        app('log')->debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
+        Log::debug(sprintf('getFieldByIndex("%s", %d)', $field, $index));
 
         switch ($field) {
             default:
@@ -121,25 +114,22 @@ class Transaction
                 return (string) $set?->getCreditDebitIndicator();
 
             case 'statementAccountIban':
-                // always the same, since its level B.
-                $ret             = '';
-                if (IbanAccount::class === get_class($this->levelB->getAccount())) {
-                    $ret = $this->levelB->getAccount()->getIdentification();
+                if (IbanAccount::class === $this->levelB->getAccount()::class) {
+                    return $this->levelB->getAccount()->getIdentification();
                 }
 
-                return $ret;
+                return '';
 
             case 'statementAccountNumber':
                 // always the same, since its level B.
                 $list            = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
-                $class           = get_class($this->levelB->getAccount());
-                $ret             = '';
+                $class           = $this->levelB->getAccount()::class;
                 if (in_array($class, $list, true)) {
-                    $ret = $this->levelB->getAccount()->getIdentification();
+                    return $this->levelB->getAccount()->getIdentification();
                 }
 
                 // LEVEL C
-                return $ret;
+                return '';
 
             case 'entryAccountServicerReference':
                 // always the same, since its level C.
@@ -170,18 +160,17 @@ class Transaction
                 return (string) $this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
 
             case 'entryBtcDomainCode':
-                $return          = '';
                 // always the same, since its level C.
-                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
-                    $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
+                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getCode();
                 }
 
-                return $return;
+                return '';
 
             case 'entryBtcFamilyCode':
                 $return          = '';
                 // always the same, since its level C.
-                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
                     $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
@@ -190,7 +179,7 @@ class Transaction
             case 'entryBtcSubFamilyCode':
                 $return          = '';
                 // always the same, since its level C.
-                if (null !== $this->levelC->getBankTransactionCode()->getDomain()) {
+                if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
                     return (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
@@ -212,7 +201,7 @@ class Transaction
 
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    app('log')->debug('There is no info for this thing.');
+                    Log::debug('There is no info for this thing.');
 
                     // TODO return nothing?
                     return $result;
@@ -252,7 +241,7 @@ class Transaction
                     // #8994 add info.
                     $string = (string) $info->getRemittanceInformation()?->getCreditorReferenceInformation()?->getRef();
                     if ('' !== $string) {
-                        $return = sprintf('%s %s', $return, $string);
+                        return sprintf('%s %s', $return, $string);
                     }
 
                     return $return;
@@ -297,7 +286,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string) $info->getBankTransactionCode()->getDomain()->getCode();
+                    return (string) $info->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return $return;
@@ -313,7 +302,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    return (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return $return;
@@ -329,7 +318,7 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    $return = (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    return (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
@@ -345,7 +334,7 @@ class Transaction
                 $info            = $this->levelD[$index] ?? null;
                 if (null !== $info) {
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                    if (is_object($opposingAccount) && IbanAccount::class === get_class($opposingAccount)) {
+                    if (is_object($opposingAccount) && IbanAccount::class === $opposingAccount::class) {
                         $result = (string) $opposingAccount->getIdentification();
                     }
                 }
@@ -363,9 +352,9 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                $class           = null !== $opposingAccount ? get_class($opposingAccount) : '';
+                $class           = $opposingAccount instanceof Account ? $opposingAccount::class : '';
                 if (in_array($class, $list, true)) {
-                    $result = (string) $opposingAccount->getIdentification();
+                    return (string) $opposingAccount->getIdentification();
                 }
 
                 return $result;
@@ -380,11 +369,11 @@ class Transaction
                 /** @var EntryTransactionDetail $info */
                 $info            = $this->levelD[$index];
                 $opposingParty   = $this->getOpposingParty($info);
-                if (null === $opposingParty) {
-                    app('log')->debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                if (!$opposingParty instanceof RelatedParty) {
+                    Log::debug('In entryDetailOpposingName, opposing party is NULL, return "".');
                 }
-                if (null !== $opposingParty) {
-                    $result = $this->getOpposingName($opposingParty);
+                if ($opposingParty instanceof RelatedParty) {
+                    return $this->getOpposingName($opposingParty);
                 }
 
                 return $result;
@@ -396,33 +385,33 @@ class Transaction
      */
     private function getOpposingParty(EntryTransactionDetail $transactionDetail): ?RelatedParty
     {
-        app('log')->debug('getOpposingParty(), interested in Creditor.');
+        Log::debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
-        $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Creditor';
+        $targetRelatedPartyObject = Creditor::class;
 
         // get amount from "getAmount":
         $amount                   = $transactionDetail?->getAmount()?->getAmount();
         if (null !== $amount) {
-            app('log')->debug(sprintf('Amount in getAmount() is "%s"', $amount));
+            Log::debug(sprintf('Amount in getAmount() is "%s"', $amount));
         }
         if (null === $amount) {
             $amount = $transactionDetail->getAmountDetails()?->getAmount();
-            app('log')->debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
+            Log::debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
         }
 
         if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
-            app('log')->debug('getOpposingParty(), interested in Debtor!');
-            $targetRelatedPartyObject = 'Genkgo\Camt\DTO\Debtor';
+            Log::debug('getOpposingParty(), interested in Debtor!');
+            $targetRelatedPartyObject = Debtor::class;
         }
         foreach ($relatedParties as $relatedParty) {
-            app('log')->debug(sprintf('Found related party of type "%s"', get_class($relatedParty->getRelatedPartyType())));
-            if (get_class($relatedParty->getRelatedPartyType()) === $targetRelatedPartyObject) {
-                app('log')->debug('This is the type we are looking for!');
+            Log::debug(sprintf('Found related party of type "%s"', $relatedParty->getRelatedPartyType()::class));
+            if ($relatedParty->getRelatedPartyType()::class === $targetRelatedPartyObject) {
+                Log::debug('This is the type we are looking for!');
 
                 return $relatedParty;
             }
         }
-        app('log')->debug('getOpposingParty(), no opposing party found, return NULL.');
+        Log::debug('getOpposingParty(), no opposing party found, return NULL.');
 
         return null;
     }
@@ -440,7 +429,7 @@ class Transaction
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
             // but maybe you want also the entire address
             if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= ', '.$addressLine;
+                $opposingName .= sprintf(', %s', $addressLine);
             }
         }
 

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Authentication;
 
+use Illuminate\Support\Facades\Log;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -42,14 +43,14 @@ class SecretManager
     public static function getId(): string
     {
         if (!self::hasId()) {
-            app('log')->debug('No Nordigen ID in hasId() session, will return config variable.');
+            Log::debug('No Nordigen ID in hasId() session, will return config variable.');
 
             return (string) config('nordigen.id');
         }
 
         try {
             $id = (string) session()->get(self::NORDIGEN_ID);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $id = '(super invalid)';
         }
 
@@ -63,7 +64,7 @@ class SecretManager
     {
         try {
             $id = (string) session()->get(self::NORDIGEN_ID);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $id = '';
         }
 
@@ -76,14 +77,14 @@ class SecretManager
     public static function getKey(): string
     {
         if (!self::hasKey()) {
-            app('log')->debug('No Nordigen key in hasKey() session, will return config variable.');
+            Log::debug('No Nordigen key in hasKey() session, will return config variable.');
 
             return (string) config('nordigen.key');
         }
 
         try {
             $key = (string) session()->get(self::NORDIGEN_KEY);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $key = '(super invalid key)';
         }
 
@@ -97,7 +98,7 @@ class SecretManager
     {
         try {
             $key = (string) session()->get(self::NORDIGEN_KEY);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
+        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $key = '';
         }
 

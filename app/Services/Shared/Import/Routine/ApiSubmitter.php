@@ -25,9 +25,11 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Import\Routine;
 
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\Shared\Submission\ProgressInformation;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
@@ -65,34 +67,37 @@ class ApiSubmitter
     {
         $this->createdTag = false;
         $this->tag        = $this->parseTag();
-        $this->tagDate    = date('Y-m-d');
+        $this->tagDate    = Carbon::now()->format('Y-m-d');
         $count            = count($lines);
         $uniqueCount      = 0;
-        app('log')->info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
-
+        Log::info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         $this->vanityURL  = SecretManager::getVanityURL();
 
-        app('log')->debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
+        Log::debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
 
         /**
          * @var int   $index
          * @var array $line
          */
         foreach ($lines as $index => $line) {
-            app('log')->debug(sprintf('Now submitting transaction %d/%d', $index + 1, $count));
+            Log::debug(sprintf('Now submitting transaction %d/%d', $index + 1, $count));
+
+            // Update progress tracking
+            SubmissionStatusManager::updateProgress($this->identifier, $index + 1, $count);
+
             // first do local duplicate transaction check (the "cell" method):
             $unique    = $this->uniqueTransaction($index, $line);
             if (null === $unique) {
-                app('log')->debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
+                Log::debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
                 ++$uniqueCount;
             }
             if (true === $unique) {
-                app('log')->debug(sprintf('Transaction #%d is unique.', $index + 1));
+                Log::debug(sprintf('Transaction #%d is unique.', $index + 1));
                 ++$uniqueCount;
             }
             if (false === $unique) {
-                app('log')->debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
+                Log::debug(sprintf('Transaction #%d is NOT unique.', $index + 1));
 
                 continue;
             }
@@ -100,8 +105,8 @@ class ApiSubmitter
             $this->addTagToGroups($groupInfo);
         }
 
-        app('log')->info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
-        app('log')->info(sprintf('Actually imported and not duplicate: %d.', $uniqueCount));
+        Log::info(sprintf('Done submitting %d transactions to your Firefly III instance.', $count));
+        Log::info(sprintf('Actually imported and not duplicate: %d.', $uniqueCount));
     }
 
     private function parseTag(): string
@@ -110,24 +115,30 @@ class ApiSubmitter
         $customTag = $this->configuration->getCustomTag();
         if ('' === $customTag) {
             // return default tag:
-            return sprintf('Data Import on %s', date('Y-m-d \@ H:i'));
+            return sprintf('Data Import on %s', Carbon::now()->format('Y-m-d \@ H:i'));
         }
         $items     = [
-            '%year%'        => date('Y'),
-            '%month%'       => date('m'),
-            '%month_full%'  => date('F'),
-            '%day%'         => date('d'),
-            '%day_of_week%' => date('l'),
-            '%hour%'        => date('H'),
-            '%minute%'      => date('i'),
-            '%second%'      => date('s'),
-            '%date%'        => date('Y-m-d'),
-            '%time%'        => date('H:i'),
-            '%datetime%'    => date('Y-m-d \@ H:i'),
+            '%year%'        => Carbon::now()->format('Y'),
+            '%month%'       => Carbon::now()->format('m'),
+            '%month_full%'  => Carbon::now()->format('F'),
+            '%day%'         => Carbon::now()->format('d'),
+            '%day_of_week%' => Carbon::now()->format('l'),
+            '%hour%'        => Carbon::now()->format('H'),
+            '%minute%'      => Carbon::now()->format('i'),
+            '%second%'      => Carbon::now()->format('s'),
+            '%date%'        => Carbon::now()->format('Y-m-d'),
+            '%time%'        => Carbon::now()->format('H:i'),
+            '%datetime%'    => Carbon::now()->format('Y-m-d \@ H:i'),
             '%version%'     => config('importer.version'),
         ];
-        $result    = str_replace(array_keys($items), array_values($items), $customTag);
-        app('log')->debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
+        $result    = str_replace(
+            array_keys($items),
+            array_values($items),
+            $customTag
+        );
+        app('log')->debug(
+            sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result)
+        );
 
         return $result;
     }
@@ -139,9 +150,7 @@ class ApiSubmitter
     private function uniqueTransaction(int $index, array $line): ?bool
     {
         if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
-            app('log')->debug(
-                sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod())
-            );
+            Log::debug(sprintf('Duplicate detection method is "%s", so this method is skipped (return true).', $this->configuration->getDuplicateDetectionMethod()));
 
             return null;
         }
@@ -152,31 +161,16 @@ class ApiSubmitter
         $field        = 'note' === $field ? 'notes' : $field;
         $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
-            $value        = (string) ($transaction[$field] ?? '');
+            $value        = (string)($transaction[$field] ?? '');
             if ('' === $value) {
-                app('log')->debug(
-                    sprintf(
-                        'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
-                        $field,
-                        $index,
-                        $transactionIndex
-                    )
-                );
+                Log::debug(sprintf('Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).', $field, $index, $transactionIndex));
 
                 continue;
             }
             $searchResult = $this->searchField($field, $value);
             if (0 !== $searchResult) {
-                app('log')->debug(
-                    sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult)
-                );
-                $message = sprintf(
-                    '[a115]: There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).',
-                    $field,
-                    $value,
-                    $this->vanityURL,
-                    $searchResult
-                );
+                Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false', $field, $value, $searchResult));
+                $message = sprintf('[a115]: There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">link</a>).', $field, $value, $this->vanityURL, $searchResult);
                 if (false === config('importer.ignore_duplicate_errors')) {
                     $this->addError($index, $message);
                 }
@@ -184,7 +178,7 @@ class ApiSubmitter
                 return false;
             }
         }
-        app('log')->debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
+        Log::debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
 
         return true;
     }
@@ -198,7 +192,7 @@ class ApiSubmitter
         $searchModifier = config(sprintf('csv.search_modifier.%s', $field));
         $query          = sprintf('%s:"%s"', $searchModifier, $value);
 
-        app('log')->debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
+        Log::debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
 
         $url            = SecretManager::getBaseUrl();
         $token          = SecretManager::getAccessToken();
@@ -211,7 +205,7 @@ class ApiSubmitter
             /** @var GetTransactionsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             return 0;
         }
@@ -219,7 +213,7 @@ class ApiSubmitter
             return 0;
         }
         $first          = $response->current();
-        app('log')->debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
+        Log::debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
 
         return $first->id;
     }
@@ -234,7 +228,7 @@ class ApiSubmitter
         $request = new PostTransactionRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        app('log')->debug(sprintf('Submitting to Firefly III: %s', json_encode($line)));
+        Log::debug(sprintf('Submitting to Firefly III: %s', json_encode($line)));
         $request->setBody($line);
 
         try {
@@ -245,13 +239,13 @@ class ApiSubmitter
             $json      = json_decode($body, true);
             // before we complain, first check what the error is:
             if (is_array($json) && array_key_exists('message', $json)) {
-                if (str_contains($json['message'], '200032')) {
+                if (str_contains((string) $json['message'], '200032')) {
                     $isDeleted = true;
                 }
             }
             if (true === $isDeleted && false === config('importer.ignore_not_found_transactions')) {
                 $this->addWarning($index, 'The transaction was created, but deleted by a rule.');
-                app('log')->error($e->getMessage());
+                Log::error($e->getMessage());
 
                 return $return;
             }
@@ -261,7 +255,7 @@ class ApiSubmitter
                 return $return;
             }
             $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
             $this->addError($index, $message);
 
             return $return;
@@ -269,13 +263,13 @@ class ApiSubmitter
 
         if ($response instanceof ValidationErrorResponse) {
             foreach ($response->errors->messages() as $key => $errors) {
-                app('log')->error(sprintf('Submission error: %d', $key), $errors);
+                Log::error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
                     $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
                         $this->addError($index, $msg);
                     }
-                    app('log')->error($msg);
+                    Log::error($msg);
                 }
             }
 
@@ -287,7 +281,7 @@ class ApiSubmitter
             $group  = $response->getTransactionGroup();
             if (null === $group) {
                 $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
-                app('log')->error($message, $response->getRawData());
+                Log::error($message, $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
@@ -296,16 +290,13 @@ class ApiSubmitter
             // perhaps zero transactions in the array.
             if (0 === count($group->transactions)) {
                 $message = '[a119]: Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
-                app('log')->error($message, $response->getRawData());
+                Log::error($message, $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
             }
 
-            $return = [
-                'group_id' => $group->id,
-                'journals' => [],
-            ];
+            $return = ['group_id' => $group->id, 'journals' => []];
             foreach ($group->transactions as $transaction) {
                 $message                              = sprintf(
                     'Created %s <a target="_blank" href="%s">#%d "%s"</a> (%s %s)',
@@ -314,12 +305,12 @@ class ApiSubmitter
                     $group->id,
                     e($transaction->description),
                     $transaction->currencyCode,
-                    round((float) $transaction->amount, (int) $transaction->currencyDecimalPlaces) // float but only for display purposes
+                    round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces) // float but only for display purposes
                 );
                 // plus 1 to keep the count.
                 $this->addMessage($index, $message);
                 $this->compareArrays($index, $line, $group);
-                app('log')->info($message);
+                Log::info($message);
                 $return['journals'][$transaction->id] = $transaction->tags;
             }
         }
@@ -329,9 +320,9 @@ class ApiSubmitter
 
     private function cleanupLine(array $line): array
     {
-        app('log')->debug('Going to map data for this line.');
+        Log::debug('Going to map data for this line.');
         if (array_key_exists(0, $this->mapping)) {
-            app('log')->debug('Configuration has mapping for opposing account name!');
+            Log::debug('Configuration has mapping for opposing account name!');
 
             /**
              * @var int   $index
@@ -345,9 +336,7 @@ class ApiSubmitter
                         unset($transaction['destination_name'], $transaction['destination_iban']);
 
                         $transaction['destination_id'] = $this->mapping[0][$destination];
-                        app('log')->debug(
-                            sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination])
-                        );
+                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
@@ -357,10 +346,10 @@ class ApiSubmitter
                         unset($transaction['source_name'], $transaction['source_iban']);
 
                         $transaction['source_id'] = $this->mapping[0][$source];
-                        app('log')->debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
+                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
-                if ('' === trim((string) $transaction['description'] ?? '')) {
+                if ('' === trim((string)$transaction['description'] ?? '')) {
                     $transaction['description'] = '(no description)';
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
@@ -373,15 +362,15 @@ class ApiSubmitter
     private function updateTransactionType(array $transaction): array
     {
         if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
-            app('log')->debug('Transaction has source_id/destination_id');
-            $sourceId        = (int) $transaction['source_id'];
-            $destinationId   = (int) $transaction['destination_id'];
+            Log::debug('Transaction has source_id/destination_id');
+            $sourceId        = (int)$transaction['source_id'];
+            $destinationId   = (int)$transaction['destination_id'];
             $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
             $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
             $combi           = sprintf('%s-%s', $sourceType, $destinationType);
-            app('log')->debug(sprintf('Account type combination is "%s"', $combi));
+            Log::debug(sprintf('Account type combination is "%s"', $combi));
             if ('asset-asset' === $combi) {
-                app('log')->debug('Both accounts are assets, so this transaction is a transfer.');
+                Log::debug('Both accounts are assets, so this transaction is a transfer.');
                 $transaction['type'] = 'transfer';
             }
         }
@@ -398,19 +387,19 @@ class ApiSubmitter
         if (3 !== count($parts)) {
             return '(unknown)';
         }
-        $index = (int) $parts[1];
+        $index = (int)$parts[1];
 
-        return (string) ($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
+        return (string)($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
     }
 
     private function isDuplicationError(string $key, string $error): bool
     {
         if ('transactions.0.description' === $key && str_contains($error, 'Duplicate of transaction #')) {
-            app('log')->debug('This is a duplicate transaction error');
+            Log::debug('This is a duplicate transaction error');
 
             return true;
         }
-        app('log')->debug('This is not a duplicate transaction error');
+        Log::debug('This is not a duplicate transaction error');
 
         return false;
     }
@@ -421,32 +410,12 @@ class ApiSubmitter
         /** @var Transaction $transaction */
         foreach ($group->transactions as $index => $transaction) {
             // compare currency ID
-            if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id']
-                && (int) $line['transactions'][$index]['currency_id'] !== (int) $transaction->currencyId
-            ) {
-                $this->addWarning(
-                    $lineIndex,
-                    sprintf(
-                        'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex,
-                        $line['transactions'][$index]['currency_id'],
-                        (int) $transaction->currencyId
-                    )
-                );
+            if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id'] && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId) {
+                $this->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_id'], (int)$transaction->currencyId));
             }
             // compare currency code:
-            if (array_key_exists('currency_code', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_code']
-                && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode
-            ) {
-                $this->addWarning(
-                    $lineIndex,
-                    sprintf(
-                        'Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.',
-                        $lineIndex,
-                        $line['transactions'][$index]['currency_code'],
-                        $transaction->currencyCode
-                    )
-                );
+            if (array_key_exists('currency_code', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_code'] && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode) {
+                $this->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_code'], $transaction->currencyCode));
             }
         }
     }
@@ -454,12 +423,12 @@ class ApiSubmitter
     private function addTagToGroups(array $groupInfo): void
     {
         if ([] === $groupInfo) {
-            app('log')->debug('Group is empty, may not have been stored correctly.');
+            Log::debug('Group is empty, may not have been stored correctly.');
 
             return;
         }
         if (false === $this->addTag) {
-            app('log')->debug('Will not add import tag.');
+            Log::debug('Will not add import tag.');
 
             return;
         }
@@ -468,11 +437,9 @@ class ApiSubmitter
             $this->createdTag = true;
         }
 
-        $groupId = (int) $groupInfo['group_id'];
-        app('log')->debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = [
-            'transactions' => [],
-        ];
+        $groupId = (int)$groupInfo['group_id'];
+        Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
+        $body    = ['transactions' => []];
 
         /**
          * @var int   $journalId
@@ -480,10 +447,7 @@ class ApiSubmitter
          */
         foreach ($groupInfo['journals'] as $journalId => $currentTags) {
             $currentTags[]          = $this->tag;
-            $body['transactions'][] = [
-                'transaction_journal_id' => $journalId,
-                'tags'                   => $currentTags,
-            ];
+            $body['transactions'][] = ['transaction_journal_id' => $journalId, 'tags' => $currentTags];
         }
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
@@ -495,17 +459,17 @@ class ApiSubmitter
         try {
             $request->put();
         } catch (ApiHttpException $e) {
-            app('log')->error($e->getMessage());
-            //            app('log')->error($e->getTraceAsString());
+            Log::error($e->getMessage());
+            //            Log::error($e->getTraceAsString());
             $this->addError(0, '[a120]: Could not store transaction: see the log files.');
         }
-        app('log')->debug(sprintf('Added import tag to transaction group #%d', $groupId));
+        Log::debug(sprintf('Added import tag to transaction group #%d', $groupId));
     }
 
     private function createTag(): void
     {
         if (false === $this->addTag) {
-            app('log')->debug('Not instructed to add a tag, so will not create one.');
+            Log::debug('Not instructed to add a tag, so will not create one.');
 
             return;
         }
@@ -514,10 +478,7 @@ class ApiSubmitter
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        $body    = [
-            'tag'  => $this->tag,
-            'date' => $this->tagDate,
-        ];
+        $body    = ['tag' => $this->tag, 'date' => $this->tagDate];
         $request->setBody($body);
 
         try {
@@ -525,19 +486,19 @@ class ApiSubmitter
             $response = $request->post();
         } catch (ApiHttpException $e) {
             $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
-            app('log')->error($message);
-            //            app('log')->error($e->getTraceAsString());
+            Log::error($message);
+            //            Log::error($e->getTraceAsString());
             $this->addError(0, $message);
 
             return;
         }
         if ($response instanceof ValidationErrorResponse) {
-            app('log')->error(json_encode($response->errors->toArray()));
+            Log::error(json_encode($response->errors->toArray()));
 
             return;
         }
         if (null !== $response->getTag()) {
-            app('log')->info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
+            Log::info(sprintf('Created tag #%d "%s"', $response->getTag()->id, $response->getTag()->tag));
         }
     }
 

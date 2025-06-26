@@ -30,6 +30,7 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Enums\ExitCode;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AutoImport
@@ -40,18 +41,7 @@ final class AutoImport extends Command
     use HaveAccess;
     use VerifyJSON;
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Will automatically import from the given directory and use the JSON and importable files found.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:auto-import {directory : The directory from which to import automatically.}';
 
     /**
@@ -62,25 +52,24 @@ final class AutoImport extends Command
         $access    = $this->haveAccess();
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
 
             return ExitCode::NO_CONNECTION->value;
         }
 
-        $argument  = (string) ($this->argument('directory') ?? './');
+        $argument  = (string) ($this->argument('directory') ?? './'); // @phpstan-ignore-line
 
-        /** @phpstan-ignore-line */
         $directory = realpath($argument);
         if (false === $directory) {
             $this->error(sprintf('Path "%s" is not a valid location.', $argument));
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
 
             return ExitCode::INVALID_PATH->value;
         }
         if (!$this->isAllowedPath($directory)) {
             $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
 
             return ExitCode::NOT_ALLOWED_PATH->value;
         }
@@ -92,7 +81,7 @@ final class AutoImport extends Command
             $this->info('To learn more about this process, read the docs:');
             $this->info('https://docs.firefly-iii.org/');
 
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::NO_FILES_FOUND->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::NO_FILES_FOUND->name));
 
             return ExitCode::NO_FILES_FOUND->value;
         }
@@ -109,11 +98,11 @@ final class AutoImport extends Command
             foreach ($result as $file => $code) {
                 $this->warn(sprintf('File %s returned code #%d', $file, $code));
             }
-            app('log')->error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
+            Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
 
             return ExitCode::GENERAL_ERROR->value;
         }
-        app('log')->error(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+        Log::error(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
 
         return ExitCode::SUCCESS->value;
     }

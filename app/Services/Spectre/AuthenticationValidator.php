@@ -32,6 +32,7 @@ use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Spectre\Authentication\SecretManager;
 use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Response\ErrorResponse;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AuthenticationValidator
@@ -42,14 +43,14 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     public function validate(): AuthenticationStatus
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         $url     = config('spectre.url');
         $appId   = SecretManager::getAppId();
         $secret  = SecretManager::getSecret();
 
         if ('' === $appId || '' === $secret) {
-            return AuthenticationStatus::nodata();
+            return AuthenticationStatus::NODATA;
         }
 
         $request = new ListCustomersRequest($url, $appId, $secret);
@@ -58,16 +59,16 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         try {
             $response = $request->get();
         } catch (ImporterHttpException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
-            return AuthenticationStatus::error();
+            return AuthenticationStatus::ERROR;
         }
         if ($response instanceof ErrorResponse) {
-            app('log')->error(sprintf('%s: %s', $response->class, $response->message));
+            Log::error(sprintf('%s: %s', $response->class, $response->message));
 
-            return AuthenticationStatus::error();
+            return AuthenticationStatus::ERROR;
         }
 
-        return AuthenticationStatus::authenticated();
+        return AuthenticationStatus::AUTHENTICATED;
     }
 }

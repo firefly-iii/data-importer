@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Authentication;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class SecretManager
  */
@@ -39,7 +41,7 @@ class SecretManager
     public static function getAppId(): string
     {
         if (!self::hasAppId()) {
-            app('log')->debug('No Spectre App ID in hasAppId() session, will return config variable.');
+            Log::debug('No Spectre App ID in hasAppId() session, will return config variable.');
 
             return (string) config('spectre.app_id');
         }
@@ -63,7 +65,7 @@ class SecretManager
     public static function getSecret(): string
     {
         if (!self::hasSecret()) {
-            app('log')->debug('No Spectre secret in hasSecret(), will return config variable.');
+            Log::debug('No Spectre secret in hasSecret(), will return config variable.');
 
             return (string) config('spectre.secret');
         }

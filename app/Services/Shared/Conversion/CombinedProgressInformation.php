@@ -74,7 +74,7 @@ trait CombinedProgressInformation
             }
         }
         if (0 === count($return)) {
-            $return = [];
+            return [];
         }
 
         return $return;

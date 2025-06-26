@@ -30,6 +30,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AuthenticationValidator
@@ -40,18 +41,18 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     public function validate(): AuthenticationStatus
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
 
         $identifier = SecretManager::getId();
         $key        = SecretManager::getKey();
 
         if ('' === $identifier || '' === $key) {
-            return AuthenticationStatus::nodata();
+            return AuthenticationStatus::NODATA;
         }
 
         // is there a valid access and refresh token?
         if (TokenManager::hasValidRefreshToken() && TokenManager::hasValidAccessToken()) {
-            return AuthenticationStatus::authenticated();
+            return AuthenticationStatus::AUTHENTICATED;
         }
 
         if (TokenManager::hasExpiredRefreshToken()) {
@@ -62,10 +63,10 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         // get complete set!
         try {
             TokenManager::getNewTokenSet($identifier, $key);
-        } catch (ImporterHttpException $e) {
-            return AuthenticationStatus::error();
+        } catch (ImporterHttpException) {
+            return AuthenticationStatus::ERROR;
         }
 
-        return AuthenticationStatus::authenticated();
+        return AuthenticationStatus::AUTHENTICATED;
     }
 }

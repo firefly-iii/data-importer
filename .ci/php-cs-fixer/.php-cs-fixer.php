@@ -60,7 +60,14 @@ return $config->setRules(
         'type_declaration_spaces'       => false,
         'cast_spaces'                   => false,
 
+        // enabled rules
+        'global_namespace_import' => true, // matches with rector.
+
         // complex rules
+        'phpdoc_to_comment' => ['ignored_tags' => ['var']],
+        'php_unit_test_case_static_method_calls' => [
+            'call_type' => 'this',
+        ],
         'array_syntax'                  => ['syntax' => 'short'],
         'binary_operator_spaces'        => [
             'default'   => 'at_least_single_space',

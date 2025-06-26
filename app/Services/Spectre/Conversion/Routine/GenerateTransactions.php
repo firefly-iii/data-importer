@@ -25,12 +25,14 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
+use Carbon\Carbon;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GenerateTransactions.
@@ -62,14 +64,14 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        app('log')->debug('Spectre: Defer account search to trait.');
+        Log::debug('Spectre: Defer account search to trait.');
         // defer to trait:
         $array = $this->collectAllTargetAccounts();
         foreach ($array as $number => $info) {
             $this->targetAccounts[$number] = $info['id'];
             $this->targetTypes[$number]    = $info['type'];
         }
-        app('log')->debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
+        Log::debug(sprintf('Spectre: Collected %d accounts.', count($this->targetAccounts)));
     }
 
     public function getTransactions(array $spectre): array
@@ -89,7 +91,7 @@ class GenerateTransactions
 
     private function generateTransaction(Transaction $entry): array
     {
-        app('log')->debug('Original Spectre transaction', $entry->toArray());
+        Log::debug('Original Spectre transaction', $entry->toArray());
         $description              = $entry->getDescription();
         $spectreAccountId         = $entry->getAccountId();
         $madeOn                   = $entry->getMadeOn()->toW3cString();
@@ -115,13 +117,13 @@ class GenerateTransactions
         ];
 
         // add time, post_date and post_time to transaction
-        if (null !== $entry->extra->getPostingDate()) {
+        if ($entry->extra->getPostingDate() instanceof Carbon) {
             $transaction['book_date'] = $entry->extra->getPostingDate()->toW3cString();
         }
-        if (null !== $entry->extra->getPostingTime()) {
+        if ($entry->extra->getPostingTime() instanceof Carbon) {
             $transaction['notes'] .= sprintf("\n\npost_time: %s", $entry->extra->getPostingTime());
         }
-        if (null !== $entry->extra->getTime()) {
+        if ($entry->extra->getTime() instanceof Carbon) {
             $transaction['notes'] .= sprintf("\n\ntime: %s", $entry->extra->getTime());
         }
 
@@ -132,24 +134,24 @@ class GenerateTransactions
         ];
 
         if ($this->configuration->isIgnoreSpectreCategories()) {
-            app('log')->debug('Remove Spectre categories and tags.');
+            Log::debug('Remove Spectre categories and tags.');
             unset($transaction['tags'], $transaction['category_name'], $transaction['category_id']);
         }
 
         // amount is positive?
         if (1 === bccomp($amount, '0')) {
-            app('log')->debug('Amount is positive: assume transfer or deposit.');
+            Log::debug('Amount is positive: assume transfer or deposit.');
             $transaction = $this->processPositiveTransaction($entry, $transaction, $amount, $spectreAccountId);
         }
 
         if (-1 === bccomp($amount, '0')) {
-            app('log')->debug('Amount is negative: assume transfer or withdrawal.');
+            Log::debug('Amount is negative: assume transfer or withdrawal.');
             $transaction = $this->processNegativeTransaction($entry, $transaction, $amount, $spectreAccountId);
         }
 
         $return['transactions'][] = $transaction;
 
-        app('log')->debug(sprintf('Parsed Spectre transaction #%d', $entry->getId()));
+        Log::debug(sprintf('Parsed Spectre transaction #%d', $entry->getId()));
 
         return $return;
     }
@@ -169,29 +171,29 @@ class GenerateTransactions
         $transaction['source_name']    = $entry->getPayer() ?? '(unknown source account)';
         $transaction['source_iban']    = $entry->getPayerIban() ?? '';
 
-        app('log')->debug(sprintf('processPositiveTransaction: source_name = "%s", source_iban = "%s"', $transaction['source_name'], $transaction['source_iban']));
+        Log::debug(sprintf('processPositiveTransaction: source_name = "%s", source_iban = "%s"', $transaction['source_name'], $transaction['source_iban']));
 
         // check if the source IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
         $iban                          = $transaction['source_iban'];
         $accountType                   = $this->targetTypes[$iban] ?? 'unknown';
         $accountId                     = $this->targetAccounts[$iban] ?? 0;
-        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+        Log::debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
 
         if ('unknown' !== $accountType) {
             if ('asset' === $accountType) {
-                app('log')->debug('Changing transaction type to "transfer"');
+                Log::debug('Changing transaction type to "transfer"');
                 $transaction['type'] = 'transfer';
             }
         }
         if (0 !== $accountId) {
-            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            Log::debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
             $transaction['source_id'] = (int) $accountId;
             unset($transaction['source_name'], $transaction['source_iban']);
         }
         $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string) $entry->getPayer(), (string) $entry->getPayerIban());
 
-        app('log')->debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
+        Log::debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
         return $transaction;
     }
@@ -208,29 +210,29 @@ class GenerateTransactions
         $transaction['destination_name'] = $entry->getPayee() ?? '(unknown destination account)';
         $transaction['destination_iban'] = $entry->getPayeeIban() ?? '';
 
-        app('log')->debug(sprintf('processNegativeTransaction: destination_name = "%s", destination_iban = "%s"', $transaction['destination_name'], $transaction['destination_iban']));
+        Log::debug(sprintf('processNegativeTransaction: destination_name = "%s", destination_iban = "%s"', $transaction['destination_name'], $transaction['destination_iban']));
 
         // check if the destination IBAN is a known account and what type it has: perhaps the
         // transaction type needs to be changed:
         $iban                            = $transaction['destination_iban'];
         $accountType                     = $this->targetTypes[$iban] ?? 'unknown';
         $accountId                       = $this->targetAccounts[$iban] ?? 0;
-        app('log')->debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
+        Log::debug(sprintf('Found account type "%s" for IBAN "%s"', $accountType, $iban));
         if ('unknown' !== $accountType) {
             if ('asset' === $accountType) {
-                app('log')->debug('Changing transaction type to "transfer"');
+                Log::debug('Changing transaction type to "transfer"');
                 $transaction['type'] = 'transfer';
             }
         }
         if (0 !== $accountId) {
-            app('log')->debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
+            Log::debug(sprintf('Found account ID #%d for IBAN "%s"', $accountId, $iban));
             $transaction['destination_id'] = $accountId;
             unset($transaction['destination_name'], $transaction['destination_iban']);
         }
 
         $transaction                     = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getPayee(), (string) $entry->getPayeeIban());
 
-        app('log')->debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
+        Log::debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
         return $transaction;
     }

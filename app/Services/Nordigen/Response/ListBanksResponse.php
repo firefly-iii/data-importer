@@ -35,9 +35,9 @@ use Iterator;
 /**
  * Class ListBanksResponse
  */
-class ListBanksResponse extends Response implements \Iterator, \Countable
+class ListBanksResponse extends Response implements Iterator, Countable
 {
-    private Collection $collection;
+    private readonly Collection $collection;
     private array      $countries;
     private int        $position = 0;
 

@@ -30,20 +30,14 @@ use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class PostNewTokenRequest
  */
 class PostNewTokenRequest extends Request
 {
-    private string $identifier;
-    private string $key;
-
-    public function __construct(string $identifier, string $key)
-    {
-        $this->identifier = $identifier;
-        $this->key        = $key;
-    }
+    public function __construct(private readonly string $identifier, private readonly string $key) {}
 
     public function get(): Response {}
 
@@ -63,12 +57,12 @@ class PostNewTokenRequest extends Request
                     'headers' => [
                         'accept'       => 'application/json',
                         'content-type' => 'application/json',
-                        'user-agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
+                        'User-Agent'   => sprintf('Firefly III Universal Data Importer / %s / %s', config('importer.version'), config('auth.line_a')),
                     ],
                 ]
             );
         } catch (GuzzleException $e) {
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
 
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }

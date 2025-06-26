@@ -37,6 +37,7 @@ use App\Services\Spectre\Request\ListCustomersRequest;
 use App\Services\Spectre\Request\PostConnectSessionsRequest;
 use App\Services\Spectre\Request\PostCustomerRequest;
 use App\Services\Spectre\Response\ErrorResponse;
+use App\Services\Spectre\Response\ListCustomersResponse;
 use App\Services\Spectre\Response\PostConnectSessionResponse;
 use App\Services\Spectre\Response\PostCustomerResponse;
 use App\Services\Storage\StorageService;
@@ -47,6 +48,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
+use JsonException;
 
 /**
  * Class ConnectionController
@@ -80,6 +83,7 @@ class ConnectionController extends Controller
 
         $request->setTimeOut(config('importer.connection.timeout'));
 
+        /** @var ErrorResponse|ListCustomersResponse $list */
         $list              = $request->get();
         $identifier        = null;
 
@@ -116,14 +120,14 @@ class ConnectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
-        app('log')->debug('About to get connections.');
+        Log::debug('About to get connections.');
         $request           = new ListConnectionsRequest($url, $appId, $secret);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->customer = $identifier;
@@ -171,8 +175,8 @@ class ConnectionController extends Controller
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
         }
         StorageService::storeContent($json);
 

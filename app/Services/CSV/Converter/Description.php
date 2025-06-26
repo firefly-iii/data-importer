@@ -39,7 +39,7 @@ class Description implements ConverterInterface
      */
     public function convert($value)
     {
-        return trim($value);
+        return trim((string) $value);
     }
 
     /**

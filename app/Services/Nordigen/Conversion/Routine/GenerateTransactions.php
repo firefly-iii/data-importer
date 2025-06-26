@@ -204,7 +204,7 @@ class GenerateTransactions
             'datetime'               => $entry->getDate()->toW3cString(),
             'amount'                 => $entry->transactionAmount,
             'description'            => $entry->getCleanDescription(),
-            'payment_date'           => null === $valueDate ? '' : $valueDate->format('Y-m-d'),
+            'payment_date'           => $valueDate instanceof Carbon ? $valueDate->format('Y-m-d') : '',
             'order'                  => 0,
             'currency_code'          => $entry->currencyCode,
             'tags'                   => $entry->tags,
@@ -238,10 +238,10 @@ class GenerateTransactions
         }
         // #9533 add entry reference as tag or as booking date.
         if ('' !== $entry->entryReference) {
-            if (false === strtotime($entry->entryReference)) {
+            if (false === Carbon::parse($entry->entryReference)->getTimestamp()) {
                 $transaction['tags'][] = $entry->entryReference;
             }
-            if (false !== strtotime($entry->entryReference)) {
+            if (false !== Carbon::parse($entry->entryReference)->getTimestamp()) {
                 try {
                     $transaction['booking_date'] = Carbon::parse($entry->entryReference)->toW3cString();
                 } catch (InvalidFormatException) {

@@ -26,46 +26,48 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Model;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
  * Class TransactionExtra
  */
 class TransactionExtra
 {
-    private ?string $accountBalanceSnapshot;
-    private ?string $accountNumber;
-    private ?string $additional;
-    private ?string $assetAmount;
-    private ?string $assetCode;
-    private ?string $categorizationConfidence;
-    private ?string $checkNumber;
-    private ?string $customerCategoryCode;
-    private ?string $customerCategoryName;
-    private ?string $id;
-    private ?string $information;
-    private ?string $mcc;
-    private ?string $originalAmount;
-    private ?string $originalCategory;
-    private ?string $originalCurrencyCode;
-    private ?string $originalSubCategory;
-    private ?string $payee;
-    private ?string $payeeInformation;
-    private ?string $payer;
-    private ?string $payerInformation;
-    private ?bool   $possibleDuplicate;
-    private ?Carbon $postingDate;
-    private ?Carbon $postingTime;
-    private ?string $recordNumber;
-    private ?array  $tags;
-    private ?Carbon $time;
-    private ?string $type;
-    private ?string $unitPrice;
-    private ?string $units;
+    private ?string $accountBalanceSnapshot   = null;
+    private ?string $accountNumber            = null;
+    private ?string $additional               = null;
+    private ?string $assetAmount              = null;
+    private ?string $assetCode                = null;
+    private ?string $categorizationConfidence = null;
+    private ?string $checkNumber              = null;
+    private ?string $customerCategoryCode     = null;
+    private ?string $customerCategoryName     = null;
+    private ?string $id                       = null;
+    private ?string $information              = null;
+    private ?string $mcc                      = null;
+    private ?string $originalAmount           = null;
+    private ?string $originalCategory         = null;
+    private ?string $originalCurrencyCode     = null;
+    private ?string $originalSubCategory      = null;
+    private ?string $payee                    = null;
+    private ?string $payeeInformation         = null;
+    private ?string $payer                    = null;
+    private ?string $payerInformation         = null;
+    private ?bool   $possibleDuplicate        = null;
+    private ?Carbon $postingDate              = null;
+    private ?Carbon $postingTime              = null;
+    private ?string $recordNumber             = null;
+    private ?array  $tags                     = null;
+    private ?Carbon $time                     = null;
+    private ?string $type                     = null;
+    private ?string $unitPrice                = null;
+    private ?string $units                    = null;
 
     /**
      * TransactionExtra constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function __construct() {}
 
@@ -109,9 +111,9 @@ class TransactionExtra
         $model->categorizationConfidence = array_key_exists('categorization_confidence', $data) ? (string) $data['categorization_confidence'] : null;
 
         // if has posting time, then set this time in the posting date?
-        app('log')->debug(sprintf('Time is         "%s"', $data['time'] ?? ''));
-        app('log')->debug(sprintf('Posting date is "%s"', $data['posting_date'] ?? ''));
-        app('log')->debug(sprintf('Posting time is "%s"', $data['posting_time'] ?? ''));
+        Log::debug(sprintf('Time is         "%s"', $data['time'] ?? ''));
+        Log::debug(sprintf('Posting date is "%s"', $data['posting_date'] ?? ''));
+        Log::debug(sprintf('Posting time is "%s"', $data['posting_time'] ?? ''));
 
         return $model;
     }
@@ -165,8 +167,8 @@ class TransactionExtra
     {
         return [
             'id'                        => $this->id,
-            'time'                      => $this->time ? $this->time->toW3cString() : '',
-            'posting_date'              => $this->postingDate ? $this->postingDate->toW3cString() : '',
+            'time'                      => $this->time instanceof Carbon ? $this->time->toW3cString() : '',
+            'posting_date'              => $this->postingDate instanceof Carbon ? $this->postingDate->toW3cString() : '',
             'posting_time'              => $this->postingTime,
             'record_number'             => $this->recordNumber,
             'information'               => $this->information,

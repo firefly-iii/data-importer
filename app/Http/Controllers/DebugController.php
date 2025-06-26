@@ -28,8 +28,11 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
+use Exception;
 
 class DebugController extends Controller
 {
@@ -42,7 +45,9 @@ class DebugController extends Controller
     {
         $now        = Carbon::now()->format('Y-m-d H:i:s e');
         $table      = $this->getTable();
-        $logger     = app('log')->driver();
+
+        /** @var Logger $logger */
+        $logger     = Log::driver();
         $handlers   = $logger->getHandlers();
         $logContent = '';
         foreach ($handlers as $handler) {
@@ -50,8 +55,8 @@ class DebugController extends Controller
                 $logFile = $handler->getUrl();
                 if (null !== $logFile) {
                     try {
-                        $logContent = file_get_contents($logFile);
-                    } catch (\Exception $e) { // @phpstan-ignore-line
+                        $logContent = (string)file_get_contents($logFile);
+                    } catch (Exception) {
                         // @ignoreException
                     }
                 }
@@ -59,20 +64,20 @@ class DebugController extends Controller
         }
         if ('' !== $logContent) {
             // last few lines
-            $logContent = 'Truncated from this point <----|'.substr($logContent, -8192);
+            $logContent = sprintf('Truncated from this point <----|%s', substr($logContent, -32 * 1024));
         }
         if (true === config('importer.is_external')) {
             $logContent = 'No logs, external installation.';
         }
 
-        app('log')->emergency('I am a EMERGENCY message.');
-        app('log')->alert('I am a ALERT message.');
-        app('log')->critical('I am a CRITICAL message.');
-        app('log')->error('I am a ERROR message.');
-        app('log')->warning('I am a WARNING message.');
-        app('log')->notice('I am a NOTICE message.');
-        app('log')->info('I am a INFO message.');
-        app('log')->debug('I am a DEBUG message.');
+        Log::emergency('I am a EMERGENCY message.');
+        Log::alert('I am a ALERT message.');
+        Log::critical('I am a CRITICAL message.');
+        Log::error('I am a ERROR message.');
+        Log::warning('I am a WARNING message.');
+        Log::notice('I am a NOTICE message.');
+        Log::info('I am a INFO message.');
+        Log::debug('I am a DEBUG message.');
 
         return view(
             'debug',
@@ -98,19 +103,19 @@ class DebugController extends Controller
     {
         $build     = null;
         $baseBuild = null;
-        $isDocker  = env('IS_DOCKER', false);
+        $isDocker  = config('importer.docker.is_docker', false);
 
         if (true === $isDocker) {
             try {
                 if (file_exists('/var/www/counter-main.txt')) {
-                    $build = trim(file_get_contents('/var/www/counter-main.txt'));
+                    $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
                 }
-            } catch (\Exception $e) {
-                app('log')->debug('Could not check build counter, but that\'s ok.');
-                app('log')->warning($e->getMessage());
+            } catch (Exception $e) {
+                Log::debug('Could not check build counter, but that\'s ok.');
+                Log::warning($e->getMessage());
             }
-            if ('' !== (string) env('BASE_IMAGE_BUILD')) {
-                $baseBuild = env('BASE_IMAGE_BUILD');
+            if ('' !== (string)config('importer.docker.base_build')) {
+                $baseBuild = (string)config('importer.docker.base_build');
             }
         }
         $search    = ['~', '#'];
@@ -131,7 +136,7 @@ class DebugController extends Controller
         return [
             'debug'          => var_export(config('app.debug'), true),
             'display_errors' => ini_get('display_errors'),
-            'reporting'      => $this->errorReporting((int) ini_get('error_reporting')),
+            'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
             'bcscale'        => bcscale(),
         ];
     }
@@ -143,15 +148,15 @@ class DebugController extends Controller
     {
         $array = [
             -1                                                             => 'ALL errors',
-            E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED                  => 'E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED',
+            E_ALL & ~E_NOTICE & ~E_DEPRECATED                              => 'E_ALL & ~E_NOTICE & ~E_DEPRECATED',
             E_ALL                                                          => 'E_ALL',
-            E_ALL & ~E_DEPRECATED & ~E_STRICT                              => 'E_ALL & ~E_DEPRECATED & ~E_STRICT',
+            E_ALL & ~E_DEPRECATED                                          => 'E_ALL & ~E_DEPRECATED',
             E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
-            E_ALL & ~E_NOTICE & ~E_STRICT                                  => 'E_ALL & ~E_NOTICE & ~E_STRICT',
+            E_ALL & ~E_NOTICE                                              => 'E_ALL & ~E_NOTICE',
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 
-        return $array[$value] ?? (string) $value;
+        return $array[$value] ?? sprintf('flags: %s', (string)$value);
     }
 
     private function getUserInfo(): array

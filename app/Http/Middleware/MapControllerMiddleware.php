@@ -29,5 +29,5 @@ class MapControllerMiddleware
 {
     use IsReadyForStep;
 
-    protected const STEP = 'map';
+    protected const string STEP = 'map';
 }

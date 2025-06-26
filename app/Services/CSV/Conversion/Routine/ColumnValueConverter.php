@@ -28,6 +28,9 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
+use Illuminate\Support\Facades\Log;
+use JsonException;
+use UnexpectedValueException;
 
 /**
  * Class ColumnValueConverter
@@ -38,17 +41,14 @@ use App\Services\Shared\Conversion\ProgressInformation;
 class ColumnValueConverter
 {
     use ProgressInformation;
-
-    private Configuration $configuration;
     private array         $roleToTransaction;
 
     /**
      * ColumnValueConverter constructor.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(private Configuration $configuration)
     {
         $this->roleToTransaction = config('csv.role_to_transaction');
-        $this->configuration     = $configuration;
     }
 
     /**
@@ -56,16 +56,16 @@ class ColumnValueConverter
      */
     public function processValueArrays(array $lines): array
     {
-        app('log')->debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('Now in %s', __METHOD__));
 
         $processed = [];
         $count     = count($lines);
-        app('log')->info(sprintf('Now parsing and combining %d lines.', $count));
+        Log::info(sprintf('Now parsing and combining %d lines.', $count));
         foreach ($lines as $index => $line) {
-            app('log')->debug(sprintf('Now processing line %d/%d', $index + 1, $count));
+            Log::debug(sprintf('Now processing line %d/%d', $index + 1, $count));
             $processed[] = $this->processValueArray($line);
         }
-        app('log')->info(sprintf('Done parsing and combining %d lines.', $count));
+        Log::info(sprintf('Done parsing and combining %d lines.', $count));
 
         return $processed;
     }
@@ -76,7 +76,7 @@ class ColumnValueConverter
     private function processValueArray(array $line): array
     {
         $count       = count($line);
-        app('log')->debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
+        Log::debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
         // make a new transaction:
         $transaction = [
             // 'user'          => 1, // ??
@@ -115,14 +115,14 @@ class ColumnValueConverter
             $transactionField = $this->roleToTransaction[$role] ?? null;
             $parsedValue      = $value->getParsedValue();
             if (null === $transactionField) {
-                throw new \UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
+                throw new UnexpectedValueException(sprintf('No place for role "%s"', $value->getRole()));
             }
             if (null === $parsedValue) {
-                app('log')->debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
+                Log::debug(sprintf('Skip column #%d with role "%s" (in field "%s")', $columnIndex + 1, $role, $transactionField));
 
                 continue;
             }
-            app('log')->debug(
+            Log::debug(
                 sprintf(
                     'Stored column #%d with value "%s" and role "%s" in field "%s"',
                     $columnIndex + 1,
@@ -134,14 +134,14 @@ class ColumnValueConverter
 
             // if append, append.
             if (true === $value->isAppendValue()) {
-                app('log')->debug(
+                Log::debug(
                     sprintf('Column #%d with role "%s" (in field "%s") must be appended to the previous value.', $columnIndex + 1, $role, $transactionField),
                     [$parsedValue]
                 );
                 if (is_array($parsedValue)) {
                     $transaction['transactions'][0][$transactionField] ??= [];
                     $transaction['transactions'][0][$transactionField] = array_merge($transaction['transactions'][0][$transactionField], $parsedValue);
-                    app('log')->debug(
+                    Log::debug(
                         sprintf('Value for [transactions][#0][%s] is now ', $transactionField),
                         $transaction['transactions'][0][$transactionField]
                     );
@@ -155,7 +155,7 @@ class ColumnValueConverter
             }
             // if not, not.
             if (false === $value->isAppendValue()) {
-                app('log')->debug(
+                Log::debug(
                     sprintf('Column #%d with role "%s" (in field "%s") must NOT be appended to the previous value.', $columnIndex + 1, $role, $transactionField)
                 );
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
@@ -163,7 +163,7 @@ class ColumnValueConverter
             // if this is an account field, AND the column is mapped, store the original value just in case.
             $saveRoles        = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
             if (0 !== $value->getMappedValue() && in_array($value->getOriginalRole(), $saveRoles, true)) {
-                app('log')->debug(
+                Log::debug(
                     sprintf(
                         'The original value ("%s") in column "%s" (originally stored in "%s") was saved just in case.',
                         $value->getValue(),
@@ -174,7 +174,7 @@ class ColumnValueConverter
                 $transaction['transactions'][0][sprintf('original-%s', $value->getOriginalRole())] = $value->getValue();
             }
         }
-        app('log')->debug('Almost final transaction', $transaction);
+        Log::debug('Almost final transaction', $transaction);
 
         return $transaction;
     }
@@ -189,7 +189,7 @@ class ColumnValueConverter
         if (is_array($value)) {
             try {
                 return json_encode($value, JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
+            } catch (JsonException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
         }

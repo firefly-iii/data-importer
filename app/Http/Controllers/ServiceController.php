@@ -32,6 +32,7 @@ use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ServiceController
@@ -53,11 +54,11 @@ class ServiceController extends Controller
         $validator = new NordigenValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if (AuthenticationStatus::ERROR === $result) {
             // send user error:
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if (AuthenticationStatus::NODATA === $result) {
             // send user error:
             return response()->json(['result' => 'NODATA']);
         }
@@ -67,17 +68,23 @@ class ServiceController extends Controller
 
     public function validateSimpleFIN(): JsonResponse
     {
+        Log::debug(sprintf('Now in %s', __METHOD__));
         $validator = new SimpleFINValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if (AuthenticationStatus::ERROR === $result) {
             // send user error:
+            Log::error('Error: Could not validate app key.');
+
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if (AuthenticationStatus::NODATA === $result) {
             // send user error:
+            Log::error('No data: Could not validate app key.');
+
             return response()->json(['result' => 'NODATA']);
         }
+        Log::info('All OK in validateSimpleFIN.');
 
         return response()->json(['result' => 'OK']);
     }
@@ -87,11 +94,11 @@ class ServiceController extends Controller
         $validator = new SpectreValidator();
         $result    = $validator->validate();
 
-        if ($result->equals(AuthenticationStatus::error())) {
+        if (AuthenticationStatus::ERROR === $result) {
             // send user error:
             return response()->json(['result' => 'NOK']);
         }
-        if ($result->equals(AuthenticationStatus::nodata())) {
+        if (AuthenticationStatus::NODATA === $result) {
             // send user error:
             return response()->json(['result' => 'NODATA']);
         }

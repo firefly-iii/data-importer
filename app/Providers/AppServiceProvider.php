@@ -27,6 +27,7 @@ namespace App\Providers;
 
 use App\Support\Steam;
 use Illuminate\Support\ServiceProvider;
+use Override;
 
 /**
  * Class AppServiceProvider
@@ -41,13 +42,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
+    #[Override]
     public function register(): void
     {
         $this->app->bind(
             'steam',
-            static function () {
-                return new Steam();
-            }
+            static fn () => new Steam()
         );
     }
 }

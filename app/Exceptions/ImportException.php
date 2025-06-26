@@ -25,9 +25,11 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Exception;
+
 /**
  * Class ImportException
  *
  * @deprecated
  */
-class ImportException extends \Exception {}
+class ImportException extends Exception {}

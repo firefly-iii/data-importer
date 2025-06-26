@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
@@ -32,6 +33,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use JsonException;
+use RuntimeException;
 
 /**
  * Class Request
@@ -69,7 +74,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
-        app('log')->debug('setParameters', $parameters);
+        Log::debug('setParameters', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -101,15 +106,16 @@ abstract class Request
                 $fullUrl,
                 [
                     'headers' => [
-                        'Accept'       => 'application/json',
-                        'Content-Type' => 'application/json',
-                        'App-id'       => $this->getAppId(),
-                        'Secret'       => $this->getSecret(),
+                        'Accept'        => 'application/json',
+                        'Content-Type'  => 'application/json',
+                        'App-id'        => $this->getAppId(),
+                        'Secret'        => $this->getSecret(),
+                        'User-Agent'    => sprintf('Firefly III Spectre importer / %s / %s', config('importer.version'), config('auth.line_c')),
                     ],
                 ]
             );
         } catch (TransferException $e) {
-            app('log')->error(sprintf('TransferException: %s', $e->getMessage()));
+            Log::error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response.
 
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
@@ -121,7 +127,7 @@ abstract class Request
         }
         if (200 !== $res->getStatusCode()) {
             // return body, class must handle this
-            app('log')->error(sprintf('[3] Status code is %d', $res->getStatusCode()));
+            Log::error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
             $body = (string) $res->getBody();
         }
@@ -129,7 +135,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException(
                 sprintf(
                     'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
@@ -145,7 +151,7 @@ abstract class Request
             throw new ImporterHttpException(sprintf('Body is empty. [4] Status code is %d.', $res->getStatusCode()));
         }
         if (config('importer.log_return_json')) {
-            app('log')->debug('JSON', $json);
+            Log::debug('JSON', $json);
         }
 
         return $json;
@@ -216,23 +222,23 @@ abstract class Request
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterErrorException($e->getMessage());
         }
 
-        app('log')->debug('Final headers for spectre signed POST request:', $headers);
+        Log::debug('Final headers for spectre signed POST request:', $headers);
 
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
-        } catch (\Exception|GuzzleException $e) {
+        } catch (Exception|GuzzleException $e) {
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
         try {
             $body = $res->getBody()->getContents();
-        } catch (\RuntimeException $e) {
-            app('log')->error(sprintf('sendSignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+        } catch (RuntimeException $e) {
+            Log::error(sprintf('sendSignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -241,7 +247,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException($e->getMessage());
         }
         $json['ResponseHeaders']    = $responseHeaders;
@@ -253,7 +259,7 @@ abstract class Request
     protected function getDefaultHeaders(): array
     {
         $userAgent       = sprintf('FireflyIII Spectre v%s', config('spectre.version'));
-        $this->expiresAt = time() + 180;
+        $this->expiresAt = Carbon::now()->getTimestamp() + 180;
 
         return [
             'App-id'        => $this->getAppId(),
@@ -282,28 +288,28 @@ abstract class Request
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
 
-        app('log')->debug('Final headers for spectre UNsigned POST request:', $headers);
+        Log::debug('Final headers for spectre UNsigned POST request:', $headers);
 
         try {
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
-        } catch (\Exception|GuzzleException $e) {
-            app('log')->error($e->getMessage());
+        } catch (Exception|GuzzleException $e) {
+            Log::error($e->getMessage());
 
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
 
         try {
             $body = $res->getBody()->getContents();
-        } catch (\RuntimeException $e) {
-            app('log')->error(sprintf('sendUnsignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+        } catch (RuntimeException $e) {
+            Log::error(sprintf('sendUnsignedSpectrePost: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -312,7 +318,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException($e->getMessage());
         }
         $json['ResponseHeaders']    = $responseHeaders;
@@ -337,14 +343,14 @@ abstract class Request
 
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
-            app('log')->error($e->getMessage());
+        } catch (JsonException $e) {
+            Log::error($e->getMessage());
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
         }
 
-        // app('log')->debug('Final body + headers for spectre UNsigned PUT request:', $opts);
+        // Log::debug('Final body + headers for spectre UNsigned PUT request:', $opts);
         try {
             $client = $this->getClient();
             $res    = $client->request('PUT', $fullUrl, $opts);
@@ -359,17 +365,17 @@ abstract class Request
 
                 try {
                     $json = json_decode((string) $e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
-                } catch (\JsonException $e) {
-                    app('log')->error($e->getMessage());
+                } catch (JsonException $e) {
+                    Log::error($e->getMessage());
                 }
                 $json['ResponseHeaders']    = $responseHeaders;
                 $json['ResponseStatusCode'] = $statusCode;
 
                 return $json;
             }
-            app('log')->error($e->getMessage());
+            Log::error($e->getMessage());
             if (null !== $response) {
-                app('log')->error((string) $e->getResponse()->getBody());
+                Log::error((string) $e->getResponse()->getBody());
             }
 
             throw new ImporterHttpException(sprintf('Request Exception: %s', $e->getMessage()));
@@ -377,8 +383,8 @@ abstract class Request
 
         try {
             $body = $res->getBody()->getContents();
-        } catch (\RuntimeException $e) {
-            app('log')->error(sprintf('sendUnsignedSpectrePut: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
+        } catch (RuntimeException $e) {
+            Log::error(sprintf('sendUnsignedSpectrePut: Could not get body from SpectreRequest::POST result: %s', $e->getMessage()));
             $body = '{}';
         }
 
@@ -387,7 +393,7 @@ abstract class Request
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+        } catch (JsonException $e) {
             throw new ImporterHttpException($e->getMessage());
         }
         $json['ResponseHeaders']    = $responseHeaders;

@@ -25,11 +25,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
+use JsonException;
 
 /**
  * Class DownloadController
@@ -38,23 +40,25 @@ class DownloadController extends Controller
 {
     use RestoresConfiguration;
 
+    /**
+     * @throws JsonException
+     */
     public function download(): Application|Response|ResponseFactory
     {
         // do something
         $configuration = $this->restoreConfiguration();
         $array         = $configuration->toArray();
-        $result        = json_encode($array, JSON_PRETTY_PRINT) ?? [];
-
+        $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         $response      = response($result);
-        $name          = sprintf('import_config_%s.json', date('Y-m-d'));
-        $response->header('Content-disposition', 'attachment; filename='.$name)
+        $name          = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
+        $response->header('Content-disposition', sprintf('attachment; filename=%s', $name))
             ->header('Content-Type', 'application/json')
             ->header('Content-Description', 'File Transfer')
             ->header('Connection', 'Keep-Alive')
             ->header('Expires', '0')
             ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->header('Pragma', 'public')
-            ->header('Content-Length', strlen($result))
+            ->header('Content-Length', (string) strlen($result))
         ;
 
         return $response;

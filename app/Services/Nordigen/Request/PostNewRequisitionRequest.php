@@ -28,6 +28,7 @@ namespace App\Services\Nordigen\Request;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class PostNewRequisitionRequest
@@ -58,7 +59,7 @@ class PostNewRequisitionRequest extends Request
      */
     public function post(): Response
     {
-        app('log')->debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('Now at %s', __METHOD__));
         $array
                 = [
                     'redirect'       => route('010-build-link.callback'),
@@ -68,7 +69,7 @@ class PostNewRequisitionRequest extends Request
                 ];
 
         $result = $this->authenticatedJsonPost($array);
-        app('log')->debug('Returned from POST: ', $result);
+        Log::debug('Returned from POST: ', $result);
 
         return new NewRequisitionResponse($result);
     }

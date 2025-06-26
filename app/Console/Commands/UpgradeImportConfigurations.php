@@ -27,21 +27,14 @@ namespace App\Console\Commands;
 
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 
 final class UpgradeImportConfigurations extends Command
 {
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Pointed to a directory, will parse and OVERWRITE all JSON files found there according to the latest JSON configuration file standards.';
-
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature   = 'importer:upgrade-import-configurations {directory}';
 
     /**
@@ -77,12 +70,12 @@ final class UpgradeImportConfigurations extends Command
 
     private function processRoot(string $directory): void
     {
-        $dir   = new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS);
-        $files = new \RecursiveIteratorIterator($dir, \RecursiveIteratorIterator::SELF_FIRST);
+        $dir   = new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
 
         /**
-         * @var string       $name
-         * @var \SplFileInfo $object
+         * @var string      $name
+         * @var SplFileInfo $object
          */
         foreach ($files as $name => $object) {
             $this->processFile($name);
