@@ -46,7 +46,7 @@ let index = function () {
             progressPercentage: 0,
         },
         checkCount: 0,
-        maxCheckCount: 600,
+        maxCheckCount: 1200,
         manualRefreshAvailable: false,
         functionName() {
 
@@ -117,9 +117,23 @@ let index = function () {
                 this.getJobStatus();
                 this.post.running = false;
             }).catch((error) => {
-                console.error('JOB HAS FAILED :(');
-                this.post.result = error;
-                this.post.errored = true;
+                if(error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    console.error('Error response:', error.response.data);
+                    console.error('Status code:', error.response.status);
+
+                    // respond to some different error codes:
+                    if(524 === error.response.status) {
+                        console.error('Error 524: A timeout occurred. The job is probably still running.');
+                        this.triedToStart = true;
+                        this.getJobStatus();
+                    }
+                } else {
+                    console.error('JOB HAS FAILED :(');
+                    this.post.result = error;
+                    this.post.errored = true;
+                }
             }).finally(() => {
                     this.getJobStatus();
                     this.triedToStart = true;

@@ -32,6 +32,8 @@ return [
     | Configuration for SimpleFIN integration
     |
     */
+    'token'                           => env('SIMPLEFIN_TOKEN', ''),
+    'origin_url'                      => env('SIMPLEFIN_CORS_ORIGIN_URL', ''),
 
     /*
     |--------------------------------------------------------------------------

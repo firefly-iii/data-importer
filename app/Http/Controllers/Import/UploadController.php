@@ -75,6 +75,10 @@ class UploadController extends Controller
         $subTitle  = 'Start page and instructions';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
+        // simplefin settings.
+        $simpleFinToken = config('simplefin.token');
+        $simpleFinOriginUrl = config('simplefin.origin_url');
+
         // get existing configs.
         $disk      = \Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
@@ -91,7 +95,7 @@ class UploadController extends Controller
 
         Log::debug('List of files:', $list);
 
-        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow'));
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow','simpleFinOriginUrl','simpleFinToken'));
     }
 
     /**

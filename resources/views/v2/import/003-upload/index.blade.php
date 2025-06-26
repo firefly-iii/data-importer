@@ -82,6 +82,7 @@
                                                class="form-control
                                            @if($errors->has('simplefin_token')) is-invalid @endif"
                                                id="simplefin_token" name="simplefin_token"
+                                               value="{{ $simpleFinToken }}"
                                                placeholder="SimpleFIN token"/>
                                         @if($errors->has('simplefin_token'))
                                             <div class="invalid-feedback">
@@ -102,6 +103,7 @@
                                                class="form-control
                                            @if($errors->has('simplefin_bridge_url')) is-invalid @endif"
                                                id="simplefin_bridge_url" name="simplefin_bridge_url"
+                                               value="{{ $simpleFinOriginUrl  }}"
                                                placeholder="https://your-app.example.com"/>
                                         <small class="form-text text-muted">
                                             Enter the URL where you access this Firefly III Data Importer (e.g., https://your-domain.com). Leave blank if unsure.
