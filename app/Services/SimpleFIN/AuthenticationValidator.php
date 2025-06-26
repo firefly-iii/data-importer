@@ -45,6 +45,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         if ('' ===   $key) {
 
             Log::warning(sprintf('app.key is empty ("%s"), cannot authenticate. Return OK anyway.', $key));
+
             return AuthenticationStatus::AUTHENTICATED;
         }
         Log::debug('app.key is OK, can authenticate.');

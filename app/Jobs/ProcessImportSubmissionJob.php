@@ -21,7 +21,8 @@ class ProcessImportSubmissionJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The number of times the job may be attempted.
