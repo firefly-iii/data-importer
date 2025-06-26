@@ -43,8 +43,8 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         // needs an APP key which isn't blank or zero or whatever.
         $key = (string) config('app.key');
         if ('' ===   $key) {
-            Log::warning(sprintf('app.key is empty ("%s"), cannot authenticate. Return OK anyway.', $key));
 
+            Log::warning(sprintf('app.key is empty ("%s"), cannot authenticate. Return OK anyway.', $key));
             return AuthenticationStatus::AUTHENTICATED;
         }
         Log::debug('app.key is OK, can authenticate.');
