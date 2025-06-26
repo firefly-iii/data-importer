@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-use UnexpectedValueException;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -52,7 +51,7 @@ class ConverterService
             return $object->convert($value);
         }
 
-        throw new UnexpectedValueException(sprintf('No such converter: "%s"', $class));
+        throw new \UnexpectedValueException(sprintf('No such converter: "%s"', $class));
     }
 
     public static function exists(string $class): bool

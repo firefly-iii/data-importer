@@ -25,9 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN;
 
-use DateTime;
-use DateTimeZone;
-use Exception;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Session\Constants;
@@ -158,15 +155,15 @@ class SimpleFINService
 
             if (isset($dateRange['start']) && '' !== (string)$dateRange['start']) {
                 try {
-                    $startDateTimestamp = new DateTime($dateRange['start'], new DateTimeZone('UTC'))->setTime(0, 0, 0)->getTimestamp();
-                } catch (Exception $e) {
+                    $startDateTimestamp = new \DateTime($dateRange['start'], new \DateTimeZone('UTC'))->setTime(0, 0, 0)->getTimestamp();
+                } catch (\Exception $e) {
                     Log::warning('Invalid start date format for SimpleFIN transaction filtering.', ['date' => $dateRange['start'], 'error' => $e->getMessage()]);
                 }
             }
             if (isset($dateRange['end']) && '' !== (string)$dateRange['end']) {
                 try {
-                    $endDateTimestamp = new DateTime($dateRange['end'], new DateTimeZone('UTC'))->setTime(23, 59, 59)->getTimestamp();
-                } catch (Exception $e) {
+                    $endDateTimestamp = new \DateTime($dateRange['end'], new \DateTimeZone('UTC'))->setTime(23, 59, 59)->getTimestamp();
+                } catch (\Exception $e) {
                     Log::warning('Invalid end date format for SimpleFIN transaction filtering.', ['date' => $dateRange['end'], 'error' => $e->getMessage()]);
                 }
             }
@@ -323,10 +320,10 @@ class SimpleFINService
                 // Log the actual response for debugging
                 Log::error(sprintf('DETAILED 403 ERROR - URL: %s, Response: %s', $claimUrl, $responseBody));
 
-                throw new ImporterErrorException(sprintf('SimpleFIN claim URL exchange failed (403 Forbidden): %s', $responseBody !== '' && $responseBody !== '0' ? $responseBody : 'No response body available'));
+                throw new ImporterErrorException(sprintf('SimpleFIN claim URL exchange failed (403 Forbidden): %s', '' !== $responseBody && '0' !== $responseBody ? $responseBody : 'No response body available'));
             }
 
-            throw new ImporterErrorException(sprintf('Failed to exchange SimpleFIN claim URL: HTTP %d error - %s', $statusCode, $responseBody !== '' && $responseBody !== '0' ? $responseBody : $e->getMessage()));
+            throw new ImporterErrorException(sprintf('Failed to exchange SimpleFIN claim URL: HTTP %d error - %s', $statusCode, '' !== $responseBody && '0' !== $responseBody ? $responseBody : $e->getMessage()));
         } catch (GuzzleException $e) {
             Log::error(sprintf('Failed to exchange SimpleFIN claim URL: %s', $e->getMessage()));
 

@@ -50,8 +50,8 @@ class TransactionProcessor
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private array         $accounts;
     private Configuration $configuration;
-    private ?Carbon       $notAfter = null;
-    private ?Carbon       $notBefore = null;
+    private ?Carbon       $notAfter       = null;
+    private ?Carbon       $notBefore      = null;
 
     /**
      * @throws ImporterErrorException

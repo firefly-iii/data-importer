@@ -38,5 +38,5 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get(
     '/user',
-    fn(Request $request) => $request->user()
+    fn (Request $request) => $request->user()
 );

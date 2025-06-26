@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use Override;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -46,7 +45,7 @@ class Kernel extends ConsoleKernel
     /**
      * Register the commands for the application.
      */
-    #[Override]
+    #[\Override]
     protected function commands(): void
     {
         $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
@@ -66,6 +65,7 @@ class Kernel extends ConsoleKernel
             echo PHP_EOL;
             echo 'If you set VANITY_URL you must also set FIREFLY_III_URL';
             echo PHP_EOL;
+
             exit;
         }
 
@@ -77,6 +77,6 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    #[Override]
+    #[\Override]
     protected function schedule(Schedule $schedule): void {}
 }

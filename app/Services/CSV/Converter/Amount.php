@@ -150,7 +150,7 @@ class Amount implements ConverterInterface
             Log::debug(sprintf('No decimal character found. Converted amount from "%s" to "%s".', $original, $value));
         }
         if (str_starts_with($value, '.')) {
-            $value = sprintf('0%s',$value);
+            $value = sprintf('0%s', $value);
         }
 
         if (is_numeric($value)) {
@@ -182,7 +182,7 @@ class Amount implements ConverterInterface
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen((string) $str);
         if (str_starts_with((string) $str, '(') && ')' === $str[$len - 1]) {
-            $str = sprintf('-%s',substr((string) $str, 1, $len - 2));
+            $str = sprintf('-%s', substr((string) $str, 1, $len - 2));
         }
         $str   = trim((string) $str);
 

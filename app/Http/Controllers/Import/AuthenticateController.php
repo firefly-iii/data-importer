@@ -69,7 +69,7 @@ class AuthenticateController extends Controller
         $pageTitle = 'Authentication';
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
-        $error     = Session::get('error');
+        $error     = \Session::get('error');
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator();

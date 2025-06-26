@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
-use Override;
 use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
@@ -65,7 +64,7 @@ class RoutineManager implements RoutineManagerInterface
         return $this->identifier;
     }
 
-    #[Override]
+    #[\Override]
     public function getServiceAccounts(): array
     {
         return session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
@@ -122,7 +121,7 @@ class RoutineManager implements RoutineManagerInterface
 
                     continue;
                 }
-                $simplefinAccountData = array_find($allAccountsSimpleFINData, fn($accountData) => $accountData['id'] === $simplefinAccountId);
+                $simplefinAccountData = array_find($allAccountsSimpleFINData, fn ($accountData) => $accountData['id'] === $simplefinAccountId);
 
                 if (!$simplefinAccountData) {
                     Log::error("SimpleFIN account data not found for ID: {$simplefinAccountId}");
@@ -179,7 +178,7 @@ class RoutineManager implements RoutineManagerInterface
                     }
                 }
             }
-            $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
+            $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
 
             if (null === $currentSimpleFINAccountData) {
                 Log::error('Failed to find SimpleFIN account raw data in session for current account ID during transformation.', ['simplefin_account_id_sought' => $simplefinAccountId]);

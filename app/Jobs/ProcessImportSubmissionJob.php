@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use Exception;
-use Throwable;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
@@ -41,9 +39,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private string $identifier, private Configuration $configuration, private array $transactions, private string $accessToken, private string $baseUrl, private ?string $vanityUrl)
-    {
-    }
+    public function __construct(private string $identifier, private Configuration $configuration, private array $transactions, private string $accessToken, private string $baseUrl, private ?string $vanityUrl) {}
 
     /**
      * Execute the job.
@@ -57,11 +53,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
         // Validate authentication credentials before proceeding
         if ('' === $this->accessToken) {
-            throw new Exception('Access token is empty - cannot authenticate with Firefly III');
+            throw new \Exception('Access token is empty - cannot authenticate with Firefly III');
         }
 
         if ('' === $this->baseUrl) {
-            throw new Exception('Base URL is empty - cannot connect to Firefly III');
+            throw new \Exception('Base URL is empty - cannot connect to Firefly III');
         }
 
         Log::info('Job authentication credentials validation', [
@@ -116,13 +112,13 @@ class ProcessImportSubmissionJob implements ShouldQueue
             ]);
 
             if ($verifyToken !== $this->accessToken) {
-                throw new Exception(
+                throw new \Exception(
                     'Failed to set access token in config properly'
                 );
             }
 
             if ($verifyUrl !== $this->baseUrl) {
-                throw new Exception(
+                throw new \Exception(
                     'Failed to set base URL in config properly'
                 );
             }
@@ -157,7 +153,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
                 'warnings'   => count($routine->getAllWarnings()),
                 'errors'     => count($routine->getAllErrors()),
             ]);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->identifier,
                 'error'      => $e->getMessage(),
@@ -185,7 +181,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * Handle a job failure.
      */
-    public function failed(Throwable $exception): void
+    public function failed(\Throwable $exception): void
     {
         Log::error('ProcessImportSubmissionJob marked as failed', [
             'identifier' => $this->identifier,

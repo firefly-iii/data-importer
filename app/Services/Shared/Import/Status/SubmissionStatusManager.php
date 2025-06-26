@@ -25,8 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Import\Status;
 
-use Storage;
-use JsonException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Submission\GeneratesIdentifier;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -47,13 +45,13 @@ class SubmissionStatusManager
     {
         $lineNo = $index + 1;
         Log::debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
-        $disk   = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
 
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = SubmissionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException) {
+                } catch (\JsonException) {
                     $status = new SubmissionStatus();
                 }
                 $status->errors[$index] ??= [];
@@ -72,11 +70,11 @@ class SubmissionStatusManager
     {
         Log::debug(sprintf('Now in %s(%s): %s', __METHOD__, $identifier, $status->status));
         Log::debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk = \Storage::disk(self::DISK_NAME);
 
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             // do nothing
             Log::error($e->getMessage());
         }
@@ -87,13 +85,13 @@ class SubmissionStatusManager
         $lineNo = $index + 1;
         Log::debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
 
-        $disk   = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
 
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = SubmissionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException) {
+                } catch (\JsonException) {
                     $status = new SubmissionStatus();
                 }
                 $status->messages[$index] ??= [];
@@ -113,13 +111,13 @@ class SubmissionStatusManager
         $lineNo = $index + 1;
         Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
 
-        $disk   = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
 
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = SubmissionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException) {
+                } catch (\JsonException) {
                     $status = new SubmissionStatus();
                 }
                 $status->warnings[$index] ??= [];
@@ -138,13 +136,13 @@ class SubmissionStatusManager
     {
         Log::debug(sprintf('Update progress for %s: %d/%d transactions', $identifier, $currentTransaction, $totalTransactions));
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk = \Storage::disk(self::DISK_NAME);
 
         try {
             if ($disk->exists($identifier)) {
                 try {
                     $status = SubmissionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
-                } catch (JsonException) {
+                } catch (\JsonException) {
                     $status = new SubmissionStatus();
                 }
 
@@ -186,7 +184,7 @@ class SubmissionStatusManager
     public static function startOrFindSubmission(string $identifier): SubmissionStatus
     {
         Log::debug(sprintf('Now in startOrFindJob(%s)', $identifier));
-        $disk   = Storage::disk(self::DISK_NAME);
+        $disk   = \Storage::disk(self::DISK_NAME);
 
         try {
             Log::debug(sprintf('Try to see if file exists for job %s.', $identifier));
@@ -196,7 +194,7 @@ class SubmissionStatusManager
                 try {
                     $array  = json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                     $status = SubmissionStatus::fromArray($array);
-                } catch (FileNotFoundException|JsonException $e) {
+                } catch (FileNotFoundException|\JsonException $e) {
                     Log::error($e->getMessage());
                     $status = new SubmissionStatus();
                 }
@@ -214,7 +212,7 @@ class SubmissionStatusManager
 
         try {
             $json = json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             Log::error($e->getMessage());
             $json = '{}';
         }

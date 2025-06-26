@@ -35,7 +35,7 @@ use Iterator;
 /**
  * Class ListAccountsResponse
  */
-class ListAccountsResponse extends Response implements Iterator, Countable
+class ListAccountsResponse extends Response implements \Iterator, \Countable
 {
     private array      $accounts;
     private readonly Collection $collection;

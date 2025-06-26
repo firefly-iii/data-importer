@@ -181,7 +181,7 @@ class MapperService
         foreach ($data as $title => $info) {
             $filtered               = array_filter(
                 $info['values'],
-                static fn(string $value) => '' !== $value
+                static fn (string $value) => '' !== $value
             );
             $info['values']         = array_unique($filtered);
             sort($info['values']);

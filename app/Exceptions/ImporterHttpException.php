@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use Exception;
-
 /**
  * Class ImporterHttpException
  */
-class ImporterHttpException extends Exception {}
+class ImporterHttpException extends \Exception {}

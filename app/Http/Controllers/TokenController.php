@@ -25,9 +25,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use JsonException;
-use Str;
-use Throwable;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
@@ -59,7 +56,7 @@ class TokenController extends Controller
      *
      * @throws ImporterErrorException
      * @throws GuzzleException
-     * @throws Throwable
+     * @throws \Throwable
      */
     public function callback(Request $request)
     {
@@ -116,7 +113,7 @@ class TokenController extends Controller
 
         try {
             $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             Log::error(sprintf('Response from server: "%s"', (string)$response->getBody()));
 
@@ -272,8 +269,8 @@ class TokenController extends Controller
         $vanityURL             = rtrim($vanityURL, '/');
 
         Log::debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state                 = Str::random(40);
-        $codeVerifier          = Str::random(128);
+        $state                 = \Str::random(40);
+        $codeVerifier          = \Str::random(128);
         $request->session()->put('state', $state);
         $request->session()->put('code_verifier', $codeVerifier);
         $request->session()->put('form_client_id', $clientId);

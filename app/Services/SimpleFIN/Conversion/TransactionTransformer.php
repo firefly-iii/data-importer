@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
-use Exception;
 use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
@@ -189,7 +188,7 @@ class TransactionTransformer
 
         // Try to find existing expense or revenue account first
         $existingAccount    = $this->findExistingAccount($description, $isDeposit);
-        if ($existingAccount !== null && $existingAccount !== []) {
+        if (null !== $existingAccount && [] !== $existingAccount) {
             return [
                 'id'     => $existingAccount['id'],
                 'name'   => $existingAccount['name'],
@@ -207,7 +206,7 @@ class TransactionTransformer
 
             if (0 === count($accountsToCheck)) {
                 $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
-                if ($clusteredAccountName !== null && $clusteredAccountName !== '' && $clusteredAccountName !== '0') {
+                if (null !== $clusteredAccountName && '' !== $clusteredAccountName && '0' !== $clusteredAccountName) {
                     return [
                         'id'     => null,
                         'name'   => $clusteredAccountName,
@@ -486,7 +485,7 @@ class TransactionTransformer
             ));
 
             $this->accountsCollected = true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error(sprintf('Failed to collect accounts: %s', $e->getMessage()));
             Log::debug('Continuing without smart expense matching due to collection failure');
             $this->expenseAccounts   = [];
@@ -526,7 +525,7 @@ class TransactionTransformer
 
         // Try fuzzy matching if no exact match found
         $bestMatch             = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
-        if ($bestMatch !== null && $bestMatch !== []) {
+        if (null !== $bestMatch && [] !== $bestMatch) {
             Log::debug(sprintf(
                 'Fuzzy match found: "%s" -> "%s" (similarity: %.2f)',
                 $description,

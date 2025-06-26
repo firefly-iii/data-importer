@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
-use InvalidArgumentException;
 use App\Services\Camt\Transaction;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -87,7 +86,7 @@ class RoleService
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new InvalidArgumentException($e->getMessage());
+                throw new \InvalidArgumentException($e->getMessage());
             }
             // @codeCoverageIgnoreEnd
             Log::debug('Detected file headers:', $headers);
@@ -107,7 +106,7 @@ class RoleService
             } catch (Exception $e) {
                 Log::error($e->getMessage());
 
-                throw new InvalidArgumentException($e->getMessage());
+                throw new \InvalidArgumentException($e->getMessage());
             }
         }
 
@@ -152,7 +151,7 @@ class RoleService
         } catch (Exception $e) {
             Log::error($e->getMessage());
 
-            throw new InvalidArgumentException($e->getMessage());
+            throw new \InvalidArgumentException($e->getMessage());
         }
 
         /** @codeCoverageIgnoreEnd */
@@ -247,7 +246,7 @@ class RoleService
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], fn(string $value) => '' !== $value);
+            $examples[$key] = array_filter($examples[$key], fn (string $value) => '' !== $value);
         }
 
         return $examples;

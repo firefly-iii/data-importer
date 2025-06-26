@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Services\Camt\Conversion;
 
-use Override;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\IsRunningCli;
@@ -73,7 +72,7 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    #[Override]
+    #[\Override]
     public function getServiceAccounts(): array
     {
         return [];

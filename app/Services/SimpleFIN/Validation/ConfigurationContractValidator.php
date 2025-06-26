@@ -41,9 +41,9 @@ use Illuminate\Support\Facades\Log;
  */
 class ConfigurationContractValidator
 {
-    private array $errors                    = [];
-    private array $warnings                  = [];
-    private array $existingAccounts          = [];
+    private array $errors                          = [];
+    private array $warnings                        = [];
+    private array $existingAccounts                = [];
 
     private const array REQUIRED_ACCOUNT_TYPES     = ['asset', 'liability', 'expense', 'revenue'];
     private const array VALID_ACCOUNT_ROLES        = ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'];

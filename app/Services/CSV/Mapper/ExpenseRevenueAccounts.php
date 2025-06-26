@@ -81,7 +81,7 @@ class ExpenseRevenueAccounts implements MapperInterface
         $allAccounts            = $this->toArray($response);
 
         // Filter for expense and revenue accounts only
-        $expenseRevenueAccounts = array_filter($allAccounts, fn(Account $account) => in_array($account->type, ['expense', 'revenue'], true));
+        $expenseRevenueAccounts = array_filter($allAccounts, fn (Account $account) => in_array($account->type, ['expense', 'revenue'], true));
 
         Log::debug(sprintf('getExpenseRevenueAccounts: Found %d expense/revenue accounts', count($expenseRevenueAccounts)));
 

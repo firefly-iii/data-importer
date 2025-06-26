@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace App\Services\SimpleFIN\Conversion;
 
 use Carbon\Carbon;
-use Exception;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Shared\Authentication\SecretManager;
@@ -79,7 +78,7 @@ class AccountMapper
                 if ('map' === $mappingConfig['action'] && isset($mappingConfig['firefly_account_id'])) {
                     // Map to existing account
                     $fireflyAccount = $this->getFireflyAccountById((int) $mappingConfig['firefly_account_id']);
-                    if ($fireflyAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+                    if ($fireflyAccount instanceof Account) {
                         $mapping[$accountKey] = [
                             'simplefin_account'    => $simplefinAccount,
                             'firefly_account_id'   => $fireflyAccount->id,
@@ -91,7 +90,7 @@ class AccountMapper
                 if ('create' === $mappingConfig['action']) {
                     // Create new account
                     $fireflyAccount = $this->createFireflyAccount($simplefinAccount, $mappingConfig);
-                    if ($fireflyAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+                    if ($fireflyAccount instanceof Account) {
                         $mapping[$accountKey] = [
                             'simplefin_account'    => $simplefinAccount,
                             'firefly_account_id'   => $fireflyAccount->id,
@@ -104,7 +103,7 @@ class AccountMapper
             if (!isset($configuration['account_mapping'][$accountKey])) {
                 // Auto-map by searching for existing accounts
                 $fireflyAccount = $this->findMatchingFireflyAccount($simplefinAccount);
-                if ($fireflyAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+                if ($fireflyAccount instanceof Account) {
                     $mapping[$accountKey] = [
                         'simplefin_account'    => $simplefinAccount,
                         'firefly_account_id'   => $fireflyAccount->id,
@@ -112,7 +111,7 @@ class AccountMapper
                         'action'               => 'auto_map',
                     ];
                 }
-                if (!$fireflyAccount instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+                if (!$fireflyAccount instanceof Account) {
                     // No mapping found - will need user input
                     $mapping[$accountKey] = [
                         'simplefin_account'    => $simplefinAccount,
@@ -145,7 +144,7 @@ class AccountMapper
         $this->loadFireflyAccounts();
 
         // Try to find by name first
-        $matchingAccounts = array_filter($this->fireflyAccounts, fn(Account $account) => strtolower((string) $account->name) === strtolower($simplefinAccount->getName()));
+        $matchingAccounts = array_filter($this->fireflyAccounts, fn (Account $account) => strtolower((string) $account->name) === strtolower($simplefinAccount->getName()));
 
         if (0 === count($matchingAccounts)) {
             return reset($matchingAccounts);
@@ -242,7 +241,7 @@ class AccountMapper
 
             if ($response instanceof PostAccountResponse) {
                 $account = $response->getAccount();
-                if ($account instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+                if ($account instanceof Account) {
                     Log::info(sprintf('Successfully created account "%s" with ID %d', $accountName, $account->id));
 
                     // Add to our local cache
@@ -261,7 +260,7 @@ class AccountMapper
             Log::error(sprintf('API error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error(sprintf('Unexpected error creating account "%s": %s', $accountName, $e->getMessage()));
 
             return null;
@@ -295,7 +294,7 @@ class AccountMapper
         }
 
         // 3. Final fallback
-        return $currency !== '' && $currency !== '0' ? $currency : 'EUR';
+        return '' !== $currency && '0' !== $currency ? $currency : 'EUR';
     }
 
     /**
@@ -459,7 +458,7 @@ class AccountMapper
 
         // Try to suggest a matching account
         $suggested = $this->findMatchingFireflyAccount($simplefinAccount);
-        if ($suggested instanceof \GrumpyDictator\FFIIIApiSupport\Model\Account) {
+        if ($suggested instanceof Account) {
             $options['suggested_account'] = [
                 'id'   => $suggested->id,
                 'name' => $suggested->name,

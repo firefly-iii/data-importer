@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
-use Exception;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
@@ -117,7 +116,7 @@ trait CollectsAccounts
             ]);
             // Return the (potentially partially filled) $accounts array so the app doesn't hard crash.
             // The view should handle cases where account lists are empty.
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('CollectsAccounts::getFireflyIIIAccounts - Generic Exception while fetching Firefly III accounts.', [
                 'message' => $e->getMessage(),
                 'code'    => $e->getCode(),
