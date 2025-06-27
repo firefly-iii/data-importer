@@ -246,7 +246,7 @@ class GenerateTransactions
                 Log::debug(sprintf('Cannot parse entry reference "%s" as date, but that\'s OK.', $entry->entryReference));
             }
             if (null === $parsed) {
-                $transaction['tags'][] = $entry->entryReference;
+                $transaction['notes'] = trim(sprintf("%s\n\nEntry reference: %s",$transaction['notes'], $entry->entryReference));
             }
             if (null !== $parsed) {
                 $transaction['booking_date'] = Carbon::parse($entry->entryReference)->toW3cString();
@@ -376,7 +376,7 @@ class GenerateTransactions
             $accountName = $this->getRevenueOrExpenseName($iban, $accountType);
             if ($bonusTag !== $accountName) {
                 Log::debug(sprintf('Add account name "%s" as extra tag because the recognized account is called "%s".', $bonusTag, $accountName));
-                $transaction['bonus_tags'][] = $bonusTag;
+                $transaction['notes'] = sprintf("%s\n\nOriginal account name: %s",$transaction['notes'],  $bonusTag);
             }
         }
 
