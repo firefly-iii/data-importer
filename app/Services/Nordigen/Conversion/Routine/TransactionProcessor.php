@@ -74,9 +74,10 @@ class TransactionProcessor
 
         $return          = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
+        $total    = count($accounts);
         foreach ($accounts as $key => $account) {
             $account                    = (string) $account;
-            Log::debug(sprintf('Going to download transactions for account #%d "%s"', $key, $account));
+            Log::debug(sprintf('[%d/%d] Going to download transactions for account #%d "%s"', $key+1, $total, $key+1, $account));
             $object                     = new Account();
             $object->setIdentifier($account);
             $fullInfo                   = null;
@@ -113,13 +114,13 @@ class TransactionProcessor
             $request                    = new GetTransactionsRequest($url, $accessToken, $account);
             $request->setTimeOut(config('importer.connection.timeout'));
 
-            // @var GetTransactionsResponse $transactions
+            /** @var GetTransactionsResponse $transactions */
             try {
                 $transactions = $request->get();
                 Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
-                $this->addError(0, $e->getMessage());
+                $this->addWarning(0, $e->getMessage());
                 $return[$account]           = [];
 
                 // save the rate limits:
@@ -148,9 +149,9 @@ class TransactionProcessor
             ];
 
             $return[$account]           = $this->filterTransactions($transactions);
-            Log::debug(sprintf('Done downloading transactions for account %s "%s"', $key, $account));
+            Log::debug(sprintf('[%d/%d] Done downloading transactions for account #%d "%s"', $key+1, $total, $key+1, $account));
         }
-        Log::debug('Done with download');
+        Log::debug('Done with download of transactions.');
 
         return $return;
     }

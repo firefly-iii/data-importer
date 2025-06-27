@@ -174,7 +174,6 @@ trait AutoImports
     {
         $exitCodes = [];
 
-        // @var string $file
         foreach ($files as $jsonFile => $importableFile) {
             try {
                 $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
