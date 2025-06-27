@@ -460,7 +460,7 @@ class GenerateTransactions
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setId($accountId);
 
-        // @var GetAccountResponse $result
+        /** @var GetAccountResponse $result */
         try {
             $result = $request->get();
         } catch (ApiHttpException $e) {
