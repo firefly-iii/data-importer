@@ -46,7 +46,7 @@ trait MergesAccountLists
 
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
-            Log::debug(sprintf('Working on generic account "%s": "%s" ("%s", "%s")', $account->name, $account->id, $account->iban, $account->bban));
+            Log::debug(sprintf('Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")', $account->name, $account->id, $account->iban, $account->bban));
 
             $iban                          = $account->iban;
             $number                        = $account->bban;
@@ -75,7 +75,8 @@ trait MergesAccountLists
                 continue;
             }
             Log::debug('No special filtering on the Firefly III account list.');
-            $entry['firefly_iii_accounts'] = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS], $fireflyIII[Constants::LIABILITIES]);
+            // remove array_merge because SimpleFIN does not do this so it broke all the other importer routines.
+            $entry['firefly_iii_accounts'] = $fireflyIII;
             $return[]                      = $entry;
         }
 
@@ -84,6 +85,7 @@ trait MergesAccountLists
 
     protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
     {
+        Log::debug(sprintf('Now filtering Firefly III accounts by IBAN "%s" or number "%s".', $iban, $number));
         // FIXME this check should also check the number of the account.
         if ('' === $iban) {
             return [];

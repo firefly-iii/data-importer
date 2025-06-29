@@ -162,7 +162,6 @@ class TokenController extends Controller
 
         $infoRequest->setVerify(config('importer.connection.verify'));
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
-
         Log::debug(sprintf('Now trying to authenticate with Firefly III at %s', $url));
 
         try {
@@ -171,6 +170,7 @@ class TokenController extends Controller
         } catch (ApiHttpException $e) {
             Log::notice(sprintf('Could NOT authenticate with Firefly III at %s', $url));
             Log::error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
+            Log::debug(sprintf('Using access token "%s" (limited to 25 chars if present)', substr($token, 0, 25)));
 
             return response()->json(['result' => 'NOK', 'message' => $e->getMessage()]);
         }

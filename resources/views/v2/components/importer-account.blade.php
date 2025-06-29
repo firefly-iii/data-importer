@@ -17,7 +17,7 @@
                 <span class="text-danger">There are no Firefly III accounts to import into</span>
             @endif
             @if( $flow === 'simplefin' || (isset($account['firefly_iii_accounts']['assets']) && count($account['firefly_iii_accounts']['assets']) > 0) || (isset($account['firefly_iii_accounts']['liabilities']) && count($account['firefly_iii_accounts']['liabilities']) > 0) )
-                <x-firefly-iii-account-generic :account="$account"  :configuration="$configuration"/>
+                <x-firefly-iii-account-generic :flow="$flow" :account="$account"  :configuration="$configuration"/>
                 <x-create-account-widget :account="$account" :configuration="$configuration" :currencies="$currencies ?? []"/>
             @endif
         </div>
