@@ -106,6 +106,9 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Now in %s', __METHOD__));
         Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
 
+        // Step 0: configuration validation.
+        $this->validateAccounts();
+
         // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
 
@@ -355,6 +358,20 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeErrors(1);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function validateAccounts(): void
+    {
+        Log::debug('Validating accounts in configuration.');
+        $accounts = $this->configuration->getAccounts();
+        foreach($accounts as $key => $accountId) {
+            if(0 === (int)$accountId) {
+                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.',$key, $accountId));
+            }
         }
     }
 }
