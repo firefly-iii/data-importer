@@ -371,9 +371,9 @@ class RoutineManager implements RoutineManagerInterface
     {
         Log::debug('Validating accounts in configuration.');
         $accounts = $this->configuration->getAccounts();
-        foreach($accounts as $key => $accountId) {
-            if(0 === (int)$accountId) {
-                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.',$key, $accountId));
+        foreach ($accounts as $key => $accountId) {
+            if (0 === (int)$accountId) {
+                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
             }
         }
     }
