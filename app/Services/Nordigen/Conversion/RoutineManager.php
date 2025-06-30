@@ -83,10 +83,16 @@ class RoutineManager implements RoutineManagerInterface
         return $this->transactionProcessor->getAccounts();
     }
 
+    /**
+     * @throws ImporterErrorException
+     */
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
         $this->configuration = $configuration;
+
+        // Step 0: configuration validation.
+        $this->validateAccounts();
 
         // share config
         $this->transactionProcessor->setConfiguration($configuration);
@@ -105,9 +111,6 @@ class RoutineManager implements RoutineManagerInterface
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
         Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
-
-        // Step 0: configuration validation.
-        $this->validateAccounts();
 
         // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
