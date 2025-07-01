@@ -98,6 +98,7 @@ class ConfigurationController extends Controller
         }
 
         // collect Firefly III accounts
+        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
         $fireflyIIIaccounts = $this->getFireflyIIIAccounts();
         // possibilities for duplicate detection (unique columns)
 

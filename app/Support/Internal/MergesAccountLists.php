@@ -53,26 +53,39 @@ trait MergesAccountLists
             $currency                      = $account->currencyCode;
             $entry                         = [
                 'import_account' => $account,
+                'firefly_iii_accounts' => [
+                    Constants::ASSET_ACCOUNTS => [],
+                    Constants::LIABILITIES    => [],
+                ],
             ];
 
             $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
             $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
-
-            if (1 === count($filteredByNumber)) {
-                Log::debug(sprintf('Generic account ("%s", "%s") has a single FF3 counter part (#%d, "%s")', $iban, $number, $filteredByNumber[0]->id, $filteredByNumber[0]->name));
-                $entry['firefly_iii_accounts'] = array_unique(array_merge($filteredByNumber, $filteredByCurrency), SORT_REGULAR);
-                $return[]                      = $entry;
-
-                continue;
+            Log::debug('Filtered by number', $filteredByNumber);
+            Log::debug('Filtered by currency', $filteredByCurrency);
+            $count = 0;
+            foreach([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
+                if (1 === count($filteredByNumber[$key])) {
+                    Log::debug(sprintf('Generic account ("%s", "%s") has a single FF3 %s counter part (#%d, "%s")', $iban, $number, $key, $filteredByNumber[$key][0]->id, $filteredByNumber[$key][0]->name));
+                    $entry['firefly_iii_accounts'][$key] = array_unique(array_merge(
+                        $filteredByNumber[$key],
+                        $filteredByCurrency[$key]), SORT_REGULAR);
+                    $return[]                      = $entry;
+                    $count++;
+                    continue 2;
+                }
             }
-            Log::debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', count($filteredByNumber), $iban));
 
-            if (count($filteredByCurrency) > 0) {
-                Log::debug(sprintf('Generic account ("%s") has %d Firefly III counter part(s) with the same currency %s.', $account->name, count($filteredByCurrency), $currency));
-                $entry['firefly_iii_accounts'] = $filteredByCurrency;
-                $return[]                      = $entry;
+            Log::debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', $count, $iban));
+            unset($count);
 
-                continue;
+            foreach([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
+                if (count($filteredByCurrency[$key]) > 0) {
+                    Log::debug(sprintf('Generic account ("%s") has %d Firefly III %s counter part(s) with the same currency %s.', $account->name, $key, count($filteredByCurrency), $currency));
+                    $entry['firefly_iii_accounts'][$key] = $filteredByCurrency[$key];
+                    $return[]                      = $entry;
+                    continue 2;
+                }
             }
             Log::debug('No special filtering on the Firefly III account list.');
             // remove array_merge because SimpleFIN does not do this so it broke all the other importer routines.
@@ -83,21 +96,26 @@ trait MergesAccountLists
         return $return;
     }
 
-    protected function filterByAccountNumber(array $firefly, string $iban, string $number): array
+    protected function filterByAccountNumber(array $fireflyIII, string $iban, string $number): array
     {
         Log::debug(sprintf('Now filtering Firefly III accounts by IBAN "%s" or number "%s".', $iban, $number));
         // FIXME this check should also check the number of the account.
         if ('' === $iban) {
-            return [];
+            return [
+            Constants::ASSET_ACCOUNTS => [],
+            Constants::LIABILITIES    => [],
+            ];
         }
-        $result = [];
-        // TODO check if this the correct merge type.
-        $all    = array_merge($firefly[Constants::ASSET_ACCOUNTS] ?? [], $firefly[Constants::LIABILITIES] ?? []);
+        $result = [
+            Constants::ASSET_ACCOUNTS => [],
+            Constants::LIABILITIES    => [],
+        ];
 
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
-                $result[] = $account;
+        foreach($fireflyIII as $key => $accounts) {
+            foreach ($accounts as $account) {
+                if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
+                    $result[$key][] = $account;
+                }
             }
         }
 
@@ -107,15 +125,21 @@ trait MergesAccountLists
     protected function filterByCurrency(array $fireflyIII, string $currency): array
     {
         if ('' === $currency) {
-            return [];
+            return [
+                Constants::ASSET_ACCOUNTS => [],
+                Constants::LIABILITIES    => [],
+            ];
         }
-        $result = [];
-        $all    = array_merge($fireflyIII[Constants::ASSET_ACCOUNTS] ?? [], $fireflyIII[Constants::LIABILITIES] ?? []);
+        $result = [
+            Constants::ASSET_ACCOUNTS => [],
+            Constants::LIABILITIES    => [],
+        ];
 
-        /** @var Account $account */
-        foreach ($all as $account) {
-            if ($currency === $account->currencyCode) {
-                $result[] = $account;
+        foreach($fireflyIII as $key => $accounts) {
+            foreach ($accounts as $account) {
+                if ($currency === $account->currencyCode) {
+                    $result[$key][] = $account;
+                }
             }
         }
 
