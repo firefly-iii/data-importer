@@ -84,7 +84,7 @@ class IndexController extends Controller
         Log::debug('IndexController authentication detection', [
             'client_id'           => $clientId,
             'url'                 => $url,
-            'access_token_config' => $accessTokenConfig,
+            'access_token_config' => substr($accessTokenConfig, 0, 25).'...',
             'access_token_empty'  => '' === $accessTokenConfig,
         ]);
 

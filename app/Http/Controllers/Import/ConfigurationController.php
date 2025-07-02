@@ -98,8 +98,8 @@ class ConfigurationController extends Controller
         }
 
         // collect Firefly III accounts
+        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
         $fireflyIIIaccounts = $this->getFireflyIIIAccounts();
-
         // possibilities for duplicate detection (unique columns)
 
         // also get the nordigen / spectre accounts
@@ -146,8 +146,7 @@ class ConfigurationController extends Controller
             $fileType = $detector->detectContentTypeFromContent($content);
             $configuration->setContentType($fileType);
         }
-
-        // Get currency data for SimpleFIN account creation widget
+        // Get currency data for account creation widget
         $currencies         = $this->getCurrencies();
 
         return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));

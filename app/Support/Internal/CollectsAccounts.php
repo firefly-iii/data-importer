@@ -58,7 +58,6 @@ trait CollectsAccounts
             Constants::LIABILITIES    => [],
         ];
         $url      = null;
-        $token    = null;
 
         try {
             $url               = SecretManager::getBaseUrl();
@@ -140,9 +139,11 @@ trait CollectsAccounts
         Log::debug(sprintf('Now in %s', __METHOD__));
         $requisitions = $configuration->getNordigenRequisitions();
         $identifier   = array_shift($requisitions);
+        $inCache      = Cache::has($identifier) && config('importer.use_cache');
+        $inCache      = false;
 
         // if cached, return it.
-        if (Cache::has($identifier) && config('importer.use_cache')) {
+        if ($inCache) {
             $result = Cache::get($identifier);
             $return = [];
             foreach ($result as $arr) {

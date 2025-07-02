@@ -43,7 +43,7 @@
             @if('' !== $account['import_account']->iban) title="IBAN: {{ $account['import_account']->iban }}" @endif
         >
             <div class="d-flex align-items-center mb-1">
-                <span class="fw-bold fs-6">{{ $account['import_account']->name ?? 'Unnamed SimpleFIN Account' }}</span>
+                <span class="fw-bold fs-6">{{ $account['import_account']->name ?? 'Unnamed account' }}</span>
             </div>
             @if(isset($account['import_account']->org) && is_array($account['import_account']->org) && !empty($account['import_account']->org['name']))
                 <div class="text-muted small">
@@ -87,6 +87,7 @@
             @endif
         </div>
 
+        {{-- Display 'mapped_to' if available --}}
         {{-- Display 'extra' fields if any --}}
         @php $extraData = (array)($account['import_account']->extra ?? []); @endphp
         @if(count($extraData) > 0)

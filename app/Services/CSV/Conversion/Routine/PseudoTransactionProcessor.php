@@ -35,6 +35,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrencyRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -84,7 +85,7 @@ class PseudoTransactionProcessor
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
 
-            // @var GetAccountResponse $result
+            /** @var GetAccountResponse $result */
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {

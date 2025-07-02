@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.1 - 2025-07-02
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Changed
+- For GoCardless imports: opposing account names and other reference data is no longer added as tags, but as text in the notes. This may lead to duplicates.
+- GoCardless: better handling of rate limits.
+
+### Fixed
+- [Issue 10508](https://github.com/firefly-iii/firefly-iii/issues/10508) (Firefly Version 1.7.0 uses SimpleFIN for GoCardless and crashes when importing) reported by @L3tum
+- Improved parsing of dates.
+
 ## v1.7.0 - 2025-06-26
 
 ### Added

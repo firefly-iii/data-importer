@@ -83,10 +83,16 @@ class RoutineManager implements RoutineManagerInterface
         return $this->transactionProcessor->getAccounts();
     }
 
+    /**
+     * @throws ImporterErrorException
+     */
     public function setConfiguration(Configuration $configuration): void
     {
         // save config
         $this->configuration = $configuration;
+
+        // Step 0: configuration validation.
+        $this->validateAccounts();
 
         // share config
         $this->transactionProcessor->setConfiguration($configuration);
@@ -355,6 +361,20 @@ class RoutineManager implements RoutineManagerInterface
             $this->mergeErrors(1);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    private function validateAccounts(): void
+    {
+        Log::debug('Validating accounts in configuration.');
+        $accounts = $this->configuration->getAccounts();
+        foreach ($accounts as $key => $accountId) {
+            if (0 === (int)$accountId) {
+                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+            }
         }
     }
 }

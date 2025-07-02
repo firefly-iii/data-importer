@@ -207,6 +207,10 @@ class AccountInformationCollector
             Log::debug('Set new IBAN from basic details.');
             $account->setIban($array['iban']);
         }
+        if (array_key_exists('owner_name', $array) && '' !== $array['owner_name'] && '' === $account->getOwnerName()) {
+            Log::debug('Set new owner name from basic details.');
+            $account->setOwnerName($array['owner_name']);
+        }
 
         return $account;
     }

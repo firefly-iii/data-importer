@@ -34,7 +34,7 @@
 
 The data importer does not connect to your bank directly. Instead, it uses [GoCardless](https://gocardless.com/) and [SaltEdge](https://www.saltedge.com/products/spectre/countries) to connect to over 6000 banks worldwide. These services are free for Firefly III users, but require registration. Keep in mind these services have their own privacy and data usage policies.
 
-The data importer can import CSV files you've downloaded from your bank.
+The data importer can also connect to your bank using `SimpleFIN`, and it can import CSV files you've downloaded from your bank.
 
 You can run the data importer once, for a bulk import. You can also run it regularly to keep up with new transactions.
 

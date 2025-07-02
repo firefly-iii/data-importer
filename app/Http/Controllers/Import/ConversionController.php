@@ -33,6 +33,7 @@ use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
+use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
@@ -117,7 +118,8 @@ class ConversionController extends Controller
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
-        // @var RoutineManagerInterface $routine
+
+        /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
@@ -247,7 +249,8 @@ class ConversionController extends Controller
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
-        // @var RoutineManagerInterface $routine
+
+        /** @var RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
