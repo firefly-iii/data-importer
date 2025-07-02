@@ -6,26 +6,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
 
-### Added
-- Initial release.
-
 ### Changed
 - For GoCardless imports: opposing account names and other reference data is no longer added as tags, but as text in the notes. This may lead to duplicates.
 - GoCardless: better handling of rate limits.
 
-### Deprecated
-- Initial release.
-
-### Removed
-- Initial release.
-
 ### Fixed
 - #10508
 - Improved parsing of dates.
-
-### Security
-- Initial release.
-
 
 ## v1.7.0 - 2025-06-26
 
