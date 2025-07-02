@@ -62,10 +62,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
-            $originalId                   = (string) str_replace('_', ' ', $encodedId);
+            $originalId                   = (string) str_replace('_', ' ', (string) $encodedId);
             $decodedDoImport[$originalId] = $value;
             Log::debug('Decoded do_import', [
-                'encoded' => $encodedId,
+                'encoded' => (string) $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
             ]);
@@ -73,10 +73,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode accounts array keys
         foreach ($accounts as $encodedId => $value) {
-            $originalId                   = (string) str_replace('_', ' ', $encodedId);
+            $originalId                   = (string) str_replace('_', ' ', (string) $encodedId);
             $decodedAccounts[$originalId] = $value;
             Log::debug('Decoded accounts', [
-                'encoded' => $encodedId,
+                'encoded' => (string) $encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
             ]);
@@ -84,10 +84,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode new_account array keys
         foreach ($newAccount as $encodedId => $accountData) {
-            $originalId                     = (string) str_replace('_', ' ', $encodedId);
+            $originalId                     = (string) str_replace('_', ' ', (string) $encodedId);
             $decodedNewAccount[$originalId] = $accountData;
             Log::debug('Decoded new_account', [
-                'encoded' => $encodedId,
+                'encoded' => (string) $encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
             ]);
@@ -99,16 +99,10 @@ class ConfigurationPostRequest extends Request
             'date'                          => $this->convertToString('date'),
             'default_account'               => $this->convertToInteger('default_account'),
             'rules'                         => $this->convertBoolean($this->get('rules')),
-            'ignore_duplicate_lines'        => $this->convertBoolean(
-                $this->get('ignore_duplicate_lines')
-            ),
-            'ignore_duplicate_transactions' => $this->convertBoolean(
-                $this->get('ignore_duplicate_transactions')
-            ),
+            'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
+            'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
-            'add_import_tag'                => $this->convertBoolean(
-                $this->get('add_import_tag')
-            ),
+            'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
             'specifics'                     => [],
             'roles'                         => [],
             'mapping'                       => [],
@@ -118,31 +112,20 @@ class ConfigurationPostRequest extends Request
             'custom_tag'                    => $this->convertToString('custom_tag'),
 
             // duplicate detection:
-            'duplicate_detection_method'    => $this->convertToString(
-                'duplicate_detection_method'
-            ),
-            'unique_column_index'           => $this->convertToInteger(
-                'unique_column_index'
-            ),
-            'unique_column_type'            => $this->convertToString(
-                'unique_column_type'
-            ),
+            'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),
+            'unique_column_index'           => $this->convertToInteger('unique_column_index'),
+            'unique_column_type'            => $this->convertToString('unique_column_type'),
 
             // spectre values:
             'connection'                    => $this->convertToString('connection'),
             'identifier'                    => $this->convertToString('identifier'),
-            'ignore_spectre_categories'     => $this->convertBoolean(
-                $this->get('ignore_spectre_categories')
-            ),
+            'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
 
             // nordigen:
             'nordigen_country'              => $this->convertToString('nordigen_country'),
             'nordigen_bank'                 => $this->convertToString('nordigen_bank'),
             'nordigen_max_days'             => $this->convertToString('nordigen_max_days'),
-            'nordigen_requisitions'         => json_decode(
-                $this->convertToString('nordigen_requisitions'),
-                true
-            ) ?? [],
+            'nordigen_requisitions'         => json_decode($this->convertToString('nordigen_requisitions'), true) ?? [],
 
             // nordigen + spectre - with decoded account IDs
             'do_import'                     => $decodedDoImport,
@@ -159,33 +142,20 @@ class ConfigurationPostRequest extends Request
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 
             // camt
-            'grouped_transaction_handling'  => $this->convertToString(
-                'grouped_transaction_handling'
-            ),
-            'use_entire_opposing_address'   => $this->convertBoolean(
-                $this->get('use_entire_opposing_address')
-            ),
+            'grouped_transaction_handling'  => $this->convertToString('grouped_transaction_handling'),
+            'use_entire_opposing_address'   => $this->convertBoolean($this->get('use_entire_opposing_address')),
         ];
     }
 
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
-        $columnOptions = implode(
-            ',',
-            array_keys(config('csv.unique_column_options'))
-        );
+        $columnOptions = implode(',', array_keys(config('csv.unique_column_options')));
         if ('nordigen' === $flow) {
-            $columnOptions = implode(
-                ',',
-                array_keys(config('nordigen.unique_column_options'))
-            );
+            $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
         }
         if ('simplefin' === $flow) {
-            $columnOptions = implode(
-                ',',
-                array_keys(config('simplefin.unique_column_options'))
-            );
+            $columnOptions = implode(',', array_keys(config('simplefin.unique_column_options')));
         }
 
         return [
@@ -234,13 +204,7 @@ class ConfigurationPostRequest extends Request
             $data        = $validator->getData();
             $doImport    = $data['do_import'] ?? [];
             if (0 === count($doImport) && 'file' !== $flow) {
-                $validator
-                    ->errors()
-                    ->add(
-                        'do_import',
-                        'You must select at least one account to import from.'
-                    )
-                ;
+                $validator->errors()->add('do_import', 'You must select at least one account to import from.');
             }
 
             // validate new account creation data - both accounts and new_account now use encoded field names
@@ -260,38 +224,20 @@ class ConfigurationPostRequest extends Request
                         [
                             'encodedAccountId' => $encodedAccountId,
                             'selectedValue'    => $selectedValue,
-                            'hasNameField'     => isset(
-                                $newAccounts[$encodedAccountId]['name']
-                            ),
-                            'hasCreateField'   => isset(
-                                $newAccounts[$encodedAccountId]['create']
-                            ),
-                            'nameValue'        => $newAccounts[$encodedAccountId]['name']
-                                ?? 'NOT_SET',
-                            'createValue'      => $newAccounts[$encodedAccountId]['create']
-                                ?? 'NOT_SET',
+                            'hasNameField'     => isset($newAccounts[$encodedAccountId]['name']),
+                            'hasCreateField'   => isset($newAccounts[$encodedAccountId]['create']),
+                            'nameValue'        => $newAccounts[$encodedAccountId]['name'] ?? 'NOT_SET',
+                            'createValue'      => $newAccounts[$encodedAccountId]['create'] ?? 'NOT_SET',
                         ]
                     );
 
                     // Validate that account name is provided and create flag is set
                     // Both arrays now use encoded keys, so they should match directly
-                    if (
-                        !isset($newAccounts[$encodedAccountId]['name'])
-                        || '' === trim((string) $newAccounts[$encodedAccountId]['name'])
-                    ) {
+                    if (!isset($newAccounts[$encodedAccountId]['name']) || '' === trim((string) $newAccounts[$encodedAccountId]['name'])) {
                         $validator->errors()->add("new_account.{$encodedAccountId}.name", 'Account name is required when creating a new account.');
                     }
-                    if (
-                        !isset($newAccounts[$encodedAccountId]['create'])
-                        || '1' !== $newAccounts[$encodedAccountId]['create']
-                    ) {
-                        $validator
-                            ->errors()
-                            ->add(
-                                "new_account.{$encodedAccountId}.create",
-                                'Create flag must be set for new account creation.'
-                            )
-                        ;
+                    if (!isset($newAccounts[$encodedAccountId]['create']) || '1' !== $newAccounts[$encodedAccountId]['create']) {
+                        $validator->errors()->add("new_account.{$encodedAccountId}.create", 'Create flag must be set for new account creation.');
                     }
                 }
             }
