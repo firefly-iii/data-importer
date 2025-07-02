@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## v1.7.2 - 2025-07-03
 
 ### Fixed
-- #10541
+- [Issue 10541](https://github.com/firefly-iii/firefly-iii/issues/10541) (Type error in str_replace function, breaks GoCardless import during configuration) reported by @alexmaisel
 
 ## v1.7.1 - 2025-07-02
 
