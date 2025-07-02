@@ -47,8 +47,8 @@ class ConfigurationPostRequest extends Request
         // Debug: Log raw form data before processing
         Log::debug('ConfigurationPostRequest raw form data', [
             'do_import_raw'     => $this->get('do_import') ?? [],
-            'accounts_raw'     => $this->get('accounts') ?? [],
-            'new_account_raw' => $this->get('new_account') ?? [],
+            'accounts_raw'      => $this->get('accounts') ?? [],
+            'new_account_raw'   => $this->get('new_account') ?? [],
         ]);
 
         // Decode underscore-encoded account IDs back to original IDs with spaces
