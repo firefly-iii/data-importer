@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - GoCardless: better handling of rate limits.
 
 ### Fixed
-- #10508
+- [Issue 10508](https://github.com/firefly-iii/firefly-iii/issues/10508) (Firefly Version 1.7.0 uses SimpleFIN for GoCardless and crashes when importing) reported by @L3tum
 - Improved parsing of dates.
 
 ## v1.7.0 - 2025-06-26
