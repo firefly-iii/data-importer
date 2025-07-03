@@ -111,14 +111,13 @@ class UploadController extends Controller
         Log::debug('UploadController::upload() INVOKED'); // Unique entry marker
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug('UploadController::upload() - Request All:', $request->all());
-        $importedFile   = $request->file('importable_file');
-        $configFile     = $request->file('config_file');
-        $simpleFINtoken = $request->get('simplefin_token');
-        $flow           = $request->cookie(Constants::FLOW_COOKIE);
-        $errors         = new MessageBag();
+        $importedFile = $request->file('importable_file');
+        $configFile   = $request->file('config_file');
+        $flow         = $request->cookie(Constants::FLOW_COOKIE);
+        $errors       = new MessageBag();
 
         // process uploaded file (if present)
-        $errors         = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors       = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -126,7 +125,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors         = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        $errors       = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors);

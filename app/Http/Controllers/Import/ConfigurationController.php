@@ -81,7 +81,6 @@ class ConfigurationController extends Controller
         $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
         $configuration      = $this->restoreConfiguration();
 
-
         // if config says to skip it, skip it:
         $overruleSkip       = 'true' === $request->get('overruleskip');
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {
@@ -311,19 +310,25 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.v
-        $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
+        $fromRequest         = $request->getAll();
+        $configuration       = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
         // TODO are all fields actually in the config?
 
         // loop accounts:
+        $accounts            = [];
+        $allNewAccounts      = $fromRequest['new_account'] ?? [];
+        $toCreateNewAccounts = [];
 
-        $accounts      = [];
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accountValue          = (int)$fromRequest['accounts'][$identifier];
                 $accounts[$identifier] = $accountValue;
+            }
+            if (array_key_exists($identifier, $allNewAccounts)) {
+                // this is a new account to create.
+                $toCreateNewAccounts[$identifier] = $allNewAccounts[$identifier];
             }
             if (!array_key_exists($identifier, $fromRequest['accounts'])) {
                 Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
@@ -331,10 +336,7 @@ class ConfigurationController extends Controller
         }
 
         $configuration->setAccounts($accounts);
-
-        // Store new account creation data
-        $newAccounts   = $fromRequest['new_account'] ?? [];
-        $configuration->setNewAccounts($newAccounts);
+        $configuration->setNewAccounts($toCreateNewAccounts);
 
         // Store do_import selections in session for validation
         session()->put('do_import', $fromRequest['do_import'] ?? []);
@@ -369,7 +371,7 @@ class ConfigurationController extends Controller
 
         // Map data option is now user-selectable for SimpleFIN via checkbox
 
-        $json          = '{}';
+        $json                = '{}';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
