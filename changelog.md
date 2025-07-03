@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.3 - 2025-07-04
+
+### Fixed
+- Restore duplicate detection options
+- SimpleFIN import will not always try to create accounts
+
 ## v1.7.2 - 2025-07-03
 
 ### Fixed
