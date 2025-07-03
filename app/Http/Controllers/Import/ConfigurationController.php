@@ -310,15 +310,15 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.v
-        $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
+        $fromRequest         = $request->getAll();
+        $configuration       = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
         // TODO are all fields actually in the config?
 
         // loop accounts:
-        $accounts      = [];
-        $allNewAccounts   = $fromRequest['new_account'] ?? [];
+        $accounts            = [];
+        $allNewAccounts      = $fromRequest['new_account'] ?? [];
         $toCreateNewAccounts = [];
 
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
@@ -371,7 +371,7 @@ class ConfigurationController extends Controller
 
         // Map data option is now user-selectable for SimpleFIN via checkbox
 
-        $json          = '{}';
+        $json                = '{}';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
