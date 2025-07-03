@@ -318,12 +318,18 @@ class ConfigurationController extends Controller
         // TODO are all fields actually in the config?
 
         // loop accounts:
-
         $accounts      = [];
+        $allNewAccounts   = $fromRequest['new_account'] ?? [];
+        $toCreateNewAccounts = [];
+
         foreach (array_keys($fromRequest['do_import']) as $identifier) {
             if (array_key_exists($identifier, $fromRequest['accounts'])) {
                 $accountValue          = (int)$fromRequest['accounts'][$identifier];
                 $accounts[$identifier] = $accountValue;
+            }
+            if (array_key_exists($identifier, $allNewAccounts)) {
+                // this is a new account to create.
+                $toCreateNewAccounts[$identifier] = $allNewAccounts[$identifier];
             }
             if (!array_key_exists($identifier, $fromRequest['accounts'])) {
                 Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
@@ -331,10 +337,7 @@ class ConfigurationController extends Controller
         }
 
         $configuration->setAccounts($accounts);
-
-        // Store new account creation data
-        $newAccounts   = $fromRequest['new_account'] ?? [];
-        $configuration->setNewAccounts($newAccounts);
+        $configuration->setNewAccounts($toCreateNewAccounts);
 
         // Store do_import selections in session for validation
         session()->put('do_import', $fromRequest['do_import'] ?? []);

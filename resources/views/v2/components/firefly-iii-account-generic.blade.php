@@ -69,9 +69,12 @@
            name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][create]"
            value="0">
 
+    <!-- #10550 do not set do_import to true for ALL accounts. -->
+    <!--
     <input type="hidden"
            name="do_import[{{ str_replace(' ', '_', $account['import_account']->id) }}]"
            value="1">
+   -->
 
     <script>
         function handleAccountSelection(accountId, selectedValue) {
