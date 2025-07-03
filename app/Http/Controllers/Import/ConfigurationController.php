@@ -81,7 +81,6 @@ class ConfigurationController extends Controller
         $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
         $configuration      = $this->restoreConfiguration();
 
-
         // if config says to skip it, skip it:
         $overruleSkip       = 'true' === $request->get('overruleskip');
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {

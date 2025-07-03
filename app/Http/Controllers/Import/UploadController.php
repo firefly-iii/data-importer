@@ -113,7 +113,6 @@ class UploadController extends Controller
         Log::debug('UploadController::upload() - Request All:', $request->all());
         $importedFile   = $request->file('importable_file');
         $configFile     = $request->file('config_file');
-        $simpleFINtoken = $request->get('simplefin_token');
         $flow           = $request->cookie(Constants::FLOW_COOKIE);
         $errors         = new MessageBag();
 
