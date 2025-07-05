@@ -27,7 +27,6 @@ namespace App\Services\SimpleFIN\Request;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Services\Session\Constants;
 use App\Services\Shared\Response\ResponseInterface as SharedResponseInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -43,10 +42,10 @@ abstract class SimpleFINRequest
 {
     private string $apiUrl;
     private string $token;
-    private array $parameters = [];
+    private array $parameters   = [];
     private float $timeOut;
 
-    private string $bridgeUrl = '';
+    private string $bridgeUrl   = '';
     private string $accessToken = '';
 
     /**
@@ -170,6 +169,4 @@ abstract class SimpleFINRequest
     {
         $this->accessToken = $accessToken;
     }
-
-
 }
