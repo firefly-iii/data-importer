@@ -76,6 +76,7 @@ class Configuration
 
     // simplefin configuration
     private bool $pendingTransactions;
+    private string $accessToken;
 
     // date range settings
     private array  $mapping;
@@ -154,6 +155,7 @@ class Configuration
 
         // simplefin configuration
         $this->pendingTransactions         = true;
+        $this->accessToken                  = '';
 
         // double transaction detection:
         $this->duplicateDetectionMethod    = 'classic';
@@ -407,6 +409,7 @@ class Configuration
 
         // simplefin configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
+        $object->accessToken = $array['access_token'] ?? '';
 
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
@@ -495,6 +498,7 @@ class Configuration
 
         // simplefin configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
+        $object->accessToken = $array['access_token'] ?? '';
 
         // flow
         $object->flow                        = $array['flow'] ?? 'file';
@@ -858,6 +862,7 @@ class Configuration
 
             // simplefin configuration
             'pending_transactions'         => $this->pendingTransactions,
+            'access_token'                 => $this->accessToken,
 
             // settings for spectre + nordigen
             'accounts'                     => $this->accounts,
@@ -954,4 +959,16 @@ class Configuration
 
         return null;
     }
+
+    public function getAccessToken(): string
+    {
+        return $this->accessToken;
+    }
+
+    public function setAccessToken(string $accessToken): void
+    {
+        $this->accessToken = $accessToken;
+    }
+
+
 }

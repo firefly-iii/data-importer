@@ -30,9 +30,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\SimpleFINService;
 use App\Services\Storage\StorageService;
+use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -52,6 +54,7 @@ class UploadController extends Controller
 {
     private string $configFileName;
     private string $contentType;
+    use RestoresConfiguration;
 
     /**
      * UploadController constructor.
@@ -108,9 +111,7 @@ class UploadController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::debug('UploadController::upload() INVOKED'); // Unique entry marker
         Log::debug(sprintf('Now at %s', __METHOD__));
-        Log::debug('UploadController::upload() - Request All:', $request->all());
         $importedFile = $request->file('importable_file');
         $configFile   = $request->file('config_file');
         $flow         = $request->cookie(Constants::FLOW_COOKIE);
@@ -128,11 +129,15 @@ class UploadController extends Controller
         $errors       = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
-            return redirect(route('003-upload.index'))->withErrors($errors);
+            return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
         }
 
+        // at this point its possible there is a config file, but there may not be.
+        $configuration = $this->restoreConfiguration();
+        $configuration->setFlow($flow); // at least set the flow.
+
         if ('simplefin' === $flow) {
-            return $this->handleSimpleFINFlow($request, new MessageBag());
+            return $this->handleSimpleFINFlow($request, new MessageBag(), $configuration);
         }
 
         if ('nordigen' === $flow) {
@@ -295,38 +300,35 @@ class UploadController extends Controller
     /**
      * Handle SimpleFIN flow integration
      */
-    private function handleSimpleFINFlow(Request $request, MessageBag $errors): RedirectResponse
+    private function handleSimpleFINFlow(Request $request, MessageBag $errors, Configuration $configuration): RedirectResponse
     {
         Log::debug('UploadController::handleSimpleFINFlow() INVOKED'); // Unique entry marker
-        Log::debug('Processing SimpleFIN flow in unified controller');
-        Log::debug('handleSimpleFINFlow() - Request All:', $request->all());
-        Log::debug('handleSimpleFINFlow() - Raw use_demo input:', [$request->input('use_demo')]);
 
         $simpleFINToken = (string)$request->get('simplefin_token');
         $bridgeUrl      = (string)$request->get('simplefin_bridge_url');
         $isDemo         = $request->boolean('use_demo');
+        $accessToken = $configuration->getAccessToken();
         Log::debug('handleSimpleFINFlow() - Evaluated $isDemo:', [$isDemo]);
         Log::debug('handleSimpleFINFlow() - Bridge URL:', [$bridgeUrl]);
 
-
         if ($isDemo) {
-            $simpleFINToken = (string)config('importer.simplefin.demo_token');
-            $bridgeUrl      = 'https://sfin.bridge.which.is'; // Demo mode uses known working Origin
+            $simpleFINToken = (string)config('simplefin.demo_token');
+            $bridgeUrl      = (string)config('simplefin.demo_url');
         }
         if (!$isDemo) {
-            if ('' === $simpleFINToken) {
+            if ('' === $simpleFINToken && '' === $accessToken) {
                 $errors->add('simplefin_token', 'SimpleFIN token is required.');
             }
             if ('' === $bridgeUrl) {
-                $errors->add('simplefin_bridge_url', 'Bridge URL is required for CORS Origin header.');
+                //$errors->add('simplefin_bridge_url', 'Bridge URL is required for CORS Origin header.');
             }
-            if ('' !== $bridgeUrl && false === filter_var($bridgeUrl, FILTER_VALIDATE_URL)) {
+            if ('' !== $bridgeUrl && false === filter_var($bridgeUrl, FILTER_VALIDATE_URL) && '' === $accessToken) {
                 $errors->add('simplefin_bridge_url', 'Bridge URL must be a valid URL.');
             }
         }
 
         if ($errors->count() > 0) {
-            return redirect(route('003-upload.index'))->withErrors($errors);
+            return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
         }
 
         // Store bridge URL in session BEFORE SimpleFIN service call (service needs it for Origin header)
@@ -335,8 +337,15 @@ class UploadController extends Controller
         try {
             $simpleFINService = app(SimpleFINService::class);
             // Use demo URL for demo mode, otherwise use empty string for claim URL token processing
-            $apiUrl           = $isDemo ? config('importer.simplefin.demo_url') : '';
-            $accountsData     = $simpleFINService->fetchAccountsAndInitialData($simpleFINToken, $apiUrl);
+            $apiUrl           = $isDemo ? config('simplefin.demo_url') : '';
+            $accountsData     = $simpleFINService->fetchAccountsAndInitialData($simpleFINToken, $apiUrl, $configuration);
+            $configuration->setAccessToken($simpleFINService->getAccessToken());
+
+            // save configuration in session and on disk: TODO needs a trait.
+            Log::debug('Save config to disk after setting access token.');
+            session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
             // Store SimpleFIN data in session for configuration step
             session()->put(Constants::SIMPLEFIN_TOKEN, $simpleFINToken);
@@ -351,7 +360,7 @@ class UploadController extends Controller
             Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
             $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
 
-            return redirect(route('003-upload.index'))->withErrors($errors);
+            return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
         }
     }
 }
