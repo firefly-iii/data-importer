@@ -155,7 +155,7 @@ class Configuration
 
         // simplefin configuration
         $this->pendingTransactions         = true;
-        $this->accessToken                  = '';
+        $this->accessToken                 = '';
 
         // double transaction detection:
         $this->duplicateDetectionMethod    = 'classic';
@@ -409,7 +409,7 @@ class Configuration
 
         // simplefin configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
-        $object->accessToken = $array['access_token'] ?? '';
+        $object->accessToken                 = $array['access_token'] ?? '';
 
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
@@ -498,7 +498,7 @@ class Configuration
 
         // simplefin configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
-        $object->accessToken = $array['access_token'] ?? '';
+        $object->accessToken                 = $array['access_token'] ?? '';
 
         // flow
         $object->flow                        = $array['flow'] ?? 'file';
@@ -969,6 +969,4 @@ class Configuration
     {
         $this->accessToken = $accessToken;
     }
-
-
 }
