@@ -44,9 +44,9 @@ use Exception;
 class SimpleFINService
 {
     private string $accessToken = '';
-    private string $accessUrl = '';
-    private string $bridgeUrl = '';
-    private string $setupToken = '';
+    private string $accessUrl   = '';
+    private string $bridgeUrl   = '';
+    private string $setupToken  = '';
     private Configuration $configuration;
 
     /**
@@ -55,8 +55,9 @@ class SimpleFINService
     public function exchangeSetupTokenForAccessToken(): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        if('' !== $this->accessToken) {
+        if ('' !== $this->accessToken) {
             Log::warning('Access token already set, skipping exchange.');
+
             return;
         }
         $isValid = $this->isBase64ClaimUrl($this->setupToken);
@@ -82,14 +83,14 @@ class SimpleFINService
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $this->accessToken));
 
-        $request      = new AccountsRequest();
+        $request    = new AccountsRequest();
         $request->setBridgeUrl($this->bridgeUrl);
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions
         // 2025-07-05 set date to the far future, because here we are not interested in any transactions.
-        $parameters   = [
+        $parameters = [
             'start-date' => 2073594480, // Sept 17, 2035 12:28 GMT+2
             'pending'    => 0,
         ];
@@ -99,7 +100,7 @@ class SimpleFINService
 
         try {
             $response = $request->get();
-        } catch(ImporterHttpException $e) {
+        } catch (ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
         }
 
@@ -107,7 +108,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
-        $accounts     = $response->getAccounts();
+        $accounts   = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -403,7 +404,4 @@ class SimpleFINService
     {
         $this->accessToken = $accessToken;
     }
-
-
-
 }

@@ -5,9 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## v1.7.4 - 2025-07-06
 
 ### Fixed
-- #10550
-- #10556
-- #10541
+- [Issue 10550](https://github.com/firefly-iii/firefly-iii/issues/10550) ([Importer] Issues with SimpleFIN Import) reported by @PacketThrowr
+- [Issue 10556](https://github.com/firefly-iii/firefly-iii/issues/10556) (Save the connection string for subsequent SimpleFIN imports) reported by @Gsyltc
+- [Issue 10541](https://github.com/firefly-iii/firefly-iii/issues/10541) (Type error in str_replace function, breaks GoCardless import during configuration) reported by @alexmaisel
 
 ## v1.7.3 - 2025-07-04
 
