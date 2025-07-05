@@ -44,6 +44,7 @@ use Exception;
 class SimpleFINService
 {
     private string $accessToken = '';
+
     /**
      * @throws ImporterHttpException
      * @throws ImporterErrorException
@@ -55,11 +56,11 @@ class SimpleFINService
         // Check if token is a base64-encoded claim URL
         $actualApiUrl = $apiUrl;
         $actualToken  = $token;
-        if('' !== $configuration->getAccessToken()) {
+        if ('' !== $configuration->getAccessToken()) {
             Log::debug('Already have access token from configuration, using that instead of provided token.');
             $actualApiUrl = $configuration->getAccessToken();
         }
-        if('' === $configuration->getAccessToken()) {
+        if ('' === $configuration->getAccessToken()) {
             Log::debug('Get new access token from given settings.');
             if ($this->isBase64ClaimUrl($token)) {
                 Log::debug('Token appears to be a base64-encoded claim URL, processing exchange');
@@ -91,8 +92,8 @@ class SimpleFINService
         $parameters   = [
             // 'start-date' => 946684800, // January 1, 2000 00:00:00 UTC
             'start-date' => 2073594480, // Sept 17, 2035 12:28 GMT+2
-            //'pending'    => ($configuration instanceof Configuration && $configuration->getPendingTransactions()) ? 1 : 0,
-            'pending'    => 0
+            // 'pending'    => ($configuration instanceof Configuration && $configuration->getPendingTransactions()) ? 1 : 0,
+            'pending'    => 0,
         ];
         $request->setParameters($parameters);
 
@@ -380,6 +381,4 @@ class SimpleFINService
     {
         return $this->accessToken;
     }
-
-
 }

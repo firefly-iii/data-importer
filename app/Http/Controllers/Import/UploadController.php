@@ -52,9 +52,9 @@ use Storage;
  */
 class UploadController extends Controller
 {
+    use RestoresConfiguration;
     private string $configFileName;
     private string $contentType;
-    use RestoresConfiguration;
 
     /**
      * UploadController constructor.
@@ -112,13 +112,13 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importedFile = $request->file('importable_file');
-        $configFile   = $request->file('config_file');
-        $flow         = $request->cookie(Constants::FLOW_COOKIE);
-        $errors       = new MessageBag();
+        $importedFile  = $request->file('importable_file');
+        $configFile    = $request->file('config_file');
+        $flow          = $request->cookie(Constants::FLOW_COOKIE);
+        $errors        = new MessageBag();
 
         // process uploaded file (if present)
-        $errors       = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors        = $this->processUploadedFile($flow, $errors, $importedFile);
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
@@ -126,7 +126,7 @@ class UploadController extends Controller
         }
 
         // process pre-selected file (if present):
-        $errors       = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        $errors        = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
 
         if ($errors->count() > 0) {
             return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
@@ -307,7 +307,7 @@ class UploadController extends Controller
         $simpleFINToken = (string)$request->get('simplefin_token');
         $bridgeUrl      = (string)$request->get('simplefin_bridge_url');
         $isDemo         = $request->boolean('use_demo');
-        $accessToken = $configuration->getAccessToken();
+        $accessToken    = $configuration->getAccessToken();
         Log::debug('handleSimpleFINFlow() - Evaluated $isDemo:', [$isDemo]);
         Log::debug('handleSimpleFINFlow() - Bridge URL:', [$bridgeUrl]);
 
@@ -320,7 +320,7 @@ class UploadController extends Controller
                 $errors->add('simplefin_token', 'SimpleFIN token is required.');
             }
             if ('' === $bridgeUrl) {
-                //$errors->add('simplefin_bridge_url', 'Bridge URL is required for CORS Origin header.');
+                // $errors->add('simplefin_bridge_url', 'Bridge URL is required for CORS Origin header.');
             }
             if ('' !== $bridgeUrl && false === filter_var($bridgeUrl, FILTER_VALIDATE_URL) && '' === $accessToken) {
                 $errors->add('simplefin_bridge_url', 'Bridge URL must be a valid URL.');
@@ -344,7 +344,7 @@ class UploadController extends Controller
             // save configuration in session and on disk: TODO needs a trait.
             Log::debug('Save config to disk after setting access token.');
             session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+            $configFileName   = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
             // Store SimpleFIN data in session for configuration step
