@@ -46,6 +46,9 @@ abstract class SimpleFINRequest
     private array $parameters = [];
     private float $timeOut;
 
+    private string $bridgeUrl = '';
+    private string $accessToken = '';
+
     /**
      * @throws ImporterHttpException
      */
@@ -74,31 +77,24 @@ abstract class SimpleFINRequest
 
     protected function authenticatedGet(string $endpoint): ResponseInterface
     {
-        Log::debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->apiUrl, $endpoint));
+        Log::debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->accessToken, $endpoint));
 
         $client  = new Client();
-        $fullUrl = sprintf('%s%s', $this->apiUrl, $endpoint);
+        $fullUrl = sprintf('%s%s', $this->accessToken, $endpoint);
 
-        $origin  = session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
         $options = [
             'timeout' => $this->timeOut,
             'headers' => [
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
-                'Origin'       => $origin,
+                'Origin'       => $this->bridgeUrl,
             ],
         ];
-
-        // Only add basic auth if userinfo is not already in the apiUrl
-        // and a token is provided. SimpleFIN typically uses userinfo in the Access URL.
-        if (in_array(str_contains($this->apiUrl, '@'), [0, false], true) && '' !== $this->token) {
-            $options['auth'] = [$this->token, ''];
-        }
-
 
         if (count($this->parameters) > 0) {
             $options['query'] = $this->parameters;
         }
+        Log::debug('Options', $options);
 
         try {
             $response = $client->get($fullUrl, $options);
@@ -164,4 +160,16 @@ abstract class SimpleFINRequest
     {
         return $this->timeOut;
     }
+
+    public function setBridgeUrl(string $bridgeUrl): void
+    {
+        $this->bridgeUrl = $bridgeUrl;
+    }
+
+    public function setAccessToken(string $accessToken): void
+    {
+        $this->accessToken = $accessToken;
+    }
+
+
 }
