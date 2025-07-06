@@ -54,10 +54,10 @@ class TransactionMapper
         // make a new transaction:
         $result        = [
             'group_title'                 => null,
-            'error_if_duplicate_hash'  => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [],
+            'error_if_duplicate_hash'     => $this->configuration->isIgnoreDuplicateTransactions(),
+            'transactions'                => [],
         ];
-        $splits        = $transaction [  'splits'] ?? 1;
+        $splits        = $transaction['splits'] ?? 1;
         $groupHandling = $this->configuration->getGroupedTransactionHandling();
         Log::debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; ++$i) {
