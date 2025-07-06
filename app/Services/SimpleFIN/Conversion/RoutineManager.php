@@ -54,10 +54,10 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier = null)
     {
-        $this->allErrors            = [];
-        $this->allWarnings          = [];
-        $this->allMessages          = [];
-        $this->allRateLimits        = [];
+        $this->allErrors        = [];
+        $this->allWarnings      = [];
+        $this->allMessages      = [];
+        $this->allRateLimits    = [];
 
         Log::debug('Constructed SimpleFIN RoutineManager');
 
@@ -94,7 +94,7 @@ class RoutineManager implements RoutineManagerInterface
         $token                    = (string)session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
         $bridgeUrl                = (string)session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation
         $allAccountsSimpleFINData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-        $accessToken = $this->configuration->getAccessToken();
+        $accessToken              = $this->configuration->getAccessToken();
 
         if ('' === $accessToken && ('' === $token || '' === $bridgeUrl || 0 === count($allAccountsSimpleFINData))) {
             Log::error(
@@ -193,7 +193,7 @@ class RoutineManager implements RoutineManagerInterface
 
             if (null === $currentSimpleFINAccountData) {
                 Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', ['simplefin_account_id_sought' => $simplefinAccountId]);
-                $allAccountsSimpleFINData = $this->simpleFINService->fetchAccounts();
+                $allAccountsSimpleFINData    = $this->simpleFINService->fetchAccounts();
                 $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
                 Log::debug('Done with downloading new data.');
                 // If the account data for this ID isn't found, we can't process its transactions.
@@ -241,8 +241,8 @@ class RoutineManager implements RoutineManagerInterface
                         // Wrap transaction in group structure expected by Firefly III
                         $transactionGroup             = [
                             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-                            'group_title' => null,
-                            'transactions' => [$transformedTransaction]];
+                            'group_title'             => null,
+                            'transactions'            => [$transformedTransaction]];
 
                         $transactions[]               = $transactionGroup;
                     } catch (ImporterErrorException $e) {
