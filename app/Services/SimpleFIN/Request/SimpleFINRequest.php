@@ -167,6 +167,7 @@ abstract class SimpleFINRequest
 
     public function setAccessToken(string $accessToken): void
     {
+        Log::debug(sprintf('Access token is now: %s', $accessToken));
         $this->accessToken = $accessToken;
     }
 }

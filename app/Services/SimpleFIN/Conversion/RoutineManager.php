@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
+use App\Services\Shared\Conversion\CombinedProgressInformation;
 use Carbon\Carbon;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
@@ -41,6 +42,7 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
+    use CombinedProgressInformation;
     private readonly AccountMapper          $accountMapper;
     private Configuration          $configuration;
     private readonly string                 $identifier;
@@ -52,6 +54,11 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(?string $identifier = null)
     {
+        $this->allErrors        = [];
+        $this->allWarnings      = [];
+        $this->allMessages      = [];
+        $this->allRateLimits    = [];
+
         Log::debug('Constructed SimpleFIN RoutineManager');
 
         $this->identifier       = $identifier ?? Str::random(16);
@@ -74,6 +81,7 @@ class RoutineManager implements RoutineManagerInterface
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
+        $this->simpleFINService->setConfiguration($configuration);
     }
 
     /**
@@ -86,11 +94,13 @@ class RoutineManager implements RoutineManagerInterface
         $token                    = (string)session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
         $bridgeUrl                = (string)session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation
         $allAccountsSimpleFINData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
+        $accessToken              = $this->configuration->getAccessToken();
 
-        if ('' === $token || '' === $bridgeUrl || 0 === count($allAccountsSimpleFINData)) {
+        if ('' === $accessToken && ('' === $token || '' === $bridgeUrl || 0 === count($allAccountsSimpleFINData))) {
             Log::error(
                 'SimpleFIN session data incomplete for conversion.',
                 [
+                    'access_token'      => '' !== $accessToken,
                     'has_token'         => '' !== $token,
                     'has_bridge_url'    => '' !== $bridgeUrl,
                     'has_accounts_data' => 0 !== count($allAccountsSimpleFINData),
@@ -182,22 +192,25 @@ class RoutineManager implements RoutineManagerInterface
             $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
 
             if (null === $currentSimpleFINAccountData) {
-                Log::error('Failed to find SimpleFIN account raw data in session for current account ID during transformation.', ['simplefin_account_id_sought' => $simplefinAccountId]);
-
+                Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', ['simplefin_account_id_sought' => $simplefinAccountId]);
+                $allAccountsSimpleFINData    = $this->simpleFINService->fetchAccounts();
+                $currentSimpleFINAccountData = array_find($allAccountsSimpleFINData, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $simplefinAccountId);
+                Log::debug('Done with downloading new data.');
                 // If the account data for this ID isn't found, we can't process its transactions.
                 // This might indicate an inconsistency in session data or configuration.
-                continue; // Skip to the next account in $accounts.
+                // continue; // Skip to the next account in $accounts.
             }
 
             try {
-                Log::debug("Extracting transactions for account {$simplefinAccountId} from stored data");
+                Log::debug(sprintf('Extracting transactions for account %s from stored data', $simplefinAccountId));
 
                 // Fetch transactions for the current account using the new method signature,
                 // passing the complete SimpleFIN accounts data retrieved from the session.
-                $accountTransactions = $this->simpleFINService->fetchTransactions($allAccountsSimpleFINData, // Pass the full dataset
-                    $simplefinAccountId, $dateRange);
+                // Pass the full dataset
+                // $accountTransactions = $this->simpleFINService->fetchTransactions($allAccountsSimpleFINData, $simplefinAccountId, $dateRange);
+                $accountTransactions = $this->simpleFINService->fetchFreshTransactions($simplefinAccountId, $dateRange);
 
-                Log::debug("Extracted {count} transactions for account {$simplefinAccountId}", ['count' => count($accountTransactions)]);
+                Log::debug(sprintf('Extracted %d transactions for account %s', count($accountTransactions), $simplefinAccountId));
 
                 // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
                 foreach ($accountTransactions as $transactionData) {
@@ -226,7 +239,10 @@ class RoutineManager implements RoutineManagerInterface
                         }
 
                         // Wrap transaction in group structure expected by Firefly III
-                        $transactionGroup             = ['group_title' => $transformedTransaction['description'] ?? 'SimpleFIN Transaction', 'transactions' => [$transformedTransaction]];
+                        $transactionGroup             = [
+                            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
+                            'group_title'             => null,
+                            'transactions'            => [$transformedTransaction]];
 
                         $transactions[]               = $transactionGroup;
                     } catch (ImporterErrorException $e) {

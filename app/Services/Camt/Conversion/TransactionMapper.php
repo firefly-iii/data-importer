@@ -53,9 +53,9 @@ class TransactionMapper
     {
         // make a new transaction:
         $result        = [
-            'group_title'             => null,
-            'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [],
+            'group_title'                 => null,
+            'error_if_duplicate_hash'     => $this->configuration->isIgnoreDuplicateTransactions(),
+            'transactions'                => [],
         ];
         $splits        = $transaction['splits'] ?? 1;
         $groupHandling = $this->configuration->getGroupedTransactionHandling();
