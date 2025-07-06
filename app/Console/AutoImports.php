@@ -31,6 +31,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Shared\Authentication\SecretManager;
@@ -339,6 +340,10 @@ trait AutoImports
         }
         if ('spectre' === $flow) {
             $manager          = new SpectreRoutineManager(null);
+            $this->identifier = $manager->getIdentifier();
+        }
+        if ('simplefin' === $flow) {
+            $manager          = new SimpleFINRoutineManager(null);
             $this->identifier = $manager->getIdentifier();
         }
         if (null === $manager) {
