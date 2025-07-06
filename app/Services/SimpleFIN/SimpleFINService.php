@@ -43,55 +43,72 @@ use Exception;
  */
 class SimpleFINService
 {
+    private string $accessToken = '';
+    private string $accessUrl   = '';
+    private string $bridgeUrl   = '';
+    private string $setupToken  = '';
+    private Configuration $configuration;
+
     /**
-     * @throws ImporterHttpException
      * @throws ImporterErrorException
      */
-    public function fetchAccountsAndInitialData(string $token, string $apiUrl, ?Configuration $configuration = null): array
+    public function exchangeSetupTokenForAccessToken(): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
+        if ('' !== $this->accessToken) {
+            Log::warning('Access token already set, skipping exchange.');
 
-        // Check if token is a base64-encoded claim URL
-        $actualApiUrl = $apiUrl;
-        $actualToken  = $token;
-
-        if ($this->isBase64ClaimUrl($token)) {
-            Log::debug('Token appears to be a base64-encoded claim URL, processing exchange');
-            $actualApiUrl = $this->exchangeClaimUrlForAccessUrl($token);
-            $actualToken  = ''; // Access URL contains auth info
-            Log::debug(sprintf('Successfully exchanged claim URL for access URL: %s', $actualApiUrl));
+            return;
         }
-        if (!$this->isBase64ClaimUrl($token)) {
+        $isValid = $this->isBase64ClaimUrl($this->setupToken);
+        if ($isValid) {
+            Log::debug('Token appears to be a base64-encoded setup token, processing exchange');
+            $this->accessToken = $this->exchangeClaimUrlForAccessUrl($this->setupToken);
+            Log::debug(sprintf('Successfully exchanged claim URL for access token: %s', $this->accessToken));
+        }
+        if (!$isValid) {
+            Log::debug('Token is not a base64-encoded claim URL, using provided bridge URL');
             // Token is not a base64 claim URL, we need an API URL
-            if ('' === $apiUrl) {
+            if ('' === $this->bridgeUrl) {
                 throw new ImporterErrorException('SimpleFIN API URL is required when token is not a base64-encoded claim URL');
             }
         }
+    }
 
-        Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $actualApiUrl));
+    /**
+     * @throws ImporterErrorException
+     */
+    public function fetchAccounts(): array
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $this->accessToken));
 
-        $request      = new AccountsRequest();
-        $request->setToken($actualToken);
-        $request->setApiUrl($actualApiUrl);
+        $request    = new AccountsRequest();
+        $request->setBridgeUrl($this->bridgeUrl);
+        $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions
-        // Use a very old start-date (Jan 1, 2000) to ensure we get all historical transactions
-        $parameters   = [
-            'start-date' => 946684800, // January 1, 2000 00:00:00 UTC
-            'pending'    => ($configuration instanceof Configuration && $configuration->getPendingTransactions()) ? 1 : 0,
+        // 2025-07-05 set date to the far future, because here we are not interested in any transactions.
+        $parameters = [
+            'start-date' => 2073594480, // Sept 17, 2035 12:28 GMT+2
+            'pending'    => 0,
         ];
         $request->setParameters($parameters);
 
         Log::debug('SimpleFIN requesting all transactions with parameters', $parameters);
 
-        $response     = $request->get();
+        try {
+            $response = $request->get();
+        } catch (ImporterHttpException $e) {
+            throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
+        }
 
         if ($response->hasError()) {
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
-        $accounts     = $response->getAccounts();
+        $accounts   = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -237,8 +254,8 @@ class SimpleFINService
     public function getDemoCredentials(): array
     {
         return [
-            'token' => config('importer.simplefin.demo_token'),
-            'url'   => config('importer.simplefin.demo_url'),
+            'token' => config('simplefin.demo_token'),
+            'url'   => config('simplefin.demo_url'),
         ];
     }
 
@@ -360,6 +377,31 @@ class SimpleFINService
 
     private function getTimeout(): float
     {
-        return (float) config('importer.simplefin.timeout', 30.0);
+        return (float) config('simplefin.connection_timeout', 30.0);
+    }
+
+    public function getAccessToken(): string
+    {
+        return $this->accessToken;
+    }
+
+    public function setBridgeUrl(string $bridgeUrl): void
+    {
+        $this->bridgeUrl = $bridgeUrl;
+    }
+
+    public function setSetupToken(string $setupToken): void
+    {
+        $this->setupToken = $setupToken;
+    }
+
+    public function setConfiguration(Configuration $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
+
+    public function setAccessToken(string $accessToken): void
+    {
+        $this->accessToken = $accessToken;
     }
 }

@@ -40,8 +40,8 @@ return [
     | Demo Configuration
     |--------------------------------------------------------------------------
     */
-    'demo_url'                        => env('SIMPLEFIN_DEMO_URL', ''),
-    'demo_token'                      => env('SIMPLEFIN_DEMO_TOKEN', ''),
+    'demo_url'                        => env('SIMPLEFIN_DEMO_URL', 'https://bridge.simplefin.org/simplefin/create'),
+    'demo_token'                      => env('SIMPLEFIN_DEMO_TOKEN', 'aHR0cHM6Ly9iZXRhLWJyaWRnZS5zaW1wbGVmaW4ub3JnL3NpbXBsZWZpbi9jbGFpbS9ERU1P'),
 
     /*
     |--------------------------------------------------------------------------

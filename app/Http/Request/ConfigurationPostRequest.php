@@ -138,6 +138,9 @@ class ConfigurationPostRequest extends Request
             'date_not_before'               => $this->getCarbonDate('date_not_before'),
             'date_not_after'                => $this->getCarbonDate('date_not_after'),
 
+            // simplefin:
+            'access_token'                  => $this->convertToString('access_token'),
+
             // utf8 conversion
             'conversion'                    => $this->convertBoolean($this->get('conversion')),
 

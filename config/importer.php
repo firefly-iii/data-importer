@@ -24,7 +24,7 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => '1.7.3',
+    'version'                       => '1.7.4',
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
