@@ -43,6 +43,12 @@ trait MergesAccountLists
     private function mergeGenericAccountList(array $generic, array $fireflyIII): array
     {
         $return = [];
+        
+        // Check if we should show all accounts regardless of matching
+        $allowAllAccountSelection = env('ALLOW_ALL_ACCOUNT_SELECTION', false);
+        if ($allowAllAccountSelection) {
+            Log::debug('ALLOW_ALL_ACCOUNT_SELECTION is enabled - showing all Firefly III accounts for all import accounts');
+        }
 
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
@@ -59,6 +65,19 @@ trait MergesAccountLists
                 ],
             ];
 
+            // If ALLOW_ALL_ACCOUNT_SELECTION is enabled, skip all matching logic and show all accounts
+            if ($allowAllAccountSelection) {
+                Log::debug(sprintf('ALLOW_ALL_ACCOUNT_SELECTION enabled - showing all %d asset accounts and %d liability accounts for "%s"', 
+                    count($fireflyIII[Constants::ASSET_ACCOUNTS]), 
+                    count($fireflyIII[Constants::LIABILITIES]), 
+                    $account->name
+                ));
+                $entry['firefly_iii_accounts'] = $fireflyIII;
+                $return[] = $entry;
+                continue;
+            }
+            
+            // Original matching logic (only runs when ALLOW_ALL_ACCOUNT_SELECTION is false)
             $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
             $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
             Log::debug('Filtered by number', $filteredByNumber);
