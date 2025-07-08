@@ -429,7 +429,7 @@ class Transaction
         // Add currency exchange information if available
         if (count($this->currencyExchange) > 0) {
             $exchangeInfo = $this->formatCurrencyExchangeInfo();
-            $notes = trim(sprintf("%s\n\n%s", $notes, $exchangeInfo));
+            $notes        = trim(sprintf("%s\n\n%s", $notes, $exchangeInfo));
         }
 
         // room for other fields
@@ -446,16 +446,17 @@ class Transaction
     private function formatCurrencyExchangeInfo(): string
     {
         $info = [];
-        
+
         // Add exchange rate if available and not zero
-        if (isset($this->currencyExchange['exchangeRate']) && $this->currencyExchange['exchangeRate'] != 0) {
+        if (isset($this->currencyExchange['exchangeRate']) && 0 !== $this->currencyExchange['exchangeRate']) {
             $info[] = sprintf('- Exchange rate: %s', $this->currencyExchange['exchangeRate']);
         }
-        
+
         // Add source and target currencies if available
-        if (isset($this->currencyExchange['sourceCurrency']) && isset($this->currencyExchange['targetCurrency'])) {
-            $info[] = sprintf('- Currency exchange: %s → %s', 
-                $this->currencyExchange['sourceCurrency'], 
+        if (isset($this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency'])) {
+            $info[] = sprintf(
+                '- Currency exchange: %s → %s',
+                $this->currencyExchange['sourceCurrency'],
                 $this->currencyExchange['targetCurrency']
             );
         }
