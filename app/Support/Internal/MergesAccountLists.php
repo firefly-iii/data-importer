@@ -43,12 +43,6 @@ trait MergesAccountLists
     private function mergeGenericAccountList(array $generic, array $fireflyIII): array
     {
         $return = [];
-        
-        // Check if we should show all accounts regardless of matching
-        $allowAllAccountSelection = env('ALLOW_ALL_ACCOUNT_SELECTION', false);
-        if ($allowAllAccountSelection) {
-            Log::debug('ALLOW_ALL_ACCOUNT_SELECTION is enabled - showing all Firefly III accounts for all import accounts');
-        }
 
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
@@ -65,54 +59,23 @@ trait MergesAccountLists
                 ],
             ];
 
-            // If ALLOW_ALL_ACCOUNT_SELECTION is enabled, skip all matching logic and show all accounts
-            if ($allowAllAccountSelection) {
-                Log::debug(sprintf('ALLOW_ALL_ACCOUNT_SELECTION enabled - showing all %d asset accounts and %d liability accounts for "%s"', 
-                    count($fireflyIII[Constants::ASSET_ACCOUNTS]), 
-                    count($fireflyIII[Constants::LIABILITIES]), 
-                    $account->name
-                ));
-                $entry['firefly_iii_accounts'] = $fireflyIII;
-                $return[] = $entry;
-                continue;
-            }
-            
-            // Original matching logic (only runs when ALLOW_ALL_ACCOUNT_SELECTION is false)
-            $filteredByNumber              = $this->filterByAccountNumber($fireflyIII, $iban, $number);
-            $filteredByCurrency            = $this->filterByCurrency($fireflyIII, $currency);
-            Log::debug('Filtered by number', $filteredByNumber);
-            Log::debug('Filtered by currency', $filteredByCurrency);
-            $count                         = 0;
-            foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                if (1 === count($filteredByNumber[$key])) {
-                    Log::debug(sprintf('Generic account ("%s", "%s") has a single FF3 %s counter part (#%d, "%s")', $iban, $number, $key, $filteredByNumber[$key][0]->id, $filteredByNumber[$key][0]->name));
-                    $entry['firefly_iii_accounts'][$key] = array_unique(array_merge(
-                        $filteredByNumber[$key],
-                        $filteredByCurrency[$key]
-                    ), SORT_REGULAR);
-                    $return[]                            = $entry;
-                    ++$count;
-
-                    continue 2;
-                }
-            }
-
-            Log::debug(sprintf('Found %d FF3 accounts with the same IBAN or number ("%s")', $count, $iban));
-            unset($count);
+            // Always show all accounts, but sort matches to the top
+            $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
 
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                if (count($filteredByCurrency[$key]) > 0) {
-                    Log::debug(sprintf('Generic account ("%s") has %d Firefly III %s counter part(s) with the same currency %s.', $account->name, $key, count($filteredByCurrency), $currency));
-                    $entry['firefly_iii_accounts'][$key] = $filteredByCurrency[$key];
-                    $return[]                            = $entry;
+                $matching = $filteredByNumber[$key];
+                $all      = $fireflyIII[$key];
 
-                    continue 2;
-                }
+                // Remove matching from all to avoid duplicates
+                $nonMatching = array_udiff($all, $matching, function ($a, $b) {
+                    return $a->id <=> $b->id;
+                });
+
+                // Concatenate: matches first, then the rest
+                $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
             }
-            Log::debug('No special filtering on the Firefly III account list.');
-            // remove array_merge because SimpleFIN does not do this so it broke all the other importer routines.
-            $entry['firefly_iii_accounts'] = $fireflyIII;
-            $return[]                      = $entry;
+
+            $return[] = $entry;
         }
 
         return $return;
