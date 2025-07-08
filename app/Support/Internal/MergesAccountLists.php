@@ -48,10 +48,10 @@ trait MergesAccountLists
         foreach ($generic as $account) {
             Log::debug(sprintf('Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")', $account->name, $account->id, $account->iban, $account->bban));
 
-            $iban                          = $account->iban;
-            $number                        = $account->bban;
-            $currency                      = $account->currencyCode;
-            $entry                         = [
+            $iban             = $account->iban;
+            $number           = $account->bban;
+            $currency         = $account->currencyCode;
+            $entry            = [
                 'import_account'       => $account,
                 'firefly_iii_accounts' => [
                     Constants::ASSET_ACCOUNTS => [],
@@ -63,11 +63,11 @@ trait MergesAccountLists
             $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
 
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                $matching = $filteredByNumber[$key];
-                $all      = $fireflyIII[$key];
+                $matching                            = $filteredByNumber[$key];
+                $all                                 = $fireflyIII[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching = array_udiff($all, $matching, function ($a, $b) {
+                $nonMatching                         = array_udiff($all, $matching, function ($a, $b) {
                     return $a->id <=> $b->id;
                 });
 
@@ -75,7 +75,7 @@ trait MergesAccountLists
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
             }
 
-            $return[] = $entry;
+            $return[]         = $entry;
         }
 
         return $return;
