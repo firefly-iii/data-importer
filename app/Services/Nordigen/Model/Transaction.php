@@ -447,8 +447,8 @@ class Transaction
     {
         $info = [];
         
-        // Add exchange rate if available
-        if (isset($this->currencyExchange['exchangeRate'])) {
+        // Add exchange rate if available and not zero
+        if (isset($this->currencyExchange['exchangeRate']) && $this->currencyExchange['exchangeRate'] != 0) {
             $info[] = sprintf('- Exchange rate: %s', $this->currencyExchange['exchangeRate']);
         }
         
