@@ -49,7 +49,7 @@ class ConfigFileProcessor
         try {
             $content = StorageService::getContent($fileName);
         } catch (FileNotFoundException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Could not find config file: %s', $e->getMessage()));
         }
@@ -57,7 +57,7 @@ class ConfigFileProcessor
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));
         }

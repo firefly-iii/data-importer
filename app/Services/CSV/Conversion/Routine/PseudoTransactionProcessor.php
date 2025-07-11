@@ -89,7 +89,7 @@ class PseudoTransactionProcessor
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
-                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
@@ -116,7 +116,7 @@ class PseudoTransactionProcessor
             $result                = $currencyRequest->get();
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException('The default currency could not be loaded.');
         }

@@ -249,7 +249,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->downloaded = $this->transactionProcessor->download();
         } catch (ImporterErrorException $e) {
             Log::error('Could not download transactions from GoCardless.');
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // add error to current error thing:
             $this->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
@@ -353,7 +353,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->transactionGenerator->collectNordigenAccounts();
         } catch (ImporterErrorException $e) {
             Log::error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         } catch (AgreementExpiredException $e) {
             $this->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
             $this->mergeMessages(1);

@@ -180,7 +180,7 @@ trait AutoImports
                 $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
             } catch (ImporterErrorException $e) {
                 Log::error(sprintf('Could not complete import from file "%s".', $importableFile));
-                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 $exitCodes[$importableFile] = 1;
             }
             // report has already been sent. Reset errors and continue.
@@ -362,7 +362,7 @@ trait AutoImports
         try {
             $transactions = $manager->start();
         } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
             $this->conversionMessages   = $manager->getAllMessages();
             $this->conversionWarnings   = $manager->getAllWarnings();
@@ -490,7 +490,7 @@ trait AutoImports
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
             SubmissionStatusManager::addError($this->identifier, 0, $e->getMessage());
             $this->importMessages = $routine->getAllMessages();

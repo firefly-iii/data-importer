@@ -73,7 +73,7 @@ class ImportedTransactionsEventHandler
                 Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
             } catch (TransportException $e) {
                 Log::error('Could not send mail. See error below');
-                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             }
             Log::debug('If no error above this line, mail was sent!');
         }
