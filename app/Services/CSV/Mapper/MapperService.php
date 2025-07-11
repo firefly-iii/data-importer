@@ -49,7 +49,7 @@ class MapperService
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
     {
-        Log::debug('Now in getMapData');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // make file reader first.
         $reader = Reader::createFromString($content);
 
@@ -127,7 +127,7 @@ class MapperService
      */
     public static function getMapDataForCamt(Configuration $configuration, string $content, array $data): array
     {
-        Log::debug('Now in getMapDataForCamt');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // make file reader first.
         $camtReader     = new CamtReader(Config::getDefault());

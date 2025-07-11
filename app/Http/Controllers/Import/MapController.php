@@ -69,7 +69,7 @@ class MapController extends Controller
      */
     public function index()
     {
-        Log::debug('Now in mapController index');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $mainTitle     = 'Map data';
         $subTitle      = 'Map values in file to actual data in Firefly III';
@@ -323,7 +323,7 @@ class MapController extends Controller
 
     private function getOpposingAccounts(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
 
         if (null === $downloadIdentifier) {
@@ -376,7 +376,7 @@ class MapController extends Controller
 
     private function getExpenseRevenueAccounts(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
 
         if (null === $downloadIdentifier) {
@@ -441,7 +441,7 @@ class MapController extends Controller
 
     private function getCategories(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $disk               = Storage::disk(self::DISK_NAME);
         $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));

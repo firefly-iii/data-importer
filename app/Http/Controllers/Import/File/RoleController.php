@@ -61,7 +61,7 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        Log::debug('Now in Role controller');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $flow          = $request->cookie(Constants::FLOW_COOKIE);
         if ('file' !== $flow) {
             exit('redirect or something');

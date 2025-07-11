@@ -35,7 +35,7 @@ trait CollectsAccounts
 {
     protected function collectAllTargetAccounts(): array
     {
-        Log::debug('Now in collectAllTargetAccounts()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {
             $set1 = $this->collectAccounts('asset');
@@ -67,7 +67,7 @@ trait CollectsAccounts
 
     protected function collectExpenseAccounts(): array
     {
-        Log::debug('Now in collectExpenseAccounts()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {
             $set1 = $this->collectAccounts('expense');
@@ -88,7 +88,7 @@ trait CollectsAccounts
 
     protected function collectRevenueAccounts(): array
     {
-        Log::debug('Now in collectExpenseAccounts()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {
             $set1 = $this->collectAccounts('revenue');

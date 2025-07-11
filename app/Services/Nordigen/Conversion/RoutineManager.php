@@ -109,7 +109,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
 
         // Step 1: get transactions from GoCardless

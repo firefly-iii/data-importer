@@ -136,7 +136,7 @@ trait CollectsAccounts
      */
     protected function getNordigenAccounts(Configuration $configuration): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $requisitions = $configuration->getNordigenRequisitions();
         $identifier   = array_shift($requisitions);
         $inCache      = Cache::has($identifier) && config('importer.use_cache');
@@ -172,10 +172,7 @@ trait CollectsAccounts
 
         /** @var NordigenAccount $account */
         foreach ($response as $index => $account) {
-            Log::debug(
-                sprintf('[%d/%d] Now collecting information for account %s', $index + 1, $total, $account->getIdentifier()),
-                $account->toLocalArray()
-            );
+            Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s',config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
             $account  = AccountInformationCollector::collectInformation($account, true);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();

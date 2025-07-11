@@ -46,7 +46,7 @@ class InfoCollector
      */
     public function collectAccountTypes(): array
     {
-        Log::debug('Now in collectAccountTypes()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // get list of asset accounts:
         $url      = SecretManager::getBaseUrl();
         $token    = SecretManager::getAccessToken();

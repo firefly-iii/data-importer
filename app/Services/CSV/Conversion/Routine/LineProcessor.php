@@ -93,7 +93,7 @@ class LineProcessor
      */
     private function process(array $line): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $count       = count($line);
         $return      = [];
         foreach ($line as $columnIndex => $value) {

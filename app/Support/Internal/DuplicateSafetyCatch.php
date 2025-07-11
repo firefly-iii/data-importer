@@ -33,7 +33,7 @@ trait DuplicateSafetyCatch
 {
     public function negativeTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        Log::debug('Now in negativeTransactionSafetyCatch');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // check for columns:
         if (!array_key_exists('source_id', $transaction)
@@ -71,7 +71,7 @@ trait DuplicateSafetyCatch
 
     public function positiveTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        Log::debug('Now in positiveTransactionSafetyCatch');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
         // The data importer will try to correct this.
 

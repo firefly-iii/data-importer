@@ -267,7 +267,7 @@ class ApiSubmitter
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
                         $this->addError($index, $msg);
                     }
-                    Log::error($msg);
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $msg));
                 }
             }
 
@@ -279,7 +279,7 @@ class ApiSubmitter
             $group  = $response->getTransactionGroup();
             if (null === $group) {
                 $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
-                Log::error($message, $response->getRawData());
+                Log::error(sprintf('[%s] %s',config('importer.version'), $message), $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
@@ -288,7 +288,7 @@ class ApiSubmitter
             // perhaps zero transactions in the array.
             if (0 === count($group->transactions)) {
                 $message = '[a119]: Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
-                Log::error($message, $response->getRawData());
+                Log::error(sprintf('[%s] %s',config('importer.version'), $message), $response->getRawData());
                 $this->addError($index, $message);
 
                 return $return;
@@ -308,7 +308,7 @@ class ApiSubmitter
                 // plus 1 to keep the count.
                 $this->addMessage($index, $message);
                 $this->compareArrays($index, $line, $group);
-                Log::info($message);
+                Log::info(sprintf('[%s] %s',config('importer.version'), $message));
                 $return['journals'][$transaction->id] = $transaction->tags;
             }
         }
@@ -484,8 +484,7 @@ class ApiSubmitter
             $response = $request->post();
         } catch (ApiHttpException $e) {
             $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
-            Log::error($message);
-            //            Log::error($e->getTraceAsString());
+            Log::error(sprintf('[%s] %s',config('importer.version'), $message));
             $this->addError(0, $message);
 
             return;

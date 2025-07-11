@@ -102,7 +102,7 @@ class RoutineManager implements RoutineManagerInterface
 
     public function start(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // get XML file
         $camtMessage        = $this->getCamtMessage();
@@ -146,7 +146,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function getCamtMessage(): ?Message
     {
-        Log::debug('Now in getCamtMessage');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
 

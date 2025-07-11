@@ -44,7 +44,7 @@ class ConfigFileProcessor
      */
     public static function convertConfigFile(string $fileName): Configuration
     {
-        Log::debug('Now in ConfigFileProcessor::convertConfigFile');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {
             $content = StorageService::getContent($fileName);

@@ -35,7 +35,7 @@ class ImportedTransactionsEventHandler
 {
     public function sendReportOverMail(ImportedTransactions $event): void
     {
-        Log::debug('Now in sendReportOverMail');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $mailer   = config('mail.default');
         $receiver = config('mail.destination');

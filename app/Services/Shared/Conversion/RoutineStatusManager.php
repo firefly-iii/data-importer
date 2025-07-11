@@ -91,7 +91,7 @@ class RoutineStatusManager
 
     private static function storeConversionStatus(string $identifier, ConversionStatus $status): void
     {
-        Log::debug(sprintf('Now in storeConversionStatus(%s): %s', $identifier, $status->status));
+        Log::debug(sprintf('[%s] Now in storeConversionStatus(%s): %s', config('importer.version'), $identifier, $status->status));
         Log::debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
         $disk = Storage::disk(self::DISK_NAME);
 

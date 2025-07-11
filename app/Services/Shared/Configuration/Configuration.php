@@ -180,7 +180,7 @@ class Configuration
      */
     public static function fromFile(array $data): self
     {
-        Log::debug('Now in Configuration::fromFile. Data is omitted and will not be printed.');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $version = $data['version'] ?? 1;
         if (1 === $version) {
             Log::debug('v1, going for classic.');
@@ -897,7 +897,7 @@ class Configuration
 
     public function updateDateRange(): void
     {
-        Log::debug('Now in updateDateRange()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // set date and time:
         switch ($this->dateRange) {

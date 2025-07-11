@@ -89,7 +89,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function start(): array
     {
-        Log::debug('Now in SimpleFIN RoutineManager::start()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $token                    = (string)session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
         $bridgeUrl                = (string)session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation

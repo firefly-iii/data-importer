@@ -55,7 +55,7 @@ class CSVFileProcessor
      */
     public function processCSVFile(): array
     {
-        Log::debug('Now in processCSVFile()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $offset = $this->hasHeaders ? 1 : 0;
 
         try {

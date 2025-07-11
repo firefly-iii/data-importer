@@ -47,7 +47,7 @@ class Accounts extends AbstractTask
      */
     public function process(array $group): array
     {
-        Log::debug('Now in Accounts::process()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $total = count($group['transactions']);
         foreach ($group['transactions'] as $index => $transaction) {
             Log::debug(sprintf('Now processing transaction %d of %d', $index + 1, $total));
@@ -62,7 +62,7 @@ class Accounts extends AbstractTask
      */
     private function processTransaction(array $transaction): array
     {
-        Log::debug('Now in Accounts::processTransaction()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         /*
          * Try to find the source and destination accounts in the transaction.

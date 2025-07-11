@@ -43,7 +43,7 @@ class ImportServiceAccount
 
     public static function convertNordigenArray(array $accounts): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $return = [];
 
         /** @var NordigenAccount $account */

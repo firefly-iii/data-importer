@@ -305,7 +305,7 @@ trait AutoImports
         $this->conversionRateLimits = [];
         $flow                       = $configuration->getFlow();
 
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         if ('' === $importableFile && 'file' === $flow) {
             $this->warn('Importable file path is empty. That means there is no importable file to import.');

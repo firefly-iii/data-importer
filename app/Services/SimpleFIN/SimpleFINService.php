@@ -363,11 +363,11 @@ class SimpleFINService
 
         try {
             $accounts = $this->fetchAccountsAndInitialData($token, $apiUrl);
-            Log::debug('SimpleFIN connection test successful');
+            Log::debug(sprintf('[%s] SimpleFIN connection test successful', config('importer.version')));
 
             return true;
         } catch (ImporterErrorException|ImporterHttpException $e) {
-            Log::error(sprintf('SimpleFIN connection test failed: %s', $e->getMessage()));
+            Log::error(sprintf('[%s] SimpleFIN connection test failed: %s', config('importer.version'), $e->getMessage()));
 
             return false;
         }

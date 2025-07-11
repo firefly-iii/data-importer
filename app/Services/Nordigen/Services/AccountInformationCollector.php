@@ -50,7 +50,7 @@ class AccountInformationCollector
      */
     public static function collectInformation(Account $account, bool $overruleSettings = false): Account
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
