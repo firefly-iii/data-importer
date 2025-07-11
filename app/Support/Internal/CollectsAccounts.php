@@ -172,7 +172,7 @@ trait CollectsAccounts
 
         /** @var NordigenAccount $account */
         foreach ($response as $index => $account) {
-            Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s',config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
+            Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s', config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
             $account  = AccountInformationCollector::collectInformation($account, true);
             $return[] = $account;
             $cache[]  = $account->toLocalArray();

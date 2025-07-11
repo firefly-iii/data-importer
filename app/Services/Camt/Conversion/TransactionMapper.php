@@ -40,9 +40,9 @@ class TransactionMapper
 
         /** @var array $transaction */
         foreach ($transactions as $index => $transaction) {
-            Log::debug(sprintf('[%s] [%d/%d] Now mapping.',config('importer.version'), $index + 1, $total));
+            Log::debug(sprintf('[%s] [%d/%d] Now mapping.', config('importer.version'), $index + 1, $total));
             $result[] = $this->mapTransactionGroup($transaction);
-            Log::debug(sprintf('[%s] [%d/%d] Now done with mapping',config('importer.version'), $index + 1, $total));
+            Log::debug(sprintf('[%s] [%d/%d] Now done with mapping', config('importer.version'), $index + 1, $total));
         }
         Log::debug(sprintf('Mapped %d transaction(s)', count($result)));
 
