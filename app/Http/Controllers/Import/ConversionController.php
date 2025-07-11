@@ -294,7 +294,7 @@ class ConversionController extends Controller
         try {
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             Log::error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 

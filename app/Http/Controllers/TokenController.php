@@ -183,18 +183,18 @@ class TokenController extends Controller
 
         if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
-            Log::warning(sprintf('[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',config('importer.version'),  $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.', config('importer.version'), $result->version));
             $compare = -1;
         }
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a branch version
-            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',config('importer.version'), $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.', config('importer.version'), $result->version));
             $compare = -1;
         }
 
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a develop version
-            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',config('importer.version'), $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.', config('importer.version'), $result->version));
             $compare = -1;
         }
 

@@ -61,7 +61,7 @@ class CSVFileProcessor
         try {
             $this->reader->setDelimiter($this->delimiter);
         } catch (Exception $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             // Log::error($e->getTraceAsString());
             $message = sprintf('[a106]: Could not set delimiter: %s', $e->getMessage());
             $this->addError(0, $message);
@@ -74,7 +74,7 @@ class CSVFileProcessor
             $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
             $message = sprintf('[a107]: Could not read CSV: %s', $e->getMessage());
             $this->addError(0, $message);
@@ -85,7 +85,7 @@ class CSVFileProcessor
         try {
             return $this->processCSVLines($records);
         } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
             $message = sprintf('[a108]: Could not parse CSV: %s', $e->getMessage());
             $this->addError(0, $message);
@@ -159,7 +159,7 @@ class CSVFileProcessor
             try {
                 $hash = hash('sha256', json_encode($line, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
-                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 //                Log::error($e->getTraceAsString());
                 throw new ImporterErrorException(sprintf('Could not decode JSON line #%d: %s', $index, $e->getMessage()));

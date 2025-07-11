@@ -53,7 +53,7 @@ class RoutineStatusManager
                 try {
                     $status = ConversionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $status = new ConversionStatus();
                 }
                 $status->errors[$index] ??= [];
@@ -61,7 +61,7 @@ class RoutineStatusManager
                 self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -77,7 +77,7 @@ class RoutineStatusManager
                 try {
                     $status = ConversionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $status = new ConversionStatus();
                 }
                 $status->rateLimits[$index] ??= [];
@@ -85,7 +85,7 @@ class RoutineStatusManager
                 self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -99,7 +99,7 @@ class RoutineStatusManager
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
         } catch (JsonException $e) {
             // do nothing
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -115,7 +115,7 @@ class RoutineStatusManager
                 try {
                     $status = ConversionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $status = new ConversionStatus();
                 }
                 $status->messages[$index] ??= [];
@@ -123,7 +123,7 @@ class RoutineStatusManager
                 self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -139,7 +139,7 @@ class RoutineStatusManager
                 try {
                     $status = ConversionStatus::fromArray(json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {
-                    Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $status = new ConversionStatus();
                 }
                 $status->warnings[$index] ??= [];
@@ -147,7 +147,7 @@ class RoutineStatusManager
                 self::storeConversionStatus($identifier, $status);
             }
         } catch (FileNotFoundException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -185,7 +185,7 @@ class RoutineStatusManager
                 $array  = json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                 $status = ConversionStatus::fromArray($array);
             } catch (FileNotFoundException|JsonException $e) {
-                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 $status = new ConversionStatus();
             }
             Log::debug(sprintf('Conversion status is "%s"', $status->status));
@@ -198,7 +198,7 @@ class RoutineStatusManager
         try {
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
         } catch (JsonException $e) {
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
 
         Log::debug('Return status.', $status->toArray());
