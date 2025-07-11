@@ -59,7 +59,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         try {
             $response = $request->get();
         } catch (ImporterHttpException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             return AuthenticationStatus::ERROR;
         }

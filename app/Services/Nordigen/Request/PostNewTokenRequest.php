@@ -62,7 +62,7 @@ class PostNewTokenRequest extends Request
                 ]
             );
         } catch (GuzzleException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }

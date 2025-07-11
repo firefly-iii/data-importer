@@ -298,7 +298,7 @@ class GenerateTransactions
                 $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
                 Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
                 Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
                 unset($transaction['source_id']);
                 $transaction['source_name'] = $originalSourceName;
@@ -531,7 +531,7 @@ class GenerateTransactions
                 $transaction['type'] = $this->getTransactionType('asset', $mappedType);
                 Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
                 Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
                 unset($transaction['destination_id']);
                 $transaction['destination_name'] = $originalDestName;

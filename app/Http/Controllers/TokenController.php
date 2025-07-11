@@ -183,18 +183,18 @@ class TokenController extends Controller
 
         if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
-            Log::warning(sprintf('You are connecting to a development version of Firefly III (%s). This may not work as expected.', $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',config('importer.version'),  $result->version));
             $compare = -1;
         }
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a branch version
-            Log::warning(sprintf('You are connecting to a branch version of Firefly III (%s). This may not work as expected.', $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',config('importer.version'), $result->version));
             $compare = -1;
         }
 
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a develop version
-            Log::warning(sprintf('You are connecting to a branch version of Firefly III (%s). This may not work as expected.', $result->version));
+            Log::warning(sprintf('[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',config('importer.version'), $result->version));
             $compare = -1;
         }
 
@@ -227,7 +227,7 @@ class TokenController extends Controller
         $baseUrl     = SecretManager::getBaseUrl();
         $vanityUrl   = SecretManager::getVanityUrl();
 
-        Log::info('The following configuration information was found:');
+        Log::info(sprintf('[%s] The following configuration information was found:', config('importer.version')));
         Log::info(sprintf('Personal Access Token: "%s" (limited to 25 chars if present)', substr($accessToken, 0, 25)));
         Log::info(sprintf('Client ID            : "%s"', $clientId));
         Log::info(sprintf('Base URL             : "%s"', $baseUrl));

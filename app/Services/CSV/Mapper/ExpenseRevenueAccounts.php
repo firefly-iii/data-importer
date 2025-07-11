@@ -69,7 +69,7 @@ class ExpenseRevenueAccounts implements MapperInterface
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Could not download accounts: %s', $e->getMessage()));
         }

@@ -66,7 +66,7 @@ class AutoUploadController extends Controller
         try {
             $this->importUpload((string) $json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
         }
 

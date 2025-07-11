@@ -289,7 +289,7 @@ abstract class Request
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
@@ -301,7 +301,7 @@ abstract class Request
             $client = $this->getClient();
             $res    = $client->request('POST', $fullUrl, $opts);
         } catch (Exception|GuzzleException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }
@@ -344,7 +344,7 @@ abstract class Request
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
         }
         if ('{}' !== (string) $body) {
             $opts['body'] = $body;
@@ -366,14 +366,14 @@ abstract class Request
                 try {
                     $json = json_decode((string) $e->getResponse()->getBody(), true, 512, JSON_THROW_ON_ERROR);
                 } catch (JsonException $e) {
-                    Log::error($e->getMessage());
+                    Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
                 }
                 $json['ResponseHeaders']    = $responseHeaders;
                 $json['ResponseStatusCode'] = $statusCode;
 
                 return $json;
             }
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
             if (null !== $response) {
                 Log::error((string) $e->getResponse()->getBody());
             }

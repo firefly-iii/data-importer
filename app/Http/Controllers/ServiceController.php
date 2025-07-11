@@ -84,7 +84,7 @@ class ServiceController extends Controller
 
             return response()->json(['result' => 'NODATA']);
         }
-        Log::info('All OK in validateSimpleFIN.');
+        Log::info(sprintf('[%s] All OK in validateSimpleFIN.', config('importer.version')));
 
         return response()->json(['result' => 'OK']);
     }

@@ -136,9 +136,7 @@ class ApiSubmitter
             array_values($items),
             $customTag
         );
-        app('log')->debug(
-            sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result)
-        );
+        Log::debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
 
         return $result;
     }
@@ -205,7 +203,7 @@ class ApiSubmitter
             /** @var GetTransactionsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             return 0;
         }
@@ -245,7 +243,7 @@ class ApiSubmitter
             }
             if (true === $isDeleted && false === config('importer.ignore_not_found_transactions')) {
                 $this->addWarning($index, 'The transaction was created, but deleted by a rule.');
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
                 return $return;
             }
@@ -255,7 +253,7 @@ class ApiSubmitter
                 return $return;
             }
             $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
             $this->addError($index, $message);
 
             return $return;
@@ -459,7 +457,7 @@ class ApiSubmitter
         try {
             $request->put();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
             $this->addError(0, '[a120]: Could not store transaction: see the log files.');
         }

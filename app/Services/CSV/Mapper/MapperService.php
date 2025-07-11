@@ -57,7 +57,7 @@ class MapperService
         try {
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
@@ -72,7 +72,7 @@ class MapperService
             $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException($e->getMessage());
         }

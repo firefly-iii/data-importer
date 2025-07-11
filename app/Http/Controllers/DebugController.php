@@ -76,7 +76,7 @@ class DebugController extends Controller
         Log::error('I am a ERROR message.');
         Log::warning('I am a WARNING message.');
         Log::notice('I am a NOTICE message.');
-        Log::info('I am a INFO message.');
+        Log::info(sprintf('[%s] I am a INFO message.', config('importer.version')));
         Log::debug('I am a DEBUG message.');
 
         return view(

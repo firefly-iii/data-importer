@@ -74,7 +74,7 @@ class LineProcessor
             try {
                 $processed[] = $this->process($line);
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
                 //                Log::error($e->getTraceAsString());
                 $this->addError(0, $e->getMessage());
             }
