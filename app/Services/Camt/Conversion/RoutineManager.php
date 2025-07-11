@@ -161,7 +161,7 @@ class RoutineManager implements RoutineManagerInterface
             }
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
-            Log::error(sprintf('[%s]: %s',config('importer.version'), $e->getMessage()));
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->addError(0, sprintf('[a104]: Could not convert CAMT.053 file: %s', $e->getMessage()));
 
             return null;
