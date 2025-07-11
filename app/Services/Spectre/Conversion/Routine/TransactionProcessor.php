@@ -112,7 +112,7 @@ class TransactionProcessor
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
         if ($response instanceof ErrorResponse) {
-            Log::error(sprintf('[%s] Could not refresh connection.',config('importer.version')));
+            Log::error(sprintf('[%s] Could not refresh connection.', config('importer.version')));
             Log::error(sprintf('[%s] %s: %s', config('importer.version'), $response->class, $response->message));
         }
     }

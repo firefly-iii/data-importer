@@ -71,7 +71,7 @@ trait ProgressInformation
 
     final protected function addMessage(int $index, string $message): void
     {
-        Log::info(sprintf('[s] [%s] Add message to index #%d: %s',config('importer.version'), $index, $message));
+        Log::info(sprintf('[s] [%s] Add message to index #%d: %s', config('importer.version'), $index, $message));
         $this->messages         ??= [];
         $this->messages[$index] ??= [];
         $this->messages[$index][] = $message;

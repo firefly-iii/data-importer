@@ -30,9 +30,9 @@ class TransactionConverter
 
         /** @var Transaction $transaction */
         foreach ($transactions as $index => $transaction) {
-            Log::debug(sprintf('[%s] [%d/%d] Now working on transaction.',config('importer.version'), $index + 1, $total));
+            Log::debug(sprintf('[%s] [%d/%d] Now working on transaction.', config('importer.version'), $index + 1, $total));
             $result[] = $this->convertSingle($transaction);
-            Log::debug(sprintf('[%s] [%d/%d] Now done with transaction.',config('importer.version'), $index + 1, $total));
+            Log::debug(sprintf('[%s] [%d/%d] Now done with transaction.', config('importer.version'), $index + 1, $total));
         }
         Log::debug(sprintf('Done converting all %d transactions into pseudo-transactions.', $total));
 
