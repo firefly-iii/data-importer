@@ -140,7 +140,7 @@ final class Import extends Command
             // could still be that there were simply no transactions (from GoCardless). This can result
             // in another exit code.
             if ($this->isNothingDownloaded()) {
-                Log::error(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::NOTHING_WAS_IMPORTED->name));
                 $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             }
 

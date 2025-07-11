@@ -242,13 +242,13 @@ trait AutoImports
             // could still be that there were simply no transactions (from GoCardless). This can result
             // in another exit code.
             if ($this->isNothingDownloaded()) {
-                Log::debug(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::NOTHING_WAS_IMPORTED->name));
                 $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             }
 
             // could also be that the end user license agreement is expired.
             if ($this->isExpiredAgreement()) {
-                Log::debug(sprintf('Exit code changed to %s.', ExitCode::AGREEMENT_EXPIRED->name));
+                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::AGREEMENT_EXPIRED->name));
                 $exitCode = ExitCode::AGREEMENT_EXPIRED->value;
             }
 
