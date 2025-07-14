@@ -441,7 +441,8 @@ class Transaction
     }
 
     /**
-     * Format currency exchange information for inclusion in notes
+     * Format currency exchange information for inclusion in notes.
+     * Returns as a list.
      */
     private function formatCurrencyExchangeInfo(): string
     {
