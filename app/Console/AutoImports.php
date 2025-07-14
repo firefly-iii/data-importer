@@ -210,7 +210,7 @@ trait AutoImports
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
-            Log::error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+            Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::CANNOT_PARSE_CONFIG->name));
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
@@ -221,7 +221,7 @@ trait AutoImports
             Log::warning('Almost tried to import a JSON file as a file lol. Skip it.');
 
             // don't report this.
-            Log::debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+            Log::debug(sprintf('[%s] Exit code is %s.',config('importer.version'), ExitCode::SUCCESS->name));
 
             return ExitCode::SUCCESS->value;
         }
@@ -236,7 +236,7 @@ trait AutoImports
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
             $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-            Log::debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            Log::debug(sprintf('[%s] Exit code is %s.',config('importer.version'), ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
             $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
 
             // could still be that there were simply no transactions (from GoCardless). This can result

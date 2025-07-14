@@ -302,8 +302,9 @@ class ConversionController extends Controller
         }
         Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
-            Log::error('[b] Zero transactions!');
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+            // #10590 do not error out if no transactions are found.
+            Log::warning('[b] Zero transactions found during conversion. Will not error out.');
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
             return response()->json($importJobStatus->toArray());
         }
