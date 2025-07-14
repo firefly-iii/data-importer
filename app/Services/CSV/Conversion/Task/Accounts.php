@@ -47,7 +47,7 @@ class Accounts extends AbstractTask
      */
     public function process(array $group): array
     {
-        Log::debug('Now in Accounts::process()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $total = count($group['transactions']);
         foreach ($group['transactions'] as $index => $transaction) {
             Log::debug(sprintf('Now processing transaction %d of %d', $index + 1, $total));
@@ -62,7 +62,7 @@ class Accounts extends AbstractTask
      */
     private function processTransaction(array $transaction): array
     {
-        Log::debug('Now in Accounts::processTransaction()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         /*
          * Try to find the source and destination accounts in the transaction.
@@ -134,15 +134,8 @@ class Accounts extends AbstractTask
          * If deposit and amount is positive, but the source is not a revenue, fall back to
          * some "original-field-name" values (if they exist) and hope for the best.
          */
-        if (
-            'deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type'] && '' !== (string) $source['type']
-        ) {
-            Log::warning(
-                sprintf(
-                    'Transaction is a deposit, and amount is positive, but source is not a revenue ("%s"). Will fall back to original field names.',
-                    $source['type']
-                )
-            );
+        if ('deposit' === $transaction['type'] && 1 === bccomp($amount, '0') && 'revenue' !== $source['type'] && '' !== (string) $source['type']) {
+            Log::warning(sprintf('Transaction is a deposit, and amount is positive, but source is not a revenue ("%s"). Will fall back to original field names.', $source['type']));
             $newSource   = [
                 'id'     => null,
                 'name'   => $transaction['original-opposing-name'] ?? '(no name)',

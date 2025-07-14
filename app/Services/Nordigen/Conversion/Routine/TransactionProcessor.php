@@ -58,7 +58,7 @@ class TransactionProcessor
      */
     public function download(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $this->notBefore = null;
         $this->notAfter  = null;
         $this->accounts  = [];
@@ -77,7 +77,7 @@ class TransactionProcessor
         $total           = count($accounts);
         foreach ($accounts as $key => $account) {
             $account                    = (string) $account;
-            Log::debug(sprintf('[%d/%d] Going to download transactions for account #%d "%s"', $key + 1, $total, $key + 1, $account));
+            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
             $object                     = new Account();
             $object->setIdentifier($account);
             $fullInfo                   = null;
@@ -149,7 +149,7 @@ class TransactionProcessor
             ];
 
             $return[$account]           = $this->filterTransactions($transactions);
-            Log::debug(sprintf('[%d/%d] Done downloading transactions for account #%d "%s"', $key + 1, $total, $key + 1, $account));
+            Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
         }
         Log::debug('Done with download of transactions.');
 

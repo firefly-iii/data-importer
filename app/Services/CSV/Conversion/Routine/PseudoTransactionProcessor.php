@@ -89,7 +89,7 @@ class PseudoTransactionProcessor
             try {
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
             }
@@ -116,7 +116,7 @@ class PseudoTransactionProcessor
             $result                = $currencyRequest->get();
             $this->defaultCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException('The default currency could not be loaded.');
         }
@@ -125,7 +125,7 @@ class PseudoTransactionProcessor
 
     public function processPseudo(array $lines): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $count     = count($lines);
         $processed = [];
         Log::info(sprintf('Converting %d line(s) into transactions.', $count));
@@ -143,7 +143,7 @@ class PseudoTransactionProcessor
 
     private function processPseudoLine(array $line): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         foreach ($this->tasks as $task) {
             /** @var AbstractTask $object */
             $object = app($task);

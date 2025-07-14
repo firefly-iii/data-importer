@@ -33,7 +33,7 @@ trait DuplicateSafetyCatch
 {
     public function negativeTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        Log::debug('Now in negativeTransactionSafetyCatch');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // check for columns:
         if (!array_key_exists('source_id', $transaction)
@@ -54,7 +54,7 @@ trait DuplicateSafetyCatch
 
             // add error message to transaction:
             $transaction['notes'] ??= '';
-            $transaction['notes'] .= "  \nThe data importer has ignored the following values in the transaction data:\n";
+            $transaction['notes'] .= "\n\nThe data importer has ignored the following values in the transaction data:\n";
             $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $originalIban);
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";
@@ -71,7 +71,7 @@ trait DuplicateSafetyCatch
 
     public function positiveTransactionSafetyCatch(array $transaction, string $originalName, string $originalIban): array
     {
-        Log::debug('Now in positiveTransactionSafetyCatch');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // safety catch: if the transaction is a transfer, BUT the source and destination are the same, Firefly III will break.
         // The data importer will try to correct this.
 
@@ -92,7 +92,7 @@ trait DuplicateSafetyCatch
 
             // add error message to transaction:
             $transaction['notes'] ??= '';
-            $transaction['notes'] .= "  \nThe data importer has ignored the following values in the transaction data:\n";
+            $transaction['notes'] .= "\n\nThe data importer has ignored the following values in the transaction data:\n";
             $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $originalIban);
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";

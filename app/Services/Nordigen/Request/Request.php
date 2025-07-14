@@ -311,7 +311,7 @@ abstract class Request
     private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
     {
         $method      = $fromErrorSituation ? 'error' : 'debug';
-        Log::{$method}('Now in pauseForRateLimit');
+        Log::{$method}(sprintf('[%s] Now in pauseForRateLimit', config('importer.version')));
         $headers     = $res->getHeaders();
 
         // raw header values for debugging:

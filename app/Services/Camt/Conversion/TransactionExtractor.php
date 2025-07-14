@@ -17,12 +17,12 @@ class TransactionExtractor
 
     public function __construct(private Configuration $configuration)
     {
-        Log::debug('Now in TransactionExtractor.');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
     }
 
     public function extractTransactions(Message $message): array
     {
-        Log::debug('Now in extractTransactions.');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // get transactions from XML file
         $transactions = [];
         $statements   = $message->getRecords();
@@ -35,10 +35,10 @@ class TransactionExtractor
         foreach ($statements as $i => $statement) { // -> Level B
             $entries    = $statement->getEntries();
             $entryCount = count($entries);
-            Log::debug(sprintf('[%d/%d] Now working on statement with %d entries.', $i + 1, $totalCount, $entryCount));
+            Log::debug(sprintf('[%s] [%d/%d] Now working on statement with %d entries.', config('importer.version'), $i + 1, $totalCount, $entryCount));
             foreach ($entries as $ii => $entry) {                // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
-                Log::debug(sprintf('[%d/%d] Now working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
+                Log::debug(sprintf('[%s] [%d/%d] Now working on entry with %d detail entries.', config('importer.version'), $ii + 1, $entryCount, $count));
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
                     $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
@@ -62,7 +62,7 @@ class TransactionExtractor
                         }
                     }
                 }
-                Log::debug(sprintf('[%d/%d] Done working on entry with %d detail entries.', $ii + 1, $entryCount, $count));
+                Log::debug(sprintf('[%s] [%d/%d] Done working on entry with %d detail entries.', config('importer.version'), $ii + 1, $entryCount, $count));
             }
         }
         Log::debug(sprintf('Extracted %d transaction(s)', count($transactions)));

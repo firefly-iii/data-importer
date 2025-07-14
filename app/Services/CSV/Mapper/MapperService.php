@@ -49,7 +49,7 @@ class MapperService
      */
     public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
     {
-        Log::debug('Now in getMapData');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // make file reader first.
         $reader = Reader::createFromString($content);
 
@@ -57,7 +57,7 @@ class MapperService
         try {
             $reader->setDelimiter($delimiter);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             //            Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('Could not set delimiter: %s', $e->getMessage()));
@@ -72,7 +72,7 @@ class MapperService
             $stmt    = new Statement()->offset($offset);
             $records = $stmt->process($reader);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException($e->getMessage());
         }
@@ -127,7 +127,7 @@ class MapperService
      */
     public static function getMapDataForCamt(Configuration $configuration, string $content, array $data): array
     {
-        Log::debug('Now in getMapDataForCamt');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // make file reader first.
         $camtReader     = new CamtReader(Config::getDefault());

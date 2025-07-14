@@ -68,7 +68,7 @@ class ServiceController extends Controller
 
     public function validateSimpleFIN(): JsonResponse
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $validator = new SimpleFINValidator();
         $result    = $validator->validate();
 
@@ -84,7 +84,7 @@ class ServiceController extends Controller
 
             return response()->json(['result' => 'NODATA']);
         }
-        Log::info('All OK in validateSimpleFIN.');
+        Log::info(sprintf('[%s] All OK in validateSimpleFIN.', config('importer.version')));
 
         return response()->json(['result' => 'OK']);
     }

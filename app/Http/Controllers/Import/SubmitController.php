@@ -69,7 +69,7 @@ class SubmitController extends Controller
      */
     public function index()
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle     = 'Submit the data';
         $statusManager = new SubmissionStatusManager();
         $configuration = $this->restoreConfiguration();

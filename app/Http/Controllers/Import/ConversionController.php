@@ -73,7 +73,7 @@ class ConversionController extends Controller
      */
     public function index(): Application|Factory|View
     {
-        // Log::debug(sprintf('Now in %s', __METHOD__));
+        // Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle           = 'Convert the data';
 
         // create configuration:
@@ -294,7 +294,7 @@ class ConversionController extends Controller
         try {
             $transactions = $routine->start();
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             Log::error($e->getTraceAsString());
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
@@ -302,8 +302,9 @@ class ConversionController extends Controller
         }
         Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
-            Log::error('[b] Zero transactions!');
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+            // #10590 do not error out if no transactions are found.
+            Log::warning('[b] Zero transactions found during conversion. Will not error out.');
+            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
 
             return response()->json($importJobStatus->toArray());
         }

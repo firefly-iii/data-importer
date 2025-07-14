@@ -70,13 +70,13 @@ class DebugController extends Controller
             $logContent = 'No logs, external installation.';
         }
 
-        Log::emergency('I am a EMERGENCY message.');
-        Log::alert('I am a ALERT message.');
-        Log::critical('I am a CRITICAL message.');
-        Log::error('I am a ERROR message.');
+        Log::emergency(sprintf('[%s] I am a EMERGENCY message.', config('importer.version')));
+        Log::alert(sprintf('[%s] I am a ALERT message.', config('importer.version')));
+        Log::critical(sprintf('[%s] I am a CRITICAL message.', config('importer.version')));
+        Log::error(sprintf('[%s] I am a ERROR message.', config('importer.version')));
         Log::warning('I am a WARNING message.');
         Log::notice('I am a NOTICE message.');
-        Log::info('I am a INFO message.');
+        Log::info(sprintf('[%s] I am a INFO message.', config('importer.version')));
         Log::debug('I am a DEBUG message.');
 
         return view(

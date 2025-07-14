@@ -180,7 +180,7 @@ trait AutoImports
                 $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
             } catch (ImporterErrorException $e) {
                 Log::error(sprintf('Could not complete import from file "%s".', $importableFile));
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 $exitCodes[$importableFile] = 1;
             }
             // report has already been sent. Reset errors and continue.
@@ -210,7 +210,7 @@ trait AutoImports
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             $this->error($message);
-            Log::error(sprintf('Exit code is %s.', ExitCode::CANNOT_PARSE_CONFIG->name));
+            Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::CANNOT_PARSE_CONFIG->name));
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
@@ -221,7 +221,7 @@ trait AutoImports
             Log::warning('Almost tried to import a JSON file as a file lol. Skip it.');
 
             // don't report this.
-            Log::debug(sprintf('Exit code is %s.', ExitCode::SUCCESS->name));
+            Log::debug(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::SUCCESS->name));
 
             return ExitCode::SUCCESS->value;
         }
@@ -236,19 +236,19 @@ trait AutoImports
         // crash here if the conversion failed.
         if (0 !== count($this->conversionErrors)) {
             $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-            Log::debug(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
+            Log::debug(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
             $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
 
             // could still be that there were simply no transactions (from GoCardless). This can result
             // in another exit code.
             if ($this->isNothingDownloaded()) {
-                Log::debug(sprintf('Exit code changed to %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
+                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::NOTHING_WAS_IMPORTED->name));
                 $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
             }
 
             // could also be that the end user license agreement is expired.
             if ($this->isExpiredAgreement()) {
-                Log::debug(sprintf('Exit code changed to %s.', ExitCode::AGREEMENT_EXPIRED->name));
+                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::AGREEMENT_EXPIRED->name));
                 $exitCode = ExitCode::AGREEMENT_EXPIRED->value;
             }
 
@@ -305,7 +305,7 @@ trait AutoImports
         $this->conversionRateLimits = [];
         $flow                       = $configuration->getFlow();
 
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         if ('' === $importableFile && 'file' === $flow) {
             $this->warn('Importable file path is empty. That means there is no importable file to import.');
@@ -362,7 +362,7 @@ trait AutoImports
         try {
             $transactions = $manager->start();
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED, $this->identifier);
             $this->conversionMessages   = $manager->getAllMessages();
             $this->conversionWarnings   = $manager->getAllWarnings();
@@ -490,7 +490,7 @@ trait AutoImports
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
             SubmissionStatusManager::addError($this->identifier, 0, $e->getMessage());
             $this->importMessages = $routine->getAllMessages();

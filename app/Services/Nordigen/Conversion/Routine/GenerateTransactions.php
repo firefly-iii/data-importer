@@ -172,9 +172,9 @@ class GenerateTransactions
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
-                Log::debug(sprintf('[%d/%d] Parsing transaction (3)', $index + 1, $total));
+                Log::debug(sprintf('[%s] [%d/%d] Parsing transaction (3)', config('importer.version'), $index + 1, $total));
                 $return[] = $this->generateTransaction($accountId, $entry);
-                Log::debug(sprintf('[%d/%d] Done parsing transaction.', $index + 1, $total));
+                Log::debug(sprintf('[%s] [%d/%d] Done parsing transaction.', config('importer.version'), $index + 1, $total));
             }
         }
         // $this->addMessage(0, sprintf('Parsed %d Nordigen transactions for further processing.', count($return)));
@@ -254,7 +254,7 @@ class GenerateTransactions
         }
 
         $return['transactions'][] = $transaction;
-        Log::debug(sprintf('Parsed Nordigen transaction "%s".', $entry->getTransactionId()), $transaction);
+        Log::debug(sprintf('[%s] Parsed Nordigen transaction "%s".', config('importer.version'), $entry->getTransactionId()), $transaction);
 
         return $return;
     }
@@ -298,7 +298,7 @@ class GenerateTransactions
                 $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
                 Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
                 unset($transaction['source_id']);
                 $transaction['source_name'] = $originalSourceName;
@@ -531,7 +531,7 @@ class GenerateTransactions
                 $transaction['type'] = $this->getTransactionType('asset', $mappedType);
                 Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
                 unset($transaction['destination_id']);
                 $transaction['destination_name'] = $originalDestName;

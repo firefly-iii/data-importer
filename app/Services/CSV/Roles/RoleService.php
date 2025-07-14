@@ -85,7 +85,7 @@ class RoleService
                 $headers = $records->fetchOne();
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 throw new InvalidArgumentException($e->getMessage());
             }
@@ -105,7 +105,7 @@ class RoleService
                 }
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 throw new InvalidArgumentException($e->getMessage());
             }
@@ -150,7 +150,7 @@ class RoleService
             $stmt = new Statement()->limit(self::EXAMPLE_COUNT)->offset($offset);
             // @codeCoverageIgnoreStart
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new InvalidArgumentException($e->getMessage());
         }

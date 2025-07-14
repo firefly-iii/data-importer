@@ -71,18 +71,18 @@ class AutoImportController extends Controller
         }
 
         // take code from auto importer.
-        Log::info(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
+        Log::info(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
         $files        = $this->getFiles($directory);
         if (0 === count($files)) {
             return response('');
         }
-        Log::info(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+        Log::info(sprintf('[%s] Found %d (importable +) JSON file sets in %s', config('importer.version'), count($files), $directory));
 
         try {
             $this->importFiles($directory, $files);
         } catch (ImporterErrorException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }

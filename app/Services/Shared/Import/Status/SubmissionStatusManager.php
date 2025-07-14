@@ -64,7 +64,7 @@ class SubmissionStatusManager
                 Log::error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -78,7 +78,7 @@ class SubmissionStatusManager
             $disk->put($identifier, json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
         } catch (JsonException $e) {
             // do nothing
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -104,7 +104,7 @@ class SubmissionStatusManager
                 Log::error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -130,7 +130,7 @@ class SubmissionStatusManager
                 Log::error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -158,7 +158,7 @@ class SubmissionStatusManager
                 Log::error(sprintf('Could not find file for job %s.', $identifier));
             }
         } catch (FileNotFoundException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
     }
 
@@ -168,7 +168,7 @@ class SubmissionStatusManager
             try {
                 $identifier = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
             } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 $identifier = 'error-setSubmissionStatus';
             }
         }
@@ -197,7 +197,7 @@ class SubmissionStatusManager
                     $array  = json_decode((string) $disk->get($identifier), true, 512, JSON_THROW_ON_ERROR);
                     $status = SubmissionStatus::fromArray($array);
                 } catch (FileNotFoundException|JsonException $e) {
-                    Log::error($e->getMessage());
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $status = new SubmissionStatus();
                 }
                 Log::debug(sprintf('Status: %s', $status->status));
@@ -207,7 +207,7 @@ class SubmissionStatusManager
             }
         } catch (FileNotFoundException $e) {
             Log::error('Could not find file, write a new one.');
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
         Log::debug('File does not exist or error, create a new one.');
         $status = new SubmissionStatus();
@@ -215,7 +215,7 @@ class SubmissionStatusManager
         try {
             $json = json_encode($status->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $json = '{}';
         }
         $disk->put($identifier, $json);

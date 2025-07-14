@@ -49,7 +49,6 @@ class Transaction
     public string  $creditorAccountBban;
     public string  $creditorAccountCurrency;
     public string  $creditorAccountIban; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
-    // TODO use currency exchange info in notes
     public string $creditorAgent;
     public string $creditorId;
     public string $creditorName;
@@ -427,12 +426,43 @@ class Transaction
             $notes = $this->additionalInformation;
         }
 
+        // Add currency exchange information if available
+        if (count($this->currencyExchange) > 0) {
+            $exchangeInfo = $this->formatCurrencyExchangeInfo();
+            $notes        = trim(sprintf("%s\n\n%s", $notes, $exchangeInfo));
+        }
+
         // room for other fields
         if (str_contains("\n", $this->getDescription())) {
             $notes .= "\n\n".$this->getDescription();
         }
 
         return trim($notes);
+    }
+
+    /**
+     * Format currency exchange information for inclusion in notes.
+     * Returns as a list.
+     */
+    private function formatCurrencyExchangeInfo(): string
+    {
+        $info = [];
+
+        // Add exchange rate if available and not zero
+        if (isset($this->currencyExchange['exchangeRate']) && 0 !== $this->currencyExchange['exchangeRate']) {
+            $info[] = sprintf('- Exchange rate: %s', $this->currencyExchange['exchangeRate']);
+        }
+
+        // Add source and target currencies if available
+        if (isset($this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency'])) {
+            $info[] = sprintf(
+                '- Currency exchange: %s → %s',
+                $this->currencyExchange['sourceCurrency'],
+                $this->currencyExchange['targetCurrency']
+            );
+        }
+
+        return implode("\n", $info);
     }
 
     /**

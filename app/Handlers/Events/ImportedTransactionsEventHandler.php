@@ -35,22 +35,22 @@ class ImportedTransactionsEventHandler
 {
     public function sendReportOverMail(ImportedTransactions $event): void
     {
-        Log::debug('Now in sendReportOverMail');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $mailer   = config('mail.default');
         $receiver = config('mail.destination');
         if ('' === $mailer) {
-            Log::info('No mailer configured, will not mail.');
+            Log::info(sprintf('[%s] No mailer configured, will not mail.', config('importer.version')));
 
             return;
         }
         if ('' === $receiver) {
-            Log::info('No mail receiver configured, will not mail.');
+            Log::info(sprintf('[%s] No mail receiver configured, will not mail.', config('importer.version')));
 
             return;
         }
         if (false === config('mail.enable_mail_report')) {
-            Log::info('Configuration does not allow mail, will not mail.');
+            Log::info(sprintf('[%s] Configuration does not allow mail, will not mail.', config('importer.version')));
 
             return;
         }
@@ -62,7 +62,7 @@ class ImportedTransactionsEventHandler
             'rate_limits' => $event->rateLimits,
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {
-            Log::info('Will send report message.');
+            Log::info(sprintf('[%s] Will send report message.', config('importer.version')));
             Log::debug(sprintf('Messages count: %s', count($event->messages)));
             Log::debug(sprintf('Warnings count: %s', count($event->warnings)));
             Log::debug(sprintf('Errors count  : %s', count($event->errors)));
@@ -73,7 +73,7 @@ class ImportedTransactionsEventHandler
                 Mail::to(config('mail.destination'))->send(new ImportReportMail($log));
             } catch (TransportException $e) {
                 Log::error('Could not send mail. See error below');
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             }
             Log::debug('If no error above this line, mail was sent!');
         }

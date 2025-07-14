@@ -102,7 +102,7 @@ class RoutineManager implements RoutineManagerInterface
 
     public function start(): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // get XML file
         $camtMessage        = $this->getCamtMessage();
@@ -146,7 +146,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function getCamtMessage(): ?Message
     {
-        Log::debug('Now in getCamtMessage');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $camtReader  = new Reader(Config::getDefault());
         $camtMessage = null;
 
@@ -161,7 +161,7 @@ class RoutineManager implements RoutineManagerInterface
             }
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->addError(0, sprintf('[a104]: Could not convert CAMT.053 file: %s', $e->getMessage()));
 
             return null;

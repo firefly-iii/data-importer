@@ -109,7 +109,7 @@ class ConfigurationController extends Controller
             try {
                 $importerAccounts = $this->getNordigenAccounts($configuration);
             } catch (AgreementExpiredException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 // remove thing from configuration
                 $configuration->clearRequisitions();
@@ -376,7 +376,7 @@ class ConfigurationController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }

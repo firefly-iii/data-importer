@@ -121,7 +121,7 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
         StorageService::storeContent($json);
 
@@ -176,7 +176,7 @@ class ConnectionController extends Controller
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
         StorageService::storeContent($json);
 

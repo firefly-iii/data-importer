@@ -50,7 +50,7 @@ class AccountInformationCollector
      */
     public static function collectInformation(Account $account, bool $overruleSettings = false): Account
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // you know nothing, Jon Snow
         $detailedAccount = $account;
@@ -60,7 +60,7 @@ class AccountInformationCollector
                 Log::debug('Get account details is ENABLED.');
                 $detailedAccount = self::getAccountDetails($detailedAccount);
             } catch (ImporterErrorException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 // ignore error otherwise for now.
                 $detailedAccount->setStatus('no-info');
                 $detailedAccount->setName('Unknown account');
@@ -74,7 +74,7 @@ class AccountInformationCollector
             try {
                 $detailedAccount = self::getBalanceDetails($detailedAccount);
             } catch (ImporterErrorException|ImporterHttpException $e) {
-                Log::error($e->getMessage());
+                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 // ignore error otherwise for now.
                 $status = $detailedAccount->getStatus();
                 if ('no-info' === $status) {

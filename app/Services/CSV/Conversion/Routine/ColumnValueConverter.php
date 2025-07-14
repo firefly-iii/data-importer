@@ -56,7 +56,7 @@ class ColumnValueConverter
      */
     public function processValueArrays(array $lines): array
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $processed = [];
         $count     = count($lines);

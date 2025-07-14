@@ -37,7 +37,7 @@ class EmptyAccounts extends AbstractTask
 {
     public function process(array $group): array
     {
-        Log::debug('Now in EmptyAccounts::process()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $total = count($group['transactions']);
         foreach ($group['transactions'] as $index => $transaction) {
             Log::debug(sprintf('Now processing transaction %d of %d', $index + 1, $total));
@@ -49,7 +49,7 @@ class EmptyAccounts extends AbstractTask
 
     private function processTransaction(array $transaction): array
     {
-        Log::debug('Now in EmptyAccounts::processTransaction()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         if ('withdrawal' === $transaction['type']) {
             $destName = $transaction['destination_name'] ?? '';

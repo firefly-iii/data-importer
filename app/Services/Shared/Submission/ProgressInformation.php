@@ -60,7 +60,7 @@ trait ProgressInformation
 
     final protected function addError(int $index, string $error): void
     {
-        Log::error(sprintf('[s] Add error to index #%d: %s', $index, $error));
+        Log::error(sprintf('[s] [%s] Add error to index #%d: %s', config('importer.version'), $index, $error));
         $this->errors         ??= [];
         $this->errors[$index] ??= [];
         $this->errors[$index][] = $error;
@@ -71,7 +71,7 @@ trait ProgressInformation
 
     final protected function addMessage(int $index, string $message): void
     {
-        Log::info(sprintf('[s] Add message to index #%d: %s', $index, $message));
+        Log::info(sprintf('[s] [%s] Add message to index #%d: %s', config('importer.version'), $index, $message));
         $this->messages         ??= [];
         $this->messages[$index] ??= [];
         $this->messages[$index][] = $message;
@@ -82,7 +82,7 @@ trait ProgressInformation
 
     final protected function addWarning(int $index, string $warning): void
     {
-        Log::error(sprintf('[s] Add warning to index #%d: %s', $index, $warning));
+        Log::error(sprintf('[s] [%s] Add warning to index #%d: %s', config('importer.version'), $index, $warning));
         $this->warnings         ??= [];
         $this->warnings[$index] ??= [];
         $this->warnings[$index][] = $warning;

@@ -44,12 +44,12 @@ class ConfigFileProcessor
      */
     public static function convertConfigFile(string $fileName): Configuration
     {
-        Log::debug('Now in ConfigFileProcessor::convertConfigFile');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {
             $content = StorageService::getContent($fileName);
         } catch (FileNotFoundException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Could not find config file: %s', $e->getMessage()));
         }
@@ -57,7 +57,7 @@ class ConfigFileProcessor
         try {
             $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error($e->getMessage());
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             throw new ImporterErrorException(sprintf('Invalid JSON configuration file: %s', $e->getMessage()));
         }

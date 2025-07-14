@@ -64,7 +64,7 @@ class IndexController extends Controller
 
     public function index(Request $request): mixed
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
@@ -132,7 +132,7 @@ class IndexController extends Controller
 
     public function postIndex(Request $request): mixed
     {
-        Log::debug(sprintf('Now in %s', __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {

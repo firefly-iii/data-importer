@@ -65,7 +65,7 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        Log::debug('Now in download()');
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $accounts        = array_keys($this->configuration->getAccounts());
         Log::debug(sprintf('Found %d accounts to download from.', count($this->configuration->getAccounts())));
         $return          = [];
@@ -112,8 +112,8 @@ class TransactionProcessor
         $put->setConnection($this->configuration->getConnection());
         $response = $put->put();
         if ($response instanceof ErrorResponse) {
-            Log::alert('Could not refresh connection.');
-            Log::alert(sprintf('%s: %s', $response->class, $response->message));
+            Log::error(sprintf('[%s] Could not refresh connection.', config('importer.version')));
+            Log::error(sprintf('[%s] %s: %s', config('importer.version'), $response->class, $response->message));
         }
     }
 
