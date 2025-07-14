@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - #10590
 - #10556
+- [PR 882](https://github.com/firefly-iii/data-importer/pull/882) (This PR fixes issue 8296) by @TomVarga
 
 ## v1.7.5 - 2025-07-06
 
