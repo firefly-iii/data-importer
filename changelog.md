@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.6 - 2025-07-15
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Added
+- Log entries will occasionally include the data importer version, so that you can see which version was used to import data.
+- #8296
+
+### Changed
+- #10556
+
+### Fixed
+- #10590
+- #10556
+
 ## v1.7.5 - 2025-07-06
 
 ### Fixed
