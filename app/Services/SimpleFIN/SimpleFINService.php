@@ -426,16 +426,15 @@ class SimpleFINService
 
             // Make POST request to claim URL with empty body
             // Use user-provided bridge URL as Origin header for CORS
-            $origin    = (string)session()->get(Constants::SIMPLEFIN_BRIDGE_URL);
-            if ('' === $origin) {
-                throw new ImporterErrorException('SimpleFIN bridge URL not found in session. Please provide a valid bridge URL.');
+            if ('' === $this->bridgeUrl) {
+                throw new ImporterErrorException('SimpleFIN bridge URL not found. Please provide a valid bridge URL.');
             }
-            Log::debug(sprintf('SimpleFIN using user-provided Origin: %s', $origin));
+            Log::debug(sprintf('SimpleFIN using user-provided Origin: %s', $this->bridgeUrl));
 
             $response  = $client->post($claimUrl, [
                 'headers' => [
                     'Content-Length' => '0',
-                    'Origin'         => $origin,
+                    'Origin'         => $this->bridgeUrl,
                 ],
             ]);
 
