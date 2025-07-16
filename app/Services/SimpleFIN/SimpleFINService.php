@@ -429,10 +429,13 @@ class SimpleFINService
                 // throw new ImporterErrorException('SimpleFIN bridge URL not found. Please provide a valid bridge URL.');
             }
             Log::debug(sprintf('SimpleFIN using user-provided origin: "%s"', $this->bridgeUrl));
+            $parts = parse_url($claimUrl);
+            Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
 
             $response  = $client->post($claimUrl, [
                 'headers' => [
                     'Content-Length' => '0',
+                    'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
                     // 'Origin'         => $this->bridgeUrl,
                 ],
             ]);
