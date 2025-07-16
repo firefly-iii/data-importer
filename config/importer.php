@@ -24,8 +24,8 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => '1.7.6',
-    'build_time'                    => 1752471233,
+    'version'                       => '1.7.7',
+    'build_time'                    => 1752689285,
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
@@ -118,4 +118,10 @@ return [
         'ISO-8859-16',
         'Windows-1251',
     ],
+    // some random lines for the data importer to use.
+    'line_a'                        => 'Everything precious is fragile',
+    'line_b'                        => 'Forgive yourself for not being at peace.',
+    'line_c'                        => 'Doesnt look like anything to me.',
+    'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
+    'line_e'                        => 'All the decisive blows are struck left-handed.',
 ];

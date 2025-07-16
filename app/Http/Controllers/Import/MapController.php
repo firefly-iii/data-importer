@@ -101,8 +101,8 @@ class MapController extends Controller
             session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
 
             // if "file", now ready for conversion
-            if ('file' === $configuration->getFlow()) {
-                Log::debug('Its a file, also set ready for conversion.');
+            if ('file' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
+                Log::debug('Its a file/simplefin, also set ready for conversion.');
                 session()->put(Constants::READY_FOR_CONVERSION, true);
             }
 

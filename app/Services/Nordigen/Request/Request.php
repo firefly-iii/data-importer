@@ -111,7 +111,7 @@ abstract class Request
                         'Accept'        => 'application/json',
                         'Content-Type'  => 'application/json',
                         'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                        'User-Agent'    => sprintf('Firefly III GoCardless importer / %s / %s', config('importer.version'), config('auth.line_b')),
+                        'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
                     ],
                 ]
             );
@@ -259,6 +259,7 @@ abstract class Request
                         'Accept'        => 'application/json',
                         'Content-Type'  => 'application/json',
                         'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                        'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_e')),
                     ],
                 ]
             );

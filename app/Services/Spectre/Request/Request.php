@@ -110,7 +110,7 @@ abstract class Request
                         'Content-Type'  => 'application/json',
                         'App-id'        => $this->getAppId(),
                         'Secret'        => $this->getSecret(),
-                        'User-Agent'    => sprintf('Firefly III Spectre importer / %s / %s', config('importer.version'), config('auth.line_c')),
+                        'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_b')),
                     ],
                 ]
             );
@@ -258,7 +258,6 @@ abstract class Request
 
     protected function getDefaultHeaders(): array
     {
-        $userAgent       = sprintf('FireflyIII Spectre v%s', config('spectre.version'));
         $this->expiresAt = Carbon::now()->getTimestamp() + 180;
 
         return [
@@ -267,7 +266,7 @@ abstract class Request
             'Accept'        => 'application/json',
             'Content-type'  => 'application/json',
             'Cache-Control' => 'no-cache',
-            'User-Agent'    => $userAgent,
+            'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
             'Expires-at'    => $this->expiresAt,
         ];
     }

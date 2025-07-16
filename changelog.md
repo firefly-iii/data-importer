@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.7 - 2025-07-16
+
+### Changed
+- Various SimpleFIN optimizations, drops the "CORS URL" from the required fields.
+
+### Fixed
+- [Discussion 10599](https://github.com/orgs/firefly-iii/discussions/10599) (Issue with simpleFIN importing) started by @DrEthan77
+
 ## v1.7.6 - 2025-07-15
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
@@ -16,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - [Issue 10590](https://github.com/firefly-iii/firefly-iii/issues/10590) ([Importer] SimpleFIN Bridge fails on zero transaction imports) reported by @wyomatthew
 - [Issue 10556](https://github.com/firefly-iii/firefly-iii/issues/10556) (Save the connection string for subsequent SimpleFIN imports) reported by @Gsyltc
+- [Issue 10580](https://github.com/firefly-iii/firefly-iii/issues/10580) ([Importer] GoCardless account matching UI is broken in dark mode) reported by @avee87
 - [PR 882](https://github.com/firefly-iii/data-importer/pull/882) (This PR fixes issue 8296) by @TomVarga
 
 ## v1.7.5 - 2025-07-06
