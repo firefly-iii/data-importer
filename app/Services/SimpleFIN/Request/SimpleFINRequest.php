@@ -85,7 +85,7 @@ abstract class SimpleFINRequest
             'headers' => [
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
-                'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c'))
+                'User-Agent'   => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c')),
             ],
         ];
 

@@ -66,6 +66,7 @@ class SimpleFINService
         }
         if (!$isValid) {
             Log::error('Token is not a base64-encoded claim URL.');
+
             // Token is not a base64 claim URL, we need an API URL
             throw new ImporterErrorException('Token is not a base64-encoded claim URL.');
         }
@@ -417,12 +418,12 @@ class SimpleFINService
                 'verify'  => config('importer.connection.verify'),
             ]);
 
-            $parts = parse_url($claimUrl);
+            $parts     = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
-            $headers = [
+            $headers   = [
                 'Content-Length' => '0',
-                'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
-                'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
+                'Origin'         => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
+                'User-Agent'     => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
             ];
             Log::debug('Headers for claim URL exchange', $headers);
 
@@ -500,7 +501,6 @@ class SimpleFINService
     {
         return $this->accessToken;
     }
-
 
     public function setSetupToken(string $setupToken): void
     {
