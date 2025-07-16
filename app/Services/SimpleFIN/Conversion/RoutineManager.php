@@ -92,17 +92,15 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $token                    = (string)session()->get(Constants::SIMPLEFIN_TOKEN); // Retained for general session validation
-        $bridgeUrl                = (string)session()->get(Constants::SIMPLEFIN_BRIDGE_URL); // Retained for general session validation
         $allAccountsSimpleFINData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
         $accessToken              = $this->configuration->getAccessToken();
 
-        if ('' === $accessToken && ('' === $token || '' === $bridgeUrl || 0 === count($allAccountsSimpleFINData))) {
+        if ('' === $accessToken && ('' === $token || 0 === count($allAccountsSimpleFINData))) {
             Log::error(
                 'SimpleFIN session data incomplete for conversion.',
                 [
                     'access_token'      => '' !== $accessToken,
                     'has_token'         => '' !== $token,
-                    'has_bridge_url'    => '' !== $bridgeUrl,
                     'has_accounts_data' => 0 !== count($allAccountsSimpleFINData),
                 ]
             );

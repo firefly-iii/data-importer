@@ -93,43 +93,15 @@
                                     </div>
                                 </div>
 
-                                <!-- SimpleFIN CORS Origin URL (Additional Options) -->
-                                <div class="form-group row mb-3" id="bridge-url-group">
-                                    <label for="simplefin_bridge_url" class="col-sm-4 col-form-label">
-                                        CORS Origin URL
-                                        <small class="text-muted">(optional)</small>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input type="url"
-                                               class="form-control
-                                           @if($errors->has('simplefin_bridge_url')) is-invalid @endif"
-                                               id="simplefin_bridge_url" name="simplefin_bridge_url"
-                                               value="{{ $simpleFinOriginUrl  }}"
-                                               autocomplete="off"
-                                               placeholder="https://your-app.example.com"/>
-                                        <small class="form-text text-muted">
-                                            Enter the URL where you access this Firefly III Data Importer (e.g., https://your-domain.com). Leave blank if unsure.
-                                        </small>
-                                        @if($errors->has('simplefin_bridge_url'))
-                                            <div class="invalid-feedback">
-                                                {{ $errors->first('simplefin_bridge_url') }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-
                                 <script>
                                 document.addEventListener('DOMContentLoaded', function() {
                                     const demoCheckbox = document.getElementById('use_demo');
-                                    const bridgeUrlGroup = document.getElementById('bridge-url-group');
                                     const tokenGroup = document.getElementById('token-group');
 
                                     function toggleSimpleFINFields() {
                                         if (demoCheckbox.checked) {
-                                            bridgeUrlGroup.style.display = 'none';
                                             tokenGroup.style.display = 'none';
                                         } else {
-                                            bridgeUrlGroup.style.display = 'flex';
                                             tokenGroup.style.display = 'flex';
                                         }
                                     }

@@ -93,7 +93,6 @@ class Constants
 
     // SimpleFIN specific constants
     public const string SIMPLEFIN_TOKEN               = 'simplefin_token';
-    public const string SIMPLEFIN_BRIDGE_URL          = 'simplefin_bridge_url';
     public const string SIMPLEFIN_ACCOUNTS_DATA       = 'simplefin_accounts_data';
     public const string SIMPLEFIN_IS_DEMO             = 'simplefin_is_demo';
     public const string SIMPLEFIN_ACCESS_TOKEN        = 'simplefin_access_token';

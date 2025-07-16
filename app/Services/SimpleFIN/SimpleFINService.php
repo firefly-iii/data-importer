@@ -44,7 +44,6 @@ class SimpleFINService
 {
     private string        $accessToken = '';
     private string        $accessUrl   = '';
-    private string        $bridgeUrl   = '';
     private string        $setupToken  = '';
     private Configuration $configuration;
 
@@ -66,11 +65,9 @@ class SimpleFINService
             Log::debug(sprintf('Successfully exchanged claim URL for access token: %s', $this->accessToken));
         }
         if (!$isValid) {
-            Log::debug('Token is not a base64-encoded claim URL, using provided bridge URL');
+            Log::error('Token is not a base64-encoded claim URL.');
             // Token is not a base64 claim URL, we need an API URL
-            if ('' === $this->bridgeUrl) {
-                throw new ImporterErrorException('SimpleFIN API URL is required when token is not a base64-encoded claim URL');
-            }
+            throw new ImporterErrorException('Token is not a base64-encoded claim URL.');
         }
     }
 
@@ -81,7 +78,6 @@ class SimpleFINService
         Log::debug(sprintf('SimpleFIN fetching transactions from: %s for account %s', $this->accessToken, $accountId));
 
         $request    = new AccountsRequest();
-        $request->setBridgeUrl($this->bridgeUrl);
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
@@ -132,7 +128,6 @@ class SimpleFINService
         Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $this->accessToken));
 
         $request    = new AccountsRequest();
-        $request->setBridgeUrl($this->bridgeUrl);
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
@@ -298,7 +293,6 @@ class SimpleFINService
         Log::debug(sprintf('SimpleFIN download transactions for account ID: "%s" from provided data structure.', $accountId));
 
         $request      = new AccountsRequest();
-        $request->setBridgeUrl($this->bridgeUrl);
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
@@ -423,12 +417,6 @@ class SimpleFINService
                 'verify'  => config('importer.connection.verify'),
             ]);
 
-            // Make POST request to claim URL with empty body
-            // Use user-provided bridge URL as Origin header for CORS
-            if ('' === $this->bridgeUrl) {
-                // throw new ImporterErrorException('SimpleFIN bridge URL not found. Please provide a valid bridge URL.');
-            }
-            Log::debug(sprintf('SimpleFIN using user-provided origin: "%s"', $this->bridgeUrl));
             $parts = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
 
@@ -436,7 +424,6 @@ class SimpleFINService
                 'headers' => [
                     'Content-Length' => '0',
                     'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
-                    // 'Origin'         => $this->bridgeUrl,
                 ],
             ]);
 
@@ -511,10 +498,6 @@ class SimpleFINService
         return $this->accessToken;
     }
 
-    public function setBridgeUrl(string $bridgeUrl): void
-    {
-        $this->bridgeUrl = $bridgeUrl;
-    }
 
     public function setSetupToken(string $setupToken): void
     {

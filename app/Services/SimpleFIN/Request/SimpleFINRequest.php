@@ -45,7 +45,6 @@ abstract class SimpleFINRequest
     private array $parameters   = [];
     private float $timeOut;
 
-    private string $bridgeUrl   = '';
     private string $accessToken = '';
 
     /**
@@ -86,7 +85,6 @@ abstract class SimpleFINRequest
             'headers' => [
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
-                'Origin'       => $this->bridgeUrl,
             ],
         ];
 
@@ -158,11 +156,6 @@ abstract class SimpleFINRequest
     protected function getTimeOut(): float
     {
         return $this->timeOut;
-    }
-
-    public function setBridgeUrl(string $bridgeUrl): void
-    {
-        $this->bridgeUrl = $bridgeUrl;
     }
 
     public function setAccessToken(string $accessToken): void

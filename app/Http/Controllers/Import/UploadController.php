@@ -307,23 +307,17 @@ class UploadController extends Controller
         Log::debug('UploadController::handleSimpleFINFlow() INVOKED'); // Unique entry marker
 
         $setupToken       = (string)$request->get('simplefin_token');
-        $bridgeUrl        = (string)$request->get('simplefin_bridge_url');
         $isDemo           = $request->boolean('use_demo');
         $accessToken      = $configuration->getAccessToken();
-        Log::debug(sprintf('handleSimpleFINFlow("%s", "%s")', $bridgeUrl, $setupToken));
+        Log::debug(sprintf('handleSimpleFINFlow("%s")', $setupToken));
 
         if ($isDemo) {
             Log::debug('Overrule info with demo info.');
             $setupToken = (string)config('simplefin.demo_token');
-            $bridgeUrl  = (string)config('simplefin.demo_url');
         }
         if ('' === $setupToken && '' === $accessToken) {
             $errors->add('simplefin_token', 'SimpleFIN token is required.');
         }
-        if ('' !== $bridgeUrl && false === filter_var($bridgeUrl, FILTER_VALIDATE_URL) && '' === $accessToken) {
-            $errors->add('simplefin_bridge_url', 'Bridge URL must be a valid URL.');
-        }
-
         if ($errors->count() > 0) {
             Log::debug('Errors in SimpleFIN flow, return to upload form.');
 
@@ -331,13 +325,11 @@ class UploadController extends Controller
         }
 
         // Store data in session (may be empty).
-        session()->put(Constants::SIMPLEFIN_BRIDGE_URL, $bridgeUrl);
         session()->put(Constants::SIMPLEFIN_TOKEN, $setupToken);
 
         // create service:
         /** @var SimpleFINService $simpleFINService */
         $simpleFINService = app(SimpleFINService::class);
-        $simpleFINService->setBridgeUrl($bridgeUrl);
         $simpleFINService->setSetupToken($setupToken);
         $simpleFINService->setConfiguration($configuration);
         $simpleFINService->setAccessToken($accessToken);
