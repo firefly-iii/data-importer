@@ -427,14 +427,14 @@ class SimpleFINService
             // Make POST request to claim URL with empty body
             // Use user-provided bridge URL as Origin header for CORS
             if ('' === $this->bridgeUrl) {
-                throw new ImporterErrorException('SimpleFIN bridge URL not found. Please provide a valid bridge URL.');
+                // throw new ImporterErrorException('SimpleFIN bridge URL not found. Please provide a valid bridge URL.');
             }
-            Log::debug(sprintf('SimpleFIN using user-provided Origin: %s', $this->bridgeUrl));
+            Log::debug(sprintf('SimpleFIN using user-provided origin: "%s"', $this->bridgeUrl));
 
             $response  = $client->post($claimUrl, [
                 'headers' => [
                     'Content-Length' => '0',
-                    'Origin'         => $this->bridgeUrl,
+                    // 'Origin'         => $this->bridgeUrl,
                 ],
             ]);
 
