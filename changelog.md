@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Various SimpleFIN optimizations, drops the "CORS URL" from the required fields.
 
 ### Fixed
-- #10599
+- [Discussion 10599](https://github.com/orgs/firefly-iii/discussions/10599) (Issue with simpleFIN importing) started by @DrEthan77
 
 ## v1.7.6 - 2025-07-15
 
