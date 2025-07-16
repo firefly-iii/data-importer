@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - [Issue 10590](https://github.com/firefly-iii/firefly-iii/issues/10590) ([Importer] SimpleFIN Bridge fails on zero transaction imports) reported by @wyomatthew
 - [Issue 10556](https://github.com/firefly-iii/firefly-iii/issues/10556) (Save the connection string for subsequent SimpleFIN imports) reported by @Gsyltc
-- #10580
+- [Issue 10580](https://github.com/firefly-iii/firefly-iii/issues/10580) ([Importer] GoCardless account matching UI is broken in dark mode) reported by @avee87
 - [PR 882](https://github.com/firefly-iii/data-importer/pull/882) (This PR fixes issue 8296) by @TomVarga
 
 ## v1.7.5 - 2025-07-06

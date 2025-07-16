@@ -27,7 +27,6 @@ namespace App\Services\SimpleFIN;
 
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\SimpleFIN\Request\AccountsRequest;
 use DateTime;
