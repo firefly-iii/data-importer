@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.7 - 2025-07-16
+
+### Changed
+- Various SimpleFIN optimizations, drops the "CORS URL" from the required fields.
+
 ## v1.7.6 - 2025-07-15
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
