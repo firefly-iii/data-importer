@@ -364,6 +364,7 @@ trait IsReadyForStep
             case 'map':
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
                     Log::debug('SimpleFIN: Mapping complete, cannot map again.');
+
                     return false;
                 }
 
