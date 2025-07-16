@@ -419,13 +419,15 @@ class SimpleFINService
 
             $parts = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
+            $headers = [
+                'Content-Length' => '0',
+                'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
+                'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
+            ];
+            Log::debug('Headers for claim URL exchange', $headers);
 
             $response  = $client->post($claimUrl, [
-                'headers' => [
-                    'Content-Length' => '0',
-                    'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
-                    'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
-                ],
+                'headers' => $headers,
             ]);
 
             $accessUrl = (string)$response->getBody();
