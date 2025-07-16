@@ -57,7 +57,7 @@ class PostNewTokenRequest extends Request
                     'headers' => [
                         'accept'       => 'application/json',
                         'content-type' => 'application/json',
-                        'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_b')),
+                        'User-Agent'   => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_b')),
                     ],
                 ]
             );
