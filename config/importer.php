@@ -118,4 +118,10 @@ return [
         'ISO-8859-16',
         'Windows-1251',
     ],
+    // some random lines for the data importer to use.
+    'line_a' => 'Everything precious is fragile',
+    'line_b' => 'Forgive yourself for not being at peace.',
+    'line_c' => 'Doesnt look like anything to me.',
+    'line_d' => 'Don’t feel so sorry for yourself. Make do.',
+    'line_e' => 'All the decisive blows are struck left-handed.',
 ];

@@ -96,7 +96,7 @@ class TokenController extends Controller
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
             'headers'         => [
-                'User-Agent' => sprintf('Mozilla/5.0 FF3-importer %s token callback', config('importer.version')),
+                'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c')),
             ],
         ];
 
