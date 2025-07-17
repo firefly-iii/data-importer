@@ -366,12 +366,8 @@ class ConfigurationController extends Controller
             }
 
         }
-
         $configuration->updateDateRange();
-
         // Map data option is now user-selectable for SimpleFIN via checkbox
-
-        $json                = '{}';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
