@@ -47,9 +47,9 @@ class TransactionTransformer
     private array $pendingTransactionClusters = []; // For clustering similar transactions in clean instances
 
     public function __construct()
-{
-    bcscale(12);
-}
+    {
+        bcscale(12);
+    }
 
     /**
      * Transform SimpleFIN transaction data (array) to Firefly III transaction format
@@ -65,7 +65,7 @@ class TransactionTransformer
         $amount                = $transactionData['amount'] ?? '0.0';
 
         // Skip zero-amount transactions as they're invalid for Firefly III
-        if(0 === bccomp('0', $amount)) {
+        if (0 === bccomp('0', $amount)) {
             Log::warning('Skipping zero-amount transaction', [
                 'transaction_id' => $transactionData['id'] ?? 'unknown',
                 'description'    => $transactionData['description'] ?? 'unknown',
