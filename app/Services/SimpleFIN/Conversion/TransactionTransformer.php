@@ -74,13 +74,13 @@ class TransactionTransformer
         // Determine transaction type and accounts
         if ($isDeposit) {
             $type               = 'deposit';
-            $sourceAccount      = $this->getCounterAccount($transactionData, $isDeposit);
+            $sourceAccount      = $this->getCounterAccount($transactionData, true);
             $destinationAccount = $this->getFireflyAccount($simpleFINAccountData, $accountMapping, $newAccountConfig);
         }
         if (!$isDeposit) {
             $type               = 'withdrawal';
             $sourceAccount      = $this->getFireflyAccount($simpleFINAccountData, $accountMapping, $newAccountConfig);
-            $destinationAccount = $this->getCounterAccount($transactionData, $isDeposit);
+            $destinationAccount = $this->getCounterAccount($transactionData, false);
         }
 
         // Use 'posted' date as the primary transaction date.
@@ -123,7 +123,6 @@ class TransactionTransformer
             'original_source'       => 'simplefin-v1',
             'recurrence_id'         => null,
             'bunq_payment_id'       => null,
-            'import_hash_v2'        => $this->generateImportHash($transactionData, $simpleFINAccountData),
             'sepa_cc'               => null,
             'sepa_ct_op'            => null,
             'sepa_ct_id'            => null,
@@ -218,6 +217,8 @@ class TransactionTransformer
                 }
             }
         }
+        // Fallback: extract meaningful counter account name from description
+        $counterAccountName = $this->extractCounterAccountName($description);
 
         // Check if automatic account creation is enabled
         if (!config('simplefin.auto_create_expense_accounts', true)) {
@@ -227,20 +228,16 @@ class TransactionTransformer
                 $description
             ));
 
-            // Return a generic account name instead of creating new ones
-            $genericAccountName = $isDeposit ? 'Unmatched Revenue' : 'Unmatched Expenses';
-
             return [
                 'id'     => null,
-                'name'   => $genericAccountName,
+                'name'   => $counterAccountName,
                 'iban'   => null,
                 'number' => null,
                 'bic'    => null,
             ];
         }
 
-        // Fallback: extract meaningful counter account name from description
-        $counterAccountName = $this->extractCounterAccountName($description);
+
 
         Log::info(sprintf(
             'Creating new %s account "%s" for transaction "%s"',
