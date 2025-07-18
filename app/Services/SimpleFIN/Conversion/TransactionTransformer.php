@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Conversion;
 
+use App\Services\CSV\Converter\Amount;
 use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
@@ -45,6 +46,11 @@ class TransactionTransformer
     private bool $accountsCollected           = false;
     private array $pendingTransactionClusters = []; // For clustering similar transactions in clean instances
 
+    public function __construct()
+{
+    bcscale(12);
+}
+
     /**
      * Transform SimpleFIN transaction data (array) to Firefly III transaction format
      *
@@ -56,10 +62,10 @@ class TransactionTransformer
     public function transform(array $transactionData, array $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {
         // Ensure amount is a float. SimpleFIN provides it as a string.
-        $amount                = isset($transactionData['amount']) ? (float) $transactionData['amount'] : 0.0;
+        $amount                = isset($transactionData['amount']) ? (float) $transactionData['amount'] : '0.0';
 
         // Skip zero-amount transactions as they're invalid for Firefly III
-        if (0.0 === abs($amount)) {
+        if(0 === bccomp('0', $amount)) {
             Log::warning('Skipping zero-amount transaction', [
                 'transaction_id' => $transactionData['id'] ?? 'unknown',
                 'description'    => $transactionData['description'] ?? 'unknown',
@@ -68,8 +74,8 @@ class TransactionTransformer
             return [];
         }
 
-        $isDeposit             = $amount >= 0;
-        $absoluteAmount        = abs($amount);
+        $isDeposit             = -1 === bccomp('0', $amount);
+        $absoluteAmount        = Amount::positive($amount);
 
         // Determine transaction type and accounts
         if ($isDeposit) {
@@ -91,7 +97,7 @@ class TransactionTransformer
         return [
             'type'                  => $type,
             'date'                  => $transactionDateCarbon->format('Y-m-d'),
-            'amount'                => number_format($absoluteAmount, 2, '.', ''),
+            'amount'                => $absoluteAmount,
             'description'           => $this->sanitizeDescription($transactionData['description'] ?? 'N/A'),
             'source_id'             => $sourceAccount['id'] ?? null,
             'source_name'           => $sourceAccount['name'] ?? null,
@@ -103,40 +109,15 @@ class TransactionTransformer
             'destination_iban'      => $destinationAccount['iban'] ?? null,
             'destination_number'    => $destinationAccount['number'] ?? null,
             'destination_bic'       => $destinationAccount['bic'] ?? null,
-            'currency_id'           => null,
             'currency_code'         => $this->getCurrencyCode($simpleFINAccountData),
-            'foreign_currency_id'   => null,
-            'foreign_currency_code' => null,
-            'foreign_amount'        => null,
-            'budget_id'             => null,
-            'budget_name'           => null,
-            'category_id'           => null,
             'category_name'         => $this->extractCategory($transactionData),
-            'bill_id'               => null,
-            'bill_name'             => null,
             'reconciled'            => false,
             'notes'                 => $this->buildNotes($transactionData),
             'tags'                  => $this->extractTags($transactionData),
             'internal_reference'    => $transactionData['id'] ?? null,
             'external_id'           => $this->buildExternalId($transactionData, $simpleFINAccountData),
-            'external_url'          => null,
-            'original_source'       => 'simplefin-v1',
-            'recurrence_id'         => null,
-            'bunq_payment_id'       => null,
-            'sepa_cc'               => null,
-            'sepa_ct_op'            => null,
-            'sepa_ct_id'            => null,
-            'sepa_db'               => null,
-            'sepa_country'          => null,
-            'sepa_ep'               => null,
-            'sepa_ci'               => null,
-            'sepa_batch_id'         => null,
-            'interest_date'         => null,
             'book_date'             => $this->getBookDate($transactionData),
             'process_date'          => $this->getProcessDate($transactionData),
-            'due_date'              => null,
-            'payment_date'          => null,
-            'invoice_date'          => null,
         ];
     }
 
@@ -239,12 +220,7 @@ class TransactionTransformer
 
 
 
-        Log::info(sprintf(
-            'Creating new %s account "%s" for transaction "%s"',
-            $isDeposit ? 'revenue' : 'expense',
-            $counterAccountName,
-            $description
-        ));
+        Log::info(sprintf('Creating new %s account "%s" for transaction "%s"', $isDeposit ? 'revenue' : 'expense', $counterAccountName, $description));
 
         return [
             'id'     => null,
@@ -376,7 +352,7 @@ class TransactionTransformer
 
             foreach ($noteFields as $field) {
                 if (isset($extra[$field]) && '' !==  (string) $extra[$field]) {
-                    $notes[] = sprintf('%s: %s', ucfirst($field), $extra[$field]);
+                    $notes[] = sprintf('- %s: %s', ucfirst($field), $extra[$field]);
                 }
             }
         }
@@ -390,25 +366,6 @@ class TransactionTransformer
     private function buildExternalId(array $transactionData, array $simpleFINAccountData): string
     {
         return sprintf('simplefin-%s-%s', $simpleFINAccountData['id'] ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
-    }
-
-    /**
-     * Generate import hash for duplicate detection
-     */
-    private function generateImportHash(array $transactionData, array $simpleFINAccountData): string
-    {
-        $postedTimestamp = isset($transactionData['posted']) ? (int)$transactionData['posted'] : Carbon::now()->getTimestamp();
-        $date            = Carbon::createFromTimestamp($postedTimestamp)->format('Y-m-d');
-
-        $data            = [
-            'account_id'     => $simpleFINAccountData['id'] ?? 'unknown_account',
-            'transaction_id' => $transactionData['id'] ?? 'unknown_transaction',
-            'amount'         => $transactionData['amount'] ?? '0.00',
-            'description'    => $transactionData['description'] ?? 'N/A',
-            'date'           => $date,
-        ];
-
-        return hash('sha256', json_encode($data));
     }
 
     /**
@@ -524,12 +481,7 @@ class TransactionTransformer
         // Try fuzzy matching if no exact match found
         $bestMatch             = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
         if (null !== $bestMatch && [] !== $bestMatch) {
-            Log::debug(sprintf(
-                'Fuzzy match found: "%s" -> "%s" (similarity: %.2f)',
-                $description,
-                $bestMatch['account']['name'],
-                $bestMatch['similarity']
-            ));
+            Log::debug(sprintf('Fuzzy match found: "%s" -> "%s" (similarity: %.2f)', $description, $bestMatch['account']['name'], $bestMatch['similarity']));
 
             return $bestMatch['account'];
         }
