@@ -62,7 +62,7 @@ class TransactionTransformer
     public function transform(array $transactionData, array $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {
         // Ensure amount is a float. SimpleFIN provides it as a string.
-        $amount                = isset($transactionData['amount']) ? (float) $transactionData['amount'] : '0.0';
+        $amount                = $transactionData['amount'] ?? '0.0';
 
         // Skip zero-amount transactions as they're invalid for Firefly III
         if(0 === bccomp('0', $amount)) {
@@ -365,7 +365,7 @@ class TransactionTransformer
      */
     private function buildExternalId(array $transactionData, array $simpleFINAccountData): string
     {
-        return sprintf('simplefin-%s-%s', $simpleFINAccountData['id'] ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
+        return sprintf('ff3-%s-%s', $simpleFINAccountData['id'] ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
     }
 
     /**
