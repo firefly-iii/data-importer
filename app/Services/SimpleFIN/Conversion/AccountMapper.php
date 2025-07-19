@@ -305,13 +305,8 @@ class AccountMapper
     {
         $this->loadFireflyAccounts();
 
-        foreach ($this->fireflyAccounts as $account) {
-            if ($account->id === $id) {
-                return $account;
-            }
-        }
+        return array_find($this->fireflyAccounts, fn($account) => $account->id === $id);
 
-        return null;
     }
 
     /**
@@ -419,13 +414,8 @@ class AccountMapper
             'Temporary failure in name resolution',
         ];
 
-        foreach ($retryableErrors as $retryableError) {
-            if (false !== stripos($errorMessage, $retryableError)) {
-                return true;
-            }
-        }
+        return array_any($retryableErrors, fn($retryableError) => false !== stripos($errorMessage, $retryableError));
 
-        return false;
     }
 
     /**

@@ -75,7 +75,7 @@ class ColumnValue
     public function getParsedValue()
     {
         if (0 !== $this->mappedValue) {
-            // @noinspection UnnecessaryCastingInspection
+            /** @noinspection UnnecessaryCastingInspection */
             return (int) $this->mappedValue;
         }
 

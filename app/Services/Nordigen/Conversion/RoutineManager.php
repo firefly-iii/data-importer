@@ -229,13 +229,8 @@ class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        foreach ($accounts as $account) {
-            if ($account['id'] === $accountId) {
-                return $account;
-            }
-        }
+        return array_find($accounts, fn($account) => $account['id'] === $accountId);
 
-        return null;
     }
 
     /**

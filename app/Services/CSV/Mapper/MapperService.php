@@ -200,15 +200,10 @@ class MapperService
     private static function getMappableFieldsForCamt(): array
     {
         $fields = config('camt.fields');
-        $return = [];
 
         /** @var array $field */
-        foreach ($fields as $name => $field) {
-            if ($field['mappable']) {
-                $return[$name] = $field;
-            }
-        }
-
-        return $return;
+        return array_filter($fields, function ($field) {
+            return $field['mappable'];
+        });
     }
 }
