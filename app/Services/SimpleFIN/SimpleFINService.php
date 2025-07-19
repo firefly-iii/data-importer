@@ -30,8 +30,6 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\SimpleFIN\Request\AccountsRequest;
 use Carbon\Carbon;
-use DateTime;
-use DateTimeZone;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -44,7 +42,6 @@ use Illuminate\Support\Facades\Log;
 class SimpleFINService
 {
     private string $accessToken = '';
-    private string $accessUrl = '';
     private string $setupToken = '';
     private Configuration $configuration;
 
@@ -106,54 +103,6 @@ class SimpleFINService
         return $return;
     }
 
-    private function getTransactions(string $accountId): array
-    {
-        // account
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        Log::debug(sprintf('SimpleFIN fetching transactions from: %s for account %s', $this->accessToken, $accountId));
-
-        $request = new AccountsRequest();
-        $request->setAccessToken($this->accessToken);
-        $request->setTimeOut($this->getTimeout());
-
-        var_dump($this->configuration->getDateRange());
-
-        exit;
-
-        // Set parameters to retrieve all transactions
-        // 2025-07-05 set date to the far future, because here we are not interested in any transactions.
-        $parameters = [
-            'start-date' => 2073594480, // Sept 17, 2035 12:28 GMT+2
-            'pending' => 0,
-            'account' => $accountId,
-        ];
-        $request->setParameters($parameters);
-
-        Log::debug('SimpleFIN requesting all transactions with parameters', $parameters);
-
-        try {
-            $response = $request->get();
-        } catch (ImporterHttpException $e) {
-            throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
-        }
-
-        if ($response->hasError()) {
-            throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
-        }
-
-        $accounts = $response->getAccounts();
-
-        if (0 === count($accounts)) {
-            Log::warning('SimpleFIN API returned no accounts');
-
-            return [];
-        }
-
-        Log::debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
-
-        return $accounts;
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -205,6 +154,7 @@ class SimpleFINService
      * @param string $accountId the ID of the account for which to extract transactions
      *
      * @return array list of transaction data (associative arrays from SimpleFIN JSON)
+     * @throws ImporterErrorException
      */
     public function fetchFreshTransactions(string $accountId): array
     {
