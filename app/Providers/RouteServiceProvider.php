@@ -43,7 +43,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * In addition, it is set as the URL generator's root namespace.
      */
-    protected $namespace = 'App\Http\Controllers';
+    protected $namespace     = 'App\Http\Controllers';
 
     /**
      * Define the routes for the application.

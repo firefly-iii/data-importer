@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Log;
 class SimpleFINService
 {
     private string $accessToken = '';
-    private string $setupToken = '';
+    private string $setupToken  = '';
     private Configuration $configuration;
 
     /**
@@ -72,19 +72,19 @@ class SimpleFINService
 
     private function getFetchParams(string $accountId): array
     {
-        $return = [
-            'pending' => $this->configuration->getPendingTransactions() ? 1 : 0,
+        $return     = [
+            'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
             'start-date' => 0,
-            'account' => $accountId,
+            'account'    => $accountId,
         ];
-        $dateAfter = $this->configuration->getDateNotBefore();
+        $dateAfter  = $this->configuration->getDateNotBefore();
         $dateBefore = $this->configuration->getDateNotAfter();
 
         // $dateAfter turns into the 'start-date' parameter.
         if ('' !== $dateAfter) {
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
-                $carbon = Carbon::parse($dateAfter, config('app.timezone'));
+                $carbon               = Carbon::parse($dateAfter, config('app.timezone'));
                 $return['start-date'] = $carbon->getTimestamp();
             } catch (Exception) {
                 Log::error(sprintf('Invalid date format for "dateAfter": %s', $dateAfter));
@@ -93,7 +93,7 @@ class SimpleFINService
         if ('' !== $dateBefore) {
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
-                $carbon = Carbon::parse($dateBefore, config('app.timezone'));
+                $carbon             = Carbon::parse($dateBefore, config('app.timezone'));
                 $return['end-date'] = $carbon->getTimestamp();
             } catch (Exception) {
                 Log::error(sprintf('Invalid date format for "dateBefore": %s', $dateBefore));
@@ -111,7 +111,7 @@ class SimpleFINService
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $this->accessToken));
 
-        $request = new AccountsRequest();
+        $request    = new AccountsRequest();
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
@@ -134,7 +134,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
-        $accounts = $response->getAccounts();
+        $accounts   = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -154,6 +154,7 @@ class SimpleFINService
      * @param string $accountId the ID of the account for which to extract transactions
      *
      * @return array list of transaction data (associative arrays from SimpleFIN JSON)
+     *
      * @throws ImporterErrorException
      */
     public function fetchFreshTransactions(string $accountId): array
@@ -161,13 +162,13 @@ class SimpleFINService
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('SimpleFIN download transactions for account ID: "%s" from provided data structure.', $accountId));
 
-        $request = new AccountsRequest();
+        $request      = new AccountsRequest();
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions
         // #10599 and #10602 add date information.
-        $parameters = $this->getFetchParams($accountId);
+        $parameters   = $this->getFetchParams($accountId);
         $request->setParameters($parameters);
 
         Log::debug('SimpleFIN downloading all transactions with parameters', $parameters);
@@ -182,7 +183,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
-        $accounts = $response->getAccounts();
+        $accounts     = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -230,21 +231,21 @@ class SimpleFINService
         Log::debug(sprintf('Decoded claim URL: %s', $claimUrl));
 
         try {
-            $client = new Client([
+            $client    = new Client([
                 'timeout' => $this->getTimeout(),
-                'verify' => config('importer.connection.verify'),
+                'verify'  => config('importer.connection.verify'),
             ]);
 
-            $parts = parse_url($claimUrl);
+            $parts     = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
-            $headers = [
+            $headers   = [
                 'Content-Length' => '0',
                 // 'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
-                'User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
+                'User-Agent'     => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
             ];
             Log::debug('Headers for claim URL exchange', $headers);
 
-            $response = $client->post($claimUrl, [
+            $response  = $client->post($claimUrl, [
                 'headers' => $headers,
             ]);
 
@@ -264,7 +265,7 @@ class SimpleFINService
             return $accessUrl;
 
         } catch (ClientException $e) {
-            $statusCode = $e->getResponse()->getStatusCode();
+            $statusCode   = $e->getResponse()->getStatusCode();
             $responseBody = (string) $e->getResponse()->getBody();
 
             Log::error(sprintf('SimpleFIN claim URL exchange failed with HTTP %d: %s', $statusCode, $e->getMessage()));
@@ -327,7 +328,7 @@ class SimpleFINService
     public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
-        $this->accessToken = $configuration->getAccessToken();
+        $this->accessToken   = $configuration->getAccessToken();
     }
 
     public function setAccessToken(string $accessToken): void
