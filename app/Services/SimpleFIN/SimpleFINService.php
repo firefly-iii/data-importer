@@ -246,36 +246,6 @@ class SimpleFINService
     }
 
     /**
-     * Test connectivity to SimpleFIN API with given credentials
-     */
-    public function testConnection(string $token, string $apiUrl): bool
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-
-        try {
-            $accounts = $this->fetchAccountsAndInitialData($token, $apiUrl);
-            Log::debug(sprintf('[%s] SimpleFIN connection test successful', config('importer.version')));
-
-            return true;
-        } catch (ImporterErrorException | ImporterHttpException $e) {
-            Log::error(sprintf('[%s] SimpleFIN connection test failed: %s', config('importer.version'), $e->getMessage()));
-
-            return false;
-        }
-    }
-
-    /**
-     * Get demo credentials for testing
-     */
-    public function getDemoCredentials(): array
-    {
-        return [
-            'token' => config('simplefin.demo_token'),
-            'url' => config('simplefin.demo_url'),
-        ];
-    }
-
-    /**
      * Check if a token is a base64-encoded claim URL
      */
     private function isBase64ClaimUrl(string $token): bool
