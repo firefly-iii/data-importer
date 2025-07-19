@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCurrenciesRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetCurrenciesResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,6 +54,7 @@ class TransactionCurrencies implements MapperInterface
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
+            /** @var GetCurrenciesResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

@@ -126,19 +126,20 @@ class ExpenseRevenueAccounts implements MapperInterface
             $name                         = $account->name;
 
             // Add optgroup to result
-            $group                        = trans(sprintf('import.account_types_%s', $account->type));
+            $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
 
         // Sort each group
-        foreach ($result as $group => $accounts) {
-            asort($accounts, SORT_STRING);
-            $result[$group] = $accounts;
+        $newResult = [];
+        foreach ($result as $group => $array) {
+            asort($array, SORT_STRING);
+            $newResult[$group] = $array;
         }
+        unset($result, $array);
 
         // Create new account functionality temporarily removed for stock compatibility
-
-        return $result;
+        return $newResult;
     }
 }

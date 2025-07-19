@@ -31,6 +31,7 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
+use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -57,7 +58,7 @@ trait GetAccounts
         $request->setType(GetAccountsRequest::ALL);
 
         try {
-            /** @var GetAccountsResponse $response */
+            /** @var GetAccountsResponse|null $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -109,7 +110,7 @@ trait GetAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
-            /** @var GetAccountsResponse $response */
+            /** @var GetAccountsResponse|null $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -175,16 +176,18 @@ trait GetAccounts
             }
 
             // add optgroup to result:
-            $group                        = trans(sprintf('import.account_types_%s', $account->type));
+            $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
-        foreach ($result as $group => $accounts) {
-            asort($accounts, SORT_STRING);
-            $result[$group] = $accounts;
+        $newResult = [];
+        foreach ($result as $group => $array) {
+            asort($array, SORT_STRING);
+            $newResult[$group] = $array;
         }
+        unset($result, $array);
 
-        return $result;
+        return $newResult;
     }
 
     /**
@@ -206,17 +209,19 @@ trait GetAccounts
             if (null !== $account->iban) {
                 $name                         = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
-                $group                        = trans(sprintf('import.account_types_%s', $account->type));
+                $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
                 $result[$group] ??= [];
                 $result[$group][$account->id] = $name;
             }
         }
 
-        foreach ($result as $group => $accounts) {
-            asort($accounts, SORT_STRING);
-            $result[$group] = $accounts;
+        $newResult = [];
+        foreach ($result as $group => $array) {
+            asort($array, SORT_STRING);
+            $newResult[$group] = $array;
         }
+        unset($result, $array);
 
-        return $result;
+        return $newResult;
     }
 }

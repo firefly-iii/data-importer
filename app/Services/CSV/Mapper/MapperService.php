@@ -82,7 +82,7 @@ class MapperService
             // $row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
             foreach ($row as $columnIndex => $column) {
-                if (!isset($data[$columnIndex])) {
+                if (!array_key_exists($columnIndex, $data)) {
                     // don't need to handle this. Continue.
                     continue;
                 }
@@ -201,8 +201,7 @@ class MapperService
     {
         $fields = config('camt.fields');
 
-        /** @var array $field */
-        return array_filter($fields, function ($field) {
+        return array_filter($fields, function (array $field) {
             return $field['mappable'];
         });
     }
