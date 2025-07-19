@@ -29,7 +29,7 @@ class TransactionExtractor
         $totalCount   = count($statements);
 
         /**
-         * @var int           $index
+         * @var int           $i
          * @var CamtStatement $statement
          */
         foreach ($statements as $i => $statement) { // -> Level B

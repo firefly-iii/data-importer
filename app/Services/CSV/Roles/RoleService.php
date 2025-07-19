@@ -82,7 +82,7 @@ class RoleService
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
-                $headers = $records->fetchOne();
+                $headers = $records->first();
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -98,7 +98,7 @@ class RoleService
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
-                $count   = count($records->fetchOne());
+                $count = count($records->first());
                 Log::debug(sprintf('Role service: first row has %d columns', $count));
                 for ($i = 0; $i < $count; ++$i) {
                     $headers[] = sprintf('Column #%d', $i + 1);
@@ -222,6 +222,7 @@ class RoleService
                 break;
             }
             foreach ($fieldNames as $name) {
+                $name = (string)$name;
                 if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
                     if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         continue;
@@ -247,7 +248,8 @@ class RoleService
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], fn (string $value) => '' !== $value);
+            // filter disabled, since empty values are already removed.
+            // $examples[$key] = array_filter($examples[$key], fn (string $value) => '' !== $value);
         }
 
         return $examples;
