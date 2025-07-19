@@ -337,11 +337,11 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
-
             case 'authenticate':
                 // simpleFIN needs no authentication.
                 return false;
 
+            case 'service-validation':
             case 'upload-files':
                 // you can always upload SimpleFIN things
                 return true;
