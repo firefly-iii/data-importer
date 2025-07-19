@@ -26,15 +26,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
     /**
      * The number of times the job may be attempted.
-     *
-     * @var int
      */
-    public int $tries = 1;
+    public int $tries   = 1;
 
     /**
      * The maximum number of seconds the job can run for.
-     *
-     * @var int
      */
     public int $timeout = 1800;
 
