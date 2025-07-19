@@ -33,6 +33,7 @@ use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Exception;
+use const PHP_SAPI;
 
 class DebugController extends Controller
 {
@@ -127,7 +128,7 @@ class DebugController extends Controller
             'base_build'  => $baseBuild,
             'php_version' => str_replace($search, $replace, PHP_VERSION),
             'php_os'      => str_replace($search, $replace, PHP_OS),
-            'interface'   => \PHP_SAPI,
+            'interface'   => PHP_SAPI,
         ];
     }
 
@@ -156,7 +157,7 @@ class DebugController extends Controller
             E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_ERROR | E_CORE_ERROR => 'E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR',
         ];
 
-        return $array[$value] ?? sprintf('flags: %s', (string)$value);
+        return $array[$value] ?? sprintf('flags: %s', $value);
     }
 
     private function getUserInfo(): array

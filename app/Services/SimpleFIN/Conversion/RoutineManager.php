@@ -61,10 +61,9 @@ class RoutineManager implements RoutineManagerInterface
 
         Log::debug('Constructed SimpleFIN RoutineManager');
 
-        $this->identifier       = $identifier ?? Str::random(16);
+        $this->identifier       = $identifier ?? Str::random(); // 16
         $this->simpleFINService = app(SimpleFINService::class);
-        $this->accountMapper    = new AccountMapper();
-        $this->transformer      = new TransactionTransformer($this->accountMapper);
+        $this->transformer      = new TransactionTransformer();
     }
 
     public function getIdentifier(): string

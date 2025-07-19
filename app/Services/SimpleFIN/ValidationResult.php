@@ -7,12 +7,12 @@ namespace App\Services\SimpleFIN;
 /**
  * Validation result container
  */
-class ValidationResult
+readonly class ValidationResult
 {
     public function __construct(
-        private readonly bool $isValid,
-        private readonly array $errors = [],
-        private readonly array $warnings = []
+        private bool  $isValid,
+        private array $errors = [],
+        private array $warnings = []
     ) {}
 
     public function isValid(): bool

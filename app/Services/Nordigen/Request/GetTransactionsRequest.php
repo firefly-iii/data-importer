@@ -38,20 +38,12 @@ use Illuminate\Support\Facades\Log;
  */
 class GetTransactionsRequest extends Request
 {
-    private string $identifier;
-
     public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
-        $this->setIdentifier($identifier);
         $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**

@@ -56,7 +56,7 @@ class ListBanksResponse extends Response implements Iterator, Countable
             $this->addToCountries($object, $bank['countries']);
         }
         ksort($this->countries);
-        $this->collection = new Collection(array_values($this->countries));
+        $this->collection = new Collection()->push(...array_values($this->countries));
     }
 
     private function processCountries(array $bank): void

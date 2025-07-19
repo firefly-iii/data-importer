@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpInconsistentReturnPointsInspection */
 
 /*
  * GetAccountBalanceRequest.php

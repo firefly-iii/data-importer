@@ -52,7 +52,7 @@ class ListAccountsResponse extends Response implements Iterator, Countable
             Log::debug(sprintf('ListAccountsResponse includes account "%s"', $account));
             $this->accounts[] = Account::createFromIdentifier($account);
         }
-        $this->collection = new Collection($this->accounts);
+        $this->collection = new Collection()->push(...$this->accounts);
     }
 
     /**

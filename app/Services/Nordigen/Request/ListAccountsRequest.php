@@ -37,20 +37,13 @@ use App\Services\Shared\Response\Response;
  */
 class ListAccountsRequest extends Request
 {
-    private string $identifier;
 
     public function __construct(string $url, string $identifier, string $token)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
-        $this->setIdentifier($identifier);
         $this->setUrl(sprintf('api/v2/requisitions/%s/', $identifier));
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     /**

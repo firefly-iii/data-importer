@@ -148,7 +148,7 @@ trait CollectsAccounts
                 continue;
             }
             $iban   = $this->filterSpaces($iban);
-            $number = sprintf('%s.', (string) $entry->number);
+            $number = sprintf('%s.', $entry->number);
             if ('.' !== $number) {
                 $number       = $this->filterSpaces((string) $entry->number);
                 $key          = sprintf('nr_%s', $number);

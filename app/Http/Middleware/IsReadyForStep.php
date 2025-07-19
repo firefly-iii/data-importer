@@ -693,6 +693,7 @@ trait IsReadyForStep
     {
         Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
 
+        /** @noinspection PhpSwitchStatementWitSingleBranchInspection */
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));
