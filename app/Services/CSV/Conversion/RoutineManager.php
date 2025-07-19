@@ -56,13 +56,11 @@ class RoutineManager implements RoutineManagerInterface
     private Configuration              $configuration;
     private string                     $content;
     private CSVFileProcessor           $csvFileProcessor;
-    private bool                       $forceCli = false;
     private LineProcessor              $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
 
     public function __construct(?string $identifier)
     {
-        $this->forceCli      = false; // used in POST auto import
         $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
@@ -106,11 +104,6 @@ class RoutineManager implements RoutineManagerInterface
     public function setContent(string $content): void
     {
         $this->content = $content;
-    }
-
-    public function setForceCli(bool $forceCli): void
-    {
-        $this->forceCli = $forceCli;
     }
 
     /**

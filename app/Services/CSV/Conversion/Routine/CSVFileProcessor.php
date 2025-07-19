@@ -72,6 +72,7 @@ class CSVFileProcessor
 
         try {
             $stmt    = new Statement()->offset($offset);
+            /** @var ResultSet $records */
             $records = $stmt->process($this->reader);
         } catch (Exception $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

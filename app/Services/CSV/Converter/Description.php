@@ -32,12 +32,8 @@ class Description implements ConverterInterface
 {
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return string
      */
-    public function convert($value)
+    public function convert(mixed $value): string
     {
         return trim((string) $value);
     }

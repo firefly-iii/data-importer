@@ -34,12 +34,8 @@ class BankDebitCredit implements ConverterInterface
 {
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return mixed
      */
-    public function convert($value): int
+    public function convert(mixed $value): int
     {
         Log::debug('Going to convert ', ['value' => $value]);
 

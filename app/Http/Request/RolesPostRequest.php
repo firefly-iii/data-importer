@@ -78,7 +78,7 @@ class RolesPostRequest extends Request
 
     protected function validateAmountRole(Validator $validator): void
     {
-        $data  = $validator->getData();
+        $data  = $validator->getData(); // @phpstan-ignore-line
         $roles = $data['roles'] ?? [];
         $count = 0;
         foreach ($roles as $role) {

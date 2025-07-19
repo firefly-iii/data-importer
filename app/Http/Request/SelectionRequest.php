@@ -60,7 +60,7 @@ class SelectionRequest extends Request
     {
         $validator->after(
             function (Validator $validator): void {
-                $data    = $validator->getData();
+                $data    = $validator->getData(); // @phpstan-ignore-line
                 $country = $data['country'];
                 $key     = sprintf('bank_%s', $country);
                 $value   = $data[$key] ?? 'XX';

@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Bill;
 use GrumpyDictator\FFIIIApiSupport\Request\GetBillsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetBillsResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,6 +54,7 @@ class Bills implements MapperInterface
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
+            /** @var GetBillsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

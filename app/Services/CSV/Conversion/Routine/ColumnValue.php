@@ -76,7 +76,7 @@ class ColumnValue
     {
         if (0 !== $this->mappedValue) {
             /** @noinspection UnnecessaryCastingInspection */
-            return (int) $this->mappedValue;
+            return $this->mappedValue;
         }
 
         // run converter on data:

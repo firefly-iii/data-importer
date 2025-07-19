@@ -52,7 +52,6 @@ class RoutineManager implements RoutineManagerInterface
     use ProgressInformation;
 
     private string               $content;
-    private bool                 $forceCli = false;
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
@@ -93,11 +92,6 @@ class RoutineManager implements RoutineManagerInterface
     public function setContent(string $content): void
     {
         $this->content = $content;
-    }
-
-    public function setForceCli(bool $forceCli): void
-    {
-        $this->forceCli = $forceCli;
     }
 
     public function start(): array

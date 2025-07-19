@@ -31,10 +31,8 @@ class AmountNegated implements ConverterInterface
 {
     /**
      * Negate amount.
-     *
-     * @param mixed $value
      */
-    public function convert($value): string
+    public function convert(mixed $value): string
     {
         /** @var ConverterInterface $converter */
         $converter = app(Amount::class);

@@ -53,10 +53,8 @@ class Amount implements ConverterInterface
      * Some people, when confronted with a problem, think "I know, I'll use regular expressions." Now they have two
      * problems.
      * - Jamie Zawinski.
-     *
-     * @param mixed $value
      */
-    public function convert($value): string
+    public function convert(mixed $value): string
     {
         if (null === $value || '' === $value) {
             return '0';
@@ -178,7 +176,7 @@ class Amount implements ConverterInterface
         // have to strip the € because apparently the Postbank (DE) thinks "1.000,00 €" is a normal way to format a number.
         // 2020-12-01 added "EUR" because another German bank doesn't know what a data format is.
         // This way of stripping exceptions is unsustainable.
-        $value = trim((string) str_replace(['€', 'EUR'], '', $value));
+        $value = trim(str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
         $len   = strlen((string) $str);
         if (str_starts_with((string) $str, '(') && ')' === $str[$len - 1]) {

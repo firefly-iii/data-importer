@@ -39,12 +39,8 @@ class Steam
 
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return mixed
      */
-    public function cleanString($value): string
+    public function cleanString(mixed $value): string
     {
         $value  = (string) $value;
         $search = [

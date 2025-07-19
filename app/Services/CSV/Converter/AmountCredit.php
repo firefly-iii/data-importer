@@ -31,10 +31,8 @@ class AmountCredit implements ConverterInterface
 {
     /**
      * Convert an amount, always return positive.
-     *
-     * @param mixed $value
      */
-    public function convert($value): string
+    public function convert(mixed $value): string
     {
         if (null === $value || '' === $value) {
             return '';

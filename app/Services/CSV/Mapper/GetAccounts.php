@@ -56,8 +56,8 @@ trait GetAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::ALL);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -108,8 +108,8 @@ trait GetAccounts
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -132,7 +132,7 @@ trait GetAccounts
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var GetAccountsResponse $response
+        /** @var GetAccountsResponse $response */
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {

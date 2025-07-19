@@ -119,7 +119,7 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
-        /** @var RoutineManagerInterface $routine */
+        /** @var RoutineManagerInterface|null $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {
@@ -250,7 +250,7 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
-        /** @var RoutineManagerInterface $routine */
+        /** @var RoutineManagerInterface|null $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
             if ('unknown' === $contentType || 'csv' === $contentType) {

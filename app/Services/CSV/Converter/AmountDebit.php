@@ -31,10 +31,8 @@ class AmountDebit implements ConverterInterface
 {
     /**
      * Convert amount, always return positive.
-     *
-     * @param mixed $value
      */
-    public function convert($value): string
+    public function convert(mixed $value): string
     {
         if (null === $value || '' === $value) {
             return '';

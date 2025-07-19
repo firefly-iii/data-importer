@@ -159,7 +159,7 @@ trait CollectsAccounts
         $request      = new ListAccountsRequest($url, $identifier, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var ListAccountsResponse $response
+        /** @var ListAccountsResponse $response */
         try {
             $response = $request->get();
         } catch (ImporterErrorException|ImporterHttpException $e) {

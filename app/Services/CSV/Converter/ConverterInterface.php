@@ -36,7 +36,7 @@ interface ConverterInterface
      *
      * @return mixed
      */
-    public function convert($value);
+    public function convert(mixed $value): mixed;
 
     /**
      * Add extra configuration parameters.

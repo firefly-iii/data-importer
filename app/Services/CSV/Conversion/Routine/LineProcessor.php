@@ -94,11 +94,11 @@ class LineProcessor
     private function process(array $line): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $count       = count($line);
-        $return      = [];
+        $count  = count($line);
+        $return = [];
         foreach ($line as $columnIndex => $value) {
             Log::debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
-            $value        = trim((string) $value);
+            $value        = trim((string)$value);
             $originalRole = $this->roles[$columnIndex] ?? '_ignore';
             Log::debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
             if ('_ignore' === $originalRole) {
@@ -113,13 +113,13 @@ class LineProcessor
             }
 
             // is a mapped value present?
-            $mapped       = $this->mapping[$columnIndex][$value] ?? 0;
+            $mapped = $this->mapping[$columnIndex][$value] ?? 0;
             Log::debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
             Log::debug(sprintf('Value is %s', var_export($value, true)));
             // Log::debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
-            $role         = $this->getRoleForColumn($columnIndex, $mapped);
-            $appendValue  = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
+            $role        = $this->getRoleForColumn($columnIndex, $mapped);
+            $appendValue = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
 
             if (null === $appendValue) {
                 $appendValue = false;
@@ -127,7 +127,7 @@ class LineProcessor
 
             // Log::debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
-            $columnValue  = new ColumnValue();
+            $columnValue = new ColumnValue();
             $columnValue->setValue($value);
             $columnValue->setRole($role);
             $columnValue->setAppendValue($appendValue);
@@ -140,7 +140,7 @@ class LineProcessor
                 $columnValue->setConfiguration($this->dateFormat);
             }
 
-            $return[]     = $columnValue;
+            $return[] = $columnValue;
         }
         // add a special column value for the "source"
         $columnValue = new ColumnValue();
@@ -148,7 +148,7 @@ class LineProcessor
         $columnValue->setMappedValue(0);
         $columnValue->setAppendValue(false);
         $columnValue->setRole('original-source');
-        $return[]    = $columnValue;
+        $return[] = $columnValue;
         Log::debug(sprintf('Added column #%d to denote the original source.', count($return)));
 
         return $return;
@@ -165,20 +165,20 @@ class LineProcessor
      */
     private function getRoleForColumn(int $column, int $mapped): string
     {
-        $role                           = $this->roles[$column] ?? '_ignore';
+        $role = $this->roles[$column] ?? '_ignore';
         if (0 === $mapped) {
             Log::debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
 
             return $role;
         }
-        if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
+        if (!(array_key_exists($column, $this->doMapping) && true === $this->doMapping[$column])) {
             // if the mapping has been filled in already by a role with a higher priority,
             // ignore the mapping.
             Log::debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
 
             return $role;
         }
-        $roleMapping                    = [
+        $roleMapping = [
             'account-id'            => 'account-id',
             'account-name'          => 'account-id',
             'account-iban'          => 'account-id',
@@ -200,10 +200,10 @@ class LineProcessor
             'opposing-iban'         => 'opposing-id',
             'opposing-number'       => 'opposing-id',
         ];
-        if (!isset($roleMapping[$role])) {
+        if (!array_key_exists($role, $roleMapping)) {
             throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
         }
-        $newRole                        = $roleMapping[$role];
+        $newRole = $roleMapping[$role];
         if ($newRole !== $role) {
             Log::debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
         }

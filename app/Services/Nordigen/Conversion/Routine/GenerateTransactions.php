@@ -106,7 +106,7 @@ class GenerateTransactions
             $request                   = new GetAccountInformationRequest($url, $accessToken, $nordigenIdentifier);
             $request->setTimeOut(config('importer.connection.timeout'));
 
-            // @var ArrayResponse $response
+            /** @var ArrayResponse $response */
             try {
                 $response = $request->get();
             } catch (ImporterHttpException|RateLimitException $e) {
