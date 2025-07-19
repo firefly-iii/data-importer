@@ -31,7 +31,7 @@ use Money\Money;
 
 class Transaction
 {
-    public const TIME_FORMAT = 'Y-m-d H:i:s';
+    public const string TIME_FORMAT = 'Y-m-d H:i:s';
 
     public function __construct(
         private readonly Configuration $configuration,

@@ -56,7 +56,7 @@ class ConversionController extends Controller
 {
     use RestoresConfiguration;
 
-    protected const DISK_NAME = 'jobs'; // TODO stored in several places
+    protected const string DISK_NAME = 'jobs'; // TODO stored in several places
 
     /**
      * StartController constructor.

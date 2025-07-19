@@ -52,7 +52,7 @@ class MapController extends Controller
 {
     use RestoresConfiguration;
 
-    protected const DISK_NAME = 'jobs';
+    protected const string DISK_NAME = 'jobs';
 
     /**
      * RoleController constructor.

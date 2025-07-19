@@ -45,8 +45,8 @@ use InvalidArgumentException;
  */
 class RoleService
 {
-    public const EXAMPLE_COUNT  = 7;
-    public const EXAMPLE_LENGTH = 26;
+    public const int EXAMPLE_COUNT  = 7;
+    public const int EXAMPLE_LENGTH = 26;
 
     /**
      * @throws InvalidArgument
