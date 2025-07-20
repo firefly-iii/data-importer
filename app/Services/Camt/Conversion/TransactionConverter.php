@@ -62,6 +62,7 @@ class TransactionConverter
             // the final response to this may be to join these fields or only use the last one.
             $current                  = [];
             foreach ($fieldNames as $field) {
+                $field = (string)$field;
                 $role  = $allRoles[$field] ?? '_ignore';
                 if ('_ignore' !== $role) {
                     Log::debug(sprintf('Field "%s" was given role "%s".', $field, $role));

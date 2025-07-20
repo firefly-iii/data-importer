@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Category;
 use GrumpyDictator\FFIIIApiSupport\Request\GetCategoriesRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetCategoriesResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -53,6 +54,7 @@ class Categories implements MapperInterface
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
+            /** @var GetCategoriesResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

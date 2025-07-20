@@ -33,6 +33,7 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException as GrumpyApiHttpE
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Model\AccountType;
 use GrumpyDictator\FFIIIApiSupport\Request\GetSearchAccountRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -272,8 +273,13 @@ class Accounts extends AbstractTask
         }
 
         $result = null;
+
+        if (array_key_exists('id', $array) && null === $array['id']) {
+            Log::debug('ID field is NULL, will not search for it.');
+        }
+
         // if the ID is set, at least search for the ID.
-        if (is_int($array['id']) && $array['id'] > 0) {
+        if (array_key_exists('id', $array) && is_int($array['id']) && $array['id'] > 0) {
             Log::debug('Will search by ID field.');
             $result = $this->findById((string) $array['id']);
         }
@@ -283,12 +289,9 @@ class Accounts extends AbstractTask
 
             return $return;
         }
-        if (array_key_exists('id', $array) && null === $array['id']) {
-            Log::debug('ID field is NULL, will not search for it.');
-        }
 
         // if the IBAN is set, search for the IBAN.
-        if (isset($array['iban']) && '' !== (string) $array['iban']) {
+        if (array_key_exists('iban', $array) && '' !== (string) $array['iban']) {
             Log::debug('Will search by IBAN.');
             $transactionType = (string) ($array['transaction_type'] ?? null);
             $result          = $this->findByIban((string) $array['iban'], $transactionType);
@@ -306,7 +309,7 @@ class Accounts extends AbstractTask
         // data importer will return an array with the IBAN (and optionally the name).
 
         // if the account number is set, search for the account number.
-        if (isset($array['number']) && '' !== (string) $array['number']) {
+        if (array_key_exists('number', $array) && '' !== (string) $array['number']) {
             Log::debug('Search by account number.');
             $transactionType = (string) ($array['transaction_type'] ?? null);
             $result          = $this->findByNumber((string) $array['number'], $transactionType);
@@ -322,7 +325,7 @@ class Accounts extends AbstractTask
         }
 
         // find by name, return only if it's an asset or liability account.
-        if (isset($array['name']) && '' !== (string) $array['name']) {
+        if (array_key_exists('name', $array)  && '' !== (string) $array['name']) {
             Log::debug('Search by name.');
             $result = $this->findByName((string) $array['name']);
         }
@@ -389,15 +392,15 @@ class Accounts extends AbstractTask
         $request->setField('id');
         $request->setQuery($value);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
             throw new ImporterErrorException($e->getMessage());
         }
         if (1 === count($response)) {
-            // @var Account $account
             try {
+                /** @var Account $account */
                 $account = $response->current();
             } catch (ApiException $e) {
                 throw new ImporterErrorException($e->getMessage());
@@ -427,8 +430,8 @@ class Accounts extends AbstractTask
         $request->setField('iban');
         $request->setQuery($iban);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
             throw new ImporterErrorException($e->getMessage());
@@ -440,8 +443,8 @@ class Accounts extends AbstractTask
         }
 
         if (1 === count($response)) {
-            // @var Account $account
             try {
+                /** @var Account $account */
                 $account = $response->current();
             } catch (ApiException $e) {
                 throw new ImporterErrorException($e->getMessage());
@@ -496,8 +499,8 @@ class Accounts extends AbstractTask
         $request->setField('number');
         $request->setQuery($accountNumber);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
             throw new ImporterErrorException($e->getMessage());
@@ -509,8 +512,8 @@ class Accounts extends AbstractTask
         }
 
         if (1 === count($response)) {
-            // @var Account $account
             try {
+                /** @var Account $account */
                 $account = $response->current();
             } catch (ApiException $e) {
                 throw new ImporterErrorException($e->getMessage());
@@ -565,8 +568,8 @@ class Accounts extends AbstractTask
         $request->setField('name');
         $request->setQuery($name);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         } catch (GrumpyApiHttpException $e) {
             throw new ImporterErrorException($e->getMessage());

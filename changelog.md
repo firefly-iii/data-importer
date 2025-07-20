@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.7.8 - 2025-07-20
+
+>  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Fixed
+- [Issue 10602](https://github.com/firefly-iii/firefly-iii/issues/10602) ([Importer] SimpleFIN import does not respect datetime) reported by @wyomatthew
+- [Discussion 10599](https://github.com/orgs/firefly-iii/discussions/10599) (Issue with simpleFIN importing) started by @DrEthan77
+- [Issue 10609](https://github.com/firefly-iii/firefly-iii/issues/10609) (GoCardless imports with exchange rate 0 should not add note to transaction) reported by @TomVarga
+- [PR 901](https://github.com/firefly-iii/data-importer/pull/901) by @TomVarga for issue 10609
+- [PR 905](https://github.com/firefly-iii/data-importer/pull/905) by @DrEthan77 (This PR fixes issue 10599)
+
+
 ## v1.7.7 - 2025-07-16
 
 ### Changed

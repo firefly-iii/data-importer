@@ -32,5 +32,5 @@ use App\Services\Shared\Response\Response;
  */
 class PutRefreshConnectionResponse extends Response
 {
-    public function __construct(private readonly array $data) {}
+    public function __construct(array $data) {}
 }

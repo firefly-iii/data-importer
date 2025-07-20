@@ -98,7 +98,7 @@ class LineProcessor
         $return      = [];
         foreach ($line as $columnIndex => $value) {
             Log::debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
-            $value        = trim((string) $value);
+            $value        = trim((string)$value);
             $originalRole = $this->roles[$columnIndex] ?? '_ignore';
             Log::debug(sprintf('Now at column #%d (%s), value "%s"', $columnIndex + 1, $originalRole, $value));
             if ('_ignore' === $originalRole) {
@@ -171,7 +171,7 @@ class LineProcessor
 
             return $role;
         }
-        if (!(isset($this->doMapping[$column]) && true === $this->doMapping[$column])) {
+        if (!(array_key_exists($column, $this->doMapping) && true === $this->doMapping[$column])) {
             // if the mapping has been filled in already by a role with a higher priority,
             // ignore the mapping.
             Log::debug(sprintf('Column #%d ("%s") has something already.', $column, $role));
@@ -200,7 +200,7 @@ class LineProcessor
             'opposing-iban'         => 'opposing-id',
             'opposing-number'       => 'opposing-id',
         ];
-        if (!isset($roleMapping[$role])) {
+        if (!array_key_exists($role, $roleMapping)) {
             throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
         }
         $newRole                        = $roleMapping[$role];

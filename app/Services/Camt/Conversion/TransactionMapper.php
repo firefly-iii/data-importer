@@ -61,9 +61,9 @@ class TransactionMapper
         $groupHandling = $this->configuration->getGroupedTransactionHandling();
         Log::debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; ++$i) {
-            /** @var array|bool $split */
+            /** @var array|false $split */
             $split                    = $transaction['transactions'][$i] ?? false;
-            if (is_bool($split) && false === $split) {
+            if (false === $split) {
                 Log::warning(sprintf('No split #%d found, break.', $i));
 
                 continue;
@@ -84,7 +84,7 @@ class TransactionMapper
         return $result;
     }
 
-    private function mapTransactionJournal(string $groupHandling, array $split): ?array
+    private function mapTransactionJournal(string $groupHandling, array $split): array
     {
         $current = [
             'type' => 'withdrawal', // perhaps to be overruled later.
@@ -710,12 +710,9 @@ class TransactionMapper
             $field = sprintf('%s_%s', $direction, $accountIdentificationSuffix);
             if (array_key_exists($field, $current)) {
                 // there is a value...
-                foreach ($this->allAccounts as $account) {
-                    // so we check all accounts for a match
-                    if ($current[$field] === $account->{$accountIdentificationSuffix}) {
-                        // we have a match
-                        return true;
-                    }
+                // so we check all accounts for a match
+                if (array_any($this->allAccounts, fn ($account) => $current[$field] === $account->{$accountIdentificationSuffix})) {
+                    return true;
                 }
             }
         }

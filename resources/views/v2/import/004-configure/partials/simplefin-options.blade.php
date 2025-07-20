@@ -11,8 +11,8 @@
                     <div class="col-sm-9">
                         <select name="date_range" id="date_range" class="form-control" onchange="toggleDateRangeInputs()">
                             <option value="all" @if($configuration->getDateRange() === 'all') selected @endif>All time</option>
-                            <option value="dynamic" @if($configuration->getDateRange() === 'dynamic') selected @endif>Dynamic range</option>
-                            <option value="specific" @if($configuration->getDateRange() === 'specific') selected @endif>Specific dates</option>
+                            <option value="partial" @if($configuration->getDateRange() === 'partial') selected @endif>Dynamic range</option>
+                            <option value="range" @if($configuration->getDateRange() === 'specific') selected @endif>Specific dates</option>
                         </select>
                     </div>
                 </div>
@@ -77,8 +77,8 @@
         const dynamicInputs = document.getElementById('dynamic_range_inputs');
         const specificInputs = document.getElementById('specific_dates_inputs');
 
-        dynamicInputs.style.display = (dateRangeType === 'dynamic') ? 'block' : 'none';
-        specificInputs.style.display = (dateRangeType === 'specific') ? 'block' : 'none';
+        dynamicInputs.style.display = (dateRangeType === 'partial') ? 'block' : 'none';
+        specificInputs.style.display = (dateRangeType === 'range') ? 'block' : 'none';
     }
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', toggleDateRangeInputs);

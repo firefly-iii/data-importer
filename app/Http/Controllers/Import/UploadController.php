@@ -345,7 +345,7 @@ class UploadController extends Controller
 
             return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
         }
-        $configuration->setaccessToken($accessToken);
+        $configuration->setAccessToken($accessToken);
 
         try {
             $accountsData   = $simpleFINService->fetchAccounts();

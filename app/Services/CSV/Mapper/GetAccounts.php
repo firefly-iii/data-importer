@@ -56,8 +56,8 @@ trait GetAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::ALL);
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var null|GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -108,8 +108,8 @@ trait GetAccounts
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var GetAccountsResponse $response
         try {
+            /** @var null|GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -132,7 +132,7 @@ trait GetAccounts
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var GetAccountsResponse $response
+        /** @var GetAccountsResponse $response */
         try {
             $response = $request->get();
         } catch (ApiHttpException $e) {
@@ -175,16 +175,18 @@ trait GetAccounts
             }
 
             // add optgroup to result:
-            $group                        = trans(sprintf('import.account_types_%s', $account->type));
+            $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
-        foreach ($result as $group => $accounts) {
-            asort($accounts, SORT_STRING);
-            $result[$group] = $accounts;
+        $newResult    = [];
+        foreach ($result as $group => $array) {
+            asort($array, SORT_STRING);
+            $newResult[$group] = $array;
         }
+        unset($result, $array);
 
-        return $result;
+        return $newResult;
     }
 
     /**
@@ -206,17 +208,19 @@ trait GetAccounts
             if (null !== $account->iban) {
                 $name                         = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
-                $group                        = trans(sprintf('import.account_types_%s', $account->type));
+                $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
                 $result[$group] ??= [];
                 $result[$group][$account->id] = $name;
             }
         }
 
-        foreach ($result as $group => $accounts) {
-            asort($accounts, SORT_STRING);
-            $result[$group] = $accounts;
+        $newResult    = [];
+        foreach ($result as $group => $array) {
+            asort($array, SORT_STRING);
+            $newResult[$group] = $array;
         }
+        unset($result, $array);
 
-        return $result;
+        return $newResult;
     }
 }

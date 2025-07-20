@@ -342,6 +342,7 @@ trait IsReadyForStep
                 // simpleFIN needs no authentication.
                 return false;
 
+            case 'service-validation':
             case 'upload-files':
                 // you can always upload SimpleFIN things
                 return true;
@@ -693,6 +694,7 @@ trait IsReadyForStep
     {
         Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
 
+        // @noinspection PhpSwitchStatementWitSingleBranchInspection
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));

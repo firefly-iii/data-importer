@@ -29,7 +29,7 @@ class TransactionExtractor
         $totalCount   = count($statements);
 
         /**
-         * @var int           $index
+         * @var int           $i
          * @var CamtStatement $statement
          */
         foreach ($statements as $i => $statement) { // -> Level B
@@ -41,24 +41,24 @@ class TransactionExtractor
                 Log::debug(sprintf('[%s] [%d/%d] Now working on entry with %d detail entries.', config('importer.version'), $ii + 1, $entryCount, $count));
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                    $transactions[] = new Transaction($message, $statement, $entry, []);
                 }
                 if (0 !== $count) {
                     $handling = $this->configuration->getGroupedTransactionHandling();
                     if ('split' === $handling) {
-                        $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
+                        $transactions[] = new Transaction($message, $statement, $entry, $entry->getTransactionDetails());
                     }
                     if ('single' === $handling) {
                         foreach ($entry->getTransactionDetails() as $detail) {
-                            $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, [$detail]);
+                            $transactions[] = new Transaction($message, $statement, $entry, [$detail]);
                         }
                     }
                     if ('group' === $handling) {
                         if (1 === $count) {
-                            $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, $entry->getTransactionDetails());
+                            $transactions[] = new Transaction($message, $statement, $entry, $entry->getTransactionDetails());
                         }
                         if ($count > 1) {
-                            $transactions[] = new Transaction($this->configuration, $message, $statement, $entry, []);
+                            $transactions[] = new Transaction($message, $statement, $entry, []);
                         }
                     }
                 }

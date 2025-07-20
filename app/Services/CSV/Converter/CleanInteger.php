@@ -32,12 +32,8 @@ class CleanInteger implements ConverterInterface
 {
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return int
      */
-    public function convert($value)
+    public function convert(mixed $value): int
     {
         return (int) $value;
     }

@@ -45,7 +45,7 @@ class Amount extends AbstractTask
     {
         Log::debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
         $amount                = null;
-        if (null === $amount && $this->validAmount((string) $transaction['amount'])) {
+        if ($this->validAmount((string) $transaction['amount'])) {
             Log::debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
         }
@@ -73,10 +73,6 @@ class Amount extends AbstractTask
             Log::debug('Missing default amount modifier: amount modifier is now "1".');
             $transaction['amount_modifier'] = '1';
         }
-        if (array_key_exists('amount_modifier', $transaction)) {
-            $transaction['amount_modifier'] = (string) $transaction['amount_modifier'];
-            Log::debug(sprintf('Amount modifier is "%s".', $transaction['amount_modifier']));
-        }
         if (array_key_exists('foreign_amount', $transaction)) {
             $transaction['foreign_amount'] = (string) $transaction['foreign_amount'];
         }
@@ -93,7 +89,7 @@ class Amount extends AbstractTask
         Log::debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
-        if (isset($transaction['foreign_amount'])) {
+        if (array_key_exists('foreign_amount', $transaction)) {
             $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
             Log::debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }

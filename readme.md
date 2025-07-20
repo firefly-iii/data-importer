@@ -65,10 +65,6 @@ Of course, there are some [contributing guidelines](https://github.com/firefly-i
 
 I can always use your help [squashing bugs](https://docs.firefly-iii.org/explanation/support/#contributing-code), thinking about [new features](https://docs.firefly-iii.org/explanation/support/#contributing-code) or [translating Firefly III](https://docs.firefly-iii.org/how-to/firefly-iii/development/translations/) into other languages.
 
-[Sonarcloud][sc-project-url] scans the code of Firefly III. If you want to help improve Firefly III, check out the latest reports and take your pick!
-
-[![Quality Gate Status][sc-gate-shield]][sc-project-url] [![Bugs][sc-bugs-shield]][sc-project-url] [![Code Smells][sc-smells-shield]][sc-project-url] [![Vulnerabilities][sc-vuln-shield]][sc-project-url]
-
 There is also a [security policy](https://github.com/firefly-iii/data-importer/security/policy).
 
 <!-- SPONSOR TEXT -->
@@ -112,9 +108,3 @@ The Firefly III logo is made by the excellent Cherie Woo.
 [donate-url]: #support-the-development-of-firefly-iii
 [hack-shield]: https://cdn.huntr.dev/huntr_security_badge_mono.svg
 [hack-url]: https://huntr.dev/bounties/disclose
-
-[sc-gate-shield]: https://sonarcloud.io/api/project_badges/measure?project=firefly-iii_data-importer&metric=alert_status
-[sc-bugs-shield]: https://sonarcloud.io/api/project_badges/measure?project=firefly-iii_data-importer&metric=bugs
-[sc-smells-shield]: https://sonarcloud.io/api/project_badges/measure?project=firefly-iii_data-importer&metric=code_smells
-[sc-vuln-shield]: https://sonarcloud.io/api/project_badges/measure?project=firefly-iii_data-importer&metric=vulnerabilities
-[sc-project-url]: https://sonarcloud.io/dashboard?id=firefly-iii_data-importer

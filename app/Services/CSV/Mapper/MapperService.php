@@ -82,7 +82,7 @@ class MapperService
             // $row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
             foreach ($row as $columnIndex => $column) {
-                if (!isset($data[$columnIndex])) {
+                if (!array_key_exists($columnIndex, $data)) {
                     // don't need to handle this. Continue.
                     continue;
                 }
@@ -144,12 +144,12 @@ class MapperService
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, []);
+                    $transactions[] = new Transaction($camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {
                     // create separate transactions, no matter user pref.
                     foreach ($entry->getTransactionDetails() as $detail) {
-                        $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, [$detail]);
+                        $transactions[] = new Transaction($camtMessage, $statement, $entry, [$detail]);
                     }
                 }
             }
@@ -200,15 +200,9 @@ class MapperService
     private static function getMappableFieldsForCamt(): array
     {
         $fields = config('camt.fields');
-        $return = [];
 
-        /** @var array $field */
-        foreach ($fields as $name => $field) {
-            if ($field['mappable']) {
-                $return[$name] = $field;
-            }
-        }
-
-        return $return;
+        return array_filter($fields, function (array $field) {
+            return $field['mappable'];
+        });
     }
 }

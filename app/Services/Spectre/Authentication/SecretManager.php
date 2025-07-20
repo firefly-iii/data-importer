@@ -32,8 +32,8 @@ use Illuminate\Support\Facades\Log;
  */
 class SecretManager
 {
-    public const APP_ID = 'spectre_app_id';
-    public const SECRET = 'spectre_secret';
+    public const string APP_ID = 'spectre_app_id';
+    public const string SECRET = 'spectre_secret';
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.

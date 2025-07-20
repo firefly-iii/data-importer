@@ -44,7 +44,6 @@ use JsonException;
 abstract class Request
 {
     private string $base;
-    private array  $body;
     private array  $parameters;
     private float  $timeOut = 3.14;
 
@@ -68,11 +67,6 @@ abstract class Request
      * @throws ImporterHttpException
      */
     abstract public function put(): Response;
-
-    public function setBody(array $body): void
-    {
-        $this->body = $body;
-    }
 
     public function setParameters(array $parameters): void
     {

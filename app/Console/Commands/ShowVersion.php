@@ -27,6 +27,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+use const PHP_SAPI;
+
 /**
  * Class ShowVersion
  */
@@ -41,7 +43,7 @@ final class ShowVersion extends Command
     public function handle(): int
     {
         $this->line(sprintf('Firefly III data importer v%s', config('importer.version')));
-        $this->line(sprintf('PHP: %s %s %s', \PHP_SAPI, PHP_VERSION, PHP_OS));
+        $this->line(sprintf('PHP: %s %s %s', PHP_SAPI, PHP_VERSION, PHP_OS));
 
         return 0;
     }

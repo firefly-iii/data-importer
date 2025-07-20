@@ -45,8 +45,8 @@ use InvalidArgumentException;
  */
 class RoleService
 {
-    public const EXAMPLE_COUNT  = 7;
-    public const EXAMPLE_LENGTH = 26;
+    public const int EXAMPLE_COUNT  = 7;
+    public const int EXAMPLE_LENGTH = 26;
 
     /**
      * @throws InvalidArgument
@@ -82,7 +82,7 @@ class RoleService
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
-                $headers = $records->fetchOne();
+                $headers = $records->first();
                 // @codeCoverageIgnoreStart
             } catch (Exception $e) {
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -98,7 +98,7 @@ class RoleService
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
-                $count   = count($records->fetchOne());
+                $count   = count($records->first());
                 Log::debug(sprintf('Role service: first row has %d columns', $count));
                 for ($i = 0; $i < $count; ++$i) {
                     $headers[] = sprintf('Column #%d', $i + 1);
@@ -205,11 +205,11 @@ class RoleService
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, []);
+                    $transactions[] = new Transaction($camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {
                     foreach ($entry->getTransactionDetails() as $detail) {
-                        $transactions[] = new Transaction($configuration, $camtMessage, $statement, $entry, [$detail]);
+                        $transactions[] = new Transaction($camtMessage, $statement, $entry, [$detail]);
                     }
                 }
             }
@@ -222,6 +222,7 @@ class RoleService
                 break;
             }
             foreach ($fieldNames as $name) {
+                $name   = (string)$name;
                 if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
                     if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         continue;
@@ -247,7 +248,8 @@ class RoleService
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
-            $examples[$key] = array_filter($examples[$key], fn (string $value) => '' !== $value);
+            // filter disabled, since empty values are already removed.
+            // $examples[$key] = array_filter($examples[$key], fn (string $value) => '' !== $value);
         }
 
         return $examples;

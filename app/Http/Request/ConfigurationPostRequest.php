@@ -25,8 +25,8 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-use Illuminate\Contracts\Validation\Validator;
 use App\Services\Session\Constants;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -46,9 +46,9 @@ class ConfigurationPostRequest extends Request
     {
         // Debug: Log raw form data before processing
         Log::debug('ConfigurationPostRequest raw form data', [
-            'do_import_raw'     => $this->get('do_import') ?? [],
-            'accounts_raw'      => $this->get('accounts') ?? [],
-            'new_account_raw'   => $this->get('new_account') ?? [],
+            'do_import_raw'   => $this->get('do_import') ?? [],
+            'accounts_raw'    => $this->get('accounts') ?? [],
+            'new_account_raw' => $this->get('new_account') ?? [],
         ]);
 
         // Decode underscore-encoded account IDs back to original IDs with spaces
@@ -62,10 +62,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
-            $originalId                   = (string) str_replace('_', ' ', (string) $encodedId);
+            $originalId                   = str_replace('_', ' ', (string)$encodedId);
             $decodedDoImport[$originalId] = $value;
             Log::debug('Decoded do_import', [
-                'encoded' => (string) $encodedId,
+                'encoded' => (string)$encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
             ]);
@@ -73,10 +73,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode accounts array keys
         foreach ($accounts as $encodedId => $value) {
-            $originalId                   = (string) str_replace('_', ' ', (string) $encodedId);
+            $originalId                   = str_replace('_', ' ', (string)$encodedId);
             $decodedAccounts[$originalId] = $value;
             Log::debug('Decoded accounts', [
-                'encoded' => (string) $encodedId,
+                'encoded' => (string)$encodedId,
                 'decoded' => $originalId,
                 'value'   => $value,
             ]);
@@ -84,10 +84,10 @@ class ConfigurationPostRequest extends Request
 
         // Decode new_account array keys
         foreach ($newAccount as $encodedId => $accountData) {
-            $originalId                     = (string) str_replace('_', ' ', (string) $encodedId);
+            $originalId                     = str_replace('_', ' ', (string)$encodedId);
             $decodedNewAccount[$originalId] = $accountData;
             Log::debug('Decoded new_account', [
-                'encoded' => (string) $encodedId,
+                'encoded' => (string)$encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
             ]);
@@ -166,8 +166,8 @@ class ConfigurationPostRequest extends Request
             'delimiter'                     => 'in:comma,semicolon,tab',
             'date'                          => 'between:1,25',
             'default_account'               => 'simplefin' === $flow
-                    ? 'nullable|numeric|min:1|max:100000'
-                    : 'required|numeric|min:1|max:100000',
+                ? 'nullable|numeric|min:1|max:100000'
+                : 'required|numeric|min:1|max:100000',
             'rules'                         => 'numeric|between:0,1',
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
             'ignore_duplicate_transactions' => 'numeric|between:0,1',
@@ -204,7 +204,7 @@ class ConfigurationPostRequest extends Request
         $validator->after(function (Validator $validator): void {
             // validate all account info
             $flow        = request()->cookie(Constants::FLOW_COOKIE);
-            $data        = $validator->getData();
+            $data        = $validator->getData(); // @phpstan-ignore-line
             $doImport    = $data['do_import'] ?? [];
             if (0 === count($doImport) && 'file' !== $flow) {
                 $validator->errors()->add('do_import', 'You must select at least one account to import from.');
@@ -222,25 +222,27 @@ class ConfigurationPostRequest extends Request
 
             foreach ($accounts as $encodedAccountId => $selectedValue) {
                 if ('create_new' === $selectedValue) {
+                    $hasName   = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('name', $newAccounts[$encodedAccountId]);
+                    $hasCreate = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('create', $newAccounts[$encodedAccountId]);
                     Log::debug(
                         'DEBUG: Validating new account creation',
                         [
                             'encodedAccountId' => $encodedAccountId,
                             'selectedValue'    => $selectedValue,
-                            'hasNameField'     => isset($newAccounts[$encodedAccountId]['name']),
-                            'hasCreateField'   => isset($newAccounts[$encodedAccountId]['create']),
-                            'nameValue'        => $newAccounts[$encodedAccountId]['name'] ?? 'NOT_SET',
-                            'createValue'      => $newAccounts[$encodedAccountId]['create'] ?? 'NOT_SET',
+                            'hasNameField'     => $hasName,
+                            'hasCreateField'   => $hasCreate,
+                            'nameValue'        => $hasName ? $newAccounts[$encodedAccountId]['name'] : null,
+                            'createValue'      => $hasCreate ? $newAccounts[$encodedAccountId]['create'] : null,
                         ]
                     );
 
                     // Validate that account name is provided and create flag is set
                     // Both arrays now use encoded keys, so they should match directly
-                    if (!isset($newAccounts[$encodedAccountId]['name']) || '' === trim((string) $newAccounts[$encodedAccountId]['name'])) {
-                        $validator->errors()->add("new_account.{$encodedAccountId}.name", 'Account name is required when creating a new account.');
+                    if ($hasName && '' === (string) $newAccounts[$encodedAccountId]['name']) {
+                        $validator->errors()->add(sprintf('new_account.%s.name', $encodedAccountId), 'Account name is required when creating a new account.');
                     }
-                    if (!isset($newAccounts[$encodedAccountId]['create']) || '1' !== $newAccounts[$encodedAccountId]['create']) {
-                        $validator->errors()->add("new_account.{$encodedAccountId}.create", 'Create flag must be set for new account creation.');
+                    if (!$hasCreate || '1' !== $newAccounts[$encodedAccountId]['create']) {
+                        $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
                     }
                 }
             }

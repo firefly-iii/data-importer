@@ -31,10 +31,9 @@ use Money\Money;
 
 class Transaction
 {
-    public const TIME_FORMAT = 'Y-m-d H:i:s';
+    public const string TIME_FORMAT = 'Y-m-d H:i:s';
 
     public function __construct(
-        private readonly Configuration $configuration,
         private readonly Message       $levelA,
         private readonly Statement     $levelB,
         private readonly Entry         $levelC,
@@ -416,7 +415,7 @@ class Transaction
         return null;
     }
 
-    private function getOpposingName(RelatedParty $relatedParty, bool $useEntireAddress = false): string
+    private function getOpposingName(RelatedParty $relatedParty): string
     {
         $opposingName = '';
         // TODO make depend on configuration
@@ -427,10 +426,12 @@ class Transaction
         if ('' !== (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
+
             // but maybe you want also the entire address
-            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-                $opposingName .= sprintf(', %s', $addressLine);
-            }
+            // 2025-07-19: method is always uses $useEntireAddress=false, nobody uses this.
+            //            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+            //                $opposingName .= sprintf(', %s', $addressLine);
+            //            }
         }
 
         return $opposingName;

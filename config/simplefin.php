@@ -57,11 +57,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'unique_column_options'           => [
-        'id'          => 'Transaction ID',
-        'account_id'  => 'Account ID',
-        'posted'      => 'Posted Date',
-        'amount'      => 'Amount',
-        'description' => 'Description',
+        'external-id'        => 'External identifier',
     ],
 
     /*

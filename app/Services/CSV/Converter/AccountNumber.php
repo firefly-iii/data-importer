@@ -8,7 +8,7 @@ use App\Support\Facades\Steam;
 
 class AccountNumber implements ConverterInterface
 {
-    public function convert($value)
+    public function convert(mixed $value): string
     {
         $value = (string)$value;
 

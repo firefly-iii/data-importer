@@ -35,7 +35,7 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const VERSION = 3;
+    public const int VERSION = 3;
     private array  $accounts;
     private array  $newAccounts;
     private bool   $addImportTag;

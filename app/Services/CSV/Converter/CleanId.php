@@ -34,12 +34,8 @@ class CleanId implements ConverterInterface
 {
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return null|int
      */
-    public function convert($value)
+    public function convert(mixed $value): ?int
     {
         Log::debug(sprintf('Now applying CleanId converter on "%s"', $value));
         $value = (int) $value;

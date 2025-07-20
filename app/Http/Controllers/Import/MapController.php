@@ -31,6 +31,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
 use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
+use App\Services\CSV\Mapper\OpposingAccounts;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -51,7 +52,7 @@ class MapController extends Controller
 {
     use RestoresConfiguration;
 
-    protected const DISK_NAME = 'jobs';
+    protected const string DISK_NAME = 'jobs';
 
     /**
      * RoleController constructor.
@@ -305,7 +306,7 @@ class MapController extends Controller
             $expenseRevenue['values']       = $this->getExpenseRevenueAccounts();
 
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
-            $class                          = ExpenseRevenueAccounts::class;
+            $class                          = OpposingAccounts::class;
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }

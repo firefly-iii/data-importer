@@ -32,18 +32,14 @@ class CleanUrl implements ConverterInterface
 {
     /**
      * Convert a value.
-     *
-     * @param mixed $value
-     *
-     * @return string
      */
-    public function convert($value)
+    public function convert(mixed $value): ?string
     {
         $value = app('steam')->cleanStringAndNewlines($value);
 
         // also remove newlines:
         $value = trim(str_replace("\n", '', $value));
-        if (filter_var($value, FILTER_VALIDATE_URL)) {
+        if (false !== filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
 

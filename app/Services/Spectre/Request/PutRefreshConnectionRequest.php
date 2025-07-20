@@ -66,7 +66,9 @@ class PutRefreshConnectionRequest extends Request
             return new ErrorResponse($response);
         }
 
-        return new PutRefreshConnectionResponse($response['data']);
+        // response data is not used, no need to include it.
+        // return new PutRefreshConnectionResponse($response['data']);
+        return new PutRefreshConnectionResponse([]);
     }
 
     public function setConnection(string $connection): void

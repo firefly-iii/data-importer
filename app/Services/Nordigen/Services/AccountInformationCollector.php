@@ -109,9 +109,9 @@ class AccountInformationCollector
         $accessToken  = TokenManager::getAccessToken();
         $request      = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
-        // @var ArrayResponse $response
 
         try {
+            /** @var ArrayResponse $response */
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             // need to redirect user at some point.
@@ -170,7 +170,7 @@ class AccountInformationCollector
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        // @var ArrayResponse $response
+        /** @var ArrayResponse $response */
         try {
             $response = $request->get();
         } catch (AgreementExpiredException $e) {

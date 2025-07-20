@@ -85,8 +85,8 @@ class PseudoTransactionProcessor
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
 
-            /** @var GetAccountResponse $result */
             try {
+                /** @var GetAccountResponse $result */
                 $result = $accountRequest->get();
             } catch (ApiHttpException $e) {
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

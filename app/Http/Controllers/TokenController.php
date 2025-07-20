@@ -118,7 +118,7 @@ class TokenController extends Controller
             $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
-            Log::error(sprintf('Response from server: "%s"', (string)$response->getBody()));
+            Log::error(sprintf('Response from server: "%s"', $response->getBody()));
 
             // Log::error($e->getTraceAsString());
             throw new ImporterErrorException(sprintf('JSON exception when decoding response: %s', $e->getMessage()));

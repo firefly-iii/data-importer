@@ -61,10 +61,9 @@ class RoutineManager implements RoutineManagerInterface
 
         Log::debug('Constructed SimpleFIN RoutineManager');
 
-        $this->identifier       = $identifier ?? Str::random(16);
+        $this->identifier       = $identifier ?? Str::random(); // 16
         $this->simpleFINService = app(SimpleFINService::class);
-        $this->accountMapper    = new AccountMapper();
-        $this->transformer      = new TransactionTransformer($this->accountMapper);
+        $this->transformer      = new TransactionTransformer();
     }
 
     public function getIdentifier(): string
@@ -110,9 +109,8 @@ class RoutineManager implements RoutineManagerInterface
 
         $transactions             = [];
         $accounts                 = $this->configuration->getAccounts();
-        $dateRange                = $this->getDateRange();
 
-        Log::info('Processing SimpleFIN accounts', ['account_count' => count($accounts), 'date_range' => $dateRange]);
+        Log::info('Processing SimpleFIN accounts', ['account_count' => count($accounts)]);
 
         foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
             // Handle account creation if requested (fireflyAccountId === 0 means "create_new")
@@ -206,7 +204,7 @@ class RoutineManager implements RoutineManagerInterface
                 // passing the complete SimpleFIN accounts data retrieved from the session.
                 // Pass the full dataset
                 // $accountTransactions = $this->simpleFINService->fetchTransactions($allAccountsSimpleFINData, $simplefinAccountId, $dateRange);
-                $accountTransactions = $this->simpleFINService->fetchFreshTransactions($simplefinAccountId, $dateRange);
+                $accountTransactions = $this->simpleFINService->fetchFreshTransactions($simplefinAccountId);
 
                 Log::debug(sprintf('Extracted %d transactions for account %s', count($accountTransactions), $simplefinAccountId));
 
@@ -258,19 +256,5 @@ class RoutineManager implements RoutineManagerInterface
         Log::info('SimpleFIN conversion completed', ['total_transactions' => count($transactions)]);
 
         return $transactions;
-    }
-
-    /**
-     * Get date range for transaction fetching
-     */
-    private function getDateRange(): array
-    {
-        $dateAfter  = $this->configuration->getDateNotBefore();
-        $dateBefore = $this->configuration->getDateNotAfter();
-
-        return [
-            'start' => '' !== $dateAfter ? $dateAfter : null,
-            'end'   => '' !== $dateBefore ? $dateBefore : null,
-        ];
     }
 }
