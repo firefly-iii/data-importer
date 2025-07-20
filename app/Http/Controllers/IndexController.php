@@ -28,7 +28,6 @@ namespace App\Http\Controllers;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 

@@ -429,9 +429,9 @@ class Transaction
 
             // but maybe you want also the entire address
             // 2025-07-19: method is always uses $useEntireAddress=false, nobody uses this.
-//            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
-//                $opposingName .= sprintf(', %s', $addressLine);
-//            }
+            //            if ($useEntireAddress && $addressLine = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress())) {
+            //                $opposingName .= sprintf(', %s', $addressLine);
+            //            }
         }
 
         return $opposingName;

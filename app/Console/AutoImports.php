@@ -662,7 +662,7 @@ trait AutoImports
     protected function isNothingDownloaded(): bool
     {
         foreach ($this->conversionErrors as $errors) {
-            if (array_any($errors, fn($error) => str_contains($error, '[a111]'))) {
+            if (array_any($errors, fn ($error) => str_contains($error, '[a111]'))) {
                 return true;
             }
         }
@@ -673,7 +673,7 @@ trait AutoImports
     protected function isExpiredAgreement(): bool
     {
         foreach ($this->conversionErrors as $errors) {
-            if (array_any($errors, fn($error) => str_contains($error, 'EUA') && str_contains($error, 'expired'))) {
+            if (array_any($errors, fn ($error) => str_contains($error, 'EUA') && str_contains($error, 'expired'))) {
                 return true;
             }
         }

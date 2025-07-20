@@ -33,6 +33,7 @@ use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Exception;
+
 use const PHP_SAPI;
 
 class DebugController extends Controller

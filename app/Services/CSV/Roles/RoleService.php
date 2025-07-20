@@ -98,7 +98,7 @@ class RoleService
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
                 $records = $stmt->process($reader);
-                $count = count($records->first());
+                $count   = count($records->first());
                 Log::debug(sprintf('Role service: first row has %d columns', $count));
                 for ($i = 0; $i < $count; ++$i) {
                     $headers[] = sprintf('Column #%d', $i + 1);
@@ -205,11 +205,11 @@ class RoleService
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction( $camtMessage, $statement, $entry, []);
+                    $transactions[] = new Transaction($camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {
                     foreach ($entry->getTransactionDetails() as $detail) {
-                        $transactions[] = new Transaction( $camtMessage, $statement, $entry, [$detail]);
+                        $transactions[] = new Transaction($camtMessage, $statement, $entry, [$detail]);
                     }
                 }
             }
@@ -222,7 +222,7 @@ class RoleService
                 break;
             }
             foreach ($fieldNames as $name) {
-                $name = (string)$name;
+                $name   = (string)$name;
                 if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
                     if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         continue;

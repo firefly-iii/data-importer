@@ -31,7 +31,6 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
-use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -58,7 +57,7 @@ trait GetAccounts
         $request->setType(GetAccountsRequest::ALL);
 
         try {
-            /** @var GetAccountsResponse|null $response */
+            /** @var null|GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -110,7 +109,7 @@ trait GetAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
-            /** @var GetAccountsResponse|null $response */
+            /** @var null|GetAccountsResponse $response */
             $response = $request->get();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -180,7 +179,7 @@ trait GetAccounts
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             asort($array, SORT_STRING);
             $newResult[$group] = $array;
@@ -215,7 +214,7 @@ trait GetAccounts
             }
         }
 
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             asort($array, SORT_STRING);
             $newResult[$group] = $array;

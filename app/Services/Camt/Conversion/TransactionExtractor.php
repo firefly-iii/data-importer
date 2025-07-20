@@ -46,19 +46,19 @@ class TransactionExtractor
                 if (0 !== $count) {
                     $handling = $this->configuration->getGroupedTransactionHandling();
                     if ('split' === $handling) {
-                        $transactions[] = new Transaction( $message, $statement, $entry, $entry->getTransactionDetails());
+                        $transactions[] = new Transaction($message, $statement, $entry, $entry->getTransactionDetails());
                     }
                     if ('single' === $handling) {
                         foreach ($entry->getTransactionDetails() as $detail) {
-                            $transactions[] = new Transaction( $message, $statement, $entry, [$detail]);
+                            $transactions[] = new Transaction($message, $statement, $entry, [$detail]);
                         }
                     }
                     if ('group' === $handling) {
                         if (1 === $count) {
-                            $transactions[] = new Transaction( $message, $statement, $entry, $entry->getTransactionDetails());
+                            $transactions[] = new Transaction($message, $statement, $entry, $entry->getTransactionDetails());
                         }
                         if ($count > 1) {
-                            $transactions[] = new Transaction( $message, $statement, $entry, []);
+                            $transactions[] = new Transaction($message, $statement, $entry, []);
                         }
                     }
                 }

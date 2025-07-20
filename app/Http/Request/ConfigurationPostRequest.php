@@ -52,9 +52,9 @@ class ConfigurationPostRequest extends Request
         ]);
 
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport   = $this->get('do_import') ?? [];
-        $accounts   = $this->get('accounts') ?? [];
-        $newAccount = $this->get('new_account') ?? [];
+        $doImport          = $this->get('do_import') ?? [];
+        $accounts          = $this->get('accounts') ?? [];
+        $newAccount        = $this->get('new_account') ?? [];
 
         $decodedDoImport   = [];
         $decodedAccounts   = [];
@@ -203,9 +203,9 @@ class ConfigurationPostRequest extends Request
     {
         $validator->after(function (Validator $validator): void {
             // validate all account info
-            $flow     = request()->cookie(Constants::FLOW_COOKIE);
-            $data     = $validator->getData(); // @phpstan-ignore-line
-            $doImport = $data['do_import'] ?? [];
+            $flow        = request()->cookie(Constants::FLOW_COOKIE);
+            $data        = $validator->getData(); // @phpstan-ignore-line
+            $doImport    = $data['do_import'] ?? [];
             if (0 === count($doImport) && 'file' !== $flow) {
                 $validator->errors()->add('do_import', 'You must select at least one account to import from.');
             }
