@@ -132,7 +132,7 @@ class ExpenseRevenueAccounts implements MapperInterface
         }
 
         // Sort each group
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             asort($array, SORT_STRING);
             $newResult[$group] = $array;

@@ -33,7 +33,7 @@ class CleanUrl implements ConverterInterface
     /**
      * Convert a value.
      */
-    public function convert(mixed $value): string|null
+    public function convert(mixed $value): ?string
     {
         $value = app('steam')->cleanStringAndNewlines($value);
 

@@ -37,7 +37,6 @@ use App\Services\Shared\Response\Response;
  */
 class ListAccountsRequest extends Request
 {
-
     public function __construct(string $url, string $identifier, string $token)
     {
         $this->setParameters([]);

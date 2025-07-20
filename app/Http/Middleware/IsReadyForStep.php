@@ -337,6 +337,7 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
+
             case 'authenticate':
                 // simpleFIN needs no authentication.
                 return false;
@@ -693,7 +694,7 @@ trait IsReadyForStep
     {
         Log::debug(sprintf('redirectToBasicStep("%s")', self::STEP));
 
-        /** @noinspection PhpSwitchStatementWitSingleBranchInspection */
+        // @noinspection PhpSwitchStatementWitSingleBranchInspection
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToBasicStep: Cannot handle basic step "%s"', self::STEP));

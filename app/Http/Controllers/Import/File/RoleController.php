@@ -212,6 +212,7 @@ class RoleController extends Controller
     private function getFieldsForLevel(string $level): array
     {
         $allFields = config('camt.fields');
+
         return array_filter($allFields, function ($field) use ($level) {
             return $level === $field['level'];
         });
