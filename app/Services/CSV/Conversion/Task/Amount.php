@@ -44,27 +44,38 @@ class Amount extends AbstractTask
     private function processAmount(array $transaction): array
     {
         Log::debug(sprintf('Now at the start of processAmount("%s")', $transaction['amount']));
-        $amount                = null;
-        if ($this->validAmount((string) $transaction['amount'])) {
+        $amount = null;
+        if ($this->validAmount((string)$transaction['amount'])) {
             Log::debug('Transaction["amount"] value is not NULL, assume this is the correct value.');
             $amount = $transaction['amount'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_debit'])) {
-            Log::debug(sprintf('Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_debit']));
+        if (null === $amount && $this->validAmount((string)$transaction['amount_debit'])) {
+            Log::debug(
+                sprintf(
+                    'Transaction["amount_debit"] value is not NULL ("%s"), assume this is the correct value.',
+                    $transaction['amount_debit'],
+                ),
+            );
             $amount = $transaction['amount_debit'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_credit'])) {
+        if (null === $amount && $this->validAmount((string)$transaction['amount_credit'])) {
             Log::debug(
-                sprintf('Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_credit'])
+                sprintf(
+                    'Transaction["amount_credit"] value is not NULL ("%s"), assume this is the correct value.',
+                    $transaction['amount_credit'],
+                ),
             );
             $amount = $transaction['amount_credit'];
         }
 
-        if (null === $amount && $this->validAmount((string) $transaction['amount_negated'])) {
+        if (null === $amount && $this->validAmount((string)$transaction['amount_negated'])) {
             Log::debug(
-                sprintf('Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.', $transaction['amount_negated'])
+                sprintf(
+                    'Transaction["amount_negated"] value is not NULL ("%s"), assume this is the correct value.',
+                    $transaction['amount_negated'],
+                ),
             );
             $amount = $transaction['amount_negated'];
         }
@@ -74,9 +85,9 @@ class Amount extends AbstractTask
             $transaction['amount_modifier'] = '1';
         }
         if (array_key_exists('foreign_amount', $transaction)) {
-            $transaction['foreign_amount'] = (string) $transaction['foreign_amount'];
+            $transaction['foreign_amount'] = (string)$transaction['foreign_amount'];
         }
-        $amount                = (string) $amount;
+        $amount = (string)$amount;
         if ('' === $amount) {
             Log::error('Amount is EMPTY. This will give problems further ahead.', $transaction);
             unset($transaction['amount_modifier']);
@@ -84,13 +95,13 @@ class Amount extends AbstractTask
             return $transaction;
         }
         // modify amount:
-        $amount                = bcmul($amount, $transaction['amount_modifier']);
+        $amount = bcmul($amount, (string) $transaction['amount_modifier']);
 
         Log::debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
         if (array_key_exists('foreign_amount', $transaction)) {
-            $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
+            $transaction['foreign_amount'] = bcmul((string) $transaction['foreign_amount'], (string) $transaction['amount_modifier']);
             Log::debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }
 
