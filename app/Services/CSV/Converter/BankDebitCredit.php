@@ -52,6 +52,7 @@ class BankDebitCredit implements ConverterInterface
             'dbit', // https://subsembly.com/index.html (Banking4 App)
             'charge', // not sure which bank but it's insane.
             '(-)', // Banco Bolivariano in Ecuador (same opinion as above)
+            'out', // Wise
         ];
 
         // Lowercase the value and trim it for comparison.
