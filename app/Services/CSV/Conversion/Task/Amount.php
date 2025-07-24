@@ -84,13 +84,13 @@ class Amount extends AbstractTask
             return $transaction;
         }
         // modify amount:
-        $amount                = bcmul($amount, $transaction['amount_modifier']);
+        $amount = bcmul($amount, (string)$transaction['amount_modifier']);
 
         Log::debug(sprintf('Amount is now %s.', $amount));
 
         // modify foreign amount
         if (array_key_exists('foreign_amount', $transaction)) {
-            $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], $transaction['amount_modifier']);
+            $transaction['foreign_amount'] = bcmul($transaction['foreign_amount'], (string) $transaction['amount_modifier']);
             Log::debug(sprintf('FOREIGN amount is now %s.', $transaction['foreign_amount']));
         }
 
