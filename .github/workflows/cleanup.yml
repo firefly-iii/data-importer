@@ -60,7 +60,6 @@ jobs:
             const workflows = [
               'cleanup.yml',
               'release.yml',
-              'sonarcloud.yml',
               'label.yml',
               'transfer.yml'
             ]
