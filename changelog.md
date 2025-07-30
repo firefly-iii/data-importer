@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - [PR 917](https://github.com/firefly-iii/data-importer/pull/917) (Add OUT as debit indicator) by @icewind1991
 
+### Fixed
+- #10643
+
 ## v1.7.8 - 2025-07-20
 
 >  ⚠️ Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
