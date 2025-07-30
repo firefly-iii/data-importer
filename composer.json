@@ -85,7 +85,7 @@
         "genkgo/camt": ">=2.10.0"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.15",
+        "barryvdh/laravel-debugbar": "^3.16",
         "barryvdh/laravel-ide-helper": "^3.5",
         "driftingly/rector-laravel": "^2.0",
         "ergebnis/phpstan-rules": "^2.10",
