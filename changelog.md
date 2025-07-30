@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [PR 917](https://github.com/firefly-iii/data-importer/pull/917) (Add OUT as debit indicator) by @icewind1991
 
 ### Fixed
-- #10643
+- [Issue 10643](https://github.com/firefly-iii/firefly-iii/issues/10643) (Importer failing on an import of ING) reported by @MTijn
 
 ## v1.7.8 - 2025-07-20
 
