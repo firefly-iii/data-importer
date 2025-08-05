@@ -242,7 +242,7 @@ class ConfigurationPostRequest extends Request
                         $validator->errors()->add(sprintf('new_account.%s.name', $encodedAccountId), 'Account name is required when creating a new account.');
                     }
                     if (!$hasCreate || '1' !== $newAccounts[$encodedAccountId]['create']) {
-                        //$validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
+                        // $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
                     }
                 }
             }
