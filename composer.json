@@ -90,7 +90,7 @@
         "driftingly/rector-laravel": "^2.0",
         "ergebnis/phpstan-rules": "^2.10",
         "fakerphp/faker": "^1.24",
-        "filp/whoops": "^2.16",
+        "filp/whoops": "^2.18",
         "larastan/larastan": "^3",
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
