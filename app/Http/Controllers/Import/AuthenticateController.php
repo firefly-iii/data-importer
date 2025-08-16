@@ -70,15 +70,18 @@ class AuthenticateController extends Controller
         $flow      = $request->cookie(Constants::FLOW_COOKIE);
         $subTitle  = ucfirst($flow);
         $error     = Session::get('error');
+        Log::debug(sprintf('Now in AuthenticateController::index (/authenticate) with flow "%s"', $flow));
 
         if ('spectre' === $flow) {
             $validator = new SpectreValidator();
             $result    = $validator->validate();
             if (AuthenticationStatus::NODATA === $result) {
                 // show for to enter data. save as cookie.
+                Log::debug('Return view import.002-authenticate.index');
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
             }
             if (AuthenticationStatus::AUTHENTICATED === $result) {
+                Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
                 return redirect(route('003-upload.index'));
             }
         }
@@ -91,9 +94,11 @@ class AuthenticateController extends Controller
                 $identifier = NordigenSecretManager::getId();
 
                 // show for to enter data. save as cookie.
+                Log::debug('Return view import.002-authenticate.index');
                 return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
             }
             if (AuthenticationStatus::AUTHENTICATED === $result) {
+                Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
                 return redirect(route('003-upload.index'));
             }
         }
@@ -101,10 +106,10 @@ class AuthenticateController extends Controller
             // This case should ideally be handled by middleware redirecting to upload.
             // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
             Log::warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
-
+            Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
             return redirect(route('003-upload.index'));
         }
-
+        Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
         throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
     }
 
