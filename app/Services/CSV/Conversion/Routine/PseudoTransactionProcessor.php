@@ -47,7 +47,7 @@ class PseudoTransactionProcessor
     use ProgressInformation;
 
     private Account             $defaultAccount;
-    private TransactionCurrency $defaultCurrency;
+    private TransactionCurrency $primaryCurrency;
     private array               $tasks;
 
     /**
@@ -59,7 +59,7 @@ class PseudoTransactionProcessor
     {
         $this->tasks = config('csv.transaction_tasks');
         $this->getDefaultAccount($defaultAccountId);
-        $this->getDefaultCurrency();
+        $this->getPrimaryCurrency();
     }
 
     /**
@@ -101,7 +101,7 @@ class PseudoTransactionProcessor
     /**
      * @throws ImporterErrorException
      */
-    private function getDefaultCurrency(): void
+    private function getPrimaryCurrency(): void
     {
         $url             = SecretManager::getBaseUrl();
         $token           = SecretManager::getAccessToken();
@@ -109,18 +109,18 @@ class PseudoTransactionProcessor
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
         $currencyRequest->setTimeOut(config('importer.connection.timeout'));
-        $currencyRequest->setCode('default');
+        $currencyRequest->setCode('primary');
 
         try {
             /** @var GetCurrencyResponse $result */
             $result                = $currencyRequest->get();
-            $this->defaultCurrency = $result->getCurrency();
+            $this->primaryCurrency = $result->getCurrency();
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
-            throw new ImporterErrorException('The default currency could not be loaded.');
+            throw new ImporterErrorException('The primary currency could not be loaded.');
         }
-        Log::debug(sprintf('Currency found, default currency is assumed to be "%s" (#%d)', $this->defaultCurrency->code, $this->defaultCurrency->id));
+        Log::debug(sprintf('Currency found, default currency is assumed to be "%s" (#%d)', $this->primaryCurrency->code, $this->primaryCurrency->id));
     }
 
     public function processPseudo(array $lines): array
@@ -152,7 +152,7 @@ class PseudoTransactionProcessor
                 $object->setAccount($this->defaultAccount);
             }
             if ($object->requiresTransactionCurrency()) {
-                $object->setTransactionCurrency($this->defaultCurrency);
+                $object->setTransactionCurrency($this->primaryCurrency);
             }
 
             $line   = $object->process($line);

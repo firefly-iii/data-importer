@@ -41,7 +41,7 @@ interface TaskInterface
     public function requiresDefaultAccount(): bool;
 
     /**
-     * Returns true if the task requires the default currency of the user.
+     * Returns true if the task requires the primary currency of the user.
      */
     public function requiresTransactionCurrency(): bool;
 
