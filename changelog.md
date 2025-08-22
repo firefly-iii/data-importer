@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Support for Firefly III < v6.3.2
 
 ### Fixed
-- #10699
+- [Issue 10699](https://github.com/firefly-iii/firefly-iii/issues/10699) ([Importer] SimpleFIN error - create flag must be set for new account creation with de-selected accounts) reported by @Siddhant-k
 
 ## v1.7.9 - 2025-07-31
 
