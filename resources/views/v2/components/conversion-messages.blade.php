@@ -7,13 +7,13 @@
                     Line #<span x-text="index"></span>:
                     <template x-if="messageList.length === 1">
                         <template x-for="message in messageList">
-                            <span x-text="message"></span>
+                            <span x-html="message"></span>
                         </template>
                     </template>
                     <template x-if="messageList.length > 1">
                     <ol>
                         <template x-for="message in messageList">
-                            <li x-text="message"></li>
+                            <li x-html="message"></li>
                         </template>
                     </ol>
                     </template>
@@ -30,13 +30,13 @@
                     Line #<span x-text="index"></span>:
                     <template x-if="messageList.length === 1">
                         <template x-for="message in messageList">
-                            <span x-text="message"></span>
+                            <span x-html="message"></span>
                         </template>
                     </template>
                     <template x-if="messageList.length > 1">
                         <ol>
                             <template x-for="message in messageList">
-                                <li x-text="message"></li>
+                                <li x-html="message"></li>
                             </template>
                         </ol>
                     </template>
@@ -60,7 +60,7 @@
                     <template x-if="messageList.length > 1">
                         <ol>
                             <template x-for="message in messageList">
-                                <li x-text="message"></li>
+                                <li x-html="message"></li>
                             </template>
                         </ol>
                     </template>
