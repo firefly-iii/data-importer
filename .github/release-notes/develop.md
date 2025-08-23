@@ -1,4 +1,4 @@
-Welcome to release %version of the Firefly III data importer. This **development** release contains the latest fixes and features. It is probably buggy and may not work as expected. You can download the release below, and adventurous Docker users can find this release under the `develop` tag.
+Welcome to the latest development of the Firefly III data importer. This **development** release contains the latest fixes and features. It is probably buggy and may not work as expected. You can download the release below, and adventurous Docker users can find this release under the `develop` tag.
 
 > [!WARNING]
 > Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.

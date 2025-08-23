@@ -290,7 +290,7 @@ class AccountMapper
         // 2. Fall back to SimpleFIN account currency
         $currency = $simplefinAccount->getCurrency();
         if ($simplefinAccount->isCustomCurrency()) {
-            // For custom currencies, default to user's base currency or EUR
+            // For custom currencies, default to user's primary currency or EUR
             return 'EUR'; // Could be made configurable
         }
 

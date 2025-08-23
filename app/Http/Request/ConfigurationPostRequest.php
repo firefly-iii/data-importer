@@ -103,6 +103,7 @@ class ConfigurationPostRequest extends Request
             'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
             'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
+            'pending_transactions'          => $this->convertBoolean($this->get('pending_transactions')),
             'specifics'                     => [],
             'roles'                         => [],
             'mapping'                       => [],
@@ -242,7 +243,7 @@ class ConfigurationPostRequest extends Request
                         $validator->errors()->add(sprintf('new_account.%s.name', $encodedAccountId), 'Account name is required when creating a new account.');
                     }
                     if (!$hasCreate || '1' !== $newAccounts[$encodedAccountId]['create']) {
-                        $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
+                        // $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
                     }
                 }
             }

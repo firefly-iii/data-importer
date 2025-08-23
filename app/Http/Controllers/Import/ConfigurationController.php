@@ -41,13 +41,13 @@ use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Exception;
 use JsonException;
 
 /**
@@ -245,7 +245,7 @@ class ConfigurationController extends Controller
     {
         $importAccountName = $importAccount->name ?? null; // @phpstan-ignore-line
 
-        if ('' === (string) $importAccountName || null === $importAccountName) { // same thing really.
+        if ('' === (string)$importAccountName || null === $importAccountName) { // same thing really.
             return null;
         }
 
@@ -254,7 +254,7 @@ class ConfigurationController extends Controller
         if (array_key_exists('assets', $fireflyAccounts) && is_array($fireflyAccounts['assets'])) {
             foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string) $fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string)$fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -264,7 +264,7 @@ class ConfigurationController extends Controller
         if (array_key_exists('liabilities', $fireflyAccounts) && is_array($fireflyAccounts['liabilities'])) {
             foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
                 $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string) $fireflyAccountName)) === trim(strtolower($importAccountName))) {
+                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string)$fireflyAccountName)) === trim(strtolower($importAccountName))) {
                     return (string)$fireflyAccount->id;
                 }
             }
@@ -311,6 +311,19 @@ class ConfigurationController extends Controller
         Log::debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.v
         $fromRequest         = $request->getAll();
+
+        // reverse dates if they are bla bla bla.
+        if (null !== $fromRequest['date_not_before'] && null !== $fromRequest['date_not_after']) {
+            if ($fromRequest['date_not_before']->gt($fromRequest['date_not_after'])) {
+                // swap them
+                Log::warning('User submitted date_not_before that is after date_not_after, swapping them.');
+                $temp                           = clone $fromRequest['date_not_before'];
+                $fromRequest['date_not_before'] = clone $fromRequest['date_not_after'];
+                $fromRequest['date_not_after']  = $temp;
+            }
+        }
+
+
         $configuration       = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
