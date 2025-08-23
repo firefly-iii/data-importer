@@ -103,7 +103,7 @@ class ConfigurationPostRequest extends Request
             'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
             'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
-            'pending_transactions' => $this->convertBoolean($this->get('pending_transactions')),
+            'pending_transactions'          => $this->convertBoolean($this->get('pending_transactions')),
             'specifics'                     => [],
             'roles'                         => [],
             'mapping'                       => [],
