@@ -85,6 +85,8 @@ class SimpleFINService
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
                 $carbon               = Carbon::parse($dateAfter, config('app.timezone'));
+                $carbon->startOfDay();
+                Log::debug(sprintf('Set start-date to %s', $carbon->toW3cString()));
                 $return['start-date'] = $carbon->getTimestamp();
             } catch (Exception) {
                 Log::error(sprintf('Invalid date format for "dateAfter": %s', $dateAfter));
@@ -94,6 +96,8 @@ class SimpleFINService
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
                 $carbon             = Carbon::parse($dateBefore, config('app.timezone'));
+                $carbon->endOfDay();
+                Log::debug(sprintf('Set end-date to %s', $carbon->toW3cString()));
                 $return['end-date'] = $carbon->getTimestamp();
             } catch (Exception) {
                 Log::error(sprintf('Invalid date format for "dateBefore": %s', $dateBefore));
