@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - [Issue 10699](https://github.com/firefly-iii/firefly-iii/issues/10699) ([Importer] SimpleFIN error - create flag must be set for new account creation with de-selected accounts) reported by @Siddhant-k
+- #10805
+- Eternal loop in UI, reported by @Kage1
+- Date range can be selected out of order, breaking the import, reported by @Kage1
+- Selecting transactions from a single day doesn't work, reported by @Kage1
+- Loop back to role selection has the wrong label, reported by @Kage1
+- Pending transactions were always imported, reported by @Kage1
 
 ## v1.7.9 - 2025-07-31
 
