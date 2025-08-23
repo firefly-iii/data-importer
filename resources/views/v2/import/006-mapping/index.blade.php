@@ -115,7 +115,7 @@
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
                             <a href="{{ route('back.roles') }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span> Go back to role selection</a>
+                                    class="fas fa-arrow-left"></span> Go back to the previous step</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>
                         </div>
