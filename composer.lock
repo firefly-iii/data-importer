@@ -689,16 +689,16 @@
         },
         {
             "name": "genkgo/camt",
-            "version": "2.10.2",
+            "version": "2.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/genkgo/camt.git",
-                "reference": "c5ed7a31efa55862ae7ecaaef0190cf020dcd8e4"
+                "reference": "56e047d1599854ca34db0ccabce15230fcdd3f16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/genkgo/camt/zipball/c5ed7a31efa55862ae7ecaaef0190cf020dcd8e4",
-                "reference": "c5ed7a31efa55862ae7ecaaef0190cf020dcd8e4",
+                "url": "https://api.github.com/repos/genkgo/camt/zipball/56e047d1599854ca34db0ccabce15230fcdd3f16",
+                "reference": "56e047d1599854ca34db0ccabce15230fcdd3f16",
                 "shasum": ""
             },
             "require": {
@@ -727,9 +727,9 @@
             "description": "Library to read CAMT files (XML containing bank statements).",
             "support": {
                 "issues": "https://github.com/genkgo/camt/issues",
-                "source": "https://github.com/genkgo/camt/tree/2.10.2"
+                "source": "https://github.com/genkgo/camt/tree/2.10.3"
             },
-            "time": "2025-08-20T07:22:23+00:00"
+            "time": "2025-08-26T09:01:28+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -7997,16 +7997,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "12.3.2",
+            "version": "12.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "086553c5b2e0e1e20293d782d788ab768202b621"
+                "reference": "733025d94635a001f67db71a2ed1bab4e7e4a9dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/086553c5b2e0e1e20293d782d788ab768202b621",
-                "reference": "086553c5b2e0e1e20293d782d788ab768202b621",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/733025d94635a001f67db71a2ed1bab4e7e4a9dc",
+                "reference": "733025d94635a001f67db71a2ed1bab4e7e4a9dc",
                 "shasum": ""
             },
             "require": {
@@ -8062,7 +8062,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.2"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.3"
             },
             "funding": [
                 {
@@ -8082,7 +8082,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-29T06:19:24+00:00"
+            "time": "2025-08-27T14:43:48+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -8500,12 +8500,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "5e3e764a48c5ae5ac4e19f49434a7ac27e66929c"
+                "reference": "e3577178d2d0ae7fe287bd4d5d5950b7476e9aed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/5e3e764a48c5ae5ac4e19f49434a7ac27e66929c",
-                "reference": "5e3e764a48c5ae5ac4e19f49434a7ac27e66929c",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/e3577178d2d0ae7fe287bd4d5d5950b7476e9aed",
+                "reference": "e3577178d2d0ae7fe287bd4d5d5950b7476e9aed",
                 "shasum": ""
             },
             "conflict": {
@@ -8523,7 +8523,7 @@
                 "airesvsg/acf-to-rest-api": "<=3.1",
                 "akaunting/akaunting": "<2.1.13",
                 "akeneo/pim-community-dev": "<5.0.119|>=6,<6.0.53",
-                "alextselegidis/easyappointments": "<=1.5.1",
+                "alextselegidis/easyappointments": "<1.5.2.0-beta1",
                 "alterphp/easyadmin-extension-bundle": ">=1.2,<1.2.11|>=1.3,<1.3.1",
                 "amazing/media2click": ">=1,<1.3.3",
                 "ameos/ameos_tarteaucitron": "<1.2.23",
@@ -8561,7 +8561,7 @@
                 "backpack/crud": "<3.4.9",
                 "backpack/filemanager": "<2.0.2|>=3,<3.0.9",
                 "bacula-web/bacula-web": "<9.7.1",
-                "badaso/core": "<2.7",
+                "badaso/core": "<=2.9.11",
                 "bagisto/bagisto": "<2.1",
                 "barrelstrength/sprout-base-email": "<1.2.7",
                 "barrelstrength/sprout-forms": "<3.9",
@@ -9455,7 +9455,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-25T23:05:33+00:00"
+            "time": "2025-08-26T23:05:13+00:00"
         },
         {
             "name": "sebastian/cli-parser",
