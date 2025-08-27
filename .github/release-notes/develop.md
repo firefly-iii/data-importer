@@ -7,7 +7,7 @@ Development releases are created to test new features and fixes before they are 
 
 ## Changelog
 
-The changelog for this release may not be up-to-date, so it is not included. However, [changelog.md](https://github.com/firefly-iii/firefly-iii/blob/develop/changelog.md) may already contain entries for the future release.
+The changelog for this release may not be up-to-date, so it is not included. However, [changelog.md](https://github.com/firefly-iii/data-importer/blob/develop/changelog.md) may already contain entries for the future release.
 
 ## Installation and upgrade instructions
 
