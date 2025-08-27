@@ -142,9 +142,6 @@ class Configuration
         $this->nordigenRequisitions        = [];
         $this->nordigenMaxDays             = '90';
 
-        // spectre + nordigen configuration
-        $this->accounts                    = [];
-
         // spectre
         $this->identifier                  = '0';
         $this->connection                  = '0';
@@ -243,6 +240,10 @@ class Configuration
         // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData                  = $data['map_all_data'] ?? false;
         $object->accounts                    = $data['accounts'] ?? [];
+
+        // simplefin
+        $object->pendingTransactions         = $data['pending_transactions'] ?? true;
+
 
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
         Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
@@ -378,6 +379,9 @@ class Configuration
         $object->nordigenBank                = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions        = $array['nordigen_requisitions'] ?? [];
         $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
+
+        // simplefin
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // duplicate transaction detection
         $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
