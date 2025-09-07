@@ -37,10 +37,10 @@ class ImportedTransactions
 
     public const int TEST = 3;
 
-    public string $configurationFile;
-    public array $errors;
-    public array $messages;
-    public array $warnings;
+    public string $configurationFile = '';
+    public array $errors = [];
+    public array $messages = [];
+    public array $warnings = [];
     public array $rateLimits;
 
     public function __construct(string $configurationFile, array $messages, array $warnings, array $errors, array $rateLimits)
@@ -52,7 +52,7 @@ class ImportedTransactions
         $this->warnings             = $this->filterArray('warning(s)', $warnings);
         $this->errors               = $this->filterArray('error(s)', $errors);
         $this->rateLimits           = $this->filterArray('rate limit message(s)', $rateLimits);
-        $this->{$configurationFile} = $configurationFile;
+        $this->configurationFile = $configurationFile;
     }
 
     /**
