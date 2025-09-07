@@ -48,11 +48,11 @@ class ImportedTransactions
         Log::debug(sprintf('Created event ImportedTransactions("%s") with filtering (2)', $configurationFile));
 
         // filter messages:
-        $this->messages   = $this->filterArray('message(s)', $messages);
-        $this->warnings   = $this->filterArray('warning(s)', $warnings);
-        $this->errors     = $this->filterArray('error(s)', $errors);
-        $this->rateLimits = $this->filterArray('rate limit message(s)', $rateLimits);
-        $this->$configurationFile = $configurationFile;
+        $this->messages             = $this->filterArray('message(s)', $messages);
+        $this->warnings             = $this->filterArray('warning(s)', $warnings);
+        $this->errors               = $this->filterArray('error(s)', $errors);
+        $this->rateLimits           = $this->filterArray('rate limit message(s)', $rateLimits);
+        $this->{$configurationFile} = $configurationFile;
     }
 
     /**
