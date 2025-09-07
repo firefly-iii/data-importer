@@ -255,6 +255,7 @@ trait AutoImports
             // report about it anyway:
             event(
                 new ImportedTransactions(
+                    basename($jsonFile),
                     array_merge($this->conversionMessages, $this->importMessages),
                     array_merge($this->conversionWarnings, $this->importWarnings),
                     array_merge($this->conversionErrors, $this->importErrors),
@@ -276,7 +277,7 @@ trait AutoImports
         $messages      = array_merge($this->importMessages, $this->conversionMessages);
         $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
         $errors        = array_merge($this->importErrors, $this->conversionErrors);
-        event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->conversionRateLimits));
 
         if (count($this->importErrors) > 0 || count($this->conversionRateLimits) > 0) {
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
@@ -651,6 +652,7 @@ trait AutoImports
         $this->line('Done!');
         event(
             new ImportedTransactions(
+                basename($jsonFile),
                 array_merge($this->conversionMessages, $this->importMessages),
                 array_merge($this->conversionWarnings, $this->importWarnings),
                 array_merge($this->conversionErrors, $this->importErrors),

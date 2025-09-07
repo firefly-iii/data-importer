@@ -37,20 +37,22 @@ class ImportedTransactions
 
     public const int TEST = 3;
 
+    public string $configurationFile;
     public array $errors;
     public array $messages;
     public array $warnings;
     public array $rateLimits;
 
-    public function __construct(array $messages, array $warnings, array $errors, array $rateLimits)
+    public function __construct(string $configurationFile, array $messages, array $warnings, array $errors, array $rateLimits)
     {
-        Log::debug('Created event ImportedTransactions with filtering (2)');
+        Log::debug(sprintf('Created event ImportedTransactions("%s") with filtering (2)', $configurationFile));
 
         // filter messages:
         $this->messages   = $this->filterArray('message(s)', $messages);
         $this->warnings   = $this->filterArray('warning(s)', $warnings);
         $this->errors     = $this->filterArray('error(s)', $errors);
         $this->rateLimits = $this->filterArray('rate limit message(s)', $rateLimits);
+        $this->$configurationFile = $configurationFile;
     }
 
     /**

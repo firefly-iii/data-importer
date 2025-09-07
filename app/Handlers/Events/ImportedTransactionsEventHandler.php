@@ -60,6 +60,7 @@ class ImportedTransactionsEventHandler
             'warnings'    => $event->warnings,
             'errors'      => $event->errors,
             'rate_limits' => $event->rateLimits,
+            'config_file' => $event->configurationFile,
         ];
         if (count($event->messages) > 0 || count($event->warnings) > 0 || count($event->errors) > 0) {
             Log::info(sprintf('[%s] Will send report message.', config('importer.version')));
