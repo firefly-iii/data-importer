@@ -200,7 +200,7 @@ jobs:
           git add -A
           # push to a new branch.
           echo "Auto commit on branch '$(git branch --show-current)'."
-          git commit -m "🤖 Auto commit for release '$version' on $(date +'%Y-%m-%d')" || true
+          git commit -m "🤖 Automated commit for release '$version' on $(date +'%Y-%m-%d')" || true
           git push
         env:
           version: ${{ github.event_name == 'schedule' && 'develop' || inputs.version }}
@@ -221,12 +221,12 @@ jobs:
             fi
 
           echo "Merge all changes from $BRANCH_NAME back into '$MERGE_INTO' using a PR"
-          PR_URL=$(gh pr create -B $MERGE_INTO -H $BRANCH_NAME --title "🤖 Automatic PR to merge all changes into the '$MERGE_INTO' branch." --body '🤖 Created by GitHub action')
+          PR_URL=$(gh pr create -B $MERGE_INTO -H $BRANCH_NAME --title "🤖 Automatic PR to merge all changes into the '$MERGE_INTO' branch." --body '🤖 This PR is created by a GitHub action, and will be merged automatically. `Share and enjoy`')
           echo "PR URL is '$PR_URL'"
           IFS='/' read -ra parts <<< "$PR_URL"
           PR_NR=$(printf %s\\n "${parts[@]:(-1)}")
           echo "PR number is '$PR_NR'"
-          gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the $MERGE_INTO branch." -d --merge
+          gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the $MERGE_INTO branch. `Share and enjoy`" -d --merge
 
           # pull the changes from the $MERGE_INTO branch.
           git checkout $MERGE_INTO
@@ -243,7 +243,7 @@ jobs:
 
             echo "Also merge everything into main since this is a release."
             echo 'create PR'
-            PR_URL=$(gh pr create -B main -H develop --title "🤖 Automatic PR to merge all changes into the main branch." --body "🤖 Created by GitHub action")
+            PR_URL=$(gh pr create -B main -H develop --title "🤖 Automatic PR to merge all changes into the main branch." --body '🤖 This PR is created by a GitHub action, and will be merged automatically. `Share and enjoy`')
             echo "PR URL is '$PR_URL'"
 
             IFS='/' read -ra parts <<< "$PR_URL"
@@ -251,7 +251,7 @@ jobs:
             echo "PR number is '$PR_NR'"
 
             echo 'Merge PR'
-            gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the main branch." --merge
+            gh pr merge $PR_NR -b "🤖 Automatically merge the PR into the main branch. `Share and enjoy`" --merge
             git checkout main
             git merge origin/main
             git pull
