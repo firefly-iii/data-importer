@@ -348,6 +348,8 @@ class Configuration
         $object->contentType                 = $array['content_type'] ?? 'csv';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
+        Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
+
         // sort
         ksort($object->doMapping);
         ksort($object->mapping);
@@ -454,6 +456,8 @@ class Configuration
         $object->doMapping                   = $array['do_mapping'] ?? [];
         $object->contentType                 = $array['content_type'] ?? 'csv';
         $object->customTag                   = $array['custom_tag'] ?? '';
+
+        Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
 
         // mapping for spectre + nordigen
         $object->mapAllData                  = $array['map_all_data'] ?? false;
@@ -622,6 +626,7 @@ class Configuration
 
     public function getDefaultAccount(): ?int
     {
+        Log::debug(sprintf('Configuration getDefaultAccount return %s', var_export($this->defaultAccount, true)));
         return $this->defaultAccount;
     }
 
