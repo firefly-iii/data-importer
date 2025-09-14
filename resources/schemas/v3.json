@@ -21,7 +21,7 @@
         },
         "date": {
             "type": "string",
-            "minLength": 1,
+            "minLength": 0,
             "maxLength": 255
         },
         "default_account": {
@@ -141,7 +141,6 @@
     },
     "required": [
         "version",
-        "date",
         "default_account",
         "delimiter",
         "headers",
