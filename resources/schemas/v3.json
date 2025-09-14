@@ -1,0 +1,163 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "The version of the import configuration.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "default": 3
+        },
+        "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+        },
+        "created_at": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+        },
+        "date": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+        },
+        "default_account": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "delimiter": {
+            "type": "string",
+            "enum": [
+                "comma",
+                "semicolon",
+                "tab"
+            ]
+        },
+        "headers": {
+            "type": "boolean"
+        },
+        "rules": {
+            "type": "boolean"
+        },
+        "skip_form": {
+            "type": "boolean"
+        },
+        "add_import_tag": {
+            "type": "boolean"
+        },
+        "roles": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "do_mapping": {
+            "type": "array",
+            "items":
+                {
+                    "type": "boolean"
+                }
+        },
+        "mapping": {
+            "type": "array"
+        },
+        "duplicate_detection_method": {
+            "type": "string",
+            "enum": [
+                "none",
+                "classic",
+                "cell"
+            ]
+        },
+        "ignore_duplicate_lines": {
+            "type": "boolean"
+        },
+        "ignore_duplicate_transactions": {
+            "type": "boolean"
+        },
+        "unique_column_index": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "unique_column_type": {
+            "type": "string"
+        },
+        "flow": {
+            "type": "string",
+            "enum": [
+                "import",
+                "spectre",
+                "file",
+                "simplefin"
+            ]
+        },
+        "identifier": {
+            "type": "string"
+        },
+        "connection": {
+            "type": "string"
+        },
+        "ignore_spectre_categories": {
+            "type": "boolean"
+        },
+        "map_all_data": {
+            "type": "boolean"
+        },
+        "accounts": {
+            "type": "array",
+            "items": {}
+        },
+        "date_range": {
+            "type": "string"
+        },
+        "date_range_number": {
+            "type": "integer"
+        },
+        "date_range_unit": {
+            "type": "string"
+        },
+        "date_not_before": {
+            "type": "string"
+        },
+        "date_not_after": {
+            "type": "string"
+        },
+        "nordigen_country": {
+            "type": "string"
+        },
+        "nordigen_bank": {
+            "type": "string"
+        },
+        "nordigen_requisitions": {
+            "type": "array",
+            "items": {}
+        },
+        "conversion": {
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "version",
+        "date",
+        "default_account",
+        "delimiter",
+        "headers",
+        "rules",
+        "skip_form",
+        "add_import_tag",
+        "roles",
+        "do_mapping",
+        "mapping",
+        "duplicate_detection_method",
+        "ignore_duplicate_lines",
+        "ignore_duplicate_transactions",
+        "unique_column_index",
+        "unique_column_type",
+        "flow",
+        "conversion"
+    ]
+}
+
