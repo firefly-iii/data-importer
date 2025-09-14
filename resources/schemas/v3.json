@@ -107,8 +107,7 @@
             "type": "boolean"
         },
         "accounts": {
-            "type": "array",
-            "items": {}
+            "type": "object"
         },
         "date_range": {
             "type": "string"
@@ -132,8 +131,7 @@
             "type": "string"
         },
         "nordigen_requisitions": {
-            "type": "array",
-            "items": {}
+            "type": "object"
         },
         "conversion": {
             "type": "boolean"
