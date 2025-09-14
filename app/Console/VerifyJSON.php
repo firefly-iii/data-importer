@@ -28,9 +28,6 @@ namespace App\Console;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use Swaggest\JsonSchema\Exception;
-use Swaggest\JsonSchema\Exception\TypeException;
-use Swaggest\JsonSchema\Exception\LogicException;
-use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 
 /**
@@ -41,7 +38,7 @@ trait VerifyJSON
     private function verifyJSON(string $file): bool
     {
         // basic check on the JSON.
-        $json = (string)file_get_contents($file);
+        $json       = (string)file_get_contents($file);
 
         try {
             $config = json_decode($json, null, 512, JSON_THROW_ON_ERROR);
@@ -54,13 +51,16 @@ trait VerifyJSON
         $schemaFile = resource_path('schemas/v3.json');
         if (!file_exists($schemaFile)) {
             Log::error(sprintf('The schema file "%s" does not exist.', $schemaFile));
+
             return false;
         }
-        $schema = json_decode(file_get_contents($schemaFile));
+        $schema     = json_decode(file_get_contents($schemaFile));
+
         try {
             Schema::import($schema)->in($config);
         } catch (Exception|\Exception $e) {
             Log::error(sprintf('Configuration file "%s" does not adhere to the v3 schema: %s', $file, $e->getMessage()));
+
             return false;
         }
 
