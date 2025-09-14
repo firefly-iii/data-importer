@@ -627,6 +627,7 @@ class Configuration
     public function getDefaultAccount(): ?int
     {
         Log::debug(sprintf('Configuration getDefaultAccount return %s', var_export($this->defaultAccount, true)));
+
         return $this->defaultAccount;
     }
 
