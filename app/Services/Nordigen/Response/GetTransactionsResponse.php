@@ -30,6 +30,7 @@ use App\Services\Shared\Response\Response;
 use Countable;
 use Illuminate\Support\Collection;
 use Iterator;
+use Log;
 
 /**
  * Class GetTransactionsResponse
@@ -38,16 +39,35 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int        $position = 0;
+    private string $accountId = '';
+    private array $data;
 
     public function __construct(array $data)
     {
         $this->collection = new Collection();
+        $this->data = $data;
+        Log::debug('Created new GetTransactionsResponse');
 
+
+    }
+
+    public function setAccountId(string $accountId): void
+    {
+        $this->accountId = $accountId;
+        Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
+    }
+
+    public function processData(): void {
+        Log::debug('Processing data in GetTransactionsResponse');
         /** @var array $array */
-        foreach ($data as $array) {
+        foreach ($this->data as $array) {
+            $array['account_id'] = $this->accountId;
             $this->collection->push(Transaction::fromArray($array));
         }
+        Log::debug('Done processing data in GetTransactionsResponse');
     }
+
+
 
     /**
      * Count elements of an object.
