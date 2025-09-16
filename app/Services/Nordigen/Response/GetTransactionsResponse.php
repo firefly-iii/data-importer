@@ -39,13 +39,13 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int        $position = 0;
-    private string $accountId = '';
+    private string $accountId    = '';
     private array $data;
 
     public function __construct(array $data)
     {
         $this->collection = new Collection();
-        $this->data = $data;
+        $this->data       = $data;
         Log::debug('Created new GetTransactionsResponse');
 
 
@@ -57,8 +57,10 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
         Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
     }
 
-    public function processData(): void {
+    public function processData(): void
+    {
         Log::debug('Processing data in GetTransactionsResponse');
+
         /** @var array $array */
         foreach ($this->data as $array) {
             $array['account_id'] = $this->accountId;
@@ -66,8 +68,6 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
         }
         Log::debug('Done processing data in GetTransactionsResponse');
     }
-
-
 
     /**
      * Count elements of an object.

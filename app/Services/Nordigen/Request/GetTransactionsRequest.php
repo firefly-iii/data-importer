@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Log;
 class GetTransactionsRequest extends Request
 {
     private string $identifier = '';
+
     public function __construct(string $url, string $token, string $identifier)
     {
         $this->identifier = $identifier;
@@ -78,7 +79,7 @@ class GetTransactionsRequest extends Request
         }
         $total        = count($return);
         Log::debug(sprintf('Downloaded [%d:%d] transactions from bank account "%s"', $count, $total, $this->identifier));
-        $response = new GetTransactionsResponse($return);
+        $response     = new GetTransactionsResponse($return);
         $response->setAccountId($this->identifier);
         $response->processData();
 
