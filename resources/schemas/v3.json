@@ -26,7 +26,7 @@
         },
         "default_account": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 0
         },
         "delimiter": {
             "type": "string",
@@ -55,14 +55,27 @@
             }
         },
         "do_mapping": {
-            "type": "array",
-            "items":
+            "anyOf": [
                 {
-                    "type": "boolean"
+                    "type": "object"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean"
+                    }
                 }
+            ]
         },
         "mapping": {
-            "type": "object"
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array"
+                }
+            ]
         },
         "duplicate_detection_method": {
             "type": "string",
@@ -107,7 +120,14 @@
             "type": "boolean"
         },
         "accounts": {
-            "type": "object"
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array"
+                }
+            ]
         },
         "date_range": {
             "type": "string"
@@ -131,7 +151,14 @@
             "type": "string"
         },
         "nordigen_requisitions": {
-            "type": "object"
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array"
+                }
+            ]
         },
         "conversion": {
             "type": "boolean"

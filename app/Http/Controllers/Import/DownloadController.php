@@ -53,6 +53,14 @@ class DownloadController extends Controller
         if(is_array($array['mapping']) && 0 === count($array['mapping'])) {
             $array['mapping'] = new \stdClass();
         }
+        // same for "accounts"
+        if(is_array($array['accounts']) && 0 === count($array['accounts'])) {
+            $array['accounts'] = new \stdClass();
+        }
+        // same for "accounts"
+        if(is_array($array['nordigen_requisitions']) && 0 === count($array['nordigen_requisitions'])) {
+            $array['nordigen_requisitions'] = new \stdClass();
+        }
 
 
         $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);

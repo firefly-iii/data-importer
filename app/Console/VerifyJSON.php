@@ -35,31 +35,40 @@ use Swaggest\JsonSchema\Schema;
  */
 trait VerifyJSON
 {
+    protected string $errorMessage = '';
+
     private function verifyJSON(string $file): bool
     {
         // basic check on the JSON.
-        $json       = (string)file_get_contents($file);
+        $json = (string)file_get_contents($file);
 
         try {
             $config = json_decode($json, null, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            Log::error(sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage()));
+            $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
+            Log::error($message);
+            $this->errorMessage = $message;
 
             return false;
         }
         // validate JSON schema.
         $schemaFile = resource_path('schemas/v3.json');
         if (!file_exists($schemaFile)) {
-            Log::error(sprintf('The schema file "%s" does not exist.', $schemaFile));
+            $message = sprintf('The schema file "%s" does not exist.', $schemaFile);
+            Log::error($message);
+            $this->errorMessage = $message;
 
             return false;
         }
-        $schema     = json_decode(file_get_contents($schemaFile));
+        $schema = json_decode(file_get_contents($schemaFile));
 
         try {
             Schema::import($schema)->in($config);
         } catch (Exception|\Exception $e) {
-            Log::error(sprintf('Configuration file "%s" does not adhere to the v3 schema: %s', $file, $e->getMessage()));
+            $message = sprintf('Configuration file "%s" does not adhere to the v3 schema: %s', $file, $e->getMessage());
+
+            Log::error($message);
+            $this->errorMessage = $message;
 
             return false;
         }
