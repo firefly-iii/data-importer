@@ -48,6 +48,13 @@ class DownloadController extends Controller
         // do something
         $configuration = $this->restoreConfiguration();
         $array         = $configuration->toArray();
+
+        // make sure that "mapping" is an empty object when downloading.
+        if(is_array($array['mapping']) && 0 === count($array['mapping'])) {
+            $array['mapping'] = new \stdClass();
+        }
+
+
         $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         $response      = response($result);
         $name          = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
