@@ -62,7 +62,7 @@
                 }
         },
         "mapping": {
-            "type": "array"
+            "type": "object"
         },
         "duplicate_detection_method": {
             "type": "string",
