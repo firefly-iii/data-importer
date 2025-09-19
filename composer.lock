@@ -8134,16 +8134,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.26",
+            "version": "2.1.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "b13345001a8553ec405b7741be0c6b8d7f8b5bf5"
+                "reference": "25da374959afa391992792691093550b3098ef1e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b13345001a8553ec405b7741be0c6b8d7f8b5bf5",
-                "reference": "b13345001a8553ec405b7741be0c6b8d7f8b5bf5",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/25da374959afa391992792691093550b3098ef1e",
+                "reference": "25da374959afa391992792691093550b3098ef1e",
                 "shasum": ""
             },
             "require": {
@@ -8188,7 +8188,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-16T11:33:46+00:00"
+            "time": "2025-09-17T09:55:13+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -8287,16 +8287,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "12.3.7",
+            "version": "12.3.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9"
+                "reference": "99e692c6a84708211f7536ba322bbbaef57ac7fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9",
-                "reference": "bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/99e692c6a84708211f7536ba322bbbaef57ac7fc",
+                "reference": "99e692c6a84708211f7536ba322bbbaef57ac7fc",
                 "shasum": ""
             },
             "require": {
@@ -8352,7 +8352,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.7"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.8"
             },
             "funding": [
                 {
@@ -8372,7 +8372,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-10T09:59:06+00:00"
+            "time": "2025-09-17T11:31:43+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
