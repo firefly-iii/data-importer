@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.8.0 - 2025-09-20
+
+> [!WARNING]
+> Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+
+### Added
+- [Issue 9045](https://github.com/firefly-iii/firefly-iii/issues/9045) (Data Importer - Add config filename or bank name into end-of-import email) reported by @Terry-JF
+- [Issue 10923](https://github.com/firefly-iii/firefly-iii/issues/10923) ([Importer] CSV import broken in cli image (does not adhere to the v3 schema)) reported by @MacPaille
+- JSON Schema validation for the configuration file.
+
+### Changed
+- [Issue 10863](https://github.com/firefly-iii/firefly-iii/issues/10863) (Data Importer: GoCardless: option to use internalTransactionId instead) reported by @diogotcorreia
+- [Issue 10914](https://github.com/firefly-iii/firefly-iii/issues/10914) (GoCardless importer: external_id dedupe should be per account) reported by @Jazzmax
+
+### Fixed
+- Fix issue with restoring empty `accounts` array from configuration.
+
 ## v1.7.10 - 2025-08-23
 
 ### Deprecated

@@ -27,22 +27,48 @@ namespace App\Console;
 
 use Illuminate\Support\Facades\Log;
 use JsonException;
+use Swaggest\JsonSchema\Exception;
+use Swaggest\JsonSchema\Schema;
 
 /**
  * Trait VerifyJSON
  */
 trait VerifyJSON
 {
+    protected string $errorMessage = '';
+
     private function verifyJSON(string $file): bool
     {
         // basic check on the JSON.
-        $json = (string) file_get_contents($file);
+        $json       = (string)file_get_contents($file);
 
         try {
-            json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+            $config = json_decode($json, null, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            $message = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
+            $message            = sprintf('The importer can\'t import: could not decode the JSON in the config file: %s', $e->getMessage());
             Log::error($message);
+            $this->errorMessage = $message;
+
+            return false;
+        }
+        // validate JSON schema.
+        $schemaFile = resource_path('schemas/v3.json');
+        if (!file_exists($schemaFile)) {
+            $message            = sprintf('The schema file "%s" does not exist.', $schemaFile);
+            Log::error($message);
+            $this->errorMessage = $message;
+
+            return false;
+        }
+        $schema     = json_decode(file_get_contents($schemaFile));
+
+        try {
+            Schema::import($schema)->in($config);
+        } catch (Exception|\Exception $e) {
+            $message            = sprintf('Configuration file "%s" does not adhere to the v3 schema: %s', $file, $e->getMessage());
+
+            Log::error($message);
+            $this->errorMessage = $message;
 
             return false;
         }

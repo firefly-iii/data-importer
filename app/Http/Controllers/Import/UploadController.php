@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -53,6 +54,7 @@ use Storage;
 class UploadController extends Controller
 {
     use RestoresConfiguration;
+    use VerifyJSON;
 
     private string $configFileName;
     private string $contentType;
@@ -247,7 +249,16 @@ class UploadController extends Controller
         // upload the file to a temp directory and use it from there.
         if (0 === $errorNumber) {
             Log::debug('Config file uploaded.');
-            $this->configFileName = StorageService::storeContent((string)file_get_contents($file->getPathname()));
+            $path                 = $file->getPathname();
+            $validation           = $this->verifyJSON($path);
+            if (false === $validation) {
+                $errors->add('config_file', $this->errorMessage);
+
+                return $errors;
+            }
+
+            $content              = (string)file_get_contents($path);
+            $this->configFileName = StorageService::storeContent($content);
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
 

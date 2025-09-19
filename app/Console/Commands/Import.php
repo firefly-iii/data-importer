@@ -160,7 +160,7 @@ final class Import extends Command
         $warnings      = array_merge($this->importWarnings, $this->conversionWarnings);
         $errors        = array_merge($this->importErrors, $this->conversionErrors);
 
-        event(new ImportedTransactions($messages, $warnings, $errors, $this->conversionRateLimits));
+        event(new ImportedTransactions(basename($config), $messages, $warnings, $errors, $this->conversionRateLimits));
         if (0 !== count($this->importErrors)) {
             $exitCode = ExitCode::GENERAL_ERROR->value;
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));

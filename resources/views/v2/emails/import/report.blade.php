@@ -1,5 +1,5 @@
 @component('mail::message')
-# Result of your import on {{ $time }}
+# Result of your import on {{ $time }}@if('' !== $configFile), using configuration file `{{ $configFile }}`@endif
 
 <hr>
 

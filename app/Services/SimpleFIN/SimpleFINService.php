@@ -41,8 +41,8 @@ use Illuminate\Support\Facades\Log;
  */
 class SimpleFINService
 {
-    private string $accessToken = '';
-    private string $setupToken  = '';
+    private string        $accessToken = '';
+    private string        $setupToken  = '';
     private Configuration $configuration;
 
     /**
@@ -73,10 +73,13 @@ class SimpleFINService
     private function getFetchParams(string $accountId): array
     {
         $return     = [
-            'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
+            // 'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
             'start-date' => 0,
             'account'    => $accountId,
         ];
+        if ($this->configuration->getPendingTransactions()) {
+            $return['pending'] = 1;
+        }
         $dateAfter  = $this->configuration->getDateNotBefore();
         $dateBefore = $this->configuration->getDateNotAfter();
 
@@ -194,7 +197,13 @@ class SimpleFINService
 
             return [];
         }
+
+        /** @var array $transactions */
         $transactions = $accounts[0]['transactions'] ?? [];
+
+        // add a little filter to remove transactions that are pending.
+        $transactions = $this->filterForPending($transactions);
+
         Log::debug(sprintf('Found %d transactions.', $transactions));
 
         return $transactions;
@@ -214,7 +223,7 @@ class SimpleFINService
         }
 
         // Check if decoded string looks like a SimpleFIN claim URL
-        return (bool) preg_match('/^https?:\/\/.+\/simplefin\/claim\/.+$/', $decoded);
+        return (bool)preg_match('/^https?:\/\/.+\/simplefin\/claim\/.+$/', $decoded);
     }
 
     /**
@@ -253,7 +262,7 @@ class SimpleFINService
                 'headers' => $headers,
             ]);
 
-            $accessUrl = (string) $response->getBody();
+            $accessUrl = (string)$response->getBody();
 
             if ('' === $accessUrl) {
                 throw new ImporterErrorException('Empty access URL returned from SimpleFIN claim exchange');
@@ -270,7 +279,7 @@ class SimpleFINService
 
         } catch (ClientException $e) {
             $statusCode   = $e->getResponse()->getStatusCode();
-            $responseBody = (string) $e->getResponse()->getBody();
+            $responseBody = (string)$e->getResponse()->getBody();
 
             Log::error(sprintf('SimpleFIN claim URL exchange failed with HTTP %d: %s', $statusCode, $e->getMessage()));
             Log::error(sprintf('SimpleFIN 403 response body: %s', $responseBody));
@@ -316,7 +325,7 @@ class SimpleFINService
 
     private function getTimeout(): float
     {
-        return (float) config('simplefin.connection_timeout', 30.0);
+        return (float)config('simplefin.connection_timeout', 30.0);
     }
 
     public function getAccessToken(): string
@@ -338,5 +347,34 @@ class SimpleFINService
     public function setAccessToken(string $accessToken): void
     {
         $this->accessToken = $accessToken;
+    }
+
+    private function filterForPending(array $transactions): array
+    {
+        Log::debug(sprintf('Filter pending transactions. Start with %d item(s)', count($transactions)));
+        if (0 === count($transactions)) {
+            Log::debug('Empty array, nothing to filter.');
+
+            return [];
+        }
+        $return        = [];
+        $removePending = !$this->configuration->getPendingTransactions();
+
+        /** @var array $item */
+        foreach ($transactions as $item) {
+            $add = true;
+            // is pending and need to collect pending transactions? add it.
+            if (array_key_exists('pending', $item) && true === $item['pending'] && $removePending) {
+                Log::debug('Transaction is pending and removePending is true, skipping.');
+                $add = false;
+            }
+            if (true === $add) {
+                Log::debug('Transaction is not pending or removePending = false, add it.');
+                $return[] = $item;
+            }
+        }
+        Log::debug(sprintf('Done filtering pending transaction, return %d item(s)', count($return)));
+
+        return $return;
     }
 }

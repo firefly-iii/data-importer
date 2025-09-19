@@ -28,10 +28,10 @@ namespace App\Services\Nordigen\Model;
 use App\Rules\Iban;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
-use Illuminate\Support\Facades\Log;
-use Ramsey\Uuid\Uuid;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Log;
 use JsonException;
+use Ramsey\Uuid\Uuid;
 use Validator;
 
 /**
@@ -49,22 +49,22 @@ class Transaction
     public string  $creditorAccountBban;
     public string  $creditorAccountCurrency;
     public string  $creditorAccountIban; // is an array (see https://github.com/firefly-iii/firefly-iii/issues/5286)
-    public string $creditorAgent;
-    public string $creditorId;
-    public string $creditorName;
-    public string $currencyCode;
-    public array  $currencyExchange;
-    public string $debtorAccountBban;
-    public string $debtorAccountCurrency;
-    public string $debtorAccountIban;
-    public string $debtorAgent;
-    public string $debtorName;
-    public string $endToEndId;
-    public string $entryReference;
-    public string $key;
-    public string $mandateId;
-    public string $merchantCategoryCode;
-    public string $proprietaryBank;
+    public string  $creditorAgent;
+    public string  $creditorId;
+    public string  $creditorName;
+    public string  $currencyCode;
+    public array   $currencyExchange;
+    public string  $debtorAccountBban;
+    public string  $debtorAccountCurrency;
+    public string  $debtorAccountIban;
+    public string  $debtorAgent;
+    public string  $debtorName;
+    public string  $endToEndId;
+    public string  $entryReference;
+    public string  $key;
+    public string  $mandateId;
+    public string  $merchantCategoryCode;
+    public string  $proprietaryBank;
 
     // debtorAccount is an array, but is saved as strings
     // iban, currency
@@ -105,11 +105,7 @@ class Transaction
         $object->additionalInformation                  = trim($array['additionalInformation'] ?? '');
         $object->additionalInformationStructured        = trim($array['additionalInformationStructured'] ?? '');
         $object->bankTransactionCode                    = trim($array['bankTransactionCode'] ?? '');
-        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat(
-            '!Y-m-d',
-            $array['bookingDate'],
-            config('app.timezone')
-        ) : null;
+        $object->bookingDate                            = array_key_exists('bookingDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['bookingDate'], config('app.timezone')) : null;
 
         // overrule with "bookingDateTime" if present:
         if (array_key_exists('bookingDateTime', $array)) {
@@ -140,19 +136,14 @@ class Transaction
         $object->transactionId                          = trim($array['transactionId'] ?? '');
         $object->ultimateCreditor                       = trim($array['ultimateCreditor'] ?? '');
         $object->ultimateDebtor                         = trim($array['ultimateDebtor'] ?? '');
-        $object->valueDate                              = array_key_exists('valueDate', $array) ? Carbon::createFromFormat(
-            '!Y-m-d',
-            $array['valueDate'],
-            config('app.timezone')
-        ) : null;
+        $object->valueDate                              = array_key_exists('valueDate', $array) ? Carbon::createFromFormat('!Y-m-d', $array['valueDate'], config('app.timezone')) : null;
 
         // undocumented values
         $object->endToEndId                             = trim($array['endToEndId'] ?? ''); // from Rabobank NL
 
         // overrule transaction id when empty using the internal ID:
-        if ('' === $object->transactionId) {
-            $object->transactionId = trim($array['internalTransactionId'] ?? '');
-        }
+        // 2025-09-07: switch to using internal transaction ID, never "transactionId".
+        $object->transactionId                          = trim($array['internalTransactionId'] ?? '');
 
         // models:
         if (array_key_exists('balanceAfterTransaction', $array) && is_array($array['balanceAfterTransaction'])) {
@@ -167,13 +158,13 @@ class Transaction
         }
 
         // add "pending" or "booked" if it exists.
-        $key                                            = (string) $array['key'];
+        $key                                            = (string)$array['key'];
         if ('' !== $key) {
             $object->tags[] = $key;
         }
 
         // add merchant category code, if it exists:
-        $merchantCode                                   = (string) ($array['merchant_category_code'] ?? '');
+        $merchantCode                                   = (string)($array['merchant_category_code'] ?? '');
         if ('' !== $merchantCode) {
             $object->tags[] = $merchantCode;
         }
@@ -191,11 +182,11 @@ class Transaction
         $object->currencyCode                           = trim($array['transactionAmount']['currency'] ?? '');
 
         // other fields:
-        $object->accountIdentifier                      = '';
+        $object->accountIdentifier                      = $array['account_id'] ?? '';
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string) microtime());
+            $hash                  = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
@@ -273,14 +264,14 @@ class Transaction
 
         // generate transactionID if empty:
         if ('' === $object->transactionId) {
-            $hash                  = hash('sha256', (string) microtime());
+            $hash                  = hash('sha256', (string)microtime());
 
             try {
                 $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
                 Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
             }
-            $object->transactionId = (string) Uuid::uuid5(config('importer.namespace'), $hash);
+            $object->transactionId = sprintf('ff3-%s', Uuid::uuid5(config('importer.namespace'), $hash));
         }
 
         return $object;
@@ -351,7 +342,13 @@ class Transaction
 
     public function getTransactionId(): string
     {
-        return substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 250);
+        // #10914 add account ID to transaction ID to make it unique.
+        $accountId     = substr(trim((string)preg_replace('/\s+/', ' ', $this->accountIdentifier)), 0, 125);
+        $transactionId = substr(trim((string)preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
+
+        Log::debug(sprintf('Returning transaction ID: %s and %s are joined.', $accountId, $transactionId));
+
+        return trim(sprintf('%s-%s', $accountId, $transactionId));
     }
 
     /**

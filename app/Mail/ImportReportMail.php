@@ -44,6 +44,7 @@ class ImportReportMail extends Mailable
     public string $url;
     public string $version;
     public array  $warnings;
+    public string $configFile = '';
     public array  $rateLimits;
 
     /**
@@ -61,6 +62,7 @@ class ImportReportMail extends Mailable
         $this->warnings   = $log['warnings'] ?? [];
         $this->messages   = $log['messages'] ?? [];
         $this->rateLimits = $log['rate_limits'] ?? [];
+        $this->configFile = $log['config_file'] ?? '';
     }
 
     /**
