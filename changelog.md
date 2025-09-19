@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.8.0 - 2025-09-20
+
+> [!WARNING]
+> Some changes in this release may unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+
+### Added
+- #9045
+- #10923
+- JSON Schema validation for the configuration file.
+
+### Changed
+- #10863
+- #10914
+
+### Fixed
+- Fix issue with restoring empty `accounts` array from configuration.
+
 ## v1.7.10 - 2025-08-23
 
 ### Deprecated
