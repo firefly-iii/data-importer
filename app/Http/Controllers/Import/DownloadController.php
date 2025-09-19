@@ -32,6 +32,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use JsonException;
+use stdClass;
 
 /**
  * Class DownloadController
@@ -50,16 +51,16 @@ class DownloadController extends Controller
         $array         = $configuration->toArray();
 
         // make sure that "mapping" is an empty object when downloading.
-        if(is_array($array['mapping']) && 0 === count($array['mapping'])) {
-            $array['mapping'] = new \stdClass();
+        if (is_array($array['mapping']) && 0 === count($array['mapping'])) {
+            $array['mapping'] = new stdClass();
         }
         // same for "accounts"
-        if(is_array($array['accounts']) && 0 === count($array['accounts'])) {
-            $array['accounts'] = new \stdClass();
+        if (is_array($array['accounts']) && 0 === count($array['accounts'])) {
+            $array['accounts'] = new stdClass();
         }
         // same for "accounts"
-        if(is_array($array['nordigen_requisitions']) && 0 === count($array['nordigen_requisitions'])) {
-            $array['nordigen_requisitions'] = new \stdClass();
+        if (is_array($array['nordigen_requisitions']) && 0 === count($array['nordigen_requisitions'])) {
+            $array['nordigen_requisitions'] = new stdClass();
         }
 
 
