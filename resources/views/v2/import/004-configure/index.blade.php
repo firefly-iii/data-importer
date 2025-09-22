@@ -83,6 +83,12 @@
                 @endif
                 <!-- end of spectre options -->
 
+                <!-- Nordigen / GoCardless specific options -->
+                @if('nordigen' === $flow)
+                    @include('import.004-configure.partials.gocardless-options')
+                @endif
+                <!-- end of Nordigen / GoCardless options -->
+
                 <!-- camt.053 options -->
                 @if('file' === $flow && 'camt'  === $configuration->getContentType())
                     @include('import.004-configure.partials.camt-053-options')
