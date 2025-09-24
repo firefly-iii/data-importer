@@ -136,6 +136,10 @@ class ConfigurationPostRequest extends Request
             'date_range'                    => $this->convertToString('date_range'),
             'date_range_number'             => $this->convertToInteger('date_range_number'),
             'date_range_unit'               => $this->convertToString('date_range_unit'),
+
+            'date_range_not_after_number'             => $this->convertToInteger('date_range_not_after_number'),
+            'date_range_not_after_unit'               => $this->convertToString('date_range_not_after_unit'),
+
             'date_not_before'               => $this->getCarbonDate('date_not_before'),
             'date_not_after'                => $this->getCarbonDate('date_not_after'),
 

@@ -308,6 +308,7 @@ class ConfigurationController extends Controller
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
+        // TODO this must all move to some kind of validator thing.
         Log::debug(sprintf('Now running %s', __METHOD__));
         // store config on drive.v
         $fromRequest         = $request->getAll();
