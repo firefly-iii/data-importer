@@ -58,7 +58,7 @@
                         </p>
                         @endif
                         <p class="text-warning">
-                            Firefly III and Salt Edge / Spectre partnered to give you free API access. This will unfortunately end on October 31st, 2025. Existing users may have to migrate to a paid tier.
+                            Firefly III and Salt Edge / Spectre partnered to give you free API access. This will unfortunately end on October 31st, 2025. The API will keep working, but existing users may have to migrate to a paid tier.
                         </p>
                     </div>
                 </div>
