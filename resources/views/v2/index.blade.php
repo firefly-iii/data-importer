@@ -57,6 +57,9 @@
                             to Firefly III.
                         </p>
                         @endif
+                        <p class="text-warning">
+                            Firefly III and Salt Edge / Spectre partnered to give you free API access. This will unfortunately end on October 31st, 2025. The API will keep working, but existing users may have to migrate to a paid tier.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -96,8 +99,7 @@
                                     <button x-show="!loadingFunctions.file && importFunctions.file" class="btn btn-info" value="file" name="flow"
                                             >Import file</button>
                                     <button x-show="!loadingFunctions.file && !importFunctions.file" class="btn text-white btn-danger disabled"  value="file" name="flow"
-                                            disabled
-                                    ><em class="fa-solid fa-face-dizzy"></em></button>
+                                            disabled><em class="fa-solid fa-face-dizzy"></em></button>
 
                                 </div>
                             </div>

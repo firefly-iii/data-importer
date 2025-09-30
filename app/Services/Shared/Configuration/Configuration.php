@@ -26,8 +26,8 @@ declare(strict_types=1);
 namespace App\Services\Shared\Configuration;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Log;
 use UnexpectedValueException;
 
 /**
@@ -35,35 +35,40 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const int VERSION = 3;
-    private array  $accounts;
-    private array  $newAccounts;
-    private bool   $addImportTag;
-    private string $connection;
-    private string $contentType;
+    public const int VERSION     = 3;
+    private array  $accounts     = [];
+    private array  $newAccounts  = [];
+    private bool   $addImportTag = true;
+    private string $connection   = '0';
+    private string $contentType  = 'csv';
     private bool   $conversion;
-    private string $customTag;
-    private string $date;
+    private string $customTag    = '';
+    private string $date         = 'Y-m-d';
     private string $dateNotAfter;
     private string $dateNotBefore;
     private string $dateRange;
     private int    $dateRangeNumber;
     private string $dateRangeUnit;
-    private int    $defaultAccount;
+
+    // same date range settings but for earlier transactions.
+    private int    $dateRangeNotAfterNumber;
+    private string $dateRangeNotAfterUnit;
+
+    private int $defaultAccount  = 1;
 
     // nordigen configuration
-    private string $delimiter;
-    private array  $doMapping;
+    private string $delimiter    = 'comma';
+    private array  $doMapping    = [];
 
     // flow and file type
     private string $duplicateDetectionMethod;
-    private string $flow;
+    private string $flow         = 'file';
 
     // csv config
     private string $groupedTransactionHandling;
 
     // spectre + nordigen configuration
-    private bool $headers;
+    private bool $headers        = false;
 
     // spectre configuration
     private string $identifier;
@@ -75,25 +80,24 @@ class Configuration
     private bool $mapAllData;
 
     // simplefin configuration
-    private bool $pendingTransactions;
+    private bool   $pendingTransactions;
     private string $accessToken;
 
     // date range settings
-    private array  $mapping;
+    private array  $mapping      = [];
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
     private array  $nordigenRequisitions;
 
     // what type of import?
-    private array $roles;
+    private array $roles         = [];
 
-    // how to do double transaction detection?
-    private bool $rules; // 'classic' or 'cell'
+    private bool $rules          = true;
 
     // configuration for "classic" method:
-    private bool  $skipForm;
-    private array $specifics;
+    private bool  $skipForm      = false;
+    private array $specifics     = [];
 
     // configuration for "cell" method:
     private int    $uniqueColumnIndex;
@@ -108,27 +112,16 @@ class Configuration
      */
     private function __construct()
     {
-        $this->date                        = 'Y-m-d';
-        $this->defaultAccount              = 1;
-        $this->delimiter                   = 'comma';
-        $this->headers                     = false;
-        $this->rules                       = true;
-        $this->skipForm                    = false;
-        $this->addImportTag                = true;
-        $this->specifics                   = [];
-        $this->roles                       = [];
-        $this->mapping                     = [];
-        $this->doMapping                   = [];
-        $this->accounts                    = [];
-        $this->newAccounts                 = [];
-        $this->flow                        = 'file';
-        $this->contentType                 = 'csv';
         $this->customTag                   = '';
 
         // date range settings
         $this->dateRange                   = 'all';
         $this->dateRangeNumber             = 30;
         $this->dateRangeUnit               = 'd';
+        // by default, no "not after" settings.
+        $this->dateRangeNotAfterNumber     = 0;
+        $this->dateRangeNotAfterUnit       = '';
+
         $this->dateNotBefore               = '';
         $this->dateNotAfter                = '';
 
@@ -223,6 +216,11 @@ class Configuration
         $object->dateRange                   = $data['date_range'] ?? 'all';
         $object->dateRangeNumber             = $data['date_range_number'] ?? 30;
         $object->dateRangeUnit               = $data['date_range_unit'] ?? 'd';
+
+        // by default, no "not after" settings (are not in v1 anyway)
+        $object->dateRangeNotAfterNumber     = $data['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $data['date_range_not_after_unit'] ?? '';
+
         $object->dateNotBefore               = $data['date_not_before'] ?? '';
         $object->dateNotAfter                = $data['date_not_after'] ?? '';
 
@@ -295,7 +293,7 @@ class Configuration
         // loop do mapping from classic file.
         $doMapping                           = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
-            $index                     = (int) $index;
+            $index                     = (int)$index;
             $object->doMapping[$index] = $map;
         }
         ksort($object->doMapping);
@@ -303,7 +301,7 @@ class Configuration
         // loop mapping from classic file.
         $mapping                             = $data['column-mapping-config'] ?? [];
         foreach ($mapping as $index => $map) {
-            $index                   = (int) $index;
+            $index                   = (int)$index;
             $object->mapping[$index] = $map;
         }
         ksort($object->mapping);
@@ -369,6 +367,11 @@ class Configuration
         $object->dateRange                   = $array['date_range'] ?? 'all';
         $object->dateRangeNumber             = $array['date_range_number'] ?? 30;
         $object->dateRangeUnit               = $array['date_range_unit'] ?? 'd';
+
+        // add date range not after settings.
+        $object->dateRangeNotAfterNumber     = $array['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $array['date_range_not_after_unit'] ?? '';
+
         $object->dateNotBefore               = $array['date_not_before'] ?? '';
         $object->dateNotAfter                = $array['date_not_after'] ?? '';
 
@@ -484,6 +487,10 @@ class Configuration
         $object->dateRange                   = $array['date_range'] ?? 'all';
         $object->dateRangeNumber             = $array['date_range_number'] ?? 30;
         $object->dateRangeUnit               = $array['date_range_unit'] ?? 'd';
+
+        // date range settings for "not after"
+        $object->dateRangeNotAfterNumber     = $array['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $array['date_range_not_after_unit'] ?? '';
 
         // null or Carbon because fromRequest will give Carbon object.
         $object->dateNotBefore               = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
@@ -882,6 +889,8 @@ class Configuration
             'date_range'                   => $this->dateRange,
             'date_range_number'            => $this->dateRangeNumber,
             'date_range_unit'              => $this->dateRangeUnit,
+            'date_range_not_after_unit'    => $this->dateRangeNotAfterUnit,
+            'date_range_not_after_number'  => $this->dateRangeNotAfterNumber,
             'date_not_before'              => $this->dateNotBefore,
             'date_not_after'               => $this->dateNotAfter,
 
@@ -914,25 +923,36 @@ class Configuration
             default:
             case 'all':
                 Log::debug('Range is null, set all to NULL.');
-                $this->dateRangeUnit   = 'd';
-                $this->dateRangeNumber = 30;
-                $this->dateNotBefore   = '';
-                $this->dateNotAfter    = '';
+                $this->dateRangeUnit           = 'd';
+                $this->dateRangeNumber         = 30;
+                $this->dateNotBefore           = '';
+                $this->dateNotAfter            = '';
+                $this->dateRangeNotAfterUnit   = '';
+                $this->dateRangeNotAfterNumber = 0;
 
                 break;
 
             case 'partial':
-                Log::debug('Range is partial, after is NULL, dateNotBefore will be calculated.');
-                $this->dateNotAfter    = '';
-                $this->dateNotBefore   = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
+                Log::debug('Range is partial.');
+                $this->dateNotBefore           = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
                 Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
+                if ('' === $this->dateRangeNotAfterUnit) {
+                    Log::debug('dateRangeNotAfterUnit is "", dateNotAfter will be empty.');
+                    $this->dateNotAfter = '';
+                    Log::debug(sprintf('dateNotAfter is now "%s"', $this->dateNotAfter));
+                }
+                if ('' !== $this->dateRangeNotAfterUnit && $this->dateRangeNotAfterNumber > 0) {
+                    Log::debug(sprintf('dateRangeNotAfterUnit is "%s", count is %d, dateNotAfter will be calculated.', $this->dateRangeNotAfterUnit, $this->dateRangeNotAfterNumber));
+                    $this->dateNotAfter = self::calcDateNotBefore($this->dateRangeNotAfterUnit, $this->dateRangeNotAfterNumber);
+                    Log::debug(sprintf('dateNotAfter is now "%s"', $this->dateNotAfter));
+                }
 
                 break;
 
             case 'range':
                 Log::debug('Range is "range", both will be created from a string.');
-                $before                = trim($this->dateNotBefore); // string
-                $after                 = trim($this->dateNotAfter);  // string
+                $before                        = trim($this->dateNotBefore); // string
+                $after                         = trim($this->dateNotAfter);  // string
                 if ('' !== $before) {
                     $before = Carbon::createFromFormat('Y-m-d', $before);
                 }
@@ -944,8 +964,8 @@ class Configuration
                     [$before, $after] = [$after, $before];
                 }
 
-                $this->dateNotBefore   = '' === $before ? '' : $before->format('Y-m-d');
-                $this->dateNotAfter    = '' === $after ? '' : $after->format('Y-m-d');
+                $this->dateNotBefore           = '' === $before ? '' : $before->format('Y-m-d');
+                $this->dateNotAfter            = '' === $after ? '' : $after->format('Y-m-d');
                 Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
     }
@@ -978,5 +998,15 @@ class Configuration
     public function setAccessToken(string $accessToken): void
     {
         $this->accessToken = $accessToken;
+    }
+
+    public function getDateRangeNotAfterNumber(): int
+    {
+        return $this->dateRangeNotAfterNumber;
+    }
+
+    public function getDateRangeNotAfterUnit(): string
+    {
+        return $this->dateRangeNotAfterUnit;
     }
 }

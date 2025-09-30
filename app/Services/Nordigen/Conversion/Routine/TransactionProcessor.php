@@ -175,9 +175,22 @@ class TransactionProcessor
         if ($this->notAfter instanceof Carbon) {
             Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
-        $return = [];
+        $return     = [];
+        $getPending = $this->configuration->getPendingTransactions();
+        if ($getPending) {
+            Log::info('Will include pending transactions.');
+        }
+        if (!$getPending) {
+            Log::info('Will NOT include pending transactions.');
+        }
         foreach ($transactions as $transaction) {
             $madeOn   = $transaction->getDate();
+
+            if (!$getPending && 'pending' === $transaction->key) {
+                Log::debug(sprintf('Skip pending transaction made on "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
+
+                continue;
+            }
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(

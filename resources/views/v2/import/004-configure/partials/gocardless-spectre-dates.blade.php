@@ -49,9 +49,9 @@
                     </div>
                 </div>
 
-                <div class="form-group row mb-3" id="date_range_partial_settings" x-show="'partial' === dateRange">
+                <div class="form-group row mb-3" id="date_range_partial_settings_one" x-show="'partial' === dateRange">
                     <div class="col-sm-3">
-                        Date range settings
+                        Go back this period
                     </div>
                     <div class="col-sm-3">
                         <input
@@ -81,6 +81,48 @@
                             value="y" label="years">years
                             </option>
                         </select>
+                    </div>
+                </div>
+                <div class="form-group row mb-3" id="date_range_partial_settings_two" x-show="'partial' === dateRange">
+                    <div class="col-sm-3">
+                        Stop when you reach transactions newer than
+                    </div>
+                    <div class="col-sm-3">
+                        <input
+                            name="date_range_not_after_number"
+                            id="date_range_not_after_number"
+                            class="form-control" value="{{ $configuration->getDateRangeNotAfterNumber() }}"
+                            type="number" step="1" min="0" max="365">
+                    </div>
+                    <div class="col-sm-6">
+                        <select class="form-control"
+                                name="date_range_not_after_unit"
+                                id="date_range_not_after_unit">
+                            <option
+                                @if('' === $configuration->getDateRangeNotAfterUnit()) selected @endif
+                            value="" label="(import all transactions)">(import all transactions)
+                            </option>
+                            <option
+                                @if('d' === $configuration->getDateRangeNotAfterUnit()) selected @endif
+                            value="d" label="days ago">days ago
+                            </option>
+                            <option
+                                @if('w' === $configuration->getDateRangeNotAfterUnit()) selected @endif
+                            value="w" label="weeks ago">weeks ago
+                            </option>
+                            <option
+                                @if('m' === $configuration->getDateRangeNotAfterUnit()) selected @endif
+                            value="m" label="months ago">months ago
+                            </option>
+                            <option
+                                @if('y' === $configuration->getDateRangeNotAfterUnit()) selected @endif
+                            value="y" label="years ago">years ago
+                            </option>
+                        </select>
+                        <p class="text-muted">
+                            Leave the number to "0" and the unit to "(import all transactions)" to import all known transactions.<br>
+                            Example: If you set it to "5" and "days ago", the import will NOT import transactions that are newer than 5 days ago.
+                        </p>
                     </div>
                 </div>
 
