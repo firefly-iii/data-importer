@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.8.1 - 2025-10-01
+
+### Added
+- #6061
+
+### Changed
+- #10947
+
+### Removed
+- Add message about future removal of Spectre / Salt Edge.
+
 ## v1.8.0 - 2025-09-20
 
 > [!WARNING]
