@@ -5,15 +5,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## v1.8.2 - 2025-10-02
 
 ### Fixed
-- #10983
+- [Issue 10983](https://github.com/firefly-iii/firefly-iii/issues/10983) (CANNOT_PARSE_CONFIG thrown on Importer-Image 1.8.0) reported by @beatbesmer
 
 ## v1.8.1 - 2025-10-01
 
 ### Added
-- #6061
+- [Issue 6061](https://github.com/firefly-iii/firefly-iii/issues/6061) (Set import daterange on both ends) reported by @JC5
 
 ### Changed
-- #10947
+- [Discussion 10947](https://github.com/orgs/firefly-iii/discussions/10947) (Shouldn't GoCardless import ignore pending transactions?) started by @molnarti
 
 ### Removed
 - Add message about future removal of Spectre / Salt Edge.
