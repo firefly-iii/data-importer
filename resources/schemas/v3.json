@@ -49,10 +49,14 @@
             "type": "boolean"
         },
         "roles": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array"
+                }
+            ]
         },
         "do_mapping": {
             "anyOf": [
