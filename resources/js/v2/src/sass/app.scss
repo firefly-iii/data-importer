@@ -18,6 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 $color-mode-type: media-query;
 $link-decoration: none !default;
 $font-family-sans-serif: "Roboto", sans-serif;
@@ -73,7 +74,10 @@ td:not(:hover) .hidden-edit-button {
 
 // Font awesome
 //@import "~font-awesome/css/font-awesome";
-$fa-font-path: "@fortawesome/fontawesome-free/webfonts";
+@use '@fortawesome/fontawesome-free/scss/variables' with (
+$fa-font-path: "@fortawesome/fontawesome-free/webfonts",
+);
+
 @import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
 @import "@fortawesome/fontawesome-free/scss/solid.scss";
 @import "@fortawesome/fontawesome-free/scss/brands.scss";
