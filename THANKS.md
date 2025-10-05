@@ -4,6 +4,7 @@ Over time, many people have contributed to the Firefly III Data Importer. Their 
 Please find below all the people who contributed to the Firefly III Data Importer code. Their names are mentioned in the year of their first contribution.
 
 ## 2025
+- Linguardium
 - Robin Appelman
 - Martijn Klene
 - DrEthan
