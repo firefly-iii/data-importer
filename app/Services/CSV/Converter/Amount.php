@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use NumberFormatter;
 
@@ -135,10 +134,10 @@ class Amount implements ConverterInterface
             // so here we use the fallback locale to pick which one it probably is.
             // still zero indication at this point so we will use the decimal from the default locale.
             // and hope for the best.
-            if(null !== config('csv.fallback_locale')) {
-                $temp = new \NumberFormatter(config('csv.fallback_locale'), NumberFormatter::CURRENCY);
+            if (null !== config('csv.fallback_locale')) {
+                $temp    = new NumberFormatter(config('csv.fallback_locale'), NumberFormatter::CURRENCY);
                 $decimal = $temp->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
-                Log::debug(sprintf('Using fallback locale "%s" to determine decimal character: "%s"',config('csv.fallback_locale'),  $decimal));
+                Log::debug(sprintf('Using fallback locale "%s" to determine decimal character: "%s"', config('csv.fallback_locale'), $decimal));
             }
 
         }
