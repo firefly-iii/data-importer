@@ -84,7 +84,8 @@
         "swaggest/json-schema": "^0.12.43",
         "symfony/http-client": "^7.3",
         "symfony/mailgun-mailer": "^7.3",
-        "thecodingmachine/safe": "^3.3"
+        "thecodingmachine/safe": "^3.3",
+        "ext-intl": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

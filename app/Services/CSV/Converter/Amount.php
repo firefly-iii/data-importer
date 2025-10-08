@@ -24,7 +24,9 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Converter;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use NumberFormatter;
 
 /**
  * Class Amount.
@@ -98,6 +100,7 @@ class Amount implements ConverterInterface
 
         // some shitty banks decided that "25.00000" is a normal way to write down numbers.
         // five decimals in the export, WHY
+
         if (null === $decimal) {
             Log::debug('No decimal point, try to find a dot.');
             $index = strripos($value, '.');
@@ -126,6 +129,18 @@ class Amount implements ConverterInterface
                     Log::debug('Decimal point is not at position 4, so probably not a thousands separator.');
                 }
             }
+            // #11032
+            // a more terrible bank from Switzerland has decided that three decimals is normal behavior.
+            // this makes "14.000" either 14 or 14000. With zero indication as to which one it may be.
+            // so here we use the fallback locale to pick which one it probably is.
+            // still zero indication at this point so we will use the decimal from the default locale.
+            // and hope for the best.
+            if(null !== config('csv.fallback_locale')) {
+                $temp = new \NumberFormatter(config('csv.fallback_locale'), NumberFormatter::CURRENCY);
+                $decimal = $temp->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
+                Log::debug(sprintf('Using fallback locale "%s" to determine decimal character: "%s"',config('csv.fallback_locale'),  $decimal));
+            }
+
         }
 
         // decimal character still null? Search from the left for '.',',' or ' '.
@@ -271,6 +286,7 @@ class Amount implements ConverterInterface
         if (',' === $decimal) {
             $search = ['.', ' '];
         }
+        Log::debug(sprintf('Search because decimal separator is a "%s":', $decimal), $search);
         $value  = str_replace($search, '', $value);
 
         // @noinspection CascadeStringReplacementInspection
