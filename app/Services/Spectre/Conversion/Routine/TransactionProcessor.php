@@ -30,7 +30,7 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Request\GetTransactionsRequest;
-use App\Services\Spectre\Request\PutRefreshConnectionRequest;
+use App\Services\Spectre\Request\PostRefreshConnectionRequest;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetTransactionsResponse;
 use Carbon\Carbon;
@@ -107,10 +107,10 @@ class TransactionProcessor
         $url      = config('spectre.url');
         $appId    = SpectreSecretManager::getAppId();
         $secret   = SpectreSecretManager::getSecret();
-        $put      = new PutRefreshConnectionRequest($url, $appId, $secret);
-        $put->setTimeOut(config('importer.connection.timeout'));
-        $put->setConnection($this->configuration->getConnection());
-        $response = $put->put();
+        $post      = new PostRefreshConnectionRequest($url, $appId, $secret);
+        $post->setTimeOut(config('importer.connection.timeout'));
+        $post->setConnection($this->configuration->getConnection());
+        $response = $post->post();
         if ($response instanceof ErrorResponse) {
             Log::error(sprintf('[%s] Could not refresh connection.', config('importer.version')));
             Log::error(sprintf('[%s] %s: %s', config('importer.version'), $response->class, $response->message));

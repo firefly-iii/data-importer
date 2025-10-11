@@ -62,10 +62,9 @@ class Connection
         $model->customerId            = $data['customer_id'];
         $model->nextPossibleRefreshAt = $data['next_refresh_possible_at'];
         $model->providerCode          = $data['provider_code'];
-        $model->providerId            = $data['provider_id'];
         $model->providerName          = $data['provider_name'];
         $model->status                = $data['status'];
-        $model->lastSuccess           = new Carbon($data['last_success_at']);
+        $model->lastSuccess           = new Carbon($data['last_attempt']['success_at']);
         $model->updatedAt             = new Carbon($data['updated_at']);
 
         return $model;
