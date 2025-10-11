@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\PostRefreshConnectionResponse;
@@ -68,7 +69,19 @@ class PostRefreshConnectionRequest extends Request
                 ],
             ],
         ];
-        $response = $this->sendUnsignedSpectrePost($body);
+        try
+        {
+            $response = $this->sendUnsignedSpectrePost($body);
+        }
+        catch (ImporterHttpException $e)
+        {
+            // This probably means that the connection has just been refreshed so let's ignore it and continue with import
+            if (str_contains($e->getMessage(), 'ConnectionCannotBeRefreshed'))
+            {
+                return new PostRefreshConnectionResponse([]);
+            }
+            throw $e;
+        }
 
         // could be error response:
         if (isset($response['error']) && !isset($response['data'])) {
