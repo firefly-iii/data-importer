@@ -107,7 +107,7 @@ class TransactionProcessor
         $url      = config('spectre.url');
         $appId    = SpectreSecretManager::getAppId();
         $secret   = SpectreSecretManager::getSecret();
-        $post      = new PostRefreshConnectionRequest($url, $appId, $secret);
+        $post     = new PostRefreshConnectionRequest($url, $appId, $secret);
         $post->setTimeOut(config('importer.connection.timeout'));
         $post->setConnection($this->configuration->getConnection());
         $response = $post->post();

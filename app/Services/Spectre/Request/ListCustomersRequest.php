@@ -64,11 +64,10 @@ class ListCustomersRequest extends Request
         }
 
         $data = $response['data'];
-        for ($i = 0; $i < count($data); $i++)
-        {
+        for ($i = 0; $i < count($data); ++$i) {
             $data[$i]['secret'] = $this->getSecret();
         }
-        
+
         return new ListCustomersResponse($data);
     }
 
