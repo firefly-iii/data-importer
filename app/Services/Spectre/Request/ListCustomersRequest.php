@@ -63,7 +63,13 @@ class ListCustomersRequest extends Request
             return new ErrorResponse($e->json ?? []);
         }
 
-        return new ListCustomersResponse($response['data']);
+        $data = $response['data'];
+        for ($i = 0; $i < count($data); $i++)
+        {
+            $data[$i]['secret'] = $this->getSecret();
+        }
+        
+        return new ListCustomersResponse($data);
     }
 
     public function post(): Response
