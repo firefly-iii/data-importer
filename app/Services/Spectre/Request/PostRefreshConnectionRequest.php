@@ -54,32 +54,30 @@ class PostRefreshConnectionRequest extends Request
     /**
      * @throws ImporterErrorException
      */
-    public function post(): Response 
+    public function post(): Response
     {
         $this->setUrl(sprintf($this->getUrl(), $this->connection));
 
-        $body     = [
+        $body = [
             'data' => [
                 'return_connection_id' => false,
-                'automatic_refresh' => true,
-                'show_widget' => false,
-                'attempt'     => [
+                'automatic_refresh'    => true,
+                'show_widget'          => false,
+                'attempt'              => [
                     'fetch_scopes' => ['accounts', 'transactions'],
-                    'return_to' => $this->getUrl(),
+                    'return_to'    => $this->getUrl(),
                 ],
             ],
         ];
-        try
-        {
+
+        try {
             $response = $this->sendUnsignedSpectrePost($body);
-        }
-        catch (ImporterHttpException $e)
-        {
+        } catch (ImporterHttpException $e) {
             // This probably means that the connection has just been refreshed so let's ignore it and continue with import
-            if (str_contains($e->getMessage(), 'ConnectionCannotBeRefreshed'))
-            {
+            if (str_contains($e->getMessage(), 'ConnectionCannotBeRefreshed')) {
                 return new PostRefreshConnectionResponse([]);
             }
+
             throw $e;
         }
 
