@@ -307,7 +307,7 @@ class ConversionController extends Controller
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
             session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
 
-            return response()->json($importJobStatus->toArray());
+            // return response()->json($importJobStatus->toArray());
         }
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
