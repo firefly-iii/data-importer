@@ -103,15 +103,16 @@ trait AutoImports
         }
         $return          = [];
         foreach ($importableFiles as $importableFile) {
-            Log::debug(sprintf('Find JSON for importable file "%s".',$importableFile));
+            Log::debug(sprintf('Find JSON for importable file "%s".', $importableFile));
             $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
             if (null !== $jsonFile) {
                 $return[$jsonFile] ??= [];
                 $return[$jsonFile][] = sprintf('%s/%s', $directory, $importableFile);
                 Log::debug(sprintf('Found JSON: "%s".', $jsonFile));
+
                 continue;
             }
-            Log::debug(sprintf('Found NO JSON for importable file "%s", will be ignored.',$importableFile));
+            Log::debug(sprintf('Found NO JSON for importable file "%s", will be ignored.', $importableFile));
         }
         foreach ($jsonFiles as $jsonFile) {
             $fullJson = sprintf('%s/%s', $directory, $jsonFile);
@@ -182,17 +183,12 @@ trait AutoImports
         return null;
     }
 
-    /**
-     * @param string $directory
-     * @param array $files
-     * @return array
-     */
     private function importFiles(string $directory, array $files): array
     {
         $exitCodes = [];
 
         foreach ($files as $jsonFile => $importableFiles) {
-            foreach($importableFiles as $importableFile) {
+            foreach ($importableFiles as $importableFile) {
                 try {
                     $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
                 } catch (ImporterErrorException $e) {
