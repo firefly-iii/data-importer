@@ -5,13 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## v1.8.3 - 2025-10-13
 
 ### Added
-- #11032
+- [Issue 11032](https://github.com/firefly-iii/firefly-iii/issues/11032) (Data importer interprets decimal separator as thousands separator) reported by @beatbesmer
 - Update Salt Edge API to use v6 by @bedesv
 
 ### Fixed
-- #11000
-- #11001
-- #11040 
+- [Issue 11000](https://github.com/firefly-iii/firefly-iii/issues/11000) (fontawesome v7 not compatible with current app.scss) reported by @Linguardium
+- [Discussion 11001](https://github.com/orgs/firefly-iii/discussions/11001) (Venmo Transactions not working with Simplefin) started by @fighterjetj
+- [Issue 11040](https://github.com/firefly-iii/firefly-iii/issues/11040) (AutoImport triggered by POST only imports last file) reported by @beatbesmer 
 - Fixed fonts in build, by @Linguardium
 
 ## v1.8.2 - 2025-10-02
