@@ -73,7 +73,7 @@ final class AutoImport extends Command
 
             return ExitCode::NOT_ALLOWED_PATH->value;
         }
-        $this->line(sprintf('Going to automatically import everything found in %s (%s)', $directory, $argument));
+        $this->line(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
         $files     = $this->getFiles($directory);
         if (0 === count($files)) {
@@ -85,7 +85,7 @@ final class AutoImport extends Command
 
             return ExitCode::NO_FILES_FOUND->value;
         }
-        $this->line(sprintf('Found %d (importable +) JSON file sets in %s', count($files), $directory));
+        $this->line(sprintf('Found %d (importable +) JSON file sets in %s.', count($files), $directory));
 
 
         $result    = $this->importFiles($directory, $files);

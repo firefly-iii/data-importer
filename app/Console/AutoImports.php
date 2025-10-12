@@ -70,6 +70,7 @@ trait AutoImports
 
     private function getFiles(string $directory): array
     {
+        Log::debug(sprintf('Now in getFiles("%s")', $directory));
         $ignore          = ['.', '..'];
 
         if ('' === $directory) {
@@ -87,29 +88,39 @@ trait AutoImports
         $importableFiles = [];
         $jsonFiles       = [];
         foreach ($files as $file) {
+            $ext = $this->getExtension($file);
             // import importable file with JSON companion
-            if (in_array($this->getExtension($file), ['csv', 'xml'], true)) {
+            if (in_array($ext, ['csv', 'xml'], true)) {
                 $importableFiles[] = $file;
+                Log::debug(sprintf('Added "%s" to the list of importable files.', $file));
             }
 
             // import JSON config files.
-            if ('json' === $this->getExtension($file)) {
+            if ('json' === $ext) {
                 $jsonFiles[] = $file;
+                Log::debug(sprintf('Added "%s" to the list of JSON files.', $file));
             }
         }
         $return          = [];
         foreach ($importableFiles as $importableFile) {
+            Log::debug(sprintf('Find JSON for importable file "%s".',$importableFile));
             $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
             if (null !== $jsonFile) {
-                $return[$jsonFile] = sprintf('%s/%s', $directory, $importableFile);
+                $return[$jsonFile] ??= [];
+                $return[$jsonFile][] = sprintf('%s/%s', $directory, $importableFile);
+                Log::debug(sprintf('Found JSON: "%s".', $jsonFile));
+                continue;
             }
+            Log::debug(sprintf('Found NO JSON for importable file "%s", will be ignored.',$importableFile));
         }
         foreach ($jsonFiles as $jsonFile) {
             $fullJson = sprintf('%s/%s', $directory, $jsonFile);
             if (!array_key_exists($fullJson, $return)) {
                 $return[$fullJson] = $fullJson;
+                Log::debug(sprintf('Add JSON file to the list of things to import: %s', $fullJson));
             }
         }
+        Log::debug('Set of importable files:', $return);
 
         return $return;
     }
@@ -171,26 +182,33 @@ trait AutoImports
         return null;
     }
 
+    /**
+     * @param string $directory
+     * @param array $files
+     * @return array
+     */
     private function importFiles(string $directory, array $files): array
     {
         $exitCodes = [];
 
-        foreach ($files as $jsonFile => $importableFile) {
-            try {
-                $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
-            } catch (ImporterErrorException $e) {
-                Log::error(sprintf('Could not complete import from file "%s".', $importableFile));
-                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-                $exitCodes[$importableFile] = 1;
+        foreach ($files as $jsonFile => $importableFiles) {
+            foreach($importableFiles as $importableFile) {
+                try {
+                    $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
+                } catch (ImporterErrorException $e) {
+                    Log::error(sprintf('Could not complete import from file "%s".', $importableFile));
+                    Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+                    $exitCodes[$importableFile] = 1;
+                }
+                // report has already been sent. Reset errors and continue.
+                $this->conversionErrors     = [];
+                $this->conversionMessages   = [];
+                $this->conversionWarnings   = [];
+                $this->conversionRateLimits = [];
+                $this->importErrors         = [];
+                $this->importMessages       = [];
+                $this->importWarnings       = [];
             }
-            // report has already been sent. Reset errors and continue.
-            $this->conversionErrors     = [];
-            $this->conversionMessages   = [];
-            $this->conversionWarnings   = [];
-            $this->conversionRateLimits = [];
-            $this->importErrors         = [];
-            $this->importMessages       = [];
-            $this->importWarnings       = [];
         }
         Log::debug(sprintf('Collection of exit codes: %s', implode(', ', array_values($exitCodes))));
 
