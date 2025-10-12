@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.8.3 - 2025-10-13
+
+### Added
+- #11032
+- Update Salt Edge API to use v6 by @bedesv
+
+### Fixed
+- #11000
+- #11001
+- #11040 
+- Fixed fonts in build, by @Linguardium
+
 ## v1.8.2 - 2025-10-02
 
 ### Fixed
