@@ -45,7 +45,7 @@ class PostConnectSessionsRequest extends Request
         $this->setBase($url);
         $this->setAppId($appId);
         $this->setSecret($secret);
-        $this->setUrl('connect_sessions/create');
+        $this->setUrl('connections/connect');
     }
 
     public function get(): Response

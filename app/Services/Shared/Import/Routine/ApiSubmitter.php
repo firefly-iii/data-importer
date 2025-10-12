@@ -72,6 +72,10 @@ class ApiSubmitter
         $uniqueCount      = 0;
         Log::info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
+        if (0 === $count) {
+            $this->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
+        }
+
         $this->vanityURL  = SecretManager::getVanityURL();
 
         Log::debug(sprintf('Vanity URL : "%s"', $this->vanityURL));

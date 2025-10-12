@@ -1,7 +1,7 @@
 <?php
 
 /*
- * PutRefreshConnectionRequest.php
+ * PostRefreshConnectionRequest.php
  * Copyright (c) 2021 james@firefly-iii.org
  *
  * This file is part of the Firefly III Data Importer
@@ -26,14 +26,15 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
-use App\Services\Spectre\Response\PutRefreshConnectionResponse;
+use App\Services\Spectre\Response\PostRefreshConnectionResponse;
 
 /**
- * Class PutRefreshConnectionRequest
+ * Class PostRefreshConnectionRequest
  */
-class PutRefreshConnectionRequest extends Request
+class PostRefreshConnectionRequest extends Request
 {
     public string $connection;
 
@@ -50,16 +51,35 @@ class PutRefreshConnectionRequest extends Request
 
     public function get(): Response {}
 
-    public function post(): Response {}
-
     /**
      * @throws ImporterErrorException
      */
-    public function put(): Response
+    public function post(): Response
     {
         $this->setUrl(sprintf($this->getUrl(), $this->connection));
 
-        $response = $this->sendUnsignedSpectrePut([]);
+        $body = [
+            'data' => [
+                'return_connection_id' => false,
+                'automatic_refresh'    => true,
+                'show_widget'          => false,
+                'attempt'              => [
+                    'fetch_scopes' => ['accounts', 'transactions'],
+                    'return_to'    => $this->getUrl(),
+                ],
+            ],
+        ];
+
+        try {
+            $response = $this->sendUnsignedSpectrePost($body);
+        } catch (ImporterHttpException $e) {
+            // This probably means that the connection has just been refreshed so let's ignore it and continue with import
+            if (str_contains($e->getMessage(), 'ConnectionCannotBeRefreshed')) {
+                return new PostRefreshConnectionResponse([]);
+            }
+
+            throw $e;
+        }
 
         // could be error response:
         if (isset($response['error']) && !isset($response['data'])) {
@@ -67,9 +87,11 @@ class PutRefreshConnectionRequest extends Request
         }
 
         // response data is not used, no need to include it.
-        // return new PutRefreshConnectionResponse($response['data']);
-        return new PutRefreshConnectionResponse([]);
+        // return new PostRefreshConnectionResponse($response['data']);
+        return new PostRefreshConnectionResponse([]);
     }
+
+    public function put(): Response {}
 
     public function setConnection(string $connection): void
     {

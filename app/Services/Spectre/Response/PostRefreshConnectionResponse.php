@@ -1,7 +1,8 @@
 <?php
 
 /**
- * PutRefreshConnectionResponse.php
+ * Post
+ *RefreshConnectionResponse.php
  * Copyright (c) 2020 james@firefly-iii.org
  *
  * This file is part of the Firefly III Spectre importer
@@ -28,9 +29,9 @@ namespace App\Services\Spectre\Response;
 use App\Services\Shared\Response\Response;
 
 /**
- * Class PutRefreshConnectionResponse
+ * Class PostRefreshConnectionResponse
  */
-class PutRefreshConnectionResponse extends Response
+class PostRefreshConnectionResponse extends Response
 {
     public function __construct(array $data) {}
 }

@@ -47,7 +47,7 @@ class Customer
     public static function fromArray(array $data): self
     {
         $model             = new self();
-        $model->id         = (string) $data['id'];
+        $model->id         = (string) $data['customer_id'];
         $model->identifier = $data['identifier'];
         $model->secret     = $data['secret'];
 
