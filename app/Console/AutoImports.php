@@ -117,7 +117,8 @@ trait AutoImports
         foreach ($jsonFiles as $jsonFile) {
             $fullJson = sprintf('%s/%s', $directory, $jsonFile);
             if (!array_key_exists($fullJson, $return)) {
-                $return[$fullJson] = $fullJson;
+                $return[$fullJson] ??= [];
+                $return[$fullJson][] = $fullJson;
                 Log::debug(sprintf('Add JSON file to the list of things to import: %s', $fullJson));
             }
         }
