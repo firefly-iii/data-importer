@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #11061
+- [Issue 11061](https://github.com/firefly-iii/firefly-iii/issues/11061) (Importing using `importer:auto-import` results in error "foreach() argument must be of type array|object, string given") reported by @jurgenhaas
 
 ## v1.8.3 - 2025-10-13
 
