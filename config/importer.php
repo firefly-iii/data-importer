@@ -24,8 +24,8 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => '1.8.4',
-    'build_time'                    => 1760350294,
+    'version'                       => 'develop/2025-10-14',
+    'build_time'                    => 1760412667,
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
     'enabled_flows'                 => [
         'nordigen'  => true,
