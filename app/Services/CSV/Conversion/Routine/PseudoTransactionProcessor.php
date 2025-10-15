@@ -143,7 +143,7 @@ class PseudoTransactionProcessor
 
     private function processPseudoLine(array $line): array
     {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__), $line);
         foreach ($this->tasks as $task) {
             /** @var AbstractTask $object */
             $object = app($task);
