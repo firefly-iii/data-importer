@@ -45,9 +45,9 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
 
-        $url     = config('spectre.url');
-        $appId   = SecretManager::getAppId();
-        $secret  = SecretManager::getSecret();
+        $url    = config('spectre.url');
+        $appId  = SecretManager::getAppId();
+        $secret = SecretManager::getSecret();
 
         if ('' === $appId || '' === $secret) {
             return AuthenticationStatus::NODATA;
@@ -70,5 +70,13 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         }
 
         return AuthenticationStatus::AUTHENTICATED;
+    }
+
+    public function getData(): array
+    {
+        return [
+            'app_id' => SecretManager::getAppId(),
+            'secret' => SecretManager::getSecret()
+        ];
     }
 }

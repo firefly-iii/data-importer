@@ -69,4 +69,12 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
         return AuthenticationStatus::AUTHENTICATED;
     }
+
+    public function getData(): array
+    {
+        return [
+            'identifier' => SecretManager::getId(),
+            'key'        => SecretManager::getKey()
+        ];
+    }
 }

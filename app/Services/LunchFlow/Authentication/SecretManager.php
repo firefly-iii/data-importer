@@ -33,12 +33,29 @@ use Illuminate\Support\Facades\Log;
  */
 class SecretManager
 {
-    public static function getApiKey(Configuration $configuration): string
+    public const string API_KEY = 'lunch_flow_api_key';
+
+    public static function getApiKey(?Configuration $configuration = null): string
     {
-        $apiKey = (string)config('lunchflow.api_key');
-        if ('' !== $apiKey) {
-            return $apiKey;
+
+        if (!self::hasApiKey()) {
+            Log::debug('LunchFlow: No API key in hasApiKey() session, will return config OR Configuration variable.');
+
+            $apiKey = (string)config('lunchflow.api_key');
+            if ('' !== $apiKey) {
+                return $apiKey;
+            }
+            return (string)$configuration?->getLunchFlowApiKey();
         }
-        return $configuration->getLunchFlowApiKey();
+
+        return (string)session()->get(self::API_KEY);
+    }
+
+    /**
+     * Will verify if the user has a Spectre App ID (in a cookie)
+     */
+    private static function hasApiKey(): bool
+    {
+        return '' !== (string)session()->get(self::API_KEY);
     }
 }

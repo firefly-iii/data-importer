@@ -25,6 +25,25 @@ declare(strict_types=1);
 
 return [
 
+    // labels for authentication
+    'label_nordigen_identifier'       => 'GoCardless Identifier',
+    'label_nordigen_key'              => 'GoCardless Key',
+    'placeholder_nordigen_identifier' => 'GoCardless Identifier',
+    'placeholder_nordigen_key'        => 'GoCardless Key',
+    'help_nordigen_identifier'        => 'Enter your GoCardless Identifier',
+    'help_nordigen_key'               => 'Enter your GoCardless Key',
+
+    'label_lunchflow_api_key'       => 'Lunch Flow API key',
+    'placeholder_lunchflow_api_key' => 'Lunch Flow API key',
+    'help_lunchflow_api_key'        => 'Enter your Lunch Flow API key',
+
+    'label_spectre_app_id'          => 'Spectre / Salt Edge App Id',
+    'label_spectre_secret'          => 'Spectre / Salt Edge Secret',
+    'placeholder_spectre_app_id'    => 'Spectre / Salt Edge App Id',
+    'placeholder_spectre_secret'    => 'Spectre / Salt Edge Secret',
+    'help_spectre_app_id'           => 'Enter your Spectre / Salt Edge App Id',
+    'help_spectre_secret'           => 'Spectre / Salt Edge Secret',
+
     // column roles for CSV import:
     'column__ignore'                => '(ignore this column)',
     'column_account-iban'           => 'Asset account (IBAN)',

@@ -30,4 +30,6 @@ use App\Services\Enums\AuthenticationStatus;
 interface AuthenticationValidatorInterface
 {
     public function validate(): AuthenticationStatus;
+
+    public function getData(): array;
 }

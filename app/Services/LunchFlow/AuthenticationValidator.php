@@ -27,8 +27,7 @@ namespace App\Services\LunchFlow;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
-use App\Services\Nordigen\Authentication\SecretManager;
-use App\Services\Nordigen\TokenManager;
+use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\IsRunningCli;
 use Illuminate\Support\Facades\Log;
@@ -43,13 +42,19 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-
-        $apiKey = config('lunchflow.api_key');
+        $apiKey  = SecretManager::getApiKey();
 
         if ('' === $apiKey) {
             return AuthenticationStatus::NODATA;
         }
 
         return AuthenticationStatus::AUTHENTICATED;
+    }
+
+    public function getData(): array
+    {
+        return [
+            'api_key' => SecretManager::getApiKey(),
+        ];
     }
 }

@@ -52,4 +52,11 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
         return AuthenticationStatus::AUTHENTICATED;
     }
+
+    public function getData(): array
+    {
+        return [
+            'key' => (string) config('app.key'),
+        ];
+    }
 }
