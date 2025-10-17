@@ -126,7 +126,7 @@
                                                 <input type="text"
                                                        class="form-control form-control-sm"
                                                        name="account_currency"
-                                                       value="USD"
+                                                       value="EUR"
                                                        maxlength="3"
                                                        required>
                                                 <small class="form-text text-muted">3-letter currency code</small>

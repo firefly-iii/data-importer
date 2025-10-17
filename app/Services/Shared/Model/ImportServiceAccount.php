@@ -29,6 +29,7 @@ use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Spectre\Model\Account as SpectreAccount;
+use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use Illuminate\Support\Facades\Log;
 
 class ImportServiceAccount
@@ -130,6 +131,32 @@ class ImportServiceAccount
                         'Currency' => $account->currencyCode,
                         'IBAN'     => $iban,
                         'BBAN'     => $account->accountNumber,
+                    ],
+                ]
+            );
+        }
+
+        return $return;
+    }
+
+    public static function convertLunchFlowArray(array $lunchFlow): array
+    {
+        $return = [];
+
+        /** @var LunchFlowAccount $account */
+        foreach ($lunchFlow as $account) {
+            $return[] = self::fromArray(
+                [
+                    'id'            => (string) $account->id,
+                    'name'          => $account->name,
+                    'currency_code' => (string) $account->currency,
+                    'iban'          => '',
+                    'bban'          => '',
+                    'status'        => $account->status,
+                    'extra'         => [
+                        'Currency' => (string) $account->currency,
+                        'IBAN'     => '',
+                        'BBAN'     => '',
                     ],
                 ]
             );

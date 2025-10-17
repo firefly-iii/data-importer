@@ -164,6 +164,9 @@
                 }
             ]
         },
+        "lunch_flow_api_key": {
+            "type": "string"
+        },
         "conversion": {
             "type": "boolean"
         }

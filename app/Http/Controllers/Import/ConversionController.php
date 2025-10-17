@@ -139,6 +139,10 @@ class ConversionController extends Controller
             Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
+        if('lunchflow' === $flow) {
+            Log::debug('Create Lunch Flow routine manager.');
+            $routine = new LunchFlowRoutineManager($identifier);
+        }
         if ('simplefin' === $flow) {
             Log::debug('Create SimpleFIN routine manager.');
 

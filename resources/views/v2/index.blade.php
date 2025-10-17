@@ -88,7 +88,7 @@
                 <div class="col-lg-10 offset-lg-1">
                     <div class="row">
                         @if($enabled['file'])
-                        <div class="col-lg">
+                        <div class="col-lg-4">
                             <div class="card">
                                 <div class="card-header">
                                     Import a file
@@ -105,46 +105,171 @@
                             </div>
                         </div>
                         @endif
-                        @if($enabled['nordigen'])
-                        <div class="col-lg">
-                            <div class="card">
-                                <div class="card-header">
-                                    Import from GoCardless
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-danger" x-text="errors.gocardless" x-show="'' !== errors.gocardless"></p>
-                                    <button x-show="loadingFunctions.gocardless" class="btn btn-info disabled" value="nordigen" name="flow" disabled="disabled"
-                                    ><span class="fas fa-cog fa-spin"></span></button>
-                                    <button x-show="!loadingFunctions.gocardless && importFunctions.gocardless" class="btn btn-info" value="nordigen" name="flow"
-                                    >Import from GoCardless</button>
-                                    <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn text-white btn-danger disabled"  value="nordigen" name="flow"
-                                            disabled
-                                    ><em class="fa-solid fa-face-dizzy"></em></button>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                        @if($enabled['spectre'])
-                        <div class="col-lg">
-                            <div class="card">
-                                <div class="card-header">
-                                    Import from Spectre
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-danger" x-text="errors.spectre" x-show="'' !== errors.spectre"></p>
-                                    <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
-                                    ><span class="fas fa-cog fa-spin"></span></button>
-                                    <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="spectre" name="flow"
-                                    >Import from Spectre</button>
-                                    <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger text-white disabled"  value="spectre" name="flow"
-                                            disabled
-                                    ><em class="fa-solid fa-face-dizzy"></em></button>
+
+                    </div>
+                    <div class="row mt-3">
+
+                        @if($enabled['lunchflow'])
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Import from Lunch Flow
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-danger" x-text="errors.lunchflow" x-show="'' !== errors.lunchflow"></p>
+                                        <button x-show="loadingFunctions.lunchflow" class="btn btn-info disabled" value="lunchflow" name="flow" disabled="disabled"
+                                        ><span class="fas fa-cog fa-spin"></span></button>
+                                        <button x-show="!loadingFunctions.lunchflow && importFunctions.lunchflow" class="btn btn-info" value="lunchflow" name="flow"
+                                        >Import from Lunch Flow</button>
+                                        <button x-show="!loadingFunctions.lunchflow && !importFunctions.lunchflow" class="btn btn-danger text-white disabled"  value="lunchflow" name="flow"
+                                                disabled
+                                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
-                        @if($enabled['simplefin'])
-                                <div class="col-lg">
+
+                            @if($enabled['obg'])
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from Open Banking Gateway
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.obg" x-show="'' !== errors.obg"></p>
+                                            <button x-show="loadingFunctions.obg" class="btn btn-info disabled" value="obg" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.obg && importFunctions.obg" class="btn btn-info" value="obg" name="flow"
+                                            >Import from Spectre</button>
+                                            <button x-show="!loadingFunctions.obg && !importFunctions.obg" class="btn btn-danger text-white disabled"  value="obg" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                    </div>
+                    <div class="row mt-3">
+                            @if($enabled['eb'])
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from Enable Banking
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.eb" x-show="'' !== errors.eb"></p>
+                                            <button x-show="loadingFunctions.eb" class="btn btn-info disabled" value="eb" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.eb && importFunctions.eb" class="btn btn-info" value="eb" name="flow"
+                                            >Import from Spectre</button>
+                                            <button x-show="!loadingFunctions.eb && !importFunctions.eb" class="btn btn-danger text-white disabled"  value="eb" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($enabled['teller'])
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from teller.io
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.teller" x-show="'' !== errors.teller"></p>
+                                            <button x-show="loadingFunctions.teller" class="btn btn-info disabled" value="teller" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.teller && importFunctions.teller" class="btn btn-info" value="teller" name="flow"
+                                            >Import from Spectre</button>
+                                            <button x-show="!loadingFunctions.teller && !importFunctions.teller" class="btn btn-danger text-white disabled"  value="teller" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                                @if($enabled['fints'])
+                                    <div class="col-lg-4">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                Import from FinTS
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="text-danger" x-text="errors.fints" x-show="'' !== errors.fints"></p>
+                                                <button x-show="loadingFunctions.fints" class="btn btn-info disabled" value="fints" name="flow" disabled="disabled"
+                                                ><span class="fas fa-cog fa-spin"></span></button>
+                                                <button x-show="!loadingFunctions.fints && importFunctions.fints" class="btn btn-info" value="fints" name="flow"
+                                                >Import from Spectre</button>
+                                                <button x-show="!loadingFunctions.fints && !importFunctions.fints" class="btn btn-danger text-white disabled"  value="fints" name="flow"
+                                                        disabled
+                                                ><em class="fa-solid fa-face-dizzy"></em></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                    </div>
+                    <div class="row mt-3">
+                        @if($enabled['basiq'])
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Import from basiq
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-danger" x-text="errors.basiq" x-show="'' !== errors.basiq"></p>
+                                        <button x-show="loadingFunctions.basiq" class="btn btn-info disabled" value="basiq" name="flow" disabled="disabled"
+                                        ><span class="fas fa-cog fa-spin"></span></button>
+                                        <button x-show="!loadingFunctions.basiq && importFunctions.basiq" class="btn btn-info" value="basiq" name="flow"
+                                        >Import from Spectre</button>
+                                        <button x-show="!loadingFunctions.basiq && !importFunctions.basiq" class="btn btn-danger text-white disabled"  value="basiq" name="flow"
+                                                disabled
+                                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                            @if($enabled['nordigen'])
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from GoCardless
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.gocardless" x-show="'' !== errors.gocardless"></p>
+                                            <button x-show="loadingFunctions.gocardless" class="btn btn-info disabled" value="nordigen" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.gocardless && importFunctions.gocardless" class="btn btn-info" value="nordigen" name="flow"
+                                            >Import from GoCardless</button>
+                                            <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn text-white btn-danger disabled"  value="nordigen" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($enabled['spectre'])
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Import from Spectre
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-danger" x-text="errors.spectre" x-show="'' !== errors.spectre"></p>
+                                            <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
+                                            ><span class="fas fa-cog fa-spin"></span></button>
+                                            <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="spectre" name="flow"
+                                            >Import from Spectre</button>
+                                            <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger text-white disabled"  value="spectre" name="flow"
+                                                    disabled
+                                            ><em class="fa-solid fa-face-dizzy"></em></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($enabled['simplefin'])
+                                <div class="col-lg-4">
                                     <div class="card">
                                         <div class="card-header">
                                             Import from SimpleFIN
@@ -161,7 +286,7 @@
                                         </div>
                                     </div>
                                 </div>
-                        @endif
+                            @endif
                     </div>
                 </div>
             </div>

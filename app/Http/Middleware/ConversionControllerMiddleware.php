@@ -64,6 +64,9 @@ class ConversionControllerMiddleware
         if ('simplefin' === $flow) {
             return $this->isReadyForSimpleFINStep();
         }
+        if ('lunchflow' === $flow) {
+            return $this->isReadyForLunchFlowStep();
+        }
 
         return $this->isReadyForBasicStep();
     }

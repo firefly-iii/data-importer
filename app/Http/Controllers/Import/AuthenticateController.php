@@ -31,6 +31,7 @@ use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
+use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
@@ -106,6 +107,17 @@ class AuthenticateController extends Controller
                 return redirect(route('003-upload.index'));
             }
         }
+
+        if ('lunchflow' === $flow) {
+            $validator = new LunchFlowValidator();
+            $result    = $validator->validate();
+            if (AuthenticationStatus::AUTHENTICATED === $result) {
+                Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
+
+                return redirect(route('003-upload.index'));
+            }
+        }
+
         if ('simplefin' === $flow) {
             // This case should ideally be handled by middleware redirecting to upload.
             // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.

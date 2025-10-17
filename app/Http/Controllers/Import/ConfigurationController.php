@@ -132,6 +132,12 @@ class ConfigurationController extends Controller
             $importerAccounts = $this->mergeSpectreAccountLists($importerAccounts, $fireflyIIIaccounts);
         }
 
+        if('lunchflow' === $flow) {
+            $importerAccounts = $this->getLunchFlowAccounts($configuration);
+            $uniqueColumns    = config('lunchflow.unique_column_options');
+            $importerAccounts = $this->mergeLunchFlowAccountLists($importerAccounts, $fireflyIIIaccounts);
+        }
+
         if ('simplefin' === $flow) {
             $importerAccounts = $this->getSimpleFINAccounts();
             $uniqueColumns    = config('simplefin.unique_column_options', ['id']);
@@ -396,7 +402,7 @@ class ConfigurationController extends Controller
 
         // set config as complete.
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
+        if ('lunchflow' === $configuration->getFlow() ||  'nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
             // at this point, nordigen, spectre, and simplefin are ready for data conversion.
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }

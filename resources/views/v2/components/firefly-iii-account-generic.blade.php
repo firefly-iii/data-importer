@@ -6,7 +6,7 @@
             id="account-select-{{ $account['import_account']->id }}">
 
         <!-- Create New Account option -->
-        @if('simplefin' === $flow)
+        @if('simplefin' === $flow || 'lunchflow' === $flow)
         <option value="create_new"
                 @php
                     $configuredAccount = $configuration->getAccounts()[$account['import_account']->id] ?? null;

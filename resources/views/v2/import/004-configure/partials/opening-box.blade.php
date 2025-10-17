@@ -25,11 +25,14 @@
                         @endif
                     </p>
                 @endif
-                @if('nordigen' === $flow || 'spectre' === $flow)
+                @if('nordigen' === $flow || 'spectre' === $flow || 'lunchflow' === $flow)
                     <p>
                         Your
                         @if('nordigen' === $flow)
                             GoCardless
+                        @endif
+                        @if('lunchflow' === $flow)
+                            Lunch Flow
                         @endif
                         @if('spectre' === $flow)
                             Spectre

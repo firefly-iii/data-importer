@@ -55,10 +55,11 @@
                 <input type="hidden" name="nordigen_max_days" value="{{ $configuration->getNordigenMaxDays() }}"/>
                 <input type="hidden" name="nordigen_bank" value="{{ $configuration->getNordigenBank() }}"/>
                 <input type="hidden" name="nordigen_requisitions" value="{{ json_encode($configuration->getNordigenRequisitions()) }}"/>
+
                 <!-- these values are used by SimpleFIN and must be preserved -->
                 <input type="hidden" name="access_token" value="{{ $configuration->getAccessToken() }}"/>
 
-                @if('nordigen' === $flow || 'spectre' === $flow || 'simplefin' === $flow)
+                @if('nordigen' === $flow || 'spectre' === $flow || 'simplefin' === $flow || 'lunchflow' === $flow)
                     <input type="hidden" name="ignore_duplicate_transactions" value="1"/>
                 @endif
 
@@ -71,7 +72,7 @@
 
                 <!-- Account selection for Gocardless and Spectre -->
                 <!-- also date range settings -->
-                @if('nordigen' === $flow || 'spectre' === $flow)
+                @if('nordigen' === $flow || 'spectre' === $flow || 'lunchflow' === $flow)
                     @include('import.004-configure.partials.gocardless-spectre-accounts')
                     @include('import.004-configure.partials.gocardless-spectre-dates')
                 @endif

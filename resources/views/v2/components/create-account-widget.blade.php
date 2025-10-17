@@ -253,11 +253,11 @@
                         <!-- Currency Display/Edit -->
                         <div>
                             @php
-                                // Check for previously committed currency selection, fall back to SimpleFIN currency, then USD
+                                // Check for previously committed currency selection, fall back to SimpleFIN currency, then EUR
                                 $accountId = $account['import_account']->id;
                                 $newAccounts = $configuration->getNewAccounts();
                                 $committedCurrency = $newAccounts[$accountId]['currency'] ?? null;
-                                $displayCurrency = $committedCurrency ?? $account['import_account']->currency ?? 'USD';
+                                $displayCurrency = $committedCurrency ?? $account['import_account']->currency ?? 'EUR';
                             @endphp
                             <span id="currency-display-{{ $account['import_account']->id }}" class="fw-bold">
                                 {{ $displayCurrency }}
@@ -271,16 +271,16 @@
                                 @endphp
                                 @foreach($currencies ?? [] as $currencyId => $currencyDisplay)
                                     @php
-                                        // Extract ISO code from currency display (e.g., "US Dollar (USD)" -> "USD")
+                                        // Extract ISO code from currency display (e.g., "US Dollar (EUR)" -> "EUR")
                                         preg_match('/\(([A-Z]{3})\)/', $currencyDisplay, $matches);
-                                        $isoCode = $matches[1] ?? 'USD';
+                                        $isoCode = $matches[1] ?? 'EUR';
                                     @endphp
                                     <option value="{{ $isoCode }}" @if($isoCode === $defaultCurrency) selected @endif>
                                         {{ $currencyDisplay }}
                                     </option>
                                 @endforeach
                                 @if(empty($currencies))
-                                    <option value="USD">USD (US Dollar)</option>
+                                    <option value="USD">EUR (Euro)</option>
                                 @endif
                             </select>
                         </div>

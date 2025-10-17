@@ -32,35 +32,51 @@ let index = function () {
             file: true,
             gocardless: true,
             spectre: true,
-            simplefin: true
+            simplefin: true,
+            lunchflow: true,
+            obg: true,
+            eb: true,
+            teller: true,
+            fints: true,
+            basiq: true,
         },
         errors: {
             spectre: '',
             gocardless: '',
             simplefin: '',
+            lunchflow: '',
+            obg: '',
+            eb: '',
+            teller: '',
+            fints: '',
+            basiq: '',
         },
         importFunctions: {
             file: false,
             gocardless: false,
             spectre: false,
-            simplefin: false
-        },
-        functionName() {
-
+            simplefin: false,
+            lunchflow: false,
+            obg: false,
+            eb: false,
+            teller: false,
+            fints: false,
+            basiq: false,
         },
         init() {
             this.checkFireflyIIIConnection();
         },
         checkFireflyIIIConnection() {
-            let validateUrl = './token/validate';
+            let validateUrl  = './token/validate';
             let tokenPageUrl = './token';
+            let providers = ['file', 'gocardless', 'spectre', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'];
             window.axios.get(validateUrl).then((response) => {
                 let message = response.data.result;
-                console.log('message is ', message)
+                // console.log('message is ', message)
 
                 if ('OK' === message) {
                     this.loadingFunctions.file = false;
-                    this.importFunctions.file = true;
+                    this.importFunctions.file  = true;
                     return;
                 }
 
@@ -69,96 +85,54 @@ let index = function () {
                     window.location.href = tokenPageUrl;
                     return;
                 }
+                for (let i = 0; i < providers.length; i++) {
+                    let provider = providers[i];
+                    this.loadingFunctions[provider] = false;
+                    this.importFunctions[provider]  = false;
+                    this.errors[provider]           = '';
+                }
 
-                // disable all
-                this.loadingFunctions.file = false;
-                this.loadingFunctions.gocardless = false;
-                this.loadingFunctions.spectre = false;
-                this.loadingFunctions.simplefin = false;
-
-                this.importFunctions.file = false;
-                this.importFunctions.gocardless = false;
-                this.importFunctions.spectre = false;
-                this.importFunctions.simplefin = false;
-
-                this.pageProperties.connectionError = true;
+                this.pageProperties.connectionError        = true;
                 this.pageProperties.connectionErrorMessage = response.data.message;
             }).catch((error) => {
-                this.loadingFunctions.file = false;
-                this.loadingFunctions.gocardless = false;
-                this.loadingFunctions.spectre = false;
-                this.loadingFunctions.simplefin = false;
 
-                this.importFunctions.file = false;
-                this.importFunctions.gocardless = false;
-                this.importFunctions.spectre = false;
-                this.importFunctions.simplefin = false;
+                for (let i = 0; i < providers.length; i++) {
+                    let provider = providers[i];
+                    this.loadingFunctions[provider] = false;
+                    this.importFunctions[provider]  = false;
+                    this.errors[provider]           = 'The "'+provider+'"-provider is not configured correctly. Please check your settings.';
+                }
 
-                this.pageProperties.connectionError = true;
+                this.pageProperties.connectionError        = true;
                 this.pageProperties.connectionErrorMessage = error;
             }).finally(() => {
-                if(false === this.pageProperties.connectionError) {
-                    this.checkSpectreConnection();
-                    this.checkGoCardlessConnection();
-                    this.checkSimpleFinConnection();
+                if (false === this.pageProperties.connectionError) {
+                    for (let i = 0; i < providers.length; i++) {
+                        let provider = providers[i];
+                        this.checkProvider(provider);
+                    }
                 }
-            });
-
-        },
-        checkSpectreConnection() {
-            let validateUrl = './validate/spectre';
-            window.axios.get(validateUrl).then((response) => {
-                let message = response.data.result;
-                if ('NODATA' === message ||  'OK' === message) {
-                    this.loadingFunctions.spectre = false;
-                    this.importFunctions.spectre = true;
-                    return;
-                }
-                this.loadingFunctions.spectre = false;
-                this.importFunctions.spectre = false;
-                this.errors.spectre = 'The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.';
-            }).catch((error) => {
-                this.loadingFunctions.spectre = false;
-                this.importFunctions.spectre = false;
-                this.errors.spectre = 'The Spectre / Salt Edge API is configured incorrectly and cannot be used to import data.';
             });
         },
-        checkSimpleFinConnection() {
-            let validateUrl = './validate/simplefin';
+        checkProvider (provider) {
+            let validateUrl = './validate/' + provider;
             window.axios.get(validateUrl).then((response) => {
                 let message = response.data.result;
-                if ('NODATA' === message ||  'OK' === message) {
-                    this.loadingFunctions.simplefin = false;
-                    this.importFunctions.simplefin = true;
+                if ('NODATA' === message || 'OK' === message) {
+                    this.loadingFunctions[provider] = false;
+                    this.importFunctions[provider]  = true;
                     return;
                 }
-                this.loadingFunctions.simplefin = false;
-                this.importFunctions.simplefin = false;
-                this.errors.simplefin = 'Please set a valid APP_KEY to use the SimpleFIN importer.';
+                this.loadingFunctions[provider] = false;
+                this.importFunctions[provider]  = false;
+                this.errors[provider]           = 'The "'+provider+'"-provider is not configured, or configured incorrectly and cannot be used to import data.';
             }).catch((error) => {
-                this.loadingFunctions.simplefin = false;
-                this.importFunctions.simplefin = false;
-                this.errors.simplefin = 'Please set a valid APP_KEY to use the SimpleFIN importer.';
+                this.loadingFunctions[provider] = false;
+                this.importFunctions[provider]  = false;
+                this.errors[provider]           = 'The "'+provider+'"-provider is not configured, or configured incorrectly and cannot be used to import data.';
+                console.error(error);
             });
         },
-        checkGoCardlessConnection() {
-            let validateUrl = './validate/nordigen';
-            window.axios.get(validateUrl).then((response) => {
-                let message = response.data.result;
-                if ('NODATA' === message ||  'OK' === message) {
-                    this.loadingFunctions.gocardless = false;
-                    this.importFunctions.gocardless = true;
-                    return;
-                }
-                this.loadingFunctions.gocardless = false;
-                this.importFunctions.gocardless = false;
-                this.errors.gocardless = 'The GoCardless API is configured incorrectly and cannot be used to import data.';
-            }).catch((error) => {
-                this.loadingFunctions.gocardless = false;
-                this.importFunctions.gocardless = false;
-                this.errors.gocardless = 'The GoCardless API is configured incorrectly and cannot be used to import data.';
-            });
-        }
     }
 }
 

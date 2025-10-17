@@ -24,37 +24,49 @@
 declare(strict_types=1);
 
 return [
-    'version'                       => 'develop/2025-10-14',
-    'build_time'                    => 1760412667,
-    'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin'],
-    'enabled_flows'                 => [
+    'version'       => 'develop/2025-10-14',
+    'build_time'    => 1760412667,
+    'flows'         => ['nordigen', 'spectre', 'file', 'simplefin','lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
+    'enabled_flows' => [
         'nordigen'  => true,
         'spectre'   => true,
         'file'      => true,
         'simplefin' => true,
+        'lunchflow' => true,
+        'obg'       => false,
+        'eb'        => false,
+        'teller'    => false,
+        'fints'     => false,
+        'basiq'     => false,
     ],
-    'flow_titles'                   => [
-        'file'        => 'File',
-        'nordigen'    => 'GoCardless',
-        'spectre'     => 'Spectre',
-        'simplefin'   => 'SimpleFIN',
+    'flow_titles'   => [
+        'file'      => 'File',
+        'nordigen'  => 'GoCardless',
+        'spectre'   => 'Spectre',
+        'simplefin' => 'SimpleFIN',
+        'lunchflow' => 'Lunch Flow',
+        'obg'       => 'Open Banking Gateway',
+        'eb'        => 'Enable Banking',
+        'teller'    => 'Teller.io',
+        'fints'     => 'FinTS/HBCI',
+        'basiq'     => 'Basiq.io',
     ],
-    'simplefin'                     => [
-        'demo_url'    => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
-        'demo_token'  => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
-        'bridge_url'  => env('SIMPLEFIN_BRIDGE_URL'),
-        'timeout'     => (int) env('SIMPLEFIN_TIMEOUT', 30),
+    'simplefin'     => [
+        'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
+        'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
+        'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
+        'timeout'    => (int)env('SIMPLEFIN_TIMEOUT', 30),
     ],
 
     // docker build info.
-    'docker'                        => [
+    'docker'        => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
 
     'fallback_in_dir'               => env('FALLBACK_IN_DIR', false),
     'fallback_configuration'        => '_fallback.json',
-    'import_dir_allowlist'          => explode(',', (string) env('IMPORT_DIR_ALLOWLIST', '')),
+    'import_dir_allowlist'          => explode(',', (string)env('IMPORT_DIR_ALLOWLIST', '')),
     'auto_import_secret'            => env('AUTO_IMPORT_SECRET', ''),
     'can_post_autoimport'           => env('CAN_POST_AUTOIMPORT', false),
     'can_post_files'                => env('CAN_POST_FILES', false),
@@ -77,7 +89,7 @@ return [
     'vanity_url'                    => envNonEmpty('VANITY_URL'),
     'connection'                    => [
         'verify'  => env('VERIFY_TLS_SECURITY', true),
-        'timeout' => 0.0 === (float) env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float) env('CONNECTION_TIMEOUT', 31.415),
+        'timeout' => 0.0 === (float)env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float)env('CONNECTION_TIMEOUT', 31.415),
     ],
     'trusted_proxies'               => env('TRUSTED_PROXIES', ''),
     'encoding'                      => [

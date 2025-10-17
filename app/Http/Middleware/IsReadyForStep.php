@@ -78,6 +78,9 @@ trait IsReadyForStep
         if ('simplefin' === $flow) {
             return $this->isReadyForSimpleFINStep();
         }
+        if('lunchflow' === $flow) {
+            return $this->isReadyForLunchFlowStep();
+        }
 
         return $this->isReadyForBasicStep();
     }
@@ -241,6 +244,71 @@ trait IsReadyForStep
                     return true;
                 }
 
+                return false;
+        }
+    }
+
+    private function isReadyForLunchFlowStep(): bool
+    {
+        // Log::debug(sprintf('isReadyForNordigenStep("%s")', self::STEP));
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('isReadyForLunchFlowStep: Cannot handle Lunch Flow step "%s"', self::STEP));
+
+            case 'authenticate':
+            case 'service-validation':
+                return true;
+            case 'upload-files':
+                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
+                    return false;
+                }
+
+                return true;
+            case 'configuration':
+                if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
+                    return false;
+                }
+
+                return true;
+            case 'define-roles':
+                return false;
+            case 'map':
+                // mapping must be complete, or not ready for this step.
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug('Return false, not ready for step [1].');
+
+                    return false;
+                }
+
+                // conversion complete?
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('Return true, ready for step [4].');
+
+                    return true;
+                }
+
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('GoCardless: return false, not yet ready for step [2].');
+
+                    return false;
+                }
+                // otherwise return false.
+                Log::debug('Return true, ready for step [3].');
+
+                return true;
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    Log::debug('Return false, ready for submission.');
+
+                    return false;
+                }
+                // if/else is in reverse!
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    return true;
+                }
+
+                // will probably never return false, but OK.
                 return false;
         }
     }
@@ -433,8 +501,49 @@ trait IsReadyForStep
         if ('simplefin' === $flow) {
             return $this->redirectToCorrectSimpleFINStep();
         }
+        if('lunchflow' === $flow) {
+            return $this->redirectToCorrectLunchFlowStep();
+        }
 
         return $this->redirectToBasicStep();
+    }
+
+    private function redirectToCorrectLunchFlowStep() {
+        switch (self::STEP) {
+            default:
+                throw new ImporterErrorException(sprintf('redirectToCorrectLunchFlowStep: Cannot handle file step "%s"', self::STEP));
+            case 'define-roles':
+                $route             = route('006-mapping.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+
+                return redirect($route);
+            case 'map':
+                // if no conversion yet, go there first
+                // must already have the conversion, or not ready for this step:
+                if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                    Log::debug('Is ready for conversion, so send to conversion.');
+                    $route = route('007-convert.index');
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
+
+                    return redirect($route);
+                }
+                Log::debug('Is ready for submit.');
+                // otherwise go to import right away
+                $route = route('008-submit.index');
+                Log::debug(sprintf('Return redirect to "%s"', $route));
+
+                return redirect($route);
+            case 'conversion':
+                if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+                    $route = route('008-submit.index');
+                    Log::debug(sprintf('Return redirect to "%s"', $route));
+
+                    return redirect($route);
+                }
+
+                throw new ImporterErrorException(sprintf('redirectToCorrectLunchFlowStep: Cannot handle Lunch Flow step "%s" [1]', self::STEP));
+
+        }
     }
 
     /**

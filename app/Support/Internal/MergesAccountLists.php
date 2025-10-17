@@ -138,4 +138,12 @@ trait MergesAccountLists
 
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }
+
+    protected function mergeLunchFlowAccountLists(array $lunchFlow, array $fireflyIII): array
+    {
+        Log::debug('Now merging Lunch Flow account lists.');
+        $generic = ImportServiceAccount::convertLunchFlowArray($lunchFlow);
+
+        return $this->mergeGenericAccountList($generic, $fireflyIII);
+    }
 }

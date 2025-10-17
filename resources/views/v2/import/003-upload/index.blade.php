@@ -13,6 +13,18 @@
                         {{ $subTitle }}
                     </div>
                     <div class="card-body">
+                        @if('file' === $flow)
+                            <p>
+                                The first step of your data import is that you upload your data file.
+                            </p>
+                        @endif
+                        @if('file' !== $flow)
+                            <p>
+                            The first (optional) step of your data import is that you upload a configuration file
+                            from a previous run. If this is the first time ever you import data, this is obviously not possible and
+                            you can skip this step. In a next step, you will be offered a configuration file that you can use here to make it easier for yourself.
+                            </p>
+                        @endif
                         <p>
                             Use the form elements below to upload your data.
                             If you need support, <a target="_blank"
@@ -49,123 +61,24 @@
                               enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
-                            <!-- SimpleFIN fields -->
+                            <!-- SimpleFIN options -->
                             @if('simplefin' === $flow)
-                                <!-- Demo Mode Toggle -->
-                                <div class="form-group row mb-3">
-                                    <label for="use_demo" class="col-sm-4 col-form-label">Demo Mode</label>
-                                    <div class="col-sm-8">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="use_demo" name="use_demo" value="1">
-                                            <label class="form-check-label" for="use_demo">
-                                                Use demo mode (test with sample data)
-                                            </label>
-                                        </div>
-                                        <small class="form-text text-muted">
-                                            Enable this to test the import process with SimpleFIN demo data.
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <!-- Connection Error Display -->
-                                @if($errors->has('connection'))
-                                    <div class="alert alert-danger" role="alert">
-                                        <strong>Connection Error:</strong> {{ $errors->first('connection') }}
-                                    </div>
-                                @endif
-
-                                <!-- SimpleFIN token -->
-                                <div class="form-group row mb-3" id="token-group">
-                                    <label for="simplefin_token" class="col-sm-4 col-form-label">SimpleFIN token</label>
-                                    <div class="col-sm-8">
-                                        <input type="text"
-                                               class="form-control
-                                           @if($errors->has('simplefin_token')) is-invalid @endif"
-                                               id="simplefin_token" name="simplefin_token"
-                                               autocomplete="off"
-                                               value="{{ old('simplefin_token') }}"
-                                               placeholder="SimpleFIN token"/>
-                                        @if($errors->has('simplefin_token'))
-                                            <div class="invalid-feedback">
-                                                {{ $errors->first('simplefin_token') }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const demoCheckbox = document.getElementById('use_demo');
-                                    const tokenGroup = document.getElementById('token-group');
-
-                                    function toggleSimpleFINFields() {
-                                        if (demoCheckbox.checked) {
-                                            tokenGroup.style.display = 'none';
-                                        } else {
-                                            tokenGroup.style.display = 'flex';
-                                        }
-                                    }
-
-                                    // Initial state
-                                    toggleSimpleFINFields();
-
-                                    // Listen for changes
-                                    demoCheckbox.addEventListener('change', toggleSimpleFINFields);
-                                });
-                                </script>
-
+                                @include('import.003-upload.partials.simplefin')
                             @endif
 
-                            <!-- importable FILE -->
+                            <!-- Importable FILE -->
                             @if('file' === $flow)
-                            <div class="form-group row mb-3">
-                                <label for="importable_file" class="col-sm-4 col-form-label">Importable file</label>
-                                <div class="col-sm-8">
-                                    <input type="file"
-                                           class="form-control
-                                           @if($errors->has('importable_file')) is-invalid @endif"
-                                           id="importable_file" name="importable_file"
-                                           placeholder="Importable file"
-                                           accept=".xml,.csv"/>
-                                    @if($errors->has('importable_file'))
-                                    <div class="invalid-feedback">
-                                        {{ $errors->first('importable_file') }}
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
+                                @include('import.003-upload.partials.file')
                             @endif
 
-                            <!-- CONFIG FILE  -->
-                            <div class="form-group row mb-3">
-                                <label for="config_file" class="col-sm-4 col-form-label">Optional configuration
-                                    file</label>
-                                <div class="col-sm-8">
-                                    <input type="file" class="form-control" id="config_file" name="config_file"
-                                           placeholder="Configuration file"
-                                           accept=".json"/>
-                                </div>
-                            </div>
+                            <!-- Configuration file (for all flows)  -->
+                            @include('import.003-upload.partials.config')
 
-                            <!-- PRE MADE CONFIG FILE -->
-                            @if(count($list) > 0)
-                            <div class="form-group row mb-3">
-                                <label for="config_file" class="col-sm-4 col-form-label">Pre-made configuration
-                                    file</label>
-                                <div class="col-sm-8">
-                                    <select class="form-control" name="existing_config">
-                                        <option value="" label="Upload or manual config">Upload or manual config
-                                        </option>
-                                        @foreach($list as $file)
-                                        <option value="{{ $file }}" label="{{ $file }}">{{ $file }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            @endif
+                            <!-- Pre-made configuration file(s) -->
+                            @include('import.003-upload.partials.premade-config')
+
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <!-- continue -->
                                     <button type="submit" class="float-end btn btn-primary">Next &rarr;</button>
                                 </div>
                             </div>
@@ -186,29 +99,4 @@
             </div>
         </div>
     </div>
-
-    @if('simplefin' === $flow)
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const demoCheckbox = document.getElementById('use_demo');
-            const tokenGroup = document.getElementById('token-group');
-            const tokenInput = document.getElementById('simplefin_token');
-
-            function toggleDemoMode() {
-                if (demoCheckbox.checked) {
-                    tokenGroup.style.display = 'none';
-                    tokenInput.required = false;
-                } else {
-                    tokenGroup.style.display = 'flex';
-                    //tokenInput.required = true;
-                }
-            }
-
-            demoCheckbox.addEventListener('change', toggleDemoMode);
-
-            // Initial state
-            toggleDemoMode();
-        });
-    </script>
-    @endif
 @endsection

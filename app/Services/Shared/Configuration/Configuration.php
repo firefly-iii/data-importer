@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
+use App\Exceptions\ImporterErrorException;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Log;
@@ -90,6 +91,8 @@ class Configuration
     private string $nordigenMaxDays;
     private array  $nordigenRequisitions;
 
+    private string $lunchFlowApiKey = '';
+
     // what type of import?
     private array $roles         = [];
 
@@ -135,9 +138,11 @@ class Configuration
         $this->nordigenRequisitions        = [];
         $this->nordigenMaxDays             = '90';
 
+        // lunch flow configuration
+        $this->lunchFlowApiKey = '';
+
         // spectre
         $this->identifier                  = '0';
-        $this->connection                  = '0';
         $this->ignoreSpectreCategories     = false;
 
         // mapping for spectre + nordigen
@@ -234,6 +239,9 @@ class Configuration
         $object->nordigenBank                = $data['nordigen_bank'] ?? '';
         $object->nordigenRequisitions        = $data['nordigen_requisitions'] ?? [];
         $object->nordigenMaxDays             = $data['nordigen_max_days'] ?? '90';
+
+        // lunch flow configuration
+        $object->lunchFlowApiKey = $data['lunch_flow_api_key'] ?? '';
 
         // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData                  = $data['map_all_data'] ?? false;
@@ -385,6 +393,9 @@ class Configuration
         $object->nordigenRequisitions        = $array['nordigen_requisitions'] ?? [];
         $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
 
+        // lunch flow configuration
+        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
+
         // simplefin
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
@@ -475,6 +486,9 @@ class Configuration
         $object->nordigenBank                = $array['nordigen_bank'] ?? '';
         $object->nordigenRequisitions        = $array['nordigen_requisitions'] ?? [];
         $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
+
+        // lunch flow configuration
+        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
 
         $object->groupedTransactionHandling  = $array['grouped_transaction_handling'] ?? 'single';
         $object->useEntireOpposingAddress    = $array['use_entire_opposing_address'] ?? false;
@@ -899,6 +913,7 @@ class Configuration
             'nordigen_bank'                => $this->nordigenBank,
             'nordigen_requisitions'        => $this->nordigenRequisitions,
             'nordigen_max_days'            => $this->nordigenMaxDays,
+            'lunch_flow_api_key'         => $this->lunchFlowApiKey,
 
             // utf8
             'conversion'                   => $this->conversion,
@@ -1009,4 +1024,16 @@ class Configuration
     {
         return $this->dateRangeNotAfterUnit;
     }
+
+    public function getLunchFlowApiKey(): string
+    {
+        return $this->lunchFlowApiKey;
+    }
+
+    public function setDuplicateDetectionMethod(string $duplicateDetectionMethod): void
+    {
+        $this->duplicateDetectionMethod = $duplicateDetectionMethod;
+    }
+
+
 }

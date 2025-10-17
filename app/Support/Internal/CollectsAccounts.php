@@ -36,7 +36,9 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
+use App\Services\LunchFlow\Authentication\SecretManager as LunchFlowSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
+use App\Services\LunchFlow\Request\GetAccountsRequest as LunchFlowGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -199,6 +201,26 @@ trait CollectsAccounts
         /** @var GetAccountsResponse $spectreAccounts */
         $spectreAccounts         = $spectreList->get();
         foreach ($spectreAccounts as $account) {
+            $return[] = $account;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws ImporterHttpException
+     */
+    protected function getLunchFlowAccounts(Configuration $configuration): array
+    {
+        $return                  = [];
+        $apiKey                   = LunchFlowSecretManager::getApiKey($configuration);
+        $lunchFlowList             = new LunchFlowGetAccountsRequest($apiKey);
+        $lunchFlowList->setTimeOut(config('importer.connection.timeout'));
+
+        /** @var GetAccountsResponse $lunchFlowAccounts */
+        $lunchFlowAccounts         = $lunchFlowList->get();
+        foreach ($lunchFlowAccounts as $account) {
             $return[] = $account;
         }
 
