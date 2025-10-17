@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\CompletedConfiguration;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
@@ -50,10 +51,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use JsonException;
 
-/**
- * Class ConfigurationController
- * TODO for spectre and nordigen duplicate detection is only on transaction id
- */
 class ConfigurationController extends Controller
 {
     use CollectsAccounts;
@@ -78,7 +75,7 @@ class ConfigurationController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle          = 'Configuration';
         $subTitle           = 'Configure your import';
-        $flow               = $request->cookie(Constants::FLOW_COOKIE); // TODO should be from configuration right
+        $flow               = $request->cookie(Constants::FLOW_COOKIE);
         $configuration      = $this->restoreConfiguration();
 
         // if config says to skip it, skip it:
@@ -86,11 +83,7 @@ class ConfigurationController extends Controller
         if (true === $configuration->isSkipForm() && false === $overruleSkip) {
             Log::debug('Skip configuration, go straight to the next step.');
             // set config as complete.
-            session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-            if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
-                // at this point, nordigen is ready for data conversion.
-                session()->put(Constants::READY_FOR_CONVERSION, true);
-            }
+            event(new CompletedConfiguration($configuration));
 
             // skipForm
             return redirect()->route('005-roles.index');
@@ -401,11 +394,7 @@ class ConfigurationController extends Controller
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 
         // set config as complete.
-        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if ('lunchflow' === $configuration->getFlow() ||  'nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
-            // at this point, nordigen, spectre, and simplefin are ready for data conversion.
-            session()->put(Constants::READY_FOR_CONVERSION, true);
-        }
+        event(new CompletedConfiguration($configuration));
 
         // always redirect to roles, even if this isn't the step yet
         // for nordigen, spectre, and simplefin, roles will be skipped right away.

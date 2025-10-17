@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Events\CompletedConfiguration;
 use App\Events\ImportedTransactions;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -46,5 +47,8 @@ class EventServiceProvider extends ServiceProvider
             ImportedTransactions::class => [
                 'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
             ],
+            CompletedConfiguration::class => [
+                'App\Handlers\Events\ImportFlowHandler@handleCompletedConfiguration',
+            ]
         ];
 }
