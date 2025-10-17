@@ -59,4 +59,9 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
             'key' => (string) config('app.key'),
         ];
     }
+
+    public function setData(array $data): void
+    {
+        // TODO: Implement setData() method.
+    }
 }

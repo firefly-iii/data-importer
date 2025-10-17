@@ -32,4 +32,6 @@ interface AuthenticationValidatorInterface
     public function validate(): AuthenticationStatus;
 
     public function getData(): array;
+
+    public function setData(array $data): void;
 }

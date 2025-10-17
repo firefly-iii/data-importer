@@ -122,32 +122,32 @@ class AuthenticateController extends Controller
         // variables for page:
         $flow = $request->cookie(Constants::FLOW_COOKIE);
 
-        // set cookies and redirect, validator will pick it up.
-        if ('spectre' === $flow) {
-            $appId  = (string)$request->get('spectre_app_id');
-            $secret = (string)$request->get('spectre_secret');
-            if ('' === $appId || '' === $secret) {
-                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
-            }
-            // give to secret manager to store:
-            SpectreSecretManager::saveAppId($appId);
-            SpectreSecretManager::saveSecret($secret);
-
-            return redirect(route(self::AUTH_ROUTE));
+        switch ($flow) {
+            case 'spectre':
+                $validator = new SpectreValidator();
+                break;
+            case 'nordigen':
+                $validator = new NordigenValidator();
+                break;
+            case 'lunchflow':
+                $validator = new LunchFlowValidator();
+                break;
+            default:
+                Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
-        if ('nordigen' === $flow) {
-            $key        = $request->get('nordigen_key');
-            $identifier = $request->get('nordigen_id');
-            if ('' === $key || '' === $identifier) {
-                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
+        $all = $request->all();
+        $submission = [];
+        foreach($all as $name => $value) {
+            if(str_starts_with($name, $flow)) {
+                $shortName = str_replace(sprintf('%s_',$flow), '', $name);
+                if('' === (string) $value) {
+                    return redirect(route(self::AUTH_ROUTE))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
+                }
+                $submission[$shortName] = (string) $value;
             }
-            // store ID and key in session:
-            NordigenSecretManager::saveId($identifier);
-            NordigenSecretManager::saveKey($key);
-
-            return redirect(route(self::AUTH_ROUTE));
         }
-
-        throw new ImporterErrorException('Impossible flow exception [b].');
+        $validator->setData($submission);
+        return redirect(route(self::AUTH_ROUTE));
     }
 }

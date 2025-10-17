@@ -58,4 +58,9 @@ class SecretManager
     {
         return '' !== (string)session()->get(self::API_KEY);
     }
+
+    public static function saveApiKey(string $apiKey): void
+    {
+        session()->put(self::API_KEY, $apiKey);
+    }
 }

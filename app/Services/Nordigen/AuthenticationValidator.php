@@ -77,4 +77,10 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
             'key'        => SecretManager::getKey()
         ];
     }
+
+    public function setData(array $data): void
+    {
+        SecretManager::saveId($data['identifier']);
+        SecretManager::saveKey($data['key']);
+    }
 }
