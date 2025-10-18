@@ -5,6 +5,9 @@ namespace App\Services\Shared\Http;
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
+use App\Services\LunchFlow\Authentication\SecretManager as LunchFlowSecretManager;
+use App\Services\LunchFlow\Request\GetAccountsRequest as LunchFlowGetAccountsRequest;
+use App\Services\LunchFlow\Response\ErrorResponse;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Request\ListAccountsRequest;
 use App\Services\Nordigen\Response\ListAccountsResponse;
@@ -13,6 +16,9 @@ use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Model\ImportServiceAccount;
+use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
+use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
+use App\Services\Spectre\Response\GetAccountsResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -38,34 +44,31 @@ class AccountListCollector
     public function collect(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        // file flow needs no collection:
-        if ('file' === $this->flow) {
-            return [];
+
+        // no choice but to split based on flow.
+
+        switch ($this->flow) {
+            default:
+                throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
+            case 'file':
+                return [];
+            case 'nordigen':
+                $this->collectGoCardlessAccounts();
+                break;
+            case 'simplefin':
+                $this->collectSimpleFINAccounts();
+                break;
+            case 'spectre':
+                $this->collectSpectreAccounts();
+                break;
+            case 'lunchflow':
+                $this->collectLunchFlowAccounts();
         }
 
-        // nordigen has its own flow.
-        if ('nordigen' === $this->flow) {
-            $this->collectGoCardlessAccounts();
-        }
-
-        // same for SimpleFIN (accounts are collected during authentication).
-        if ('simplefin' === $this->flow) {
-            $this->collectSimpleFINAccounts();
-        }
-
-
-        // the rest is unified, splits at a later point.
-        if ('nordigen' !== $this->flow) {
-            $this->collectImportServiceAccounts();
-        }
+        //$this->collectImportServiceAccounts();
 
         $this->mergeAccounts();
         return $this->mergedAccounts;
-
-        $this->flow;
-        $this->configuration;
-        $this->existingAccounts;
-        return [];
     }
 
     private function collectGoCardlessAccounts(): void
@@ -122,6 +125,9 @@ class AccountListCollector
                 break;
             case 'simplefin':
                 $generic = ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts);
+                break;
+            case 'lunchflow':
+                $generic = ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts);
                 break;
             default:
                 throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow));
@@ -192,8 +198,23 @@ class AccountListCollector
         return $result;
     }
 
-    private function collectImportServiceAccounts(): void
+    private function collectSpectreAccounts(): void
     {
+        $return      = [];
+        $url         = config('spectre.url');
+        $appId       = SpectreSecretManager::getAppId();
+        $secret      = SpectreSecretManager::getSecret();
+        $spectreList = new SpectreGetAccountsRequest($url, $appId, $secret);
+        $spectreList->setTimeOut(config('importer.connection.timeout'));
+        $spectreList->connection = $this->configuration->getConnection();
+
+        /** @var GetAccountsResponse $spectreAccounts */
+        $spectreAccounts = $spectreList->get();
+        foreach ($spectreAccounts as $account) {
+            $return[] = $account;
+        }
+
+        $this->importServiceAccounts = $return;
 
     }
 
@@ -229,6 +250,29 @@ class AccountListCollector
         }
         Log::debug(sprintf('Collected %d SimpleFIN accounts from session.', count($accounts)));
         $this->importServiceAccounts = $accounts;
+    }
+
+    private function collectLunchFlowAccounts(): void
+    {
+        $return = [];
+        $url    = config('lunchflow.api_url');
+        $apiKey = LunchFlowSecretManager::getApiKey($this->configuration);
+        $req    = new LunchFlowGetAccountsRequest($apiKey);
+        $req->setTimeOut(config('importer.connection.timeout'));
+
+        /** @var GetAccountsResponse|ErrorResponse $accounts */
+        $accounts = $req->get();
+
+        if ($accounts instanceof ErrorResponse) {
+            $message = config(sprintf('importer.http_codes.%d', $accounts->statusCode));
+            throw new ImporterErrorException(sprintf('LunchFlow API error with HTTP code %d: %s', $accounts->statusCode, $message));
+        }
+
+        foreach ($accounts as $account) {
+            $return[] = $account;
+        }
+
+        $this->importServiceAccounts = $return;
     }
 
 }

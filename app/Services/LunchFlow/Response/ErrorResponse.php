@@ -34,10 +34,12 @@ class ErrorResponse extends Response
 {
     public string $class;
     public string $message;
+    public int    $statusCode = 0;
 
     public function __construct(array $data)
     {
-        $this->class   = $data['error']['class'] ?? 'Unknown Lunch Flow Error Class';
-        $this->message = $data['error']['message'] ?? 'Unknown Error';
+        $this->class      = $data['error']['class'] ?? 'Unknown Lunch Flow Error Class';
+        $this->message    = $data['error']['message'] ?? 'Unknown Error';
+        $this->statusCode = $data['statusCode'] ?? 0;
     }
 }

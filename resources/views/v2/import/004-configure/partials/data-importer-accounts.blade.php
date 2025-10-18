@@ -26,7 +26,7 @@
                     </div>
                 @else
                     <div class="alert alert-warning">
-                        <strong>No SimpleFIN accounts found.</strong> Please ensure your SimpleFIN token is valid and try again.
+                        <strong>No {{ config('importer.flow_titles.' . $flow) }} accounts found.</strong> Please ensure your settings are valid and try again.
                     </div>
                 @endif
             </div>

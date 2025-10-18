@@ -3,6 +3,7 @@
 namespace App\Services\LunchFlow\Request;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\LunchFlow\Response\ErrorResponse;
 use App\Services\LunchFlow\Response\GetAccountsResponse;
 use App\Services\Shared\Response\Response;
@@ -31,9 +32,9 @@ class GetAccountsRequest extends Request {
 
         try {
             $response = $this->authenticatedGet();
-        } catch (ImporterErrorException $e) {
+        } catch (ImporterHttpException $e) {
             // JSON thing.
-            return new ErrorResponse($e->json ?? []);
+            return new ErrorResponse($e->json ?? ['statusCode' => $e->statusCode]);
         }
         return new GetAccountsResponse($response['accounts'] ?? []);
     }

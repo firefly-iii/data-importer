@@ -47,10 +47,10 @@ declare(strict_types=1);
  */
 
 return [
-    'version'       => 'develop/2025-10-14',
-    'build_time'    => 1760412667,
-    'flows'         => ['nordigen', 'spectre', 'file', 'simplefin','lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
-    'enabled_flows' => [
+    'version'          => 'develop/2025-10-14',
+    'build_time'       => 1760412667,
+    'flows'            => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
+    'enabled_flows'    => [
         'nordigen'  => true,
         'spectre'   => true,
         'file'      => true,
@@ -62,7 +62,7 @@ return [
         'fints'     => false,
         'basiq'     => false,
     ],
-    'flow_titles'   => [
+    'flow_titles'      => [
         'file'      => 'File',
         'nordigen'  => 'GoCardless',
         'spectre'   => 'Spectre',
@@ -74,7 +74,7 @@ return [
         'fints'     => 'FinTS/HBCI',
         'basiq'     => 'Basiq.io',
     ],
-    'simplefin'     => [
+    'simplefin'        => [
         'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
         'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
         'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
@@ -97,7 +97,7 @@ return [
     ],
 
     // docker build info.
-    'docker'        => [
+    'docker'           => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -174,4 +174,65 @@ return [
     'line_c'                        => 'Doesnt look like anything to me.',
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
+
+    'http_codes' => [
+        0 => 'Unknown Error',
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
+        103 => 'Checkpoint',
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status',
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        306 => 'Switch Proxy',
+        307 => 'Temporary Redirect',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        402 => 'Payment Required',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable',
+        407 => 'Proxy Authentication Required',
+        408 => 'Request Timeout',
+        409 => 'Conflict',
+        410 => 'Gone',
+        411 => 'Length Required',
+        412 => 'Precondition Failed',
+        413 => 'Request Entity Too Large',
+        414 => 'Request-URI Too Long',
+        415 => 'Unsupported Media Type',
+        416 => 'Requested Range Not Satisfiable',
+        417 => 'Expectation Failed',
+        418 => 'I\'m a teapot',
+        422 => 'Unprocessable Entity',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        425 => 'Unordered Collection',
+        426 => 'Upgrade Required',
+        429 => 'Too Many Requests',
+        449 => 'Retry With',
+        450 => 'Blocked by Windows Parental Controls',
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        509 => 'Bandwidth Limit Exceeded',
+        510 => 'Not Extended'
+    ]
 ];
