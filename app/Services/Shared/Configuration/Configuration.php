@@ -364,7 +364,7 @@ class Configuration
         // settings for spectre + nordigen
         $object->mapAllData                  = $array['map_all_data'] ?? false;
         $object->accounts                    = $array['accounts'] ?? [];
-        $object->newAccounts                 = $array['new_account'] ?? [];
+        $object->newAccounts                 = $array['new_accounts'] ?? [];
 
         // spectre
         $object->identifier                  = $array['identifier'] ?? '0';
@@ -495,7 +495,7 @@ class Configuration
 
         // spectre + nordigen
         $object->accounts                    = $array['accounts'] ?? [];
-        $object->newAccounts                 = $array['new_account'] ?? [];
+        $object->newAccounts                 = $array['new_accounts'] ?? [];
 
         // date range settings
         $object->dateRange                   = $array['date_range'] ?? 'all';
@@ -897,7 +897,7 @@ class Configuration
 
             // settings for spectre + nordigen
             'accounts'                     => $this->accounts,
-            'new_account'                  => $this->newAccounts,
+            'new_accounts'                  => $this->newAccounts,
 
             // date range settings:
             'date_range'                   => $this->dateRange,

@@ -61,7 +61,6 @@ class ConfigurationContractValidator
         $this->loadExistingAccounts();
 
         // Core validation
-        $this->validateSimpleFINFlow($configuration);
         $this->validateSessionData($configuration);
         $this->validateAccountMappings($configuration);
         $this->validateNewAccountConfigurations($configuration);
@@ -72,13 +71,6 @@ class ConfigurationContractValidator
             $this->errors,
             $this->warnings
         );
-    }
-
-    private function validateSimpleFINFlow(Configuration $configuration): void
-    {
-        if ('simplefin' !== $configuration->getFlow()) {
-            $this->addError('configuration.flow', 'Configuration must be SimpleFIN flow', $configuration->getFlow());
-        }
     }
 
     private function validateSessionData(Configuration $configuration): void

@@ -161,49 +161,10 @@ class ConfigurationController extends Controller
      */
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
-        // TODO this must all move to some kind of validator thing.
         Log::debug(sprintf('Now running %s', __METHOD__));
-        // store config on drive.v
         $fromRequest         = $request->getAll();
-
-        // reverse dates if they are bla bla bla.
-        if (null !== $fromRequest['date_not_before'] && null !== $fromRequest['date_not_after']) {
-            if ($fromRequest['date_not_before']->gt($fromRequest['date_not_after'])) {
-                // swap them
-                Log::warning('User submitted date_not_before that is after date_not_after, swapping them.');
-                $temp                           = clone $fromRequest['date_not_before'];
-                $fromRequest['date_not_before'] = clone $fromRequest['date_not_after'];
-                $fromRequest['date_not_after']  = $temp;
-            }
-        }
-
-
         $configuration       = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
-
-        // TODO are all fields actually in the config?
-
-        // loop accounts:
-        $accounts            = [];
-        $allNewAccounts      = $fromRequest['new_account'] ?? [];
-        $toCreateNewAccounts = [];
-
-        foreach (array_keys($fromRequest['do_import']) as $identifier) {
-            if (array_key_exists($identifier, $fromRequest['accounts'])) {
-                $accountValue          = (int)$fromRequest['accounts'][$identifier];
-                $accounts[$identifier] = $accountValue;
-            }
-            if (array_key_exists($identifier, $allNewAccounts)) {
-                // this is a new account to create.
-                $toCreateNewAccounts[$identifier] = $allNewAccounts[$identifier];
-            }
-            if (!array_key_exists($identifier, $fromRequest['accounts'])) {
-                Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
-            }
-        }
-
-        $configuration->setAccounts($accounts);
-        $configuration->setNewAccounts($toCreateNewAccounts);
 
         // Store do_import selections in session for validation
         session()->put('do_import', $fromRequest['do_import'] ?? []);

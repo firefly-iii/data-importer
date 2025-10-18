@@ -64,7 +64,7 @@
     <!-- Hidden field to indicate account creation is requested when create_new is selected -->
     <input type="hidden"
            id="create-new-indicator-{{ $account['import_account']->id }}"
-           name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][create]"
+           name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][create]"
            value="0">
 
     <!-- #10550 do not set do_import to true for ALL accounts. -->

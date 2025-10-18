@@ -54,11 +54,11 @@ class ConfigurationPostRequest extends Request
         // Decode underscore-encoded account IDs back to original IDs with spaces
         $doImport          = $this->get('do_import') ?? [];
         $accounts          = $this->get('accounts') ?? [];
-        $newAccount        = $this->get('new_account') ?? [];
+        $newAccounts        = $this->get('new_accounts') ?? [];
 
         $decodedDoImport   = [];
         $decodedAccounts   = [];
-        $decodedNewAccount = [];
+        $decodedNewAccounts = [];
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
@@ -82,15 +82,43 @@ class ConfigurationPostRequest extends Request
             ]);
         }
 
-        // Decode new_account array keys
-        foreach ($newAccount as $encodedId => $accountData) {
+        // Decode new_accounts array keys
+        foreach ($newAccounts as $encodedId => $accountData) {
             $originalId                     = str_replace('_', ' ', (string)$encodedId);
-            $decodedNewAccount[$originalId] = $accountData;
+            $decodedNewAccounts[$originalId] = $accountData;
             Log::debug('Decoded new_account', [
                 'encoded' => (string)$encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
             ]);
+        }
+        $notBefore = $this->getCarbonDate('date_not_before');
+        $notAfter = $this->getCarbonDate('date_not_after');
+
+        // reverse dates if they are bla bla bla.
+        if (null !== $notBefore && null !== $notAfter) {
+            if ($notBefore->gt($notAfter)) {
+                // swap them
+                [$notBefore, $notAfter] = [$notAfter->copy(), $notBefore->copy()];
+            }
+        }
+
+        // loop accounts:
+        $accounts            = [];
+        $toCreateNewAccounts = [];
+
+        foreach (array_keys($decodedDoImport) as $identifier) {
+            if (array_key_exists($identifier, $decodedAccounts)) {
+                $accountValue          = (int)$decodedAccounts[$identifier];
+                $accounts[$identifier] = $accountValue;
+            }
+            if (array_key_exists($identifier, $decodedNewAccounts)) {
+                // this is a new account to create.
+                $toCreateNewAccounts[$identifier] = $decodedNewAccounts[$identifier];
+            }
+            if (!array_key_exists($identifier, $decodedAccounts)) {
+                Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
+            }
         }
 
         return [
@@ -130,8 +158,8 @@ class ConfigurationPostRequest extends Request
 
             // nordigen + spectre - with decoded account IDs
             'do_import'                               => $decodedDoImport,
-            'accounts'                                => $decodedAccounts,
-            'new_account'                             => $decodedNewAccount,
+            'accounts'                                => $accounts,
+            'new_accounts'                             => $toCreateNewAccounts,
             'map_all_data'                            => $this->convertBoolean($this->get('map_all_data')),
             'date_range'                              => $this->convertToString('date_range'),
             'date_range_number'                       => $this->convertToInteger('date_range_number'),
@@ -140,8 +168,8 @@ class ConfigurationPostRequest extends Request
             'date_range_not_after_number'             => $this->convertToInteger('date_range_not_after_number'),
             'date_range_not_after_unit'               => $this->convertToString('date_range_not_after_unit'),
 
-            'date_not_before'                         => $this->getCarbonDate('date_not_before'),
-            'date_not_after'                          => $this->getCarbonDate('date_not_after'),
+            'date_not_before'                         => $notBefore,
+            'date_not_after'                          => $notAfter,
 
             // simplefin:
             'access_token'                            => $this->convertToString('access_token'),
