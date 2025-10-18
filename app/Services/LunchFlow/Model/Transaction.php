@@ -31,7 +31,6 @@ use Carbon\Carbon;
  */
 class Transaction
 {
-
     public string $id;
     public int    $account;
     public string $amount;
@@ -47,7 +46,7 @@ class Transaction
      */
     public static function fromArray($array): self
     {
-        $object = new self();
+        $object              = new self();
         // mandatory fields:
         $object->id          = $array['id'];
         $object->account     = $array['accountId'];
@@ -65,7 +64,7 @@ class Transaction
      */
     public static function fromLocalArray(array $array): self
     {
-        $object = new self();
+        $object              = new self();
 
         // mandatory fields:
         $object->id          = $array['id'];
@@ -92,6 +91,7 @@ class Transaction
         if ('' === $this->description) {
             return '(empty description)';
         }
+
         return $this->description;
     }
 
@@ -99,7 +99,6 @@ class Transaction
     {
         return $this->id;
     }
-
 
     /**
      * Return name of the destination account
@@ -109,6 +108,7 @@ class Transaction
         if ('' === $this->merchant) {
             return '(empty destination)';
         }
+
         return $this->merchant;
     }
 

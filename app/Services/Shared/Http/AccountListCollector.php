@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * AccountListCollector.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -57,8 +59,7 @@ class AccountListCollector
     }
 
     /**
-     * @return array
-     * @throws ImporterErrorException|AgreementExpiredException
+     * @throws AgreementExpiredException|ImporterErrorException
      */
     public function collect(): array
     {
@@ -69,33 +70,42 @@ class AccountListCollector
         switch ($this->flow) {
             default:
                 throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
+
             case 'file':
                 return [];
+
             case 'nordigen':
                 $this->collectGoCardlessAccounts();
+
                 break;
+
             case 'simplefin':
                 $this->collectSimpleFINAccounts();
+
                 break;
+
             case 'spectre':
                 $this->collectSpectreAccounts();
+
                 break;
+
             case 'lunchflow':
                 $this->collectLunchFlowAccounts();
         }
 
-        //$this->collectImportServiceAccounts();
+        // $this->collectImportServiceAccounts();
 
         $this->mergeAccounts();
+
         return $this->mergedAccounts;
     }
 
     private function collectGoCardlessAccounts(): void
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $requisitions = $this->configuration->getNordigenRequisitions();
-        $return       = [];
-        $cache        = [];
+        $requisitions                = $this->configuration->getNordigenRequisitions();
+        $return                      = [];
+        $cache                       = [];
         foreach ($requisitions as $requisition) {
             $inCache = Cache::has($requisition) && config('importer.use_cache');
             // if cached, return it.
@@ -119,7 +129,7 @@ class AccountListCollector
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
-                $total = count($response);
+                $total       = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
 
                 /** @var NordigenAccount $account */
@@ -138,16 +148,23 @@ class AccountListCollector
     private function mergeAccounts(): void
     {
         Log::debug(sprintf('Now merging "%s" account lists.', $this->flow));
+
         switch ($this->flow) {
             case 'nordigen':
                 $generic = ImportServiceAccount::convertNordigenArray($this->importServiceAccounts);
+
                 break;
+
             case 'simplefin':
                 $generic = ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts);
+
                 break;
+
             case 'lunchflow':
                 $generic = ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts);
+
                 break;
+
             default:
                 throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow));
         }
@@ -162,7 +179,7 @@ class AccountListCollector
         foreach ($list as $importServiceAccount) {
             Log::debug(sprintf('Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")', $importServiceAccount->name, $importServiceAccount->id, $importServiceAccount->iban, $importServiceAccount->bban));
 
-            $entry = [
+            $entry          = [
                 'import_account'       => $importServiceAccount,
                 'mapped_to'            => null,
                 'firefly_iii_accounts' => [
@@ -175,11 +192,11 @@ class AccountListCollector
             $filteredByData = $this->filterByAccountData($importServiceAccount->iban, $importServiceAccount->bban, $importServiceAccount->name);
 
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                $matching = $filteredByData[$key];
-                $all      = $this->existingAccounts[$key];
+                $matching                            = $filteredByData[$key];
+                $all                                 = $this->existingAccounts[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching = array_udiff($all, $matching, function ($a, $b) {
+                $nonMatching                         = array_udiff($all, $matching, function ($a, $b) {
                     return $a->id <=> $b->id;
                 });
 
@@ -191,7 +208,7 @@ class AccountListCollector
                 }
             }
 
-            $return[] = $entry;
+            $return[]       = $entry;
         }
         Log::debug(sprintf('Merged into %d accounts.', count($return)));
 
@@ -219,16 +236,16 @@ class AccountListCollector
 
     private function collectSpectreAccounts(): void
     {
-        $return      = [];
-        $url         = config('spectre.url');
-        $appId       = SpectreSecretManager::getAppId();
-        $secret      = SpectreSecretManager::getSecret();
-        $spectreList = new SpectreGetAccountsRequest($url, $appId, $secret);
+        $return                      = [];
+        $url                         = config('spectre.url');
+        $appId                       = SpectreSecretManager::getAppId();
+        $secret                      = SpectreSecretManager::getSecret();
+        $spectreList                 = new SpectreGetAccountsRequest($url, $appId, $secret);
         $spectreList->setTimeOut(config('importer.connection.timeout'));
-        $spectreList->connection = $this->configuration->getConnection();
+        $spectreList->connection     = $this->configuration->getConnection();
 
         /** @var GetAccountsResponse $spectreAccounts */
-        $spectreAccounts = $spectreList->get();
+        $spectreAccounts             = $spectreList->get();
         foreach ($spectreAccounts as $account) {
             $return[] = $account;
         }
@@ -240,8 +257,8 @@ class AccountListCollector
     private function collectSimpleFINAccounts(): void
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $accountsData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-        $accounts     = [];
+        $accountsData                = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
+        $accounts                    = [];
 
         foreach ($accountsData ?? [] as $account) {
             // Ensure the account has required SimpleFIN protocol fields
@@ -273,17 +290,18 @@ class AccountListCollector
 
     private function collectLunchFlowAccounts(): void
     {
-        $return = [];
-        $url    = config('lunchflow.api_url');
-        $apiKey = LunchFlowSecretManager::getApiKey($this->configuration);
-        $req    = new LunchFlowGetAccountsRequest($apiKey);
+        $return                      = [];
+        $url                         = config('lunchflow.api_url');
+        $apiKey                      = LunchFlowSecretManager::getApiKey($this->configuration);
+        $req                         = new LunchFlowGetAccountsRequest($apiKey);
         $req->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var GetAccountsResponse|ErrorResponse $accounts */
-        $accounts = $req->get();
+        /** @var ErrorResponse|GetAccountsResponse $accounts */
+        $accounts                    = $req->get();
 
         if ($accounts instanceof ErrorResponse) {
             $message = config(sprintf('importer.http_codes.%d', $accounts->statusCode));
+
             throw new ImporterErrorException(sprintf('LunchFlow API error with HTTP code %d: %s', $accounts->statusCode, $message));
         }
 
@@ -293,5 +311,4 @@ class AccountListCollector
 
         $this->importServiceAccounts = $return;
     }
-
 }

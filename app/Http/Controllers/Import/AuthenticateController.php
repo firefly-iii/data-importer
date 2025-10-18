@@ -29,10 +29,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
-use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
-use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -76,23 +74,31 @@ class AuthenticateController extends Controller
         switch ($flow) {
             case 'spectre':
                 $validator = new SpectreValidator();
+
                 break;
+
             case 'nordigen':
                 $validator = new NordigenValidator();
+
                 break;
+
             case 'lunchflow':
                 $validator = new LunchFlowValidator();
+
                 break;
+
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
                 throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
 
-        $result = $validator->validate();
+        $result    = $validator->validate();
 
         if (AuthenticationStatus::NODATA === $result) {
             // need to get and present the auth data in the system (yes it is always empty).
             $data = $validator->getData();
+
             return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'data', 'error'));
         }
 
@@ -115,34 +121,42 @@ class AuthenticateController extends Controller
     public function postIndex(Request $request)
     {
         // variables for page:
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        $flow       = $request->cookie(Constants::FLOW_COOKIE);
 
         switch ($flow) {
             case 'spectre':
                 $validator = new SpectreValidator();
+
                 break;
+
             case 'nordigen':
                 $validator = new NordigenValidator();
+
                 break;
+
             case 'lunchflow':
                 $validator = new LunchFlowValidator();
+
                 break;
+
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
                 throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
-        $all = $request->all();
+        $all        = $request->all();
         $submission = [];
-        foreach($all as $name => $value) {
-            if(str_starts_with($name, $flow)) {
-                $shortName = str_replace(sprintf('%s_',$flow), '', $name);
-                if('' === (string) $value) {
+        foreach ($all as $name => $value) {
+            if (str_starts_with($name, $flow)) {
+                $shortName              = str_replace(sprintf('%s_', $flow), '', $name);
+                if ('' === (string) $value) {
                     return redirect(route(self::AUTH_ROUTE))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
                 }
                 $submission[$shortName] = (string) $value;
             }
         }
         $validator->setData($submission);
+
         return redirect(route(self::AUTH_ROUTE));
     }
 }

@@ -29,6 +29,7 @@ use Exception;
 /**
  * Class ImporterHttpException
  */
-class ImporterHttpException extends Exception {
+class ImporterHttpException extends Exception
+{
     public int $statusCode = 0;
 }

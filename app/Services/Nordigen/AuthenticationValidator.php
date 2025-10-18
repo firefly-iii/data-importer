@@ -73,7 +73,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     {
         return [
             'identifier' => SecretManager::getId(),
-            'key'        => SecretManager::getKey()
+            'key'        => SecretManager::getKey(),
         ];
     }
 

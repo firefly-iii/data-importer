@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * CollectsSettings.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -23,12 +25,10 @@ namespace App\Support\Http\Upload;
 
 trait CollectsSettings
 {
-
     protected function getSimpleFINSettings(): array
     {
         return [
             'token' => old('simplefin_token') ?? config('simplefin.token'),
         ];
     }
-
 }

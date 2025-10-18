@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * GetAccountsRequest.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -21,7 +23,6 @@
 
 namespace App\Services\LunchFlow\Request;
 
-use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\LunchFlow\Response\ErrorResponse;
 use App\Services\LunchFlow\Response\GetAccountsResponse;
@@ -29,7 +30,8 @@ use App\Services\Shared\Response\Response;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 
-class GetAccountsRequest extends Request {
+class GetAccountsRequest extends Request
+{
     public string $connection;
 
     /**
@@ -55,6 +57,7 @@ class GetAccountsRequest extends Request {
             // JSON thing.
             return new ErrorResponse($e->json ?? ['statusCode' => $e->statusCode]);
         }
+
         return new GetAccountsResponse($response['accounts'] ?? []);
     }
 

@@ -38,7 +38,7 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int        $position = 0;
-    private int $account = 0;
+    private int $account         = 0;
     private array $data;
 
     public function __construct(array $data)

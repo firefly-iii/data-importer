@@ -209,6 +209,7 @@ class RoleController extends Controller
     {
         // the request object must be able to handle all file types.
         $configuration = $this->restoreConfiguration();
+
         return $this->processPostIndex($request, $configuration);
     }
 

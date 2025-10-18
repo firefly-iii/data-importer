@@ -34,18 +34,13 @@ class Account
     public string      $institutionName;
     public string      $name;
     public string      $provider;
-    public string|null $currency;
-    public string|null $status;
+    public ?string $currency;
+    public ?string $status;
 
     /**
      * Account constructor.
      */
-    public function __construct()
-    {
-    }
-
-
-
+    public function __construct() {}
 
     /**
      * @return static
