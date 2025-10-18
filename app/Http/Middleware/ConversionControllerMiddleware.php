@@ -38,36 +38,5 @@ class ConversionControllerMiddleware
 
     protected const string STEP = 'conversion';
 
-    protected function isReadyForStep(Request $request): bool
-    {
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
 
-        // Call trait logic directly since we can't use parent:: with traits
-        if (null === $flow) {
-            Log::debug('isReadyForStep returns true because $flow is null');
-
-            return true;
-        }
-
-        if ('file' === $flow) {
-            $result = $this->isReadyForFileStep();
-            Log::debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
-
-            return $result;
-        }
-        if ('nordigen' === $flow) {
-            return $this->isReadyForNordigenStep();
-        }
-        if ('spectre' === $flow) {
-            return $this->isReadyForSpectreStep();
-        }
-        if ('simplefin' === $flow) {
-            return $this->isReadyForSimpleFINStep();
-        }
-        if ('lunchflow' === $flow) {
-            return $this->isReadyForLunchFlowStep();
-        }
-
-        return $this->isReadyForBasicStep();
-    }
 }

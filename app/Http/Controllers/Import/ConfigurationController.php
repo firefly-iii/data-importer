@@ -113,13 +113,6 @@ class ConfigurationController extends Controller
             return redirect()->route('009-selection.index');
         }
 
-//        if('lunchflow' === $flow) {
-//            $importerAccounts = $this->getLunchFlowAccounts($configuration);
-//            $importerAccounts = $this->mergeLunchFlowAccountLists($importerAccounts, $fireflyIIIaccounts);
-//        }
-//
-//            $importerAccounts = $this->mergeSimpleFINAccountLists($importerAccounts, $fireflyIIIaccounts);
-
         if ('file' === $flow) {
             // detect content type and save to config object.
             $detector = new FileContentSherlock();
@@ -131,93 +124,6 @@ class ConfigurationController extends Controller
         $currencies         = $this->getCurrencies();
 
         return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
-    }
-
-    /**
-     * Get SimpleFIN accounts from session data
-     */
-    private function getSimpleFINAccounts(): array
-    {
-        $accountsData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-        $accounts     = [];
-
-        foreach ($accountsData ?? [] as $account) {
-            // Ensure the account has required SimpleFIN protocol fields
-            if (!array_key_exists('id', $account) || '' === (string)$account['id']) {
-                Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
-
-                continue;
-            }
-
-            if (!array_key_exists('name', $account) || null === $account['name']) {
-                Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
-                $account['name'] = sprintf('Unknown Account (ID: %s)', $account['id']);
-            }
-
-            if (!array_key_exists('currency', $account) || null === $account['currency']) {
-                Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
-            }
-
-            if (!array_key_exists('balance', $account) || null === $account['balance']) {
-                Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
-            }
-
-            // Preserve raw SimpleFIN protocol data structure
-            $accounts[] = $account;
-        }
-
-        return $accounts;
-    }
-
-    /**
-     * Merge SimpleFIN accounts with Firefly III accounts
-     */
-    private function mergeSimpleFINAccountLists(array $simplefinAccounts, array $fireflyAccounts): array
-    {
-
-    }
-
-    /**
-     * Stub for determining if an imported account is mapped to a Firefly III account.
-     * TODO: Implement actual mapping logic.
-     * TODO get rid of object casting.
-     *
-     * @param object $importAccount   An object representing the account from the import source.
-     *                                Expected to have at least 'identifier' and 'name' properties.
-     * @param array  $fireflyAccounts array of existing Firefly III accounts
-     *
-     * @return ?string the ID of the mapped Firefly III account, or null if not mapped
-     */
-    private function getMappedTo(object $importAccount, array $fireflyAccounts): ?string
-    {
-        $importAccountName = $importAccount->name ?? null; // @phpstan-ignore-line
-
-        if ('' === (string)$importAccountName || null === $importAccountName) { // same thing really.
-            return null;
-        }
-
-
-        // Check assets accounts for name match
-        if (array_key_exists('assets', $fireflyAccounts) && is_array($fireflyAccounts['assets'])) {
-            foreach ($fireflyAccounts['assets'] as $fireflyAccount) {
-                $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string)$fireflyAccountName)) === trim(strtolower($importAccountName))) {
-                    return (string)$fireflyAccount->id;
-                }
-            }
-        }
-
-        // Check liability accounts for name match
-        if (array_key_exists('liabilities', $fireflyAccounts) && is_array($fireflyAccounts['liabilities'])) {
-            foreach ($fireflyAccounts['liabilities'] as $fireflyAccount) {
-                $fireflyAccountName = $fireflyAccount->name ?? null;
-                if (null !== $fireflyAccountName && '' !== $fireflyAccountName && trim(strtolower((string)$fireflyAccountName)) === trim(strtolower($importAccountName))) {
-                    return (string)$fireflyAccount->id;
-                }
-            }
-        }
-
-        return null;
     }
 
     /**

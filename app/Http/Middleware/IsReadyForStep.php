@@ -37,10 +37,31 @@ use Closure;
  */
 trait IsReadyForStep
 {
-    public const string TEST = 'test';
+    // in these flows and step combinations, the answer is always the same:
+    private array $staticAnswers = [
+        'file' => [
+            'authenticate' => false,
+        ],
+        'nordigen' => [
+            'authenticate' => true,
+            'define-roles' => false
+        ],
+        'lunchflow' => [
+            'authenticate' => true,
+            'define-roles' => false
+        ],
+        'spectre' => [
+            'authenticate' => true,
+            'define-roles' => false
+        ],
+        'simplefin' => [
+            'authenticate' => false,
+        ],
+    ];
 
     public function handle(Request $request, Closure $next): mixed
     {
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
         $result   = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
@@ -51,7 +72,7 @@ trait IsReadyForStep
             return $redirect;
         }
 
-        throw new ImporterErrorException(sprintf('Cannot handle middleware: %s', self::STEP));
+        throw new ImporterErrorException(sprintf('Cannot handle step "%s" for flow "%s"', self::STEP, $flow));
     }
 
     protected function isReadyForStep(Request $request): bool
@@ -62,6 +83,24 @@ trait IsReadyForStep
 
             return true;
         }
+
+        // we are always ready for some steps:
+        if('service-validation' === self::STEP) {
+            Log::debug('isReadyForStep returns true because the step is "service-validation"');
+            return true;
+        }
+
+        // this step is the same for everybody:
+        if('upload-files' === self::STEP) {
+            // ready for this step if NO uploads.
+            return !(session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD));
+        }
+
+        if(array_key_exists($flow, $this->staticAnswers) && array_key_exists(self::STEP, $this->staticAnswers[$flow])) {
+            Log::debug(sprintf('Return %s because there is a static answer for for flow "%s" and step "%s".', var_export($this->staticAnswers[$flow][self::STEP], true), $flow, self::STEP));
+            return $this->staticAnswers[$flow][self::STEP];
+        }
+
         // TODO this flow is weird.
         if ('file' === $flow) {
             $result = $this->isReadyForFileStep();
@@ -69,6 +108,7 @@ trait IsReadyForStep
 
             return $result;
         }
+
         if ('nordigen' === $flow) {
             return $this->isReadyForNordigenStep();
         }
@@ -82,9 +122,8 @@ trait IsReadyForStep
             return $this->isReadyForLunchFlowStep();
         }
 
-        return $this->isReadyForBasicStep();
+        throw new ImporterErrorException(sprintf('Cannot handle step "%s" in flow "%s"', self::STEP, $flow)); // @phpstan-ignore-line
     }
-
     private function isReadyForFileStep(): bool
     {
         Log::debug(sprintf('isReadyForFileStep("%s")', self::STEP));
@@ -92,20 +131,6 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForFileStep: Cannot handle file step "%s"', self::STEP));
-
-            case 'service-validation':
-                return true;
-
-            case 'upload-files':
-                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    return false;
-                }
-
-                return true;
-
-            case 'authenticate':
-                // for files this is always false.
-                return false;
 
             case 'define-roles':
                 if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
@@ -160,20 +185,6 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
-
-            case 'authenticate':
-            case 'service-validation':
-                return true;
-
-            case 'define-roles':
-                return false;
-
-            case 'upload-files':
-                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    return false;
-                }
-
-                return true;
 
             case 'nordigen-selection':
                 // must have upload, that's it
@@ -254,24 +265,12 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForLunchFlowStep: Cannot handle Lunch Flow step "%s"', self::STEP));
-
-            case 'authenticate':
-            case 'service-validation':
-                return true;
-            case 'upload-files':
-                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    return false;
-                }
-
-                return true;
             case 'configuration':
                 if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
                     return false;
                 }
 
                 return true;
-            case 'define-roles':
-                return false;
             case 'map':
                 // mapping must be complete, or not ready for this step.
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
@@ -321,10 +320,6 @@ trait IsReadyForStep
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSpectreStep: Cannot handle Spectre step "%s"', self::STEP));
 
-            case 'service-validation':
-            case 'authenticate':
-                return true;
-
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     Log::debug('Spectre: Return false, ready for submission.');
@@ -339,13 +334,6 @@ trait IsReadyForStep
                 // will probably never return false, but OK.
                 return false;
 
-            case 'upload-files':
-                if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-                    return false;
-                }
-
-                return true;
-
             case 'select-connection':
                 if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
                     return true;
@@ -358,9 +346,6 @@ trait IsReadyForStep
                     return true;
                 }
 
-                return false;
-
-            case 'define-roles':
                 return false;
 
             case 'map':
@@ -405,15 +390,6 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('isReadyForSimpleFINStep: Cannot handle SimpleFIN step "%s"', self::STEP));
-
-            case 'authenticate':
-                // simpleFIN needs no authentication.
-                return false;
-
-            case 'service-validation':
-            case 'upload-files':
-                // you can always upload SimpleFIN things
-                return true;
 
             case 'configuration':
                 return session()->has(Constants::HAS_UPLOAD) && session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA);
@@ -467,20 +443,6 @@ trait IsReadyForStep
         }
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function isReadyForBasicStep(): bool
-    {
-        Log::debug(sprintf('isReadyForBasicStep("%s")', self::STEP));
-
-        if (self::STEP === 'service-validation') {
-            return true;
-        }
-
-        throw new ImporterErrorException(sprintf('isReadyForBasicStep: Cannot handle basic step "%s"', self::STEP)); // @phpstan-ignore-line
-    }
-
     protected function redirectToCorrectStep(Request $request): ?RedirectResponse
     {
         $flow = $request->cookie(Constants::FLOW_COOKIE);
@@ -505,7 +467,7 @@ trait IsReadyForStep
             return $this->redirectToCorrectLunchFlowStep();
         }
 
-        return $this->redirectToBasicStep();
+        return null;
     }
 
     private function redirectToCorrectLunchFlowStep() {
