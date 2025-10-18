@@ -2,7 +2,7 @@
 
 /*
  * HealthcheckController.php
- * Copyright (c) 2021 https://github.com/ajgon and github.com/davidschlachter
+ * Copyright (c) 2025 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *

@@ -1,11 +1,10 @@
 <?php
 
-/**
+/*
  * GetAccountsResponse.php
- * Copyright (c) 2020 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Spectre importer
- * (https://github.com/firefly-iii/spectre-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
