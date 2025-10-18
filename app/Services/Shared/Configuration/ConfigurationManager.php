@@ -1,4 +1,5 @@
 <?php
+
 /*
  * ConfigurationManager.php
  * Copyright (c) 2025 james@firefly-iii.org

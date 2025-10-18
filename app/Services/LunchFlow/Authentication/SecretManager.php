@@ -44,6 +44,7 @@ class SecretManager
             if ('' !== $apiKey) {
                 return $apiKey;
             }
+
             return (string)$configuration?->getLunchFlowApiKey();
         }
 

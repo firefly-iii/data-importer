@@ -341,9 +341,9 @@ class Accounts extends AbstractTask
         Log::debug('Found no account or haven\'t searched for one because of missing data.');
 
         // append an empty type to the array for consistency's sake.
-        $array['type'] ??= null;
-        $array['bic']  ??= null;
-        $array['currency_code']  ??= null;
+        $array['type']          ??= null;
+        $array['bic']           ??= null;
+        $array['currency_code'] ??= null;
 
         // Return ID or name if not null
         if (null !== $array['id'] || '' !== (string) $array['name']) {

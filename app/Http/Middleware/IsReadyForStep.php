@@ -43,26 +43,26 @@ trait IsReadyForStep
         ],
         'nordigen'  => [
             'authenticate' => true,
-            'define-roles' => false
+            'define-roles' => false,
         ],
         'lunchflow' => [
             'authenticate' => true,
-            'define-roles' => false
+            'define-roles' => false,
         ],
         'spectre'   => [
             'authenticate' => true,
-            'define-roles' => false
+            'define-roles' => false,
         ],
         'simplefin' => [
             'authenticate' => false,
-            'define-roles' => false
+            'define-roles' => false,
         ],
     ];
 
     public function handle(Request $request, Closure $next): mixed
     {
-        $flow   = $request->cookie(Constants::FLOW_COOKIE);
-        $result = $this->isReadyForStep($request);
+        $flow     = $request->cookie(Constants::FLOW_COOKIE);
+        $result   = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -87,6 +87,7 @@ trait IsReadyForStep
         // we are always ready for some steps:
         if ('service-validation' === self::STEP) {
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns true because the step is "service-validation"', $flow, self::STEP));
+
             return true;
         }
 
@@ -95,12 +96,14 @@ trait IsReadyForStep
             // ready for this step if NO uploads.
             $res = !(session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD));
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
 
         // static answer for some steps and roles.
         if (array_key_exists($flow, $this->staticAnswers) && array_key_exists(self::STEP, $this->staticAnswers[$flow])) {
             Log::debug(sprintf('Return %s because there is a static answer for for flow "%s" and step "%s".', var_export($this->staticAnswers[$flow][self::STEP], true), $flow, self::STEP));
+
             return $this->staticAnswers[$flow][self::STEP];
         }
 
@@ -108,26 +111,31 @@ trait IsReadyForStep
         if ('define-roles' === self::STEP) {
             $res = $this->isReadyToDefineRoles($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
         if ('configuration' === self::STEP) {
             $res = $this->isReadyForConfiguration();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
         if ('map' === self::STEP) {
             $res = $this->isReadyForMapping();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
         if ('conversion' === self::STEP) {
             $res = $this->isReadyForConversion();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
         if ('submit' === self::STEP) {
             $res = $this->isReadyForSubmission();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
+
             return $res;
         }
 
@@ -138,6 +146,7 @@ trait IsReadyForStep
         if ('spectre' === $flow) {
             return $this->isReadyForSpectreStep();
         }
+
         throw new ImporterErrorException(sprintf('Cannot handle step "%s" in flow "%s"', self::STEP, $flow)); // @phpstan-ignore-line
     }
 
@@ -160,18 +169,17 @@ trait IsReadyForStep
         // if/else is in reverse!
         if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
             Log::debug('Return true, ready for conversion.');
+
             return true;
         }
         Log::debug('Return false, fallback.');
+
         // will probably never return false, but OK.
         return false;
     }
 
     /**
      * For mapping, the order in which this happens is different per flow. That makes this function a little complex.
-     *
-     *
-     *
      */
     private function isReadyForMapping(): bool
     {
@@ -187,23 +195,24 @@ trait IsReadyForStep
         if (session()->has(Constants::CONFIG_COMPLETE_INDICATOR) && true === session()->get(Constants::CONFIG_COMPLETE_INDICATOR)) {
             // if a key is present, we are not ready for this step (aka ready for the next one).
             Log::debug('isReadyForConfiguration: return false because configuration is already complete.');
+
             return false;
         }
         // by definition, not ready for this step. Need to have all counts:
         $count = 0;
         if (session()->has(Constants::SELECTED_BANK_COUNTRY) && true === session()->get(Constants::SELECTED_BANK_COUNTRY)) {
             // becomes true when user has selected bank + country.
-            $count++; // 1
+            ++$count; // 1
             Log::debug(sprintf('isReadyForConfiguration: user has selected bank and country, count is now %d.', $count));
         }
         if (session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA) && true === session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA)) {
             // becomes true when user has selected bank + country.
-            $count++; // 2
+            ++$count; // 2
             Log::debug(sprintf('isReadyForConfiguration: user has simplefin accounts data, count is now %d.', $count));
         }
         if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
             // has upload is always true after the uploadcontroller.
-            $count++; // 3
+            ++$count; // 3
             Log::debug(sprintf('isReadyForConfiguration: user has upload, count is now %d.', $count));
         }
         Log::debug(sprintf('isReadyForConfiguration: final count is now %d.', $count));
@@ -217,8 +226,10 @@ trait IsReadyForStep
             if (session()->has(Constants::ROLES_COMPLETE_INDICATOR) && true === session()->get(Constants::ROLES_COMPLETE_INDICATOR)) {
                 return false;
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -296,11 +307,13 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectLunchFlowStep: Cannot handle file step "%s"', self::STEP));
+
             case 'define-roles':
                 $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
+
             case 'map':
                 // if no conversion yet, go there first
                 // must already have the conversion, or not ready for this step:
@@ -317,6 +330,7 @@ trait IsReadyForStep
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
+
             case 'conversion':
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
@@ -340,31 +354,33 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
+
             case 'authenticate':
-                $route = route('003-upload.index');
+                $route             = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
+
             case 'upload-files':
-                $route = route('004-configure.index');
+                $route             = route('004-configure.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route = route('005-roles.index');
+                $route             = route('005-roles.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -385,14 +401,14 @@ trait IsReadyForStep
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -406,6 +422,7 @@ trait IsReadyForStep
         switch (self::STEP) {
             default:
                 throw new ImporterErrorException(sprintf('redirectToCorrectNordigenStep: Cannot handle Nordigen step "%s"', self::STEP));
+
             case 'nordigen-selection':
                 // back to upload
                 $route = route('003-upload.index');

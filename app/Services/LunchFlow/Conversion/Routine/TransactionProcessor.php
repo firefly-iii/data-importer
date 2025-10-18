@@ -29,11 +29,8 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Services\LunchFlow\Authentication\SecretManager;
-use App\Services\LunchFlow\Model\Account;
 use App\Services\LunchFlow\Request\GetTransactionsRequest;
 use App\Services\LunchFlow\Response\GetTransactionsResponse;
-use App\Services\Nordigen\Services\AccountInformationCollector;
-use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
@@ -50,8 +47,8 @@ class TransactionProcessor
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private array         $accounts;
     private Configuration $configuration;
-    private ?Carbon       $notAfter  = null;
-    private ?Carbon       $notBefore = null;
+    private ?Carbon       $notAfter       = null;
+    private ?Carbon       $notBefore      = null;
 
     /**
      * @throws ImporterErrorException
@@ -69,19 +66,20 @@ class TransactionProcessor
         if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
-        $accounts = array_keys($this->configuration->getAccounts());
-        $return   = [];
+        $accounts        = array_keys($this->configuration->getAccounts());
+        $return          = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total = count($accounts);
+        $total           = count($accounts);
+
         /**
          * @var int $key
          * @var int $account
          */
         foreach ($accounts as $key => $account) {
             Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
-            $apiToken = SecretManager::getApiKey($this->configuration);
+            $apiToken         = SecretManager::getApiKey($this->configuration);
 
-            $request = new GetTransactionsRequest($apiToken, $account);
+            $request          = new GetTransactionsRequest($apiToken, $account);
             $request->setBase(config('lunchflow.api_url'));
             $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -101,6 +99,7 @@ class TransactionProcessor
                 // agreement expired, whoops.
                 $return[$account] = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
+
                 continue;
             }
 
@@ -140,7 +139,7 @@ class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT), $this->notBefore->format(self::DATE_TIME_FORMAT)));

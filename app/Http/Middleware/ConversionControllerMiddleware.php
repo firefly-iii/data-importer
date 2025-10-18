@@ -24,10 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Services\Session\Constants;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-
 /**
  * Class ConversionControllerMiddleware
  */

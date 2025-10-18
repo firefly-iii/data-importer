@@ -28,8 +28,6 @@ use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
-use App\Services\LunchFlow\Conversion\Routine\ArrayResponse;
-use App\Services\LunchFlow\Conversion\Routine\GetAccountResponse;
 use App\Services\LunchFlow\Model\Transaction;
 use App\Services\LunchFlow\Request\GetAccountInformationRequest;
 use App\Services\LunchFlow\TokenManager;
@@ -38,8 +36,6 @@ use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
-use Carbon\Carbon;
-use Carbon\Exceptions\InvalidFormatException;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use Illuminate\Support\Facades\Log;
@@ -161,8 +157,8 @@ class GenerateTransactions
         $return = [];
 
         /**
-         * @var int $accountId
-         * @var array  $entries
+         * @var int   $accountId
+         * @var array $entries
          */
         foreach ($transactions as $accountId => $entries) {
             $total = count($entries);

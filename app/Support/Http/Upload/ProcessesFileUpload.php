@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ProcessesFileUpload.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -28,11 +30,11 @@ use Illuminate\Http\Request;
 
 trait ProcessesFileUpload
 {
-
-    protected function processFileUpload(Request $request, Configuration $configuration): RedirectResponse {
+    protected function processFileUpload(Request $request, Configuration $configuration): RedirectResponse
+    {
 
         event(new ProvidedConfigUpload('', $configuration));
+
         return redirect(route('004-configure.index'));
     }
-
 }

@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\LunchFlow\Request;
 
-use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use Carbon\Carbon;
@@ -100,9 +99,10 @@ abstract class Request
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
-            $body = method_exists($e, 'getResponse') ? (string)$e->getResponse()->getBody() : '';
-            $exception = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
+            $body                  = method_exists($e, 'getResponse') ? (string)$e->getResponse()->getBody() : '';
+            $exception             = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
             $exception->statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+
             throw $exception;
         }
         if (200 !== $res->getStatusCode()) {
@@ -168,7 +168,6 @@ abstract class Request
         );
     }
 
-
     protected function getDefaultHeaders(): array
     {
         $this->expiresAt = Carbon::now()->getTimestamp() + 180;
@@ -188,6 +187,4 @@ abstract class Request
     {
         $this->apiKey = $apiKey;
     }
-
-
 }

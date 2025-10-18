@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\LunchFlow;
 
-use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
@@ -41,7 +40,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $apiKey  = SecretManager::getApiKey();
+        $apiKey = SecretManager::getApiKey();
 
         if ('' === $apiKey) {
             return AuthenticationStatus::NODATA;
@@ -61,5 +60,4 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     {
         SecretManager::saveApiKey($data['api_key']);
     }
-
 }

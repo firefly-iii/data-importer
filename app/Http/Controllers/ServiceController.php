@@ -49,24 +49,30 @@ class ServiceController extends Controller
         $this->middleware(ServiceControllerMiddleware::class);
     }
 
-
-    public function validateProvider(string $provider): JsonResponse {
+    public function validateProvider(string $provider): JsonResponse
+    {
         switch ($provider) {
             case 'nordigen':
             case 'gocardless':
                 return $this->validateNordigen();
+
             case 'simplefin':
                 return $this->validateSimpleFIN();
+
             case 'spectre':
                 return $this->validateSpectre(request());
+
             case 'lunchflow':
                 return $this->validateLunchFlow();
+
             case 'file':
                 return response()->json(['result' => 'OK']);
+
             default:
                 return response()->json(['result' => 'NOK', 'message' => 'Unknown provider']);
         }
     }
+
     public function validateNordigen(): JsonResponse
     {
         $validator = new NordigenValidator();

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ProcessesNordigenUpload.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -29,7 +31,8 @@ use Illuminate\Support\Facades\Log;
 
 trait ProcessesNordigenUpload
 {
-    protected function processNordigen(Configuration $configuration) {
+    protected function processNordigen(Configuration $configuration)
+    {
 
         Log::debug('Save config to disk after processing GoCardless.');
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
@@ -38,5 +41,4 @@ trait ProcessesNordigenUpload
 
         return redirect(route('009-selection.index'));
     }
-
 }

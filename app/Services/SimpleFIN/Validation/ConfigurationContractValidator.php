@@ -398,8 +398,8 @@ class ConfigurationContractValidator
 
         // Validate expected form structure
         $expectedStructure = [
-            'do_import'   => 'array',
-            'accounts'    => 'array',
+            'do_import'    => 'array',
+            'accounts'     => 'array',
             'new_accounts' => 'array',
         ];
 
