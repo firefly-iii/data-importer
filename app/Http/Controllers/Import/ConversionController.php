@@ -31,6 +31,7 @@ use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
