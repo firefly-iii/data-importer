@@ -3,6 +3,8 @@
 namespace App\Handlers\Events;
 
 use App\Events\CompletedConfiguration;
+use App\Events\ProvidedConfigUpload;
+use App\Events\ProvidedDataUpload;
 use App\Services\Session\Constants;
 
 class ImportFlowHandler
@@ -16,5 +18,17 @@ class ImportFlowHandler
             // at this point, nordigen, spectre, and simplefin are ready for data conversion.
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }
+    }
+
+    public function handleProvidedDataUpload(ProvidedDataUpload $event): void
+    {
+        session()->put(Constants::UPLOAD_DATA_FILE, $event->fileName);
+        session()->put(Constants::HAS_UPLOAD, true);
+    }
+
+    public function handleProvidedConfigUpload(ProvidedConfigUpload $event): void
+    {
+        session()->put(Constants::UPLOAD_CONFIG_FILE, $event->fileName);
+        session()->put(Constants::HAS_UPLOAD, true);
     }
 }

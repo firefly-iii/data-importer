@@ -2,24 +2,22 @@
 
 namespace App\Events;
 
-use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class CompletedConfiguration
+class ProvidedConfigUpload
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public Configuration $configuration;
-
+    public string $fileName;
     /**
      * Create a new event instance.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(string $fileName)
     {
-        $this->configuration = $configuration;
+        $this->fileName = $fileName;
     }
 
     /**
@@ -33,4 +31,5 @@ class CompletedConfiguration
             new PrivateChannel('channel-name'),
         ];
     }
+
 }

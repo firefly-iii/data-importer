@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Console\VerifyJSON;
+use App\Events\ProvidedDataUpload;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
@@ -206,8 +207,7 @@ class UploadController extends Controller
                     $content = (string)file_get_contents($file->getPathname());
                 }
                 $fileName          = StorageService::storeContent($content);
-                session()->put(Constants::UPLOAD_DATA_FILE, $fileName);
-                session()->put(Constants::HAS_UPLOAD, true);
+                event(new ProvidedDataUpload($fileName));
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Support\Http\Upload;
 
+use App\Events\ProvidedConfigUpload;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -70,13 +71,13 @@ trait ProcessesSimpleFINUpload
             Log::debug('Save config to disk after setting access token.');
             session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
             $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
 
             // Store SimpleFIN data in session for configuration step
             session()->put(Constants::SIMPLEFIN_TOKEN, $accessToken);
             session()->put(Constants::SIMPLEFIN_ACCOUNTS_DATA, $accountsData);
             session()->put(Constants::SIMPLEFIN_IS_DEMO, $isDemo);
-            session()->put(Constants::HAS_UPLOAD, true);
+
+            event(new ProvidedConfigUpload($configFileName));
 
             Log::info('SimpleFIN connection established', ['account_count' => count($accountsData), 'is_demo' => $isDemo]);
 

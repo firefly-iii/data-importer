@@ -27,6 +27,8 @@ namespace App\Providers;
 
 use App\Events\CompletedConfiguration;
 use App\Events\ImportedTransactions;
+use App\Events\ProvidedConfigUpload;
+use App\Events\ProvidedDataUpload;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -49,6 +51,12 @@ class EventServiceProvider extends ServiceProvider
             ],
             CompletedConfiguration::class => [
                 'App\Handlers\Events\ImportFlowHandler@handleCompletedConfiguration',
+            ],
+            ProvidedDataUpload::class => [
+                'App\Handlers\Events\ImportFlowHandler@handleProvidedDataUpload',
+            ],
+            ProvidedConfigUpload::class => [
+                'App\Handlers\Events\ImportFlowHandler@handleProvidedConfigUpload',
             ]
         ];
 }
