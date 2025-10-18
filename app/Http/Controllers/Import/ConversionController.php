@@ -270,6 +270,9 @@ class ConversionController extends Controller
         if ('spectre' === $flow) {
             $routine = new SpectreRoutineManager($identifier);
         }
+        if ('lunchflow' === $flow) {
+            $routine = new LunchFlowRoutineManager($identifier);
+        }
         if ('simplefin' === $flow) {
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
