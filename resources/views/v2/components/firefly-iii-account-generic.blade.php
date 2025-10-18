@@ -6,7 +6,6 @@
             id="account-select-{{ $account['import_account']->id }}">
 
         <!-- Create New Account option -->
-        @if('simplefin' === $flow || 'lunchflow' === $flow)
         <option value="create_new"
                 @php
                     $configuredAccount = $configuration->getAccounts()[$account['import_account']->id] ?? null;
@@ -14,7 +13,6 @@
                     $isCreateNewSelected = (!$configuredAccount || $configuredAccount === 'create_new') && !$mappedTo;
                 @endphp
                 @if($isCreateNewSelected) selected @endif>➕ Create New Account</option>
-        @endif
 
         <!-- loop all Firefly III account groups (assets, liabilities) -->
         @foreach($account['firefly_iii_accounts'] as $accountGroupKey => $accountGroup)

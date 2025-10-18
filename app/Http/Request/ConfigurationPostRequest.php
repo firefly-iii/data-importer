@@ -158,7 +158,7 @@ class ConfigurationPostRequest extends Request
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
-        $columnOptions = implode(',', array_keys(config('csv.unique_column_options')));
+        $columnOptions = implode(',', array_keys(config('file.unique_column_options')));
         if ('nordigen' === $flow) {
             $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
         }

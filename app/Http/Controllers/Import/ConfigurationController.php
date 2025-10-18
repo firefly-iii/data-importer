@@ -36,6 +36,7 @@ use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
+use App\Services\Shared\Http\AccountListCollector;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
@@ -67,9 +68,6 @@ class ConfigurationController extends Controller
         $this->middleware(ConfigurationControllerMiddleware::class);
     }
 
-    /**
-     * @return Factory|RedirectResponse|View
-     */
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
@@ -84,58 +82,43 @@ class ConfigurationController extends Controller
             Log::debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             event(new CompletedConfiguration($configuration));
-
             // skipForm
             return redirect()->route('005-roles.index');
         }
 
         // collect Firefly III accounts
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        $fireflyIIIaccounts = $this->getFireflyIIIAccounts();
-        // possibilities for duplicate detection (unique columns)
+        $fireflyIIIAccounts = $this->getFireflyIIIAccounts();
 
-        // also get the nordigen / spectre accounts
-        $importerAccounts   = [];
-        $uniqueColumns      = config('csv.unique_column_options');
-        if ('nordigen' === $flow) {
-            // TODO here we need to redirect to Nordigen.
-            try {
-                $importerAccounts = $this->getNordigenAccounts($configuration);
-            } catch (AgreementExpiredException $e) {
-                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+        // unique column options:
+        $uniqueColumns      = config(sprintf('%s.unique_column_options', $flow));
 
-                // remove thing from configuration
-                $configuration->clearRequisitions();
+        // also get the importer service accounts, if any.
+        $collector = new AccountListCollector($configuration, $flow, $fireflyIIIAccounts);
 
-                // save configuration in session and on disk:
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+        try {
+            $importerAccounts = $collector->collect();
+        } catch(AgreementExpiredException $e) {
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
-                // redirect to selection.
-                return redirect()->route('009-selection.index');
-            }
-            $uniqueColumns    = config('nordigen.unique_column_options');
-            $importerAccounts = $this->mergeNordigenAccountLists($importerAccounts, $fireflyIIIaccounts);
+            // remove thing from configuration
+            $configuration->clearRequisitions();
+
+            // save configuration in session and on disk:
+            session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+            // redirect to selection.
+            return redirect()->route('009-selection.index');
         }
 
-        if ('spectre' === $flow) {
-            $importerAccounts = $this->getSpectreAccounts($configuration);
-            $uniqueColumns    = config('spectre.unique_column_options');
-            $importerAccounts = $this->mergeSpectreAccountLists($importerAccounts, $fireflyIIIaccounts);
-        }
-
-        if('lunchflow' === $flow) {
-            $importerAccounts = $this->getLunchFlowAccounts($configuration);
-            $uniqueColumns    = config('lunchflow.unique_column_options');
-            $importerAccounts = $this->mergeLunchFlowAccountLists($importerAccounts, $fireflyIIIaccounts);
-        }
-
-        if ('simplefin' === $flow) {
-            $importerAccounts = $this->getSimpleFINAccounts();
-            $uniqueColumns    = config('simplefin.unique_column_options', ['id']);
-            $importerAccounts = $this->mergeSimpleFINAccountLists($importerAccounts, $fireflyIIIaccounts);
-        }
+//        if('lunchflow' === $flow) {
+//            $importerAccounts = $this->getLunchFlowAccounts($configuration);
+//            $importerAccounts = $this->mergeLunchFlowAccountLists($importerAccounts, $fireflyIIIaccounts);
+//        }
+//
+//            $importerAccounts = $this->mergeSimpleFINAccountLists($importerAccounts, $fireflyIIIaccounts);
 
         if ('file' === $flow) {
             // detect content type and save to config object.
@@ -147,7 +130,7 @@ class ConfigurationController extends Controller
         // Get currency data for account creation widget
         $currencies         = $this->getCurrencies();
 
-        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIaccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     /**
@@ -191,42 +174,7 @@ class ConfigurationController extends Controller
      */
     private function mergeSimpleFINAccountLists(array $simplefinAccounts, array $fireflyAccounts): array
     {
-        $return = [];
 
-        foreach ($simplefinAccounts as $sfinAccountData) {
-            // $sfinAccountData is raw SimpleFIN protocol data with fields:
-            // ['id', 'name', 'currency', 'balance', 'balance-date', 'org', etc.]
-
-            $importAccountRepresentation = (object)['id'              => $sfinAccountData['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
-                'name'                                                => $sfinAccountData['name'], // Expected by getMappedTo, display in component
-                'status'                                              => 'active', // Expected by view for status checks
-                'currency'                                            => $sfinAccountData['currency'] ?? null, // SimpleFIN currency field
-                'balance'                                             => $sfinAccountData['balance'] ?? null, // SimpleFIN balance (numeric string)
-                'balance_date'                                        => $sfinAccountData['balance-date'] ?? null, // SimpleFIN balance timestamp
-                'org'                                                 => $sfinAccountData['org'] ?? null, // SimpleFIN organization data
-                'iban'                                                => null, // Placeholder for consistency if component expects it
-                'extra'                                               => $sfinAccountData['extra'] ?? [], // SimpleFIN extra data
-                'bic'                                                 => null, // Placeholder
-                'product'                                             => null, // Placeholder
-                'cashAccountType'                                     => null, // Placeholder
-                'usage'                                               => null, // Placeholder
-                'resourceId'                                          => null, // Placeholder
-                'bban'                                                => null, // Placeholder
-                'ownerName'                                           => null, // Placeholder
-            ];
-
-
-            $return[]                    = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
-                'name'                                             => $sfinAccountData['name'], // SimpleFIN account name
-                'id'                                               => $sfinAccountData['id'], // ID for form fields (do_import[ID], accounts[ID])
-                'mapped_to'                                        => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
-                'type'                                             => 'source', // Indicates it's an account from the import source
-                'firefly_iii_accounts'                             => $fireflyAccounts, // Required by x-importer-account component
-            ];
-        }
-
-
-        return $return;
     }
 
     /**

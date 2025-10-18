@@ -10,7 +10,7 @@
                     <div class="col-sm-9">
                         <select id="default_account" name="default_account" class="form-control"
                                 aria-describedby="defaultAccountHelp">
-                            @foreach($fireflyIIIaccounts as $accountGroup => $accountList)
+                            @foreach($fireflyIIIAccounts as $accountGroup => $accountList)
                                 <optgroup label="{{ $accountGroup }}">
                                     {% for account in accountList %}
                                     @foreach($accountList as $account)

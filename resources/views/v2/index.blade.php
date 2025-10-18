@@ -140,7 +140,7 @@
                                             <button x-show="loadingFunctions.obg" class="btn btn-info disabled" value="obg" name="flow" disabled="disabled"
                                             ><span class="fas fa-cog fa-spin"></span></button>
                                             <button x-show="!loadingFunctions.obg && importFunctions.obg" class="btn btn-info" value="obg" name="flow"
-                                            >Import from Spectre</button>
+                                            >Import from OBG</button>
                                             <button x-show="!loadingFunctions.obg && !importFunctions.obg" class="btn btn-danger text-white disabled"  value="obg" name="flow"
                                                     disabled
                                             ><em class="fa-solid fa-face-dizzy"></em></button>
@@ -161,7 +161,7 @@
                                             <button x-show="loadingFunctions.eb" class="btn btn-info disabled" value="eb" name="flow" disabled="disabled"
                                             ><span class="fas fa-cog fa-spin"></span></button>
                                             <button x-show="!loadingFunctions.eb && importFunctions.eb" class="btn btn-info" value="eb" name="flow"
-                                            >Import from Spectre</button>
+                                            >Import from EB</button>
                                             <button x-show="!loadingFunctions.eb && !importFunctions.eb" class="btn btn-danger text-white disabled"  value="eb" name="flow"
                                                     disabled
                                             ><em class="fa-solid fa-face-dizzy"></em></button>
@@ -181,7 +181,7 @@
                                             <button x-show="loadingFunctions.teller" class="btn btn-info disabled" value="teller" name="flow" disabled="disabled"
                                             ><span class="fas fa-cog fa-spin"></span></button>
                                             <button x-show="!loadingFunctions.teller && importFunctions.teller" class="btn btn-info" value="teller" name="flow"
-                                            >Import from Spectre</button>
+                                            >Import from teller</button>
                                             <button x-show="!loadingFunctions.teller && !importFunctions.teller" class="btn btn-danger text-white disabled"  value="teller" name="flow"
                                                     disabled
                                             ><em class="fa-solid fa-face-dizzy"></em></button>
@@ -201,7 +201,7 @@
                                                 <button x-show="loadingFunctions.fints" class="btn btn-info disabled" value="fints" name="flow" disabled="disabled"
                                                 ><span class="fas fa-cog fa-spin"></span></button>
                                                 <button x-show="!loadingFunctions.fints && importFunctions.fints" class="btn btn-info" value="fints" name="flow"
-                                                >Import from Spectre</button>
+                                                >Import from FinTS</button>
                                                 <button x-show="!loadingFunctions.fints && !importFunctions.fints" class="btn btn-danger text-white disabled"  value="fints" name="flow"
                                                         disabled
                                                 ><em class="fa-solid fa-face-dizzy"></em></button>
@@ -222,7 +222,7 @@
                                         <button x-show="loadingFunctions.basiq" class="btn btn-info disabled" value="basiq" name="flow" disabled="disabled"
                                         ><span class="fas fa-cog fa-spin"></span></button>
                                         <button x-show="!loadingFunctions.basiq && importFunctions.basiq" class="btn btn-info" value="basiq" name="flow"
-                                        >Import from Spectre</button>
+                                        >Import from basiq</button>
                                         <button x-show="!loadingFunctions.basiq && !importFunctions.basiq" class="btn btn-danger text-white disabled"  value="basiq" name="flow"
                                                 disabled
                                         ><em class="fa-solid fa-face-dizzy"></em></button>

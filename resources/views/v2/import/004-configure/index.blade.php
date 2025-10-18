@@ -36,9 +36,9 @@
 
         <!-- user has no accounts -->
         @include('import.004-configure.partials.no-account-warning')
-        <!-- user has accounts! -->
 
-        @if(count($fireflyIIIaccounts['assets']) > 0 || count($fireflyIIIaccounts['liabilities']) > 0 || $flow === 'simplefin')
+        <!-- user has accounts! -->
+        @if(count($fireflyIIIAccounts['assets']) > 0 || count($fireflyIIIAccounts['liabilities']) > 0 || $flow !== 'file')
             <!-- opening box with instructions -->
             @include('import.004-configure.partials.opening-box')
 
@@ -48,21 +48,21 @@
                 <input type="hidden" name="flow" value="{{ $flow }}"/>
                 <input type="hidden" name="content_type" value="{{ $configuration->getContentType() }}"/>
 
-                <!-- these values are used by Spectre + Nordigen and must be preserved -->
+                <!-- these values are used by data providers and must be preserved -->
                 <input type="hidden" name="identifier" value="{{ $configuration->getIdentifier() }}"/>
                 <input type="hidden" name="connection" value="{{ $configuration->getConnection() }}"/>
                 <input type="hidden" name="nordigen_country" value="{{ $configuration->getNordigenCountry() }}"/>
                 <input type="hidden" name="nordigen_max_days" value="{{ $configuration->getNordigenMaxDays() }}"/>
                 <input type="hidden" name="nordigen_bank" value="{{ $configuration->getNordigenBank() }}"/>
                 <input type="hidden" name="nordigen_requisitions" value="{{ json_encode($configuration->getNordigenRequisitions()) }}"/>
-
-                <!-- these values are used by SimpleFIN and must be preserved -->
                 <input type="hidden" name="access_token" value="{{ $configuration->getAccessToken() }}"/>
 
-                @if('nordigen' === $flow || 'spectre' === $flow || 'simplefin' === $flow || 'lunchflow' === $flow)
+                <!-- overrule settings when the flow is not "file" -->
+                @if('file' !== $flow)
                     <input type="hidden" name="ignore_duplicate_transactions" value="1"/>
                 @endif
 
+                {{--
                 <!-- SimpleFIN account configuration -->
                 @if('simplefin' === $flow)
                     @include('import.004-configure.partials.simplefin-accounts')
@@ -77,6 +77,14 @@
                     @include('import.004-configure.partials.gocardless-spectre-dates')
                 @endif
                 <!-- end of account selection and date range settings -->
+                --}}
+
+                <!-- Account selection and date range settings for all third party data providers -->
+                @if('file' !== $flow)
+                    @include('import.004-configure.partials.data-importer-accounts')
+                    @include('import.004-configure.partials.data-importer-dates')
+                @endif
+
 
                 <!-- spectre specific options -->
                 @if('spectre' === $flow)

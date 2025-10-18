@@ -561,12 +561,6 @@ return [
         'date_invoice'          => 'invoice_date',
         'currency-code'         => 'currency_code',
     ],
-    'unique_column_options' => [
-        'note'               => 'The notes',
-        'external-id'        => 'External identifier',
-        'description'        => 'Transaction description',
-        'internal_reference' => 'Internal reference',
-    ],
     'search_modifier'       => [
         'note'                => 'notes_are',
         'notes'               => 'notes_are',

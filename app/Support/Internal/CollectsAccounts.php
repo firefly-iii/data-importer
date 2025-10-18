@@ -126,62 +126,9 @@ trait CollectsAccounts
                 'trace'   => $e->getTraceAsString(),
             ]);
         }
-        Log::debug('CollectsAccounts::getFireflyIIIAccounts - Returning accounts structure.', $accounts);
+        // Log::debug('CollectsAccounts::getFireflyIIIAccounts - Returning accounts structure.', $accounts);
 
         return $accounts;
-    }
-
-    /**
-     * List Nordigen accounts with account details, balances, and 2 transactions (if present)
-     *
-     * @throws AgreementExpiredException|ImporterErrorException
-     */
-    protected function getNordigenAccounts(Configuration $configuration): array
-    {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $requisitions = $configuration->getNordigenRequisitions();
-        $identifier   = array_shift($requisitions);
-        $inCache      = Cache::has($identifier) && config('importer.use_cache');
-        $inCache      = false;
-
-        // if cached, return it.
-        if ($inCache) {
-            $result = Cache::get($identifier);
-            $return = [];
-            foreach ($result as $arr) {
-                $return[] = NordigenAccount::fromLocalArray($arr);
-            }
-            Log::debug('Grab accounts from cache', $result);
-
-            return $return;
-        }
-        // get banks and countries
-        $accessToken  = TokenManager::getAccessToken();
-        $url          = config('nordigen.url');
-        $request      = new ListAccountsRequest($url, $identifier, $accessToken);
-        $request->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var ListAccountsResponse $response */
-        try {
-            $response = $request->get();
-        } catch (ImporterErrorException|ImporterHttpException $e) {
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        $total        = count($response);
-        $return       = [];
-        $cache        = [];
-        Log::debug(sprintf('Found %d GoCardless accounts.', $total));
-
-        /** @var NordigenAccount $account */
-        foreach ($response as $index => $account) {
-            Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s', config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
-            $account  = AccountInformationCollector::collectInformation($account, true);
-            $return[] = $account;
-            $cache[]  = $account->toLocalArray();
-        }
-        Cache::put($identifier, $cache, 1800); // half an hour
-
-        return $return;
     }
 
     /**

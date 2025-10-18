@@ -156,7 +156,7 @@ class Configuration
         $this->duplicateDetectionMethod    = 'classic';
 
         // config for "classic":
-        Log::debug('Configuration __construct. ignoreDuplicateTransactions = true');
+        // Log::debug('Configuration __construct. ignoreDuplicateTransactions = true');
         $this->ignoreDuplicateTransactions = true;
         $this->ignoreDuplicateLines        = true;
 
@@ -354,7 +354,7 @@ class Configuration
         $object->contentType                 = $array['content_type'] ?? 'csv';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
-        Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
+        // Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
 
         // sort
         ksort($object->doMapping);
