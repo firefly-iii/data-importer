@@ -23,6 +23,29 @@
 
 declare(strict_types=1);
 
+
+/**
+ * The preferred order for ALL workflows is as follows:
+ *
+ * FILE workflow
+ * - 2: Upload
+ * - 3: Configuration
+ * - 4: Role selection
+ * - 5: Map data
+ * - 6: Convert data
+ * - 7: Submit data
+ *
+ *  NORDIGEN / GOCARDLESS workflow
+ *  - 1: Authentication
+ *  - 2: Upload
+ *  - 8: Select country and bank.
+ *  - 3: Configuration
+ *  - 4: Role selection
+ *  - 5: Map data
+ *  - 6: Convert data
+ *  - 7: Submit data
+ */
+
 return [
     'version'       => 'develop/2025-10-14',
     'build_time'    => 1760412667,
@@ -56,6 +79,21 @@ return [
         'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
         'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
         'timeout'    => (int)env('SIMPLEFIN_TIMEOUT', 30),
+    ],
+
+    // to determine which steps are possible for each import flow, the following properties have been defined.
+    'can_define_roles' => [
+        // do you need to set roles (source, destination) for this flow?
+        'file'      => true,
+        'nordigen'  => false,
+        'spectre'   => false,
+        'simplefin' => false,
+        'lunchflow' => false,
+        'obg'       => false,
+        'eb'        => false,
+        'teller'    => false,
+        'fints'     => false,
+        'basiq'     => false,
     ],
 
     // docker build info.

@@ -82,6 +82,7 @@ class SelectionController extends Controller
             session()->put(Constants::SELECTED_BANK_COUNTRY, true);
 
             // send to Nordigen for approval
+            Log::debug('Redirect to GoCardless from selection controller.');
             return redirect(route('010-build-link.index'));
         }
         // get banks and countries

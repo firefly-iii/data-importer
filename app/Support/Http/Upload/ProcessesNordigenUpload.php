@@ -15,7 +15,7 @@ trait ProcessesNordigenUpload
         Log::debug('Save config to disk after processing GoCardless.');
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
         $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-        event(new ProvidedConfigUpload($configFileName));
+        event(new ProvidedConfigUpload($configFileName, $configuration));
 
         return redirect(route('009-selection.index'));
     }

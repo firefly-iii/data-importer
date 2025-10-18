@@ -125,18 +125,12 @@ class IndexController extends Controller
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {
-            Log::debug(
-                sprintf('%s is a valid flow, redirect to authenticate.', $flow)
-            );
+            Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
-            return redirect(route('002-authenticate.index'))->withCookies(
-                $cookies
-            );
+            return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
-        Log::debug(
-            sprintf('"%s" is not a valid flow, redirect to index.', $flow)
-        );
+        Log::debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
 
         return redirect(route('index'));
     }

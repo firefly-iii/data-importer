@@ -405,7 +405,7 @@ class Configuration
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
         $object->ignoreDuplicateTransactions = $array['ignore_duplicate_transactions'] ?? true;
-        Log::debug(sprintf('Configuration fromArray: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
+        // Log::debug(sprintf('Configuration fromArray: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
 
         if (!array_key_exists('duplicate_detection_method', $array)) {
             if (false === $object->ignoreDuplicateTransactions) {

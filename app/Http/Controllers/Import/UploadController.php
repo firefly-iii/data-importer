@@ -38,6 +38,7 @@ use App\Services\SimpleFIN\SimpleFINService;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\Upload\CollectsSettings;
+use App\Support\Http\Upload\ProcessesFileUpload;
 use App\Support\Http\Upload\ProcessesLunchFlowUpload;
 use App\Support\Http\Upload\ProcessesNordigenUpload;
 use App\Support\Http\Upload\ProcessesSimpleFINUpload;
@@ -66,6 +67,7 @@ class UploadController extends Controller
     use ProcessesNordigenUpload;
     use ProcessesSpectreUpload;
     use ProcessesLunchFlowUpload;
+    use ProcessesFileUpload;
 
     private string $configFileName;
     private string $contentType;
@@ -158,7 +160,7 @@ class UploadController extends Controller
             case 'simplefin':
                 return $this->processSimpleFIN($request, $configuration);
             case 'file':
-                return redirect(route('004-configure.index'));
+                return $this->processFileUpload($request, $configuration);
             case 'nordigen':
                 return $this->processNordigen($configuration);
             case 'lunchflow':

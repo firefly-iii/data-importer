@@ -84,10 +84,6 @@ class AuthenticateController extends Controller
             case 'lunchflow':
                 $validator = new LunchFlowValidator();
                 break;
-            case 'simplefin':
-                // simplefin does not need authentication step.
-                Log::debug('SimpleFIN flow detected, redirecting to upload step.');
-                return redirect(route('003-upload.index'));
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
                 throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
@@ -96,7 +92,7 @@ class AuthenticateController extends Controller
         $result = $validator->validate();
 
         if (AuthenticationStatus::NODATA === $result) {
-            // need to get and present the auth data in the system (yes it is empty).
+            // need to get and present the auth data in the system (yes it is always empty).
             $data = $validator->getData();
             return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'data', 'error'));
         }

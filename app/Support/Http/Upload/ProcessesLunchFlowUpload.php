@@ -16,7 +16,7 @@ trait ProcessesLunchFlowUpload
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
         $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
 
-        event(new ProvidedConfigUpload($configFileName));
+        event(new ProvidedConfigUpload($configFileName, $configuration));
 
         return redirect(route('004-configure.index'));
     }

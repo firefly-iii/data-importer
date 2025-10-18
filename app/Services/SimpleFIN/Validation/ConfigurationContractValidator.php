@@ -401,7 +401,7 @@ class ConfigurationContractValidator
         $expectedStructure = [
             'do_import'   => 'array',
             'accounts'    => 'array',
-            'new_account' => 'array',
+            'new_accounts' => 'array',
         ];
 
         foreach ($expectedStructure as $field => $expectedType) {

@@ -18,7 +18,7 @@ trait ProcessesSimpleFINUpload
     /**
      * Handle SimpleFIN flow integration
      */
-    protected  function processSimpleFIN(Request $request, Configuration $configuration): RedirectResponse
+    protected function processSimpleFIN(Request $request, Configuration $configuration): RedirectResponse
     {
         $errors           = new MessageBag();
         Log::debug('UploadController::handleSimpleFINFlow() INVOKED'); // Unique entry marker
@@ -77,7 +77,7 @@ trait ProcessesSimpleFINUpload
             session()->put(Constants::SIMPLEFIN_ACCOUNTS_DATA, $accountsData);
             session()->put(Constants::SIMPLEFIN_IS_DEMO, $isDemo);
 
-            event(new ProvidedConfigUpload($configFileName));
+            event(new ProvidedConfigUpload($configFileName, $configuration));
 
             Log::info('SimpleFIN connection established', ['account_count' => count($accountsData), 'is_demo' => $isDemo]);
 
