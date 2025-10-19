@@ -70,25 +70,17 @@ class AccountListCollector
         switch ($this->flow) {
             default:
                 throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
-
             case 'file':
                 return [];
-
             case 'nordigen':
                 $this->collectGoCardlessAccounts();
-
                 break;
-
             case 'simplefin':
                 $this->collectSimpleFINAccounts();
-
                 break;
-
             case 'spectre':
                 $this->collectSpectreAccounts();
-
                 break;
-
             case 'lunchflow':
                 $this->collectLunchFlowAccounts();
         }

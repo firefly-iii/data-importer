@@ -50,8 +50,12 @@ class ImportFlowHandler
     {
         $configuration = $event->configuration;
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-        if ('lunchflow' === $configuration->getFlow() || 'nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
-            // at this point, nordigen, spectre, and simplefin are ready for data conversion.
+
+
+
+
+        if ('file' !== $configuration->getFlow()) {
+            // at this point, lunchbox, nordigen, spectre, and simplefin are ready for data conversion.
             Log::debug('Mark READY_FOR_CONVERSION = true');
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }

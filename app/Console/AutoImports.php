@@ -367,7 +367,7 @@ trait AutoImports
             $this->identifier = $manager->getIdentifier();
         }
         if (null === $manager) {
-            $this->error(sprintf('There is no support for flow "%s"', $flow));
+            $this->error(sprintf('There is no Auto Import support for flow "%s"', $flow));
 
             exit(1);
         }

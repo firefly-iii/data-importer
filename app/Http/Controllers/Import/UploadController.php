@@ -158,16 +158,12 @@ class UploadController extends Controller
 
             case 'simplefin':
                 return $this->processSimpleFIN($request, $configuration);
-
             case 'file':
                 return $this->processFileUpload($request, $configuration);
-
             case 'nordigen':
                 return $this->processNordigen($configuration);
-
             case 'lunchflow':
                 return $this->processLunchFlow($configuration);
-
             case 'spectre':
                 return $this->processSpectreUpload($configuration);
         }
