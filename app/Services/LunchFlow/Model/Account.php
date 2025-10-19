@@ -34,8 +34,8 @@ class Account
     public string      $institutionName;
     public string      $name;
     public string      $provider;
-    public ?string $currency;
-    public ?string $status;
+    public ?string $currency = null;
+    public ?string $status = null;
 
     /**
      * Account constructor.

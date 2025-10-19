@@ -36,14 +36,11 @@ class CompletedConfiguration
     use InteractsWithSockets;
     use SerializesModels;
 
-    public Configuration $configuration;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(public Configuration $configuration)
     {
-        $this->configuration = $configuration;
     }
 
     /**

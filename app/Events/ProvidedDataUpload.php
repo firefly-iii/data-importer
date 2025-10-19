@@ -35,14 +35,11 @@ class ProvidedDataUpload
     use InteractsWithSockets;
     use SerializesModels;
 
-    public string $fileName;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(string $fileName)
+    public function __construct(public string $fileName)
     {
-        $this->fileName = $fileName;
     }
 
     /**

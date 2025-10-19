@@ -25,7 +25,6 @@ namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Model\ImportServiceAccount;
-use App\Services\SimpleFIN\Model\Account as SimpleFINAccount;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Support\Facades\Log;
@@ -90,13 +89,13 @@ trait CreatesAccounts
             // overrule the name with what we actually want to search for.
             $existingAccountObject->name = $newAccountData['name'];
 
-            if (null === $createdAccount) {
+            if (!$createdAccount instanceof Account) {
                 Log::warning('Failed to create Firefly III account. May not be able to proceed with transaction import for this account.', $configuration);
                 $createdAccount = $accountMapper->findMatchingFireflyIIIAccount($existingAccountObject);
             }
         }
 
-        if (null === $createdAccount) {
+        if (!$createdAccount instanceof Account) {
             $message = sprintf('Creation failed, and could not find a matching account for SimpleFIN account "%s"', $importServiceId);
             Log::error($message);
 

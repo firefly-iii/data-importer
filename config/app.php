@@ -22,6 +22,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\App;
 use App\Providers\AppServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\RouteServiceProvider;
@@ -262,7 +263,7 @@ return [
     */
 
     'aliases'         => [
-        'App'          => Illuminate\Support\Facades\App::class,
+        'App'          => App::class,
         'Arr'          => Arr::class,
         'Artisan'      => Artisan::class,
         'Auth'         => Auth::class,

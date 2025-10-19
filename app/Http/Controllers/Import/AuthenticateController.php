@@ -133,7 +133,7 @@ class AuthenticateController extends Controller
         $all        = $request->all();
         $submission = [];
         foreach ($all as $name => $value) {
-            if (str_starts_with($name, $flow)) {
+            if (str_starts_with((string) $name, $flow)) {
                 $shortName              = str_replace(sprintf('%s_', $flow), '', $name);
                 if ('' === (string) $value) {
                     return redirect(route(self::AUTH_ROUTE))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);

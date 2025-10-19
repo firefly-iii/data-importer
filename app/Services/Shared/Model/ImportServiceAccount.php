@@ -88,7 +88,7 @@ class ImportServiceAccount
             );
         }
 
-        throw new ImporterErrorException(sprintf('Cannot convert object of class %s to ImportServiceAccount.', get_class($object)));
+        throw new ImporterErrorException(sprintf('Cannot convert object of class %s to ImportServiceAccount.', $object::class));
     }
 
     /**

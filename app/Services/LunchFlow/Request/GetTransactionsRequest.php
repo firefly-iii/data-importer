@@ -38,13 +38,11 @@ use Illuminate\Support\Facades\Log;
 class GetTransactionsRequest extends Request
 {
     private string $identifier = '';
-    private int    $account;
 
-    public function __construct(string $apiToken, int $account)
+    public function __construct(string $apiToken, private readonly int $account)
     {
         $this->setApiKey($apiToken);
-        $this->account = $account;
-        $this->setUrl(sprintf('accounts/%d/transactions', $account));
+        $this->setUrl(sprintf('accounts/%d/transactions', $this->account));
     }
 
     /**

@@ -26,7 +26,6 @@ namespace App\Support\Internal;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Model\ImportServiceAccount;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Support\Facades\Log;
 
 trait MergesAccountLists
@@ -66,9 +65,7 @@ trait MergesAccountLists
                 $all                                 = $fireflyIII[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, function ($a, $b) {
-                    return $a->id <=> $b->id;
-                });
+                $nonMatching                         = array_udiff($all, $matching, fn($a, $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);

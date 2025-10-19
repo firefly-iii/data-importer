@@ -88,7 +88,7 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $this->assertFalse($result->isValid());
         $this->assertNotEmpty($result->getErrors());
-        $this->assertStringContainsString('SimpleFIN flow', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('SimpleFIN flow', (string) $result->getErrorMessages()[0]);
     }
 
     /**
@@ -101,7 +101,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
         $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('SimpleFIN accounts data missing', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('SimpleFIN accounts data missing', (string) $result->getErrorMessages()[0]);
     }
 
     /**
@@ -158,7 +158,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $result = $this->validator->validateConfigurationContract($config);
 
         $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('New account configuration missing', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('New account configuration missing', (string) $result->getErrorMessages()[0]);
     }
 
     /**

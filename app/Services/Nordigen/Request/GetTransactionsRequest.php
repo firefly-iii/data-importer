@@ -37,9 +37,7 @@ use Illuminate\Support\Facades\Log;
  */
 class GetTransactionsRequest extends Request
 {
-    private string $identifier = '';
-
-    public function __construct(string $url, string $token, string $identifier, string $dateFrom, string $dateTo)
+    public function __construct(string $url, string $token, private readonly string $identifier, string $dateFrom, string $dateTo)
     {
         $params           = [];
         $pattern          = '/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][\d]|3[01])$/';
@@ -56,11 +54,9 @@ class GetTransactionsRequest extends Request
         if (count($params) > 0) {
             $this->setParameters($params);
         }
-
-        $this->identifier = $identifier;
         $this->setBase($url);
         $this->setToken($token);
-        $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
+        $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $this->identifier));
 
 
     }

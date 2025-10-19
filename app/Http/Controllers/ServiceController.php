@@ -51,26 +51,14 @@ class ServiceController extends Controller
 
     public function validateProvider(string $provider): JsonResponse
     {
-        switch ($provider) {
-            case 'nordigen':
-            case 'gocardless':
-                return $this->validateNordigen();
-
-            case 'simplefin':
-                return $this->validateSimpleFIN();
-
-            case 'spectre':
-                return $this->validateSpectre(request());
-
-            case 'lunchflow':
-                return $this->validateLunchFlow();
-
-            case 'file':
-                return response()->json(['result' => 'OK']);
-
-            default:
-                return response()->json(['result' => 'NOK', 'message' => 'Unknown provider']);
-        }
+        return match ($provider) {
+            'nordigen', 'gocardless' => $this->validateNordigen(),
+            'simplefin' => $this->validateSimpleFIN(),
+            'spectre' => $this->validateSpectre(request()),
+            'lunchflow' => $this->validateLunchFlow(),
+            'file' => response()->json(['result' => 'OK']),
+            default => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
+        };
     }
 
     public function validateNordigen(): JsonResponse

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
+use Carbon\Carbon;
 use App\Services\Session\Constants;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
@@ -95,7 +96,7 @@ class ConfigurationPostRequest extends Request
         $notAfter            = $this->getCarbonDate('date_not_after');
 
         // reverse dates if they are bla bla bla.
-        if (null !== $notBefore && null !== $notAfter) {
+        if ($notBefore instanceof Carbon && $notAfter instanceof Carbon) {
             if ($notBefore->gt($notAfter)) {
                 // swap them
                 [$notBefore, $notAfter] = [$notAfter->copy(), $notBefore->copy()];

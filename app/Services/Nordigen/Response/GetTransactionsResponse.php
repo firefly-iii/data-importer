@@ -39,12 +39,10 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
     private readonly Collection $collection;
     private int        $position = 0;
     private string $accountId    = '';
-    private array $data;
 
-    public function __construct(array $data)
+    public function __construct(private readonly array $data)
     {
         $this->collection = new Collection();
-        $this->data       = $data;
         Log::debug('Created new GetTransactionsResponse');
 
 

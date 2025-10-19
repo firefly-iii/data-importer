@@ -29,7 +29,6 @@ namespace App\Services\Camt;
 use Genkgo\Camt\DTO\DomainBankTransactionCode;
 use Genkgo\Camt\DTO\Account;
 use App\Exceptions\ImporterErrorException;
-use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement;
 use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;

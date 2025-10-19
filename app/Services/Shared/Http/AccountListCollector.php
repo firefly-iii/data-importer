@@ -45,17 +45,11 @@ use Illuminate\Support\Facades\Log;
 
 class AccountListCollector
 {
-    private string        $flow;
-    private Configuration $configuration;
-    private array         $existingAccounts;
     private array         $importServiceAccounts = [];
     private array         $mergedAccounts        = [];
 
-    public function __construct(Configuration $configuration, string $flow, array $existingAccounts)
+    public function __construct(private readonly Configuration $configuration, private readonly string $flow, private array $existingAccounts)
     {
-        $this->configuration    = $configuration;
-        $this->flow             = $flow;
-        $this->existingAccounts = $existingAccounts;
     }
 
     /**
@@ -141,25 +135,12 @@ class AccountListCollector
     {
         Log::debug(sprintf('Now merging "%s" account lists.', $this->flow));
 
-        switch ($this->flow) {
-            case 'nordigen':
-                $generic = ImportServiceAccount::convertNordigenArray($this->importServiceAccounts);
-
-                break;
-
-            case 'simplefin':
-                $generic = ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts);
-
-                break;
-
-            case 'lunchflow':
-                $generic = ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts);
-
-                break;
-
-            default:
-                throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow));
-        }
+        $generic = match ($this->flow) {
+            'nordigen' => ImportServiceAccount::convertNordigenArray($this->importServiceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts),
+            default => throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow)),
+        };
         $this->mergedAccounts = $this->mergeGenericAccountList($generic);
     }
 
@@ -188,9 +169,7 @@ class AccountListCollector
                 $all                                 = $this->existingAccounts[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, function ($a, $b) {
-                    return $a->id <=> $b->id;
-                });
+                $nonMatching                         = array_udiff($all, $matching, fn($a, $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);

@@ -241,7 +241,7 @@ class GenerateTransactions
 
             try {
                 $parsed = Carbon::parse($entry->entryReference)->getTimestamp();
-            } catch (InvalidFormatException $e) {
+            } catch (InvalidFormatException) {
                 Log::debug(sprintf('Cannot parse entry reference "%s" as date, but that\'s OK.', $entry->entryReference));
             }
             if (null === $parsed) {

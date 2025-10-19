@@ -36,16 +36,11 @@ class ProvidedConfigUpload
     use InteractsWithSockets;
     use SerializesModels;
 
-    public string $fileName;
-    public Configuration $configuration;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(string $fileName, Configuration $configuration)
+    public function __construct(public string $fileName, public Configuration $configuration)
     {
-        $this->fileName      = $fileName;
-        $this->configuration = $configuration;
     }
 
     /**
