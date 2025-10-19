@@ -74,15 +74,22 @@ class AuthenticateController extends Controller
         switch ($flow) {
             case 'spectre':
                 $validator = new SpectreValidator();
+
                 break;
+
             case 'nordigen':
                 $validator = new NordigenValidator();
+
                 break;
+
             case 'lunchflow':
                 $validator = new LunchFlowValidator();
+
                 break;
+
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
                 throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
 
@@ -119,15 +126,22 @@ class AuthenticateController extends Controller
         switch ($flow) {
             case 'spectre':
                 $validator = new SpectreValidator();
+
                 break;
+
             case 'nordigen':
                 $validator = new NordigenValidator();
+
                 break;
+
             case 'lunchflow':
                 $validator = new LunchFlowValidator();
+
                 break;
+
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
                 throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
         $all        = $request->all();

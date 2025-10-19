@@ -39,15 +39,15 @@ class GetTransactionsRequest extends Request
 {
     public function __construct(string $url, string $token, private readonly string $identifier, string $dateFrom, string $dateTo)
     {
-        $params           = [];
-        $pattern          = '/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][\d]|3[01])$/';
-        $result           = preg_match($pattern, $dateFrom);
+        $params  = [];
+        $pattern = '/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][\d]|3[01])$/';
+        $result  = preg_match($pattern, $dateFrom);
         $this->setParameters([]);
         if ('' !== $dateFrom && 1 === $result) {
             $params['date_from'] = $dateFrom;
         }
 
-        $result           = preg_match($pattern, $dateTo);
+        $result  = preg_match($pattern, $dateTo);
         if ('' !== $dateTo && 1 === $result) {
             $params['date_to'] = $dateTo;
         }

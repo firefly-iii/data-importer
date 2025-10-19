@@ -8,12 +8,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 > Lunch Flow support is new to the Data Importer. Please read the [tutorial](https://docs.firefly-iii.org/tutorials/data-importer/lunchflow/) carefully. Feel free to open an issue or start a discussion if you have issues. Thanks in advance for your support!
 
 ### Added
-- #10849
+- [Issue 10849](https://github.com/firefly-iii/firefly-iii/issues/10849) (Integrate Lunch Flow with the data importer) reported by @JC5
 - Lunch Flow support was also brought to you by @amrawadk
 
 ### Fixed
-- #11075
-- #11070
+- [Issue 11075](https://github.com/firefly-iii/firefly-iii/issues/11075) (Importer handling of conflicting range options) reported by @molnarti
+- [Issue 11070](https://github.com/firefly-iii/firefly-iii/issues/11070) (GoCardless API no longer available) reported by @jgelon
 
 ## v1.8.4 - 2025-10-14
 

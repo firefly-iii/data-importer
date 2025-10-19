@@ -65,7 +65,7 @@ trait MergesAccountLists
                 $all                                 = $fireflyIII[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, fn($a, $b) => $a->id <=> $b->id);
+                $nonMatching                         = array_udiff($all, $matching, fn ($a, $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
