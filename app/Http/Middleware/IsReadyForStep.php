@@ -424,7 +424,7 @@ trait IsReadyForStep
                 return redirect($route);
 
             case 'define-roles':
-                // will always push to mapping, and mapping will send them to
+                // will always push to mapping, and mapping will send the user back to
                 // the right step.
                 $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));

@@ -212,6 +212,7 @@ class ConfigurationController extends Controller
 
         // always redirect to roles, even if this isn't the step yet
         // for nordigen, spectre, and simplefin, roles will be skipped right away.
+        Log::debug('Redirect to roles');
         return redirect(route('005-roles.index'));
     }
 }

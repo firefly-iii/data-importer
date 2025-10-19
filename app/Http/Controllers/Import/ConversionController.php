@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\ConversionCompleted;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
@@ -313,6 +314,7 @@ class ConversionController extends Controller
             Log::warning('[b] Zero transactions found during conversion. Will not error out.');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
             session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
+            event(new ConversionCompleted());
 
             // return response()->json($importJobStatus->toArray());
         }
@@ -333,7 +335,7 @@ class ConversionController extends Controller
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-
+        event(new ConversionCompleted());
         // set config as complete.
         session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
         Log::debug('Set conversion as complete.');
