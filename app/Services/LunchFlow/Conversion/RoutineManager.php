@@ -235,7 +235,7 @@ class RoutineManager implements RoutineManagerInterface
         $accounts = $this->configuration->getAccounts();
         foreach ($accounts as $key => $accountId) {
             if (0 === (int)$accountId) {
-                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+                throw new ImporterErrorException(sprintf('Cannot import Lunch Flow account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
             }
         }
     }

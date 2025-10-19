@@ -224,13 +224,13 @@ trait IsReadyForStep
             ++$count; // 1
             Log::debug(sprintf('isReadyForConfiguration: user has selected bank and country, count is now %d.', $count));
         }
-        if (session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA) && true === session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA)) {
+        if (session()->has(Constants::SIMPLEFIN_ACCOUNTS_DATA)) {
             // becomes true when user has selected bank + country.
             ++$count; // 2
             Log::debug(sprintf('isReadyForConfiguration: user has simplefin accounts data, count is now %d.', $count));
         }
         if (session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD)) {
-            // has upload is always true after the uploadcontroller.
+            // has upload is always true after the upload controller.
             ++$count; // 3
             Log::debug(sprintf('isReadyForConfiguration: user has upload, count is now %d.', $count));
         }

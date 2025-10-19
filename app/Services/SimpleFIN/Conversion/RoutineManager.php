@@ -112,6 +112,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::info('Processing SimpleFIN accounts', ['account_count' => count($accounts)]);
 
         foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
+            die('here we are');
             // Handle account creation if requested (fireflyAccountId === 0 means "create_new")
             if (0 === $fireflyAccountId) {
                 $newAccountData       = $this->configuration->getNewAccounts()[$simplefinAccountId] ?? null;

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN;
 
+use App\Events\DownloadedSimpleFINAccounts;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
@@ -34,6 +35,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use RectorPrefix202509\Symfony\Component\Console\Descriptor\MarkdownDescriptor;
 
 /**
  * Class SimpleFINService
@@ -144,12 +146,13 @@ class SimpleFINService
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
+            event(new DownloadedSimpleFINAccounts());
 
             return [];
         }
 
         Log::debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
-
+        event(new DownloadedSimpleFINAccounts());
         return $accounts;
     }
 

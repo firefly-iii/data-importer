@@ -42,8 +42,8 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         $this->statusCode = $response->getStatusCode();
         $this->rawBody    = (string) $response->getBody();
 
-        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
-        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
+//        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
+//        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
 
         $this->parseResponse();
     }
