@@ -68,6 +68,7 @@ class LinkController extends Controller
         $configuration     = $this->restoreConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
             Log::debug('Return back to selection because bank is XX');
+
             return redirect(route('back.selection'));
         }
 
@@ -89,6 +90,7 @@ class LinkController extends Controller
 
             session()->put(Constants::REQUISITION_REFERENCE, $reference);
             Log::debug('Return redirect to configuration.');
+
             return redirect(route('004-configure.index'));
         }
 

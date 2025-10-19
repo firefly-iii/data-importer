@@ -43,12 +43,10 @@ use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use JsonException;
 
 class ConfigurationController extends Controller
@@ -81,6 +79,7 @@ class ConfigurationController extends Controller
             Log::debug('Skip configuration, go straight to the next step.');
             // set config as complete.
             event(new CompletedConfiguration($configuration));
+
             // skipForm
             return redirect()->route('005-roles.index');
         }
@@ -93,11 +92,11 @@ class ConfigurationController extends Controller
         $uniqueColumns      = config(sprintf('%s.unique_column_options', $flow));
 
         // also get the importer service accounts, if any.
-        $collector = new AccountListCollector($configuration, $flow, $fireflyIIIAccounts);
+        $collector          = new AccountListCollector($configuration, $flow, $fireflyIIIAccounts);
 
         try {
             $importerAccounts = $collector->collect();
-        } catch(AgreementExpiredException $e) {
+        } catch (AgreementExpiredException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // remove thing from configuration
@@ -161,8 +160,8 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
-        $fromRequest         = $request->getAll();
-        $configuration       = Configuration::fromRequest($fromRequest);
+        $fromRequest   = $request->getAll();
+        $configuration = Configuration::fromRequest($fromRequest);
         $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
         // Store do_import selections in session for validation

@@ -24,11 +24,9 @@ declare(strict_types=1);
 
 namespace App\Services\LunchFlow\Conversion;
 
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Services\LunchFlow\Conversion\Routine\GenerateTransactions;
 use App\Services\LunchFlow\Conversion\Routine\TransactionProcessor;
-use App\Services\LunchFlow\Request\Request;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
@@ -169,7 +167,6 @@ class RoutineManager implements RoutineManagerInterface
         );
     }
 
-
     /**
      * @throws ImporterErrorException
      */
@@ -193,8 +190,6 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-
-
     private function collectTargetAccounts(): void
     {
         Log::debug('Generating Firefly III transactions.');
@@ -210,7 +205,6 @@ class RoutineManager implements RoutineManagerInterface
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
     }
-
 
     private function breakOnDownload(): bool
     {
@@ -231,7 +225,6 @@ class RoutineManager implements RoutineManagerInterface
 
         return false;
     }
-
 
     /**
      * @throws ImporterErrorException

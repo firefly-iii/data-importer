@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ImportFlowHandler.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -29,7 +31,6 @@ use Illuminate\Support\Facades\Log;
 
 class ImportFlowHandler
 {
-
     public function handleCompletedConfiguration(CompletedConfiguration $event): void
     {
         $configuration = $event->configuration;
@@ -42,7 +43,7 @@ class ImportFlowHandler
 
     public function handleProvidedDataUpload(ProvidedDataUpload $event): void
     {
-        if('' !== $event->fileName){
+        if ('' !== $event->fileName) {
             session()->put(Constants::UPLOAD_DATA_FILE, $event->fileName);
         }
         session()->put(Constants::HAS_UPLOAD, true);
@@ -50,15 +51,15 @@ class ImportFlowHandler
 
     public function handleProvidedConfigUpload(ProvidedConfigUpload $event): void
     {
-        if('' !== $event->fileName) {
+        if ('' !== $event->fileName) {
             session()->put(Constants::UPLOAD_CONFIG_FILE, $event->fileName);
         }
-        if('nordigen' !== $event->configuration->getFlow()) {
+        if ('nordigen' !== $event->configuration->getFlow()) {
             // at this point, every flow exept the GoCardless flow will pretend to have selected a country and a bank.
             Log::debug('Marking country and bank as selected for non-GoCardless flow.');
             session()->put(Constants::SELECTED_BANK_COUNTRY, true);
         }
-        if('simplefin' !== $event->configuration->getFlow()) {
+        if ('simplefin' !== $event->configuration->getFlow()) {
             Log::debug('Mark Simplefin account data as present for non-Simplefin flow.');
             session()->put(Constants::SIMPLEFIN_ACCOUNTS_DATA, true);
         }

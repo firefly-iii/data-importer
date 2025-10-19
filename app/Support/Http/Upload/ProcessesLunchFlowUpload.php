@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ProcessesLunchFlowUpload.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -29,7 +31,8 @@ use Illuminate\Support\Facades\Log;
 
 trait ProcessesLunchFlowUpload
 {
-    protected function processLunchFlow(Configuration $configuration) {
+    protected function processLunchFlow(Configuration $configuration)
+    {
 
         Log::debug('Save config to disk after processing Lunch Flow.');
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());

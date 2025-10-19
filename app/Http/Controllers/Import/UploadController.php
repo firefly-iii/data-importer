@@ -33,7 +33,6 @@ use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
-use App\Services\SimpleFIN\SimpleFINService;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\Upload\CollectsSettings;
@@ -59,14 +58,14 @@ use Storage;
  */
 class UploadController extends Controller
 {
+    use CollectsSettings;
+    use ProcessesFileUpload;
+    use ProcessesLunchFlowUpload;
+    use ProcessesNordigenUpload;
+    use ProcessesSimpleFINUpload;
+    use ProcessesSpectreUpload;
     use RestoresConfiguration;
     use VerifyJSON;
-    use CollectsSettings;
-    use ProcessesSimpleFINUpload;
-    use ProcessesNordigenUpload;
-    use ProcessesSpectreUpload;
-    use ProcessesLunchFlowUpload;
-    use ProcessesFileUpload;
 
     private string $configFileName;
     private string $contentType;
@@ -90,22 +89,22 @@ class UploadController extends Controller
     public function index(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle          = 'Upload your file(s)';
-        $subTitle           = 'Start page and instructions';
-        $flow               = $request->cookie(Constants::FLOW_COOKIE);
+        $mainTitle = 'Upload your file(s)';
+        $subTitle  = 'Start page and instructions';
+        $flow      = $request->cookie(Constants::FLOW_COOKIE);
 
-        $settings = [
-            'simplefin' => $this->getSimpleFINSettings()
+        $settings  = [
+            'simplefin' => $this->getSimpleFINSettings(),
         ];
 
         // get existing configs.
-        $disk               = Storage::disk('configurations');
+        $disk      = Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all                = $disk->files();
+        $all       = $disk->files();
 
         // remove files from list
-        $list               = [];
-        $ignored            = config('importer.ignored_files');
+        $list      = [];
+        $ignored   = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -153,17 +152,22 @@ class UploadController extends Controller
         $configuration->setFlow($flow); // at least set the flow.
 
         // do validation for all configurations.
-        switch($flow) {
+        switch ($flow) {
             default:
                 throw new ImporterErrorException(sprintf('The data importer cannot deal with workflow "%s".', $flow));
+
             case 'simplefin':
                 return $this->processSimpleFIN($request, $configuration);
+
             case 'file':
                 return $this->processFileUpload($request, $configuration);
+
             case 'nordigen':
                 return $this->processNordigen($configuration);
+
             case 'lunchflow':
                 return $this->processLunchFlow($configuration);
+
             case 'spectre':
                 return $this->processSpectreUpload($configuration);
         }

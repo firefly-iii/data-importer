@@ -1,4 +1,5 @@
 <?php
+
 /*
  * GetAccountBalanceRequest.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -19,7 +20,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/** @noinspection PhpInconsistentReturnPointsInspection */
+// @noinspection PhpInconsistentReturnPointsInspection
 
 declare(strict_types=1);
 

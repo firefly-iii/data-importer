@@ -24,13 +24,7 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
-use App\Exceptions\AgreementExpiredException;
-use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Services\Nordigen\Model\Account as NordigenAccount;
-use App\Services\Nordigen\Request\ListAccountsRequest;
-use App\Services\Nordigen\Services\AccountInformationCollector;
-use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -43,7 +37,6 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -160,13 +153,13 @@ trait CollectsAccounts
      */
     protected function getLunchFlowAccounts(Configuration $configuration): array
     {
-        $return                  = [];
-        $apiKey                   = LunchFlowSecretManager::getApiKey($configuration);
-        $lunchFlowList             = new LunchFlowGetAccountsRequest($apiKey);
+        $return            = [];
+        $apiKey            = LunchFlowSecretManager::getApiKey($configuration);
+        $lunchFlowList     = new LunchFlowGetAccountsRequest($apiKey);
         $lunchFlowList->setTimeOut(config('importer.connection.timeout'));
 
         /** @var GetAccountsResponse $lunchFlowAccounts */
-        $lunchFlowAccounts         = $lunchFlowList->get();
+        $lunchFlowAccounts = $lunchFlowList->get();
         foreach ($lunchFlowAccounts as $account) {
             $return[] = $account;
         }

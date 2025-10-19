@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
-use App\Exceptions\ImporterErrorException;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Log;
@@ -35,15 +34,15 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const int VERSION     = 3;
-    private array  $accounts     = [];
-    private array  $newAccounts  = [];
-    private bool   $addImportTag = true;
-    private string $connection   = '0';
-    private string $contentType  = 'csv';
+    public const int VERSION        = 3;
+    private array  $accounts        = [];
+    private array  $newAccounts     = [];
+    private bool   $addImportTag    = true;
+    private string $connection      = '0';
+    private string $contentType     = 'csv';
     private bool   $conversion;
-    private string $customTag    = '';
-    private string $date         = 'Y-m-d';
+    private string $customTag       = '';
+    private string $date            = 'Y-m-d';
     private string $dateNotAfter;
     private string $dateNotBefore;
     private string $dateRange;
@@ -54,21 +53,21 @@ class Configuration
     private int    $dateRangeNotAfterNumber;
     private string $dateRangeNotAfterUnit;
 
-    private int $defaultAccount  = 1;
+    private int $defaultAccount     = 1;
 
     // nordigen configuration
-    private string $delimiter    = 'comma';
-    private array  $doMapping    = [];
+    private string $delimiter       = 'comma';
+    private array  $doMapping       = [];
 
     // flow and file type
     private string $duplicateDetectionMethod;
-    private string $flow         = 'file';
+    private string $flow            = 'file';
 
     // csv config
     private string $groupedTransactionHandling;
 
     // spectre + nordigen configuration
-    private bool $headers        = false;
+    private bool $headers           = false;
 
     // spectre configuration
     private string $identifier;
@@ -84,7 +83,7 @@ class Configuration
     private string $accessToken;
 
     // date range settings
-    private array  $mapping      = [];
+    private array  $mapping         = [];
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
@@ -93,13 +92,13 @@ class Configuration
     private string $lunchFlowApiKey = '';
 
     // what type of import?
-    private array $roles         = [];
+    private array $roles            = [];
 
-    private bool $rules          = true;
+    private bool $rules             = true;
 
     // configuration for "classic" method:
-    private bool  $skipForm      = false;
-    private array $specifics     = [];
+    private bool  $skipForm         = false;
+    private array $specifics        = [];
 
     // configuration for "cell" method:
     private int    $uniqueColumnIndex;
@@ -138,7 +137,7 @@ class Configuration
         $this->nordigenMaxDays             = '90';
 
         // lunch flow configuration
-        $this->lunchFlowApiKey = '';
+        $this->lunchFlowApiKey             = '';
 
         // spectre
         $this->identifier                  = '0';
@@ -240,7 +239,7 @@ class Configuration
         $object->nordigenMaxDays             = $data['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $data['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $data['lunch_flow_api_key'] ?? '';
 
         // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData                  = $data['map_all_data'] ?? false;
@@ -393,7 +392,7 @@ class Configuration
         $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
 
         // simplefin
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
@@ -487,7 +486,7 @@ class Configuration
         $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
 
         $object->groupedTransactionHandling  = $array['grouped_transaction_handling'] ?? 'single';
         $object->useEntireOpposingAddress    = $array['use_entire_opposing_address'] ?? false;
@@ -857,65 +856,65 @@ class Configuration
     public function toArray(): array
     {
         $array                                  = [
-            'version'                      => $this->version,
-            'source'                       => sprintf('ff3-importer-%s', config('importer.version')),
-            'created_at'                   => date(DateTimeInterface::W3C),
-            'date'                         => $this->date,
-            'default_account'              => $this->defaultAccount,
-            'delimiter'                    => $this->delimiter,
-            'headers'                      => $this->headers,
-            'rules'                        => $this->rules,
-            'skip_form'                    => $this->skipForm,
-            'add_import_tag'               => $this->addImportTag,
-            'roles'                        => $this->roles,
-            'do_mapping'                   => $this->doMapping,
-            'mapping'                      => $this->mapping,
-            'duplicate_detection_method'   => $this->duplicateDetectionMethod,
-            'ignore_duplicate_lines'       => $this->ignoreDuplicateLines,
-            'unique_column_index'          => $this->uniqueColumnIndex,
-            'unique_column_type'           => $this->uniqueColumnType,
-            'flow'                         => $this->flow,
-            'content_type'                 => $this->contentType,
-            'custom_tag'                   => $this->customTag,
+            'version'                       => $this->version,
+            'source'                        => sprintf('ff3-importer-%s', config('importer.version')),
+            'created_at'                    => date(DateTimeInterface::W3C),
+            'date'                          => $this->date,
+            'default_account'               => $this->defaultAccount,
+            'delimiter'                     => $this->delimiter,
+            'headers'                       => $this->headers,
+            'rules'                         => $this->rules,
+            'skip_form'                     => $this->skipForm,
+            'add_import_tag'                => $this->addImportTag,
+            'roles'                         => $this->roles,
+            'do_mapping'                    => $this->doMapping,
+            'mapping'                       => $this->mapping,
+            'duplicate_detection_method'    => $this->duplicateDetectionMethod,
+            'ignore_duplicate_lines'        => $this->ignoreDuplicateLines,
+            'unique_column_index'           => $this->uniqueColumnIndex,
+            'unique_column_type'            => $this->uniqueColumnType,
+            'flow'                          => $this->flow,
+            'content_type'                  => $this->contentType,
+            'custom_tag'                    => $this->customTag,
 
             // spectre
-            'identifier'                   => $this->identifier,
-            'connection'                   => $this->connection,
-            'ignore_spectre_categories'    => $this->ignoreSpectreCategories,
+            'identifier'                    => $this->identifier,
+            'connection'                    => $this->connection,
+            'ignore_spectre_categories'     => $this->ignoreSpectreCategories,
 
             // camt:
-            'grouped_transaction_handling' => $this->groupedTransactionHandling,
-            'use_entire_opposing_address'  => $this->useEntireOpposingAddress,
+            'grouped_transaction_handling'  => $this->groupedTransactionHandling,
+            'use_entire_opposing_address'   => $this->useEntireOpposingAddress,
 
             // mapping for spectre + nordigen
-            'map_all_data'                 => $this->mapAllData,
+            'map_all_data'                  => $this->mapAllData,
 
             // simplefin configuration
-            'pending_transactions'         => $this->pendingTransactions,
-            'access_token'                 => $this->accessToken,
+            'pending_transactions'          => $this->pendingTransactions,
+            'access_token'                  => $this->accessToken,
 
             // settings for spectre + nordigen
-            'accounts'                     => $this->accounts,
+            'accounts'                      => $this->accounts,
             'new_accounts'                  => $this->newAccounts,
 
             // date range settings:
-            'date_range'                   => $this->dateRange,
-            'date_range_number'            => $this->dateRangeNumber,
-            'date_range_unit'              => $this->dateRangeUnit,
-            'date_range_not_after_unit'    => $this->dateRangeNotAfterUnit,
-            'date_range_not_after_number'  => $this->dateRangeNotAfterNumber,
-            'date_not_before'              => $this->dateNotBefore,
-            'date_not_after'               => $this->dateNotAfter,
+            'date_range'                    => $this->dateRange,
+            'date_range_number'             => $this->dateRangeNumber,
+            'date_range_unit'               => $this->dateRangeUnit,
+            'date_range_not_after_unit'     => $this->dateRangeNotAfterUnit,
+            'date_range_not_after_number'   => $this->dateRangeNotAfterNumber,
+            'date_not_before'               => $this->dateNotBefore,
+            'date_not_after'                => $this->dateNotAfter,
 
             // nordigen information:
-            'nordigen_country'             => $this->nordigenCountry,
-            'nordigen_bank'                => $this->nordigenBank,
-            'nordigen_requisitions'        => $this->nordigenRequisitions,
-            'nordigen_max_days'            => $this->nordigenMaxDays,
-            'lunch_flow_api_key'         => $this->lunchFlowApiKey,
+            'nordigen_country'              => $this->nordigenCountry,
+            'nordigen_bank'                 => $this->nordigenBank,
+            'nordigen_requisitions'         => $this->nordigenRequisitions,
+            'nordigen_max_days'             => $this->nordigenMaxDays,
+            'lunch_flow_api_key'            => $this->lunchFlowApiKey,
 
             // utf8
-            'conversion'                   => $this->conversion,
+            'conversion'                    => $this->conversion,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -1033,6 +1032,4 @@ class Configuration
     {
         $this->duplicateDetectionMethod = $duplicateDetectionMethod;
     }
-
-
 }
