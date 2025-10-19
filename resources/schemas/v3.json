@@ -108,7 +108,8 @@
                 "nordigen",
                 "spectre",
                 "file",
-                "simplefin"
+                "simplefin",
+                "lunchflow"
             ]
         },
         "identifier": {
@@ -163,6 +164,9 @@
                     "type": "array"
                 }
             ]
+        },
+        "lunch_flow_api_key": {
+            "type": "string"
         },
         "conversion": {
             "type": "boolean"

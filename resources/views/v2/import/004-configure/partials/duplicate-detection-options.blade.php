@@ -59,8 +59,7 @@
                         <small id="duplicate_detection_method_help" class="form-text text-muted">
                             For more details on these detection method see <a
                                 href="https://docs.firefly-iii.org/references/data-importer/duplicate-detection/"
-                                target="_blank">the documentation</a>. If you're not sure, select
-                            "content-based" detection.
+                                target="_blank">the documentation</a>. If you're not sure, don't change it.
                         </small>
                     </div>
                 </div>

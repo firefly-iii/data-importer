@@ -2,10 +2,9 @@
 
 /*
  * GenerateTransactions.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -242,7 +241,7 @@ class GenerateTransactions
 
             try {
                 $parsed = Carbon::parse($entry->entryReference)->getTimestamp();
-            } catch (InvalidFormatException $e) {
+            } catch (InvalidFormatException) {
                 Log::debug(sprintf('Cannot parse entry reference "%s" as date, but that\'s OK.', $entry->entryReference));
             }
             if (null === $parsed) {

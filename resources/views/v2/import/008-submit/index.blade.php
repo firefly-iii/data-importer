@@ -53,7 +53,7 @@
                         </div>
                         <div x-show="showPostError()" class="card-body">
                             <p class="text-danger">
-                                The conversion could not be started, or failed due to an error. Please check the log files.
+                                The submission could not be started, or failed due to an error. Please check the log files.
                                 Sorry about this :(
                             </p>
                             <p x-show="'' !== post.result" x-text="post.result"></p>
@@ -62,7 +62,7 @@
 
                         <div x-show="showWhenRunning()" class="card-body">
                             <p>
-                                <span class="fas fa-cog fa-spin"></span> The conversion is running, please wait. Messages may appear below the progress bar.
+                                <span class="fas fa-cog fa-spin"></span> The submission is running, please wait. Messages may appear below the progress bar.
                             </p>
                             <div class="progress">
                                 <div aria-valuemax="100" aria-valuemin="0"
@@ -84,7 +84,7 @@
                         </div>
                         <div x-show="showIfError()" class="card-body">
                             <p class="text-danger">
-                                The conversion could not be started, or failed due to an error. Please check the log files.
+                                The submission could not be started, or failed due to an error. Please check the log files.
                                 Sorry about this :(
                             </p>
                             <x-conversion-messages />
@@ -103,7 +103,7 @@
                             <a href="{{ $jobBackUrl }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span>
                                 Go back to the previous step</a>
                             <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
-                               data-bs-placement="top" title="If the conversion seems stuck, you can reset it."><span
+                               data-bs-placement="top" title="If the submission seems stuck, you can reset it."><span
                                     class="fas fa-redo-alt"></span> Start over</a>
                             <a class="btn btn-info text-white btn-sm" href="{{ route('004-configure.download') }}"
                                data-bs-toggle="tooltip" data-bs-placement="top"

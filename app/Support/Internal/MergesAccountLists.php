@@ -2,10 +2,9 @@
 
 /*
  * MergesAccountLists.php
- * Copyright (c) 2023 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -27,7 +26,6 @@ namespace App\Support\Internal;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Model\ImportServiceAccount;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Support\Facades\Log;
 
 trait MergesAccountLists
@@ -67,9 +65,7 @@ trait MergesAccountLists
                 $all                                 = $fireflyIII[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, function ($a, $b) {
-                    return $a->id <=> $b->id;
-                });
+                $nonMatching                         = array_udiff($all, $matching, fn ($a, $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
@@ -135,6 +131,14 @@ trait MergesAccountLists
     {
         Log::debug('Now merging Spectre account lists.');
         $generic = ImportServiceAccount::convertSpectreArray($spectre);
+
+        return $this->mergeGenericAccountList($generic, $fireflyIII);
+    }
+
+    protected function mergeLunchFlowAccountLists(array $lunchFlow, array $fireflyIII): array
+    {
+        Log::debug('Now merging Lunch Flow account lists.');
+        $generic = ImportServiceAccount::convertLunchFlowArray($lunchFlow);
 
         return $this->mergeGenericAccountList($generic, $fireflyIII);
     }

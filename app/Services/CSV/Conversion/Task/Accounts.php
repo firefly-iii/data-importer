@@ -2,10 +2,9 @@
 
 /*
  * Accounts.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -342,8 +341,9 @@ class Accounts extends AbstractTask
         Log::debug('Found no account or haven\'t searched for one because of missing data.');
 
         // append an empty type to the array for consistency's sake.
-        $array['type'] ??= null;
-        $array['bic']  ??= null;
+        $array['type']          ??= null;
+        $array['bic']           ??= null;
+        $array['currency_code'] ??= null;
 
         // Return ID or name if not null
         if (null !== $array['id'] || '' !== (string) $array['name']) {

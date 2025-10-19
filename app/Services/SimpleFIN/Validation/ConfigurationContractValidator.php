@@ -2,10 +2,9 @@
 
 /*
  * ConfigurationContractValidator.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -61,7 +60,6 @@ class ConfigurationContractValidator
         $this->loadExistingAccounts();
 
         // Core validation
-        $this->validateSimpleFINFlow($configuration);
         $this->validateSessionData($configuration);
         $this->validateAccountMappings($configuration);
         $this->validateNewAccountConfigurations($configuration);
@@ -72,13 +70,6 @@ class ConfigurationContractValidator
             $this->errors,
             $this->warnings
         );
-    }
-
-    private function validateSimpleFINFlow(Configuration $configuration): void
-    {
-        if ('simplefin' !== $configuration->getFlow()) {
-            $this->addError('configuration.flow', 'Configuration must be SimpleFIN flow', $configuration->getFlow());
-        }
     }
 
     private function validateSessionData(Configuration $configuration): void
@@ -407,9 +398,9 @@ class ConfigurationContractValidator
 
         // Validate expected form structure
         $expectedStructure = [
-            'do_import'   => 'array',
-            'accounts'    => 'array',
-            'new_account' => 'array',
+            'do_import'    => 'array',
+            'accounts'     => 'array',
+            'new_accounts' => 'array',
         ];
 
         foreach ($expectedStructure as $field => $expectedType) {

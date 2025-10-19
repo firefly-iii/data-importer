@@ -2,10 +2,9 @@
 
 /*
  * ConfigurationContractValidatorTest.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -89,7 +88,7 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $this->assertFalse($result->isValid());
         $this->assertNotEmpty($result->getErrors());
-        $this->assertStringContainsString('SimpleFIN flow', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('SimpleFIN flow', (string) $result->getErrorMessages()[0]);
     }
 
     /**
@@ -102,7 +101,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $result = $this->validator->validateConfigurationContract($this->mockConfiguration);
 
         $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('SimpleFIN accounts data missing', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('SimpleFIN accounts data missing', (string) $result->getErrorMessages()[0]);
     }
 
     /**
@@ -159,7 +158,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $result = $this->validator->validateConfigurationContract($config);
 
         $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('New account configuration missing', $result->getErrorMessages()[0]);
+        $this->assertStringContainsString('New account configuration missing', (string) $result->getErrorMessages()[0]);
     }
 
     /**

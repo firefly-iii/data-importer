@@ -2,10 +2,9 @@
 
 /*
  * GetTransactionsResponse.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -40,12 +39,10 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
     private readonly Collection $collection;
     private int        $position = 0;
     private string $accountId    = '';
-    private array $data;
 
-    public function __construct(array $data)
+    public function __construct(private readonly array $data)
     {
         $this->collection = new Collection();
-        $this->data       = $data;
         Log::debug('Created new GetTransactionsResponse');
 
 

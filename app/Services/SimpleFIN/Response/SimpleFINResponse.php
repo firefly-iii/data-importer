@@ -2,10 +2,9 @@
 
 /*
  * SimpleFINResponse.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,8 +42,8 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         $this->statusCode = $response->getStatusCode();
         $this->rawBody    = (string) $response->getBody();
 
-        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
-        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
+        //        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
+        //        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
 
         $this->parseResponse();
     }

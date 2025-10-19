@@ -2,10 +2,9 @@
 
 /*
  * RoleController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -109,10 +108,7 @@ class RoleController extends Controller
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
 
-        return view(
-            'import.005-roles.index-csv',
-            compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping')
-        );
+        return view('import.005-roles.index-csv', compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
     }
 
     private function camtIndex(Request $request, Configuration $configuration): View
@@ -179,15 +175,9 @@ class RoleController extends Controller
                 'explanation' => trans('camt.explain_D'),
                 'fields'      => [
                     // have to collect D by hand because of intermediate sections
-                    'entryDetailAccountServicerReference'                                            => config(
-                        'camt.fields.entryDetailAccountServicerReference'
-                    ),
-                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
-                        'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'
-                    ),
-                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
-                        'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
-                    ),
+                    'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
+                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config('camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'),
+                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config('camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'),
                     'section_tr'                                                                     => ['section' => true, 'title' => 'transaction'],
                     'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
                     'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
@@ -203,38 +193,25 @@ class RoleController extends Controller
             ];
         }
 
-        return view(
-            'import.005-roles.index-camt',
-            compact('mainTitle', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles')
-        );
+        return view('import.005-roles.index-camt', compact('mainTitle', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
     }
 
     private function getFieldsForLevel(string $level): array
     {
         $allFields = config('camt.fields');
 
-        return array_filter($allFields, function ($field) use ($level) {
-            return $level === $field['level'];
-        });
+        return array_filter($allFields, fn ($field) => $level === $field['level']);
     }
 
     public function postIndex(RolesPostRequest $request): RedirectResponse
     {
         // the request object must be able to handle all file types.
         $configuration = $this->restoreConfiguration();
-        $contentType   = $configuration->getContentType();
 
-        if ('csv' === $contentType) {
-            return $this->csvPostIndex($request, $configuration);
-        }
-        if ('camt' === $contentType) {
-            return $this->camtPostIndex($request, $configuration);
-        }
-
-        throw new ImporterErrorException(sprintf('Cannot handle file type "%s" in POST.', $contentType));
+        return $this->processPostIndex($request, $configuration);
     }
 
-    private function csvPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    private function processPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
         $data           = $request->getAllForFile();
         $needsMapping   = $this->needMapping($data['do_mapping']);
@@ -282,43 +259,5 @@ class RoleController extends Controller
         }
 
         return $need;
-    }
-
-    /**
-     * TODO is basically the same as the CSV processor.
-     */
-    private function camtPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
-    {
-        $data           = $request->getAllForFile();
-        $needsMapping   = $this->needMapping($data['do_mapping']);
-        $configuration->setRoles($data['roles']);
-        $configuration->setDoMapping($data['do_mapping']);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // then this is the new, full array:
-        $fullArray      = $configuration->toArray();
-
-        // and it can be saved on disk:
-        $configFileName = StorageService::storeArray($fullArray);
-        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // this is a new config file name.
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set role config as complete.
-        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-
-        // redirect to mapping thing.
-        if (true === $needsMapping) {
-            return redirect()->route('006-mapping.index');
-        }
-        // otherwise, store empty mapping, and continue:
-        // set map config as complete.
-        session()->put(Constants::READY_FOR_CONVERSION, true);
-
-        return redirect()->route('007-convert.index');
     }
 }

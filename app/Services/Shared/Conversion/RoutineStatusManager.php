@@ -2,10 +2,9 @@
 
 /*
  * RoutineStatusManager.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -176,7 +175,7 @@ class RoutineStatusManager
 
     public static function startOrFindConversion(string $identifier): ConversionStatus
     {
-        Log::debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
+        // Log::debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
         $disk   = Storage::disk(self::DISK_NAME);
         // Log::debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
         if ($disk->exists($identifier)) {

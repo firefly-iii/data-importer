@@ -3,12 +3,8 @@
         <div class="card">
             <div class="card-header">
                 Account selection for
-                @if('nordigen' === $flow)
-                    GoCardless
-                @endif
-                @if('spectre' === $flow)
-                    Spectre
-                @endif
+
+                {{ config('importer.flow_titles.' . $flow) }}
                 import
             </div>
             <div class="card-body">
@@ -23,19 +19,20 @@
                             <thead>
                             <tr>
                                 <th>
-                                    @if('nordigen' === $flow)
-                                        GoCardless
-                                    @endif
-                                    @if('spectre' === $flow)
-                                        Spectre
-                                    @endif
+                                    {{ config('importer.flow_titles.' . $flow) }}
                                     account
                                 </th>
                                 <th>&nbsp;</th>
                                 <th>Firefly III account</th>
                             </tr>
                             </thead>
+
                             <tbody>
+                            @foreach($importerAccounts as $information)
+                                <x-importer-account :account="$information" :configuration="$configuration" :currencies="$currencies" :flow="$flow"/>
+                            @endforeach
+
+                            {{--
                             @foreach($importerAccounts as $information)
                                 <!-- update variables -->
                                 <!-- account is disabled at provider -->
@@ -68,14 +65,10 @@
                                                     :currencies="$currencies"
                                                     :flow="$flow"/>
                             @endforeach
+                            --}}
                             </tbody>
                             <caption>Select and match the
-                                @if('nordigen' === $flow)
-                                    GoCardless
-                                @endif
-                                @if('spectre' === $flow)
-                                    Spectre
-                                @endif
+                                {{ config('importer.flow_titles.' . $flow) }}
                                 accounts you want to import into your Firefly III installation.
                             </caption>
                         </table>

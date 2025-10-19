@@ -2,10 +2,9 @@
 
 /*
  * Iban.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -40,7 +39,7 @@ class Iban implements ConverterInterface
     {
         if (self::isValidIban($value)) {
             // strip spaces from IBAN and make upper case.
-            $result = str_replace("\x20", '', strtoupper(app('steam')->cleanStringAndNewlines($value)));
+            $result = str_replace("\x20", '', strtoupper((string) app('steam')->cleanStringAndNewlines($value)));
             Log::debug(sprintf('Converted "%s" to "%s"', $value, $result));
 
             return trim($result);
@@ -53,7 +52,7 @@ class Iban implements ConverterInterface
     public static function isValidIban(string $value): bool
     {
         Log::debug(sprintf('isValidIBAN("%s")', $value));
-        $value   = strtoupper(trim(app('steam')->cleanStringAndNewlines($value)));
+        $value   = strtoupper(trim((string) app('steam')->cleanStringAndNewlines($value)));
         $value   = str_replace("\x20", '', $value);
         Log::debug(sprintf('Trim: isValidIBAN("%s")', $value));
         $search  = [' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];

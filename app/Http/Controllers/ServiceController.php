@@ -2,10 +2,9 @@
 
 /*
  * ServiceController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,6 +29,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
+use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -49,9 +49,38 @@ class ServiceController extends Controller
         $this->middleware(ServiceControllerMiddleware::class);
     }
 
+    public function validateProvider(string $provider): JsonResponse
+    {
+        return match ($provider) {
+            'nordigen', 'gocardless' => $this->validateNordigen(),
+            'simplefin' => $this->validateSimpleFIN(),
+            'spectre'   => $this->validateSpectre(request()),
+            'lunchflow' => $this->validateLunchFlow(),
+            'file'      => response()->json(['result' => 'OK']),
+            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
+        };
+    }
+
     public function validateNordigen(): JsonResponse
     {
         $validator = new NordigenValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            // send user error:
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    public function validateLunchFlow(): JsonResponse
+    {
+        $validator = new LunchFlowValidator();
         $result    = $validator->validate();
 
         if (AuthenticationStatus::ERROR === $result) {

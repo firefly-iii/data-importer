@@ -2,10 +2,9 @@
 
 /*
  * ConversionController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,12 +24,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\CompletedConversion;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -65,7 +66,7 @@ class ConversionController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ConversionControllerMiddleware::class);
+        $this->middleware(ConversionControllerMiddleware::class)->except(['status', 'start']);
     }
 
     /**
@@ -86,27 +87,21 @@ class ConversionController extends Controller
         $jobBackUrl          = route('back.mapping');
 
         // Set appropriate back URL based on flow
-        // SimpleFIN always goes back to configuration
-        if ('simplefin' === $flow) {
+        // All flows but the file flow go back to configuration
+        if ('file' !== $flow) {
             $jobBackUrl = route('back.config');
-            Log::debug('SimpleFIN: Pressing "back" will send you to configure.');
+            Log::debug('Not file flow: Pressing "back" will send you to configure.');
         }
         // no mapping, back to roles
-        if ('simplefin' !== $flow && 0 === count($configuration->getDoMapping()) && 'file' === $flow) {
+        if ('file' === $flow && 0 === count($configuration->getDoMapping())) {
             Log::debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
         // back to mapping
-        if ('simplefin' !== $flow && 0 === count($configuration->getMapping())) {
+        if ('file' === $flow && 0 === count($configuration->getMapping())) {
             Log::debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
-        // TODO option is not used atm.
-        //        if (true === $configuration->isMapAllData()) {
-        //            Log::debug('Pressing "back" will send you to mapping.');
-        //            $jobBackUrl = route('back.mapping');
-        //        }
-
         // job ID may be in session:
         $identifier          = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
         $routine             = null;
@@ -138,6 +133,10 @@ class ConversionController extends Controller
         if ('spectre' === $flow) {
             Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
+        }
+        if ('lunchflow' === $flow) {
+            Log::debug('Create Lunch Flow routine manager.');
+            $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
             Log::debug('Create SimpleFIN routine manager.');
@@ -266,6 +265,9 @@ class ConversionController extends Controller
         if ('spectre' === $flow) {
             $routine = new SpectreRoutineManager($identifier);
         }
+        if ('lunchflow' === $flow) {
+            $routine = new LunchFlowRoutineManager($identifier);
+        }
         if ('simplefin' === $flow) {
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
@@ -305,7 +307,7 @@ class ConversionController extends Controller
             // #10590 do not error out if no transactions are found.
             Log::warning('[b] Zero transactions found during conversion. Will not error out.');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-            session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
+            event(new CompletedConversion());
 
             // return response()->json($importJobStatus->toArray());
         }
@@ -326,10 +328,7 @@ class ConversionController extends Controller
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-
-        // set config as complete.
-        session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-        Log::debug('Set conversion as complete.');
+        event(new CompletedConversion());
 
         return response()->json($importJobStatus->toArray());
     }
@@ -338,7 +337,7 @@ class ConversionController extends Controller
     {
         //        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
-        Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+        // Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             Log::warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.

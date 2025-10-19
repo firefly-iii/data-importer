@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #
-# phpstan.sh
-# Copyright (c) 2021 james@firefly-iii.org
+# rector.sh
+# Copyright (c) 2025 james@firefly-iii.org
 #
 # This file is part of Firefly III (https://github.com/firefly-iii).
 #

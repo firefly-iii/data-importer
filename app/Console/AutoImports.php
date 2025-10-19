@@ -2,10 +2,9 @@
 
 /*
  * AutoImports.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -32,6 +31,7 @@ use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
+use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\Shared\Authentication\SecretManager;
@@ -362,8 +362,12 @@ trait AutoImports
             $manager          = new SimpleFINRoutineManager(null);
             $this->identifier = $manager->getIdentifier();
         }
+        if ('lunchflow' === $flow) {
+            $manager          = new LunchFlowRoutineManager(null);
+            $this->identifier = $manager->getIdentifier();
+        }
         if (null === $manager) {
-            $this->error(sprintf('There is no support for flow "%s"', $flow));
+            $this->error(sprintf('There is no Auto Import support for flow "%s"', $flow));
 
             exit(1);
         }
@@ -679,7 +683,7 @@ trait AutoImports
     protected function isNothingDownloaded(): bool
     {
         foreach ($this->conversionErrors as $errors) {
-            if (array_any($errors, fn ($error) => str_contains($error, '[a111]'))) {
+            if (array_any($errors, fn ($error) => str_contains((string) $error, '[a111]'))) {
                 return true;
             }
         }
@@ -690,7 +694,7 @@ trait AutoImports
     protected function isExpiredAgreement(): bool
     {
         foreach ($this->conversionErrors as $errors) {
-            if (array_any($errors, fn ($error) => str_contains($error, 'EUA') && str_contains($error, 'expired'))) {
+            if (array_any($errors, fn ($error) => str_contains((string) $error, 'EUA') && str_contains((string) $error, 'expired'))) {
                 return true;
             }
         }

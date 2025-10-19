@@ -2,10 +2,9 @@
 
 /*
  * ConversionControllerMiddleware.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,10 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Services\Session\Constants;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-
 /**
  * Class ConversionControllerMiddleware
  */
@@ -38,33 +33,5 @@ class ConversionControllerMiddleware
 
     protected const string STEP = 'conversion';
 
-    protected function isReadyForStep(Request $request): bool
-    {
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
 
-        // Call trait logic directly since we can't use parent:: with traits
-        if (null === $flow) {
-            Log::debug('isReadyForStep returns true because $flow is null');
-
-            return true;
-        }
-
-        if ('file' === $flow) {
-            $result = $this->isReadyForFileStep();
-            Log::debug(sprintf('isReadyForFileStep: Return %s', var_export($result, true)));
-
-            return $result;
-        }
-        if ('nordigen' === $flow) {
-            return $this->isReadyForNordigenStep();
-        }
-        if ('spectre' === $flow) {
-            return $this->isReadyForSpectreStep();
-        }
-        if ('simplefin' === $flow) {
-            return $this->isReadyForSimpleFINStep();
-        }
-
-        return $this->isReadyForBasicStep();
-    }
 }

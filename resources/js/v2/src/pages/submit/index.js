@@ -1,9 +1,8 @@
 /*
  * index.js
- * Copyright (c) 2024 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -188,7 +187,7 @@ let index = function () {
                 }
 
                 if ('submission_running' === this.pageStatus.status) {
-                    console.log('Conversion is running...')
+                    console.log('Submission is running...')
                 }
                 if ('submission_done' === this.pageStatus.status) {
                     console.log('Job is done!');

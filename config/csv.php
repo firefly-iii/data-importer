@@ -2,10 +2,9 @@
 
 /*
  * csv.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -560,12 +559,6 @@ return [
         'date_payment'          => 'payment_date',
         'date_invoice'          => 'invoice_date',
         'currency-code'         => 'currency_code',
-    ],
-    'unique_column_options' => [
-        'note'               => 'The notes',
-        'external-id'        => 'External identifier',
-        'description'        => 'Transaction description',
-        'internal_reference' => 'Internal reference',
     ],
     'search_modifier'       => [
         'note'                => 'notes_are',

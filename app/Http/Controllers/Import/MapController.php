@@ -2,10 +2,9 @@
 
 /*
  * MapController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Services\CSV\Mapper\ExpenseRevenueAccounts;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
@@ -91,7 +89,7 @@ class MapController extends Controller
 
         // nordigen, spectre, simplefin and others:
         if ('file' !== $configuration->getFlow()) {
-            Log::debug('Get mapping data for GoCardless, Spectre, and SimpleFIN');
+            Log::debug('Get mapping data for data importers.');
             $roles = [];
             $data  = $this->getImporterMapInformation();
         }
@@ -256,7 +254,11 @@ class MapController extends Controller
          * that contains:
          * - opposing account names (this is preordained).
          */
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow()) {
+        if (
+            'nordigen' === $configuration->getFlow()
+            || 'spectre' === $configuration->getFlow()
+            || 'lunchflow' === $configuration->getFlow()
+        ) {
             // TODO should be in a helper or something generic.
             // index 0, opposing account name:
             $index                        = 0;
@@ -542,7 +544,11 @@ class MapController extends Controller
         // set map config as complete.
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
-        if ('nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
+        if (
+            'nordigen' === $configuration->getFlow()
+            || 'spectre' === $configuration->getFlow()
+            || 'lunchflow' === $configuration->getFlow()
+            || 'simplefin' === $configuration->getFlow()) {
             // if nordigen, spectre, or simplefin, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
 

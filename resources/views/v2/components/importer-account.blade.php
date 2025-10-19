@@ -12,15 +12,7 @@
     <td  style="width:45%">
         <!-- Firefly III Account Content - Visibility Controlled -->
         <div id="firefly-account-content-{{ $account['import_account']->id }}">
-            <!-- TODO this is one of those things to merge into one generic type -->
-            @if(
-                // flow is not simplefin.
-                $flow !== 'simplefin' &&
-                ((!isset($account['firefly_iii_accounts']['assets']) || count($account['firefly_iii_accounts']['assets']) === 0) && (!isset($account['firefly_iii_accounts']['liabilities']) || count($account['firefly_iii_accounts']['liabilities']) === 0) )
-                )
-                <span class="text-danger">X There are no Firefly III accounts to import into</span>
-            @endif
-            @if( $flow === 'simplefin' || (isset($account['firefly_iii_accounts']['assets']) && count($account['firefly_iii_accounts']['assets']) > 0) || (isset($account['firefly_iii_accounts']['liabilities']) && count($account['firefly_iii_accounts']['liabilities']) > 0) )
+            @if((isset($account['firefly_iii_accounts']['assets']) && count($account['firefly_iii_accounts']['assets']) > 0) || (isset($account['firefly_iii_accounts']['liabilities']) && count($account['firefly_iii_accounts']['liabilities']) > 0) )
                 <x-firefly-iii-account-generic :flow="$flow" :account="$account"  :configuration="$configuration"/>
                 <x-create-account-widget :account="$account" :configuration="$configuration" :currencies="$currencies ?? []"/>
             @endif

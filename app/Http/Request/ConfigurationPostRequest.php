@@ -2,10 +2,9 @@
 
 /*
  * ConfigurationPostRequest.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
+use Carbon\Carbon;
 use App\Services\Session\Constants;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
@@ -52,13 +52,13 @@ class ConfigurationPostRequest extends Request
         ]);
 
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport          = $this->get('do_import') ?? [];
-        $accounts          = $this->get('accounts') ?? [];
-        $newAccount        = $this->get('new_account') ?? [];
+        $doImport            = $this->get('do_import') ?? [];
+        $accounts            = $this->get('accounts') ?? [];
+        $newAccounts         = $this->get('new_accounts') ?? [];
 
-        $decodedDoImport   = [];
-        $decodedAccounts   = [];
-        $decodedNewAccount = [];
+        $decodedDoImport     = [];
+        $decodedAccounts     = [];
+        $decodedNewAccounts  = [];
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
@@ -82,83 +82,111 @@ class ConfigurationPostRequest extends Request
             ]);
         }
 
-        // Decode new_account array keys
-        foreach ($newAccount as $encodedId => $accountData) {
-            $originalId                     = str_replace('_', ' ', (string)$encodedId);
-            $decodedNewAccount[$originalId] = $accountData;
+        // Decode new_accounts array keys
+        foreach ($newAccounts as $encodedId => $accountData) {
+            $originalId                      = str_replace('_', ' ', (string)$encodedId);
+            $decodedNewAccounts[$originalId] = $accountData;
             Log::debug('Decoded new_account', [
                 'encoded' => (string)$encodedId,
                 'decoded' => $originalId,
                 'data'    => $accountData,
             ]);
         }
+        $notBefore           = $this->getCarbonDate('date_not_before');
+        $notAfter            = $this->getCarbonDate('date_not_after');
+
+        // reverse dates if they are bla bla bla.
+        if ($notBefore instanceof Carbon && $notAfter instanceof Carbon) {
+            if ($notBefore->gt($notAfter)) {
+                // swap them
+                [$notBefore, $notAfter] = [$notAfter->copy(), $notBefore->copy()];
+            }
+        }
+
+        // loop accounts:
+        $accounts            = [];
+        $toCreateNewAccounts = [];
+
+        foreach (array_keys($decodedDoImport) as $identifier) {
+            if (array_key_exists($identifier, $decodedAccounts)) {
+                $accountValue          = (int)$decodedAccounts[$identifier];
+                $accounts[$identifier] = $accountValue;
+            }
+            if (array_key_exists($identifier, $decodedNewAccounts)) {
+                // this is a new account to create.
+                $toCreateNewAccounts[$identifier] = $decodedNewAccounts[$identifier];
+            }
+            if (!array_key_exists($identifier, $decodedAccounts)) {
+                Log::warning(sprintf('Account identifier %s in do_import but not in accounts array', $identifier));
+            }
+        }
 
         return [
-            'headers'                                 => $this->convertBoolean($this->get('headers')),
-            'delimiter'                               => $this->convertToString('delimiter'),
-            'date'                                    => $this->convertToString('date'),
-            'default_account'                         => $this->convertToInteger('default_account'),
-            'rules'                                   => $this->convertBoolean($this->get('rules')),
-            'ignore_duplicate_lines'                  => $this->convertBoolean($this->get('ignore_duplicate_lines')),
-            'ignore_duplicate_transactions'           => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
-            'skip_form'                               => $this->convertBoolean($this->get('skip_form')),
-            'add_import_tag'                          => $this->convertBoolean($this->get('add_import_tag')),
-            'pending_transactions'                    => $this->convertBoolean($this->get('pending_transactions')),
-            'specifics'                               => [],
-            'roles'                                   => [],
-            'mapping'                                 => [],
-            'do_mapping'                              => [],
-            'flow'                                    => $this->convertToString('flow'),
-            'content_type'                            => $this->convertToString('content_type'),
-            'custom_tag'                              => $this->convertToString('custom_tag'),
+            'headers'                                  => $this->convertBoolean($this->get('headers')),
+            'delimiter'                                => $this->convertToString('delimiter'),
+            'date'                                     => $this->convertToString('date'),
+            'default_account'                          => $this->convertToInteger('default_account'),
+            'rules'                                    => $this->convertBoolean($this->get('rules')),
+            'ignore_duplicate_lines'                   => $this->convertBoolean($this->get('ignore_duplicate_lines')),
+            'ignore_duplicate_transactions'            => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
+            'skip_form'                                => $this->convertBoolean($this->get('skip_form')),
+            'add_import_tag'                           => $this->convertBoolean($this->get('add_import_tag')),
+            'pending_transactions'                     => $this->convertBoolean($this->get('pending_transactions')),
+            'specifics'                                => [],
+            'roles'                                    => [],
+            'mapping'                                  => [],
+            'do_mapping'                               => [],
+            'flow'                                     => $this->convertToString('flow'),
+            'content_type'                             => $this->convertToString('content_type'),
+            'custom_tag'                               => $this->convertToString('custom_tag'),
 
             // duplicate detection:
-            'duplicate_detection_method'              => $this->convertToString('duplicate_detection_method'),
-            'unique_column_index'                     => $this->convertToInteger('unique_column_index'),
-            'unique_column_type'                      => $this->convertToString('unique_column_type'),
+            'duplicate_detection_method'               => $this->convertToString('duplicate_detection_method'),
+            'unique_column_index'                      => $this->convertToInteger('unique_column_index'),
+            'unique_column_type'                       => $this->convertToString('unique_column_type'),
 
             // spectre values:
-            'connection'                              => $this->convertToString('connection'),
-            'identifier'                              => $this->convertToString('identifier'),
-            'ignore_spectre_categories'               => $this->convertBoolean($this->get('ignore_spectre_categories')),
+            'connection'                               => $this->convertToString('connection'),
+            'identifier'                               => $this->convertToString('identifier'),
+            'ignore_spectre_categories'                => $this->convertBoolean($this->get('ignore_spectre_categories')),
 
             // nordigen:
-            'nordigen_country'                        => $this->convertToString('nordigen_country'),
-            'nordigen_bank'                           => $this->convertToString('nordigen_bank'),
-            'nordigen_max_days'                       => $this->convertToString('nordigen_max_days'),
-            'nordigen_requisitions'                   => json_decode($this->convertToString('nordigen_requisitions'), true) ?? [],
+            'nordigen_country'                         => $this->convertToString('nordigen_country'),
+            'nordigen_bank'                            => $this->convertToString('nordigen_bank'),
+            'nordigen_max_days'                        => $this->convertToString('nordigen_max_days'),
+            'nordigen_requisitions'                    => json_decode($this->convertToString('nordigen_requisitions'), true) ?? [],
 
             // nordigen + spectre - with decoded account IDs
-            'do_import'                               => $decodedDoImport,
-            'accounts'                                => $decodedAccounts,
-            'new_account'                             => $decodedNewAccount,
-            'map_all_data'                            => $this->convertBoolean($this->get('map_all_data')),
-            'date_range'                              => $this->convertToString('date_range'),
-            'date_range_number'                       => $this->convertToInteger('date_range_number'),
-            'date_range_unit'                         => $this->convertToString('date_range_unit'),
+            'do_import'                                => $decodedDoImport,
+            'accounts'                                 => $accounts,
+            'new_accounts'                             => $toCreateNewAccounts,
+            'map_all_data'                             => $this->convertBoolean($this->get('map_all_data')),
+            'date_range'                               => $this->convertToString('date_range'),
+            'date_range_number'                        => $this->convertToInteger('date_range_number'),
+            'date_range_unit'                          => $this->convertToString('date_range_unit'),
 
-            'date_range_not_after_number'             => $this->convertToInteger('date_range_not_after_number'),
-            'date_range_not_after_unit'               => $this->convertToString('date_range_not_after_unit'),
+            'date_range_not_after_number'              => $this->convertToInteger('date_range_not_after_number'),
+            'date_range_not_after_unit'                => $this->convertToString('date_range_not_after_unit'),
 
-            'date_not_before'                         => $this->getCarbonDate('date_not_before'),
-            'date_not_after'                          => $this->getCarbonDate('date_not_after'),
+            'date_not_before'                          => $notBefore,
+            'date_not_after'                           => $notAfter,
 
             // simplefin:
-            'access_token'                            => $this->convertToString('access_token'),
+            'access_token'                             => $this->convertToString('access_token'),
 
             // utf8 conversion
-            'conversion'                              => $this->convertBoolean($this->get('conversion')),
+            'conversion'                               => $this->convertBoolean($this->get('conversion')),
 
             // camt
-            'grouped_transaction_handling'            => $this->convertToString('grouped_transaction_handling'),
-            'use_entire_opposing_address'             => $this->convertBoolean($this->get('use_entire_opposing_address')),
+            'grouped_transaction_handling'             => $this->convertToString('grouped_transaction_handling'),
+            'use_entire_opposing_address'              => $this->convertBoolean($this->get('use_entire_opposing_address')),
         ];
     }
 
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
-        $columnOptions = implode(',', array_keys(config('csv.unique_column_options')));
+        $columnOptions = implode(',', array_keys(config('file.unique_column_options')));
         if ('nordigen' === $flow) {
             $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
         }

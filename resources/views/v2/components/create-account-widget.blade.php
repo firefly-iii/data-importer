@@ -12,7 +12,7 @@
                             <input type="text"
                                    class="form-control form-control-sm d-none"
                                    id="account-name-edit-{{ $account['import_account']->id }}"
-                                   name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][name]"
+                                   name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][name]"
                                    value="{{ $account['import_account']->name ?? 'New Account' }}"
                                    style="display: inline-block; width: auto; min-width: 200px;">
                         </div>
@@ -49,7 +49,7 @@
                         <label class="form-label mb-0 me-3" style="min-width: 60px;">Type:</label>
                         <select class="form-control"
                                 id="new-account-type-{{ $account['import_account']->id }}"
-                                name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][type]"
+                                name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][type]"
                                 onchange="updateAccountTypeVisibility('{{ $account['import_account']->id }}')"
                                 required>
                             @php
@@ -77,7 +77,7 @@
                         <label class="form-label mb-0 me-3" style="min-width: 60px;">Role:</label>
                         <select class="form-control"
                                 id="new-account-role-{{ $account['import_account']->id }}"
-                                name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][account_role]">
+                                name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][account_role]">
                             @php
                                 // Intelligent role detection for asset accounts
                                 $inferredRole = 'defaultAsset'; // Default fallback
@@ -131,7 +131,7 @@
                             <label class="form-label mb-0 me-3" style="min-width: 60px;">Role:</label>
                             <select class="form-control"
                                     id="liability-type-{{ $account['import_account']->id }}"
-                                    name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_type]">
+                                    name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_type]">
                                 @php
                                     // Intelligent liability role detection
                                     $inferredLiabilityRole = 'debt'; // Default fallback
@@ -172,7 +172,7 @@
                             @endphp
                             <div class="btn-group" role="group" data-bs-toggle="buttons">
                                 <input type="radio" class="btn-check"
-                                       name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_direction]"
+                                       name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_direction]"
                                        id="direction-credit-{{ $account['import_account']->id }}"
                                        value="credit"
                                        @if($inferredDirection === 'credit') checked @endif>
@@ -181,7 +181,7 @@
                                 </label>
 
                                 <input type="radio" class="btn-check"
-                                       name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_direction]"
+                                       name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][liability_direction]"
                                        id="direction-debit-{{ $account['import_account']->id }}"
                                        value="debit"
                                        @if($inferredDirection === 'debit') checked @endif>
@@ -245,7 +245,7 @@
                                    step="0.01"
                                    class="form-control form-control-sm d-none"
                                    id="balance-edit-{{ $account['import_account']->id }}"
-                                   name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][opening_balance]"
+                                   name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][opening_balance]"
                                    value="{{ $convertedFloat }}"
                                    placeholder="0.00">
                         </div>
@@ -253,34 +253,34 @@
                         <!-- Currency Display/Edit -->
                         <div>
                             @php
-                                // Check for previously committed currency selection, fall back to SimpleFIN currency, then USD
+                                // Check for previously committed currency selection, fall back to SimpleFIN currency, then EUR
                                 $accountId = $account['import_account']->id;
                                 $newAccounts = $configuration->getNewAccounts();
                                 $committedCurrency = $newAccounts[$accountId]['currency'] ?? null;
-                                $displayCurrency = $committedCurrency ?? $account['import_account']->currency ?? 'USD';
+                                $displayCurrency = $committedCurrency ?? $account['import_account']->currency ?? 'EUR';
                             @endphp
                             <span id="currency-display-{{ $account['import_account']->id }}" class="fw-bold">
                                 {{ $displayCurrency }}
                             </span>
                             <select class="form-control form-control-sm d-none"
                                     id="currency-edit-{{ $account['import_account']->id }}"
-                                    name="new_account[{{ str_replace(' ', '_', $account['import_account']->id) }}][currency]">
+                                    name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][currency]">
                                 @php
                                     // Use the same committed currency logic for option selection
                                     $defaultCurrency = $displayCurrency;
                                 @endphp
                                 @foreach($currencies ?? [] as $currencyId => $currencyDisplay)
                                     @php
-                                        // Extract ISO code from currency display (e.g., "US Dollar (USD)" -> "USD")
+                                        // Extract ISO code from currency display (e.g., "US Dollar (EUR)" -> "EUR")
                                         preg_match('/\(([A-Z]{3})\)/', $currencyDisplay, $matches);
-                                        $isoCode = $matches[1] ?? 'USD';
+                                        $isoCode = $matches[1] ?? 'EUR';
                                     @endphp
                                     <option value="{{ $isoCode }}" @if($isoCode === $defaultCurrency) selected @endif>
                                         {{ $currencyDisplay }}
                                     </option>
                                 @endforeach
                                 @if(empty($currencies))
-                                    <option value="USD">USD (US Dollar)</option>
+                                    <option value="USD">EUR (Euro)</option>
                                 @endif
                             </select>
                         </div>

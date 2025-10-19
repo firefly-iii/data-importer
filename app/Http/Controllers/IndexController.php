@@ -2,10 +2,9 @@
 
 /*
  * IndexController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -116,18 +115,7 @@ class IndexController extends Controller
         $identifier        = substr(session()->getId(), 0, 10);
         $enabled           = config('importer.enabled_flows');
 
-        return view(
-            'index',
-            compact(
-                'pat',
-                'clientIdWithURL',
-                'URLonly',
-                'flexible',
-                'identifier',
-                'isDocker',
-                'enabled'
-            )
-        );
+        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
     }
 
     public function postIndex(Request $request): mixed
@@ -136,18 +124,12 @@ class IndexController extends Controller
         // set cookie with flow:
         $flow = $request->get('flow');
         if (in_array($flow, config('importer.flows'), true)) {
-            Log::debug(
-                sprintf('%s is a valid flow, redirect to authenticate.', $flow)
-            );
+            Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
-            return redirect(route('002-authenticate.index'))->withCookies(
-                $cookies
-            );
+            return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
-        Log::debug(
-            sprintf('"%s" is not a valid flow, redirect to index.', $flow)
-        );
+        Log::debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
 
         return redirect(route('index'));
     }

@@ -2,10 +2,9 @@
 
 /*
  * LinkController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -68,6 +67,8 @@ class LinkController extends Controller
         // create a new config thing
         $configuration     = $this->restoreConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
+            Log::debug('Return back to selection because bank is XX');
+
             return redirect(route('back.selection'));
         }
 
@@ -88,6 +89,7 @@ class LinkController extends Controller
             $configuration->setAccounts($result->accounts);
 
             session()->put(Constants::REQUISITION_REFERENCE, $reference);
+            Log::debug('Return redirect to configuration.');
 
             return redirect(route('004-configure.index'));
         }

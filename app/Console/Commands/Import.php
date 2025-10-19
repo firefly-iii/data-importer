@@ -2,10 +2,9 @@
 
 /*
  * Import.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -121,7 +120,6 @@ final class Import extends Command
         }
 
         $configuration->updateDateRange();
-
         $this->line('The import routine is about to start.');
         $this->line('This is invisible and may take quite some time.');
         $this->line('Once finished, you will see a list of errors, warnings and messages (if applicable).');

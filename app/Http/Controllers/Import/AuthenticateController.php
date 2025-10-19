@@ -2,10 +2,9 @@
 
 /*
  * AuthenticateController.php
- * Copyright (c) 2021 james@firefly-iii.org
+ * Copyright (c) 2025 james@firefly-iii.org
  *
- * This file is part of the Firefly III Data Importer
- * (https://github.com/firefly-iii/data-importer).
+ * This file is part of Firefly III (https://github.com/firefly-iii).
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,10 +28,9 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
-use App\Services\Nordigen\Authentication\SecretManager as NordigenSecretManager;
+use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Session\Constants;
-use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -72,48 +70,44 @@ class AuthenticateController extends Controller
         $error     = Session::get('error');
         Log::debug(sprintf('Now in AuthenticateController::index (/authenticate) with flow "%s"', $flow));
 
-        if ('spectre' === $flow) {
-            $validator = new SpectreValidator();
-            $result    = $validator->validate();
-            if (AuthenticationStatus::NODATA === $result) {
-                // show for to enter data. save as cookie.
-                Log::debug('Return view import.002-authenticate.index');
+        // need a switch here to validate all possible flows.
+        switch ($flow) {
+            case 'spectre':
+                $validator = new SpectreValidator();
 
-                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'error'));
-            }
-            if (AuthenticationStatus::AUTHENTICATED === $result) {
-                Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
+                break;
 
-                return redirect(route('003-upload.index'));
-            }
+            case 'nordigen':
+                $validator = new NordigenValidator();
+
+                break;
+
+            case 'lunchflow':
+                $validator = new LunchFlowValidator();
+
+                break;
+
+            default:
+                Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
+                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
 
-        if ('nordigen' === $flow) {
-            $validator = new NordigenValidator();
-            $result    = $validator->validate();
-            if (AuthenticationStatus::NODATA === $result) {
-                $key        = NordigenSecretManager::getKey();
-                $identifier = NordigenSecretManager::getId();
+        $result    = $validator->validate();
 
-                // show for to enter data. save as cookie.
-                Log::debug('Return view import.002-authenticate.index');
+        if (AuthenticationStatus::NODATA === $result) {
+            // need to get and present the auth data in the system (yes it is always empty).
+            $data = $validator->getData();
 
-                return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'key', 'identifier'));
-            }
-            if (AuthenticationStatus::AUTHENTICATED === $result) {
-                Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
-
-                return redirect(route('003-upload.index'));
-            }
+            return view('import.002-authenticate.index')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle', 'data', 'error'));
         }
-        if ('simplefin' === $flow) {
-            // This case should ideally be handled by middleware redirecting to upload.
-            // Adding explicit redirect here as a safeguard if middleware fails or is bypassed.
-            Log::warning('AuthenticateController reached for simplefin flow; middleware redirect might have failed. Redirecting to upload.');
-            Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
+
+        if (AuthenticationStatus::AUTHENTICATED === $result) {
+            Log::debug(sprintf('[a] Return redirect to %s', route('003-upload.index')));
 
             return redirect(route('003-upload.index'));
         }
+
         Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
 
         throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
@@ -127,34 +121,42 @@ class AuthenticateController extends Controller
     public function postIndex(Request $request)
     {
         // variables for page:
-        $flow = $request->cookie(Constants::FLOW_COOKIE);
+        $flow       = $request->cookie(Constants::FLOW_COOKIE);
 
-        // set cookies and redirect, validator will pick it up.
-        if ('spectre' === $flow) {
-            $appId  = (string) $request->get('spectre_app_id');
-            $secret = (string) $request->get('spectre_secret');
-            if ('' === $appId || '' === $secret) {
-                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
-            }
-            // give to secret manager to store:
-            SpectreSecretManager::saveAppId($appId);
-            SpectreSecretManager::saveSecret($secret);
+        switch ($flow) {
+            case 'spectre':
+                $validator = new SpectreValidator();
 
-            return redirect(route(self::AUTH_ROUTE));
+                break;
+
+            case 'nordigen':
+                $validator = new NordigenValidator();
+
+                break;
+
+            case 'lunchflow':
+                $validator = new LunchFlowValidator();
+
+                break;
+
+            default:
+                Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
+
+                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
-        if ('nordigen' === $flow) {
-            $key        = $request->get('nordigen_key');
-            $identifier = $request->get('nordigen_id');
-            if ('' === $key || '' === $identifier) {
-                return redirect(route(self::AUTH_ROUTE))->with(['error' => 'Both fields must be filled in.']);
+        $all        = $request->all();
+        $submission = [];
+        foreach ($all as $name => $value) {
+            if (str_starts_with((string) $name, $flow)) {
+                $shortName              = str_replace(sprintf('%s_', $flow), '', $name);
+                if ('' === (string) $value) {
+                    return redirect(route(self::AUTH_ROUTE))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
+                }
+                $submission[$shortName] = (string) $value;
             }
-            // store ID and key in session:
-            NordigenSecretManager::saveId($identifier);
-            NordigenSecretManager::saveKey($key);
-
-            return redirect(route(self::AUTH_ROUTE));
         }
+        $validator->setData($submission);
 
-        throw new ImporterErrorException('Impossible flow exception [b].');
+        return redirect(route(self::AUTH_ROUTE));
     }
 }
