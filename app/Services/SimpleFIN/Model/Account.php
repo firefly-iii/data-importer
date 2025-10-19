@@ -32,15 +32,15 @@ use InvalidArgumentException;
  */
 class Account
 {
-    private array   $org;
+    private array            $org;
     private readonly string  $id;
-    private readonly string  $name;
+    public string            $name;
     private readonly string  $currency;
     private readonly string  $balance;
     private readonly ?string $availableBalance;
     private readonly int     $balanceDate;
     private readonly array   $transactions;
-    private array   $extra;
+    private array            $extra;
 
     public function __construct(array $data)
     {
