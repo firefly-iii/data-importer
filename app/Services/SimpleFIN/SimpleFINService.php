@@ -35,7 +35,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
-use RectorPrefix202509\Symfony\Component\Console\Descriptor\MarkdownDescriptor;
 
 /**
  * Class SimpleFINService
@@ -153,6 +152,7 @@ class SimpleFINService
 
         Log::debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
         event(new DownloadedSimpleFINAccounts());
+
         return $accounts;
     }
 

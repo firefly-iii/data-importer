@@ -256,9 +256,9 @@ class MapController extends Controller
          * - opposing account names (this is preordained).
          */
         if (
-            'nordigen' === $configuration->getFlow() ||
-            'spectre' === $configuration->getFlow() ||
-            'lunchflow' === $configuration->getFlow()
+            'nordigen' === $configuration->getFlow()
+            || 'spectre' === $configuration->getFlow()
+            || 'lunchflow' === $configuration->getFlow()
         ) {
             // TODO should be in a helper or something generic.
             // index 0, opposing account name:
@@ -546,10 +546,10 @@ class MapController extends Controller
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
         session()->put(Constants::READY_FOR_CONVERSION, true);
         if (
-            'nordigen' === $configuration->getFlow() ||
-            'spectre' === $configuration->getFlow() ||
-            'lunchflow' === $configuration->getFlow() ||
-            'simplefin' === $configuration->getFlow()) {
+            'nordigen' === $configuration->getFlow()
+            || 'spectre' === $configuration->getFlow()
+            || 'lunchflow' === $configuration->getFlow()
+            || 'simplefin' === $configuration->getFlow()) {
             // if nordigen, spectre, or simplefin, now ready for submission!
             session()->put(Constants::READY_FOR_SUBMISSION, true);
 

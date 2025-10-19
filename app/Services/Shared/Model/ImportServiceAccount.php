@@ -67,7 +67,8 @@ class ImportServiceAccount
                         'Balance date' => $dateString, // SimpleFIN balance timestamp
                         'Organization' => $account['org']['name'] ?? null, // SimpleFIN organization data
                     ],
-                ]);
+                ]
+            );
         }
         if ($account instanceof LunchFlowAccount) {
             return self::fromArray(
@@ -83,8 +84,10 @@ class ImportServiceAccount
                         'IBAN'     => '',
                         'BBAN'     => '',
                     ],
-                ]);
+                ]
+            );
         }
+
         throw new ImporterErrorException(sprintf('Cannot convert object of class %s to ImportServiceAccount.', get_class($object)));
     }
 
@@ -98,13 +101,13 @@ class ImportServiceAccount
 
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
-            $iban = $account->getIban();
+            $iban     = $account->getIban();
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
 
-            $current = self::fromArray(
+            $current  = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getFullName(),
@@ -145,7 +148,7 @@ class ImportServiceAccount
                 $carbon     = Carbon::createFromTimestamp($timestamp);
                 $dateString = $carbon->format('Y-m-d H:i:s');
             }
-            $current = self::fromArray(
+            $current    = self::fromArray(
                 [
                     'id'            => $account['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
                     'name'          => $account['name'], // Expected by getMappedTo, display in component
@@ -165,7 +168,7 @@ class ImportServiceAccount
                     $current->extra[$key] = $value;
                 }
             }
-            $return[] = $current;
+            $return[]   = $current;
             //            $return[] = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
             //                         'mapped_to'            => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
             //                         'type'                 => 'source', // Indicates it's an account from the import source
@@ -182,7 +185,7 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         Log::debug('Create generic account from', $array);
-        $iban = (string)($array['iban'] ?? '');
+        $iban                  = (string)($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
@@ -205,7 +208,7 @@ class ImportServiceAccount
 
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban = (string)$account->iban;
+            $iban     = (string)$account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';

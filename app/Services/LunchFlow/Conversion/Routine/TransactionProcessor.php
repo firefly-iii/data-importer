@@ -43,9 +43,9 @@ use Illuminate\Support\Facades\Log;
  */
 class TransactionProcessor
 {
-    use ProgressInformation;
-    use CreatesAccounts;
     use CollectsAccounts;
+    use CreatesAccounts;
+    use ProgressInformation;
 
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
@@ -60,9 +60,9 @@ class TransactionProcessor
     public function download(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $this->notBefore = null;
-        $this->notAfter  = null;
-        $this->accounts  = [];
+        $this->notBefore               = null;
+        $this->notAfter                = null;
+        $this->accounts                = [];
         if ('' !== $this->configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($this->configuration->getDateNotBefore());
         }
@@ -70,10 +70,10 @@ class TransactionProcessor
         if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
-        $accounts        = $this->configuration->getAccounts();
-        $return          = [];
+        $accounts                      = $this->configuration->getAccounts();
+        $return                        = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total           = count($accounts);
+        $total                         = count($accounts);
 
         $this->existingServiceAccounts = $this->getLunchFlowAccounts($this->configuration);
 
@@ -85,7 +85,7 @@ class TransactionProcessor
             Log::debug(sprintf('[%s] Going to download Lunch Flow transactions for account #%d', config('importer.version'), $importServiceAccountId));
 
             // first create the account if it does not exist.
-            if(0 === $fireflyIIIAccountId){
+            if (0 === $fireflyIIIAccountId) {
                 $createdAccount                           = $this->createOrFindExistingAccount((string) $importServiceAccountId);
                 $updatedAccounts                          = $this->configuration->getAccounts();
                 $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
@@ -94,9 +94,9 @@ class TransactionProcessor
             }
 
 
-            $apiToken         = SecretManager::getApiKey($this->configuration);
+            $apiToken                        = SecretManager::getApiKey($this->configuration);
 
-            $request          = new GetTransactionsRequest($apiToken, $importServiceAccountId);
+            $request                         = new GetTransactionsRequest($apiToken, $importServiceAccountId);
             $request->setBase(config('lunchflow.api_url'));
             $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -194,7 +194,4 @@ class TransactionProcessor
     {
         return $this->rateLimits;
     }
-
-
-
 }

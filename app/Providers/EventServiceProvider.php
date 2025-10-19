@@ -44,26 +44,26 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen
         = [
-            Registered::class             => [
+            Registered::class                  => [
                 SendEmailVerificationNotification::class,
             ],
-            ImportedTransactions::class   => [
+            ImportedTransactions::class        => [
                 'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
             ],
-            CompletedConfiguration::class => [
+            CompletedConfiguration::class      => [
                 'App\Handlers\Events\ImportFlowHandler@handleCompletedConfiguration',
             ],
-            ProvidedDataUpload::class     => [
+            ProvidedDataUpload::class          => [
                 'App\Handlers\Events\ImportFlowHandler@handleProvidedDataUpload',
             ],
-            ProvidedConfigUpload::class   => [
+            ProvidedConfigUpload::class        => [
                 'App\Handlers\Events\ImportFlowHandler@handleProvidedConfigUpload',
             ],
             DownloadedSimpleFINAccounts::class => [
                 'App\Handlers\Events\ImportFlowHandler@handleDownloadedSimpleFINAccounts',
             ],
-            CompletedConversion::class       => [
+            CompletedConversion::class         => [
                 'App\Handlers\Events\ImportFlowHandler@handleCompletedConversion',
-            ]
+            ],
         ];
 }

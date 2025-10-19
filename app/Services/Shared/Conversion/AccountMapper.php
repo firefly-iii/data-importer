@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * AccountMapper.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -97,7 +99,7 @@ class AccountMapper
             }
             if (!isset($configuration['account_mapping'][$accountKey])) {
                 // Auto-map by searching for existing accounts
-                $converted = ImportServiceAccount::convertSingleAccount($simplefinAccount);
+                $converted      = ImportServiceAccount::convertSingleAccount($simplefinAccount);
                 $fireflyAccount = $this->findMatchingFireflyIIIAccount($converted);
                 if ($fireflyAccount instanceof Account) {
                     $mapping[$accountKey] = [
@@ -130,16 +132,17 @@ class AccountMapper
         $this->loadFireflyIIIAccounts();
 
         // Try to find by name first
-        $matchingAccounts = array_filter($this->fireflyIIIAccounts, fn(Account $current) => strtolower((string)$current->name) === strtolower($account->name));
+        $matchingAccounts = array_filter($this->fireflyIIIAccounts, fn (Account $current) => strtolower((string)$current->name) === strtolower($account->name));
 
         if (0 === count($matchingAccounts)) {
             return null;
         }
 
         Log::debug(sprintf('Search for Firefly III account with name "%s"', $account->name));
+
         // Try to search via API
         try {
-            $request = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
             $request->setField('name');
             $request->setQuery($account->name);
             $response = $request->get();
@@ -171,10 +174,10 @@ class AccountMapper
         Log::info(sprintf('Creating Firefly III account "%s" via API', $accountName));
 
         try {
-            $request = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
 
             // Build account creation payload
-            $payload = [
+            $payload  = [
                 'name'              => $accountName,
                 'type'              => $accountType,
                 'currency_code'     => $currencyCode,
@@ -196,7 +199,7 @@ class AccountMapper
             // Add liability-specific fields for liability accounts
             if (in_array($accountType, [AccountType::DEBT, AccountType::LOAN, AccountType::MORTGAGE, AccountType::LIABILITIES, 'liability'], true)) {
                 // Map account type to liability type
-                $liabilityTypeMap = [
+                $liabilityTypeMap               = [
                     AccountType::DEBT        => 'debt',
                     AccountType::LOAN        => 'loan',
                     AccountType::MORTGAGE    => 'mortgage',
@@ -288,7 +291,7 @@ class AccountMapper
     {
         $this->loadFireflyIIIAccounts();
 
-        return array_find($this->fireflyIIIAccounts, fn($account) => $account->id === $id);
+        return array_find($this->fireflyIIIAccounts, fn ($account) => $account->id === $id);
 
     }
 
@@ -300,6 +303,7 @@ class AccountMapper
         // Only load once
         if (count($this->fireflyIIIAccounts) > 0) {
             Log::debug('Already loaded Firefly III accounts, skipping reload');
+
             return;
         }
 
@@ -314,9 +318,9 @@ class AccountMapper
                 throw new ImporterErrorException('Authentication context not available for account loading');
             }
 
-            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request     = new GetAccountsRequest($baseUrl, $accessToken);
             $request->setType(AccountType::ASSET);
-            $response = $request->get();
+            $response    = $request->get();
 
             if ($response instanceof GetAccountsResponse) {
                 $this->fireflyIIIAccounts = iterator_to_array($response);
@@ -353,7 +357,7 @@ class AccountMapper
                 $errorMessage  = $e->getMessage();
 
                 // Check if this is a DNS/connection timeout error that we should retry
-                $shouldRetry = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
+                $shouldRetry   = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
 
                 if (!$shouldRetry) {
                     Log::error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
@@ -398,7 +402,7 @@ class AccountMapper
             'Temporary failure in name resolution',
         ];
 
-        return array_any($retryableErrors, fn($retryableError) => false !== stripos($errorMessage, $retryableError));
+        return array_any($retryableErrors, fn ($retryableError) => false !== stripos($errorMessage, $retryableError));
 
     }
 
@@ -411,7 +415,7 @@ class AccountMapper
     {
         $this->loadFireflyAccounts();
 
-        $options = [
+        $options   = [
             'account_name'      => $simplefinAccount->getName(),
             'account_id'        => $simplefinAccount->getId(),
             'currency'          => $simplefinAccount->getCurrency(),
