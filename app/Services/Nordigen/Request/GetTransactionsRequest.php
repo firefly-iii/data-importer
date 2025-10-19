@@ -39,13 +39,31 @@ class GetTransactionsRequest extends Request
 {
     private string $identifier = '';
 
-    public function __construct(string $url, string $token, string $identifier)
+
+    public function __construct(string $url, string $token, string $identifier, string $dateFrom, string $dateTo)
     {
-        $this->identifier = $identifier;
+        $params=  [];
+        $pattern = '/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][\d]|3[01])$/';
+        $result  = preg_match($pattern, $dateFrom);
         $this->setParameters([]);
+        if('' !== $dateFrom && 1 === $result){
+            $params['date_from'] = $dateFrom;
+        }
+
+        $result  = preg_match($pattern, $dateTo);
+        if('' !== $dateTo && 1 === $result){
+            $params['date_to'] = $dateTo;
+        }
+        if(count($params) > 0){
+            $this->setParameters($params);
+        }
+
+        $this->identifier = $identifier;
         $this->setBase($url);
         $this->setToken($token);
         $this->setUrl(sprintf('api/v2/accounts/%s/transactions/', $identifier));
+
+
     }
 
     /**

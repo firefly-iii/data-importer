@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Configuration;
 
+use App\Exceptions\ImporterErrorException;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Log;
@@ -947,6 +948,7 @@ class Configuration
 
             case 'partial':
                 Log::debug('Range is partial.');
+                $this->dateNotAfter = '';
                 $this->dateNotBefore           = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
                 Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
                 if ('' === $this->dateRangeNotAfterUnit) {
@@ -980,6 +982,14 @@ class Configuration
                 $this->dateNotBefore           = '' === $before ? '' : $before->format('Y-m-d');
                 $this->dateNotAfter            = '' === $after ? '' : $after->format('Y-m-d');
                 Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
+        }
+        // sanity check right away.
+        if('' !== $this->dateNotBefore && '' !== $this->dateNotAfter) {
+            $notBefore = Carbon::createFromFormat('Y-m-d', $this->dateNotBefore);
+            $notAfter  = Carbon::createFromFormat('Y-m-d', $this->dateNotAfter);
+            if ($notAfter->lt($notBefore)) {
+                throw new ImporterErrorException(sprintf('The date range in your configuration is invalid. The "not before" date (%s) is after the "not after" date (%s). You must correct this manually.', $this->dateNotBefore, $this->dateNotAfter));
+            }
         }
     }
 

@@ -120,7 +120,6 @@ final class Import extends Command
         }
 
         $configuration->updateDateRange();
-
         $this->line('The import routine is about to start.');
         $this->line('This is invisible and may take quite some time.');
         $this->line('Once finished, you will see a list of errors, warnings and messages (if applicable).');

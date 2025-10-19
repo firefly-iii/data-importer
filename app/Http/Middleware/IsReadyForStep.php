@@ -61,8 +61,8 @@ trait IsReadyForStep
 
     public function handle(Request $request, Closure $next): mixed
     {
-        $flow     = $request->cookie(Constants::FLOW_COOKIE);
-        $result   = $this->isReadyForStep($request);
+        $flow   = $request->cookie(Constants::FLOW_COOKIE);
+        $result = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -121,7 +121,7 @@ trait IsReadyForStep
             return $res;
         }
         if ('map' === self::STEP) {
-            $res = $this->isReadyForMapping();
+            $res = $this->isReadyForMapping($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
 
             return $res;
@@ -181,11 +181,30 @@ trait IsReadyForStep
     /**
      * For mapping, the order in which this happens is different per flow. That makes this function a little complex.
      */
-    private function isReadyForMapping(): bool
+    private function isReadyForMapping(string $flow): bool
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
             return false;
         }
+
+        if ('nordigen' === $flow || 'spectre' === $flow || 'lunchflow' === $flow) {
+
+            // conversion complete?
+            if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                Log::debug(sprintf('%s: Return true, ready for step [4].', $flow));
+
+                return true;
+            }
+
+            // must already have the conversion, or not ready for this step:
+            if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
+                Log::debug(sprintf('%s: return false, not yet ready for step [2].', $flow));
+
+                return false;
+            }
+        }
+        // otherwise return false.
+        Log::debug('Return true, ready for step [3].');
 
         return true;
     }
@@ -356,31 +375,31 @@ trait IsReadyForStep
                 throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
 
             case 'authenticate':
-                $route             = route('003-upload.index');
+                $route = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'upload-files':
-                $route             = route('004-configure.index');
+                $route = route('004-configure.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route             = route('006-mapping.index');
+                $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route             = route('005-roles.index');
+                $route = route('005-roles.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route             = route('007-convert.index');
+                $route = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -401,14 +420,14 @@ trait IsReadyForStep
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route             = route('006-mapping.index');
+                $route = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route             = route('007-convert.index');
+                $route = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);

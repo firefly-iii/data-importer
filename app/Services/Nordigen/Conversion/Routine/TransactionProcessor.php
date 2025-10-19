@@ -110,7 +110,7 @@ class TransactionProcessor
                 continue;
             }
             $url                        = config('nordigen.url');
-            $request                    = new GetTransactionsRequest($url, $accessToken, $account);
+            $request                    = new GetTransactionsRequest($url, $accessToken, $account, $this->configuration->getDateNotBefore(), $this->configuration->getDateNotAfter());
             $request->setTimeOut(config('importer.connection.timeout'));
 
             /** @var GetTransactionsResponse $transactions */
