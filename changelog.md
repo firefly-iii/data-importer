@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.9.0 - 2025-10-19
+
+> [!NOTE]
+> Lunch Flow support is new to the Data Importer. Please read the [tutorial](https://docs.firefly-iii.org/tutorials/data-importer/lunchflow/) carefully. Feel free to open an issue or start a discussion if you have issues. Thanks in advance for your support!
+
+### Added
+- #10849
+- Lunch Flow support was also brought to you by @amrawadk
+
+### Fixed
+- #11075
+- #11070
+
 ## v1.8.4 - 2025-10-14
 
 ### Fixed

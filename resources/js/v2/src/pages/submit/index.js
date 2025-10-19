@@ -187,7 +187,7 @@ let index = function () {
                 }
 
                 if ('submission_running' === this.pageStatus.status) {
-                    console.log('Conversion is running...')
+                    console.log('Submission is running...')
                 }
                 if ('submission_done' === this.pageStatus.status) {
                     console.log('Job is done!');
