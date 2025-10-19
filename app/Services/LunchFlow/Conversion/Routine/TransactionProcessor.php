@@ -32,7 +32,9 @@ use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\LunchFlow\Request\GetTransactionsRequest;
 use App\Services\LunchFlow\Response\GetTransactionsResponse;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\ProgressInformation;
+use App\Support\Internal\CollectsAccounts;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -42,6 +44,8 @@ use Illuminate\Support\Facades\Log;
 class TransactionProcessor
 {
     use ProgressInformation;
+    use CreatesAccounts;
+    use CollectsAccounts;
 
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
@@ -66,20 +70,33 @@ class TransactionProcessor
         if ('' !== $this->configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
-        $accounts        = array_keys($this->configuration->getAccounts());
+        $accounts        = $this->configuration->getAccounts();
         $return          = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
         $total           = count($accounts);
 
+        $this->existingServiceAccounts = $this->getLunchFlowAccounts($this->configuration);
+
         /**
-         * @var int $key
-         * @var int $account
+         * @var int $importServiceAccountId
+         * @var int $fireflyIIIAccountId
          */
-        foreach ($accounts as $key => $account) {
-            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
+        foreach ($accounts as $importServiceAccountId => $fireflyIIIAccountId) {
+            Log::debug(sprintf('[%s] Going to download Lunch Flow transactions for account #%d', config('importer.version'), $importServiceAccountId));
+
+            // first create the account if it does not exist.
+            if(0 === $fireflyIIIAccountId){
+                $createdAccount                           = $this->createOrFindExistingAccount((string) $importServiceAccountId);
+                $updatedAccounts                          = $this->configuration->getAccounts();
+                $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
+                $this->configuration->setAccounts($updatedAccounts);
+                // $accounts = $this->configuration->getAccounts();
+            }
+
+
             $apiToken         = SecretManager::getApiKey($this->configuration);
 
-            $request          = new GetTransactionsRequest($apiToken, $account);
+            $request          = new GetTransactionsRequest($apiToken, $importServiceAccountId);
             $request->setBase(config('lunchflow.api_url'));
             $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -90,21 +107,21 @@ class TransactionProcessor
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 $this->addWarning(0, $e->getMessage());
-                $return[$account] = [];
+                $return[$importServiceAccountId] = [];
 
 
                 continue;
             } catch (AgreementExpiredException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
-                $return[$account] = [];
+                $return[$importServiceAccountId] = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
 
                 continue;
             }
 
-            $return[$account] = $this->filterTransactions($transactions);
-            Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
+            $return[$importServiceAccountId] = $this->filterTransactions($transactions);
+            Log::debug(sprintf('[%s] Going to download Lunch Flow transactions for account #%d', config('importer.version'), $importServiceAccountId));
         }
         Log::debug('Done with download of transactions.');
 
@@ -177,4 +194,7 @@ class TransactionProcessor
     {
         return $this->rateLimits;
     }
+
+
+
 }

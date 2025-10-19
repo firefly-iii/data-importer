@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace App\Handlers\Events;
 
 use App\Events\CompletedConfiguration;
+use App\Events\CompletedConversion;
 use App\Events\DownloadedSimpleFINAccounts;
 use App\Events\ProvidedConfigUpload;
 use App\Events\ProvidedDataUpload;
@@ -33,17 +34,34 @@ use Illuminate\Support\Facades\Log;
 class ImportFlowHandler
 {
 
-    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void {
+    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void
+    {
 
     }
+
+    public function handleCompletedConversion(CompletedConversion $event): void
+    {
+        Log::debug('Set conversion as complete. Forget READY_FOR_CONVERSION.');
+        session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
+        session()->forget(Constants::READY_FOR_CONVERSION);
+    }
+
     public function handleCompletedConfiguration(CompletedConfiguration $event): void
     {
         $configuration = $event->configuration;
         session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
         if ('lunchflow' === $configuration->getFlow() || 'nordigen' === $configuration->getFlow() || 'spectre' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
             // at this point, nordigen, spectre, and simplefin are ready for data conversion.
+            Log::debug('Mark READY_FOR_CONVERSION = true');
             session()->put(Constants::READY_FOR_CONVERSION, true);
         }
+        // if the user does not want to map data, this step is now complete:
+        if (!$configuration->isMapAllData()) {
+            Log::debug('Mark MAPPING_COMPLETE_INDICATOR = true');
+            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
+        }
+
+
     }
 
     public function handleProvidedDataUpload(ProvidedDataUpload $event): void

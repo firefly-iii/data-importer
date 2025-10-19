@@ -83,6 +83,7 @@ trait IsReadyForStep
 
             return true;
         }
+        Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) called.', $flow, self::STEP));
 
         // we are always ready for some steps:
         if ('service-validation' === self::STEP) {
@@ -133,7 +134,8 @@ trait IsReadyForStep
             return $res;
         }
         if ('submit' === self::STEP) {
-            $res = $this->isReadyForSubmission();
+
+            $res = $this->isReadyForSubmission($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
 
             return $res;
@@ -150,12 +152,23 @@ trait IsReadyForStep
         throw new ImporterErrorException(sprintf('Cannot handle step "%s" in flow "%s"', self::STEP, $flow)); // @phpstan-ignore-line
     }
 
-    private function isReadyForSubmission(): bool
+    private function isReadyForSubmission(string $flow): bool
     {
+        Log::debug(sprintf('isReadyForSubmission("%s")', $flow));
         if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+            // only ready for submission when mapping is also complete.
+            if('file' !== $flow) {
+                if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+                    Log::debug(sprintf('isReadyForSubmission("%s"): conversion complete AND mapping complete, return true.', $flow));
+                    return true;
+                }
+                Log::debug(sprintf('isReadyForSubmission("%s"), conversion complete but mapping is not, return false.', $flow));
+                return false;
+            }
+            Log::debug(sprintf('isReadyForSubmission("%s"), conversion complete, return true.', $flow));
             return true;
         }
-
+        Log::debug(sprintf('isReadyForSubmission("%s"), conversion is not complete (%s), return false.', $flow, var_export(session()->get(Constants::CONVERSION_COMPLETE_INDICATOR),true)));
         return false;
     }
 
@@ -166,6 +179,14 @@ trait IsReadyForStep
 
             return false;
         }
+        // if conversion is already complete, not ready for this step.
+        if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+            Log::debug('Return FALSE, NOT ready for conversion.');
+
+            return false;
+        }
+
+
         // if/else is in reverse!
         if (session()->has(Constants::READY_FOR_CONVERSION) && true === session()->get(Constants::READY_FOR_CONVERSION)) {
             Log::debug('Return true, ready for conversion.');
@@ -184,11 +205,11 @@ trait IsReadyForStep
     private function isReadyForMapping(string $flow): bool
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
+            Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is false or non existent.');
             return false;
         }
 
-        if ('nordigen' === $flow || 'spectre' === $flow || 'lunchflow' === $flow) {
-
+        if ('file' !== $flow) {
             // conversion complete?
             if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
                 Log::debug(sprintf('%s: Return true, ready for step [4].', $flow));
@@ -302,6 +323,7 @@ trait IsReadyForStep
 
             return null;
         }
+        Log::debug(sprintf('redirectToCorrectStep("%s", "%s")', $flow, self::STEP));
         if ('file' === $flow) {
             return $this->redirectToCorrectFileStep();
         }
@@ -329,7 +351,12 @@ trait IsReadyForStep
 
             case 'define-roles':
                 $route = route('006-mapping.index');
-                Log::debug(sprintf('Return redirect to "%s"', $route));
+                Log::debug(sprintf('[b] Return redirect to "%s"', $route));
+
+                return redirect($route);
+            case 'submit':
+                $route = route('006-mapping.index');
+                Log::debug(sprintf('[c] Return redirect to "%s"', $route));
 
                 return redirect($route);
 
@@ -351,6 +378,14 @@ trait IsReadyForStep
                 return redirect($route);
 
             case 'conversion':
+                if(session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                    Log::debug('Conversion is complete, so send to mapping.');
+                    $route = route('006-mapping.index');
+                    Log::debug(sprintf('[d] Return redirect to "%s"', $route));
+
+                    return redirect($route);
+                }
+
                 if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
                     $route = route('008-submit.index');
                     Log::debug(sprintf('Return redirect to "%s"', $route));

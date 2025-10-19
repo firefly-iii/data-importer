@@ -85,9 +85,6 @@ class RoutineManager implements RoutineManagerInterface
         // save config
         $this->configuration = $configuration;
 
-        // Step 0: configuration validation.
-        $this->validateAccounts();
-
         // share config
         $this->transactionProcessor->setConfiguration($configuration);
         $this->transactionGenerator->setConfiguration($configuration);
@@ -103,7 +100,7 @@ class RoutineManager implements RoutineManagerInterface
     public function start(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        Log::debug(sprintf('The Lunch Flow API URL is %s', config('nordigen.url')));
+        Log::debug(sprintf('The Lunch Flow API URL is %s', config('lunchflow.api_url')));
 
         // Step 1: get transactions from Lunch Flow
         $this->downloadFromLunchFlow();
@@ -226,17 +223,4 @@ class RoutineManager implements RoutineManagerInterface
         return false;
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function validateAccounts(): void
-    {
-        Log::debug('Validating accounts in configuration.');
-        $accounts = $this->configuration->getAccounts();
-        foreach ($accounts as $key => $accountId) {
-            if (0 === (int)$accountId) {
-                throw new ImporterErrorException(sprintf('Cannot import Lunch Flow account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
-            }
-        }
-    }
 }

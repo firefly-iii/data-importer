@@ -175,7 +175,7 @@ class RoutineStatusManager
 
     public static function startOrFindConversion(string $identifier): ConversionStatus
     {
-        Log::debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
+        // Log::debug(sprintf('Now in startOrFindConversion(%s)', $identifier));
         $disk   = Storage::disk(self::DISK_NAME);
         // Log::debug(sprintf('Try to see if file exists for conversion "%s".', $identifier));
         if ($disk->exists($identifier)) {

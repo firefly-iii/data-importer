@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\ConversionCompleted;
+use App\Events\CompletedConversion;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
@@ -66,7 +66,7 @@ class ConversionController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ConversionControllerMiddleware::class);
+        $this->middleware(ConversionControllerMiddleware::class)->except(['status','start']);
     }
 
     /**
@@ -93,12 +93,12 @@ class ConversionController extends Controller
             Log::debug('SimpleFIN: Pressing "back" will send you to configure.');
         }
         // no mapping, back to roles
-        if ('simplefin' !== $flow && 0 === count($configuration->getDoMapping()) && 'file' === $flow) {
+        if ('simplefin' !== $flow && 'lunchflow' !== $flow && 0 === count($configuration->getDoMapping()) && 'file' === $flow) {
             Log::debug('Pressing "back" will send you to roles.');
             $jobBackUrl = route('back.roles');
         }
         // back to mapping
-        if ('simplefin' !== $flow && 0 === count($configuration->getMapping())) {
+        if ('simplefin' !== $flow && 'lunchflow' !== $flow && 0 === count($configuration->getMapping())) {
             Log::debug('Pressing "back" will send you to mapping.');
             $jobBackUrl = route('back.mapping');
         }
@@ -313,8 +313,7 @@ class ConversionController extends Controller
             // #10590 do not error out if no transactions are found.
             Log::warning('[b] Zero transactions found during conversion. Will not error out.');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-            session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-            event(new ConversionCompleted());
+            event(new CompletedConversion());
 
             // return response()->json($importJobStatus->toArray());
         }
@@ -335,10 +334,7 @@ class ConversionController extends Controller
 
         // set done:
         RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-        event(new ConversionCompleted());
-        // set config as complete.
-        session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
-        Log::debug('Set conversion as complete.');
+        event(new CompletedConversion());
 
         return response()->json($importJobStatus->toArray());
     }
@@ -347,7 +343,7 @@ class ConversionController extends Controller
     {
         //        Log::debug(sprintf('Now at %s', __METHOD__));
         $identifier      = $request->get('identifier');
-        Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+        // Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             Log::warning('Identifier is NULL.');
             // no status is known yet because no identifier is in the session.

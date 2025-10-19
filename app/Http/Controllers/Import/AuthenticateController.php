@@ -103,7 +103,7 @@ class AuthenticateController extends Controller
         }
 
         if (AuthenticationStatus::AUTHENTICATED === $result) {
-            Log::debug(sprintf('Return redirect to %s', route('003-upload.index')));
+            Log::debug(sprintf('[a] Return redirect to %s', route('003-upload.index')));
 
             return redirect(route('003-upload.index'));
         }

@@ -22,6 +22,7 @@
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Shared\Model\ImportServiceAccount;
 use App\Services\SimpleFIN\Model\Account as SimpleFINAccount;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -37,8 +38,13 @@ trait CreatesAccounts
         $newAccountData = $this->configuration->getNewAccounts()[$importServiceId] ?? null;
         $createdAccount = null;
         // here is a check to see if account to be created is part of the import process.
-        // so, existing service accounts contains all the accounts present at the import service with all of their meta data.
-        $existingAccount = array_find($this->existingServiceAccounts, fn($entry) => $entry['id'] === $importServiceId);
+        // so, existing service accounts contains all the accounts present at the import service with all of their meta-data.
+        $existingAccount = array_find($this->existingServiceAccounts, function (array|object $entry) use ($importServiceId) {
+            if (is_array($entry)) {
+                return (string)$entry['id'] === $importServiceId;
+            }
+            return (string)$entry->id === $importServiceId;
+        });
 
         $continue = true;
         if (null === $newAccountData) {
@@ -73,16 +79,17 @@ trait CreatesAccounts
             Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration' => $configuration]);
 
             // Create SimpleFIN Account object and create Firefly III account
-            $existingAccountObject = SimpleFINAccount::fromArray($existingAccount);
+            // $existingAccountObject = SimpleFINAccount::fromArray($existingAccount);
+            $existingAccountObject = ImportServiceAccount::convertSingleAccount($existingAccount);
             $accountMapper         = new AccountMapper();
-            $createdAccount        = $accountMapper->createFireflyAccount($existingAccountObject, $configuration);
+            $createdAccount        = $accountMapper->createFireflyIIIAccount($existingAccountObject, $configuration);
 
             // overrule the name with what we actually want to search for.
             $existingAccountObject->name = $newAccountData['name'];
 
             if (null === $createdAccount) {
                 Log::warning('Failed to create Firefly III account. May not be able to proceed with transaction import for this account.', $configuration);
-                $createdAccount = $accountMapper->findMatchingFireflyAccount($existingAccountObject);
+                $createdAccount = $accountMapper->findMatchingFireflyIIIAccount($existingAccountObject);
             }
         }
 

@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Events\CompletedConfiguration;
+use App\Events\CompletedConversion;
 use App\Events\DownloadedSimpleFINAccounts;
 use App\Events\ImportedTransactions;
 use App\Events\ProvidedConfigUpload;
@@ -61,5 +62,8 @@ class EventServiceProvider extends ServiceProvider
             DownloadedSimpleFINAccounts::class => [
                 'App\Handlers\Events\ImportFlowHandler@handleDownloadedSimpleFINAccounts',
             ],
+            CompletedConversion::class       => [
+                'App\Handlers\Events\ImportFlowHandler@handleCompletedConversion',
+            ]
         ];
 }

@@ -122,7 +122,7 @@ class GenerateTransactions
      */
     public function collectTargetAccounts(): void
     {
-        Log::debug('GoCardless: Defer account search to trait.');
+        Log::debug('Lunch Flow: Defer account search to trait.');
         // defer to trait:
         $array = $this->collectAllTargetAccounts();
         foreach ($array as $number => $info) {
@@ -146,9 +146,9 @@ class GenerateTransactions
             $this->targetTypes[$number]         = $info['type'];
         }
 
-        Log::debug(sprintf('GoCardless: Collected %d target accounts.', count($this->targetAccounts)));
-        Log::debug(sprintf('GoCardless: Collected %d expense accounts.', count($this->expenseAccounts)));
-        Log::debug(sprintf('GoCardless: Collected %d revenue accounts.', count($this->revenueAccounts)));
+        Log::debug(sprintf('Lunch Flow: Collected %d target accounts.', count($this->targetAccounts)));
+        Log::debug(sprintf('Lunch Flow: Collected %d expense accounts.', count($this->expenseAccounts)));
+        Log::debug(sprintf('Lunch Flow: Collected %d revenue accounts.', count($this->revenueAccounts)));
     }
 
     public function getTransactions(array $transactions): array
