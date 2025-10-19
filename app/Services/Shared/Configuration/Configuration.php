@@ -948,7 +948,7 @@ class Configuration
 
             case 'partial':
                 Log::debug('Range is partial.');
-                $this->dateNotAfter = '';
+                $this->dateNotAfter            = '';
                 $this->dateNotBefore           = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
                 Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
                 if ('' === $this->dateRangeNotAfterUnit) {
@@ -984,7 +984,7 @@ class Configuration
                 Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
         // sanity check right away.
-        if('' !== $this->dateNotBefore && '' !== $this->dateNotAfter) {
+        if ('' !== $this->dateNotBefore && '' !== $this->dateNotAfter) {
             $notBefore = Carbon::createFromFormat('Y-m-d', $this->dateNotBefore);
             $notAfter  = Carbon::createFromFormat('Y-m-d', $this->dateNotAfter);
             if ($notAfter->lt($notBefore)) {

@@ -61,8 +61,8 @@ trait IsReadyForStep
 
     public function handle(Request $request, Closure $next): mixed
     {
-        $flow   = $request->cookie(Constants::FLOW_COOKIE);
-        $result = $this->isReadyForStep($request);
+        $flow     = $request->cookie(Constants::FLOW_COOKIE);
+        $result   = $this->isReadyForStep($request);
         if (true === $result) {
             return $next($request);
         }
@@ -375,31 +375,31 @@ trait IsReadyForStep
                 throw new ImporterErrorException(sprintf('redirectToCorrectFileStep: Cannot handle file step "%s"', self::STEP));
 
             case 'authenticate':
-                $route = route('003-upload.index');
+                $route             = route('003-upload.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'upload-files':
-                $route = route('004-configure.index');
+                $route             = route('004-configure.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'define-roles':
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'configuration':
-                $route = route('005-roles.index');
+                $route             = route('005-roles.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'map':
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
@@ -420,14 +420,14 @@ trait IsReadyForStep
                 }
 
                 // Default file-based behavior: redirect to mapping
-                $route = route('006-mapping.index');
+                $route             = route('006-mapping.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
 
             case 'submit':
                 // return back to conversion:
-                $route = route('007-convert.index');
+                $route             = route('007-convert.index');
                 Log::debug(sprintf('Return redirect to "%s"', $route));
 
                 return redirect($route);
