@@ -200,6 +200,6 @@ class MapperService
     {
         $fields = config('camt.fields');
 
-        return array_filter($fields, fn(array $field) => $field['mappable']);
+        return array_filter($fields, fn (array $field) => $field['mappable']);
     }
 }

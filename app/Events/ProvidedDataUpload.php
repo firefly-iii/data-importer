@@ -38,9 +38,7 @@ class ProvidedDataUpload
     /**
      * Create a new event instance.
      */
-    public function __construct(public string $fileName)
-    {
-    }
+    public function __construct(public string $fileName) {}
 
     /**
      * Get the channels the event should broadcast on.

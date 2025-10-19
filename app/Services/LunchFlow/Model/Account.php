@@ -35,7 +35,7 @@ class Account
     public string      $name;
     public string      $provider;
     public ?string $currency = null;
-    public ?string $status = null;
+    public ?string $status   = null;
 
     /**
      * Account constructor.

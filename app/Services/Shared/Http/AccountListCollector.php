@@ -48,9 +48,7 @@ class AccountListCollector
     private array         $importServiceAccounts = [];
     private array         $mergedAccounts        = [];
 
-    public function __construct(private readonly Configuration $configuration, private readonly string $flow, private array $existingAccounts)
-    {
-    }
+    public function __construct(private readonly Configuration $configuration, private readonly string $flow, private array $existingAccounts) {}
 
     /**
      * @throws AgreementExpiredException|ImporterErrorException
@@ -64,17 +62,25 @@ class AccountListCollector
         switch ($this->flow) {
             default:
                 throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
+
             case 'file':
                 return [];
+
             case 'nordigen':
                 $this->collectGoCardlessAccounts();
+
                 break;
+
             case 'simplefin':
                 $this->collectSimpleFINAccounts();
+
                 break;
+
             case 'spectre':
                 $this->collectSpectreAccounts();
+
                 break;
+
             case 'lunchflow':
                 $this->collectLunchFlowAccounts();
         }
@@ -135,11 +141,11 @@ class AccountListCollector
     {
         Log::debug(sprintf('Now merging "%s" account lists.', $this->flow));
 
-        $generic = match ($this->flow) {
-            'nordigen' => ImportServiceAccount::convertNordigenArray($this->importServiceAccounts),
+        $generic              = match ($this->flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($this->importServiceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts),
             'lunchflow' => ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts),
-            default => throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow)),
+            default     => throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow)),
         };
         $this->mergedAccounts = $this->mergeGenericAccountList($generic);
     }
@@ -169,7 +175,7 @@ class AccountListCollector
                 $all                                 = $this->existingAccounts[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, fn($a, $b) => $a->id <=> $b->id);
+                $nonMatching                         = array_udiff($all, $matching, fn ($a, $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
