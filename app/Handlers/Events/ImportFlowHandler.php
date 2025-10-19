@@ -33,11 +33,7 @@ use Illuminate\Support\Facades\Log;
 
 class ImportFlowHandler
 {
-
-    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void
-    {
-
-    }
+    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void {}
 
     public function handleCompletedConversion(CompletedConversion $event): void
     {

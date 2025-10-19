@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * CreatesAccounts.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -35,18 +37,19 @@ trait CreatesAccounts
     protected function createOrFindExistingAccount(string $importServiceId): Account
     {
         Log::debug('Starting account creation process.');
-        $newAccountData = $this->configuration->getNewAccounts()[$importServiceId] ?? null;
-        $createdAccount = null;
+        $newAccountData  = $this->configuration->getNewAccounts()[$importServiceId] ?? null;
+        $createdAccount  = null;
         // here is a check to see if account to be created is part of the import process.
         // so, existing service accounts contains all the accounts present at the import service with all of their meta-data.
         $existingAccount = array_find($this->existingServiceAccounts, function (array|object $entry) use ($importServiceId) {
             if (is_array($entry)) {
                 return (string)$entry['id'] === $importServiceId;
             }
+
             return (string)$entry->id === $importServiceId;
         });
 
-        $continue = true;
+        $continue        = true;
         if (null === $newAccountData) {
             Log::error(sprintf('No new account data found for account "%s"', $importServiceId));
             $continue = false;
@@ -65,7 +68,7 @@ trait CreatesAccounts
 
         if (true === $continue) {
             // Prepare account creation configuration with defaults
-            $configuration = [
+            $configuration               = [
                 'name'     => $newAccountData['name'],
                 'type'     => $newAccountData['type'] ?? 'asset',
                 'currency' => $newAccountData['currency'] ?? 'EUR',
@@ -80,9 +83,9 @@ trait CreatesAccounts
 
             // Create SimpleFIN Account object and create Firefly III account
             // $existingAccountObject = SimpleFINAccount::fromArray($existingAccount);
-            $existingAccountObject = ImportServiceAccount::convertSingleAccount($existingAccount);
-            $accountMapper         = new AccountMapper();
-            $createdAccount        = $accountMapper->createFireflyIIIAccount($existingAccountObject, $configuration);
+            $existingAccountObject       = ImportServiceAccount::convertSingleAccount($existingAccount);
+            $accountMapper               = new AccountMapper();
+            $createdAccount              = $accountMapper->createFireflyIIIAccount($existingAccountObject, $configuration);
 
             // overrule the name with what we actually want to search for.
             $existingAccountObject->name = $newAccountData['name'];
@@ -96,11 +99,11 @@ trait CreatesAccounts
         if (null === $createdAccount) {
             $message = sprintf('Creation failed, and could not find a matching account for SimpleFIN account "%s"', $importServiceId);
             Log::error($message);
+
             throw new ImporterErrorException($message);
         }
         Log::info('Successfully created or found new Firefly III account', ['simplefin_account_id' => $importServiceId, 'firefly_account_id' => $createdAccount->id, 'account_name' => $createdAccount->name, 'account_type' => $configuration['type'], 'currency' => $configuration['currency']]);
+
         return $createdAccount;
     }
-
-
 }

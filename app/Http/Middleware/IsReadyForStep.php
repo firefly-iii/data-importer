@@ -157,18 +157,22 @@ trait IsReadyForStep
         Log::debug(sprintf('isReadyForSubmission("%s")', $flow));
         if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
             // only ready for submission when mapping is also complete.
-            if('file' !== $flow) {
+            if ('file' !== $flow) {
                 if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
                     Log::debug(sprintf('isReadyForSubmission("%s"): conversion complete AND mapping complete, return true.', $flow));
+
                     return true;
                 }
                 Log::debug(sprintf('isReadyForSubmission("%s"), conversion complete but mapping is not, return false.', $flow));
+
                 return false;
             }
             Log::debug(sprintf('isReadyForSubmission("%s"), conversion complete, return true.', $flow));
+
             return true;
         }
-        Log::debug(sprintf('isReadyForSubmission("%s"), conversion is not complete (%s), return false.', $flow, var_export(session()->get(Constants::CONVERSION_COMPLETE_INDICATOR),true)));
+        Log::debug(sprintf('isReadyForSubmission("%s"), conversion is not complete (%s), return false.', $flow, var_export(session()->get(Constants::CONVERSION_COMPLETE_INDICATOR), true)));
+
         return false;
     }
 
@@ -206,6 +210,7 @@ trait IsReadyForStep
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
             Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is false or non existent.');
+
             return false;
         }
 
@@ -354,6 +359,7 @@ trait IsReadyForStep
                 Log::debug(sprintf('[b] Return redirect to "%s"', $route));
 
                 return redirect($route);
+
             case 'submit':
                 $route = route('006-mapping.index');
                 Log::debug(sprintf('[c] Return redirect to "%s"', $route));
@@ -378,7 +384,7 @@ trait IsReadyForStep
                 return redirect($route);
 
             case 'conversion':
-                if(session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
+                if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
                     Log::debug('Conversion is complete, so send to mapping.');
                     $route = route('006-mapping.index');
                     Log::debug(sprintf('[d] Return redirect to "%s"', $route));
