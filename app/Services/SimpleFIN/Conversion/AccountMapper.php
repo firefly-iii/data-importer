@@ -27,7 +27,4 @@ namespace App\Services\SimpleFIN\Conversion;
 /**
  * Class AccountMapper
  */
-class AccountMapper
-{
-
-}
+class AccountMapper {}

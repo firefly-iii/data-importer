@@ -222,5 +222,4 @@ class RoutineManager implements RoutineManagerInterface
 
         return false;
     }
-
 }

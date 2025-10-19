@@ -66,7 +66,7 @@ class ConversionController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ConversionControllerMiddleware::class)->except(['status','start']);
+        $this->middleware(ConversionControllerMiddleware::class)->except(['status', 'start']);
     }
 
     /**

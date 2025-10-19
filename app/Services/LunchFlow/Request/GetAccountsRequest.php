@@ -53,27 +53,24 @@ class GetAccountsRequest extends Request
         $response = [];
         if (true === config('importer.fake_data')) {
             $response = [
-                'accounts' =>
-                    [
-                        0 =>
-                            [
-                                'id'               => 1470,
-                                'name'             => 'Main Account A',
-                                'institution_name' => 'Sandbox Finance',
-                                'institution_logo' => 'https://cdn-logos.gocardless.com/ais/SANDBOXFINANCE_SFIN0000.png',
-                                'provider'         => 'gocardless',
-                                'status'           => 'ACTIVE',
-                            ],
-                        1 =>
-                            [
-                                'id'               => 1469,
-                                'name'             => 'Main Account B',
-                                'institution_name' => 'Sandbox Finance',
-                                'institution_logo' => 'https://cdn-logos.gocardless.com/ais/SANDBOXFINANCE_SFIN0000.png',
-                                'provider'         => 'gocardless',
-                                'status'           => 'ACTIVE',
-                            ],
+                'accounts' => [
+                    0 => [
+                        'id'               => 1470,
+                        'name'             => 'Main Account A',
+                        'institution_name' => 'Sandbox Finance',
+                        'institution_logo' => 'https://cdn-logos.gocardless.com/ais/SANDBOXFINANCE_SFIN0000.png',
+                        'provider'         => 'gocardless',
+                        'status'           => 'ACTIVE',
                     ],
+                    1 => [
+                        'id'               => 1469,
+                        'name'             => 'Main Account B',
+                        'institution_name' => 'Sandbox Finance',
+                        'institution_logo' => 'https://cdn-logos.gocardless.com/ais/SANDBOXFINANCE_SFIN0000.png',
+                        'provider'         => 'gocardless',
+                        'status'           => 'ACTIVE',
+                    ],
+                ],
                 'total'    => 2,
             ];
         }
