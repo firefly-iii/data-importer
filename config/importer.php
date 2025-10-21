@@ -46,8 +46,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => '1.9.0',
-    'build_time'                    => 1760890845,
+    'version'                       => 'develop/2025-10-21',
+    'build_time'                    => 1761017771,
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
     'fake_data'                     => env('FAKE_DATA', false),
     'enabled_flows'                 => [
