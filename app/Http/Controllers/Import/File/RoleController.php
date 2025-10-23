@@ -61,7 +61,7 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $flow          = $request->cookie(Constants::FLOW_COOKIE);
+        $flow = $request->cookie(Constants::FLOW_COOKIE);
         if ('file' !== $flow) {
             exit('redirect or something');
         }
@@ -81,9 +81,9 @@ class RoleController extends Controller
 
     private function csvIndex(Request $request, Configuration $configuration): View
     {
-        $mainTitle           = 'Role definition';
-        $subTitle            = 'Configure the role of each column in your file';
-        $sessionUploadFile   = session()->get(Constants::UPLOAD_DATA_FILE);
+        $mainTitle         = 'Role definition';
+        $subTitle          = 'Configure the role of each column in your file';
+        $sessionUploadFile = session()->get(Constants::UPLOAD_DATA_FILE);
         if (null === $sessionUploadFile) {
             Log::error('No data file in session, give big fat error.');
             Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
@@ -93,15 +93,15 @@ class RoleController extends Controller
 
 
         // get columns from file
-        $content             = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
-        $columns             = RoleService::getColumns($content, $configuration);
-        $examples            = RoleService::getExampleData($content, $configuration);
+        $content  = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
+        $columns  = RoleService::getColumns($content, $configuration);
+        $examples = RoleService::getExampleData($content, $configuration);
 
         // submit mapping from config.
-        $mapping             = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
+        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
 
         // roles
-        $roles               = config('csv.import_roles');
+        $roles = config('csv.import_roles');
         ksort($roles);
 
         // configuration (if it is set)
@@ -113,8 +113,8 @@ class RoleController extends Controller
 
     private function camtIndex(Request $request, Configuration $configuration): View
     {
-        $mainTitle         = 'Role definition';
-        $subTitle          = 'Configure the role of each field in your camt.053 file';
+        $mainTitle = 'Role definition';
+        $subTitle  = 'Configure the role of each field in your camt.053 file';
 
         $sessionUploadFile = session()->get(Constants::UPLOAD_DATA_FILE);
 
@@ -126,24 +126,24 @@ class RoleController extends Controller
         }
 
         // get example data from file.
-        $content           = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
-        $examples          = RoleService::getExampleDataFromCamt($content, $configuration);
-        $roles             = $configuration->getRoles();
-        $doMapping         = $configuration->getDoMapping();
+        $content   = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
+        $examples  = RoleService::getExampleDataFromCamt($content, $configuration);
+        $roles     = $configuration->getRoles();
+        $doMapping = $configuration->getDoMapping();
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
-        $levels            = [];
-        $levels['A']       = [
+        $levels         = [];
+        $levels['A']    = [
             'title'       => trans('camt.level_A'),
             'explanation' => trans('camt.explain_A'),
             'fields'      => $this->getFieldsForLevel('A'),
         ];
-        $levels['B']       = [
+        $levels['B']    = [
             'title'       => trans('camt.level_B'),
             'explanation' => trans('camt.explain_B'),
             'fields'      => $this->getFieldsForLevel('B'),
         ];
-        $levels['C']       = [
+        $levels['C']    = [
             'title'       => trans('camt.level_C'),
             'explanation' => trans('camt.explain_C'),
             'fields'      => [
@@ -162,7 +162,7 @@ class RoleController extends Controller
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
             ],
         ];
-        $group_handling    = $configuration->getGroupedTransactionHandling();
+        $group_handling = $configuration->getGroupedTransactionHandling();
         if ('group' === $group_handling) {
             $levels['D'] = [
                 'title'       => trans('camt.level_D'),
@@ -200,7 +200,7 @@ class RoleController extends Controller
     {
         $allFields = config('camt.fields');
 
-        return array_filter($allFields, fn ($field) => $level === $field['level']);
+        return array_filter($allFields, fn($field) => $level === $field['level']);
     }
 
     public function postIndex(RolesPostRequest $request): RedirectResponse
@@ -213,15 +213,15 @@ class RoleController extends Controller
 
     private function processPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
     {
-        $data           = $request->getAllForFile();
-        $needsMapping   = $this->needMapping($data['do_mapping']);
+        $data         = $request->getAllForFile();
+        $needsMapping = $this->needMapping($data['do_mapping']);
         $configuration->setRoles($data['roles']);
         $configuration->setDoMapping($data['do_mapping']);
 
         session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
 
         // then this is the new, full array:
-        $fullArray      = $configuration->toArray();
+        $fullArray = $configuration->toArray();
 
         // and it can be saved on disk:
         $configFileName = StorageService::storeArray($fullArray);
@@ -234,13 +234,15 @@ class RoleController extends Controller
 
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-
+        Log::debug('Set ROLES_COMPLETE_INDICATOR = true');
         // redirect to mapping thing.
         if (true === $needsMapping) {
+            Log::debug('Redirect to mapping, because $needsMapping is true.');
             return redirect()->route('006-mapping.index');
         }
         // otherwise, store empty mapping, and continue:
         // set map config as complete.
+        Log::debug('Set READY_FOR_CONVERSION = true + redirect to conversion, because $needsMapping is false.');
         session()->put(Constants::READY_FOR_CONVERSION, true);
 
         return redirect()->route('007-convert.index');

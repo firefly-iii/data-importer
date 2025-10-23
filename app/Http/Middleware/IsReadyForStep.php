@@ -209,7 +209,7 @@ trait IsReadyForStep
     private function isReadyForMapping(string $flow): bool
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-            Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is false or non existent.');
+            Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is true.');
 
             return false;
         }
