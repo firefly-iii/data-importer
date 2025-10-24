@@ -176,6 +176,7 @@ class RoleController extends Controller
                 'fields'      => [
                     // have to collect D by hand because of intermediate sections
                     'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
+                    'entryDetailEndToEndId'                                                          => config('camt.fields.entryDetailEndToEndId'),
                     'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config('camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'),
                     'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config('camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'),
                     'section_tr'                                                                     => ['section' => true, 'title' => 'transaction'],

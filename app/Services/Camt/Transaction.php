@@ -214,6 +214,16 @@ class Transaction
 
                 return (string) $info?->getReference()?->getAccountServicerReference();
 
+            case 'entryDetailEndToEndId':
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return '';
+                }
+
+                /** @var EntryTransactionDetail $info */
+                $info            = $this->levelD[$index];
+
+                return (string) $info?->getReference()?->getEndToEndId();
+
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
                 $result          = '';
 
