@@ -66,16 +66,17 @@
                 @if('file' === $flow)
                     <div class="form-group row mb-3" id="unique_column_index_holder" x-show="'cell' === detectionMethod">
                         <label for="unique_column_index" class="col-sm-3 col-form-label">Unique column
-                            index</label>
+                            index(es)</label>
                         <div class="col-sm-9">
-                            <input type="number" step="1" name="unique_column_index" class="form-control"
-                                   id="unique_column_index" placeholder="Column index"
-                                   value="{{ $configuration->getUniqueColumnIndex() }}"
+                            <input type="text" name="unique_column_index" class="form-control"
+                                   id="unique_column_index" placeholder="Column index (e.g., 0 or 0,3,5)"
+                                   value="{{ $configuration->getUniqueColumnIndexDisplay() }}"
                                    aria-describedby="unique_column_index_help">
                             <small id="unique_column_index_help" class="form-text text-muted">
                                 This field is only relevant for the "identifier-based" detection option.
-                                Indicate which column / field contains the unique identifier. Start counting from
-                                zero!
+                                Indicate which column(s) contain the unique identifier. Start counting from zero!
+                                <br><strong>Single column:</strong> Enter one number (e.g., <code>0</code>)
+                                <br><strong>Composite identifier:</strong> Enter comma-separated numbers (e.g., <code>0,3,5</code>) to combine multiple columns
                             </small>
                         </div>
                     </div>

@@ -104,6 +104,10 @@ class Configuration
     // configuration for "cell" method:
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
+
+    // configuration for pseudo identifier (composite identifiers):
+    private array  $pseudoIdentifier = [];
+
     private bool   $useEntireOpposingAddress;
 
     // configuration for utf-8
@@ -423,6 +427,12 @@ class Configuration
         $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
 
+        // config for pseudo identifier (composite identifiers):
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $object->migrateSingleIdentifierToPseudoIdentifier();
+
         // utf8
         $object->conversion                  = $array['conversion'] ?? false;
 
@@ -520,6 +530,12 @@ class Configuration
         // config for "cell":
         $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
+
+        // config for pseudo identifier (composite identifiers):
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $object->migrateSingleIdentifierToPseudoIdentifier();
 
         // utf8 conversion
         $object->conversion                  = $array['conversion'] ?? false;
@@ -781,6 +797,72 @@ class Configuration
         return $this->uniqueColumnType;
     }
 
+    public function getPseudoIdentifier(): ?array
+    {
+        return !empty($this->pseudoIdentifier) ? $this->pseudoIdentifier : null;
+    }
+
+    public function hasPseudoIdentifier(): bool
+    {
+        return !empty($this->pseudoIdentifier);
+    }
+
+    public function setPseudoIdentifier(array $pseudoIdentifier): void
+    {
+        $this->pseudoIdentifier = $pseudoIdentifier;
+    }
+
+    /**
+     * Get unique column index display value (comma-separated if pseudo identifier exists).
+     * This is used for displaying in the UI form.
+     */
+    public function getUniqueColumnIndexDisplay(): string
+    {
+        // If pseudo identifier exists, return comma-separated source columns
+        if ($this->hasPseudoIdentifier() && isset($this->pseudoIdentifier['source_columns'])) {
+            return implode(',', $this->pseudoIdentifier['source_columns']);
+        }
+
+        // Otherwise return single index
+        return (string)$this->uniqueColumnIndex;
+    }
+
+    /**
+     * Migrate old single-column identifier format to unified pseudo identifier format.
+     * This ensures backward compatibility while unifying the behavior.
+     */
+    private function migrateSingleIdentifierToPseudoIdentifier(): void
+    {
+        // Only migrate if:
+        // 1. Using identifier-based detection ('cell')
+        // 2. No pseudo identifier exists yet (old format)
+        // 3. Have a valid unique column type
+        if ('cell' !== $this->duplicateDetectionMethod) {
+            return;
+        }
+
+        if (!empty($this->pseudoIdentifier)) {
+            return; // Already using new format
+        }
+
+        if (empty($this->uniqueColumnType)) {
+            return; // No identifier configured
+        }
+
+        // Create pseudo identifier from old single-column format
+        Log::debug(sprintf(
+            'Migrating old identifier format to pseudo identifier: index=%d, type=%s',
+            $this->uniqueColumnIndex,
+            $this->uniqueColumnType
+        ));
+
+        $this->pseudoIdentifier = [
+            'source_columns' => [$this->uniqueColumnIndex],
+            'separator'      => '|',
+            'role'           => $this->uniqueColumnType,
+        ];
+    }
+
     public function getPendingTransactions(): bool
     {
         return $this->pendingTransactions;
@@ -874,6 +956,7 @@ class Configuration
             'ignore_duplicate_lines'        => $this->ignoreDuplicateLines,
             'unique_column_index'           => $this->uniqueColumnIndex,
             'unique_column_type'            => $this->uniqueColumnType,
+            'pseudo_identifier'             => $this->pseudoIdentifier,
             'flow'                          => $this->flow,
             'content_type'                  => $this->contentType,
             'custom_tag'                    => $this->customTag,

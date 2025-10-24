@@ -40,6 +40,7 @@ class LineProcessor
 {
     use ProgressInformation;
 
+    private Configuration $configuration;
     private string $dateFormat;
     private array  $doMapping;
     private array  $mappedValues;
@@ -54,6 +55,7 @@ class LineProcessor
         Log::debug('Created LineProcessor()');
         Log::debug('Roles', $configuration->getRoles());
         Log::debug('Mapping (will not be printed)');
+        $this->configuration = $configuration;
         $this->roles      = $configuration->getRoles();
         $this->mapping    = $configuration->getMapping();
         $this->doMapping  = $configuration->getDoMapping();
@@ -141,6 +143,43 @@ class LineProcessor
 
             $return[]     = $columnValue;
         }
+
+        // Process pseudo identifier if it exists
+        if ($this->configuration->hasPseudoIdentifier()) {
+            Log::debug('Processing pseudo identifier...');
+            $pseudoIdentifier = $this->configuration->getPseudoIdentifier();
+
+            // Combine values from source columns
+            $combinedParts = [];
+            foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
+                $value = isset($line[$sourceIndex]) ? trim((string)$line[$sourceIndex]) : '';
+                if ('' !== $value) {
+                    $combinedParts[] = $value;
+                }
+            }
+
+            // Only create pseudo identifier if we have values
+            if (!empty($combinedParts)) {
+                $separator = $pseudoIdentifier['separator'];
+                $combinedValue = implode($separator, $combinedParts);
+
+                // Hash composite identifiers (multiple columns) to avoid long values
+                if (count($pseudoIdentifier['source_columns']) > 1) {
+                    $combinedValue = substr(hash('sha256', $combinedValue), 0, 8);
+                }
+
+                $pseudoIdentifierValue = new ColumnValue();
+                $pseudoIdentifierValue->setValue($combinedValue);
+                $pseudoIdentifierValue->setRole($pseudoIdentifier['role']);
+                $pseudoIdentifierValue->setOriginalRole($pseudoIdentifier['role']);
+                $pseudoIdentifierValue->setMappedValue(0);
+                $pseudoIdentifierValue->setAppendValue(false);
+
+                $return[] = $pseudoIdentifierValue;
+                Log::debug(sprintf('Added pseudo identifier with value: %s', $combinedValue));
+            }
+        }
+
         // add a special column value for the "source"
         $columnValue = new ColumnValue();
         $columnValue->setValue(sprintf('jc5-data-import-v%s', config('importer.version')));
