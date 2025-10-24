@@ -143,6 +143,7 @@ class RoleService
 
         $offset    = $configuration->isHeaders() ? 1 : 0;
         $examples  = [];
+        $pseudoExamples = [];
 
         // make statement.
         try {
@@ -163,6 +164,34 @@ class RoleService
         foreach ($records as $line) {
             $line = array_values($line);
             // $line = SpecificService::runSpecifics($line, $configuration->getSpecifics());
+
+            // Generate pseudo identifier example from this line BEFORE deduplication
+            if ($configuration->hasPseudoIdentifier()) {
+                $pseudoIdentifier = $configuration->getPseudoIdentifier();
+                $combinedParts = [];
+
+                foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
+                    $value = isset($line[$sourceIndex]) ? trim((string)$line[$sourceIndex]) : '';
+                    if ('' !== $value) {
+                        $combinedParts[] = $value;
+                    }
+                }
+
+                if (!empty($combinedParts)) {
+                    $separator = $pseudoIdentifier['separator'];
+                    $combinedValue = implode($separator, $combinedParts);
+                    $rawValue = $combinedValue;
+
+                    // Hash composite identifiers (multiple columns) to match actual processing
+                    if (count($pseudoIdentifier['source_columns']) > 1) {
+                        $combinedValue = substr(hash('sha256', $combinedValue), 0, 8);
+                        $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
+                    } else {
+                        $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => null];
+                    }
+                }
+            }
+
             foreach ($line as $index => $cell) {
                 if (strlen((string) $cell) > self::EXAMPLE_LENGTH) {
                     $cell = sprintf('%s...', substr((string) $cell, 0, self::EXAMPLE_LENGTH));
@@ -171,12 +200,21 @@ class RoleService
                 $examples[$index]   = array_unique($examples[$index]);
             }
         }
+
+        // Deduplicate pseudo identifier examples
+        if (!empty($pseudoExamples)) {
+            $pseudoExamples = array_values(array_unique($pseudoExamples, SORT_REGULAR));
+        }
+
         foreach ($examples as $line => $entries) {
             asort($entries);
             $examples[$line] = $entries;
         }
 
-        return $examples;
+        return [
+            'columns' => $examples,
+            'pseudo_identifier' => $pseudoExamples,
+        ];
     }
 
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array

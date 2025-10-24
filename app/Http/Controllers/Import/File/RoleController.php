@@ -95,7 +95,11 @@ class RoleController extends Controller
         // get columns from file
         $content             = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
         $columns             = RoleService::getColumns($content, $configuration);
-        $examples            = RoleService::getExampleData($content, $configuration);
+        $exampleData         = RoleService::getExampleData($content, $configuration);
+
+        // Extract column examples and pseudo identifier examples
+        $examples            = $exampleData['columns'];
+        $pseudoExamples      = $exampleData['pseudo_identifier'];
 
         // submit mapping from config.
         $mapping             = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
@@ -108,7 +112,7 @@ class RoleController extends Controller
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
 
-        return view('import.005-roles.index-csv', compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
+        return view('import.005-roles.index-csv', compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
     }
 
     private function camtIndex(Request $request, Configuration $configuration): View

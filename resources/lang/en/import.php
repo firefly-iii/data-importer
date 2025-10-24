@@ -97,6 +97,14 @@ return [
     'column_opposing-number'        => 'Opposing account (account number)',
     'column_note'                   => 'Note(s)',
     'column_internal_reference'     => 'Internal reference',
+
+    // pseudo identifiers for identifier-based deduplication:
+    'pseudo_identifier_label'       => 'Identifier',
+    'pseudo_identifier_badge'       => 'Pseudo Identifier',
+    'pseudo_identifier_combines'    => 'Combines columns:',
+    'pseudo_identifier_locked_to'   => 'This pseudo identifier is locked to',
+    'pseudo_identifier_used_in'     => 'Used in pseudo identifier',
+
     'account_types_asset'           => 'Asset accounts',
     'account_types_liabilities'     => 'Liabilities',
     'account_types_revenue'         => 'Revenue accounts',

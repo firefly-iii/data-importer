@@ -142,8 +142,9 @@ class ConfigurationPostRequest extends Request
 
             // duplicate detection:
             'duplicate_detection_method'               => $this->convertToString('duplicate_detection_method'),
-            'unique_column_index'                      => $this->convertToInteger('unique_column_index'),
+            'unique_column_index'                      => $this->parseUniqueColumnIndex(),
             'unique_column_type'                       => $this->convertToString('unique_column_type'),
+            'pseudo_identifier'                        => $this->buildPseudoIdentifier(),
 
             // spectre values:
             'connection'                               => $this->convertToString('connection'),
@@ -183,6 +184,65 @@ class ConfigurationPostRequest extends Request
         ];
     }
 
+    /**
+     * Parse unique_column_index from either single integer or comma-separated string.
+     * Returns the first index for backward compatibility with existing code.
+     */
+    private function parseUniqueColumnIndex(): int
+    {
+        $raw = $this->get('unique_column_index', '0');
+
+        // Handle empty input
+        if (trim($raw) === '') {
+            return 0;
+        }
+
+        // If it contains comma, parse as array and return first element
+        if (str_contains((string)$raw, ',')) {
+            $indices = array_map('trim', explode(',', (string)$raw));
+            $indices = array_filter($indices, 'is_numeric');
+            $indices = array_map('intval', $indices);
+
+            return !empty($indices) ? (int)reset($indices) : 0;
+        }
+
+        // Single value - convert to integer
+        return (int)$raw;
+    }
+
+    /**
+     * Build pseudo identifier definition for identifier-based detection.
+     * This unifies single and multiple column identifiers into one mechanism.
+     */
+    private function buildPseudoIdentifier(): array
+    {
+        // Only build pseudo identifier if using 'cell' detection method
+        if ('cell' !== $this->convertToString('duplicate_detection_method')) {
+            return [];
+        }
+
+        $raw = $this->get('unique_column_index', '0');
+
+        // Parse column indices (handles both single "0" and multiple "0,3,5")
+        $indices = array_map('trim', explode(',', (string)$raw));
+        $indices = array_filter($indices, 'is_numeric');
+        $indices = array_map('intval', $indices);
+
+        // Need at least 1 column
+        if (empty($indices)) {
+            return [];
+        }
+
+        // Build pseudo identifier definition (same for single or multiple columns)
+        $type = $this->convertToString('unique_column_type');
+
+        return [
+            'source_columns' => $indices,
+            'separator'      => '|',
+            'role'           => $type,
+        ];
+    }
+
     public function rules(): array
     {
         $flow          = request()->cookie(Constants::FLOW_COOKIE);
@@ -210,7 +270,7 @@ class ConfigurationPostRequest extends Request
 
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',
-            'unique_column_index'           => 'numeric',
+            'unique_column_index'           => 'nullable|string',  // Allow comma-separated indices
             'unique_column_type'            => sprintf('in:%s', $columnOptions),
 
             // conversion
