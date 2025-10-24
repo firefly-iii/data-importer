@@ -455,6 +455,13 @@ return [
             'mappable'     => false,
             'level'        => 'D',
         ],
+        'entryDetailEndToEndId'                                                          => [
+            'title'        => 'entryDetailEndToEndId',
+            'default_role' => 'external-id',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
         'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => [
             'title'        => 'entryDetailRemittanceInformationUnstructuredBlockMessage',
             'default_role' => 'description',
