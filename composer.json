@@ -90,7 +90,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",
         "barryvdh/laravel-ide-helper": "^3.5",
-        "driftingly/rector-laravel": "^2.0",
+        "driftingly/rector-laravel": "^2.1",
         "ergebnis/phpstan-rules": "^2.12",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.18",
