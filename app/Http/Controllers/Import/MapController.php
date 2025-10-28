@@ -98,6 +98,7 @@ class MapController extends Controller
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
             event(new CompletedMapping($configuration));
+
             return redirect()->route('007-convert.index');
         }
 
