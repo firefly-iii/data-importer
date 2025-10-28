@@ -49,6 +49,7 @@ use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 
 /**
@@ -71,17 +72,20 @@ class FileContentSherlock
         if (!is_readable($file)) {
             return 'unknown';
         }
+
         try {
             $content = file_get_contents($file);
         } catch (FilesystemException $e) {
             Log::error(sprintf('Cannot read file at %s', $file));
             Log::error($e->getMessage());
+
             return 'unknown';
         }
 
         try {
             $this->camtReader->readFile($file);
             Log::debug('CAMT.053 Check on file: positive');
+
             return $this->detectContentTypeFromContent($content);
         } catch (Exception $e) {
             Log::debug('CAMT.053 Check on file: negative');

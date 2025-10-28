@@ -66,8 +66,8 @@ class EventServiceProvider extends ServiceProvider
             CompletedConversion::class         => [
                 'App\Handlers\Events\ImportFlowHandler@handleCompletedConversion',
             ],
-            CompletedMapping::class           => [
+            CompletedMapping::class            => [
                 'App\Handlers\Events\ImportFlowHandler@handleCompletedMapping',
-            ]
+            ],
         ];
 }

@@ -43,7 +43,8 @@ class ImportFlowHandler
         session()->forget(Constants::READY_FOR_CONVERSION);
     }
 
-    public function handleCompletedMapping(CompletedMapping $event): void {
+    public function handleCompletedMapping(CompletedMapping $event): void
+    {
         // set map config as complete.
         Log::debug('Set MAPPING_COMPLETE_INDICATOR = true');
         session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
