@@ -6,10 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #11090
-- #11100
-- #11151
-- #11118
+- [Issue 11090](https://github.com/firefly-iii/firefly-iii/issues/11090) (Importer - Getting error "..redirected you too many times") reported by @hiyan
+- [Issue 11100](https://github.com/firefly-iii/firefly-iii/issues/11100) (Camt 052.001.08 xml import error) reported by @bestlinuxgamers
+- [Issue 11151](https://github.com/firefly-iii/firefly-iii/issues/11151) (Submitting import before /import/check-duplicate returns breaks importer) reported by @grgar
+- [Issue 11118](https://github.com/firefly-iii/firefly-iii/issues/11118) (Camt importer ignoring config role definitions) reported by @bestlinuxgamers
 
 ## v1.9.0 - 2025-10-19
 
