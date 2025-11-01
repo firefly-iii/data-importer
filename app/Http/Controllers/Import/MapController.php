@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
+use App\Events\CompletedMapping;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
@@ -96,14 +97,7 @@ class MapController extends Controller
 
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
-            // set map config as complete.
-            session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-
-            // if "file", now ready for conversion
-            if ('file' === $configuration->getFlow() || 'simplefin' === $configuration->getFlow()) {
-                Log::debug('Its a file/simplefin, also set ready for conversion.');
-                session()->put(Constants::READY_FOR_CONVERSION, true);
-            }
+            event(new CompletedMapping($configuration));
 
             return redirect()->route('007-convert.index');
         }
@@ -542,16 +536,12 @@ class MapController extends Controller
         Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
 
         // set map config as complete.
-        session()->put(Constants::MAPPING_COMPLETE_INDICATOR, true);
-        session()->put(Constants::READY_FOR_CONVERSION, true);
+        event(new CompletedMapping($configuration));
         if (
             'nordigen' === $configuration->getFlow()
             || 'spectre' === $configuration->getFlow()
             || 'lunchflow' === $configuration->getFlow()
             || 'simplefin' === $configuration->getFlow()) {
-            // if nordigen, spectre, or simplefin, now ready for submission!
-            session()->put(Constants::READY_FOR_SUBMISSION, true);
-
             return redirect()->route('008-submit.index');
         }
 

@@ -100,8 +100,7 @@
                                                                 <select name="roles[{{ $field['title'] }}]" id="roles_{{ $field['title'] }}" class="form-control">
                                                                     @foreach(config('camt.roles.' . $field['roles']) as $roleKey => $role)
                                                                     <option value="{{ $roleKey }}" label="{{ __('import.column_' . $roleKey) }}"
-                                                                            @if($field['default_role'] === $roleKey) selected @endif
-                                                                            @if($field['default_role'] !== $roleKey && array_key_exists($field['title'], $roles) && $roles[$field['title']] == $roleKey) selected @endif
+                                                                    @if($field['selected'] == $roleKey) selected @endif
                                                                     >
                                                                         {{ trans('import.column_' . $roleKey) }}
                                                                     </option>

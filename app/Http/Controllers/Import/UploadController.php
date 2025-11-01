@@ -193,25 +193,35 @@ class UploadController extends Controller
             if (0 === $errorNumber) {
                 $detector          = new FileContentSherlock();
                 $this->contentType = $detector->detectContentType($file->getPathname());
-                $content           = '';
-                if ('csv' === $this->contentType) {
-                    $content = (string)file_get_contents($file->getPathname());
+                $content           = null;
 
-                    // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                    // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                    // This one is for you: 🤦‍♀️
-                    $eol     = $this->detectEOL($content);
-                    if ("\r" === $eol) {
-                        Log::error('Your bank is dumb. Tell them to fix their CSV files.');
-                        $content = str_replace("\r", "\n", $content);
-                    }
-                }
+                switch ($this->contentType) {
+                    case 'csv':
+                        $content = (string)file_get_contents($file->getPathname());
 
-                if ('camt' === $this->contentType) {
-                    $content = (string)file_get_contents($file->getPathname());
+                        // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                        // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                        // This one is for you: 🤦‍♀️
+                        $eol     = $this->detectEOL($content);
+                        if ("\r" === $eol) {
+                            Log::error('Your bank is dumb. Tell them to fix their CSV files.');
+                            $content = str_replace("\r", "\n", $content);
+                        }
+
+                        break;
+
+                    case 'camt':
+                        $content = (string)file_get_contents($file->getPathname());
+
+                        break;
+
+                    default:
+                        $errors->add('importable_file', sprintf('The file type of your upload is "%s". This file type is not supported. Please check the logs, and start over. Sorry about this.', $this->contentType));
                 }
-                $fileName          = StorageService::storeContent($content);
-                event(new ProvidedDataUpload($fileName));
+                if (null !== $content && '' !== $content) {
+                    $fileName = StorageService::storeContent($content);
+                    event(new ProvidedDataUpload($fileName));
+                }
             }
         }
 

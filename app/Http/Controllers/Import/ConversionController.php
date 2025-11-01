@@ -302,6 +302,7 @@ class ConversionController extends Controller
 
             return response()->json($importJobStatus->toArray());
         }
+
         Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
             // #10590 do not error out if no transactions are found.

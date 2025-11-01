@@ -143,6 +143,9 @@ class RoleController extends Controller
             'explanation' => trans('camt.explain_B'),
             'fields'      => $this->getFieldsForLevel('B'),
         ];
+        //        var_dump($levels['B']);
+        //        var_dump($roles);
+        //        exit;
         $levels['C']       = [
             'title'       => trans('camt.level_C'),
             'explanation' => trans('camt.explain_C'),
@@ -176,6 +179,7 @@ class RoleController extends Controller
                 'fields'      => [
                     // have to collect D by hand because of intermediate sections
                     'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
+                    'entryDetailEndToEndId'                                                          => config('camt.fields.entryDetailEndToEndId'),
                     'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config('camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'),
                     'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config('camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'),
                     'section_tr'                                                                     => ['section' => true, 'title' => 'transaction'],
@@ -192,6 +196,7 @@ class RoleController extends Controller
                 ],
             ];
         }
+        $levels            = $this->mergeLevelsAndRoles($levels, $roles);
 
         return view('import.005-roles.index-camt', compact('mainTitle', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
     }
@@ -234,13 +239,16 @@ class RoleController extends Controller
 
         // set role config as complete.
         session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-
+        Log::debug('Set ROLES_COMPLETE_INDICATOR = true');
         // redirect to mapping thing.
         if (true === $needsMapping) {
+            Log::debug('Redirect to mapping, because $needsMapping is true.');
+
             return redirect()->route('006-mapping.index');
         }
         // otherwise, store empty mapping, and continue:
         // set map config as complete.
+        Log::debug('Set READY_FOR_CONVERSION = true + redirect to conversion, because $needsMapping is false.');
         session()->put(Constants::READY_FOR_CONVERSION, true);
 
         return redirect()->route('007-convert.index');
@@ -259,5 +267,32 @@ class RoleController extends Controller
         }
 
         return $need;
+    }
+
+    private function mergeLevelsAndRoles(array $levels, array $roles): array
+    {
+        foreach ($levels as $letter => $info) {
+            foreach ($info['fields'] as $index => $field) {
+                $title                                         = $field['title'];
+                $selected                                      = $field['default_role'] ?? '_impossible';
+                Log::debug(sprintf('Analysing level %s field "%s"', $letter, $title));
+                if (array_key_exists($title, $roles)) {
+                    if ('_ignore' === $roles[$title]) {
+                        $selected = '_ignore';
+                        Log::debug(sprintf('Make default role "_ignore" for level %s field "%s"', $letter, $title));
+                    }
+                    if ($roles[$title] === $field['default_role']) {
+                        // $selected = $field['default_role'];
+                        Log::debug(sprintf('User has selected role "%s" for level %s field "%s"', $roles[$title], $letter, $title));
+                    }
+                }
+                if (!array_key_exists($title, $roles)) {
+                    Log::debug(sprintf('User has no role pre-selected for level %s field "%s"', $letter, $title));
+                }
+                $levels[$letter]['fields'][$index]['selected'] = $selected;
+            }
+        }
+
+        return $levels;
     }
 }

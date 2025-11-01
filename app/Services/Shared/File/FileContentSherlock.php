@@ -44,10 +44,13 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\File;
 
+use Exception;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
-use Exception;
+use Safe\Exceptions\FilesystemException;
+
+use function Safe\file_get_contents;
 
 /**
  * Class FileContentSherlock
@@ -66,18 +69,30 @@ class FileContentSherlock
         if (null === $file) {
             return 'unknown';
         }
+        if (!is_readable($file)) {
+            return 'unknown';
+        }
 
         try {
-            $message = $this->camtReader->readFile($file);
+            $content = file_get_contents($file);
+        } catch (FilesystemException $e) {
+            Log::error(sprintf('Cannot read file at %s', $file));
+            Log::error($e->getMessage());
+
+            return 'unknown';
+        }
+
+        try {
+            $this->camtReader->readFile($file);
             Log::debug('CAMT.053 Check on file: positive');
 
-            return 'camt';
+            return $this->detectContentTypeFromContent($content);
         } catch (Exception $e) {
             Log::debug('CAMT.053 Check on file: negative');
             Log::debug($e->getMessage());
         }
 
-        return 'csv';
+        return $this->detectContentTypeFromContent($content);
     }
 
     public function detectContentTypeFromContent(?string $content): string
@@ -94,6 +109,10 @@ class FileContentSherlock
         } catch (Exception) {
             Log::debug('CAMT.053 Check of content: negative');
             // Log::debug($e->getMessage());
+        }
+        $short = substr($content, 0, 1024);
+        if (str_contains($short, 'camt.052.001.08')) {
+            return 'camt.052';
         }
 
         return 'csv';

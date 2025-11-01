@@ -155,6 +155,12 @@ trait IsReadyForStep
     private function isReadyForSubmission(string $flow): bool
     {
         Log::debug(sprintf('isReadyForSubmission("%s")', $flow));
+        if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
+            Log::debug(sprintf('isReadyForSubmission("%s"): READY_FOR_SUBMISSION = true, return true.', $flow));
+
+            return true;
+        }
+        // isReadyForSubmission
         if (session()->has(Constants::CONVERSION_COMPLETE_INDICATOR) && true === session()->get(Constants::CONVERSION_COMPLETE_INDICATOR)) {
             // only ready for submission when mapping is also complete.
             if ('file' !== $flow) {
@@ -209,7 +215,7 @@ trait IsReadyForStep
     private function isReadyForMapping(string $flow): bool
     {
         if (session()->has(Constants::MAPPING_COMPLETE_INDICATOR) && true === session()->get(Constants::MAPPING_COMPLETE_INDICATOR)) {
-            Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is false or non existent.');
+            Log::debug('Return false in isReadyForMapping, because MAPPING_COMPLETE_INDICATOR is true.');
 
             return false;
         }

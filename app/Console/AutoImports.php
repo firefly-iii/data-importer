@@ -389,6 +389,10 @@ trait AutoImports
             $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
         }
+
+
+
+
         if (0 === count($transactions)) {
             Log::error('[a] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
@@ -519,6 +523,7 @@ trait AutoImports
 
             return;
         }
+
 
         // set done:
         SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);

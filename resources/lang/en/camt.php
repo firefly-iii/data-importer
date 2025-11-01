@@ -69,6 +69,7 @@ return [
     'field_entryDetailAmountCurrency'                                                      => 'Currency Code',
     'section_transaction'                                                                  => 'Transaction',
     'field_entryDetailAccountServicerReference'                                            => 'Accounter Service Reference',
+    'field_entryDetailEndToEndId'                                                          => 'End To End Identification',
     'field_entryDetailRemittanceInformationUnstructuredBlockMessage'                       => 'Unstructured Message',
     'field_entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => 'Structured Message',
 
