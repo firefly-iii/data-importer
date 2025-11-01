@@ -157,6 +157,7 @@ trait IsReadyForStep
         Log::debug(sprintf('isReadyForSubmission("%s")', $flow));
         if (session()->has(Constants::READY_FOR_SUBMISSION) && true === session()->get(Constants::READY_FOR_SUBMISSION)) {
             Log::debug(sprintf('isReadyForSubmission("%s"): READY_FOR_SUBMISSION = true, return true.', $flow));
+
             return true;
         }
         // isReadyForSubmission

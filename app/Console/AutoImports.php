@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Enums\ExitCode;
-use App\Events\CompletedConversion;
 use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;

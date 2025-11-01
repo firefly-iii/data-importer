@@ -62,8 +62,8 @@ class ImportFlowHandler
             || 'lunchflow' === $event->configuration->getFlow()
             || 'simplefin' === $event->configuration->getFlow()) {
             // if nordigen, spectre, or simplefin, now ready for submission!
-             //Log::debug('Set READY_FOR_SUBMISSION = true');
-             // session()->put(Constants::READY_FOR_SUBMISSION, true);
+            // Log::debug('Set READY_FOR_SUBMISSION = true');
+            // session()->put(Constants::READY_FOR_SUBMISSION, true);
         }
 
     }
