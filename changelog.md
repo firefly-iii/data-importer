@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.9.1 - 2025-11-02
+
+### Fixed
+
+- #11090
+- #11100
+- #11151
+- #11118
+
 ## v1.9.0 - 2025-10-19
 
 > [!NOTE]
