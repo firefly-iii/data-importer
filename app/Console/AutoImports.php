@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Enums\ExitCode;
+use App\Events\CompletedConversion;
 use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
@@ -389,6 +390,10 @@ trait AutoImports
             $this->conversionErrors     = $manager->getAllErrors();
             $this->conversionRateLimits = $manager->getAllRateLimits();
         }
+
+
+
+
         if (0 === count($transactions)) {
             Log::error('[a] Zero transactions!');
             RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE, $this->identifier);
@@ -519,6 +524,7 @@ trait AutoImports
 
             return;
         }
+
 
         // set done:
         SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);

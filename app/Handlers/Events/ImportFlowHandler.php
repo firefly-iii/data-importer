@@ -39,6 +39,7 @@ class ImportFlowHandler
     public function handleCompletedConversion(CompletedConversion $event): void
     {
         Log::debug('Set conversion as complete. Forget READY_FOR_CONVERSION.');
+        Log::debug('Set CONVERSION_COMPLETE_INDICATOR = true');
         session()->put(Constants::CONVERSION_COMPLETE_INDICATOR, true);
         session()->forget(Constants::READY_FOR_CONVERSION);
     }
@@ -61,7 +62,8 @@ class ImportFlowHandler
             || 'lunchflow' === $event->configuration->getFlow()
             || 'simplefin' === $event->configuration->getFlow()) {
             // if nordigen, spectre, or simplefin, now ready for submission!
-            session()->put(Constants::READY_FOR_SUBMISSION, true);
+             //Log::debug('Set READY_FOR_SUBMISSION = true');
+             // session()->put(Constants::READY_FOR_SUBMISSION, true);
         }
 
     }

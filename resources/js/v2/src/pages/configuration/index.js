@@ -28,9 +28,6 @@ let index = function () {
         parsedDateFormat: 'hello',
         dateRange: '',
         detectionMethod: '',
-        functionName() {
-
-        },
         getParsedDate() {
             this.loadingParsedDate = true;
             const parseUrl = './import/php_date';
