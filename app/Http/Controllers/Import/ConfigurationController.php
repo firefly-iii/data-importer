@@ -115,7 +115,8 @@ class ConfigurationController extends Controller
             // detect content type and save to config object.
             $detector = new FileContentSherlock();
             $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-            $fileType = $detector->detectContentTypeFromContent($content);
+            $camtType = null;
+            $fileType = $detector->detectContentTypeFromContent($content, $camtType);
             $configuration->setContentType($fileType);
         }
         // Get currency data for account creation widget
