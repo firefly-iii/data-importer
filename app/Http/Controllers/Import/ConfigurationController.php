@@ -118,6 +118,15 @@ class ConfigurationController extends Controller
             $camtType = null;
             $fileType = $detector->detectContentTypeFromContent($content, $camtType);
             $configuration->setContentType($fileType);
+            if($fileType == 'camt' && $camtType != null) {
+                $configuration->setCamtType($camtType);
+
+                // save configuration in session and on disk AGAIN:
+                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+                $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
+                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+
+            }
         }
         // Get currency data for account creation widget
         $currencies         = $this->getCurrencies();
