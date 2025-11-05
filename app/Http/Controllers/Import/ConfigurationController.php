@@ -131,7 +131,7 @@ class ConfigurationController extends Controller
         // Get currency data for account creation widget
         $currencies         = $this->getCurrencies();
 
-        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     /**
