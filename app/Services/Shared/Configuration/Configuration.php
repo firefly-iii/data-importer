@@ -41,6 +41,7 @@ class Configuration
     private bool   $addImportTag    = true;
     private string $connection      = '0';
     private string $contentType     = 'csv';
+    private string $camtType        = '';
     private bool   $conversion;
     private string $customTag       = '';
     private string $date            = 'Y-m-d';
@@ -210,6 +211,7 @@ class Configuration
         $object->rules                       = $data['apply-rules'] ?? true;
         $object->flow                        = $data['flow'] ?? 'file';
         $object->contentType                 = $data['content_type'] ?? 'csv';
+        $object->camtType                    = $data['camt_type'] ?? '';
         $object->customTag                   = $data['custom_tag'] ?? '';
 
         // camt settings
@@ -351,6 +353,7 @@ class Configuration
         $object->version                     = self::VERSION;
         $object->flow                        = $array['flow'] ?? 'file';
         $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
         // Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
@@ -468,6 +471,7 @@ class Configuration
         $object->mapping                     = $array['mapping'] ?? [];
         $object->doMapping                   = $array['do_mapping'] ?? [];
         $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
         Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
@@ -607,6 +611,16 @@ class Configuration
     public function setContentType(string $contentType): void
     {
         $this->contentType = $contentType;
+    }
+
+    public function getCamtType(): string
+    {
+        return $this->camtType;
+    }
+
+    public function setCamtType(string $camtType): void
+    {
+        $this->camtType = $camtType;
     }
 
     public function getCustomTag(): string
@@ -876,6 +890,7 @@ class Configuration
             'unique_column_type'            => $this->uniqueColumnType,
             'flow'                          => $this->flow,
             'content_type'                  => $this->contentType,
+            'camt_type'                     => $this->camtType,
             'custom_tag'                    => $this->customTag,
 
             // spectre
