@@ -6,6 +6,7 @@ namespace App\Services\Camt;
 
 use Genkgo\Camt\Camt053\DTO\Statement;
 use Genkgo\Camt\DTO\Entry;
+use Illuminate\Support\Facades\Log;
 
 class TransactionCamt053 extends AbstractTransaction
 {
