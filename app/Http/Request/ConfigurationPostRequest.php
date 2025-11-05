@@ -229,7 +229,7 @@ class ConfigurationPostRequest extends Request
         $indices = array_map('intval', $indices);
 
         // Need at least 1 column
-        if (empty($indices)) {
+        if (0 === count($indices)) {
             return [];
         }
 
