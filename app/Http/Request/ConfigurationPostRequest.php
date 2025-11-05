@@ -203,7 +203,7 @@ class ConfigurationPostRequest extends Request
             $indices = array_filter($indices, 'is_numeric');
             $indices = array_map('intval', $indices);
 
-            return !empty($indices) ? (int)reset($indices) : 0;
+            return count($indices) > 0 ? (int)reset($indices) : 0;
         }
 
         // Single value - convert to integer
