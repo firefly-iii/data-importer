@@ -799,12 +799,12 @@ class Configuration
 
     public function getPseudoIdentifier(): ?array
     {
-        return !empty($this->pseudoIdentifier) ? $this->pseudoIdentifier : null;
+        return count($this->pseudoIdentifier) > 0 ? $this->pseudoIdentifier : null;
     }
 
     public function hasPseudoIdentifier(): bool
     {
-        return !empty($this->pseudoIdentifier);
+        return count($this->pseudoIdentifier) > 0;
     }
 
     public function setPseudoIdentifier(array $pseudoIdentifier): void
@@ -841,20 +841,16 @@ class Configuration
             return;
         }
 
-        if (!empty($this->pseudoIdentifier)) {
+        if (count($this->pseudoIdentifier) > 0) {
             return; // Already using new format
         }
 
-        if (empty($this->uniqueColumnType)) {
+        if ('' === $this->uniqueColumnType) {
             return; // No identifier configured
         }
 
         // Create pseudo identifier from old single-column format
-        Log::debug(sprintf(
-            'Migrating old identifier format to pseudo identifier: index=%d, type=%s',
-            $this->uniqueColumnIndex,
-            $this->uniqueColumnType
-        ));
+        Log::debug(sprintf('Migrating old identifier format to pseudo identifier: index=%d, type=%s', $this->uniqueColumnIndex, $this->uniqueColumnType));
 
         $this->pseudoIdentifier = [
             'source_columns' => [$this->uniqueColumnIndex],

@@ -177,16 +177,18 @@ class RoleService
                     }
                 }
 
-                if (!empty($combinedParts)) {
+                if (count($combinedParts) > 0) {
                     $separator = $pseudoIdentifier['separator'];
                     $combinedValue = implode($separator, $combinedParts);
                     $rawValue = $combinedValue;
 
                     // Hash composite identifiers (multiple columns) to match actual processing
-                    if (count($pseudoIdentifier['source_columns']) > 1) {
+                    $count = count($pseudoIdentifier['source_columns']);
+                    if ($count > 1) {
                         $combinedValue = substr(hash('sha256', $combinedValue), 0, 8);
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
-                    } else {
+                    }
+                    if($count <= 1) {
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => null];
                     }
                 }
@@ -202,7 +204,7 @@ class RoleService
         }
 
         // Deduplicate pseudo identifier examples
-        if (!empty($pseudoExamples)) {
+        if (count($pseudoExamples) > 0) {
             $pseudoExamples = array_values(array_unique($pseudoExamples, SORT_REGULAR));
         }
 
