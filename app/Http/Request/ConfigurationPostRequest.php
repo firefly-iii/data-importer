@@ -138,6 +138,7 @@ class ConfigurationPostRequest extends Request
             'do_mapping'                               => [],
             'flow'                                     => $this->convertToString('flow'),
             'content_type'                             => $this->convertToString('content_type'),
+            'camt_type'                                => $this->convertToString('camt_type'),
             'custom_tag'                               => $this->convertToString('custom_tag'),
 
             // duplicate detection:
