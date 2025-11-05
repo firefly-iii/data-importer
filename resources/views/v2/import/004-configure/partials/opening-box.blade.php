@@ -8,7 +8,7 @@
                 @if('file' === $flow)
                     <p>
                         @if('camt' === $configuration->getContentType())
-                            Even though camt.053 is a defined standard, you might want to customize. Some of the most important settings are below.
+                            Even though camt.{{ $camtType }} is a defined standard, you might want to customize. Some of the most important settings are below.
                             They apply to all records in the uploaded files. If you would like some support,
                             you won't find anything at <a
                                 href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/"
