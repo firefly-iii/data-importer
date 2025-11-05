@@ -24,6 +24,13 @@
                                 the documentation</a> to learn more
                             about this process.
                         </p>
+                        <p>
+                            Make sure you map at least, or the import will fail:
+                        </p>
+                        <ul>
+                            <li>Amount</li>
+                            <li>Transaction date</li>
+                        </ul>
                     </div>
                 </div>
             </div>
