@@ -61,26 +61,27 @@ class FileContentSherlock
         $this->camtReader = new Reader(Config::getDefault());
     }
 
-    public function detectContentType(?string $file): string
+    public function detectContentType(?string $file, &$camtType = null): string
     {
         if (null === $file) {
             return 'unknown';
         }
 
         try {
-            $message = $this->camtReader->readFile($file);
-            Log::debug('CAMT.053 Check on file: positive');
+            $this->camtReader->readFile($file);
+            Log::debug('CAMT Check on file: positive');
+            $camtType = $this->extractCamtType($this->camtReader);
 
             return 'camt';
         } catch (Exception $e) {
-            Log::debug('CAMT.053 Check on file: negative');
+            Log::debug('CAMT Check on file: negative');
             Log::debug($e->getMessage());
         }
 
         return 'csv';
     }
 
-    public function detectContentTypeFromContent(?string $content): string
+    public function detectContentTypeFromContent(?string $content, &$camtType = null): string
     {
         if (null === $content) {
             return 'unknown';
@@ -88,14 +89,38 @@ class FileContentSherlock
 
         try {
             $this->camtReader->readString($content);
-            Log::debug('CAMT.053 Check of content: positive');
+            Log::debug('CAMT Check of content: positive');
+            $camtType = $this->extractCamtType($this->camtReader);
 
             return 'camt';
         } catch (Exception) {
-            Log::debug('CAMT.053 Check of content: negative');
+            Log::debug('CAMT Check of content: negative');
             // Log::debug($e->getMessage());
         }
 
         return 'csv';
+    }
+
+    private function extractCamtType(Reader $reader)
+    {
+        if(null === $reader) {
+            return null;
+        }
+        
+        try {
+            // Get Class and Version
+            $format = $reader->getMessageFormat();
+            $class = get_class($format);
+            if (preg_match('/Camt(\d+).*V(\d+)/', $class, $m)) {
+                $type = $m[1];      // e. g. 052 or 053
+                $version = $m[2];   // e. g. 08
+                Log::debug('CAMT Type: '.$type);
+                Log::debug('CAMT Version: '.$version);
+            }
+            return $type;
+        } catch (Exception) {
+            Log::debug('Unable to determine the type and version of CAMT-message');
+        }
+        
     }
 }
