@@ -159,7 +159,7 @@ class LineProcessor
             }
 
             // Only create pseudo identifier if we have values
-            if (!empty($combinedParts)) {
+            if (count($combinedParts) > 0) {
                 $separator = $pseudoIdentifier['separator'];
                 $combinedValue = implode($separator, $combinedParts);
 
