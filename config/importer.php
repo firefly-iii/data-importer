@@ -27,6 +27,7 @@ declare(strict_types=1);
  * The preferred order for ALL workflows is as follows:
  *
  * FILE workflow
+ * - 1: INDEX
  * - 2: Upload
  * - 3: Configuration
  * - 4: Role selection
@@ -34,15 +35,32 @@ declare(strict_types=1);
  * - 6: Convert data
  * - 7: Submit data
  *
- *  NORDIGEN / GOCARDLESS workflow
+ * LUNCH FLOW
+ *
+ * 1: INDEX
+ * 2: Upload
+ * 3: Configuration
+ * 4: Convert data
+ * 5: Map data
+ * 6: Submit data
+ *
+ *  GOCARDLESS workflow
  *  - 1: Authentication
  *  - 2: Upload
- *  - 8: Select country and bank.
- *  - 3: Configuration
- *  - 4: Role selection
- *  - 5: Map data
- *  - 6: Convert data
+ *  - 3: Select country and bank.
+ *  - 4: Configuration
+ *  - 5: Convert data
+ *  - 6: Map data
  *  - 7: Submit data
+ *
+ * Previous version decided, using all kinds of variables, if the user was "ready".
+ * This is no longer viable. User must be able to switch between each step effortlessly.
+ *
+ * Which means:
+ *
+ * Function to tell you which step is next, based on current step.
+ * Every step is valid. if not, friendly notification will redirect you.
+ *
  */
 
 return [

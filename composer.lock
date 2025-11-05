@@ -514,12 +514,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/JC5/api-support-classes.git",
-                "reference": "c70158bc66bb3da01c9b7547539f1331ea2282ce"
+                "reference": "a17e2302890268a4ff395d8a29099b59e355c7d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/c70158bc66bb3da01c9b7547539f1331ea2282ce",
-                "reference": "c70158bc66bb3da01c9b7547539f1331ea2282ce",
+                "url": "https://api.github.com/repos/JC5/api-support-classes/zipball/a17e2302890268a4ff395d8a29099b59e355c7d7",
+                "reference": "a17e2302890268a4ff395d8a29099b59e355c7d7",
                 "shasum": ""
             },
             "require": {
@@ -613,7 +613,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2025-06-29T14:43:41+00:00"
+            "time": "2025-11-05T15:53:46+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -7052,21 +7052,22 @@
         },
         {
             "name": "driftingly/rector-laravel",
-            "version": "2.1.2",
+            "version": "2.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/driftingly/rector-laravel.git",
-                "reference": "d7cd932cff9e398a43393f1a1a63b27d574e35ef"
+                "reference": "2f1e9c3997bf45592d58916f0cedd775e844b9c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/d7cd932cff9e398a43393f1a1a63b27d574e35ef",
-                "reference": "d7cd932cff9e398a43393f1a1a63b27d574e35ef",
+                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/2f1e9c3997bf45592d58916f0cedd775e844b9c6",
+                "reference": "2f1e9c3997bf45592d58916f0cedd775e844b9c6",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.4 || ^8.0",
-                "rector/rector": "^2.2.7"
+                "rector/rector": "^2.2.7",
+                "webmozart/assert": "^1.11"
             },
             "type": "rector-extension",
             "autoload": {
@@ -7081,9 +7082,9 @@
             "description": "Rector upgrades rules for Laravel Framework",
             "support": {
                 "issues": "https://github.com/driftingly/rector-laravel/issues",
-                "source": "https://github.com/driftingly/rector-laravel/tree/2.1.2"
+                "source": "https://github.com/driftingly/rector-laravel/tree/2.1.3"
             },
-            "time": "2025-10-31T21:56:58+00:00"
+            "time": "2025-11-04T18:32:57+00:00"
         },
         {
             "name": "ergebnis/phpstan-rules",
@@ -10711,6 +10712,64 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
+        },
+        {
+            "name": "webmozart/assert",
+            "version": "1.12.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozarts/assert.git",
+                "reference": "9be6926d8b485f55b9229203f962b51ed377ba68"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/9be6926d8b485f55b9229203f962b51ed377ba68",
+                "reference": "9be6926d8b485f55b9229203f962b51ed377ba68",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-date": "*",
+                "ext-filter": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "suggest": {
+                "ext-intl": "",
+                "ext-simplexml": "",
+                "ext-spl": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webmozart\\Assert\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bernhard Schussek",
+                    "email": "bschussek@gmail.com"
+                }
+            ],
+            "description": "Assertions to validate method input/output with nice error messages.",
+            "keywords": [
+                "assert",
+                "check",
+                "validate"
+            ],
+            "support": {
+                "issues": "https://github.com/webmozarts/assert/issues",
+                "source": "https://github.com/webmozarts/assert/tree/1.12.1"
+            },
+            "time": "2025-10-29T15:56:20+00:00"
         }
     ],
     "aliases": [],

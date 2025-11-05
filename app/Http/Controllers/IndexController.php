@@ -26,6 +26,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -44,19 +45,24 @@ class IndexController extends Controller
         app('view')->share('pageTitle', 'Index');
     }
 
-    public function flush(): mixed
+    public function flush(): RedirectResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget([
             Constants::UPLOAD_DATA_FILE,
             Constants::UPLOAD_CONFIG_FILE,
             Constants::IMPORT_JOB_IDENTIFIER,
+            Constants::READY_FOR_CONVERSION,
+            Constants::CONVERSION_COMPLETE_INDICATOR,
+            Constants::MAPPING_COMPLETE_INDICATOR,
+            Constants::CONNECTION_SELECTED_INDICATOR,
+            Constants::ROLES_COMPLETE_INDICATOR,
+            Constants::SELECTED_BANK_COUNTRY
         ]);
         session()->flush();
         session()->regenerate(true);
         $cookies = [cookie(Constants::FLOW_COOKIE, '')];
         Artisan::call('cache:clear');
-        // Artisan::call('config:clear'); // disable command to try and fix
 
         return redirect(route('index'))->withCookies($cookies);
     }

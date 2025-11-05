@@ -57,9 +57,6 @@
                             to Firefly III.
                         </p>
                         @endif
-                        <p class="text-warning">
-                            Firefly III and Salt Edge / Spectre partnered to give you free API access. This will unfortunately end on October 31st, 2025. The API will keep working, but existing users may have to migrate to a paid tier.
-                        </p>
                     </div>
                 </div>
             </div>
@@ -312,6 +309,7 @@
                             <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
                                data-bs-placement="top"
                                title="This button resets your progress">Start over</a>
+                            <a class="btn btn-secondary btn-sm" onclick="window.location.reload(true)">Only refresh the page</a>
                         </p>
                     </div>
                 </div>
