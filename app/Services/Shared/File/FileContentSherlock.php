@@ -106,10 +106,10 @@ class FileContentSherlock
             Log::debug('CAMT.05x Check of content: positive');
 
             return 'camt';
-        } catch (Exception $e) {
+        } catch (Exception) {
             Log::debug('CAMT.05x Check of content: negative');
          }
- 
+
         return 'csv';
     }
 
@@ -120,14 +120,14 @@ class FileContentSherlock
             // Get Class and Version
             $format = $this->camtReader->getMessageFormat();
             $class = get_class($format);
-            Log::debug('Class is : '.$class);
-            if (preg_match('/Camt(\d+).*V(\d+)/', $class, $m)) {
+            Log::debug(sprintf('Class is: %s',$class));
+            if (false !== preg_match('/Camt(\d+).*V(\d+)/', $class, $m)) {
                 $type = $m[1];      // e. g. 052 or 053
                 $version = $m[2];   // e. g. 08
-                Log::debug('CAMT Type: '.$type);
-                Log::debug('CAMT Version: '.$version);
+                Log::debug(sprintf('CAMT Type: %s',$type));
+                Log::debug(sprintf('CAMT Version: %',$version));
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             Log::debug('Unable to determine the type and version of CAMT-message');
         }
         return $type;

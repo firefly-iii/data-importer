@@ -6,12 +6,13 @@ namespace App\Services\Camt;
 
 use Genkgo\Camt\Camt052\DTO\Report;
 use Genkgo\Camt\DTO\Entry;
+use Genkgo\Camt\DTO\Message;
 use Illuminate\Support\Facades\Log;
 
 class TransactionCamt052 extends AbstractTransaction
 {
     public function __construct(
-        protected readonly \Genkgo\Camt\DTO\Message $levelA,
+        protected readonly Message $levelA,
         protected readonly Report $levelB,
         protected readonly Entry $levelC,
         protected array $levelD

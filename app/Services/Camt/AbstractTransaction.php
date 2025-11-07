@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Camt;
 
+use Genkgo\Camt\DTO\DomainBankTransactionCode;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
@@ -72,9 +73,9 @@ abstract class AbstractTransaction
         switch ($field) {
             default:
                 // temporary debug message:
-                                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-                                echo PHP_EOL;
-                                exit;
+//                                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+//                                echo PHP_EOL;
+//                                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
@@ -436,5 +437,5 @@ abstract class AbstractTransaction
     private function generateAddressLine(?Address $address = null): string
     {
         return implode(', ', $address->getAddressLines());
-    }    
+    }
 }
