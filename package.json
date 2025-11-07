@@ -4,5 +4,8 @@
     ],
     "devDependencies": {
         "esbuild": "^0.25.12"
+    },
+    "dependencies": {
+        "patch-package": "^8.0.1"
     }
 }
