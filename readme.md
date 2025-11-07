@@ -30,11 +30,17 @@
 
 ## About the data importer
 
-"Firefly III" is a (self-hosted) manager for your personal finances. It can help you keep track of your expenses and income, so you can spend less and save more. The **data importer** is built to help you import transactions into Firefly III. It is separated from Firefly III for security and maintenance reasons.
+"Firefly III" is a (self-hosted) manager for your personal finances. It can help you keep track of your expenses and income, so you can spend less and save more. The **Firefly III Data Importer** is built to help you import transactions into Firefly III. It is separated from Firefly III for security and maintenance reasons.
 
-The data importer does not connect to your bank directly. Instead, it uses [GoCardless](https://gocardless.com/) and [SaltEdge](https://www.saltedge.com/products/spectre/countries) to connect to over 6000 banks worldwide. These services are free for Firefly III users, but require registration. Keep in mind these services have their own privacy and data usage policies.
+The data importer does not connect to your bank directly. Instead, it uses [third party data providers](https://docs.firefly-iii.org/how-to/data-importer/import/third-party-providers/) to help you import data into Firefly III. Some of these providers are free of charge, others charge money.
 
-The data importer can also connect to your bank using `SimpleFIN`, and it can import CSV files you've downloaded from your bank.
+If you do not want to rely on third parties to import your data, you can import data using the following file formats:
+
+- CSV
+- CAMT.052
+- CAMT.053
+
+Other formats are on my to do list :-).
 
 You can run the data importer once, for a bulk import. You can also run it regularly to keep up with new transactions.
 
@@ -42,7 +48,7 @@ Eager to get started? Go to [the documentation](https://docs.firefly-iii.org/)!
 
 ## Features
 
-* Import from over 6000 banks
+* Import from many banks using third party data providers
 * Import over the command line for easy automation
 * Import over an API for easy automation
 * Use rules and data mapping for transaction clarity
