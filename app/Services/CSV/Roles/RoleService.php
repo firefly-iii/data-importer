@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
-use App\Services\Camt\Transaction;
+use App\Services\Camt\TransactionFactory;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -223,6 +223,7 @@ class RoleService
     {
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        $camtType     = $configuration->getCamtType();
         $transactions = [];
         $examples     = [];
         $fieldNames   = array_keys(config('camt.fields'));
@@ -244,11 +245,11 @@ class RoleService
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
                     // TODO Create a single transaction, I guess?
-                    $transactions[] = new Transaction($camtMessage, $statement, $entry, []);
+                    $transactions[] = TransactionFactory::create($camtType, $camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {
                     foreach ($entry->getTransactionDetails() as $detail) {
-                        $transactions[] = new Transaction($camtMessage, $statement, $entry, [$detail]);
+                        $transactions[] = TransactionFactory::create($camtType, $camtMessage, $statement, $entry, [$detail]);
                     }
                 }
             }

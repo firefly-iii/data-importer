@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Camt\Transaction;
+use App\Services\Camt\AbstractTransaction;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
@@ -62,7 +62,7 @@ class TransactionConverter
     /**
      * @throws ImporterErrorException
      */
-    private function convertSingle(Transaction $transaction): array
+    private function convertSingle(AbstractTransaction $transaction): array
     {
         Log::debug('Convert single transaction into pseudo-transaction.');
         $result           = [
