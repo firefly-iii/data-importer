@@ -57,7 +57,7 @@ class IndexController extends Controller
             Constants::MAPPING_COMPLETE_INDICATOR,
             Constants::CONNECTION_SELECTED_INDICATOR,
             Constants::ROLES_COMPLETE_INDICATOR,
-            Constants::SELECTED_BANK_COUNTRY
+            Constants::SELECTED_BANK_COUNTRY,
         ]);
         session()->flush();
         session()->regenerate(true);

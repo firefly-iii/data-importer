@@ -71,9 +71,9 @@ abstract class AbstractTransaction
         switch ($field) {
             default:
                 // temporary debug message:
-//                                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-//                                echo PHP_EOL;
-//                                exit;
+                //                                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+                //                                echo PHP_EOL;
+                //                                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 

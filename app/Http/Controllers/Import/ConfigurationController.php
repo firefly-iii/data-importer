@@ -117,8 +117,8 @@ class ConfigurationController extends Controller
             $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
             $fileType = $detector->detectContentTypeFromContent($content);
             $configuration->setContentType($fileType);
-            if($fileType === 'camt') {
-                $camtType = $detector->getCamtType();
+            if ('camt' === $fileType) {
+                $camtType       = $detector->getCamtType();
                 $configuration->setCamtType($camtType);
                 // save configuration in session and on disk AGAIN:
                 session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());

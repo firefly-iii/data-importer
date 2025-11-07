@@ -194,7 +194,7 @@ class ConfigurationPostRequest extends Request
         $raw = $this->get('unique_column_index', '0');
 
         // Handle empty input
-        if (trim((string) $raw) === '') {
+        if ('' === trim((string) $raw)) {
             return 0;
         }
 
@@ -222,7 +222,7 @@ class ConfigurationPostRequest extends Request
             return [];
         }
 
-        $raw = $this->get('unique_column_index', '0');
+        $raw     = $this->get('unique_column_index', '0');
 
         // Parse column indices (handles both single "0" and multiple "0,3,5")
         $indices = array_map(trim(...), explode(',', (string)$raw));
@@ -235,7 +235,7 @@ class ConfigurationPostRequest extends Request
         }
 
         // Build pseudo identifier definition (same for single or multiple columns)
-        $type = $this->convertToString('unique_column_type');
+        $type    = $this->convertToString('unique_column_type');
 
         return [
             'source_columns' => $indices,

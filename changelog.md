@@ -9,8 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Support for camt.052, by @beatbesmer
 
 ### Fixed
-- #11162
-- #11172
+- [Discussion 11162](https://github.com/orgs/firefly-iii/discussions/11162) (Importer account generation via account number) started by @ahmetpekbas
+- [Issue 11172](https://github.com/firefly-iii/firefly-iii/issues/11172) (Special characters not sorted correctly in account mapping) reported by @empeig
 
 ## v1.9.1 - 2025-11-02
 

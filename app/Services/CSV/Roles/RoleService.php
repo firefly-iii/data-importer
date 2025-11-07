@@ -118,10 +118,10 @@ class RoleService
      */
     public static function getExampleData(string $content, Configuration $configuration): array
     {
-        $reader    = Reader::createFromString($content);
+        $reader         = Reader::createFromString($content);
 
         // configure reader:
-        $delimiter = $configuration->getDelimiter();
+        $delimiter      = $configuration->getDelimiter();
 
         switch ($delimiter) {
             default:
@@ -141,8 +141,8 @@ class RoleService
                 break;
         }
 
-        $offset    = $configuration->isHeaders() ? 1 : 0;
-        $examples  = [];
+        $offset         = $configuration->isHeaders() ? 1 : 0;
+        $examples       = [];
         $pseudoExamples = [];
 
         // make statement.
@@ -158,7 +158,7 @@ class RoleService
         /** @codeCoverageIgnoreEnd */
 
         // grab the records:
-        $records   = $stmt->process($reader);
+        $records        = $stmt->process($reader);
 
         /** @var array $line */
         foreach ($records as $line) {
@@ -168,7 +168,7 @@ class RoleService
             // Generate pseudo identifier example from this line BEFORE deduplication
             if ($configuration->hasPseudoIdentifier()) {
                 $pseudoIdentifier = $configuration->getPseudoIdentifier();
-                $combinedParts = [];
+                $combinedParts    = [];
 
                 foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
                     $value = isset($line[$sourceIndex]) ? trim((string)$line[$sourceIndex]) : '';
@@ -178,17 +178,17 @@ class RoleService
                 }
 
                 if (count($combinedParts) > 0) {
-                    $separator = $pseudoIdentifier['separator'];
+                    $separator     = $pseudoIdentifier['separator'];
                     $combinedValue = implode($separator, $combinedParts);
-                    $rawValue = $combinedValue;
+                    $rawValue      = $combinedValue;
 
                     // Hash composite identifiers (multiple columns) to match actual processing
-                    $count = count($pseudoIdentifier['source_columns']);
+                    $count         = count($pseudoIdentifier['source_columns']);
                     if ($count > 1) {
-                        $combinedValue = substr(hash('sha256', $combinedValue), 0, 8);
+                        $combinedValue    = substr(hash('sha256', $combinedValue), 0, 8);
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
                     }
-                    if($count <= 1) {
+                    if ($count <= 1) {
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => null];
                     }
                 }
@@ -214,7 +214,7 @@ class RoleService
         }
 
         return [
-            'columns' => $examples,
+            'columns'           => $examples,
             'pseudo_identifier' => $pseudoExamples,
         ];
     }

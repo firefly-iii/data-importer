@@ -56,10 +56,10 @@ class LineProcessor
         Log::debug('Roles', $configuration->getRoles());
         Log::debug('Mapping (will not be printed)');
         $this->configuration = $configuration;
-        $this->roles      = $configuration->getRoles();
-        $this->mapping    = $configuration->getMapping();
-        $this->doMapping  = $configuration->getDoMapping();
-        $this->dateFormat = $configuration->getDate();
+        $this->roles         = $configuration->getRoles();
+        $this->mapping       = $configuration->getMapping();
+        $this->doMapping     = $configuration->getDoMapping();
+        $this->dateFormat    = $configuration->getDate();
     }
 
     public function processCSVLines(array $lines): array
@@ -150,7 +150,7 @@ class LineProcessor
             $pseudoIdentifier = $this->configuration->getPseudoIdentifier();
 
             // Combine values from source columns
-            $combinedParts = [];
+            $combinedParts    = [];
             foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
                 $value = isset($line[$sourceIndex]) ? trim((string)$line[$sourceIndex]) : '';
                 if ('' !== $value) {
@@ -160,8 +160,8 @@ class LineProcessor
 
             // Only create pseudo identifier if we have values
             if (count($combinedParts) > 0) {
-                $separator = $pseudoIdentifier['separator'];
-                $combinedValue = implode($separator, $combinedParts);
+                $separator             = $pseudoIdentifier['separator'];
+                $combinedValue         = implode($separator, $combinedParts);
 
                 // Hash composite identifiers (multiple columns) to avoid long values
                 if (count($pseudoIdentifier['source_columns']) > 1) {
@@ -175,7 +175,7 @@ class LineProcessor
                 $pseudoIdentifierValue->setMappedValue(0);
                 $pseudoIdentifierValue->setAppendValue(false);
 
-                $return[] = $pseudoIdentifierValue;
+                $return[]              = $pseudoIdentifierValue;
                 Log::debug(sprintf('Added pseudo identifier with value: %s', $combinedValue));
             }
         }
