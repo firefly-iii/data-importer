@@ -118,8 +118,8 @@ class RoleController extends Controller
     private function camtIndex(Request $request, Configuration $configuration): View
     {
         $mainTitle         = 'Role definition';
-        $camtType = $configuration->getCamtType();
-        $subTitle  = sprintf('Configure the role of each field in your camt.%s file', $camtType);
+        $camtType          = $configuration->getCamtType();
+        $subTitle          = sprintf('Configure the role of each field in your camt.%s file', $camtType);
 
         $sessionUploadFile = session()->get(Constants::UPLOAD_DATA_FILE);
 

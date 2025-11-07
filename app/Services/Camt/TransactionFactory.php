@@ -10,10 +10,9 @@ use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\Entry;
 use InvalidArgumentException;
 
-
 class TransactionFactory
 {
-    public static function create(string $camtType, Message $msg, Statement|Report $levelB, Entry $entry, array $splits): AbstractTransaction
+    public static function create(string $camtType, Message $msg, Report|Statement $levelB, Entry $entry, array $splits): AbstractTransaction
     {
         // Read Config heres
 
@@ -24,6 +23,7 @@ class TransactionFactory
         if ('053' === $camtType) {
             return new TransactionCamt053($msg, $levelB, $entry, $splits);
         }
+
         throw new InvalidArgumentException(
             sprintf('Unhandled CAMT type: "%s". Expected "052" or "053".', $camtType)
         );

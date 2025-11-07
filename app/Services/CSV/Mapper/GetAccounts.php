@@ -72,7 +72,7 @@ trait GetAccounts
         if (!$response instanceof GetAccountsResponse) {
             throw new ImporterErrorException('Could not get list of ALL accounts.');
         }
-        $result = array_merge($accounts);
+        $result   = array_merge($accounts);
         Log::debug(sprintf('getAllAccounts: Done collecting, found %d account(s)', count($result)));
 
         return $result;
@@ -125,7 +125,7 @@ trait GetAccounts
             throw new ImporterErrorException('Could not get list of asset accounts.');
         }
 
-        $request = new GetAccountsRequest($url, $token);
+        $request     = new GetAccountsRequest($url, $token);
 
         $request->setType(GetAccountsRequest::LIABILITIES);
         $request->setVerify(config('importer.connection.verify'));
@@ -162,7 +162,7 @@ trait GetAccounts
 
         /** @var Account $account */
         foreach ($accounts as $account) {
-            $name = $account->name;
+            $name                         = $account->name;
 
             // remove some types:
             if (in_array($account->type, $invalidTypes, true)) {
@@ -175,10 +175,10 @@ trait GetAccounts
 
             // add optgroup to result:
             $group                        = (string)trans(sprintf('import.account_types_%s', $account->type));
-            $result[$group]               ??= [];
+            $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             setlocale(LC_ALL, 'en_US.UTF-8');
             asort($array, SORT_LOCALE_STRING);
@@ -206,15 +206,15 @@ trait GetAccounts
 
             // only merge if IBAN is not null.
             if (null !== $account->iban) {
-                $name = sprintf('%s (%s)', $account->name, $account->iban);
+                $name                         = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
                 $group                        = (string)trans(sprintf('import.account_types_%s', $account->type));
-                $result[$group]               ??= [];
+                $result[$group] ??= [];
                 $result[$group][$account->id] = $name;
             }
         }
 
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             asort($array, SORT_STRING);
             $newResult[$group] = $array;
