@@ -1,65 +1,32 @@
 <?php
 
-/*
- * Transaction.php
- * Copyright (c) 2025 james@firefly-iii.org
- *
- * This file is part of Firefly III (https://github.com/firefly-iii).
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 declare(strict_types=1);
-
-// contains plain-text information as they have to be used for the API or wherever. no objects and stuff
 
 namespace App\Services\Camt;
 
-use Genkgo\Camt\DTO\DomainBankTransactionCode;
-use Genkgo\Camt\DTO\Account;
-use App\Exceptions\ImporterErrorException;
-use Genkgo\Camt\Camt053\DTO\Statement;
-use Genkgo\Camt\DTO\Address;
-use Genkgo\Camt\DTO\BBANAccount;
-use Genkgo\Camt\DTO\Creditor;
-use Genkgo\Camt\DTO\Debtor;
+use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
+use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
+use Genkgo\Camt\DTO\RelatedParty;
+use Genkgo\Camt\DTO\Creditor;
+use Genkgo\Camt\DTO\Debtor;
+use Genkgo\Camt\DTO\Account;
 use Genkgo\Camt\DTO\IbanAccount;
-use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\OtherAccount;
 use Genkgo\Camt\DTO\ProprietaryAccount;
-use Genkgo\Camt\DTO\RelatedParty;
-use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\UPICAccount;
+use Genkgo\Camt\DTO\BBANAccount;
+use Genkgo\Camt\DTO\Address;
+use App\Exceptions\ImporterErrorException;
 use Illuminate\Support\Facades\Log;
 use Money\Currencies\ISOCurrencies;
 use Money\Formatter\DecimalMoneyFormatter;
 use Money\Money;
 
-class Transaction
+abstract class AbstractTransaction
 {
-    public const string TIME_FORMAT = 'Y-m-d H:i:s';
-
-    public function __construct(
-        private readonly Message       $levelA,
-        private readonly Statement     $levelB,
-        private readonly Entry         $levelC,
-        private array         $levelD
-    ) {
-        Log::debug('Constructed a CAMT Transaction');
-    }
+    public const TIME_FORMAT = 'Y-m-d H:i:s';
 
     public function countSplits(): int
     {
@@ -105,9 +72,9 @@ class Transaction
         switch ($field) {
             default:
                 // temporary debug message:
-                //                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
-                //                echo PHP_EOL;
-                //                exit;
+                                echo sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index);
+                                echo PHP_EOL;
+                                exit;
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
@@ -469,5 +436,5 @@ class Transaction
     private function generateAddressLine(?Address $address = null): string
     {
         return implode(', ', $address->getAddressLines());
-    }
+    }    
 }
