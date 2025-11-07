@@ -49,7 +49,7 @@ trait RestoresConfiguration
         if (null !== $configFileName) {
             $diskArray  = json_decode(StorageService::getContent($configFileName), true);
             $diskConfig = Configuration::fromArray($diskArray ?? []);
-
+            $configuration->setCamtType($diskConfig->getCamtType());
             $configuration->setMapping($diskConfig->getMapping());
             $configuration->setDoMapping($diskConfig->getDoMapping());
             $configuration->setRoles($diskConfig->getRoles());
