@@ -2,7 +2,7 @@
     <div class="col-lg-10 offset-lg-1">
         <div class="card">
             <div class="card-header">
-                CAMT.053 import options
+                CAMT.{{$camtType}} import options
             </div>
             <div class="card-body">
                 <div class="form-group row mb-3">
