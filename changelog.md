@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v1.9.2 - 2025-11-08
+
+### Added
+- Support for composite transaction identifiers, by @pingu8007
+- Support for camt.052, by @beatbesmer
+
+### Fixed
+- #11162
+- #11172
+
 ## v1.9.1 - 2025-11-02
 
 ### Fixed
