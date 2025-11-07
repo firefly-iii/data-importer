@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Camt;
 
 use Genkgo\Camt\DTO\DomainBankTransactionCode;
-use Genkgo\Camt\DTO\Message;
-use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
 use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\RelatedParty;

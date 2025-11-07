@@ -142,7 +142,7 @@ final class PseudoIdentifierTest extends TestCase
         $this->assertEquals([0, 3, 5], $pseudo['source_columns']);
 
         // Display value should show comma-separated indices
-        $this->assertEquals('0,3,5', $config->getUniqueColumnIndexDisplay());
+        $this->assertSame('0,3,5', $config->getUniqueColumnIndexDisplay());
     }
 
     /**

@@ -194,15 +194,15 @@ class ConfigurationPostRequest extends Request
         $raw = $this->get('unique_column_index', '0');
 
         // Handle empty input
-        if (trim($raw) === '') {
+        if (trim((string) $raw) === '') {
             return 0;
         }
 
         // If it contains comma, parse as array and return first element
         if (str_contains((string)$raw, ',')) {
-            $indices = array_map('trim', explode(',', (string)$raw));
-            $indices = array_filter($indices, 'is_numeric');
-            $indices = array_map('intval', $indices);
+            $indices = array_map(trim(...), explode(',', (string)$raw));
+            $indices = array_filter($indices, is_numeric(...));
+            $indices = array_map(intval(...), $indices);
 
             return count($indices) > 0 ? (int)reset($indices) : 0;
         }
@@ -225,9 +225,9 @@ class ConfigurationPostRequest extends Request
         $raw = $this->get('unique_column_index', '0');
 
         // Parse column indices (handles both single "0" and multiple "0,3,5")
-        $indices = array_map('trim', explode(',', (string)$raw));
-        $indices = array_filter($indices, 'is_numeric');
-        $indices = array_map('intval', $indices);
+        $indices = array_map(trim(...), explode(',', (string)$raw));
+        $indices = array_filter($indices, is_numeric(...));
+        $indices = array_map(intval(...), $indices);
 
         // Need at least 1 column
         if (0 === count($indices)) {

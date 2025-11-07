@@ -28,7 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConnectionControllerMiddleware;
 use App\Services\Session\Constants;
-use App\Services\Spectre\Authentication\SecretManager;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Model\Customer;
 use App\Services\Spectre\Request\ListConnectionsRequest;
@@ -73,8 +72,8 @@ class ConnectionController extends Controller
         $subTitle          = 'Select your financial organisation';
         $url               = config('spectre.url');
 
-        $appId             = SecretManager::getAppId();
-        $secret            = SecretManager::getSecret();
+        $appId             = SpectreSecretManager::getAppId();
+        $secret            = SpectreSecretManager::getSecret();
 
         // check if already has the correct customer:
         $hasCustomer       = false;
