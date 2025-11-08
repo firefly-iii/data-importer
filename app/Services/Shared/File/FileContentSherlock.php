@@ -127,7 +127,7 @@ class FileContentSherlock
                 $type    = $m[1];      // e. g. 052 or 053
                 $version = $m[2];   // e. g. 08
                 Log::debug(sprintf('CAMT Type: %s', $type));
-                Log::debug(sprintf('CAMT Version: %', $version));
+                Log::debug(sprintf('CAMT Version: %s', $version));
             }
         } catch (Exception) {
             Log::debug('Unable to determine the type and version of CAMT-message');
