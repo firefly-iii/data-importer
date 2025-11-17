@@ -103,7 +103,7 @@
         "phpstan/phpstan-deprecation-rules": "^2",
         "phpstan/phpstan-strict-rules": "^2",
         "phpunit/phpunit": "^12",
-        "rector/rector": "^2.1",
+        "rector/rector": "^2.2",
         "roave/security-advisories": "dev-master"
     },
     "config": {
