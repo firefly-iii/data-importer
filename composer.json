@@ -83,7 +83,7 @@
         "spatie/enum": "^3.10",
         "swaggest/json-schema": "^0.12.43",
         "symfony/http-client": "^7.3",
-        "symfony/mailgun-mailer": "^7.3",
+        "symfony/mailgun-mailer": "^8.0",
         "thecodingmachine/safe": "^3.3",
         "ext-intl": "*"
     },
