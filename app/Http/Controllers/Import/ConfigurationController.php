@@ -72,6 +72,7 @@ class ConfigurationController extends Controller
         $subTitle           = 'Configure your import';
         $flow               = $request->cookie(Constants::FLOW_COOKIE);
         $configuration      = $this->restoreConfiguration();
+        $camtType='';
 
         // if config says to skip it, skip it:
         $overruleSkip       = 'true' === $request->get('overruleskip');
