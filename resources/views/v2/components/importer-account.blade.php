@@ -3,19 +3,19 @@
         <x-importer-account-title :account="$account" :configuration="$configuration"/>
     </td>
     <td style="width:10%">
+
         @if('disabled' !== $account['import_account']->status)
             @if( (isset($account['firefly_iii_accounts']['assets']) && count($account['firefly_iii_accounts']['assets']) > 0) || (isset($account['firefly_iii_accounts']['liabilities']) && count($account['firefly_iii_accounts']['liabilities']) > 0) )
                 &rarr;
         @endif
         @endif
     </td>
-    <td  style="width:45%">
+    <td style="width:45%">
         <!-- Firefly III Account Content - Visibility Controlled -->
         <div id="firefly-account-content-{{ $account['import_account']->id }}">
-            @if((isset($account['firefly_iii_accounts']['assets']) && count($account['firefly_iii_accounts']['assets']) > 0) || (isset($account['firefly_iii_accounts']['liabilities']) && count($account['firefly_iii_accounts']['liabilities']) > 0) )
-                <x-firefly-iii-account-generic :flow="$flow" :account="$account"  :configuration="$configuration"/>
-                <x-create-account-widget :account="$account" :configuration="$configuration" :currencies="$currencies ?? []"/>
-            @endif
+                <x-firefly-iii-account-generic :flow="$flow" :account="$account" :configuration="$configuration"/>
+                <x-create-account-widget :account="$account" :configuration="$configuration"
+                                         :currencies="$currencies ?? []"/>
         </div>
 
         <!-- Not Imported Text - Hidden by Default -->
