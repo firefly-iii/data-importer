@@ -257,7 +257,7 @@
                                 $accountId = $account['import_account']->id;
                                 $newAccounts = $configuration->getNewAccounts();
                                 $committedCurrency = $newAccounts[$accountId]['currency'] ?? null;
-                                $displayCurrency = $committedCurrency ?? $account['import_account']->currency ?? 'EUR';
+                                $displayCurrency = $committedCurrency ?? $account['import_account']->currencyCode ?? 'EUR';
                             @endphp
                             <span id="currency-display-{{ $account['import_account']->id }}" class="fw-bold">
                                 {{ $displayCurrency }}
