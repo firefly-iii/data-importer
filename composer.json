@@ -78,7 +78,7 @@
         "firefly-iii/api-support-classes": "@dev",
         "genkgo/camt": ">=2.10.1",
         "guzzlehttp/guzzle": "^7.9",
-        "laravel/framework": "^11",
+        "laravel/framework": "^12",
         "league/csv": "9.*",
         "spatie/enum": "^3.10",
         "swaggest/json-schema": "^0.12.43",
