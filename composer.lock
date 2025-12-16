@@ -8917,12 +8917,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "eeebba0043eaddd36fd8747cc144b9b661d9b392"
+                "reference": "df7a11b7df806e493d3047bf9cf9736645bbdf84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/eeebba0043eaddd36fd8747cc144b9b661d9b392",
-                "reference": "eeebba0043eaddd36fd8747cc144b9b661d9b392",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/df7a11b7df806e493d3047bf9cf9736645bbdf84",
+                "reference": "df7a11b7df806e493d3047bf9cf9736645bbdf84",
                 "shasum": ""
             },
             "conflict": {
@@ -8944,6 +8944,7 @@
                 "alextselegidis/easyappointments": "<1.5.2.0-beta1",
                 "alexusmai/laravel-file-manager": "<=3.3.1",
                 "alt-design/alt-redirect": "<1.6.4",
+                "altcha-org/altcha": "<1.3.1",
                 "alterphp/easyadmin-extension-bundle": ">=1.2,<1.2.11|>=1.3,<1.3.1",
                 "amazing/media2click": ">=1,<1.3.3",
                 "ameos/ameos_tarteaucitron": "<1.2.23",
@@ -8975,7 +8976,7 @@
                 "automattic/jetpack": "<9.8",
                 "awesome-support/awesome-support": "<=6.0.7",
                 "aws/aws-sdk-php": "<3.288.1",
-                "azuracast/azuracast": "<0.18.3",
+                "azuracast/azuracast": "<=0.23.1",
                 "b13/seo_basics": "<0.8.2",
                 "backdrop/backdrop": "<=1.32",
                 "backpack/crud": "<3.4.9",
@@ -9174,6 +9175,7 @@
                 "feehi/feehicms": "<=2.1.1",
                 "fenom/fenom": "<=2.12.1",
                 "filament/actions": ">=3.2,<3.2.123",
+                "filament/filament": ">=4,<4.3.1",
                 "filament/infolists": ">=3,<3.2.115",
                 "filament/tables": ">=3,<3.2.115",
                 "filegator/filegator": "<7.8",
@@ -9192,6 +9194,7 @@
                 "floriangaerber/magnesium": "<0.3.1",
                 "fluidtypo3/vhs": "<5.1.1",
                 "fof/byobu": ">=0.3.0.0-beta2,<1.1.7",
+                "fof/pretty-mail": "<=1.1.2",
                 "fof/upload": "<1.2.3",
                 "foodcoopshop/foodcoopshop": ">=3.2,<3.6.1",
                 "fooman/tcpdf": "<6.2.22",
@@ -9255,7 +9258,7 @@
                 "ibexa/http-cache": ">=4.6,<4.6.14",
                 "ibexa/post-install": "<1.0.16|>=4.6,<4.6.14",
                 "ibexa/solr": ">=4.5,<4.5.4",
-                "ibexa/user": ">=4,<4.4.3|>=5,<5.0.3",
+                "ibexa/user": ">=4,<4.4.3|>=5,<5.0.4",
                 "icecoder/icecoder": "<=8.1",
                 "idno/known": "<=1.3.1",
                 "ilicmiljan/secure-props": ">=1.2,<1.2.2",
@@ -9392,6 +9395,7 @@
                 "microsoft/microsoft-graph-core": "<2.0.2",
                 "microweber/microweber": "<=2.0.19",
                 "mikehaertl/php-shellcommand": "<1.6.1",
+                "mineadmin/mineadmin": "<=3.0.9",
                 "miniorange/miniorange-saml": "<1.4.3",
                 "mittwald/typo3_forum": "<1.2.1",
                 "mobiledetect/mobiledetectlib": "<2.8.32",
@@ -9428,6 +9432,7 @@
                 "netgen/tagsbundle": ">=3.4,<3.4.11|>=4,<4.0.15",
                 "nette/application": ">=2,<2.0.19|>=2.1,<2.1.13|>=2.2,<2.2.10|>=2.3,<2.3.14|>=2.4,<2.4.16|>=3,<3.0.6",
                 "nette/nette": ">=2,<2.0.19|>=2.1,<2.1.13",
+                "neuron-core/neuron-ai": "<=2.8.11",
                 "nilsteampassnet/teampass": "<3.1.3.1-dev",
                 "nitsan/ns-backup": "<13.0.1",
                 "nonfiction/nterchange": "<4.1.1",
@@ -9447,7 +9452,7 @@
                 "october/system": "<3.7.5",
                 "oliverklee/phpunit": "<3.5.15",
                 "omeka/omeka-s": "<4.0.3",
-                "onelogin/php-saml": "<2.10.4",
+                "onelogin/php-saml": "<2.21.1|>=3,<3.8.1|>=4,<4.3.1",
                 "oneup/uploader-bundle": ">=1,<1.9.3|>=2,<2.1.5",
                 "open-web-analytics/open-web-analytics": "<1.8.1",
                 "opencart/opencart": ">=0",
@@ -9581,8 +9586,8 @@
                 "shopware/core": "<6.6.10.9-dev|>=6.7,<6.7.4.1-dev",
                 "shopware/platform": "<6.6.10.7-dev|>=6.7,<6.7.3.1-dev",
                 "shopware/production": "<=6.3.5.2",
-                "shopware/shopware": "<=5.7.17|>=6.7,<6.7.2.1-dev",
-                "shopware/storefront": "<=6.4.8.1|>=6.5.8,<6.5.8.7-dev",
+                "shopware/shopware": "<=5.7.17|>=6.4.6,<6.6.10.10-dev|>=6.7,<6.7.5.1-dev",
+                "shopware/storefront": "<6.6.10.10-dev|>=6.7,<6.7.5.1-dev",
                 "shopxo/shopxo": "<=6.4",
                 "showdoc/showdoc": "<2.10.4",
                 "shuchkin/simplexlsx": ">=1.0.12,<1.1.13",
@@ -9908,7 +9913,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-08T23:05:37+00:00"
+            "time": "2025-12-16T01:34:46+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -10983,5 +10988,5 @@
         "ext-intl": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
