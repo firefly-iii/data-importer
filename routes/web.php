@@ -27,6 +27,7 @@ Route::get('/authenticate-flow/{flow?}', 'Import\AuthenticateController@index')-
 Route::post('/authenticate-flow/{flow}', 'Import\AuthenticateController@postIndex')->name('authenticate-flow.post');
 
 Route::get('/new-import/{flow?}', 'Import\UploadController@index')->name('new-import.index');
+Route::get('/new-import/{flow}', 'Import\UploadController@index')->name('new-import.post');
 
 
 

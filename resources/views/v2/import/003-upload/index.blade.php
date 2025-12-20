@@ -57,7 +57,7 @@
                         Form
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('003-upload.upload') }}" accept-charset="UTF-8" id="store"
+                        <form method="post" action="{{ route('new-import.post', [$flow]) }}" accept-charset="UTF-8" id="store"
                               enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
