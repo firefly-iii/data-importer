@@ -81,7 +81,7 @@ class ConfigurationController extends Controller
             // set config as complete.
             event(new CompletedConfiguration($configuration));
 
-            // skipForm
+            // need a redirect to roles or mapping, depending on the flow.
             return redirect()->route('005-roles.index');
         }
 

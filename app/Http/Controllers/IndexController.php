@@ -133,6 +133,11 @@ class IndexController extends Controller
             Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
+            // redirect directly to upload step.
+            if('file' === $flow) {
+                return redirect(route('003-upload.index'))->withCookies($cookies);
+            }
+
             return redirect(route('002-authenticate.index'))->withCookies($cookies);
         }
         Log::debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));

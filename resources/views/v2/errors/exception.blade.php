@@ -103,7 +103,12 @@
                 <li>Include error logs (see above).</li>
                 <li>Tell us what you were doing.</li>
             </ol>
-
+            <h2>Stacktrace</h2>
+            <p>
+                A stacktrace can help find the location of the bug.
+            </p>
+            <pre>{{ $exception->getTraceAsString() }}
+            </pre>
         </div>
     </div>
 </body>
