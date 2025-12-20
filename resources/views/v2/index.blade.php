@@ -28,34 +28,32 @@
                             Welcome! This tool will help you import data into Firefly III. You can find instructions in
                             the <a href="https://docs.firefly-iii.org/" target="_blank">documentation</a>. Any links you
                             see to the documentation will open in a <em>new</em> window or tab.
-                        </p>
-                        <p>
                             To import data, you need to authenticate with Firefly III, and optionally with one of the
                             data sources this importer supports.
                         </p>
                         @if($pat)
-                        <p id="firefly_expl">
-                            You're using a Personal Access Token to <span class="text-info">authenticate</span> to
-                            Firefly III.
-                        </p>
+                            <p id="firefly_expl">
+                                You're using a Personal Access Token to <span class="text-info">authenticate</span> to
+                                Firefly III.
+                            </p>
                         @endif
                         @if($clientIdWithURL)
-                        <p id="firefly_expl">
-                            You're using a fixed Client ID and a fixed Firefly III URL to <span class="text-info">authenticate</span>
-                            to Firefly III.
-                        </p>
+                            <p id="firefly_expl">
+                                You're using a fixed Client ID and a fixed Firefly III URL to <span class="text-info">authenticate</span>
+                                to Firefly III.
+                            </p>
                         @endif
                         @if($URLonly)
-                        <p id="firefly_expl">
-                            You're using a Client ID and a fixed Firefly III URL to <span
-                                class="text-info">authenticate</span> to Firefly III.
-                        </p>
+                            <p id="firefly_expl">
+                                You're using a Client ID and a fixed Firefly III URL to <span
+                                    class="text-info">authenticate</span> to Firefly III.
+                            </p>
                         @endif
                         @if($flexible)
-                        <p id="firefly_expl">
-                            You're using a self-submitted Client ID and Firefly III URL to <span class="text-info">authenticate</span>
-                            to Firefly III.
-                        </p>
+                            <p id="firefly_expl">
+                                You're using a self-submitted Client ID and Firefly III URL to <span class="text-info">authenticate</span>
+                                to Firefly III.
+                            </p>
                         @endif
                     </div>
                 </div>
@@ -65,229 +63,275 @@
             <div class="col-lg-10 offset-lg-1">
                 <div class="card">
                     <div class="card-header">
-                        Configuration / connection error :(
+                        Configuration or connection error :(
                     </div>
                     <div class="card-body">
-                        <p>The importer could not connect to Firefly III.
-                            Please remedy the error below first, and check out the <a
-                                href="https://docs.firefly-iii.org/references/faq/data-importer/general/"
-                                target="_blank">
-                                documentation</a> if necessary.</p>
+                        <p>The importer could not connect to Firefly III. Please remedy the error below first, and check
+                            out the <a href="https://docs.firefly-iii.org/references/faq/data-importer/general/"
+                                       target="_blank">documentation</a> if necessary.</p>
                         <p class="text-danger" x-text="pageProperties.connectionErrorMessage"></p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <form action="{{ route('index.post') }}/" method="post">
-            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-            <div class="row" style="margin-top:1em;" id="importers">
-                <div class="col-lg-10 offset-lg-1">
-                    <div class="row">
-                        @if($enabled['file'])
-                        <div class="col-lg-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    Import a file
-                                </div>
-                                <div class="card-body">
-                                    <button x-show="loadingFunctions.file" class="btn btn-info disabled" value="file" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                    <button x-show="!loadingFunctions.file && importFunctions.file" class="btn btn-info" value="file" name="flow"
-                                            >Import file</button>
-                                    <button x-show="!loadingFunctions.file && !importFunctions.file" class="btn text-white btn-danger disabled"  value="file" name="flow"
-                                            disabled><em class="fa-solid fa-face-dizzy"></em></button>
-
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        Existing and historical import jobs
                     </div>
-                    <div class="row mt-3">
-
-                        @if($enabled['lunchflow'])
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        Import from Lunch Flow
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-danger" x-text="errors.lunchflow" x-show="'' !== errors.lunchflow"></p>
-                                        <button x-show="loadingFunctions.lunchflow" class="btn btn-info disabled" value="lunchflow" name="flow" disabled="disabled"
-                                        ><span class="fas fa-cog fa-spin"></span></button>
-                                        <button x-show="!loadingFunctions.lunchflow && importFunctions.lunchflow" class="btn btn-info" value="lunchflow" name="flow"
-                                        >Import from Lunch Flow</button>
-                                        <button x-show="!loadingFunctions.lunchflow && !importFunctions.lunchflow" class="btn btn-danger text-white disabled"  value="lunchflow" name="flow"
-                                                disabled
-                                        ><em class="fa-solid fa-face-dizzy"></em></button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                            @if($enabled['obg'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from Open Banking Gateway
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.obg" x-show="'' !== errors.obg"></p>
-                                            <button x-show="loadingFunctions.obg" class="btn btn-info disabled" value="obg" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.obg && importFunctions.obg" class="btn btn-info" value="obg" name="flow"
-                                            >Import from OBG</button>
-                                            <button x-show="!loadingFunctions.obg && !importFunctions.obg" class="btn btn-danger text-white disabled"  value="obg" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                    </div>
-                    <div class="row mt-3">
-                            @if($enabled['eb'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from Enable Banking
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.eb" x-show="'' !== errors.eb"></p>
-                                            <button x-show="loadingFunctions.eb" class="btn btn-info disabled" value="eb" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.eb && importFunctions.eb" class="btn btn-info" value="eb" name="flow"
-                                            >Import from EB</button>
-                                            <button x-show="!loadingFunctions.eb && !importFunctions.eb" class="btn btn-danger text-white disabled"  value="eb" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($enabled['teller'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from teller.io
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.teller" x-show="'' !== errors.teller"></p>
-                                            <button x-show="loadingFunctions.teller" class="btn btn-info disabled" value="teller" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.teller && importFunctions.teller" class="btn btn-info" value="teller" name="flow"
-                                            >Import from teller</button>
-                                            <button x-show="!loadingFunctions.teller && !importFunctions.teller" class="btn btn-danger text-white disabled"  value="teller" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-
-                                @if($enabled['fints'])
-                                    <div class="col-lg-4">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                Import from FinTS
-                                            </div>
-                                            <div class="card-body">
-                                                <p class="text-danger" x-text="errors.fints" x-show="'' !== errors.fints"></p>
-                                                <button x-show="loadingFunctions.fints" class="btn btn-info disabled" value="fints" name="flow" disabled="disabled"
-                                                ><span class="fas fa-cog fa-spin"></span></button>
-                                                <button x-show="!loadingFunctions.fints && importFunctions.fints" class="btn btn-info" value="fints" name="flow"
-                                                >Import from FinTS</button>
-                                                <button x-show="!loadingFunctions.fints && !importFunctions.fints" class="btn btn-danger text-white disabled"  value="fints" name="flow"
-                                                        disabled
-                                                ><em class="fa-solid fa-face-dizzy"></em></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                    </div>
-                    <div class="row mt-3">
-                        @if($enabled['basiq'])
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        Import from basiq
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-danger" x-text="errors.basiq" x-show="'' !== errors.basiq"></p>
-                                        <button x-show="loadingFunctions.basiq" class="btn btn-info disabled" value="basiq" name="flow" disabled="disabled"
-                                        ><span class="fas fa-cog fa-spin"></span></button>
-                                        <button x-show="!loadingFunctions.basiq && importFunctions.basiq" class="btn btn-info" value="basiq" name="flow"
-                                        >Import from basiq</button>
-                                        <button x-show="!loadingFunctions.basiq && !importFunctions.basiq" class="btn btn-danger text-white disabled"  value="basiq" name="flow"
-                                                disabled
-                                        ><em class="fa-solid fa-face-dizzy"></em></button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                            @if($enabled['nordigen'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from GoCardless
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.gocardless" x-show="'' !== errors.gocardless"></p>
-                                            <button x-show="loadingFunctions.gocardless" class="btn btn-info disabled" value="nordigen" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.gocardless && importFunctions.gocardless" class="btn btn-info" value="nordigen" name="flow"
-                                            >Import from GoCardless</button>
-                                            <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn text-white btn-danger disabled"  value="nordigen" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                            @if($enabled['spectre'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from Spectre
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.spectre" x-show="'' !== errors.spectre"></p>
-                                            <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="spectre" name="flow"
-                                            >Import from Spectre</button>
-                                            <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger text-white disabled"  value="spectre" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                            @if($enabled['simplefin'])
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Import from SimpleFIN
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="text-danger" x-text="errors.simplefin" x-show="'' !== errors.simplefin"></p>
-                                            <button x-show="loadingFunctions.simplefin" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
-                                            ><span class="fas fa-cog fa-spin"></span></button>
-                                            <button x-show="!loadingFunctions.simplefin && importFunctions.simplefin" class="btn btn-info" value="simplefin" name="flow"
-                                            >Import from SimpleFIN</button>
-                                            <button x-show="!loadingFunctions.simplefin && !importFunctions.simplefin" class="btn btn-danger text-white disabled"  value="simplefin" name="flow"
-                                                    disabled
-                                            ><em class="fa-solid fa-face-dizzy"></em></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                    <div class="card-body">
+                        <p>
+                            This table shows you historical and current import jobs.
+                            <span class="text-warning">This table does not work yet, stay tuned!</span>
+                        </p>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Identifier</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>More details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <template x-if="false === loading && 0 === importJobs.length">
+                                <tr>
+                                    <td colspan="4"><em>There are no existing import jobs.</em></td>
+                                </tr>
+                            </template>
+                            <template x-if="true === loading && 0 === importJobs.length">
+                                <tr>
+                                    <td colspan="4"><em>Please wait while the disk is inspected for existing import jobs.</em></td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        Create a new import job
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            To start importing data into Firefly III, select your data source below and press the [Start] button.
+                        </p>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th style="width:33%;">Import data souce</th>
+                                <th style="width:33%;">Availability</th>
+                                <th>Button!</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <template x-for="flow in importFlows">
+                                <tr>
+                                    <td><span x-text="flow.title"></span>
+                                        <span x-show="'' !== flow.explanation">
+                                            <span>
+                                        <br>
+                                        <small class="text-muted" x-text="flow.explanation"></small>
+                                                </span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span x-show="flow.loading" class="fas fa-cog fa-spin"></span>
+                                        <small x-show="!flow.loading && !flow.enabled" class="text-danger">Not built yet, stay tuned!</small>
+                                        <span x-show="!flow.loading && flow.enabled && flow.authenticated && !flow.loading" class="text-success">Available</span>
+                                        <span x-show="!flow.loading && flow.enabled && !flow.authenticated" class="text-primary">Needs authentication details</span>
+
+                                    </td>
+                                    <td>
+                                        <span x-show="flow.loading" class="fas fa-cog fa-spin"></span>
+                                        <a x-show="!flow.loading && true === flow.enabled && false === flow.authenticated" :href="'{{ route('authenticate-flow.index', ['']) }}/' + flow.key" class="btn btn-sm btn-primary">Authenticate</a>
+                                        <a x-show="!flow.loading && true === flow.enabled && flow.authenticated" :href="'{{ route('new-import.index', ['']) }}/' + flow.key" class="btn btn-sm btn-success">Start</a>
+                                    </td>
+                                </tr>
+                            </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--
+        <form action="{{ route('index.post') }}/" method="post">
+        </div>
+        <div class="row mt-3">
+
+
+        @if($enabled['obg'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        >Import from OBG</button>
+                        <button x-show="!loadingFunctions.obg && !importFunctions.obg" class="btn btn-danger text-white disabled"  value="obg" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        </div>
+        <div class="row mt-3">
+@if($enabled['eb'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from Enable Banking
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.eb" x-show="'' !== errors.eb"></p>
+                        <button x-show="loadingFunctions.eb" class="btn btn-info disabled" value="eb" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.eb && importFunctions.eb" class="btn btn-info" value="eb" name="flow"
+                        >Import from EB</button>
+                        <button x-show="!loadingFunctions.eb && !importFunctions.eb" class="btn btn-danger text-white disabled"  value="eb" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+
+        @if($enabled['teller'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from teller.io
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.teller" x-show="'' !== errors.teller"></p>
+                        <button x-show="loadingFunctions.teller" class="btn btn-info disabled" value="teller" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.teller && importFunctions.teller" class="btn btn-info" value="teller" name="flow"
+                        >Import from teller</button>
+                        <button x-show="!loadingFunctions.teller && !importFunctions.teller" class="btn btn-danger text-white disabled"  value="teller" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+
+        @if($enabled['fints'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from FinTS
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.fints" x-show="'' !== errors.fints"></p>
+                        <button x-show="loadingFunctions.fints" class="btn btn-info disabled" value="fints" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.fints && importFunctions.fints" class="btn btn-info" value="fints" name="flow"
+                        >Import from FinTS</button>
+                        <button x-show="!loadingFunctions.fints && !importFunctions.fints" class="btn btn-danger text-white disabled"  value="fints" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        </div>
+        <div class="row mt-3">
+@if($enabled['basiq'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from basiq
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.basiq" x-show="'' !== errors.basiq"></p>
+                        <button x-show="loadingFunctions.basiq" class="btn btn-info disabled" value="basiq" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.basiq && importFunctions.basiq" class="btn btn-info" value="basiq" name="flow"
+                        >Import from basiq</button>
+                        <button x-show="!loadingFunctions.basiq && !importFunctions.basiq" class="btn btn-danger text-white disabled"  value="basiq" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        @if($enabled['nordigen'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from GoCardless
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.gocardless" x-show="'' !== errors.gocardless"></p>
+                        <button x-show="loadingFunctions.gocardless" class="btn btn-info disabled" value="nordigen" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.gocardless && importFunctions.gocardless" class="btn btn-info" value="nordigen" name="flow"
+                        >Import from GoCardless</button>
+                        <button x-show="!loadingFunctions.gocardless && !importFunctions.gocardless" class="btn text-white btn-danger disabled"  value="nordigen" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        @if($enabled['spectre'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from Spectre
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.spectre" x-show="'' !== errors.spectre"></p>
+                        <button x-show="loadingFunctions.spectre" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.spectre && importFunctions.spectre" class="btn btn-info" value="spectre" name="flow"
+                        >Import from Spectre</button>
+                        <button x-show="!loadingFunctions.spectre && !importFunctions.spectre" class="btn btn-danger text-white disabled"  value="spectre" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        @if($enabled['simplefin'])
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        Import from SimpleFIN
+                    </div>
+                    <div class="card-body">
+                        <p class="text-danger" x-text="errors.simplefin" x-show="'' !== errors.simplefin"></p>
+                        <button x-show="loadingFunctions.simplefin" class="btn btn-info disabled" value="spectre" name="flow" disabled="disabled"
+                        ><span class="fas fa-cog fa-spin"></span></button>
+                        <button x-show="!loadingFunctions.simplefin && importFunctions.simplefin" class="btn btn-info" value="simplefin" name="flow"
+                        >Import from SimpleFIN</button>
+                        <button x-show="!loadingFunctions.simplefin && !importFunctions.simplefin" class="btn btn-danger text-white disabled"  value="simplefin" name="flow"
+                                disabled
+                        ><em class="fa-solid fa-face-dizzy"></em></button>
+                    </div>
+                </div>
+            </div>
+
+        @endif
+        </div>
+    </div>
+</div>
+</form>
+-->
 
         <div class="row" style="margin-top:1em;" id="importers">
             <div class="col-lg-10 offset-lg-1">
@@ -296,20 +340,21 @@
                         Extra information
                     </div>
                     <div class="card-body">
-                        <p>
-                            If you change your settings, you may need to press <strong>start over</strong> for the
-                            settings to be recognized.
-                            If you are in doubt if the button works: your session identifier is "{{ $identifier }}" and
-                            should change every time you
-                            press the @if(!$isDocker)button,@else button or restart the container,@endif
-                             but it
-                            has to stay the same when you simply refresh the page.
+                        <p>If you change your settings, you may need to press <strong>start over</strong> for the
+                            settings to be recognized. If you are in doubt if the button works: your session identifier
+                            is "{{ $identifier }}" and should change every time you
+                            press the @if(!$isDocker)
+                                button,
+                            @else
+                                button or restart the container,
+                            @endif but it has to stay the same when you simply refresh the page.
                         </p>
                         <p>
-                            <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
-                               data-bs-placement="top"
+                            <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}"
+                               data-bs-toggle="tooltip" data-bs-placement="top"
                                title="This button resets your progress">Start over</a>
-                            <a class="btn btn-secondary btn-sm" onclick="window.location.reload(true)">Only refresh the page</a>
+                            <a class="btn btn-secondary btn-sm" onclick="window.location.reload(true)">Only refresh the
+                                page</a>
                         </p>
                     </div>
                 </div>

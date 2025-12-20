@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
             ValidatePostSize::class,
             TrimStrings::class,
             ConvertEmptyStringsToNull::class,
+            StartSession::class,
         ];
 
     /**
@@ -75,7 +76,7 @@ class Kernel extends HttpKernel
             'web' => [
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
-                StartSession::class,
+                // StartSession::class,
                 // \Illuminate\Session\Middleware\AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
@@ -83,6 +84,8 @@ class Kernel extends HttpKernel
             ],
 
             'api' => [
+                // VerifyCsrfToken::class,
+                //  StartSession::class,
                 'throttle:60,1',
                 SubstituteBindings::class,
             ],

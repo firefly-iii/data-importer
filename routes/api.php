@@ -22,8 +22,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -35,7 +33,19 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get(
-    '/user',
-    fn (Request $request) => $request->user()
-);
+Route::group(
+    [
+        'prefix'    => '',
+        'as'        => 'api.',
+    ],
+    static function (): void {
+        // import flows
+        Route::get('import-flows', 'ImportFlow\IndexController@index')->name('import-flows.index');
+        Route::get('import-flows/validate/{flow}', 'ImportFlow\ValidationController@validateFlow')->name('import-flows.validate');
+
+        // Firefly III connection validator:
+        Route::get('firefly-iii/validate','Connection\IndexController@validateConnection')->name('firefly-iii.validate');
+
+        // import jobs
+        Route::get('import-jobs', 'ImportJob\IndexController@index')->name('import-jobs.index');
+    });

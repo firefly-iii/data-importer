@@ -72,7 +72,7 @@ trait IsReadyForStep
             return $redirect;
         }
 
-        throw new ImporterErrorException(sprintf('Cannot handle step "%s" for flow "%s"', self::STEP, $flow));
+        throw new ImporterErrorException(sprintf('[a] Cannot handle step "%s" for flow "%s"', self::STEP, $flow));
     }
 
     protected function isReadyForStep(Request $request): bool
@@ -149,7 +149,9 @@ trait IsReadyForStep
             return $this->isReadyForSpectreStep();
         }
 
-        throw new ImporterErrorException(sprintf('Cannot handle step "%s" in flow "%s"', self::STEP, $flow)); // @phpstan-ignore-line
+        // 2025-12-20 no longer throw error, just return true.
+        return true;
+        // throw new ImporterErrorException(sprintf('[b] Cannot handle step "%s" in flow "%s"', self::STEP, $flow)); // @phpstan-ignore-line
     }
 
     private function isReadyForSubmission(string $flow): bool

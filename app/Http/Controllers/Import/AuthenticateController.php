@@ -60,12 +60,14 @@ class AuthenticateController extends Controller
      *
      * @throws ImporterErrorException
      */
-    public function index(Request $request)
+    public function index(Request $request, ?string $flow = null)
     {
         // variables for page:
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        if(null === $flow) {
+            $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        }
         $subTitle  = ucfirst($flow);
         $error     = Session::get('error');
         Log::debug(sprintf('Now in AuthenticateController::index (/authenticate) with flow "%s"', $flow));
@@ -90,7 +92,7 @@ class AuthenticateController extends Controller
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
 
-                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+                throw new ImporterErrorException(sprintf('[a] Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
 
         $result    = $validator->validate();
@@ -110,7 +112,7 @@ class AuthenticateController extends Controller
 
         Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
 
-        throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+        throw new ImporterErrorException(sprintf('[b] Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
     }
 
     /**
@@ -142,7 +144,7 @@ class AuthenticateController extends Controller
             default:
                 Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
 
-                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+                throw new ImporterErrorException(sprintf('[c] Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
         }
         $all        = $request->all();
         $submission = [];

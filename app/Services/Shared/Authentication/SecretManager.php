@@ -37,11 +37,15 @@ class SecretManager
      */
     public static function getAccessToken(): string
     {
+        Log::debug(sprintf(__METHOD__));
         if (session()->has(Constants::SESSION_ACCESS_TOKEN)) {
+            Log::debug('There is a token in the session.');
             $token = session()->get(Constants::SESSION_ACCESS_TOKEN);
             if ('' !== $token) {
+                Log::debug('Token is not empty, return it.');
                 return $token;
             }
+            Log::debug('Token is empty or invalid.');
         }
 
         Log::debug('No access token in session, will return header or config variable.');
@@ -144,9 +148,10 @@ class SecretManager
         Log::debug(__METHOD__);
         // check for access token cookie. if not, redirect to flow to get it.
         if ('' === self::getAccessToken() && !self::hasRefreshToken() && !self::hasBaseUrl()) {
+            Log::debug('Have NO valid secrets');
             return false;
         }
-
+        Log::debug('Have valid secrets!');
         return true;
     }
 
@@ -166,6 +171,7 @@ class SecretManager
      */
     public static function saveAccessToken(string $token): void
     {
+        Log::debug(sprintf('saveAccessToken in session under "%s"',Constants::SESSION_ACCESS_TOKEN));
         session()->put(Constants::SESSION_ACCESS_TOKEN, $token);
     }
 

@@ -1,5 +1,13 @@
+<?php
+
+namespace App\Api\Controllers\ImportJob;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Storage;
+
 /*
- * bootstrap.js
+ * IndexController.php
  * Copyright (c) 2025 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
@@ -18,29 +26,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
 
-// import things
-import axios from 'axios';
-import Alpine from "alpinejs";
-import * as bootstrap from 'bootstrap';
-// import even more
+class IndexController extends BaseController
+{
 
+    public function index(): JsonResponse
+    {
+        $disk  = Storage::disk('import-jobs');
+        $files = [];
+        foreach ($disk->allFiles() as $file) {
+            if ('json' === $this->getExtension($file)) {
+                $files[] = $file;
+            }
+        }
+        return response()->json($files);
+    }
 
-window.bootstrapped = true;
+    private function getExtension(string $name): string
+    {
+        $parts = explode('.', $name);
+        if (count($parts) > 1) {
+            return $parts[count($parts) - 1];
+        }
 
-window.axios = axios;
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-let token = document.head.querySelector('meta[name="csrf-token"]');
-if (token) {
-    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-    console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
+        return '';
+    }
+
 }
-
-
-window.Alpine = Alpine

@@ -30,6 +30,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Class IndexController
@@ -74,6 +75,7 @@ class IndexController extends Controller
         // global methods to get these values, from cookies or configuration.
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
+
         $validInfo         = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             Log::debug('No valid secrets, redirect to token.index');

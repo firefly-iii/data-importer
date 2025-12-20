@@ -27,6 +27,7 @@ let index = function () {
             connectionError: false,
             connectionErrorMessage: '',
         },
+        importJobs: [],
         loadingFunctions: {
             file: true,
             gocardless: true,
@@ -50,6 +51,7 @@ let index = function () {
             fints: '',
             basiq: '',
         },
+        loading: true,
         importFunctions: {
             file: false,
             gocardless: false,
@@ -62,74 +64,90 @@ let index = function () {
             fints: false,
             basiq: false,
         },
+        importFlows: {},
         init() {
             this.checkFireflyIIIConnection();
         },
-        checkFireflyIIIConnection() {
-            let validateUrl  = './token/validate';
-            let tokenPageUrl = './token';
-            let providers = ['file', 'gocardless', 'spectre', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'];
-            window.axios.get(validateUrl).then((response) => {
-                let message = response.data.result;
-                // console.log('message is ', message)
+        loadImportFlows() {
+            let importFlowUrl = './api/import-flows';
+            window.axios.get(importFlowUrl).then((response) => {
+                let flows = response.data;
+                for (let i = 0; i < flows.length; i++) {
+                    if (flows.hasOwnProperty(i)) {
+                        let flow                   = flows[i];
+                        flow.loading               = true;
+                        this.importFlows[flow.key] = flow;
+                    }
 
-                if ('OK' === message) {
-                    this.loadingFunctions.file = false;
-                    this.importFunctions.file  = true;
+                }
+                this.loading = false;
+                this.validateAuthentications();
+            });
+        },
+        validateAuthentications() {
+            for (let flow in this.importFlows) {
+                if (this.importFlows.hasOwnProperty(flow)) {
+                    console.log('Validate ' + flow);
+                    if (!this.importFlows[flow].enabled) {
+                        console.log('Skip ' + flow);
+                        this.importFlows[flow].loading = false;
+                        continue;
+                    }
+                    let validateUrl = './api/import-flows/validate/' + flow;
+                    window.axios.get(validateUrl).then((response) => {
+                        let message = response.data.result;
+                        console.log('Result for ' + flow + ' = ' + message);
+                        if ('NODATA' === message) {
+                            this.importFlows[flow].loading = false;
+                        }
+                        if ('OK' === message) {
+                            this.importFlows[flow].loading       = false;
+                            this.importFlows[flow].authenticated = true;
+                        }
+                    }).catch((error) => {
+                        console.warn(flow + ' is broken');
+                        this.importFlows[flow].loading = false;
+                    });
+                }
+            }
+        },
+        checkFireflyIIIConnection() {
+            let validateUrl  = './api/firefly-iii/validate';
+            //window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
+            window.axios.get(validateUrl).then((response) => {
+                let result = response.data.result;
+                let statusCode = response.data.status_code;
+                console.log('Result is ', result)
+
+                if ('OK' === result) {
+                    this.loadImportFlows();
                     return;
                 }
 
-                if ('NEEDS_OAUTH' === message) {
+                if ('NEEDS_OAUTH' === result) {
                     console.log('OAuth authentication required, redirecting to token page');
                     window.location.href = tokenPageUrl;
                     return;
                 }
-                for (let i = 0; i < providers.length; i++) {
-                    let provider = providers[i];
-                    this.loadingFunctions[provider] = false;
-                    this.importFunctions[provider]  = false;
-                    this.errors[provider]           = '';
+                console.log(statusCode);
+                if(401 === statusCode) {
+                    this.pageProperties.connectionError        = true;
+                    this.pageProperties.connectionErrorMessage = 'Firefly III refused the connection. It believes you are not authenticated properly. Perhaps you\'ve not copy-pasted the access token correctly, or it has expired.';
+                    return;
                 }
+
 
                 this.pageProperties.connectionError        = true;
                 this.pageProperties.connectionErrorMessage = response.data.message;
             }).catch((error) => {
-
-                for (let i = 0; i < providers.length; i++) {
-                    let provider = providers[i];
-                    this.loadingFunctions[provider] = false;
-                    this.importFunctions[provider]  = false;
-                    this.errors[provider]           = 'The "'+provider+'"-provider is not configured correctly. Please check your settings.';
-                }
-
-                this.pageProperties.connectionError        = true;
-                this.pageProperties.connectionErrorMessage = error;
-            }).finally(() => {
-                if (false === this.pageProperties.connectionError) {
-                    for (let i = 0; i < providers.length; i++) {
-                        let provider = providers[i];
-                        this.checkProvider(provider);
-                    }
-                }
-            });
-        },
-        checkProvider (provider) {
-            let validateUrl = './validate/' + provider;
-            window.axios.get(validateUrl).then((response) => {
-                let message = response.data.result;
-                if ('NODATA' === message || 'OK' === message) {
-                    this.loadingFunctions[provider] = false;
-                    this.importFunctions[provider]  = true;
+                if(500 === error.response.status) {
+                    this.pageProperties.connectionError        = true;
+                    this.pageProperties.connectionErrorMessage = 'A "500"-error occurred inside the data importer while trying to check the connection to Firefly III. Sorry about that. Please follow the link to the documentation and consult the log files to see what happened. Sorry about this!';
                     return;
                 }
-                this.loadingFunctions[provider] = false;
-                this.importFunctions[provider]  = false;
-                this.errors[provider]           = 'The "'+provider+'"-provider is not configured, or configured incorrectly and cannot be used to import data.';
-            }).catch((error) => {
-                this.loadingFunctions[provider] = false;
-                this.importFunctions[provider]  = false;
-                this.errors[provider]           = 'The "'+provider+'"-provider is not configured, or configured incorrectly and cannot be used to import data.';
-                console.error(error);
+                console.log(error.response.status);
+                this.pageProperties.connectionError        = true;
+                this.pageProperties.connectionErrorMessage = error;
             });
         },
     }

@@ -22,6 +22,12 @@
 
 declare(strict_types=1);
 
+// new routes that use less session data and redirects.
+Route::get('/authenticate-flow/{flow?}', 'Import\AuthenticateController@index')->name('authenticate-flow.index');
+Route::get('/new-import/{flow?}', 'Import\UploadController@index')->name('new-import.index');
+
+
+
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
 Route::post('/', 'IndexController@postIndex')->name('index.post');
@@ -42,12 +48,12 @@ Route::get('/flush', 'IndexController@flush')->name('flush');
 
 // step 2: Authenticate Nordigen / Spectre manually if necessary.
 // check : must not be CSV flow. If so redirect to upload.
-Route::get('/authenticate', 'Import\AuthenticateController@index')->name('002-authenticate.index');
+Route::get('/authenticate/{flow?}', 'Import\AuthenticateController@index')->name('002-authenticate.index');
 Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
 
 // step 3: Upload CSV file + config file
 // check : Must not already have uploaded files (HAS_UPLOAD). If so redirect to configuration.
-Route::get('/upload', 'Import\UploadController@index')->name('003-upload.index');
+Route::get('/upload/{flow?}', 'Import\UploadController@index')->name('003-upload.index');
 Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003-upload.upload']);
 
 // step 4: Configure import

@@ -75,6 +75,10 @@ return [
             'driver' => 'local',
             'root'   => storage_path('jobs'),
         ],
+        'import-jobs'                => [
+            'driver' => 'local',
+            'root'   => storage_path('import-jobs'),
+        ],
         'conversion-routines' => [
             'driver' => 'local',
             'root'   => storage_path('conversion-routines'),
