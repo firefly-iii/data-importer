@@ -29,7 +29,7 @@
                             <p class="text-danger">{{ $error }}</p>
                         @endif
 
-                        <form method="post" action="{{ route('002-authenticate.post') }}" accept-charset="UTF-8">
+                        <form method="post" action="{{ route('authenticate-flow.post', [$flow]) }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
                             @foreach($data as $key => $value)

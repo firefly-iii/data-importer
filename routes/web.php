@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 // new routes that use less session data and redirects.
 Route::get('/authenticate-flow/{flow?}', 'Import\AuthenticateController@index')->name('authenticate-flow.index');
+Route::post('/authenticate-flow/{flow}', 'Import\AuthenticateController@postIndex')->name('authenticate-flow.post');
+
 Route::get('/new-import/{flow?}', 'Import\UploadController@index')->name('new-import.index');
 
 
