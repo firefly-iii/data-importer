@@ -10,7 +10,7 @@
                         Firefly III can automatically detect duplicate transactions. This is pretty
                         foolproof. In some special cases however,
                         you want more control over this process. Read more about the options below in <a
-                            href="https://docs.firefly-iii.org/how-to/data-importer/import/csv/"
+                            href="https://docs.firefly-iii.org/how-to/data-importer/import/duplicates/"
                             target="_blank">the documentation</a>.
                     </p>
                 </div>

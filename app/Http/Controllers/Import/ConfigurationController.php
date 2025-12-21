@@ -25,24 +25,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Events\CompletedConfiguration;
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
-use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\File\FileContentSherlock;
-use App\Services\Shared\Http\AccountListCollector;
 use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +51,8 @@ class ConfigurationController extends Controller
     use MergesAccountLists;
     use RestoresConfiguration;
 
+    private ImportJobRepository $repository;
+
     /**
      * StartController constructor.
      */
@@ -63,102 +61,60 @@ class ConfigurationController extends Controller
         parent::__construct();
         app('view')->share('pageTitle', 'Configuration');
         $this->middleware(ConfigurationControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
-    public function index(Request $request)
+    public function index(Request $request, string $identifier)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle          = 'Configuration';
-        $subTitle           = 'Configure your import';
-        $flow               = $request->cookie(Constants::FLOW_COOKIE);
-        $configuration      = $this->restoreConfiguration();
-        $camtType           = '';
+        $mainTitle = 'Configuration';
+        $subTitle  = 'Configure your import';
+        $doParse   = 'true' === $request->get('parse');
+        $importJob = $this->repository->find($identifier);
 
-        // if config says to skip it, skip it:
-        $overruleSkip       = 'true' === $request->get('overruleskip');
-        if (true === $configuration->isSkipForm() && false === $overruleSkip) {
-            Log::debug('Skip configuration, go straight to the next step.');
-            // set config as complete.
-            event(new CompletedConfiguration($configuration));
-
-            // need a redirect to roles or mapping, depending on the flow.
-            return redirect()->route('005-roles.index');
+        // if the job is "loaded", redirect to a step that will fix this, and show the user an intermediate page.
+        if (!$doParse && 'loaded' === $importJob->getState()) {
+            return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
-
-        // collect Firefly III accounts
-        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        $fireflyIIIAccounts = $this->getFireflyIIIAccounts();
-
-        // unique column options:
-        $uniqueColumns      = config(sprintf('%s.unique_column_options', $flow));
-
-        // also get the importer service accounts, if any.
-        $collector          = new AccountListCollector($configuration, $flow, $fireflyIIIAccounts);
-
-        try {
-            $importerAccounts = $collector->collect();
-        } catch (AgreementExpiredException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-
-            // remove thing from configuration
-            $configuration->clearRequisitions();
-
-            // save configuration in session and on disk:
-            session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // redirect to selection.
-            return redirect()->route('009-selection.index');
-        }
-
-        if ('file' === $flow) {
-            // detect content type and save to config object.
-            $detector = new FileContentSherlock();
-            $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-            $fileType = $detector->detectContentTypeFromContent($content);
-            $configuration->setContentType($fileType);
-            if ('camt' === $fileType) {
-                $camtType       = $detector->getCamtType();
-                $configuration->setCamtType($camtType);
-                // save configuration in session and on disk AGAIN:
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
+        // if the job is "loaded", parse it. Redirect if errors occur.
+        if ($doParse && 'loaded' === $importJob->getState()) {
+            $messages = $this->repository->parseImportJob($importJob);
+            if ($messages->count() > 0) {
+                return redirect()->route('new-import.index', [$importJob->getFlow()])->withErrors($messages);
             }
+
         }
-        // Get currency data for account creation widget
-        $currencies         = $this->getCurrencies();
 
-        return view('import.004-configure.index', compact('camtType', 'mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
-    }
-
-    /**
-     * Get available currencies from Firefly III for account creation
-     */
-    private function getCurrencies(): array
-    {
-        try {
-            /** @var TransactionCurrencies $mapper */
-            $mapper = app(TransactionCurrencies::class);
-
-            return $mapper->getMap();
-        } catch (Exception $e) {
-            Log::error(sprintf('Failed to load currencies: %s', $e->getMessage()));
-
-            return [];
+        // if configuration says to skip this configuration step, skip it:
+        $configuration = $importJob->getConfiguration();
+        $doNotSkip     = 'true' === $request->get('do_not_skip');
+        if (true === $configuration->isSkipForm() && false === $doNotSkip) {
+            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
+
+        $flow     = $importJob->getFlow();
+        $camtType = '';
+        // unique column options (this depends on the flow):
+        $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow));
+        $applicationAccounts = $importJob->getApplicationAccounts();
+        $currencies          = $importJob->getCurrencies();
+
+        // TODO what is "importerAccounts" in this context?
+        $importerAccounts = [];
+
+
+        return view('import.004-configure.index', compact('camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     public function phpDate(Request $request): JsonResponse
     {
         Log::debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj           = new Date();
+        $dateObj = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
 
         /** @var Carbon $date */
-        $date              = today()->locale($locale);
+        $date = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
@@ -178,10 +134,10 @@ class ConfigurationController extends Controller
 
         // Validate configuration contract for SimpleFIN
         if ('simplefin' === $configuration->getFlow()) {
-            $validator          = new ConfigurationContractValidator();
+            $validator = new ConfigurationContractValidator();
 
             // Validate form structure first
-            $formValidation     = $validator->validateFormFieldStructure($fromRequest);
+            $formValidation = $validator->validateFormFieldStructure($fromRequest);
             if (!$formValidation->isValid()) {
                 Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
 

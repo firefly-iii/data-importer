@@ -1,4 +1,4 @@
-@if(0 === count($fireflyIIIAccounts['assets']) && 0 === count($fireflyIIIAccounts['liabilities']) && $flow === 'file')
+@if(0 === count($applicationAccounts['assets']) && 0 === count($applicationAccounts['liabilities']) && $flow === 'file')
     <div class="row mt-3">
         <div class="col-lg-10 offset-lg-1">
             <div class="card">

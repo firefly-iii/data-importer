@@ -94,6 +94,8 @@ trait IsReadyForStep
 
         // this step is the same for everybody:
         if ('upload-files' === self::STEP) {
+            // 2025-12-20 for importer 2.0 we always return true.
+            return true;
             // ready for this step if NO uploads.
             $res = !(session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD));
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
@@ -116,6 +118,8 @@ trait IsReadyForStep
             return $res;
         }
         if ('configuration' === self::STEP) {
+            // 2025-12-20 for importer 2.0 we always return true.
+            return true;
             $res = $this->isReadyForConfiguration();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
 

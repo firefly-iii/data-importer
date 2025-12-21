@@ -74,18 +74,19 @@
     "require": {
         "php": ">=8.4",
         "ext-bcmath": "*",
+        "ext-intl": "*",
         "ext-json": "*",
         "firefly-iii/api-support-classes": "@dev",
         "genkgo/camt": ">=2.10.1",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^12",
         "league/csv": "9.*",
+        "ramsey/uuid": "^4.9",
         "spatie/enum": "^3.10",
         "swaggest/json-schema": "^0.12.43",
         "symfony/http-client": "^8.0",
         "symfony/mailgun-mailer": "^8.0",
-        "thecodingmachine/safe": "^3.3",
-        "ext-intl": "*"
+        "thecodingmachine/safe": "^3.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

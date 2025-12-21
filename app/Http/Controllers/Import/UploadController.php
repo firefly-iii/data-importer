@@ -28,6 +28,7 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
 use App\Services\Shared\File\FileContentSherlock;
@@ -68,6 +69,8 @@ class UploadController extends Controller
     private string $configFileName;
     private string $contentType;
     private string $importableFileContent = '';
+    private string $configFileContent     = '';
+    private ImportJobRepository $repository;
 
     /**
      * UploadController constructor.
@@ -80,6 +83,7 @@ class UploadController extends Controller
         // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType    = 'unknown';
         $this->configFileName = '';
+        $this->repository = new ImportJobRepository();
     }
 
     /**
@@ -122,17 +126,29 @@ class UploadController extends Controller
         if (0 === count($errors) && null !== $configFile) {
             $errors = $this->processConfigFile($errors, $configFile);
         }
+        // at this point the config (unprocessed) is in $this->configFileContent
 
         // process pre-selected file (if present):
         $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        // the config in $this->configFileContent may now be overruled.
 
         // stop here if any errors:
         if ($errors->count() > 0) {
             return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
         }
+        // at this point, create a new import job. With raw content of the config + importable file.
+        $importJob = $this->repository->create();
+        $importJob = $this->repository->setFlow($importJob, $flow);
+        $importJob = $this->repository->setConfigurationString($importJob, $this->configFileContent);
+        $importJob = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
+        $importJob = $this->repository->markAs($importJob, 'loaded');
+
+        // redirect to configuration controller.
+        return redirect()->route('configure-import.index', [$importJob->identifier]);
+
         // at this point its possible there is a config file, but there may not be.
-        //$configuration = $this->restoreConfiguration($flow);
-        //$configuration->setFlow($flow); // at least set the flow.
+
+        // create a new import job with import file content AND config file content.
 
         // do validation for all configurations.
         switch ($flow) {
@@ -252,43 +268,20 @@ class UploadController extends Controller
         $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('config_file', (string)$errorNumber);
+            return $errors;
         }
+
         // upload the file to a temp directory and use it from there.
-        if (0 === $errorNumber) {
-            Log::debug('Config file uploaded.');
-            $path       = $file->getPathname();
-            $validation = $this->verifyJSON($path);
-            if (false === $validation) {
-                $errors->add('config_file', $this->errorMessage);
+        Log::debug('Config file uploaded.');
+        $path       = $file->getPathname();
+        $validation = $this->verifyJSON($path);
+        if (false === $validation) {
+            $errors->add('config_file', $this->errorMessage);
 
-                return $errors;
-            }
-
-            $content              = (string)file_get_contents($path);
-            $this->configFileName = StorageService::storeContent($content);
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
-
-            // process the config file
-            $success       = false;
-            $configuration = null;
-
-            try {
-                $configuration = ConfigFileProcessor::convertConfigFile($this->configFileName);
-                $configuration->setContentType($this->contentType);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $success = true;
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
-            }
-            // if conversion of the config file was a success, store the new version again:
-            if (true === $success) {
-                $configuration->updateDateRange();
-                $this->configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
-            }
+            return $errors;
         }
 
+        $this->configFileContent = (string)file_get_contents($path);
         return $errors;
     }
 
@@ -300,17 +293,11 @@ class UploadController extends Controller
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
             $disk           = Storage::disk('configurations');
-            $configFileName = StorageService::storeContent($disk->get($selection));
+            $content = (string)$disk->get($selection);
+            $configFileName = StorageService::storeContent($content);
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // process the config file
-            try {
-                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
-            }
+            $this->configFileContent = $content;
         }
 
         return $errors;

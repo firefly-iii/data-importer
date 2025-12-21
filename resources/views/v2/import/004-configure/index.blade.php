@@ -38,7 +38,7 @@
         @include('import.004-configure.partials.no-account-warning')
 
         <!-- user has accounts! -->
-        @if(count($fireflyIIIAccounts['assets']) > 0 || count($fireflyIIIAccounts['liabilities']) > 0 || $flow !== 'file')
+        @if(count($applicationAccounts['assets']) > 0 || count($applicationAccounts['liabilities']) > 0 || $flow !== 'file')
             <!-- opening box with instructions -->
             @include('import.004-configure.partials.opening-box')
 
