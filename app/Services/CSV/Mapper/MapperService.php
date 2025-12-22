@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Camt\Transaction;
+use App\Services\Camt\TransactionCamt052 as Transaction;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
@@ -50,7 +50,7 @@ class MapperService
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // make file reader first.
-        $reader = Reader::createFromString($content);
+        $reader = Reader::fromString($content);
 
         // reader not configured to use correct delimiter.
         try {

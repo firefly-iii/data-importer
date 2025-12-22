@@ -104,22 +104,22 @@ class ConversionController extends Controller
             }
         }
         if ('nordigen' === $flow) {
-            die('a');
+            throw new ImporterErrorException('Need to handle gocardless');
             Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            die('b');
+            throw new ImporterErrorException('Need to handle spectre');
             Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
-            die('c');
+            throw new ImporterErrorException('Need to handle lunchflow');
             Log::debug('Create Lunch Flow routine manager.');
             $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
-            die('d');
+            throw new ImporterErrorException('Need to handle simplefin');
             Log::debug('Create SimpleFIN routine manager.');
 
             try {
@@ -135,7 +135,7 @@ class ConversionController extends Controller
             }
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
-            die('e');
+            throw new ImporterErrorException('Need to handle redirect.');
             Log::debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
@@ -145,7 +145,9 @@ class ConversionController extends Controller
 
         // Prepare new account creation data for SimpleFIN
         // FIXME restore the code below
-
+        if ('simplefin' === $flow) {
+            throw new ImporterErrorException('Need simplefin fix');
+        }
 //        $newAccountsToCreate = [];
 //        if ('simplefin' === $flow) {
 //            $accounts    = $configuration->getAccounts();
@@ -172,7 +174,7 @@ class ConversionController extends Controller
 
         // Validate configuration contract for SimpleFIN before proceeding
         if ('simplefin' === $importJob->getFlow()) {
-            die('why another validation come on');
+            throw new ImporterErrorException('Need more simplefin fix');
             $validator          = new ConfigurationContractValidator();
             $contractValidation = $validator->validateConfigurationContract($configuration);
 
@@ -194,7 +196,7 @@ class ConversionController extends Controller
 
         // Handle new account data for SimpleFIN
         if ('simplefin' === $importJob->getFlow()) {
-            die('create new accounts');
+            throw new ImporterErrorException('Need something new accounts.');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
                 Log::debug('Updating configuration with detailed new account data', $newAccountData);
@@ -235,23 +237,23 @@ class ConversionController extends Controller
                 $routine = new CSVRoutineManager($identifier);
             }
             if ('camt' === $contentType) {
-                $routine = new CamtRoutineManager($identifier); // why do we need this one?
+                $routine = new CamtRoutineManager($identifier);
             }
         }
         if ('nordigen' === $flow) {
-            die('cannot do this a');
+            throw new ImporterErrorException('cannot go here A');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
-            die('cannot do this b');
+            throw new ImporterErrorException('cannot go here B');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
-            die('cannot do this c');
+            throw new ImporterErrorException('cannot go here C');
             $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
-            die('cannot do this e');
+            throw new ImporterErrorException('cannot go here D');
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
                 Log::debug('SimpleFIN routine manager created successfully in start method.');
@@ -299,7 +301,7 @@ class ConversionController extends Controller
 
         if('file' !== $flow) {
             // all other workflows go to mapping (if requested from configuration)
-            die('dont know what to do.');
+            throw new ImporterErrorException('Dont know what to do here.');
         }
         if('file' === $flow) {
             $importJob->setState('ready_for_submission');

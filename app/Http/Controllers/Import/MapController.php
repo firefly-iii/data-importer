@@ -34,8 +34,6 @@ use App\Services\CSV\Mapper\MapperInterface;
 use App\Services\CSV\Mapper\MapperService;
 use App\Services\CSV\Mapper\OpposingAccounts;
 use App\Services\Session\Constants;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -92,7 +90,6 @@ class MapController extends Controller
             $data  = $this->getCSVMapInformation($importJob);
         }
         if ('file' === $importJob->getFlow() && 'camt' === $configuration->getContentType()) {
-            die('fix camt');
             Log::debug('Get mapping data for CAMT file');
             $roles = $configuration->getRoles();
             $data  = $this->getCamtMapInformation($importJob);
@@ -100,7 +97,7 @@ class MapController extends Controller
 
         // nordigen, spectre, simplefin and others:
         if ('file' !== $importJob->getFlow()) {
-            die('does not work');
+            throw new ImporterErrorException('get mapping data');
             Log::debug('Get mapping data for data importers.');
             $roles = [];
             $data  = $this->getImporterMapInformation();
@@ -109,7 +106,7 @@ class MapController extends Controller
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
             event(new CompletedMapping($configuration));
-            die('here we are 1');
+            throw new ImporterErrorException('fix something.');
 
             return redirect()->route('007-convert.index');
         }
@@ -190,9 +187,9 @@ class MapController extends Controller
      * Return the map data necessary for the importable file mapping based on some weird helpers.
      * TODO needs refactoring and proper splitting into helpers.
      */
-    private function getCamtMapInformation(): array
+    private function getCamtMapInformation(ImportJob $importJob): array
     {
-        $configuration   = $this->restoreConfiguration();
+        $configuration   = $importJob->getConfiguration();
         $roles           = $configuration->getRoles();
         $existingMapping = $configuration->getMapping();
         $doMapping       = $configuration->getDoMapping();
@@ -240,9 +237,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-
-        return MapperService::getMapDataForCamt($configuration, $content, $data);
+        return MapperService::getMapDataForCamt($configuration, $importJob->getImportableFileString(), $data);
     }
 
     /**
@@ -519,8 +514,8 @@ class MapController extends Controller
         $importJob->setConfiguration($configuration);
         // FIXME needs better redirect or state.
         $flow = $importJob->getFlow();
-        if(in_array($flow, ['nordigen','spectre','lunchflow','simplefin'])) {
-            die('need to go to submission.');
+        if (in_array($flow, ['nordigen', 'spectre', 'lunchflow', 'simplefin'])) {
+            throw new ImporterErrorException('Go to submission');
         }
 
         $importJob->setState('configured_roles_map_in_place');

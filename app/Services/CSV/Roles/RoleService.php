@@ -222,7 +222,7 @@ class RoleService
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {
         $camtReader   = new CamtReader(Config::getDefault());
-        $camtMessage  = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
+        $camtMessage  = $camtReader->readString($content); // -> Level A
         $camtType     = $configuration->getCamtType();
         $transactions = [];
         $examples     = [];

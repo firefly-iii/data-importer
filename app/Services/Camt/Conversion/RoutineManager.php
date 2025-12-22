@@ -25,14 +25,14 @@ declare(strict_types=1);
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Session\Constants;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
-use App\Services\Storage\StorageService;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Exception\InvalidMessageException;
@@ -54,8 +54,10 @@ class RoutineManager implements RoutineManagerInterface
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
+    private ImportJob            $importJob;
+    private ImportJobRepository  $repository;
 
-    public function __construct(?string $identifier)
+    public function __construct(string $identifier)
     {
         Log::debug('Constructed CAMT RoutineManager');
         $this->content       = '';    // used in CLI
@@ -63,12 +65,10 @@ class RoutineManager implements RoutineManagerInterface
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->identifier    = $identifier;
+        $this->repository    = new ImportJobRepository();
+        $this->importJob     = $this->repository->find($identifier);
+        $this->setConfiguration($this->importJob->getConfiguration());
     }
 
     #[Override]
@@ -80,7 +80,7 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         // make objects
         $this->transactionExtractor = new TransactionExtractor($configuration);
@@ -98,7 +98,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // get XML file
-        $camtMessage        = $this->getCamtMessage();
+        $camtMessage = $this->getCamtMessage();
         if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
@@ -111,13 +111,13 @@ class RoutineManager implements RoutineManagerInterface
             return [];
         }
         // get raw messages
-        $rawTransactions    = $this->transactionExtractor->extractTransactions($camtMessage);
+        $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
 
         // get intermediate result (still needs processing like mapping etc)
         $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
 
         // put the result into firefly iii compatible arrays (and replace mapping when necessary)
-        $transactions       = $this->transactionMapper->map($pseudoTransactions);
+        $transactions = $this->transactionMapper->map($pseudoTransactions);
 
         if (0 === count($transactions)) {
             Log::error('No transactions found in CAMT file');
@@ -141,17 +141,9 @@ class RoutineManager implements RoutineManagerInterface
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $camtReader  = new Reader(Config::getDefault());
-        $camtMessage = null;
 
         try {
-            // check if CLI or not and read as appropriate:
-            if ('' !== $this->content) {
-                // seems the CLI part
-                $camtMessage = $camtReader->readString($this->content); // -> Level A
-            }
-            if ('' === $this->content) {
-                $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
-            }
+            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString()); // -> Level A
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
