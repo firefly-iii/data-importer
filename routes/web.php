@@ -31,6 +31,8 @@ Route::post('/new-import/{flow}', 'Import\UploadController@upload')->name('new-i
 
 Route::get('/configure-import/{identifier}', 'Import\ConfigurationController@index')->name('configure-import.index');
 Route::post('/configure-import/{identifier}', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => 'configure-import.post']);
+Route::get('/download-import-configuration/{identifier}', ['uses' => 'Import\DownloadController@download', 'as' => 'configure-import.download']);
+
 
 Route::get('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@index', 'as' => 'configure-roles.index']);
 Route::post('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@postIndex', 'as' => 'configure-roles.post']);
@@ -41,6 +43,11 @@ Route::post('/data-mapping/{identifier}', ['uses' => 'Import\MapController@postI
 Route::get('/data-conversion/{identifier}', ['uses' => 'Import\ConversionController@index', 'as' => 'data-conversion.index']);
 Route::any('/data-conversion/{identifier}/start', ['uses' => 'Import\ConversionController@start', 'as' => 'data-conversion.start']);
 Route::get('/data-conversion/{identifier}/status', ['uses' => 'Import\ConversionController@status', 'as' => 'data-conversion.status']);
+
+Route::get('/submit-data/{identifier}', ['uses' => 'Import\SubmitController@index', 'as' => 'submit-data.index']);
+Route::any('/submit-data/{identifier}/start', ['uses' => 'Import\SubmitController@start', 'as' => 'submit-data.start']);
+Route::get('/submit-data/{identifier}/status', ['uses' => 'Import\SubmitController@status', 'as' => 'submit-data.status']);
+
 
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
@@ -75,7 +82,6 @@ Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('0
 //Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
 //Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
 
-Route::get('/import/configure/download', ['uses' => 'Import\DownloadController@download', 'as' => '004-configure.download']);
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
 Route::post('/import/check-duplicate', ['uses' => 'Import\DuplicateCheckController@checkDuplicate', 'as' => 'import.check-duplicate']);
 
@@ -96,9 +102,9 @@ Route::post('/import/check-duplicate', ['uses' => 'Import\DuplicateCheckControll
 //Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);
 
 // step 8: submit JSON to Firefly III
-Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' => '008-submit.index']);
-Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
-Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
+//Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' => '008-submit.index']);
+//Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
+//Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
 
 // step 9: Nordigen select a country + bank
 Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => '009-selection.index']);

@@ -25,6 +25,8 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Conversion\Routine\ColumnValueConverter;
 use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
 use App\Services\CSV\Conversion\Routine\LineProcessor;
@@ -37,9 +39,9 @@ use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
+use Override;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Override;
 
 /**
  * Class RoutineManager
@@ -53,24 +55,24 @@ class RoutineManager implements RoutineManagerInterface
 
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;
-    private string                     $content;
     private CSVFileProcessor           $csvFileProcessor;
     private LineProcessor              $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
+    private ImportJob                  $importJob;
+    private ImportJobRepository        $repository;
 
-    public function __construct(?string $identifier)
+    public function __construct(string $identifier)
     {
         $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->identifier    = $identifier;
+        $this->repository    = new ImportJobRepository();
+        $this->importJob     = $this->repository->find($identifier);
+        $this->setConfiguration($this->importJob->getConfiguration());
+
     }
 
     #[Override]
@@ -82,10 +84,10 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         // save config
-        $this->configuration              = $configuration;
+        $this->configuration = $configuration;
 
         // share config
         $this->csvFileProcessor           = new CSVFileProcessor($this->configuration);
@@ -100,11 +102,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->pseudoTransactionProcessor->setIdentifier($this->identifier);
     }
 
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -116,30 +113,20 @@ class RoutineManager implements RoutineManagerInterface
         $this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());
         $this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
 
-        // check if CLI or not and read as appropriate:
-        if ('' !== $this->content) {
-            $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->content, $this->configuration->isConversion()));
-        }
-        if ('' === $this->content) {
-            try {
-                $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-                throw new ImporterErrorException($e->getMessage(), 0, $e);
-            }
-        }
+        $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString(), $this->configuration->isConversion()));
 
-        $CSVLines     = $this->csvFileProcessor->processCSVFile();
+        $CSVLines = $this->csvFileProcessor->processCSVFile();
 
         // convert raw lines into arrays with individual ColumnValues
-        $valueArrays  = $this->lineProcessor->processCSVLines($CSVLines);
+        $valueArrays = $this->lineProcessor->processCSVLines($CSVLines);
 
         // convert value arrays into (pseudo) transactions.
-        $pseudo       = $this->columnValueConverter->processValueArrays($valueArrays);
+        $pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
 
         // convert pseudo transactions into actual transactions.
         $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
 
-        $count        = count($CSVLines);
+        $count = count($CSVLines);
 
         // debug messages on weird indexes.
         //        $this->addError(3, '3: No transactions found in CSV file.');

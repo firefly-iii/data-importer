@@ -24,6 +24,7 @@ namespace App\Models;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
+use App\Services\Shared\Import\Status\SubmissionStatus;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Ramsey\Uuid\Uuid;
@@ -31,11 +32,13 @@ use Ramsey\Uuid\Uuid;
 /*
  * ImportJob states:
  * - new: totally new, no data or anything.
- * - loaded: has config content and importable file content loaded, but nothing else has been done.
- * - parsed: configuration + importable file are parsed and processed. More meta-data exists in the import job.
- * - configured: configuration is set and validated. Also check on new to be created accounts. But not yet created!
- * - roles_defined: file imports with this state are ready to be mapped. may be AFTER conversion.
+ * - contains_content: has config content and importable file content loaded, but nothing else has been done.
+ * - is_parsed: configuration is parsed and processed. More meta-data exists in the import job.
+ * - is_configured: configuration is set and validated. Also check on new to be created accounts. But not yet created!
+ * - configured_and_roles_defined: file imports with this state are configured and have roles for their data. are ready to be mapped. may be AFTER conversion.
+ * - configured_roles_map_in_place: file import has roles defined, configuration and data is mapped. Is ready to be converted.
  * - ready_for_conversion: any import with this state is ready to be converted to Firefly III compatible transactions.
+ * - ready_for_submission: any import with converted data that can be submitted to Firefly III.
  */
 
 class ImportJob implements Arrayable
@@ -48,7 +51,8 @@ class ImportJob implements Arrayable
     private string           $configurationString  = '';
     private string           $importableFileString = '';
     private ?Configuration   $configuration        = null;
-    private ConversionStatus $conversionStatus;
+    public ConversionStatus $conversionStatus;
+    public SubmissionStatus $submissionStatus;
     private array $convertedTransactions = [];
 
     // collected Firefly III data.
@@ -59,6 +63,7 @@ class ImportJob implements Arrayable
     {
         $job                   = new ImportJob();
         $job->conversionStatus = new ConversionStatus();
+        $job->submissionStatus = new SubmissionStatus();
         return $job;
     }
 
@@ -84,6 +89,8 @@ class ImportJob implements Arrayable
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
         $importJob->conversionStatus    = ConversionStatus::fromArray($array['conversion_status']);
+        $importJob->submissionStatus    = SubmissionStatus::fromArray($array['submission_status']);
+        $importJob->convertedTransactions = $array['converted_transactions'];
         $importJob->applicationAccounts = $array['application_accounts'];
         $importJob->currencies          = $array['currencies'];
         return $importJob;
@@ -114,6 +121,8 @@ class ImportJob implements Arrayable
                 'importable_file_string' => $this->importableFileString,
                 'configuration'          => null === $this->configuration ? [] : $this->configuration->toArray(),
                 'conversion_status'      => $this->conversionStatus->toArray(),
+                'submission_status'      => $this->submissionStatus->toArray(),
+                'converted_transactions' => $this->convertedTransactions,
                 'application_accounts'   => $this->applicationAccounts,
                 'currencies'             => $this->currencies,
             ];
@@ -204,16 +213,6 @@ class ImportJob implements Arrayable
     public function setCurrencies(array $currencies): void
     {
         $this->currencies = $currencies;
-    }
-
-    public function getConversionStatus(): ConversionStatus
-    {
-        return $this->conversionStatus;
-    }
-
-    public function setConversionStatus(ConversionStatus $conversionStatus): void
-    {
-        $this->conversionStatus = $conversionStatus;
     }
 
     public function getConvertedTransactions(): array

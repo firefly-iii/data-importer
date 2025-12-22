@@ -462,7 +462,6 @@ trait AutoImports
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $routine              = new RoutineManager($this->identifier);
-        SubmissionStatusManager::startOrFindSubmission($this->identifier);
         $disk                 = \Storage::disk('jobs');
         $fileName             = sprintf('%s.json', $this->identifier);
 

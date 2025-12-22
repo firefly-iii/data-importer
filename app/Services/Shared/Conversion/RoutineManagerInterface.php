@@ -35,7 +35,6 @@ interface RoutineManagerInterface
 
     public function getServiceAccounts(): array;
 
-    public function setConfiguration(Configuration $configuration): void;
 
     public function start(): array;
 }

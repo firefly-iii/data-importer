@@ -28,21 +28,18 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Jobs\ProcessImportSubmissionJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
-use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Support\Http\RestoresConfiguration;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use JsonException;
-use Storage;
 
 /**
  * Class SubmitController
@@ -53,6 +50,8 @@ class SubmitController extends Controller
 
     protected const string DISK_NAME = 'jobs';
 
+    private ImportJobRepository $repository;
+
     /**
      * StartController constructor.
      */
@@ -61,27 +60,26 @@ class SubmitController extends Controller
         parent::__construct();
         view()->share('pageTitle', 'Submit data to Firefly III');
         $this->middleware(SubmitControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
     /**
      * @return Application|Factory|View
      */
-    public function index()
+    public function index(string $identifier)
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle     = 'Submit the data';
+        $importJob     = $this->repository->find($identifier);
         $statusManager = new SubmissionStatusManager();
-        $configuration = $this->restoreConfiguration();
-        $flow          = $configuration->getFlow();
-        // The step immediately preceding submit (008) is always convert (007)
-        $jobBackUrl    = route('007-convert.index');
+        $flow          = $importJob->getFlow();
 
-        // submission job ID may be in session:
-        $identifier    = session()->get(Constants::IMPORT_JOB_IDENTIFIER);
-        // if null, create a new one:
-        if (null === $identifier) {
-            $identifier = $statusManager->generateIdentifier();
+        if ('ready_for_submission' !== $importJob->getState()) {
+            die(sprintf('Job is in state "%s", expected ready_for_submission.', $importJob->getState()));
         }
+
+        // The step immediately preceding submit (008) is always convert (007)
+        $jobBackUrl = route('data-conversion.index', [$identifier]);
 
         // validate flow
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -97,58 +95,24 @@ class SubmitController extends Controller
         return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
-    public function start(Request $request): JsonResponse
+    public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier           = $request->get('identifier');
-        if (null === $identifier) {
-            Log::error('Start: Identifier is NULL');
-            $status         = new SubmissionStatus();
-            $status->status = SubmissionStatus::SUBMISSION_ERRORED;
-
-            return response()->json($status->toArray());
-        }
-        $configuration        = $this->restoreConfiguration();
-        $routine              = new RoutineManager($identifier);
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
         Log::error('Start: Find import job status.');
-        $importJobStatus      = SubmissionStatusManager::startOrFindSubmission($identifier);
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
-        $conversionIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk                 = Storage::disk(self::DISK_NAME);
-        $fileName             = sprintf('%s.json', $conversionIdentifier);
-
-        // get files from disk:
-        if (!$disk->has($fileName)) {
-            Log::error(sprintf('The file "%s" does not exist on the "%s" disk.', $fileName, self::DISK_NAME));
-            // TODO error in logs
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
-
-            return response()->json($importJobStatus->toArray());
-        }
-
-        try {
-            $json         = $disk->get($fileName);
-            $transactions = json_decode((string) $json, true, 512, JSON_THROW_ON_ERROR);
-            Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
-            Log::error(sprintf('The file "%s" on "%s" disk contains error: %s', $fileName, self::DISK_NAME, $e->getMessage()));
-            // TODO error in logs
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED);
-
-            return response()->json($importJobStatus->toArray());
-        }
+        $transactions = $importJob->getConvertedTransactions();
 
         // Retrieve authentication credentials for job
-        $accessToken          = SecretManager::getAccessToken();
-        $baseUrl              = SecretManager::getBaseUrl();
-        $vanityUrl            = SecretManager::getVanityUrl();
+        $accessToken = SecretManager::getAccessToken();
+        $baseUrl     = SecretManager::getBaseUrl();
+        $vanityUrl   = SecretManager::getVanityUrl();
 
         // Set initial running status before dispatching job
-        SubmissionStatusManager::setSubmissionStatus(
-            SubmissionStatus::SUBMISSION_RUNNING,
-            $identifier
-        );
+        $importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_RUNNING;
+        $this->repository->saveToDisk($importJob);
 
         // Dispatch asynchronous job for processing
         ProcessImportSubmissionJob::dispatch(
@@ -160,32 +124,14 @@ class SubmitController extends Controller
             $vanityUrl
         );
 
-        Log::debug('ProcessImportSubmissionJob dispatched', [
-            'identifier'        => $identifier,
-            'transaction_count' => count($transactions),
-        ]);
-
         // Return immediate response indicating job was dispatched
-        return response()->json([
-            'status'     => 'job_dispatched',
-            'identifier' => $identifier,
-        ]);
+        return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier,]);
     }
 
-    public function status(Request $request): JsonResponse
+    public function status(Request $request, string $identifier): JsonResponse
     {
-        $identifier      = $request->get('identifier');
+        $importJob = $this->repository->find($identifier);
         Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
-        if (null === $identifier) {
-            Log::warning('Identifier is NULL.');
-            // no status is known yet because no identifier is in the session.
-            // As a fallback, return empty status
-            $fakeStatus = new SubmissionStatus();
-
-            return response()->json($fakeStatus->toArray());
-        }
-        $importJobStatus = SubmissionStatusManager::startOrFindSubmission($identifier);
-
-        return response()->json($importJobStatus->toArray());
+        return response()->json($importJob->submissionStatus);
     }
 }

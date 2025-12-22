@@ -82,7 +82,7 @@ class MapController extends Controller
         $roles         = [];
 
         $state = $importJob->getState();
-        if ('new' === $state || 'loaded' === $state || 'parsed' === $state || 'configured' === $state) {
+        if ('new' === $state || 'contains_content' === $state || 'is_parsed' === $state || 'is_configured' === $state) {
             die(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
 
@@ -523,7 +523,7 @@ class MapController extends Controller
             die('need to go to submission.');
         }
 
-        $importJob->setState('ready_for_conversion');
+        $importJob->setState('configured_roles_map_in_place');
         $this->repository->saveToDisk($importJob);
 
         return redirect()->route('data-conversion.index', [$identifier]);

@@ -173,7 +173,7 @@
                             <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}" data-bs-toggle="tooltip"
                                data-bs-placement="top" title="If the conversion seems stuck, you can reset it."><span
                                     class="fas fa-redo-alt"></span> Start over</a>
-                            <a class="btn btn-info text-white btn-sm" href="{{ route('004-configure.download') }}"
+                            <a class="btn btn-info text-white btn-sm" href="{{ route('configure-import.download', [$identifier]) }}"
                                data-bs-toggle="tooltip" data-bs-placement="top"
                                title="You can download a configuration file of your import, so you can make a quick start the next time you import.">
                                 <span class="fas fa-download"></span> Download configuration file

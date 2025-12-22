@@ -24,17 +24,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\CompletedConfiguration;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
-use App\Services\Session\Constants;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
-use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
@@ -43,7 +38,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use JsonException;
 
 class ConfigurationController extends Controller
 {
@@ -71,16 +65,20 @@ class ConfigurationController extends Controller
         $subTitle  = 'Configure your import';
         $doParse   = 'true' === $request->get('parse');
         $importJob = $this->repository->find($identifier);
+        $flow      = $importJob->getFlow();
 
-        // if the job is "loaded", redirect to a step that will fix this, and show the user an intermediate page.
-        if (!$doParse && 'loaded' === $importJob->getState()) {
+        // if the job is "contains_content", redirect to a step that will fix this, and show the user an intermediate page.
+        if (!$doParse && 'contains_content' === $importJob->getState()) {
             return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
-        // if the job is "loaded", parse it. Redirect if errors occur.
-        if ($doParse && 'loaded' === $importJob->getState()) {
+        // if the job is "contains_content", parse it. Redirect if errors occur.
+        if ($doParse && 'contains_content' === $importJob->getState()) {
             $messages = $this->repository->parseImportJob($importJob);
+
             if ($messages->count() > 0) {
-                return redirect()->route('new-import.index', [$importJob->getFlow()])->withErrors($messages);
+                // if there is any state for the job here forget about it, just remove it.
+                $this->repository->deleteImportJob($importJob);
+                return redirect()->route('new-import.index', [$flow])->withErrors($messages);
             }
 
         }
@@ -92,7 +90,6 @@ class ConfigurationController extends Controller
             return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
 
-        $flow     = $importJob->getFlow();
         $camtType = '';
         // unique column options (this depends on the flow):
         $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow));
@@ -103,7 +100,7 @@ class ConfigurationController extends Controller
         $importerAccounts = [];
 
 
-        return view('import.004-configure.index', compact('identifier','camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('identifier', 'camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     public function phpDate(Request $request): JsonResponse
@@ -125,23 +122,27 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
-        $fromRequest   = $request->getAll();
+        $fromRequest = $request->getAll();
         // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
-        $importJob = $this->repository->find($identifier);
+        $importJob     = $this->repository->find($identifier);
         $configuration = $importJob->getConfiguration();
         $configuration->updateFromRequest($request->getAll());
         $importJob->setConfiguration($configuration);
-        $importJob->setState('configured');
+
+        $importJob->setState('is_configured');
         $this->repository->saveToDisk($importJob);
 
         // at this moment the config should be valid and saved.
         // file import ONLY needs roles before it is complete. After completion, can go to overview.
-        if('file' === $importJob->getFlow()) {
+        if ('file' === $importJob->getFlow()) {
             return redirect()->route('configure-roles.index', [$identifier]);
         }
 
         // simplefin and others are now complete.
+        $importJob->setState('configured_and_roles_defined');
+        $this->repository->saveToDisk($importJob);
 
-        die('Did not expect to get here.');
+        // can now redirect to conversion, because that will be the next step.
+        return redirect()->route('data-conversion.index', [$identifier]);
     }
 }

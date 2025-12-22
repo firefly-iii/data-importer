@@ -141,7 +141,7 @@ class UploadController extends Controller
         $importJob = $this->repository->setFlow($importJob, $flow);
         $importJob = $this->repository->setConfigurationString($importJob, $this->configFileContent);
         $importJob = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
-        $importJob = $this->repository->markAs($importJob, 'loaded');
+        $importJob = $this->repository->markAs($importJob, 'contains_content');
 
         // redirect to configuration controller.
         return redirect()->route('configure-import.index', [$importJob->identifier]);

@@ -51,6 +51,17 @@ class ImportJobRepository
         return $importJob;
     }
 
+    public function deleteImportJob(ImportJob $importJob): void
+    {
+        $disk = $this->getDisk();
+        $file = sprintf('%s.json', $importJob->identifier);
+        if (!$disk->exists($file)) {
+            return;
+        }
+        Log::warning(sprintf('Deleted import job with key "%s"', $importJob->identifier));
+        $disk->delete($file);
+    }
+
     public function find(string $identifier): ImportJob
     {
         $disk = $this->getDisk();
@@ -131,7 +142,7 @@ class ImportJobRepository
 
         // save configuration and return it.
         $importJob = $this->setConfiguration($importJob, $configuration);
-        $importJob->setState('parsed');
+        $importJob->setState('is_parsed');
         $this->saveToDisk($importJob);
 
         // if parse errors, display to user with a redirect to upload?

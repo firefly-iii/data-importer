@@ -130,15 +130,11 @@ class ProcessImportSubmissionJob implements ShouldQueue
             ]);
 
             if ($verifyToken !== $this->accessToken) {
-                throw new Exception(
-                    'Failed to set access token in config properly'
-                );
+                throw new Exception('Failed to set access token in config properly');
             }
 
             if ($verifyUrl !== $this->baseUrl) {
-                throw new Exception(
-                    'Failed to set base URL in config properly'
-                );
+                throw new Exception('Failed to set base URL in config properly');
             }
 
             // Set initial running status

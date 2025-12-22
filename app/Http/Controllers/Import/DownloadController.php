@@ -24,9 +24,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Support\Http\RestoresConfiguration;
+use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
@@ -40,13 +41,21 @@ class DownloadController extends Controller
 {
     use RestoresConfiguration;
 
+    private ImportJobRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = new ImportJobRepository();
+    }
+
     /**
      * @throws JsonException
      */
-    public function download(): Application|Response|ResponseFactory
+    public function download(string $identifier): Application|Response|ResponseFactory
     {
-        // do something
-        $configuration = $this->restoreConfiguration();
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
         $array         = $configuration->toArray();
 
         // make sure that "mapping" is an empty object when downloading.
@@ -57,24 +66,23 @@ class DownloadController extends Controller
         if (is_array($array['accounts']) && 0 === count($array['accounts'])) {
             $array['accounts'] = new stdClass();
         }
-        // same for "accounts"
+        // same for "nordigen requisitions"
         if (is_array($array['nordigen_requisitions']) && 0 === count($array['nordigen_requisitions'])) {
             $array['nordigen_requisitions'] = new stdClass();
         }
 
 
-        $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
-        $response      = response($result);
-        $name          = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
+        $result   = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $response = response($result);
+        $name     = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
         $response->header('Content-disposition', sprintf('attachment; filename=%s', $name))
-            ->header('Content-Type', 'application/json')
-            ->header('Content-Description', 'File Transfer')
-            ->header('Connection', 'Keep-Alive')
-            ->header('Expires', '0')
-            ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
-            ->header('Pragma', 'public')
-            ->header('Content-Length', (string) strlen($result))
-        ;
+                 ->header('Content-Type', 'application/json')
+                 ->header('Content-Description', 'File Transfer')
+                 ->header('Connection', 'Keep-Alive')
+                 ->header('Expires', '0')
+                 ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
+                 ->header('Pragma', 'public')
+                 ->header('Content-Length', (string)strlen($result));
 
         return $response;
     }

@@ -70,11 +70,12 @@ class RoleController extends Controller
             return view('import.005-roles.no-define-roles')->with(compact('flow', 'mainTitle', 'subTitle'));
         }
         $state = $importJob->getState();
-        if ('new' === $state || 'loaded' === $state || 'parsed' === $state) {
+        if ('new' === $state || 'contains_content' === $state || 'is_parsed' === $state) {
             die(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
+
         $warning = '';
-        if ('roles_defined' === $importJob->getState()) {
+        if ('configured_and_roles_defined' === $importJob->getState() || 'configured_roles_map_in_place' === $importJob->getState()) {
             $warning = trans('import.roles_defined_warning');
         }
 
@@ -222,11 +223,11 @@ class RoleController extends Controller
 
         if (false === $needsMapping) {
             // job needs no data mapping, so the state can be set:
-            $importJob->setState('ready_for_conversion');
+            $importJob->setState('configured_roles_map_in_place');
         }
         if (true === $needsMapping) {
             // needs mapping still:
-            $importJob->setState('roles_defined');
+            $importJob->setState('configured_and_roles_defined');
         }
 
         $importJob->setConfiguration($configuration);

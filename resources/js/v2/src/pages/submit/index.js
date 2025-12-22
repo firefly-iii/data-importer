@@ -110,8 +110,8 @@ let index = function () {
         postJobStart() {
             this.triedToStart = true;
             this.post.running = true;
-            const jobStartUrl = './import/submit/start';
-            window.axios.post(jobStartUrl, null,{params: {identifier: this.identifier}}).then((response) => {
+            const jobStartUrl = './submit-data/' + this.identifier + '/start';
+            window.axios.post(jobStartUrl, null).then((response) => {
                 console.log('POST was OK');
                 this.getJobStatus();
                 this.post.running = false;
@@ -149,8 +149,8 @@ let index = function () {
                 this.manualRefreshAvailable = true;
                 return;
             }
-            const submitUrl = './import/submit/status';
-            window.axios.get(submitUrl, {params: {identifier: this.identifier}}).then((response) => {
+            const submitUrl = './submit-data/' + this.identifier + '/status';
+            window.axios.get(submitUrl).then((response) => {
                 this.pageStatus.status = response.data.status;
                 console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ')');
 
