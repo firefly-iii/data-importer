@@ -1166,10 +1166,13 @@ class Configuration
         $this->dateRangeUnit               = $request['date_range_unit'];
         $this->dateRangeNotAfterNumber     = $request['date_range_not_after_number'];
         $this->dateRangeNotAfterUnit       = $request['date_range_not_after_unit'];
-        $this->dateNotBefore               = (string) $request['date_not_before'];
-        $this->dateNotAfter                = (string) $request['date_not_after'];
+        $this->dateNotBefore               = (string)$request['date_not_before'];
+        $this->dateNotAfter                = (string)$request['date_not_after'];
         $this->conversion                  = $request['conversion'];
         $this->groupedTransactionHandling  = $request['grouped_transaction_handling'];
         $this->useEntireOpposingAddress    = $request['use_entire_opposing_address'];
+        $this->newAccounts                 = $request['to_create'];
+        $this->accounts                    = $request['to_import_from'];
+
     }
 }

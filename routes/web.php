@@ -32,6 +32,8 @@ Route::post('/new-import/{flow}', 'Import\UploadController@upload')->name('new-i
 Route::get('/configure-import/{identifier}', 'Import\ConfigurationController@index')->name('configure-import.index');
 Route::post('/configure-import/{identifier}', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => 'configure-import.post']);
 Route::get('/download-import-configuration/{identifier}', ['uses' => 'Import\DownloadController@download', 'as' => 'configure-import.download']);
+Route::post('/check-duplicate-account/{identifier}', ['uses' => 'Import\DuplicateCheckController@checkDuplicate', 'as' => 'configure-import.check-duplicate']);
+
 
 
 Route::get('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@index', 'as' => 'configure-roles.index']);
@@ -83,7 +85,6 @@ Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('0
 //Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
 
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
-Route::post('/import/check-duplicate', ['uses' => 'Import\DuplicateCheckController@checkDuplicate', 'as' => 'import.check-duplicate']);
 
 // step 5: Set column roles (CSV or other file types)
 // check : must be CSV and not config complete otherwise redirect to mapping.

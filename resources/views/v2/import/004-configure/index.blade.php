@@ -46,9 +46,6 @@
             <form method="post" action="{{ route('configure-import.post', [$identifier]) }}" accept-charset="UTF-8" id="store">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
-                <!-- these values are used by data providers and must be preserved -->
-                <input type="hidden" name="identifier" value="{{ $configuration->getIdentifier() }}"/>
-
                 <!-- overrule settings when the flow is not "file" -->
                 @if('file' !== $flow)
                     <input type="hidden" name="ignore_duplicate_transactions" value="1"/>

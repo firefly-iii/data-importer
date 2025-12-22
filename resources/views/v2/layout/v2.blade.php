@@ -277,7 +277,7 @@ window.updateDuplicateStatus = function(accountId) {
         statusElement.className = 'text-info';
 
         // Make AJAX request to duplicate check endpoint
-        fetch('/import/check-duplicate', {
+        fetch('./check-duplicate-account/{{ $identifier ?? '' }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

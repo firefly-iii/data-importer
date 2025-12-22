@@ -1,7 +1,7 @@
 @if('disabled' !== $account['import_account']->status)
     <select style="width:100%;"
             class="custom-select custom-select-sm form-control"
-            name="accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}]"
+            name="accounts[{{  $account['import_account']->id }}]"
             onchange="handleAccountSelection('{{ $account['import_account']->id }}', this.value)"
             id="account-select-{{ $account['import_account']->id }}">
 
@@ -12,7 +12,7 @@
                     $mappedTo = $account['mapped_to'] ?? null;
                     $isCreateNewSelected = (!$configuredAccount || $configuredAccount === 'create_new') && !$mappedTo;
                 @endphp
-                @if($isCreateNewSelected) selected @endif>➕ Create New Account</option>
+                @if($isCreateNewSelected) selected @endif>➕ Create new account</option>
 
         <!-- loop all Firefly III account groups (assets, liabilities) -->
         @foreach($account['firefly_iii_accounts'] as $accountGroupKey => $accountGroup)
@@ -21,17 +21,17 @@
             @if(is_array($accountGroup) && count($accountGroup) > 0)
                 <optgroup label="{{ ucfirst($accountGroupKey) }}">
                     @foreach($accountGroup as $ff3Account) {{-- $ff3Account is now a single Firefly III Account object/array --}}
-                        <option value="{{ $ff3Account->id ?? '' }}"
+                        <option value="{{ $ff3Account['id']  }}"
                                 @php
                                     $isSelected = false;
                                     // First check if mapped_to matches this account
-                                    if (isset($account['mapped_to']) && (string) $account['mapped_to'] === (string) ($ff3Account->id ?? '')) {
+                                    if (isset($account['mapped_to']) && (string) $account['mapped_to'] === (string) $ff3Account['id']) {
                                         $isSelected = true;
                                     }
                                     // Otherwise check configuration for pre-selection
                                     else {
                                         foreach($configuration->getAccounts() as $key => $preConfig) {
-                                            if((string) $key === (string) $account['import_account']->id && (int) $preConfig === (int) ($ff3Account->id ?? null)) {
+                                            if((string) $key === (string) $account['import_account']->id && (int) $preConfig === (int) ($ff3Account['id'])) {
                                                 $isSelected = true;
                                                 break;
                                             }
@@ -39,8 +39,8 @@
                                     }
                                 @endphp
                                 @if($isSelected) selected="selected" @endif
-                                label="{{ $ff3Account->name ?? 'Unknown Account' }} @if($ff3Account->iban ?? null) ({{ $ff3Account->iban ?? '' }}) @endif">
-                            {{ $ff3Account->name ?? 'Unknown Account' }} @if($ff3Account->iban ?? null) ({{ $ff3Account->iban ?? '' }}) @endif
+                                label="{{ $ff3Account['name']  }} @if('' !== (string) $ff3Account['iban']) ({{ $ff3Account['iban']}}) @endif">
+                            {{ $ff3Account['name']  }} @if('' !== (string)$ff3Account['iban']) ({{ $ff3Account['iban'] }}) @endif
                         </option>
                     @endforeach
                 </optgroup>
@@ -64,13 +64,13 @@
     <!-- Hidden field to indicate account creation is requested when create_new is selected -->
     <input type="hidden"
            id="create-new-indicator-{{ $account['import_account']->id }}"
-           name="new_accounts[{{ str_replace(' ', '_', $account['import_account']->id) }}][create]"
+           name="new_accounts[{{  $account['import_account']->id }}][create]"
            value="0">
 
     <!-- #10550 do not set do_import to true for ALL accounts. -->
     <!--
     <input type="hidden"
-           name="do_import[{{ str_replace(' ', '_', $account['import_account']->id) }}]"
+           name="do_import[{{  $account['import_account']->id }}]"
            value="1">
    -->
 

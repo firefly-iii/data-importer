@@ -30,6 +30,7 @@ use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
+use App\Services\Shared\Model\ImportServiceAccount;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
@@ -80,7 +81,6 @@ class ConfigurationController extends Controller
                 $this->repository->deleteImportJob($importJob);
                 return redirect()->route('new-import.index', [$flow])->withErrors($messages);
             }
-
         }
 
         // if configuration says to skip this configuration step, skip it:
@@ -90,17 +90,14 @@ class ConfigurationController extends Controller
             return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
 
-        $camtType = '';
         // unique column options (this depends on the flow):
         $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow));
         $applicationAccounts = $importJob->getApplicationAccounts();
+        $serviceAccounts     = $importJob->getServiceAccounts();
         $currencies          = $importJob->getCurrencies();
+        $accounts            = $this->mergeAccountLists($flow, $applicationAccounts, $serviceAccounts);
 
-        // TODO what is "importerAccounts" in this context?
-        $importerAccounts = [];
-
-
-        return view('import.004-configure.index', compact('identifier', 'camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('identifier', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'accounts', 'uniqueColumns', 'currencies'));
     }
 
     public function phpDate(Request $request): JsonResponse
@@ -123,10 +120,12 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
         $fromRequest = $request->getAll();
+
         // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
         $importJob     = $this->repository->find($identifier);
         $configuration = $importJob->getConfiguration();
         $configuration->updateFromRequest($request->getAll());
+        $configuration->updateDateRange();
         $importJob->setConfiguration($configuration);
 
         $importJob->setState('is_configured');
@@ -144,5 +143,17 @@ class ConfigurationController extends Controller
 
         // can now redirect to conversion, because that will be the next step.
         return redirect()->route('data-conversion.index', [$identifier]);
+    }
+
+    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
+    {
+        $generic = match ($flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
+            'file'      => [],
+            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow)),
+        };
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 }

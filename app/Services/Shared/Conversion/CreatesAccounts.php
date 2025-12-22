@@ -36,7 +36,7 @@ trait CreatesAccounts
     protected function createOrFindExistingAccount(string $importServiceId): Account
     {
         Log::debug('Starting account creation process.');
-        $newAccountData  = $this->configuration->getNewAccounts()[$importServiceId] ?? null;
+        $newAccountData  = $this->importJob->getConfiguration()->getNewAccounts()[$importServiceId] ?? null;
         $createdAccount  = null;
         // here is a check to see if account to be created is part of the import process.
         // so, existing service accounts contains all the accounts present at the import service with all of their meta-data.

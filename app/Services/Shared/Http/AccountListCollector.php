@@ -150,6 +150,17 @@ class AccountListCollector
         $this->mergedAccounts = $this->mergeGenericAccountList($generic);
     }
 
+    public function mergeAllAccounts(array $applicationAccounts, array $serviceAccounts): void
+    {
+        $generic              = match ($this->flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($this->importServiceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($this->importServiceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchflowArray($this->importServiceAccounts),
+            default     => throw new ImporterErrorException(sprintf('Need to merge account lists, but cannot handle "%s"', $this->flow)),
+        };
+        $this->mergedAccounts = $this->mergeGenericAccountList($generic);
+    }
+
     private function mergeGenericAccountList(array $list): array
     {
         $return = [];

@@ -78,4 +78,9 @@ class PostAccountRequest extends Request
     {
         // TODO: Implement put() method.
     }
+
+    public function delete(): Response
+    {
+        // TODO: Implement delete() method.
+    }
 }

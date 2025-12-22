@@ -102,15 +102,19 @@ class ImportJobRepository
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
         Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
-        $messageBag = new MessageBag();
+        $messageBag    = new MessageBag();
         $configuration = $importJob->getConfiguration();
 
-        // collect Firefly III accounts
+        // collect Firefly III accounts, if not already in place for this job.
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        $applicationAccounts = $this->getApplicationAccounts();
-        $importJob->setApplicationAccounts($applicationAccounts);
-        $currencies = $this->getCurrencies();
-        $importJob->setCurrencies($currencies);
+        if (0 === count($importJob->getApplicationAccounts())) {
+            $applicationAccounts = $this->getApplicationAccounts();
+            $importJob->setApplicationAccounts($applicationAccounts);
+        }
+        if (0 === count($importJob->getCurrencies())) {
+            $currencies = $this->getCurrencies();
+            $importJob->setCurrencies($currencies);
+        }
 
 
         // validate stuff (from simplefin etc).
@@ -127,7 +131,7 @@ class ImportJobRepository
                 }
                 break;
             case 'simplefin':
-                $validator = new NewJobDataCollector();
+                $validator  = new NewJobDataCollector();
                 $messageBag = $validator->collectAccounts($importJob);
                 break;
             default:

@@ -42,6 +42,7 @@ class SimpleFINService
 {
     private string        $setupToken = '';
     private Configuration $configuration;
+    private string $accessToken = '';
 
     /**
      * @throws ImporterErrorException
@@ -166,7 +167,7 @@ class SimpleFINService
         Log::debug(sprintf('SimpleFIN download transactions for account ID: "%s" from provided data structure.', $accountId));
 
         $request = new AccountsRequest();
-        $request->setAccessToken($this->accessToken);
+        $request->setAccessToken($this->configuration->getAccessToken());
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions

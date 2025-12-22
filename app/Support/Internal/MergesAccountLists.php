@@ -30,14 +30,6 @@ use Illuminate\Support\Facades\Log;
 
 trait MergesAccountLists
 {
-    protected function mergeNordigenAccountLists(array $nordigen, array $fireflyIII): array
-    {
-        Log::debug('Now merging GoCardless account lists.');
-        $generic = ImportServiceAccount::convertNordigenArray($nordigen);
-
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
-    }
-
     private function mergeGenericAccountList(array $generic, array $fireflyIII): array
     {
         $return = [];
@@ -65,7 +57,7 @@ trait MergesAccountLists
                 $all                                 = $fireflyIII[$key];
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, fn ($a, $b) => $a->id <=> $b->id);
+                $nonMatching                         = array_udiff($all, $matching, fn (array $a,array $b) => $a['id'] <=> $b['id']);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);

@@ -26,11 +26,11 @@ namespace App\Http\Controllers\Import;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
-use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
+use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\Session\Constants;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 /**
  * Class DuplicateCheckController
@@ -39,6 +39,8 @@ use Exception;
  */
 class DuplicateCheckController extends Controller
 {
+    private ImportJobRepository $repository;
+
     /**
      * Create a new controller instance.
      */
@@ -46,82 +48,70 @@ class DuplicateCheckController extends Controller
     {
         parent::__construct();
         $this->middleware(ConfigurationControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
     /**
      * Check if an account name and type combination already exists
      */
-    public function checkDuplicate(Request $request): JsonResponse
+    public function checkDuplicate(Request $request, string $identifier): JsonResponse
     {
-        try {
-            $name        = trim((string) $request->input('name', ''));
-            $type        = trim((string) $request->input('type', ''));
+        $importJob           = $this->repository->find($identifier);
+        $applicationAccounts = $importJob->getApplicationAccounts();
+        $name                = trim((string)$request->input('name', ''));
+        $type                = trim((string)$request->input('type', ''));
 
-            Log::debug('DUPLICATE_CHECK: Received request', [
-                'name'        => $name,
-                'type'        => $type,
-                'name_length' => strlen($name),
-            ]);
+        if ('' === $name || '' === $type) {
+            Log::debug('DUPLICATE_CHECK: Empty name or type, returning no duplicate');
 
-            // Empty name or type means no duplicate possible
-            if ('' === $name || '' === $type) {
-                Log::debug('DUPLICATE_CHECK: Empty name or type, returning no duplicate');
-
-                return response()->json([
+            return response()->json(
+                [
                     'isDuplicate' => false,
                     'message'     => null,
                 ]);
-            }
-
-            // Validate account type
-            $validTypes  = ['asset', 'liability', 'expense', 'revenue'];
-            if (!in_array($type, $validTypes, true)) {
-                Log::warning('DUPLICATE_CHECK: Invalid account type provided', [
-                    'type'        => $type,
-                    'valid_types' => $validTypes,
-                ]);
-
-                return response()->json([
-                    'isDuplicate' => false,
-                    'message'     => null,
-                ]);
-            }
-
-            // Create validator instance and check for duplicates
-            $validator   = new ConfigurationContractValidator();
-            $isDuplicate = $validator->checkSingleAccountDuplicate($name, $type);
-
-            $message     = null;
-            if ($isDuplicate) {
-                $message = sprintf('%s <em>%s</em> already exists!', ucfirst($type), $name);
-            }
-
-            Log::debug('DUPLICATE_CHECK: Validation result', [
-                'name'        => $name,
-                'type'        => $type,
-                'isDuplicate' => $isDuplicate,
-                'message'     => $message,
-            ]);
-
-            return response()->json([
-                'isDuplicate' => $isDuplicate,
-                'message'     => $message,
-            ]);
-
-        } catch (Exception $e) {
-            Log::error('DUPLICATE_CHECK: Exception during duplicate check', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'name'  => $request->input('name', ''),
-                'type'  => $request->input('type', ''),
-            ]);
-
-            // Return safe response on error - assume no duplicate to avoid blocking user
-            return response()->json([
-                'isDuplicate' => false,
-                'message'     => null,
-                'error'       => 'Unable to check for duplicates at this time',
-            ]);
         }
+        // Validate account type
+        $validTypes = ['asset', 'liability'];
+        if (!in_array($type, $validTypes, true)) {
+            Log::warning('DUPLICATE_CHECK: Invalid account type provided', [
+                'type'        => $type,
+                'valid_types' => $validTypes,
+            ]);
+
+            return response()->json(
+                [
+                    'isDuplicate' => false,
+                    'message'     => null,
+                ]);
+        }
+        $arrayToCheck = [
+            'asset'     => Constants::ASSET_ACCOUNTS,
+            'liability' => Constants::LIABILITIES,
+        ];
+        $array        = $applicationAccounts[$arrayToCheck[$type]] ?? [];
+        $isDuplicate  = false;
+        foreach ($array as $account) {
+            if (strtolower($name) === strtolower($account['name'])) {
+                $isDuplicate = true;
+            }
+        }
+        $message = null;
+        if ($isDuplicate) {
+            $message = sprintf('%s <em>%s</em> already exists!', ucfirst($type), $name);
+        }
+
+        Log::debug('DUPLICATE_CHECK: Validation result', [
+            'name'        => $name,
+            'type'        => $type,
+            'isDuplicate' => $isDuplicate,
+            'message'     => $message,
+        ]);
+
+        return response()->json(
+            [
+                'isDuplicate' => $isDuplicate,
+                'message'     => $message,
+            ]);
+
     }
 }

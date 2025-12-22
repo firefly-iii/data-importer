@@ -44,8 +44,6 @@ class NewJobDataCollector
     {
         $configuration       = $importJob->getConfiguration();
         $errors              = new MessageBag();
-        $flow                = $importJob->getFlow();
-        $applicationAccounts = $importJob->getApplicationAccounts();
         $accessToken         = $configuration->getAccessToken();
         Log::debug(sprintf('validate("%s") for SimpleFIN', $importJob->identifier));
 
@@ -83,35 +81,6 @@ class NewJobDataCollector
         $configuration->setAccessToken($accessToken);
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);
-
-//        // FIXME collect accounts LATER.
-//
-//        try {
-//            $accountsData = $simpleFINService->fetchAccounts();
-//
-//            // save configuration in session and on disk: TODO needs a trait.
-//            Log::debug('Save config to disk after setting access token.');
-//            session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-//            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-//
-//            // Store SimpleFIN data in session for configuration step
-//            session()->put(Constants::SIMPLEFIN_TOKEN, $accessToken);
-//            session()->put(Constants::SIMPLEFIN_ACCOUNTS_DATA, $accountsData);
-//            session()->put(Constants::SIMPLEFIN_IS_DEMO, $isDemo);
-//
-//            event(new ProvidedConfigUpload($configFileName, $configuration));
-//
-//            Log::info('SimpleFIN connection established', ['account_count' => count($accountsData), 'is_demo' => $isDemo]);
-//
-//            return redirect(route('004-configure.index'));
-//        } catch (ImporterErrorException $e) {
-//            Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
-//            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
-//
-//            return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
-//        }
-
-
         return new MessageBag();
     }
 
