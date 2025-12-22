@@ -81,6 +81,10 @@ class ConversionController extends Controller
         $flow       = $importJob->getFlow();
 
         $nextUrl = route('submit-data.index', [$identifier]);
+        // next URL is different when it's not a file flow (in those cases, its mapping)
+        if('file' !== $flow) {
+            $nextUrl = route('data-mapping.index', [$identifier]);
+        }
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -235,8 +239,8 @@ class ConversionController extends Controller
 
 
         if ('file' !== $flow) {
-            // all other workflows go to mapping (if requested from configuration)
-            throw new ImporterErrorException('Dont know what to do here.');
+            // all other workflows go to mapping (if requested from configuration?)
+            $importJob->setState('configured_and_roles_defined');
         }
         if ('file' === $flow) {
             $importJob->setState('ready_for_submission');

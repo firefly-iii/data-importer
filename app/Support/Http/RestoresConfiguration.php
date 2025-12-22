@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Support\Http;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Storage\StorageService;
@@ -32,9 +33,11 @@ trait RestoresConfiguration
 {
     /**
      * Restore configuration from session and drive.
+     * @deprecated
      */
     protected function restoreConfiguration(?string $flow = null): Configuration
     {
+        throw new ImporterErrorException('Do not restore configuration.');
         $configuration  = Configuration::make();
         $hasConfig      = session()->has(Constants::CONFIGURATION);
         if ($hasConfig) {

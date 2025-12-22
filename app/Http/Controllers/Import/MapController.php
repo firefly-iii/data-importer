@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\CompletedMapping;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\MapControllerMiddleware;
@@ -97,15 +96,13 @@ class MapController extends Controller
 
         // nordigen, spectre, simplefin and others:
         if ('file' !== $importJob->getFlow()) {
-            throw new ImporterErrorException('get mapping data');
             Log::debug('Get mapping data for data importers.');
             $roles = [];
-            $data  = $this->getImporterMapInformation();
+            $data  = $this->getImporterMapInformation($importJob);
         }
 
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
-            event(new CompletedMapping($configuration));
             throw new ImporterErrorException('fix something.');
 
             return redirect()->route('007-convert.index');
@@ -243,21 +240,17 @@ class MapController extends Controller
     /**
      * Weird bunch of code to return info on Spectre and Nordigen.
      */
-    private function getImporterMapInformation(): array
+    private function getImporterMapInformation(ImportJob $importJob): array
     {
         $data            = [];
-        $configuration   = $this->restoreConfiguration();
+        $configuration   = $importJob->getConfiguration();
         $existingMapping = $configuration->getMapping();
         /*
          * To map Nordigen and SimpleFIN, pretend the file has one "column" (this is based on the CSV importer after all)
          * that contains:
          * - opposing account names (this is preordained).
          */
-        if (
-            'nordigen' === $importJob->getFlow()
-            || 'spectre' === $importJob->getFlow()
-            || 'lunchflow' === $importJob->getFlow()
-        ) {
+        if ('nordigen' === $importJob->getFlow() || 'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
             // TODO should be in a helper or something generic.
             // index 0, opposing account name:
             $index                  = 0;
@@ -300,11 +293,12 @@ class MapController extends Controller
             $data[]                   = $category;
         }
         if ('simplefin' === $importJob->getFlow()) {
+
             // index 0: expense/revenue account mapping
             $index                    = 0;
             $expenseRevenue           = config('csv.import_roles.opposing-name') ?? null;
             $expenseRevenue['role']   = 'opposing-name';
-            $expenseRevenue['values'] = $this->getExpenseRevenueAccounts();
+            $expenseRevenue['values'] = $this->getExpenseRevenueAccounts($importJob);
 
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
             $class = OpposingAccounts::class;
@@ -323,12 +317,13 @@ class MapController extends Controller
         return $data;
     }
 
-    private function getOpposingAccounts(): array
+    private function getOpposingAccounts(ImportJob $importJob): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
 
         if (null === $downloadIdentifier) {
+            throw new ImporterErrorException('here?');
             Log::warning('No conversion job identifier found in session - mapping called before conversion');
 
             return [];
@@ -337,6 +332,7 @@ class MapController extends Controller
         $disk = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
+            throw new ImporterErrorException('here? b');
             Log::warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
 
             return [];
@@ -345,6 +341,7 @@ class MapController extends Controller
         $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
+            throw new ImporterErrorException('here? c');
             Log::warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
 
             return [];
@@ -376,43 +373,14 @@ class MapController extends Controller
         return array_unique($filtered);
     }
 
-    private function getExpenseRevenueAccounts(): array
+    private function getExpenseRevenueAccounts(ImportJob $importJob): array
     {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-
-        if (null === $downloadIdentifier) {
-            Log::warning('No conversion job identifier found in session - mapping called before conversion');
-
-            return [];
-        }
-
-        $disk = Storage::disk(self::DISK_NAME);
-
-        if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
-            Log::warning(sprintf('Conversion file %s.json does not exist - mapping called before conversion', $downloadIdentifier));
-
-            return [];
-        }
-
-        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
-
-        if (null === $json) {
-            Log::warning(sprintf('Conversion file %s.json is empty', $downloadIdentifier));
-
-            return [];
-        }
-
-        try {
-            $array = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        }
+        $transactions   = $importJob->getConvertedTransactions();
         $expenseRevenue = [];
-        $total          = count($array);
+        $total          = count($transactions);
 
         /** @var array $transaction */
-        foreach ($array as $index => $transaction) {
+        foreach ($transactions as $index => $transaction) {
             Log::debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
 
             /** @var array $row */
@@ -430,18 +398,10 @@ class MapController extends Controller
                 }
             }
         }
-        // removed, filtering has already happened in the foreach loop above
-        //        $filtered           = array_filter(
-        //            $expenseRevenue,
-        //            static function (string $value) {
-        //                return '' !== $value;
-        //            }
-        //        );
-
         return array_unique($expenseRevenue);
     }
 
-    private function getCategories(): array
+    private function getCategories(ImportJob $importJob): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
@@ -512,10 +472,14 @@ class MapController extends Controller
         $mergedMapping = $this->mergeMapping($originalMapping, $data);
         $configuration->setMapping($mergedMapping);
         $importJob->setConfiguration($configuration);
+
         // FIXME needs better redirect or state.
         $flow = $importJob->getFlow();
         if (in_array($flow, ['nordigen', 'spectre', 'lunchflow', 'simplefin'])) {
-            throw new ImporterErrorException('Go to submission');
+            $importJob->setState('ready_for_submission');
+            $this->repository->saveToDisk($importJob);
+
+            return redirect()->route('submit-data.index', [$identifier]);
         }
 
         $importJob->setState('configured_roles_map_in_place');
