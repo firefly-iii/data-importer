@@ -28,6 +28,7 @@ use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
+use App\Services\SimpleFIN\Validation\NewJobDataCollector;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -101,16 +102,16 @@ class ImportJobRepository
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
         Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
-        // create configuration object from JSON, if the job doesn't have one already.
-        $string        = $importJob->getConfigurationString();
-        $configuration = Configuration::make();
-        if ('' !== $string && null === $importJob->getConfiguration()) {
-            $configuration = Configuration::fromArray(json_decode($string, true));
-        }
-        if (null !== $importJob->getConfiguration()) {
-            $configuration = $importJob->getConfiguration();
-        }
         $messageBag = new MessageBag();
+        $configuration = $importJob->getConfiguration();
+
+        // collect Firefly III accounts
+        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
+        $applicationAccounts = $this->getApplicationAccounts();
+        $importJob->setApplicationAccounts($applicationAccounts);
+        $currencies = $this->getCurrencies();
+        $importJob->setCurrencies($currencies);
+
 
         // validate stuff (from simplefin etc).
         switch ($importJob->getFlow()) {
@@ -125,20 +126,15 @@ class ImportJobRepository
                     $configuration->setCamtType($camtType);
                 }
                 break;
+            case 'simplefin':
+                $validator = new NewJobDataCollector();
+                $messageBag = $validator->collectAccounts($importJob);
+                break;
             default:
                 $messageBag->add('importable_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));
                 $messageBag->add('config_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));
         }
 
-
-        // collect Firefly III accounts
-        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        $applicationAccounts = $this->getApplicationAccounts();
-        $importJob->setApplicationAccounts($applicationAccounts);
-        $currencies = $this->getCurrencies();
-        $importJob->setCurrencies($currencies);
-
-        // collect currencies
 
         // save configuration and return it.
         $importJob = $this->setConfiguration($importJob, $configuration);

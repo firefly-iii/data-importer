@@ -29,16 +29,16 @@ use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\UploadControllerMiddleware;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\CSV\Configuration\ConfigFileProcessor;
 use App\Services\Session\Constants;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
+use App\Services\SimpleFIN\Validation\NewJobDataCollector;
 use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\Upload\CollectsSettings;
 use App\Support\Http\Upload\ProcessesFileUpload;
 use App\Support\Http\Upload\ProcessesLunchFlowUpload;
 use App\Support\Http\Upload\ProcessesNordigenUpload;
-use App\Support\Http\Upload\ProcessesSimpleFINUpload;
 use App\Support\Http\Upload\ProcessesSpectreUpload;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
@@ -61,15 +61,14 @@ class UploadController extends Controller
     use ProcessesFileUpload;
     use ProcessesLunchFlowUpload;
     use ProcessesNordigenUpload;
-    use ProcessesSimpleFINUpload;
     use ProcessesSpectreUpload;
     use RestoresConfiguration;
     use VerifyJSON;
 
-    private string $configFileName;
-    private string $contentType;
-    private string $importableFileContent = '';
-    private string $configFileContent     = '';
+    private string              $configFileName;
+    private string              $contentType;
+    private string              $importableFileContent = '';
+    private string              $configFileContent     = '';
     private ImportJobRepository $repository;
 
     /**
@@ -83,7 +82,7 @@ class UploadController extends Controller
         // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType    = 'unknown';
         $this->configFileName = '';
-        $this->repository = new ImportJobRepository();
+        $this->repository     = new ImportJobRepository();
     }
 
     /**
@@ -143,8 +142,17 @@ class UploadController extends Controller
         $importJob = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
         $importJob = $this->repository->markAs($importJob, 'contains_content');
 
-        // redirect to configuration controller.
-        return redirect()->route('configure-import.index', [$importJob->identifier]);
+        // at this point, also parse and process the uploaded configuration file string.
+        $configuration = Configuration::make();
+        if ('' !== $this->configFileContent && null === $importJob->getConfiguration()) {
+            $configuration = Configuration::fromArray(json_decode($this->configFileContent, true));
+        }
+        if (null !== $importJob->getConfiguration()) {
+            $configuration = $importJob->getConfiguration();
+        }
+        $importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($importJob);
+
 
         // at this point its possible there is a config file, but there may not be.
 
@@ -154,22 +162,33 @@ class UploadController extends Controller
         switch ($flow) {
             default:
                 throw new ImporterErrorException(sprintf('The data importer cannot deal with workflow "%s".', $flow));
-
-            case 'simplefin':
-                return $this->processSimpleFIN($request, $configuration);
-
             case 'file':
-                return $this->processFileUpload($request, $configuration);
-
-            case 'nordigen':
-                return $this->processNordigen($configuration);
-
-            case 'lunchflow':
-                return $this->processLunchFlow($configuration);
-
-            case 'spectre':
-                return $this->processSpectreUpload($configuration);
+                Log::debug('No extra steps.');
+                break;
+            case 'simplefin':
+                $collector             = new NewJobDataCollector();
+                $collector->useDemo    = $request->boolean('use_demo');
+                $collector->setupToken = (string)$request->get('simplefin_token');
+                $errors                = $collector->validate($importJob);
+                break;
+//            case 'nordigen':
+//                return $this->processNordigen($configuration);
+//
+//            case 'lunchflow':
+//                return $this->processLunchFlow($configuration);
+//
+//            case 'spectre':
+//                return $this->processSpectreUpload($configuration);
         }
+
+        // stop again if any errors:
+        if ($errors->count() > 0) {
+            return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
+        }
+
+        // redirect to configuration controller.
+        return redirect()->route('configure-import.index', [$importJob->identifier]);
+
     }
 
     /**
@@ -293,7 +312,7 @@ class UploadController extends Controller
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
             $disk           = Storage::disk('configurations');
-            $content = (string)$disk->get($selection);
+            $content        = (string)$disk->get($selection);
             $configFileName = StorageService::storeContent($content);
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);

@@ -58,6 +58,7 @@ class ImportJob implements Arrayable
     // collected Firefly III data.
     private array $applicationAccounts = [];
     private array $currencies          = [];
+    private array $serviceAccounts = [];
 
     public static function createNew(): self
     {
@@ -92,6 +93,7 @@ class ImportJob implements Arrayable
         $importJob->submissionStatus    = SubmissionStatus::fromArray($array['submission_status']);
         $importJob->convertedTransactions = $array['converted_transactions'];
         $importJob->applicationAccounts = $array['application_accounts'];
+        $importJob->serviceAccounts     = $array['service_accounts'];
         $importJob->currencies          = $array['currencies'];
         return $importJob;
     }
@@ -124,6 +126,7 @@ class ImportJob implements Arrayable
                 'submission_status'      => $this->submissionStatus->toArray(),
                 'converted_transactions' => $this->convertedTransactions,
                 'application_accounts'   => $this->applicationAccounts,
+                'service_accounts'       => $this->serviceAccounts,
                 'currencies'             => $this->currencies,
             ];
     }
@@ -225,7 +228,13 @@ class ImportJob implements Arrayable
         $this->convertedTransactions = $convertedTransactions;
     }
 
+    public function getServiceAccounts(): array
+    {
+        return $this->serviceAccounts;
+    }
 
-
-
+    public function setServiceAccounts(array $serviceAccounts): void
+    {
+        $this->serviceAccounts = $serviceAccounts;
+    }
 }
