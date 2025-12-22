@@ -49,7 +49,7 @@
                         Role configuration
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+                        <form method="post" action="{{ route('configure-roles.post', [$identifier]) }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
                             @foreach($levels as $key => $level)

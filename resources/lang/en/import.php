@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 return [
 
+    'roles_defined_warning' => 'It looks like you already defined the roles for this import job. If you change the settings below, your data mapping settings may become inaccurate.',
+
     // labels for authentication
     'label_nordigen_identifier'       => 'GoCardless Identifier',
     'label_nordigen_key'              => 'GoCardless Key',

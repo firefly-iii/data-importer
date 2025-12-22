@@ -32,18 +32,21 @@ use Ramsey\Uuid\Uuid;
  * - new: totally new, no data or anything.
  * - loaded: has config content and importable file content loaded, but nothing else has been done.
  * - parsed: configuration + importable file are parsed and processed. More meta-data exists in the import job.
+ * - configured: configuration is set and validated. Also check on new to be created accounts. But not yet created!
+ * - roles_defined: file imports with this state are ready to be mapped.
+ * - ready_for_conversion: any import with this state is ready to be converted to Firefly III compatible transactions.
  */
 
 class ImportJob implements Arrayable
 {
     // job meta-data:
-    public string         $identifier;
-    private Carbon        $createdAt;
-    private string        $state;
-    private string        $flow                 = '';
-    private string        $configurationString  = '';
-    private string        $importableFileString = '';
-    private ?Configuration $configuration = null;
+    public string          $identifier;
+    private Carbon         $createdAt;
+    private string         $state;
+    private string         $flow                 = '';
+    private string         $configurationString  = '';
+    private string         $importableFileString = '';
+    private ?Configuration $configuration        = null;
 
     // collected Firefly III data.
     private array $applicationAccounts = [];
@@ -69,9 +72,14 @@ class ImportJob implements Arrayable
         $importJob->flow                 = $array['flow'];
         $importJob->configurationString  = $array['configuration_string'];
         $importJob->importableFileString = $array['importable_file_string'];
-        $importJob->configuration        = Configuration::fromArray($array['configuration']);
-        $importJob->applicationAccounts  = $array['application_accounts'];
-        $importJob->currencies           = $array['currencies'];
+
+        // only create configuration object when there is configuration to be parsed.
+        $importJob->configuration        = null;
+        if (0 !== count($array['configuration'])) {
+            $importJob->configuration = Configuration::fromArray($array['configuration']);
+        }
+        $importJob->applicationAccounts = $array['application_accounts'];
+        $importJob->currencies          = $array['currencies'];
         return $importJob;
     }
 
@@ -109,7 +117,7 @@ class ImportJob implements Arrayable
         return json_encode($this->toArray(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
-    public function getConfiguration(): Configuration
+    public function getConfiguration(): ?Configuration
     {
         return $this->configuration;
     }

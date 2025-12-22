@@ -43,19 +43,11 @@
             @include('import.004-configure.partials.opening-box')
 
             <!-- start of form -->
-            <form method="post" action="{{ route('004-configure.post') }}" accept-charset="UTF-8" id="store">
+            <form method="post" action="{{ route('configure-import.post', [$identifier]) }}" accept-charset="UTF-8" id="store">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="flow" value="{{ $flow }}"/>
-                <input type="hidden" name="content_type" value="{{ $configuration->getContentType() }}"/>
 
                 <!-- these values are used by data providers and must be preserved -->
                 <input type="hidden" name="identifier" value="{{ $configuration->getIdentifier() }}"/>
-                <input type="hidden" name="connection" value="{{ $configuration->getConnection() }}"/>
-                <input type="hidden" name="nordigen_country" value="{{ $configuration->getNordigenCountry() }}"/>
-                <input type="hidden" name="nordigen_max_days" value="{{ $configuration->getNordigenMaxDays() }}"/>
-                <input type="hidden" name="nordigen_bank" value="{{ $configuration->getNordigenBank() }}"/>
-                <input type="hidden" name="nordigen_requisitions" value="{{ json_encode($configuration->getNordigenRequisitions()) }}"/>
-                <input type="hidden" name="access_token" value="{{ $configuration->getAccessToken() }}"/>
 
                 <!-- overrule settings when the flow is not "file" -->
                 @if('file' !== $flow)
@@ -146,8 +138,6 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.upload') }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span> Go back to upload</a>
                             <a href="{{ route('flush') }}" class="btn text-white btn-danger btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>
                         </div>

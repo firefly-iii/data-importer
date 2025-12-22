@@ -28,10 +28,11 @@ use App\Events\CompletedConversion;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
-use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
+use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Session\Constants;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -58,6 +59,7 @@ class ConversionController extends Controller
     use RestoresConfiguration;
 
     protected const string DISK_NAME = 'jobs'; // TODO stored in several places
+    private ImportJobRepository $repository;
 
     /**
      * StartController constructor.
@@ -67,47 +69,26 @@ class ConversionController extends Controller
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
         $this->middleware(ConversionControllerMiddleware::class)->except(['status', 'start']);
+        $this->repository = new ImportJobRepository();
     }
 
     /**
      * @throws ImporterErrorException
      */
-    public function index(): Application|Factory|View
+    public function index(string $identifier): Application|Factory|View
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $mainTitle           = 'Convert the data';
-
-        // create configuration:
-        $configuration       = $this->restoreConfiguration();
-
-        Log::debug('Will now verify configuration content.');
-        $flow                = $configuration->getFlow();
+        $mainTitle     = 'Convert the data';
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
+        $flow          = $importJob->getFlow();
 
         // default back to mapping
-        $jobBackUrl          = route('back.mapping');
+        $jobBackUrl = $this->getJobBackUrl($flow, $identifier);
+        $flow       = $importJob->getFlow();
 
-        // Set appropriate back URL based on flow
-        // All flows but the file flow go back to configuration
-        if ('file' !== $flow) {
-            $jobBackUrl = route('back.config');
-            Log::debug('Not file flow: Pressing "back" will send you to configure.');
-        }
-        // no mapping, back to roles
-        if ('file' === $flow && 0 === count($configuration->getDoMapping())) {
-            Log::debug('Pressing "back" will send you to roles.');
-            $jobBackUrl = route('back.roles');
-        }
-        // back to mapping
-        if ('file' === $flow && 0 === count($configuration->getMapping())) {
-            Log::debug('Pressing "back" will send you to mapping.');
-            $jobBackUrl = route('back.mapping');
-        }
-        // job ID may be in session:
-        $identifier          = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $routine             = null;
-        $flow                = $configuration->getFlow();
         Log::debug('Will redirect to submission after conversion.');
-        $nextUrl             = route('008-submit.index');
+        $nextUrl = route('008-submit.index');
 
         // switch based on flow:
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -127,18 +108,22 @@ class ConversionController extends Controller
             }
         }
         if ('nordigen' === $flow) {
+            die('a');
             Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
+            die('b');
             Log::debug('Create Spectre routine manager.');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
+            die('c');
             Log::debug('Create Lunch Flow routine manager.');
             $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
+            die('d');
             Log::debug('Create SimpleFIN routine manager.');
 
             try {
@@ -154,6 +139,7 @@ class ConversionController extends Controller
             }
         }
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
+            die('e');
             Log::debug('Will redirect to mapping after conversion.');
             $nextUrl = route('006-mapping.index');
         }
@@ -162,7 +148,7 @@ class ConversionController extends Controller
         }
 
         // may be a new identifier! Yay!
-        $identifier          = $routine->getIdentifier();
+        $identifier = $routine->getIdentifier();
 
         Log::debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
 
@@ -189,12 +175,12 @@ class ConversionController extends Controller
     public function start(Request $request): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier      = $request->get('identifier');
-        $configuration   = $this->restoreConfiguration();
-        $routine         = null;
+        $identifier    = $request->get('identifier');
+        $configuration = $this->restoreConfiguration();
+        $routine       = null;
 
         // Validate configuration contract for SimpleFIN before proceeding
-        if ('simplefin' === $configuration->getFlow()) {
+        if ('simplefin' === $importJob->getFlow()) {
             $validator          = new ConfigurationContractValidator();
             $contractValidation = $validator->validateConfigurationContract($configuration);
 
@@ -215,7 +201,7 @@ class ConversionController extends Controller
         }
 
         // Handle new account data for SimpleFIN
-        if ('simplefin' === $configuration->getFlow()) {
+        if ('simplefin' === $importJob->getFlow()) {
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
                 Log::debug('Updating configuration with detailed new account data', $newAccountData);
@@ -244,7 +230,7 @@ class ConversionController extends Controller
         }
 
         // now create the right class:
-        $flow            = $configuration->getFlow();
+        $flow = $importJob->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
@@ -314,7 +300,7 @@ class ConversionController extends Controller
         }
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk            = Storage::disk(self::DISK_NAME);
+        $disk = Storage::disk(self::DISK_NAME);
 
         try {
             $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
@@ -337,7 +323,7 @@ class ConversionController extends Controller
     public function status(Request $request): JsonResponse
     {
         //        Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier      = $request->get('identifier');
+        $identifier = $request->get('identifier');
         // Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
         if (null === $identifier) {
             Log::warning('Identifier is NULL.');
@@ -350,5 +336,17 @@ class ConversionController extends Controller
         $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
 
         return response()->json($importJobStatus->toArray());
+    }
+
+    private function getJobBackUrl(string $flow, string $identifier): string
+    {
+        $jobBackUrl = route('configure-roles.index', [$identifier]);
+
+        // Set appropriate back URL based on flow
+        // All flows but the file flow go back to configuration
+        if ('file' !== $flow) {
+            $jobBackUrl = route('configure-import.index', [$identifier]);
+        }
+        return $jobBackUrl;
     }
 }

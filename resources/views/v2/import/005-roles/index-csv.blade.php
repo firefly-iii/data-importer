@@ -54,7 +54,15 @@
             </div>
         </div>
         @endif
-
+        @if('' !== $warning)
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <div class="alert alert-warning" role="alert">
+                    {{$warning}}
+                </div>
+            </div>
+        </div>
+        @endif
         <div class="row mt-3">
             <div class="col-lg-12">
                 <div class="card">
@@ -62,7 +70,7 @@
                         Role configuration
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+                        <form method="post" action="{{ route('configure-roles.post', [$identifier]) }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                             <table class="table">
                                 <tr>
@@ -167,7 +175,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
+                            <a href="{{ route('configure-import.index', [$identifier]) }}" class="btn btn-secondary"><span
                                     class="fas fa-arrow-left"></span> Go back to configuration</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>

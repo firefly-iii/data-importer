@@ -46,6 +46,7 @@ class ImportJobRepository
 
         // save to disk:
         $this->saveToDisk($importJob);
+        Log::debug(sprintf('Created new import job with key "%s"', $importJob->identifier));
 
         return $importJob;
     }
@@ -61,10 +62,11 @@ class ImportJobRepository
         if (null === $content || '' === $content) {
             throw new ImporterErrorException(sprintf('The file for import job "%s" is empty.', $identifier));
         }
+        Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
         return ImportJob::createFromJson($content);
     }
 
-    private function saveToDisk(ImportJob $importJob): void
+    public function saveToDisk(ImportJob $importJob): void
     {
         $disk = $this->getDisk();
         $path = sprintf('%s.json', $importJob->identifier);
@@ -87,14 +89,16 @@ class ImportJobRepository
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
+        Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
         // create configuration object from JSON, if the job doesn't have one already.
         $string        = $importJob->getConfigurationString();
         $configuration = Configuration::make();
-        if ('' !== $string) {
+        if ('' !== $string && null === $importJob->getConfiguration()) {
             $configuration = Configuration::fromArray(json_decode($string, true));
         }
-        // TODO what if a valid Configuration is present in the import job?
-
+        if (null !== $importJob->getConfiguration()) {
+            $configuration = $importJob->getConfiguration();
+        }
         $messageBag = new MessageBag();
 
         // validate stuff (from simplefin etc).
@@ -222,7 +226,7 @@ class ImportJobRepository
 
             /** @var Account $account */
             foreach ($responseAsset as $account) {
-                $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account;
+                $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account->toArray();
             }
             Log::debug(sprintf('Fetched %d asset accounts.', count($accounts[Constants::ASSET_ACCOUNTS])));
         } catch (ApiHttpException|\Exception $e) {
@@ -244,7 +248,7 @@ class ImportJobRepository
 
             /** @var Account $account */
             foreach ($responseLiability as $account) {
-                $accounts[Constants::LIABILITIES][$account->id] = $account;
+                $accounts[Constants::LIABILITIES][$account->id] = $account->toArray();
             }
             Log::debug(sprintf('Fetched %d liability accounts.', count($accounts[Constants::LIABILITIES])));
 

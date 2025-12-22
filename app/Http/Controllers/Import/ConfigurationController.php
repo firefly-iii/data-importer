@@ -103,7 +103,7 @@ class ConfigurationController extends Controller
         $importerAccounts = [];
 
 
-        return view('import.004-configure.index', compact('camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('identifier','camtType', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'camtType', 'importerAccounts', 'uniqueColumns', 'currencies'));
     }
 
     public function phpDate(Request $request): JsonResponse
@@ -122,62 +122,26 @@ class ConfigurationController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function postIndex(ConfigurationPostRequest $request): RedirectResponse
+    public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
         $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
+        // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
+        $importJob = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
+        $configuration->updateFromRequest($request->getAll());
+        $importJob->setConfiguration($configuration);
+        $importJob->setState('configured');
+        $this->repository->saveToDisk($importJob);
 
-        // Store do_import selections in session for validation
-        session()->put('do_import', $fromRequest['do_import'] ?? []);
-
-        // Validate configuration contract for SimpleFIN
-        if ('simplefin' === $configuration->getFlow()) {
-            $validator = new ConfigurationContractValidator();
-
-            // Validate form structure first
-            $formValidation = $validator->validateFormFieldStructure($fromRequest);
-            if (!$formValidation->isValid()) {
-                Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
-
-                return redirect()->back()->withErrors($formValidation->getErrorMessages())->withInput();
-            }
-
-            // Validate complete configuration contract
-            $contractValidation = $validator->validateConfigurationContract($configuration);
-            if (!$contractValidation->isValid()) {
-                Log::error('SimpleFIN configuration contract validation failed', $contractValidation->getErrors());
-
-                return redirect()->back()->withErrors($contractValidation->getErrorMessages())->withInput();
-            }
-
-            if ($contractValidation->hasWarnings()) {
-                Log::warning('SimpleFIN configuration contract warnings', $contractValidation->getWarnings());
-            }
-
+        // at this moment the config should be valid and saved.
+        // file import ONLY needs roles before it is complete. After completion, can go to overview.
+        if('file' === $importJob->getFlow()) {
+            return redirect()->route('configure-roles.index', [$identifier]);
         }
-        $configuration->updateDateRange();
-        // Map data option is now user-selectable for SimpleFIN via checkbox
 
-        try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+        // simplefin and others are now complete.
 
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
-        }
-        StorageService::storeContent($json);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // set config as complete.
-        event(new CompletedConfiguration($configuration));
-
-        // always redirect to roles, even if this isn't the step yet
-        // for nordigen, spectre, and simplefin, roles will be skipped right away.
-        Log::debug('Redirect to roles');
-
-        return redirect(route('005-roles.index'));
+        die('Did not expect to get here.');
     }
 }

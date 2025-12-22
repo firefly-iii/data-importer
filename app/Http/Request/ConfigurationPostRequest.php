@@ -24,8 +24,8 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
+use App\Repository\ImportJob\ImportJobRepository;
 use Carbon\Carbon;
-use App\Services\Session\Constants;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
 
@@ -44,21 +44,14 @@ class ConfigurationPostRequest extends Request
 
     public function getAll(): array
     {
-        // Debug: Log raw form data before processing
-        Log::debug('ConfigurationPostRequest raw form data', [
-            'do_import_raw'   => $this->get('do_import') ?? [],
-            'accounts_raw'    => $this->get('accounts') ?? [],
-            'new_account_raw' => $this->get('new_account') ?? [],
-        ]);
-
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport            = $this->get('do_import') ?? [];
-        $accounts            = $this->get('accounts') ?? [];
-        $newAccounts         = $this->get('new_accounts') ?? [];
+        $doImport    = $this->get('do_import') ?? [];
+        $accounts    = $this->get('accounts') ?? [];
+        $newAccounts = $this->get('new_accounts') ?? [];
 
-        $decodedDoImport     = [];
-        $decodedAccounts     = [];
-        $decodedNewAccounts  = [];
+        $decodedDoImport    = [];
+        $decodedAccounts    = [];
+        $decodedNewAccounts = [];
 
         // Decode do_import array keys
         foreach ($doImport as $encodedId => $value) {
@@ -92,8 +85,8 @@ class ConfigurationPostRequest extends Request
                 'data'    => $accountData,
             ]);
         }
-        $notBefore           = $this->getCarbonDate('date_not_before');
-        $notAfter            = $this->getCarbonDate('date_not_after');
+        $notBefore = $this->getCarbonDate('date_not_before');
+        $notAfter  = $this->getCarbonDate('date_not_after');
 
         // reverse dates if they are bla bla bla.
         if ($notBefore instanceof Carbon && $notAfter instanceof Carbon) {
@@ -122,66 +115,53 @@ class ConfigurationPostRequest extends Request
         }
 
         return [
-            'headers'                                  => $this->convertBoolean($this->get('headers')),
-            'delimiter'                                => $this->convertToString('delimiter'),
-            'date'                                     => $this->convertToString('date'),
-            'default_account'                          => $this->convertToInteger('default_account'),
-            'rules'                                    => $this->convertBoolean($this->get('rules')),
-            'ignore_duplicate_lines'                   => $this->convertBoolean($this->get('ignore_duplicate_lines')),
-            'ignore_duplicate_transactions'            => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
-            'skip_form'                                => $this->convertBoolean($this->get('skip_form')),
-            'add_import_tag'                           => $this->convertBoolean($this->get('add_import_tag')),
-            'pending_transactions'                     => $this->convertBoolean($this->get('pending_transactions')),
-            'specifics'                                => [],
-            'roles'                                    => [],
-            'mapping'                                  => [],
-            'do_mapping'                               => [],
-            'flow'                                     => $this->convertToString('flow'),
-            'content_type'                             => $this->convertToString('content_type'),
-            'camt_type'                                => $this->convertToString('camt_type'),
-            'custom_tag'                               => $this->convertToString('custom_tag'),
+            'headers'                       => $this->convertBoolean($this->get('headers')),
+            'delimiter'                     => $this->convertToString('delimiter'),
+            'date'                          => $this->convertToString('date'),
+            'default_account'               => $this->convertToInteger('default_account'),
+            'rules'                         => $this->convertBoolean($this->get('rules')),
+            'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
+            'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
+            'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
+            'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
+            'pending_transactions'          => $this->convertBoolean($this->get('pending_transactions')),
+            'custom_tag'                    => $this->convertToString('custom_tag'),
 
             // duplicate detection:
-            'duplicate_detection_method'               => $this->convertToString('duplicate_detection_method'),
-            'unique_column_index'                      => $this->parseUniqueColumnIndex(),
-            'unique_column_type'                       => $this->convertToString('unique_column_type'),
-            'pseudo_identifier'                        => $this->buildPseudoIdentifier(),
+            'duplicate_detection_method'    => $this->convertToString('duplicate_detection_method'),
+            'unique_column_index'           => $this->parseUniqueColumnIndex(),
+            'unique_column_type'            => $this->convertToString('unique_column_type'),
+            'pseudo_identifier'             => $this->buildPseudoIdentifier(),
 
             // spectre values:
-            'connection'                               => $this->convertToString('connection'),
-            'identifier'                               => $this->convertToString('identifier'),
-            'ignore_spectre_categories'                => $this->convertBoolean($this->get('ignore_spectre_categories')),
-
-            // nordigen:
-            'nordigen_country'                         => $this->convertToString('nordigen_country'),
-            'nordigen_bank'                            => $this->convertToString('nordigen_bank'),
-            'nordigen_max_days'                        => $this->convertToString('nordigen_max_days'),
-            'nordigen_requisitions'                    => json_decode($this->convertToString('nordigen_requisitions'), true) ?? [],
+            'ignore_spectre_categories'     => $this->convertBoolean($this->get('ignore_spectre_categories')),
 
             // nordigen + spectre - with decoded account IDs
-            'do_import'                                => $decodedDoImport,
-            'accounts'                                 => $accounts,
-            'new_accounts'                             => $toCreateNewAccounts,
-            'map_all_data'                             => $this->convertBoolean($this->get('map_all_data')),
-            'date_range'                               => $this->convertToString('date_range'),
-            'date_range_number'                        => $this->convertToInteger('date_range_number'),
-            'date_range_unit'                          => $this->convertToString('date_range_unit'),
+            // FIXME also process this when we get to it.
+//            'do_import'                     => $decodedDoImport,
+//            'accounts'                      => $accounts,
+//            'new_accounts'                  => $toCreateNewAccounts,
 
-            'date_range_not_after_number'              => $this->convertToInteger('date_range_not_after_number'),
-            'date_range_not_after_unit'                => $this->convertToString('date_range_not_after_unit'),
+            'map_all_data'                  => $this->convertBoolean($this->get('map_all_data')),
+            'date_range'                    => $this->convertToString('date_range'),
+            'date_range_number'             => $this->convertToInteger('date_range_number'),
+            'date_range_unit'               => $this->convertToString('date_range_unit'),
 
-            'date_not_before'                          => $notBefore,
-            'date_not_after'                           => $notAfter,
+            'date_range_not_after_number' => $this->convertToInteger('date_range_not_after_number'),
+            'date_range_not_after_unit'   => $this->convertToString('date_range_not_after_unit'),
+
+            'date_not_before'              => $notBefore,
+            'date_not_after'               => $notAfter,
 
             // simplefin:
-            'access_token'                             => $this->convertToString('access_token'),
+            'access_token'                 => $this->convertToString('access_token'),
 
             // utf8 conversion
-            'conversion'                               => $this->convertBoolean($this->get('conversion')),
+            'conversion'                   => $this->convertBoolean($this->get('conversion')),
 
             // camt
-            'grouped_transaction_handling'             => $this->convertToString('grouped_transaction_handling'),
-            'use_entire_opposing_address'              => $this->convertBoolean($this->get('use_entire_opposing_address')),
+            'grouped_transaction_handling' => $this->convertToString('grouped_transaction_handling'),
+            'use_entire_opposing_address'  => $this->convertBoolean($this->get('use_entire_opposing_address')),
         ];
     }
 
@@ -194,7 +174,7 @@ class ConfigurationPostRequest extends Request
         $raw = $this->get('unique_column_index', '0');
 
         // Handle empty input
-        if ('' === trim((string) $raw)) {
+        if ('' === trim((string)$raw)) {
             return 0;
         }
 
@@ -222,7 +202,7 @@ class ConfigurationPostRequest extends Request
             return [];
         }
 
-        $raw     = $this->get('unique_column_index', '0');
+        $raw = $this->get('unique_column_index', '0');
 
         // Parse column indices (handles both single "0" and multiple "0,3,5")
         $indices = array_map(trim(...), explode(',', (string)$raw));
@@ -235,7 +215,7 @@ class ConfigurationPostRequest extends Request
         }
 
         // Build pseudo identifier definition (same for single or multiple columns)
-        $type    = $this->convertToString('unique_column_type');
+        $type = $this->convertToString('unique_column_type');
 
         return [
             'source_columns' => $indices,
@@ -246,22 +226,18 @@ class ConfigurationPostRequest extends Request
 
     public function rules(): array
     {
-        $flow          = request()->cookie(Constants::FLOW_COOKIE);
-        $columnOptions = implode(',', array_keys(config('file.unique_column_options')));
-        if ('nordigen' === $flow) {
-            $columnOptions = implode(',', array_keys(config('nordigen.unique_column_options')));
-        }
-        if ('simplefin' === $flow) {
-            $columnOptions = implode(',', array_keys(config('simplefin.unique_column_options')));
-        }
+        $repository         = new ImportJobRepository();
+        $identifier         = request()->route()->parameter('identifier');
+        $importJob          = $repository->find($identifier);
+        $flow               = $importJob->getFlow();
+        $columnOptions      = $this->getColumnOptions($flow);
+        $defaultAccountRule = $this->getDefaultAccountRule($flow);
 
         return [
             'headers'                       => 'numeric|between:0,1',
             'delimiter'                     => 'in:comma,semicolon,tab',
             'date'                          => 'between:1,25',
-            'default_account'               => 'simplefin' === $flow
-                ? 'nullable|numeric|min:1|max:100000'
-                : 'required|numeric|min:1|max:100000',
+            'default_account'               => $defaultAccountRule,
             'rules'                         => 'numeric|between:0,1',
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
             'ignore_duplicate_transactions' => 'numeric|between:0,1',
@@ -281,7 +257,7 @@ class ConfigurationPostRequest extends Request
             'new_account.*.name'            => 'nullable|string|max:255',
             'new_account.*.create'          => 'nullable|string|in:0,1',
             'new_account.*.type'            => 'nullable|string|in:asset,liability,expense,revenue',
-            'new_account.*.currency'        => 'nullable|string|size:3|regex:/^[A-Z]{3}$/',
+            'new_account.*.currency'        => 'nullable|string|size:3|regex:/^[A-Z]{7}$/',
             'new_account.*.opening_balance' => 'nullable|numeric',
 
             // camt
@@ -296,50 +272,126 @@ class ConfigurationPostRequest extends Request
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            $repository = new ImportJobRepository();
+            $identifier = request()->route()->parameter('identifier');
+            $importJob  = $repository->find($identifier);
+            $flow       = $importJob->getFlow();
+            $data       = $validator->getData();
+
+            // redirect to import job overview for
+
+            // TODO move all the code below to the right place.
+            // TODO do it in separate functions.
+
+//        // Store do_import selections in session for validation
+//        session()->put('do_import', $fromRequest['do_import'] ?? []);
+//
+//        // Validate configuration contract for SimpleFIN
+//        if ('simplefin' === $configuration->getFlow()) {
+//            $validator = new ConfigurationContractValidator();
+//
+//            // Validate form structure first
+//            $formValidation = $validator->validateFormFieldStructure($fromRequest);
+//            if (!$formValidation->isValid()) {
+//                Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
+//
+//                return redirect()->back()->withErrors($formValidation->getErrorMessages())->withInput();
+//            }
+//
+//            // Validate complete configuration contract
+//            $contractValidation = $validator->validateConfigurationContract($configuration);
+//            if (!$contractValidation->isValid()) {
+//                Log::error('SimpleFIN configuration contract validation failed', $contractValidation->getErrors());
+//
+//                return redirect()->back()->withErrors($contractValidation->getErrorMessages())->withInput();
+//            }
+//
+//            if ($contractValidation->hasWarnings()) {
+//                Log::warning('SimpleFIN configuration contract warnings', $contractValidation->getWarnings());
+//            }
+//
+//        }
+//        $configuration->updateDateRange();
+//        // Map data option is now user-selectable for SimpleFIN via checkbox
+//
+//        try {
+//            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+//        } catch (JsonException $e) {
+//            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+//
+//            throw new ImporterErrorException($e->getMessage(), 0, $e);
+//        }
+//        StorageService::storeContent($json);
+//
+//        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+//
+//        // set config as complete.
+//        event(new CompletedConfiguration($configuration));
+//
+//        // always redirect to roles, even if this isn't the step yet
+//        // for nordigen, spectre, and simplefin, roles will be skipped right away.
+//        Log::debug('Redirect to roles');
+//
+//        return redirect(route('005-roles.index'));
             // validate all account info
-            $flow        = request()->cookie(Constants::FLOW_COOKIE);
-            $data        = $validator->getData(); // @phpstan-ignore-line
-            $doImport    = $data['do_import'] ?? [];
-            if (0 === count($doImport) && 'file' !== $flow) {
-                $validator->errors()->add('do_import', 'You must select at least one account to import from.');
-            }
+            // $flow        = request()->cookie(Constants::FLOW_COOKIE);
+//            $doImport = $data['do_import'] ?? [];
+//            if (0 === count($doImport) && 'file' !== $flow) {
+//                $validator->errors()->add('do_import', 'You must select at least one account to import from.');
+//            }
 
             // validate new account creation data - both accounts and new_account now use encoded field names
-            $accounts    = $data['accounts'] ?? [];
-            $newAccounts = $data['new_account'] ?? [];
+//            $accounts    = $data['accounts'] ?? [];
+//            $newAccounts = $data['new_account'] ?? [];
 
-            Log::debug('withValidator account validation', [
-                'accounts'    => $accounts,
-                'newAccounts' => array_keys($newAccounts),
-                'flow'        => $flow,
-            ]);
+//            Log::debug('withValidator account validation', [
+//                'accounts'    => $accounts,
+//                'newAccounts' => array_keys($newAccounts),
+//                'flow'        => $flow,
+//            ]);
 
-            foreach ($accounts as $encodedAccountId => $selectedValue) {
-                if ('create_new' === $selectedValue) {
-                    $hasName   = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('name', $newAccounts[$encodedAccountId]);
-                    $hasCreate = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('create', $newAccounts[$encodedAccountId]);
-                    Log::debug(
-                        'DEBUG: Validating new account creation',
-                        [
-                            'encodedAccountId' => $encodedAccountId,
-                            'selectedValue'    => $selectedValue,
-                            'hasNameField'     => $hasName,
-                            'hasCreateField'   => $hasCreate,
-                            'nameValue'        => $hasName ? $newAccounts[$encodedAccountId]['name'] : null,
-                            'createValue'      => $hasCreate ? $newAccounts[$encodedAccountId]['create'] : null,
-                        ]
-                    );
-
-                    // Validate that account name is provided and create flag is set
-                    // Both arrays now use encoded keys, so they should match directly
-                    if ($hasName && '' === (string) $newAccounts[$encodedAccountId]['name']) {
-                        $validator->errors()->add(sprintf('new_account.%s.name', $encodedAccountId), 'Account name is required when creating a new account.');
-                    }
-                    if (!$hasCreate || '1' !== $newAccounts[$encodedAccountId]['create']) {
-                        // $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
-                    }
-                }
-            }
+//            foreach ($accounts as $encodedAccountId => $selectedValue) {
+//                if ('create_new' === $selectedValue) {
+//                    $hasName   = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('name', $newAccounts[$encodedAccountId]);
+//                    $hasCreate = array_key_exists($encodedAccountId, $newAccounts) && array_key_exists('create', $newAccounts[$encodedAccountId]);
+//                    Log::debug(
+//                        'DEBUG: Validating new account creation',
+//                        [
+//                            'encodedAccountId' => $encodedAccountId,
+//                            'selectedValue'    => $selectedValue,
+//                            'hasNameField'     => $hasName,
+//                            'hasCreateField'   => $hasCreate,
+//                            'nameValue'        => $hasName ? $newAccounts[$encodedAccountId]['name'] : null,
+//                            'createValue'      => $hasCreate ? $newAccounts[$encodedAccountId]['create'] : null,
+//                        ]
+//                    );
+//
+//                    // Validate that account name is provided and create flag is set
+//                    // Both arrays now use encoded keys, so they should match directly
+//                    if ($hasName && '' === (string)$newAccounts[$encodedAccountId]['name']) {
+//                        $validator->errors()->add(sprintf('new_account.%s.name', $encodedAccountId), 'Account name is required when creating a new account.');
+//                    }
+//                    if (!$hasCreate || '1' !== $newAccounts[$encodedAccountId]['create']) {
+//                        // $validator->errors()->add(sprintf('new_account.%s.create', $encodedAccountId), 'Create flag must be set for new account creation.');
+//                    }
+//                }
+//            }
         });
+    }
+
+    private function getColumnOptions(string $flow): string
+    {
+        if ('nordigen' === $flow) {
+            return implode(',', array_keys(config('nordigen.unique_column_options')));
+        }
+        if ('simplefin' === $flow) {
+            return implode(',', array_keys(config('simplefin.unique_column_options')));
+        }
+        return implode(',', array_keys(config('file.unique_column_options')));
+    }
+
+    private function getDefaultAccountRule(string $flow): string
+    {
+        return 'simplefin' === $flow ? 'nullable|numeric|min:1|max:100000' : 'required|numeric|min:1|max:100000';
     }
 }
