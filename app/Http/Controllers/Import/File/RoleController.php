@@ -31,8 +31,6 @@ use App\Http\Request\RolesPostRequest;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Roles\RoleService;
-use App\Services\Session\Constants;
-use App\Services\Storage\StorageService;
 use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,11 +70,11 @@ class RoleController extends Controller
             return view('import.005-roles.no-define-roles')->with(compact('flow', 'mainTitle', 'subTitle'));
         }
         $state = $importJob->getState();
-        if('new' === $state || 'loaded' === $state || 'parsed' === $state) {
+        if ('new' === $state || 'loaded' === $state || 'parsed' === $state) {
             die(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
         $warning = '';
-        if('roles_defined' === $importJob->getState()) {
+        if ('roles_defined' === $importJob->getState()) {
             $warning = trans('import.roles_defined_warning');
         }
 
@@ -120,7 +118,7 @@ class RoleController extends Controller
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
 
-        return view('import.005-roles.index-csv', compact('mainTitle','warning', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
+        return view('import.005-roles.index-csv', compact('mainTitle', 'warning', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
     }
 
     private function camtIndex(ImportJob $importJob, string $warning): View
@@ -203,7 +201,7 @@ class RoleController extends Controller
         }
         $levels = $this->mergeLevelsAndRoles($levels, $roles);
 
-        return view('import.005-roles.index-camt', compact('mainTitle', 'warning','identifier', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
+        return view('import.005-roles.index-camt', compact('mainTitle', 'warning', 'identifier', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
     }
 
     private function getFieldsForLevel(string $level): array
@@ -238,8 +236,7 @@ class RoleController extends Controller
             // redirect to the route to set mapping:
             return redirect()->route('data-mapping.index', [$identifier]);
         }
-        die('here we are');
-        return redirect()->route('007-convert.index', [$identifier]);
+        return redirect()->route('data-conversion.index', [$identifier]);
     }
 
     /**

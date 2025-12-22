@@ -22,8 +22,7 @@
                     <p>
                         The first step in the import process is a <strong>conversion</strong>.
                         <span x-show="'file' === flow">The CSV file you uploaded</span>
-                        <span x-show="'nordigen' === flow">The transactions downloaded from GoCardless</span>
-                        <span x-show="'spectre' === flow">The transactions downloaded from Spectre</span>
+                        <span x-show="'file' !== flow">The downloaded transactions </span>
                         will be converted to Firefly III compatible transactions. Please press <strong>Start
                             job</strong> to start.
                     </p>
@@ -80,6 +79,8 @@
 </div>
 
     <!-- New Account Creation Section (SimpleFIN only) -->
+        <!-- 2025-12-22 disabled for the time being. -->
+        {{--
     @if('simplefin' === $flow && !empty($newAccountsToCreate))
     <div class="row mt-3">
         <div class="col-lg-10 offset-lg-1">
@@ -159,6 +160,8 @@
         </div>
     </div>
     @endif
+    --}}
+    <!-- end of disabled simplefin code -->
 
     <div class="row mt-3">
         <div class="col-lg-10 offset-lg-1">

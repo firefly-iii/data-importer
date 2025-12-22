@@ -23,6 +23,7 @@ namespace App\Models;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\ConversionStatus;
 use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Ramsey\Uuid\Uuid;
@@ -33,20 +34,22 @@ use Ramsey\Uuid\Uuid;
  * - loaded: has config content and importable file content loaded, but nothing else has been done.
  * - parsed: configuration + importable file are parsed and processed. More meta-data exists in the import job.
  * - configured: configuration is set and validated. Also check on new to be created accounts. But not yet created!
- * - roles_defined: file imports with this state are ready to be mapped.
+ * - roles_defined: file imports with this state are ready to be mapped. may be AFTER conversion.
  * - ready_for_conversion: any import with this state is ready to be converted to Firefly III compatible transactions.
  */
 
 class ImportJob implements Arrayable
 {
     // job meta-data:
-    public string          $identifier;
-    private Carbon         $createdAt;
-    private string         $state;
-    private string         $flow                 = '';
-    private string         $configurationString  = '';
-    private string         $importableFileString = '';
-    private ?Configuration $configuration        = null;
+    public string            $identifier;
+    private Carbon           $createdAt;
+    private string           $state;
+    private string           $flow                 = '';
+    private string           $configurationString  = '';
+    private string           $importableFileString = '';
+    private ?Configuration   $configuration        = null;
+    private ConversionStatus $conversionStatus;
+    private array $convertedTransactions = [];
 
     // collected Firefly III data.
     private array $applicationAccounts = [];
@@ -54,7 +57,9 @@ class ImportJob implements Arrayable
 
     public static function createNew(): self
     {
-        return new ImportJob();
+        $job                   = new ImportJob();
+        $job->conversionStatus = new ConversionStatus();
+        return $job;
     }
 
     public static function createFromJson(string $json): self
@@ -74,10 +79,11 @@ class ImportJob implements Arrayable
         $importJob->importableFileString = $array['importable_file_string'];
 
         // only create configuration object when there is configuration to be parsed.
-        $importJob->configuration        = null;
+        $importJob->configuration = null;
         if (0 !== count($array['configuration'])) {
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
+        $importJob->conversionStatus    = ConversionStatus::fromArray($array['conversion_status']);
         $importJob->applicationAccounts = $array['application_accounts'];
         $importJob->currencies          = $array['currencies'];
         return $importJob;
@@ -107,6 +113,7 @@ class ImportJob implements Arrayable
                 'configuration_string'   => $this->configurationString,
                 'importable_file_string' => $this->importableFileString,
                 'configuration'          => null === $this->configuration ? [] : $this->configuration->toArray(),
+                'conversion_status'      => $this->conversionStatus->toArray(),
                 'application_accounts'   => $this->applicationAccounts,
                 'currencies'             => $this->currencies,
             ];
@@ -198,6 +205,28 @@ class ImportJob implements Arrayable
     {
         $this->currencies = $currencies;
     }
+
+    public function getConversionStatus(): ConversionStatus
+    {
+        return $this->conversionStatus;
+    }
+
+    public function setConversionStatus(ConversionStatus $conversionStatus): void
+    {
+        $this->conversionStatus = $conversionStatus;
+    }
+
+    public function getConvertedTransactions(): array
+    {
+        return $this->convertedTransactions;
+    }
+
+    public function setConvertedTransactions(array $convertedTransactions): void
+    {
+        $this->convertedTransactions = $convertedTransactions;
+    }
+
+
 
 
 }

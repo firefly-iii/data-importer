@@ -43,14 +43,11 @@ let index = function () {
         },
         checkCount: 0,
         maxCheckCount: 600,
-        functionName() {
-
-        },
         showJobMessages() {
             return Object.values(this.messages.messages).length > 0 || Object.values(this.messages.warnings).length > 0 || Object.values(this.messages.errors).length > 0;
         },
         showStartButton() {
-            return('init' === this.pageStatus.status || 'waiting_to_start' === this.pageStatus.status) && false === this.pageStatus.triedToStart && false === this.post.errored;
+            return ('init' === this.pageStatus.status || 'waiting_to_start' === this.pageStatus.status) && false === this.pageStatus.triedToStart && false === this.post.errored;
         },
         showWaitingButton() {
             return 'waiting_to_start' === this.pageStatus.status && true === this.pageStatus.triedToStart && false === this.post.errored;
@@ -71,25 +68,25 @@ let index = function () {
             return 'conv_errored' === this.pageStatus.status;
         },
         init() {
-            this.flow = document.querySelector('#data-helper').dataset.flow;
+            this.flow       = document.querySelector('#data-helper').dataset.flow;
             this.identifier = document.querySelector('#data-helper').dataset.identifier;
-            this.nextUrl  = document.querySelector('#data-helper').dataset.url;
+            this.nextUrl    = document.querySelector('#data-helper').dataset.url;
             console.log('Flow is ' + this.flow);
             console.log('Identifier is ' + this.identifier);
             this.getJobStatus();
         },
         startJobButton() {
             this.pageStatus.triedToStart = true;
-            this.pageStatus.status = 'waiting_to_start';
+            this.pageStatus.status       = 'waiting_to_start';
             this.postJobStart();
         },
         collectNewAccountData() {
             const newAccountData = {};
-            const forms = document.querySelectorAll('.new-account-form');
+            const forms          = document.querySelectorAll('.new-account-form');
 
             forms.forEach(form => {
                 const accountId = form.dataset.accountId;
-                const formData = new FormData(form);
+                const formData  = new FormData(form);
 
                 newAccountData[accountId] = {
                     name: formData.get('account_name'),
@@ -104,11 +101,11 @@ let index = function () {
         postJobStart() {
             this.triedToStart = true;
             this.post.running = true;
-            const jobStartUrl = './import/convert/start';
+            const jobStartUrl = './data-conversion/' + this.identifier + '/start';
 
             // Collect new account data for SimpleFIN
             const newAccountData = this.collectNewAccountData();
-            const postData = {
+            const postData       = {
                 identifier: this.identifier,
                 new_account_data: newAccountData
             };
@@ -119,12 +116,12 @@ let index = function () {
                 this.post.running = false;
             }).catch((error) => {
                 console.error('JOB HAS FAILED :(');
-                this.post.result = error;
+                this.post.result  = error;
                 this.post.errored = true;
             }).finally(() => {
-                    this.getJobStatus();
-                    this.triedToStart = true;
-                }
+                           this.getJobStatus();
+                           this.triedToStart = true;
+                       }
             );
             this.getJobStatus();
             this.triedToStart = true;
@@ -139,8 +136,8 @@ let index = function () {
                 this.pageStatus.status = 'too_long_checks';
                 return;
             }
-            const statusUrl = './import/convert/status';
-            window.axios.get(statusUrl, {params: {identifier: this.identifier}}).then((response) => {
+            const statusUrl = './data-conversion/' + this.identifier + '/status';
+            window.axios.get(statusUrl).then((response) => {
                 this.pageStatus.status = response.data.status;
                 console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ')');
 
@@ -151,7 +148,7 @@ let index = function () {
                 }
 
                 // process messages, warnings and errors:
-                this.messages.errors = response.data.errors;
+                this.messages.errors   = response.data.errors;
                 this.messages.warnings = response.data.warnings;
                 this.messages.messages = response.data.messages;
 
@@ -190,7 +187,7 @@ let index = function () {
                 }
             }).catch((error) => {
                 console.error('JOB HAS FAILED :(');
-                this.post.result = error;
+                this.post.result  = error;
                 this.post.errored = true;
             });
             if (this.checkCount < this.maxCheckCount && !this.post.errored && !this.post.done) {

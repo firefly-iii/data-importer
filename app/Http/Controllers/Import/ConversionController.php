@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\CompletedConversion;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConversionControllerMiddleware;
@@ -47,8 +46,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use JsonException;
-use Storage;
 use Throwable;
 
 /**
@@ -147,40 +144,36 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
 
-        // may be a new identifier! Yay!
-        $identifier = $routine->getIdentifier();
-
-        Log::debug(sprintf('Conversion routine manager identifier is "%s"', $identifier));
-
-        // store identifier in session so the status can get it.
-        session()->put(Constants::CONVERSION_JOB_IDENTIFIER, $identifier);
-        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::CONVERSION_JOB_IDENTIFIER));
-
         // Prepare new account creation data for SimpleFIN
-        $newAccountsToCreate = [];
-        if ('simplefin' === $flow) {
-            $accounts    = $configuration->getAccounts();
-            $newAccounts = $configuration->getNewAccounts();
+        // FIXME restore the code below
 
-            foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
-                if ('create_new' === $fireflyAccountId && array_key_exists($simplefinAccountId, $newAccounts) && null !== $newAccounts[$simplefinAccountId]) {
-                    $newAccountsToCreate[$simplefinAccountId] = $newAccounts[$simplefinAccountId];
-                }
-            }
-        }
+//        $newAccountsToCreate = [];
+//        if ('simplefin' === $flow) {
+//            $accounts    = $configuration->getAccounts();
+//            $newAccounts = $configuration->getNewAccounts();
+//
+//            foreach ($accounts as $simplefinAccountId => $fireflyAccountId) {
+//                if ('create_new' === $fireflyAccountId && array_key_exists($simplefinAccountId, $newAccounts) && null !== $newAccounts[$simplefinAccountId]) {
+//                    $newAccountsToCreate[$simplefinAccountId] = $newAccounts[$simplefinAccountId];
+//                }
+//            }
+//        }
+        // FIXME restore the code above.
+        $newAccountsToCreate = [];
 
         return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl', 'newAccountsToCreate'));
     }
 
-    public function start(Request $request): JsonResponse
+    public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier    = $request->get('identifier');
-        $configuration = $this->restoreConfiguration();
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
         $routine       = null;
 
         // Validate configuration contract for SimpleFIN before proceeding
         if ('simplefin' === $importJob->getFlow()) {
+            die('why another validation come on');
             $validator          = new ConfigurationContractValidator();
             $contractValidation = $validator->validateConfigurationContract($configuration);
 
@@ -202,6 +195,7 @@ class ConversionController extends Controller
 
         // Handle new account data for SimpleFIN
         if ('simplefin' === $importJob->getFlow()) {
+            die('create new accounts');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
                 Log::debug('Updating configuration with detailed new account data', $newAccountData);
@@ -246,15 +240,19 @@ class ConversionController extends Controller
             }
         }
         if ('nordigen' === $flow) {
+            die('cannot do this a');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {
+            die('cannot do this b');
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
+            die('cannot do this c');
             $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
+            die('cannot do this e');
             try {
                 $routine = new SimpleFINRoutineManager($identifier);
                 Log::debug('SimpleFIN routine manager created successfully in start method.');
@@ -271,10 +269,10 @@ class ConversionController extends Controller
         if (null === $routine) {
             throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
-
-        $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
-
-        RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_RUNNING);
+        $conversionStatus         = $importJob->getConversionStatus();
+        $conversionStatus->status = ConversionStatus::CONVERSION_RUNNING;
+        $importJob->setConversionStatus($conversionStatus);
+        $this->repository->saveToDisk($importJob);
 
         // then push stuff into the routine:
         $routine->setConfiguration($configuration);
@@ -284,58 +282,39 @@ class ConversionController extends Controller
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             Log::error($e->getTraceAsString());
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
 
-            return response()->json($importJobStatus->toArray());
+            $conversionStatus->status = ConversionStatus::CONVERSION_ERRORED;
+            $importJob->setConversionStatus($conversionStatus);
+            $this->repository->saveToDisk($importJob);
+
+            return response()->json($conversionStatus->toArray());
         }
 
         Log::debug(sprintf('Conversion routine "%s" was started successfully.', $flow));
         if (0 === count($transactions)) {
             // #10590 do not error out if no transactions are found.
             Log::warning('[b] Zero transactions found during conversion. Will not error out.');
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-            event(new CompletedConversion());
+
+            $conversionStatus->status = ConversionStatus::CONVERSION_DONE;
+            $importJob->setConversionStatus($conversionStatus);
+            $this->repository->saveToDisk($importJob);
 
             // return response()->json($importJobStatus->toArray());
         }
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
-        // save transactions in 'jobs' directory under the same key as the conversion thing.
-        $disk = Storage::disk(self::DISK_NAME);
+        $importJob->setConvertedTransactions($transactions);
 
-        try {
-            $disk->put(sprintf('%s.json', $identifier), json_encode($transactions, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
-        } catch (JsonException $e) {
-            Log::error(sprintf('JSON exception: %s', $e->getMessage()));
-            Log::error($e->getTraceAsString());
-            RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_ERRORED);
+        $conversionStatus->status = ConversionStatus::CONVERSION_DONE;
+        $importJob->setConversionStatus($conversionStatus);
+        $this->repository->saveToDisk($importJob);
 
-            return response()->json($importJobStatus->toArray());
-        }
-        Log::debug(sprintf('Transactions are stored on disk "%s" in file "%s.json"', self::DISK_NAME, $identifier));
-
-        // set done:
-        RoutineStatusManager::setConversionStatus(ConversionStatus::CONVERSION_DONE);
-        event(new CompletedConversion());
-
-        return response()->json($importJobStatus->toArray());
+        return response()->json($conversionStatus->toArray());
     }
 
-    public function status(Request $request): JsonResponse
+    public function status(Request $request, string $identifier): JsonResponse
     {
-        //        Log::debug(sprintf('Now at %s', __METHOD__));
-        $identifier = $request->get('identifier');
-        // Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
-        if (null === $identifier) {
-            Log::warning('Identifier is NULL.');
-            // no status is known yet because no identifier is in the session.
-            // As a fallback, return empty status
-            $fakeStatus = new ConversionStatus();
-
-            return response()->json($fakeStatus->toArray());
-        }
-        $importJobStatus = RoutineStatusManager::startOrFindConversion($identifier);
-
-        return response()->json($importJobStatus->toArray());
+        $importJob = $this->repository->find($identifier);
+        return response()->json($importJob->getConversionStatus()->toArray());
     }
 
     private function getJobBackUrl(string $flow, string $identifier): string
