@@ -72,17 +72,18 @@ class DownloadController extends Controller
         }
 
 
-        $result   = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
-        $response = response($result);
-        $name     = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
+        $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $response      = response($result);
+        $name          = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
         $response->header('Content-disposition', sprintf('attachment; filename=%s', $name))
-                 ->header('Content-Type', 'application/json')
-                 ->header('Content-Description', 'File Transfer')
-                 ->header('Connection', 'Keep-Alive')
-                 ->header('Expires', '0')
-                 ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
-                 ->header('Pragma', 'public')
-                 ->header('Content-Length', (string)strlen($result));
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Description', 'File Transfer')
+            ->header('Connection', 'Keep-Alive')
+            ->header('Expires', '0')
+            ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
+            ->header('Pragma', 'public')
+            ->header('Content-Length', (string)strlen($result))
+        ;
 
         return $response;
     }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ImportJobRepository.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -37,10 +39,10 @@ use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
+use Exception;
 
 class ImportJobRepository
 {
-
     public function create(): ImportJob
     {
         $importJob = ImportJob::createNew();
@@ -65,8 +67,8 @@ class ImportJobRepository
 
     public function find(string $identifier): ImportJob
     {
-        $disk = $this->getDisk();
-        $file = sprintf('%s.json', $identifier);
+        $disk    = $this->getDisk();
+        $file    = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
@@ -75,6 +77,7 @@ class ImportJobRepository
             throw new ImporterErrorException(sprintf('The file for import job "%s" is empty.', $identifier));
         }
         Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
+
         return ImportJob::createFromJson($content);
     }
 
@@ -95,8 +98,7 @@ class ImportJobRepository
 
     /**
      * FIXME: this is starting to look like a "catch-all" function for all tiny details that need to be taken care of when a new import is started.
-     * @param ImportJob $importJob
-     * @return MessageBag
+     *
      * @throws ApiHttpException
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
@@ -121,19 +123,23 @@ class ImportJobRepository
         switch ($importJob->getFlow()) {
             case 'file':
                 // do file content sherlock things.
-                $detector = new FileContentSherlock();
-                $content  = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
-                $fileType = $detector->detectContentTypeFromContent($content);
+                $detector   = new FileContentSherlock();
+                $content    = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
+                $fileType   = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
                     $camtType = $detector->getCamtType();
                     $configuration->setCamtType($camtType);
                 }
+
                 break;
+
             case 'simplefin':
                 $validator  = new NewJobDataCollector();
                 $messageBag = $validator->collectAccounts($importJob);
+
                 break;
+
             default:
                 $messageBag->add('importable_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));
                 $messageBag->add('config_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));
@@ -141,7 +147,7 @@ class ImportJobRepository
 
 
         // save configuration and return it.
-        $importJob = $this->setConfiguration($importJob, $configuration);
+        $importJob     = $this->setConfiguration($importJob, $configuration);
         $importJob->setState('is_parsed');
         $this->saveToDisk($importJob);
 
@@ -218,8 +224,8 @@ class ImportJobRepository
         $url      = null;
 
         try {
-            $url   = SecretManager::getBaseUrl();
-            $token = SecretManager::getAccessToken();
+            $url           = SecretManager::getBaseUrl();
+            $token         = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
                 Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
@@ -229,7 +235,7 @@ class ImportJobRepository
 
             // Fetch ASSET accounts
             Log::debug('Fetching asset accounts from Firefly III.', ['url' => $url]);
-            $requestAsset = new GetAccountsRequest($url, $token);
+            $requestAsset  = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
@@ -240,7 +246,7 @@ class ImportJobRepository
                 $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account->toArray();
             }
             Log::debug(sprintf('Fetched %d asset accounts.', count($accounts[Constants::ASSET_ACCOUNTS])));
-        } catch (ApiHttpException|\Exception $e) {
+        } catch (ApiHttpException|Exception $e) {
             Log::error(sprintf('%s while fetching Firefly III asset accounts.', get_class($e)), [
                 'message' => $e->getMessage(),
                 'code'    => $e->getCode(),
@@ -249,9 +255,10 @@ class ImportJobRepository
             ]);
 
         }
+
         try {
             Log::debug('Fetching liability accounts from Firefly III.', ['url' => $url]);
-            $requestLiability = new GetAccountsRequest($url, $token);
+            $requestLiability  = new GetAccountsRequest($url, $token);
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
@@ -263,7 +270,7 @@ class ImportJobRepository
             }
             Log::debug(sprintf('Fetched %d liability accounts.', count($accounts[Constants::LIABILITIES])));
 
-        } catch (ApiHttpException|\Exception $e) {
+        } catch (ApiHttpException|Exception $e) {
             Log::error(sprintf('%s while fetching Firefly III liability accounts.', get_class($e)), [
                 'message' => $e->getMessage(),
                 'code'    => $e->getCode(),
@@ -283,7 +290,7 @@ class ImportJobRepository
             $mapper = app(TransactionCurrencies::class);
 
             return $mapper->getMap();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error(sprintf('Failed to load currencies: %s', $e->getMessage()));
 
             return [];

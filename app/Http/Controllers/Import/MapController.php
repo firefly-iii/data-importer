@@ -78,9 +78,9 @@ class MapController extends Controller
         $data          = [];
         $roles         = [];
 
-        $state = $importJob->getState();
+        $state         = $importJob->getState();
         if ('new' === $state || 'contains_content' === $state || 'is_parsed' === $state || 'is_configured' === $state) {
-            die(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
+            exit(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
 
         if ('file' === $importJob->getFlow() && 'csv' === $configuration->getContentType()) {
@@ -107,6 +107,7 @@ class MapController extends Controller
 
             return redirect()->route('007-convert.index');
         }
+
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'identifier', 'roles', 'data'));
     }
 
@@ -124,25 +125,25 @@ class MapController extends Controller
         $data            = [];
 
         foreach ($roles as $index => $role) {
-            $info     = config('csv.import_roles')[$role] ?? null;
-            $mappable = $info['mappable'] ?? false;
+            $info                 = config('csv.import_roles')[$role] ?? null;
+            $mappable             = $info['mappable'] ?? false;
             if (null === $info) {
                 continue;
             }
             if (false === $mappable) {
                 continue;
             }
-            $mapColumn = $doMapping[$index] ?? false;
+            $mapColumn            = $doMapping[$index] ?? false;
             if (false === $mapColumn) {
                 continue;
             }
             Log::debug(sprintf('Mappable role is "%s"', $role));
 
-            $info['role']   = $role;
-            $info['values'] = [];
+            $info['role']         = $role;
+            $info['values']       = [];
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
+            $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -155,18 +156,18 @@ class MapController extends Controller
 
             Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
 
-            $data[$index] = $info;
+            $data[$index]         = $info;
         }
 
         // get columns from file
-        $content   = $importJob->getImportableFileString();
-        $delimiter = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
-        $result    = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+        $content         = $importJob->getImportableFileString();
+        $delimiter       = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
+        $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
 
         // sort the column on if they're mapped or not.
         foreach ($result as $index => $set) {
-            $values = $set['values'];
-            $mapped = array_keys($set['mapped']);
+            $values                   = $set['values'];
+            $mapped                   = array_keys($set['mapped']);
             usort($values, function (string $a, string $b) use ($mapped) {
                 if (in_array($a, $mapped, true) && !in_array($b, $mapped, true)) {
                     return 1;
@@ -193,8 +194,8 @@ class MapController extends Controller
         $data            = [];
 
         foreach ($roles as $index => $role) {
-            $info     = config('camt.all_roles')[$role] ?? null;
-            $mappable = $info['mappable'] ?? false;
+            $info                 = config('camt.all_roles')[$role] ?? null;
+            $mappable             = $info['mappable'] ?? false;
             if (null === $info) {
                 Log::warning(sprintf('Field "%s" with role "%s" does not exist.', $index, $role));
 
@@ -205,7 +206,7 @@ class MapController extends Controller
 
                 continue;
             }
-            $mapColumn = $doMapping[$index] ?? false;
+            $mapColumn            = $doMapping[$index] ?? false;
             if (false === $mapColumn) {
                 Log::warning(sprintf('Field "%s" with role "%s" does not have to be mapped.', $index, $role));
 
@@ -213,11 +214,11 @@ class MapController extends Controller
             }
             Log::debug(sprintf('Field "%s" with role is "%s"', $index, $role));
 
-            $info['role']   = $role;
-            $info['values'] = [];
+            $info['role']         = $role;
+            $info['values']       = [];
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
+            $class                = sprintf('App\Services\CSV\Mapper\%s', $info['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -230,7 +231,7 @@ class MapController extends Controller
 
             Log::debug(sprintf('Mapping data length is %d', count($info['mapping_data'])));
 
-            $data[$index] = $info;
+            $data[$index]         = $info;
         }
 
         // get columns from file
@@ -253,13 +254,13 @@ class MapController extends Controller
         if ('nordigen' === $importJob->getFlow() || 'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
             // TODO should be in a helper or something generic.
             // index 0, opposing account name:
-            $index                  = 0;
-            $opposingName           = config('csv.import_roles.opposing-name') ?? null;
-            $opposingName['role']   = 'opposing-name';
-            $opposingName['values'] = $this->getOpposingAccounts();
+            $index                        = 0;
+            $opposingName                 = config('csv.import_roles.opposing-name') ?? null;
+            $opposingName['role']         = 'opposing-name';
+            $opposingName['values']       = $this->getOpposingAccounts();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
+            $class                        = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -274,13 +275,13 @@ class MapController extends Controller
         if ('spectre' === $importJob->getFlow()) {
             // index 1: category (TODO)
             // index 0, category name:
-            $index              = 1;
-            $category           = config('csv.import_roles.category-name') ?? null;
-            $category['role']   = 'category-name';
-            $category['values'] = $this->getCategories();
+            $index                    = 1;
+            $category                 = config('csv.import_roles.category-name') ?? null;
+            $category['role']         = 'category-name';
+            $category['values']       = $this->getCategories();
 
             // create the "mapper" class which will get data from Firefly III.
-            $class = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
+            $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -295,13 +296,13 @@ class MapController extends Controller
         if ('simplefin' === $importJob->getFlow()) {
 
             // index 0: expense/revenue account mapping
-            $index                    = 0;
-            $expenseRevenue           = config('csv.import_roles.opposing-name') ?? null;
-            $expenseRevenue['role']   = 'opposing-name';
-            $expenseRevenue['values'] = $this->getExpenseRevenueAccounts($importJob);
+            $index                          = 0;
+            $expenseRevenue                 = config('csv.import_roles.opposing-name') ?? null;
+            $expenseRevenue['role']         = 'opposing-name';
+            $expenseRevenue['values']       = $this->getExpenseRevenueAccounts($importJob);
 
             // Use ExpenseRevenueAccounts mapper for SimpleFIN
-            $class = OpposingAccounts::class;
+            $class                          = OpposingAccounts::class;
             if (!class_exists($class)) {
                 throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
             }
@@ -329,7 +330,7 @@ class MapController extends Controller
             return [];
         }
 
-        $disk = Storage::disk(self::DISK_NAME);
+        $disk               = Storage::disk(self::DISK_NAME);
 
         if (!$disk->exists(sprintf('%s.json', $downloadIdentifier))) {
             throw new ImporterErrorException('here? b');
@@ -338,7 +339,7 @@ class MapController extends Controller
             return [];
         }
 
-        $json = $disk->get(sprintf('%s.json', $downloadIdentifier));
+        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
 
         if (null === $json) {
             throw new ImporterErrorException('here? c');
@@ -352,8 +353,8 @@ class MapController extends Controller
         } catch (JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
-        $opposing = [];
-        $total    = count($array);
+        $opposing           = [];
+        $total              = count($array);
 
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
@@ -365,9 +366,9 @@ class MapController extends Controller
                 $opposing[] = (string)(array_key_exists('source_name', $row) ? $row['source_name'] : '');
             }
         }
-        $filtered = array_filter(
+        $filtered           = array_filter(
             $opposing,
-            static fn(string $value) => '' !== $value
+            static fn (string $value) => '' !== $value
         );
 
         return array_unique($filtered);
@@ -398,6 +399,7 @@ class MapController extends Controller
                 }
             }
         }
+
         return array_unique($expenseRevenue);
     }
 
@@ -413,8 +415,8 @@ class MapController extends Controller
         } catch (JsonException $e) {
             throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
         }
-        $categories = [];
-        $total      = count($array);
+        $categories         = [];
+        $total              = count($array);
 
         /** @var array $transaction */
         foreach ($array as $index => $transaction) {
@@ -425,9 +427,9 @@ class MapController extends Controller
                 $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
             }
         }
-        $filtered = array_filter(
+        $filtered           = array_filter(
             $categories,
-            static fn(string $value) => '' !== $value
+            static fn (string $value) => '' !== $value
         );
 
         return array_unique($filtered);
@@ -435,13 +437,13 @@ class MapController extends Controller
 
     public function postIndex(Request $request, string $identifier): RedirectResponse
     {
-        $values        = $request->get('values') ?? [];
-        $mapping       = $request->get('mapping') ?? [];
-        $values        = !is_array($values) ? [] : $values;
-        $mapping       = !is_array($mapping) ? [] : $mapping;
-        $data          = [];
-        $importJob     = $this->repository->find($identifier);
-        $configuration = $importJob->getConfiguration();
+        $values          = $request->get('values') ?? [];
+        $mapping         = $request->get('mapping') ?? [];
+        $values          = !is_array($values) ? [] : $values;
+        $mapping         = !is_array($mapping) ? [] : $mapping;
+        $data            = [];
+        $importJob       = $this->repository->find($identifier);
+        $configuration   = $importJob->getConfiguration();
 
         /*
          * Loop array with available columns.
@@ -453,7 +455,7 @@ class MapController extends Controller
             /**
              * Loop all values for this column
              *
-             * @var int $valueIndex
+             * @var int    $valueIndex
              * @var string $value
              */
             foreach ($column as $valueIndex => $value) {
@@ -469,13 +471,13 @@ class MapController extends Controller
         $originalMapping = $configuration->getMapping();
 
         // loop $data and save values:
-        $mergedMapping = $this->mergeMapping($originalMapping, $data);
+        $mergedMapping   = $this->mergeMapping($originalMapping, $data);
         $configuration->setMapping($mergedMapping);
         $importJob->setConfiguration($configuration);
 
         // FIXME needs better redirect or state.
-        $flow = $importJob->getFlow();
-        if (in_array($flow, ['nordigen', 'spectre', 'lunchflow', 'simplefin'])) {
+        $flow            = $importJob->getFlow();
+        if (in_array($flow, ['nordigen', 'spectre', 'lunchflow', 'simplefin'], true)) {
             $importJob->setState('ready_for_submission');
             $this->repository->saveToDisk($importJob);
 

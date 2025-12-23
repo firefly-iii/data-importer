@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * NewJobValidator.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -42,9 +44,9 @@ class NewJobDataCollector
 
     public function validate(ImportJob $importJob): MessageBag
     {
-        $configuration       = $importJob->getConfiguration();
-        $errors              = new MessageBag();
-        $accessToken         = $configuration->getAccessToken();
+        $configuration    = $importJob->getConfiguration();
+        $errors           = new MessageBag();
+        $accessToken      = $configuration->getAccessToken();
         Log::debug(sprintf('validate("%s") for SimpleFIN', $importJob->identifier));
 
         if ($this->useDemo) {
@@ -54,6 +56,7 @@ class NewJobDataCollector
 
         if ('' === $this->setupToken && '' === $accessToken) {
             $errors->add('simplefin_token', 'SimpleFIN token is required.');
+
             return $errors;
         }
         if ('' !== $accessToken) {
@@ -81,14 +84,15 @@ class NewJobDataCollector
         $configuration->setAccessToken($accessToken);
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);
+
         return new MessageBag();
     }
 
     public function collectAccounts(ImportJob $importJob): MessageBag
     {
-        $configuration       = $importJob->getConfiguration();
-        $errors              = new MessageBag();
-        $accessToken = $configuration->getAccessToken();
+        $configuration    = $importJob->getConfiguration();
+        $errors           = new MessageBag();
+        $accessToken      = $configuration->getAccessToken();
         Log::debug(sprintf('collectAccounts("%s")', $importJob->identifier));
 
         // create service:
@@ -96,12 +100,14 @@ class NewJobDataCollector
         $simpleFINService = app(SimpleFINService::class);
         $simpleFINService->setConfiguration($configuration);
         $simpleFINService->setAccessToken($accessToken);
-        $accounts =[];
+        $accounts         = [];
+
         try {
             $accounts = $simpleFINService->fetchAccounts();
         } catch (ImporterErrorException $e) {
             Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
             $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
+
             return $errors;
         }
         $importJob->setServiceAccounts($accounts);
@@ -110,12 +116,11 @@ class NewJobDataCollector
         return new MessageBag();
     }
 
-
     private function collectSimpleFINAccounts(): void
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $accountsData = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-        $accounts     = [];
+        $accountsData                = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
+        $accounts                    = [];
 
         foreach ($accountsData ?? [] as $account) {
             // Ensure the account has required SimpleFIN protocol fields

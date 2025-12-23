@@ -40,8 +40,6 @@ use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
 use Override;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class RoutineManager
@@ -87,7 +85,7 @@ class RoutineManager implements RoutineManagerInterface
     private function setConfiguration(Configuration $configuration): void
     {
         // save config
-        $this->configuration = $configuration;
+        $this->configuration              = $configuration;
 
         // share config
         $this->csvFileProcessor           = new CSVFileProcessor($this->configuration);
@@ -115,18 +113,18 @@ class RoutineManager implements RoutineManagerInterface
 
         $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString(), $this->configuration->isConversion()));
 
-        $CSVLines = $this->csvFileProcessor->processCSVFile();
+        $CSVLines     = $this->csvFileProcessor->processCSVFile();
 
         // convert raw lines into arrays with individual ColumnValues
-        $valueArrays = $this->lineProcessor->processCSVLines($CSVLines);
+        $valueArrays  = $this->lineProcessor->processCSVLines($CSVLines);
 
         // convert value arrays into (pseudo) transactions.
-        $pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
+        $pseudo       = $this->columnValueConverter->processValueArrays($valueArrays);
 
         // convert pseudo transactions into actual transactions.
         $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
 
-        $count = count($CSVLines);
+        $count        = count($CSVLines);
 
         // debug messages on weird indexes.
         //        $this->addError(3, '3: No transactions found in CSV file.');

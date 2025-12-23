@@ -25,25 +25,16 @@ declare(strict_types=1);
 namespace App\Support\Internal;
 
 use App\Exceptions\ImporterHttpException;
-use App\Services\Session\Constants;
-use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\LunchFlow\Authentication\SecretManager as LunchFlowSecretManager;
 use App\Services\Spectre\Request\GetAccountsRequest as SpectreGetAccountsRequest;
 use App\Services\LunchFlow\Request\GetAccountsRequest as LunchFlowGetAccountsRequest;
 use App\Services\Spectre\Response\GetAccountsResponse;
-use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
-use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Log;
-use Exception;
 
 trait CollectsAccounts
 {
-
-
     /**
      * @throws GuzzleException
      * @throws ImporterHttpException

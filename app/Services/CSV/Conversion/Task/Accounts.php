@@ -70,10 +70,10 @@ class Accounts extends AbstractTask
          * The source account will default back to the user's submitted default account.
          * So when everything fails, the transaction will be an expense for amount X.
          */
-        $sourceArray = $this->getSourceArray($transaction);
-        $destArray   = $this->getDestinationArray($transaction);
-        $source      = $this->findAccount($sourceArray, $this->account);
-        $destination = $this->findAccount($destArray, null);
+        $sourceArray         = $this->getSourceArray($transaction);
+        $destArray           = $this->getDestinationArray($transaction);
+        $source              = $this->findAccount($sourceArray, $this->account);
+        $destination         = $this->findAccount($destArray, null);
 
         // First, set source and destination in the transaction array:
         $transaction         = $this->setSource($transaction, $source);
@@ -83,8 +83,8 @@ class Accounts extends AbstractTask
         Log::debug('Source is now:', $source);
         Log::debug('Destination is now:', $destination);
 
-        $amount = (string)$transaction['amount'];
-        $amount = '' === $amount ? '0' : $amount;
+        $amount              = (string)$transaction['amount'];
+        $amount              = '' === $amount ? '0' : $amount;
 
         if ('0' === $amount) {
             Log::error('Amount is ZERO. This will give trouble further down the line.');
@@ -99,9 +99,9 @@ class Accounts extends AbstractTask
         if ('withdrawal' === $transaction['type'] && 1 === bccomp($amount, '0')) {
             // amount is positive
             Log::debug(sprintf('%s is positive and type is "%s", switch source/destination', $amount, $transaction['type']));
-            $transaction         = $this->setSource($transaction, $destination);
-            $transaction         = $this->setDestination($transaction, $source);
-            $transaction['type'] = $this->determineType($destination['type'], $source['type']);
+            $transaction            = $this->setSource($transaction, $destination);
+            $transaction            = $this->setDestination($transaction, $source);
+            $transaction['type']    = $this->determineType($destination['type'], $source['type']);
             Log::debug('Source is now:', $destination); // yes this is correct.
             Log::debug('Destination is now:', $source); // yes this is correct.
 
@@ -615,7 +615,7 @@ class Accounts extends AbstractTask
             $transaction[sprintf('%s_number', $direction)] = $account['account_number'];
         }
 
-        $transaction[sprintf('%s_bic', $direction)] = $account['bic'];
+        $transaction[sprintf('%s_bic', $direction)]    = $account['bic'];
 
         return $transaction;
     }

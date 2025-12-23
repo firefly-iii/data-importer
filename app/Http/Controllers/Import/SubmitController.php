@@ -75,11 +75,11 @@ class SubmitController extends Controller
         $flow          = $importJob->getFlow();
 
         if ('ready_for_submission' !== $importJob->getState()) {
-            die(sprintf('Job is in state "%s", expected ready_for_submission.', $importJob->getState()));
+            exit(sprintf('Job is in state "%s", expected ready_for_submission.', $importJob->getState()));
         }
 
         // The step immediately preceding submit (008) is always convert (007)
-        $jobBackUrl = route('data-conversion.index', [$identifier]);
+        $jobBackUrl    = route('data-conversion.index', [$identifier]);
 
         // validate flow
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -98,17 +98,17 @@ class SubmitController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob     = $this->repository->find($identifier);
-        $configuration = $importJob->getConfiguration();
+        $importJob                           = $this->repository->find($identifier);
+        $configuration                       = $importJob->getConfiguration();
         Log::error('Start: Find import job status.');
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
-        $transactions = $importJob->getConvertedTransactions();
+        $transactions                        = $importJob->getConvertedTransactions();
 
         // Retrieve authentication credentials for job
-        $accessToken = SecretManager::getAccessToken();
-        $baseUrl     = SecretManager::getBaseUrl();
-        $vanityUrl   = SecretManager::getVanityUrl();
+        $accessToken                         = SecretManager::getAccessToken();
+        $baseUrl                             = SecretManager::getBaseUrl();
+        $vanityUrl                           = SecretManager::getVanityUrl();
 
         // Set initial running status before dispatching job
         $importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_RUNNING;
@@ -125,13 +125,14 @@ class SubmitController extends Controller
         );
 
         // Return immediate response indicating job was dispatched
-        return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier,]);
+        return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
     }
 
     public function status(Request $request, string $identifier): JsonResponse
     {
         $importJob = $this->repository->find($identifier);
         Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
+
         return response()->json($importJob->submissionStatus);
     }
 }
