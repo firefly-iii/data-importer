@@ -35,6 +35,7 @@ use App\Services\Nordigen\Request\Request;
 use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
+use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
@@ -51,6 +52,7 @@ class RoutineManager implements RoutineManagerInterface
     use GeneratesIdentifier;
     use IsRunningCli;
     use ProgressInformation;
+    use CreatesAccounts;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
@@ -80,7 +82,8 @@ class RoutineManager implements RoutineManagerInterface
     #[Override]
     public function getServiceAccounts(): array
     {
-        return $this->transactionProcessor->getAccounts();
+        Log::debug(sprintf('RoutineManager.getServiceAccounts(%d)', count($this->importJob->getServiceAccounts())));
+        return $this->importJob->getServiceAccounts();
     }
 
     /**
@@ -95,7 +98,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->validateAccounts();
 
         // share config
-        $this->transactionProcessor->setConfiguration($configuration);
+        $this->transactionProcessor->setImportJob($this->importJob);
         $this->transactionGenerator->setConfiguration($configuration);
 
         // set identifier
@@ -111,7 +114,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
-
+        $this->transactionProcessor->setExistingServiceAccounts($this->getServiceAccounts());
         // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
 

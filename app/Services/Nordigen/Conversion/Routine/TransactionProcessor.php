@@ -28,12 +28,15 @@ use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Model\Account;
 use App\Services\Nordigen\Request\GetTransactionsRequest;
 use App\Services\Nordigen\Response\GetTransactionsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -44,13 +47,17 @@ use Illuminate\Support\Facades\Log;
 class TransactionProcessor
 {
     use ProgressInformation;
+    use CreatesAccounts;
 
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    private array         $accounts;
-    private Configuration $configuration;
-    private ?Carbon       $notAfter       = null;
-    private ?Carbon       $notBefore      = null;
+    private array               $accounts = [];
+    private Configuration       $configuration;
+    private ?Carbon             $notAfter  = null;
+    private ?Carbon             $notBefore = null;
+    private ImportJob           $importJob;
+    private ImportJobRepository $repository;
+
 
     /**
      * @throws ImporterErrorException
@@ -69,17 +76,28 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        $accounts        = array_keys($this->configuration->getAccounts());
+        $accounts = $this->configuration->getAccounts();
 
-        $return          = [];
+        $return = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total           = count($accounts);
-        foreach ($accounts as $key => $account) {
-            $account                    = (string) $account;
-            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
-            $object                     = new Account();
+        $total = count($accounts);
+        $index = 1;
+        /**
+         * @var string $account
+         * @var int $destinationId
+         */
+        foreach ($accounts as $account => $destinationId) {
+            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $index, $total, $index, $account));
+            $object = new Account();
             $object->setIdentifier($account);
-            $fullInfo                   = null;
+            $fullInfo = null;
+
+            if (0 === $destinationId) {
+                Log::debug('No destination ID found, create account');
+                $destinationId = $this->createNewAccount($account);
+                Log::debug(sprintf('Newly created account #%d', $destinationId));
+            }
+
 
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object);
@@ -88,18 +106,18 @@ class TransactionProcessor
                     0,
                     '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
-                if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
+                if (array_key_exists('summary', $e->json) && '' !== (string)$e->json['summary']) {
                     $this->addError(0, $e->json['summary']);
                 }
-                if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
+                if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
                     $this->addError(0, $e->json['detail']);
                 }
                 $return[$account] = [];
-
+                $index++;
                 continue;
             }
             Log::debug('Done downloading information for debug purposes.');
-            $this->accounts[]           = $fullInfo;
+            $this->accounts[] = $fullInfo;
 
             try {
                 $accessToken = TokenManager::getAccessToken();
@@ -109,8 +127,8 @@ class TransactionProcessor
 
                 continue;
             }
-            $url                        = config('nordigen.url');
-            $request                    = new GetTransactionsRequest($url, $accessToken, $account, $this->configuration->getDateNotBefore(), $this->configuration->getDateNotAfter());
+            $url     = config('nordigen.url');
+            $request = new GetTransactionsRequest($url, $accessToken, $account, $this->configuration->getDateNotBefore(), $this->configuration->getDateNotAfter());
             $request->setTimeOut(config('importer.connection.timeout'));
 
             /** @var GetTransactionsResponse $transactions */
@@ -120,26 +138,26 @@ class TransactionProcessor
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 $this->addWarning(0, $e->getMessage());
-                $return[$account]           = [];
+                $return[$account] = [];
 
                 // save the rate limits:
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),
                     'reset'     => $request->getReset(),
                 ];
-
+                $index++;
                 continue;
             } catch (AgreementExpiredException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
-                $return[$account]           = [];
+                $return[$account] = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),
                     'reset'     => $request->getReset(),
                 ];
-
+                $index++;
                 continue;
             }
             $this->rateLimits[$account] = [
@@ -147,8 +165,9 @@ class TransactionProcessor
                 'reset'     => $request->getReset(),
             ];
 
-            $return[$account]           = $this->filterTransactions($transactions);
-            Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $key + 1, $total, $key + 1, $account));
+            $return[$account] = $this->filterTransactions($transactions);
+            Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $index, $total, $index, $account));
+            $index++;
         }
         Log::debug('Done with download of transactions.');
 
@@ -183,7 +202,7 @@ class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn   = $transaction->getDate();
+            $madeOn = $transaction->getDate();
 
             if (!$getPending && 'pending' === $transaction->key) {
                 Log::debug(sprintf('Skip pending transaction made on "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
@@ -236,13 +255,27 @@ class TransactionProcessor
         return $return;
     }
 
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-    }
-
     public function getRateLimits(): array
     {
         return $this->rateLimits;
+    }
+
+    private function createNewAccount(string $importServiceAccountId): int
+    {
+        $configuration                            = $this->importJob->getConfiguration();
+        $createdAccount                           = $this->createOrFindExistingAccount($importServiceAccountId);
+        $updatedAccounts                          = $configuration->getAccounts();
+        $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
+        $configuration->setAccounts($updatedAccounts);
+        $this->importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($this->importJob);
+        return $createdAccount->id;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->repository    = new ImportJobRepository();
+        $this->importJob     = $importJob;
+        $this->configuration = $importJob->getConfiguration();
     }
 }

@@ -148,6 +148,7 @@ class ConversionController extends Controller
         // Handle new account data for SimpleFIN
         $flow = $importJob->getFlow();
         if ('simplefin' === $flow || 'nordigen' === $flow) {
+            Log::debug('Will see if new accounts need to be created.');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
                 Log::debug('Updating configuration with detailed new account data', $newAccountData);

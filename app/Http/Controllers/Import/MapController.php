@@ -257,7 +257,7 @@ class MapController extends Controller
             $index                        = 0;
             $opposingName                 = config('csv.import_roles.opposing-name') ?? null;
             $opposingName['role']         = 'opposing-name';
-            $opposingName['values']       = $this->getOpposingAccounts();
+            $opposingName['values']       = $this->getOpposingAccounts($importJob);
 
             // create the "mapper" class which will get data from Firefly III.
             $class                        = sprintf('App\Services\CSV\Mapper\%s', $opposingName['mapper']);
@@ -278,7 +278,7 @@ class MapController extends Controller
             $index                    = 1;
             $category                 = config('csv.import_roles.category-name') ?? null;
             $category['role']         = 'category-name';
-            $category['values']       = $this->getCategories();
+            $category['values']       = $this->getCategories($importJob);
 
             // create the "mapper" class which will get data from Firefly III.
             $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);

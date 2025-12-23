@@ -64,8 +64,8 @@ class RoutineStatusManager
 
     private static function storeImportJob(ImportJob $importJob): void
     {
-        Log::debug(sprintf('[%s] Now in storeConversionStatus(%s): %s', config('importer.version'), $identifier, $status->status));
-        Log::debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($status->messages), count($status->warnings), count($status->errors)));
+        Log::debug(sprintf('[%s] Now in storeConversionStatus(%s): %s', config('importer.version'), $importJob->identifier, $importJob->conversionStatus->status));
+        Log::debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($importJob->conversionStatus->messages), count($importJob->conversionStatus->warnings), count($importJob->conversionStatus->errors)));
         $repository = new ImportJobRepository();
         $repository->saveToDisk($importJob);
     }
