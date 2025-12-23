@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Api\Controllers\ImportFlow;
 
 use Illuminate\Http\JsonResponse;
@@ -28,17 +30,16 @@ use Illuminate\Routing\Controller as BaseController;
 
 class IndexController extends BaseController
 {
-
     public function index(): JsonResponse
     {
         $flows = [];
         foreach (config('importer.enabled_flows') as $key => $enabled) {
             $flows[] = [
-                'key'     => $key,
-                'enabled' => $enabled,
+                'key'           => $key,
+                'enabled'       => $enabled,
                 'authenticated' => false,
-                'explanation' => config(sprintf('importer.flow_explanations.%s', $key)),
-                'title'   => config(sprintf('importer.flow_titles.%s', $key)),
+                'explanation'   => config(sprintf('importer.flow_explanations.%s', $key)),
+                'title'         => config(sprintf('importer.flow_titles.%s', $key)),
             ];
         }
 

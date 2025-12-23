@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ImportJob.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -54,48 +56,51 @@ class ImportJob implements Arrayable
     private ?Configuration   $configuration        = null;
     public ConversionStatus $conversionStatus;
     public SubmissionStatus $submissionStatus;
-    private array $convertedTransactions = [];
+    private array $convertedTransactions           = [];
 
     // collected Firefly III data.
-    private array $applicationAccounts = [];
-    private array $currencies          = [];
-    private array $serviceAccounts = [];
+    private array $applicationAccounts             = [];
+    private array $currencies                      = [];
+    private array $serviceAccounts                 = [];
 
     public static function createNew(): self
     {
-        $job                   = new ImportJob();
+        $job                   = new self();
         $job->conversionStatus = new ConversionStatus();
         $job->submissionStatus = new SubmissionStatus();
+
         return $job;
     }
 
     public static function createFromJson(string $json): self
     {
         $array = json_decode($json, true);
-        return ImportJob::fromArray($array);
+
+        return self::fromArray($array);
     }
 
     public static function fromArray(array $array): self
     {
-        $importJob                       = new ImportJob();
-        $importJob->identifier           = $array['identifier'];
-        $importJob->createdAt            = Carbon::parse($array['created_at']);
-        $importJob->state                = $array['state'];
-        $importJob->flow                 = $array['flow'];
-        $importJob->configurationString  = $array['configuration_string'];
-        $importJob->importableFileString = $array['importable_file_string'];
+        $importJob                        = new self();
+        $importJob->identifier            = $array['identifier'];
+        $importJob->createdAt             = Carbon::parse($array['created_at']);
+        $importJob->state                 = $array['state'];
+        $importJob->flow                  = $array['flow'];
+        $importJob->configurationString   = $array['configuration_string'];
+        $importJob->importableFileString  = $array['importable_file_string'];
 
         // only create configuration object when there is configuration to be parsed.
-        $importJob->configuration = null;
+        $importJob->configuration         = null;
         if (0 !== count($array['configuration'])) {
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
-        $importJob->conversionStatus    = ConversionStatus::fromArray($array['conversion_status']);
-        $importJob->submissionStatus    = SubmissionStatus::fromArray($array['submission_status']);
+        $importJob->conversionStatus      = ConversionStatus::fromArray($array['conversion_status']);
+        $importJob->submissionStatus      = SubmissionStatus::fromArray($array['submission_status']);
         $importJob->convertedTransactions = $array['converted_transactions'];
-        $importJob->applicationAccounts = $array['application_accounts'];
-        $importJob->serviceAccounts     = $array['service_accounts'];
-        $importJob->currencies          = $array['currencies'];
+        $importJob->applicationAccounts   = $array['application_accounts'];
+        $importJob->serviceAccounts       = $array['service_accounts'];
+        $importJob->currencies            = $array['currencies'];
+
         return $importJob;
     }
 
@@ -109,6 +114,7 @@ class ImportJob implements Arrayable
     private function generateIdentifier(): string
     {
         $uuid = Uuid::uuid4();
+
         return $uuid->toString();
     }
 
@@ -158,7 +164,7 @@ class ImportJob implements Arrayable
         $this->flow = $flow;
     }
 
-    public function setConfiguration(Configuration $configuration)
+    public function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
 

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ValidationController.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -43,7 +45,6 @@ class ValidationController extends Controller
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
         };
     }
-
 
     public function validateGoCardless(): JsonResponse
     {
@@ -102,7 +103,6 @@ class ValidationController extends Controller
         return response()->json(['result' => 'OK']);
     }
 
-
     public function validateSpectre(): JsonResponse
     {
         $validator = new SpectreValidator();
@@ -119,5 +119,4 @@ class ValidationController extends Controller
 
         return response()->json(['result' => 'OK']);
     }
-
 }

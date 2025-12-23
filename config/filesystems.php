@@ -63,15 +63,15 @@ return [
     */
 
     'disks'   => [
-        'local'               => [
+        'local'                      => [
             'driver' => 'local',
             'root'   => storage_path('app'),
         ],
-        'uploads'             => [
+        'uploads'                    => [
             'driver' => 'local',
             'root'   => storage_path('uploads'),
         ],
-        'jobs'                => [
+        'jobs'                       => [
             'driver' => 'local',
             'root'   => storage_path('jobs'),
         ],
@@ -79,26 +79,26 @@ return [
             'driver' => 'local',
             'root'   => storage_path('import-jobs'),
         ],
-        'conversion-routines' => [
+        'conversion-routines'        => [
             'driver' => 'local',
             'root'   => storage_path('conversion-routines'),
         ],
-        'submission-routines' => [
+        'submission-routines'        => [
             'driver' => 'local',
             'root'   => storage_path('submission-routines'),
         ],
-        'configurations'      => [
+        'configurations'             => [
             'driver' => 'local',
             'root'   => envNonEmpty('JSON_CONFIGURATION_DIR', storage_path('configurations')),
         ],
-        'public'              => [
+        'public'                     => [
             'driver'     => 'local',
             'root'       => storage_path('app/public'),
             'url'        => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
 
-        's3'                  => [
+        's3'                         => [
             'driver'   => 's3',
             'key'      => env('AWS_ACCESS_KEY_ID'),
             'secret'   => env('AWS_SECRET_ACCESS_KEY'),

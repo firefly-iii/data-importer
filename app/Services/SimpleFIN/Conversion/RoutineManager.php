@@ -51,13 +51,15 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * RoutineManager constructor.
+     *
+     * @param mixed $identifier
      */
     public function __construct($identifier)
     {
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
+        $this->allErrors        = [];
+        $this->allWarnings      = [];
+        $this->allMessages      = [];
+        $this->allRateLimits    = [];
 
         Log::debug('Constructed SimpleFIN RoutineManager');
 
@@ -87,14 +89,14 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->existingServiceAccounts = $this->getServiceAccounts();
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $transactions  = [];
-        $configuration = $this->importJob->getConfiguration();
-        $accounts      = $configuration->getAccounts();
+        $transactions                  = [];
+        $configuration                 = $this->importJob->getConfiguration();
+        $accounts                      = $configuration->getAccounts();
         Log::info('Processing SimpleFIN accounts', ['account_count' => count($accounts)]);
 
         /**
          * @var string $importServiceAccountId
-         * @var int $applicationAccountId
+         * @var int    $applicationAccountId
          */
         foreach ($accounts as $importServiceAccountId => $applicationAccountId) {
             array_push($transactions, ...$this->processAccount($importServiceAccountId, $applicationAccountId));
@@ -111,15 +113,17 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $applicationAccountId) {
             $this->createNewAccount($importServiceAccountId);
         }
-        $currentSimpleFINAccountData = array_find($this->existingServiceAccounts, fn($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $importServiceAccountId);
+        $currentSimpleFINAccountData = array_find($this->existingServiceAccounts, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $importServiceAccountId);
 
         if (null === $currentSimpleFINAccountData) {
             Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', ['simplefin_account_id_sought' => $importServiceAccountId]);
             Log::debug('Done with downloading new data.');
+
             // If the account data for this ID isn't found, we can't process its transactions.
             // This might indicate an inconsistency in session data or configuration.
             return [];
         }
+
         return $this->getTransactions($importServiceAccountId, $currentSimpleFINAccountData);
     }
 
@@ -137,13 +141,13 @@ class RoutineManager implements RoutineManagerInterface
     private function getTransactions(string $importServiceAccountId, array $simpleFINAccount): array
     {
         Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
-        $accounts = $this->importJob->getServiceAccounts();
+        $accounts            = $this->importJob->getServiceAccounts();
         // Fetch transactions for the current account using the new method signature,
         // passing the complete SimpleFIN accounts data retrieved from the session.
         // Pass the full dataset
         $accountTransactions = $this->simpleFINService->fetchFreshTransactions($importServiceAccountId);
         Log::debug(sprintf('Extracted %d transactions for account %s', count($accountTransactions), $importServiceAccountId));
-        $transactions = [];
+        $transactions        = [];
         // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
         foreach ($accountTransactions as $transactionData) {
             // Renamed $transactionObject to $transactionData for clarity
@@ -167,12 +171,12 @@ class RoutineManager implements RoutineManagerInterface
             }
 
             // Wrap transaction in group structure expected by Firefly III
-            $transactionGroup = [
+            $transactionGroup       = [
                 'error_if_duplicate_hash' => $this->importJob->getConfiguration()->isIgnoreDuplicateTransactions(),
                 'group_title'             => null,
                 'transactions'            => [$transformedTransaction]];
 
-            $transactions[] = $transactionGroup;
+            $transactions[]         = $transactionGroup;
         }
 
         return $transactions;

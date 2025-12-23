@@ -71,10 +71,10 @@ class AccountListCollector
 //
 //                break;
 
-//            case 'simplefin':
-//                $this->collectSimpleFINAccounts();
-//
-//                break;
+                //            case 'simplefin':
+                //                $this->collectSimpleFINAccounts();
+                //
+                //                break;
 
             case 'spectre':
                 $this->collectSpectreAccounts();

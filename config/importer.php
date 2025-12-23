@@ -64,11 +64,11 @@ declare(strict_types=1);
  */
 
 return [
-    'version'          => 'develop/2025-12-16',
-    'build_time'       => 1765857354,
-    'flows'            => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
-    'fake_data'        => env('FAKE_DATA', false),
-    'enabled_flows'    => [
+    'version'                       => 'develop/2025-12-23',
+    'build_time'                    => 1766462326,
+    'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
+    'fake_data'                     => env('FAKE_DATA', false),
+    'enabled_flows'                 => [
         'file'      => true,
         'sophtron'  => false,
         'nordigen'  => true,
@@ -81,7 +81,7 @@ return [
         'fints'     => false,
         'basiq'     => false,
     ],
-    'flow_titles'      => [
+    'flow_titles'                   => [
         'file'      => 'File',
         'nordigen'  => 'GoCardless',
         'sophtron'  => 'Sophtron',
@@ -94,7 +94,7 @@ return [
         'fints'     => 'FinTS/HBCI',
         'basiq'     => 'Basiq.io',
     ],
-    'flow_explanations'      => [
+    'flow_explanations'             => [
         'file'      => 'CSV or CAMT.* files',
         'nordigen'  => '',
         'sophtron'  => '',
@@ -107,7 +107,7 @@ return [
         'fints'     => '',
         'basiq'     => '',
     ],
-    'simplefin'        => [
+    'simplefin'                     => [
         'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
         'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
         'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
@@ -115,7 +115,7 @@ return [
     ],
 
     // to determine which steps are possible for each import flow, the following properties have been defined.
-    'can_define_roles' => [
+    'can_define_roles'              => [
         // do you need to set roles (source, destination) for this flow?
         'file'      => true,
         'nordigen'  => false,
@@ -130,7 +130,7 @@ return [
     ],
 
     // docker build info.
-    'docker'           => [
+    'docker'                        => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -208,7 +208,7 @@ return [
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
 
-    'http_codes' => [
+    'http_codes'                    => [
         0   => 'Unknown Error',
         100 => 'Continue',
         101 => 'Switching Protocols',

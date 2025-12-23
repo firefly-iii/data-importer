@@ -44,8 +44,9 @@ Route::group(
         Route::get('import-flows/validate/{flow}', 'ImportFlow\ValidationController@validateFlow')->name('import-flows.validate');
 
         // Firefly III connection validator:
-        Route::get('firefly-iii/validate','Connection\IndexController@validateConnection')->name('firefly-iii.validate');
+        Route::get('firefly-iii/validate', 'Connection\IndexController@validateConnection')->name('firefly-iii.validate');
 
         // import jobs
         Route::get('import-jobs', 'ImportJob\IndexController@index')->name('import-jobs.index');
-    });
+    }
+);
