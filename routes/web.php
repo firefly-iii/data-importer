@@ -35,7 +35,13 @@ Route::get('/download-import-configuration/{identifier}', ['uses' => 'Import\Dow
 Route::post('/check-duplicate-account/{identifier}', ['uses' => 'Import\DuplicateCheckController@checkDuplicate', 'as' => 'configure-import.check-duplicate']);
 
 // for GoCardless / Nordigen we have another step if you have no requisitions.
+// 1. Select a bank
+// 2. Redirect to Nordigen.
+Route::get('/gocardless-select-bank/{identifier}',  ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => 'select-bank.index']);
+Route::post('/gocardless-select-bank/{identifier}', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => 'select-bank.post']);
 
+Route::get('/gocardless-connect/{identifier}', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => 'gocardless-connect.index']);
+Route::get('/gocardless-connected/{identifier}', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => 'gocardless-connect.callback']);
 
 Route::get('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@index', 'as' => 'configure-roles.index']);
 Route::post('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@postIndex', 'as' => 'configure-roles.post']);

@@ -21,17 +21,17 @@
             @if(is_array($accountGroup) && count($accountGroup) > 0)
                 <optgroup label="{{ ucfirst($accountGroupKey) }}">
                     @foreach($accountGroup as $ff3Account) {{-- $ff3Account is now a single Firefly III Account object/array --}}
-                        <option value="{{ $ff3Account['id']  }}"
+                        <option value="{{ $ff3Account->id  }}"
                                 @php
                                     $isSelected = false;
                                     // First check if mapped_to matches this account
-                                    if (isset($account['mapped_to']) && (string) $account['mapped_to'] === (string) $ff3Account['id']) {
+                                    if (isset($account['mapped_to']) && (string) $account['mapped_to'] === (string) $ff3Account->id) {
                                         $isSelected = true;
                                     }
                                     // Otherwise check configuration for pre-selection
                                     else {
                                         foreach($configuration->getAccounts() as $key => $preConfig) {
-                                            if((string) $key === (string) $account['import_account']->id && (int) $preConfig === (int) ($ff3Account['id'])) {
+                                            if((string) $key === (string) $account['import_account']->id && (int) $preConfig === (int) ($ff3Account->id)) {
                                                 $isSelected = true;
                                                 break;
                                             }
@@ -39,8 +39,8 @@
                                     }
                                 @endphp
                                 @if($isSelected) selected="selected" @endif
-                                label="{{ $ff3Account['name']  }} @if('' !== (string) $ff3Account['iban']) ({{ $ff3Account['iban']}}) @endif">
-                            {{ $ff3Account['name']  }} @if('' !== (string)$ff3Account['iban']) ({{ $ff3Account['iban'] }}) @endif
+                                label="{{ $ff3Account->name  }} @if('' !== (string) $ff3Account->iban) ({{ $ff3Account->iban}}) @endif">
+                            {{ $ff3Account->name  }} @if('' !== (string)$ff3Account->iban) ({{ $ff3Account->iban }}) @endif
                         </option>
                     @endforeach
                 </optgroup>

@@ -51,7 +51,6 @@ class Iban implements ConverterInterface
 
     public static function isValidIban(string $value): bool
     {
-        Log::debug(sprintf('isValidIBAN("%s")', $value));
         $value   = strtoupper(trim((string) app('steam')->cleanStringAndNewlines($value)));
         $value   = str_replace("\x20", '', $value);
         Log::debug(sprintf('Trim: isValidIBAN("%s")', $value));

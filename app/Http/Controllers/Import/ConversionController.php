@@ -104,7 +104,8 @@ class ConversionController extends Controller
             }
         }
         if ('nordigen' === $flow) {
-            throw new ImporterErrorException('Need to handle gocardless');
+            // Prepare new account creation data for Gocardless.
+            $newAccountsToCreate = $configuration->getNewAccounts();
             Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
@@ -145,7 +146,8 @@ class ConversionController extends Controller
         $routine                             = null;
 
         // Handle new account data for SimpleFIN
-        if ('simplefin' === $importJob->getFlow()) {
+        $flow = $importJob->getFlow();
+        if ('simplefin' === $flow || 'nordigen' === $flow) {
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
                 Log::debug('Updating configuration with detailed new account data', $newAccountData);
@@ -194,7 +196,6 @@ class ConversionController extends Controller
         }
 
         if ('nordigen' === $flow) {
-            throw new ImporterErrorException('cannot go here A');
             $routine = new NordigenRoutineManager($identifier);
         }
         if ('spectre' === $flow) {

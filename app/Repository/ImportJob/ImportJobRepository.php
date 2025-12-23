@@ -32,6 +32,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
+use Exception;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -40,7 +41,6 @@ use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
-use Exception;
 
 class ImportJobRepository
 {
@@ -68,8 +68,8 @@ class ImportJobRepository
 
     public function find(string $identifier): ImportJob
     {
-        $disk    = $this->getDisk();
-        $file    = sprintf('%s.json', $identifier);
+        $disk = $this->getDisk();
+        $file = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
@@ -110,7 +110,11 @@ class ImportJobRepository
 
         // collect Firefly III accounts, if not already in place for this job.
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        if (0 === count($importJob->getApplicationAccounts())) {
+
+        $allAccounts = $importJob->getApplicationAccounts();
+        $count       = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
+        if (0 === $count) {
+            Log::debug('No asset accounts or liabilities found, will collect them now.');
             $applicationAccounts = $this->getApplicationAccounts();
             $importJob->setApplicationAccounts($applicationAccounts);
         }
@@ -124,9 +128,9 @@ class ImportJobRepository
         switch ($importJob->getFlow()) {
             case 'file':
                 // do file content sherlock things.
-                $detector   = new FileContentSherlock();
-                $content    = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
-                $fileType   = $detector->detectContentTypeFromContent($content);
+                $detector = new FileContentSherlock();
+                $content  = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
+                $fileType = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
                     $camtType = $detector->getCamtType();
@@ -231,8 +235,8 @@ class ImportJobRepository
         $url      = null;
 
         try {
-            $url           = SecretManager::getBaseUrl();
-            $token         = SecretManager::getAccessToken();
+            $url   = SecretManager::getBaseUrl();
+            $token = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
                 Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
@@ -242,7 +246,7 @@ class ImportJobRepository
 
             // Fetch ASSET accounts
             Log::debug('Fetching asset accounts from Firefly III.', ['url' => $url]);
-            $requestAsset  = new GetAccountsRequest($url, $token);
+            $requestAsset = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
@@ -250,7 +254,8 @@ class ImportJobRepository
 
             /** @var Account $account */
             foreach ($responseAsset as $account) {
-                $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account->toArray();
+                Log::debug(sprintf('Class of account is %s', get_class($account)));
+                $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account;
             }
             Log::debug(sprintf('Fetched %d asset accounts.', count($accounts[Constants::ASSET_ACCOUNTS])));
         } catch (ApiHttpException|Exception $e) {
@@ -265,7 +270,7 @@ class ImportJobRepository
 
         try {
             Log::debug('Fetching liability accounts from Firefly III.', ['url' => $url]);
-            $requestLiability  = new GetAccountsRequest($url, $token);
+            $requestLiability = new GetAccountsRequest($url, $token);
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
@@ -273,7 +278,7 @@ class ImportJobRepository
 
             /** @var Account $account */
             foreach ($responseLiability as $account) {
-                $accounts[Constants::LIABILITIES][$account->id] = $account->toArray();
+                $accounts[Constants::LIABILITIES][$account->id] = $account;
             }
             Log::debug(sprintf('Fetched %d liability accounts.', count($accounts[Constants::LIABILITIES])));
 

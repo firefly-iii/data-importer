@@ -15,9 +15,9 @@
                                     {% for account in accountList %}
                                     @foreach($accountList as $account)
                                         <option
-                                            @if($configuration->getDefaultAccount() === $account['id']) selected @endif
-                                        value="{{ $account['id'] }}"
-                                            label="{{ $account['name'] }}">{{ $account['name'] }}</option>
+                                            @if($configuration->getDefaultAccount() === $account->id) selected @endif
+                                        value="{{ $account->id }}"
+                                            label="{{ $account->name }}">{{ $account->name }}</option>
                                     @endforeach
                                 </optgroup>
                             @endforeach

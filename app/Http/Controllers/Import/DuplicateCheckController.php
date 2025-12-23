@@ -28,6 +28,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Session\Constants;
+use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -92,8 +93,9 @@ class DuplicateCheckController extends Controller
         ];
         $array               = $applicationAccounts[$arrayToCheck[$type]] ?? [];
         $isDuplicate         = false;
+        /** @var Account $account */
         foreach ($array as $account) {
-            if (strtolower($name) === strtolower($account['name'])) {
+            if (strtolower($name) === strtolower($account->name)) {
                 $isDuplicate = true;
             }
         }

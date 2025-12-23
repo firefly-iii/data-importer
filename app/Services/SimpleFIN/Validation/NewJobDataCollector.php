@@ -116,37 +116,37 @@ class NewJobDataCollector
         return new MessageBag();
     }
 
-    private function collectSimpleFINAccounts(): void
-    {
-        Log::debug(sprintf('Now in %s', __METHOD__));
-        $accountsData                = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-        $accounts                    = [];
-
-        foreach ($accountsData ?? [] as $account) {
-            // Ensure the account has required SimpleFIN protocol fields
-            if (!array_key_exists('id', $account) || '' === (string)$account['id']) {
-                Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
-
-                continue;
-            }
-
-            if (!array_key_exists('name', $account) || null === $account['name']) {
-                Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
-                $account['name'] = sprintf('Unknown Account (ID: %s)', $account['id']);
-            }
-
-            if (!array_key_exists('currency', $account) || null === $account['currency']) {
-                Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
-            }
-
-            if (!array_key_exists('balance', $account) || null === $account['balance']) {
-                Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
-            }
-
-            // Preserve raw SimpleFIN protocol data structure
-            $accounts[] = $account;
-        }
-        Log::debug(sprintf('Collected %d SimpleFIN accounts from session.', count($accounts)));
-        $this->importServiceAccounts = $accounts;
-    }
+//    private function collectSimpleFINAccounts(): void
+//    {
+//        Log::debug(sprintf('Now in %s', __METHOD__));
+//        $accountsData                = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
+//        $accounts                    = [];
+//
+//        foreach ($accountsData ?? [] as $account) {
+//            // Ensure the account has required SimpleFIN protocol fields
+//            if (!array_key_exists('id', $account) || '' === (string)$account['id']) {
+//                Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
+//
+//                continue;
+//            }
+//
+//            if (!array_key_exists('name', $account) || null === $account['name']) {
+//                Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
+//                $account['name'] = sprintf('Unknown Account (ID: %s)', $account['id']);
+//            }
+//
+//            if (!array_key_exists('currency', $account) || null === $account['currency']) {
+//                Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
+//            }
+//
+//            if (!array_key_exists('balance', $account) || null === $account['balance']) {
+//                Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
+//            }
+//
+//            // Preserve raw SimpleFIN protocol data structure
+//            $accounts[] = $account;
+//        }
+//        Log::debug(sprintf('Collected %d SimpleFIN accounts from session.', count($accounts)));
+//        $this->importServiceAccounts = $accounts;
+//    }
 }

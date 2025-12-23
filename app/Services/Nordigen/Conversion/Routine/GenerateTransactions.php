@@ -30,6 +30,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Model\Transaction;
 use App\Services\Nordigen\Request\GetAccountInformationRequest;
+use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;

@@ -24,14 +24,17 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Model\ImportServiceAccount;
+use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Support\Facades\Log;
 
 trait MergesAccountLists
 {
     private function mergeGenericAccountList(array $generic, array $fireflyIII): array
     {
+        Log::debug('Now in mergeGenericAccountList');
         $return = [];
 
         /** @var ImportServiceAccount $account */
@@ -51,20 +54,21 @@ trait MergesAccountLists
 
             // Always show all accounts, but sort matches to the top
             $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
-
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
                 $matching                            = $filteredByNumber[$key];
                 $all                                 = $fireflyIII[$key];
 
+                Log::debug(sprintf('There are %d accounts in $fireflyIII[%s]', count($fireflyIII[$key]), $key));
+
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, fn (array $a, array $b) => $a['id'] <=> $b['id']);
+                $nonMatching                         = array_udiff($all, $matching, fn (Account $a, Account $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
             }
-
             $return[]         = $entry;
         }
+        Log::debug('done with mergeGenericAccountList');
 
         return $return;
     }
@@ -85,6 +89,7 @@ trait MergesAccountLists
         ];
 
         foreach ($fireflyIII as $key => $accounts) {
+            /** @var Account $account */
             foreach ($accounts as $account) {
                 if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
                     $result[$key][] = $account;

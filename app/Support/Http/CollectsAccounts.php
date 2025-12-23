@@ -54,9 +54,13 @@ use Illuminate\Support\Facades\Log;
 
 trait CollectsAccounts
 {
+    /**
+     * FIXME Is this not duplicate with the account search in the configuration class?
+     * @return array
+     * @throws ImporterErrorException
+     */
     protected function collectAllTargetAccounts(): array
     {
-        throw new ImporterErrorException('Is this not duplicate with the account search in the configuration class?');
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {

@@ -103,7 +103,7 @@ let index = function () {
             this.post.running = true;
             const jobStartUrl = './data-conversion/' + this.identifier + '/start';
 
-            // Collect new account data for SimpleFIN
+            // Collect new account data for SimpleFIN + Nordigen
             const newAccountData = this.collectNewAccountData();
             const postData       = {
                 identifier: this.identifier,
@@ -198,7 +198,6 @@ let index = function () {
         }
     }
 }
-
 
 function loadPage() {
     Alpine.data('index', () => index());

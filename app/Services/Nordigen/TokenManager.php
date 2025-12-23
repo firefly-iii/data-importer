@@ -46,7 +46,6 @@ class TokenManager
      */
     public static function getAccessToken(): string
     {
-        throw new ImporterErrorException('getAccessToken: Do not use this method, store token somewhere else.');
         // Log::debug(sprintf('Now at %s', __METHOD__));
         self::validateAllTokens();
 
@@ -64,7 +63,6 @@ class TokenManager
      */
     public static function validateAllTokens(): void
     {
-        throw new ImporterErrorException('validateAllTokens: Do not use this method, store token somewhere else.');
         // Log::debug(sprintf('Now at %s', __METHOD__));
         // is there a valid access and refresh token?
         if (self::hasValidRefreshToken() && self::hasValidAccessToken()) {
@@ -88,7 +86,6 @@ class TokenManager
 
     public static function hasValidRefreshToken(): bool
     {
-        throw new ImporterErrorException('hasValidRefreshToken: Do not use this method, store token somewhere else.');
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
             Log::debug(sprintf('Now at %s', __METHOD__));
@@ -108,7 +105,6 @@ class TokenManager
 
     public static function hasValidAccessToken(): bool
     {
-        throw new ImporterErrorException('hasValidAccessToken: Do not use this method, store token somewhere else.');
         $hasAccessToken = session()->has(Constants::NORDIGEN_ACCESS_TOKEN);
         if (false === $hasAccessToken) {
             Log::debug(sprintf('Now at %s', __METHOD__));
@@ -137,7 +133,6 @@ class TokenManager
 
     public static function hasExpiredRefreshToken(): bool
     {
-        throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
         // Log::debug(sprintf('Now at %s', __METHOD__));
         $hasToken = session()->has(Constants::NORDIGEN_REFRESH_TOKEN);
         if (false === $hasToken) {
@@ -145,8 +140,7 @@ class TokenManager
 
             return false;
         }
-
-        exit(__METHOD__);
+        throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
     }
 
     #[NoReturn]
@@ -162,7 +156,6 @@ class TokenManager
      */
     public static function getNewTokenSet(string $identifier, string $key): void
     {
-        throw new ImporterErrorException('getNewTokenSet: Do not use this method, store token somewhere else.');
         Log::debug(sprintf('Now at %s', __METHOD__));
         $client = new PostNewTokenRequest($identifier, $key);
         $client->setTimeOut(config('importer.connection.timeout'));
@@ -170,7 +163,7 @@ class TokenManager
         /** @var TokenSetResponse $result */
         $result = $client->post();
 
-        // store in session:
+        // store in session, there is no configuration to put it yet.
         session()->put(Constants::NORDIGEN_ACCESS_TOKEN, $result->accessToken);
         session()->put(Constants::NORDIGEN_REFRESH_TOKEN, $result->refreshToken);
 

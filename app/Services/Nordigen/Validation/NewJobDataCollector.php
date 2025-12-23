@@ -24,9 +24,11 @@ namespace App\Services\Nordigen\Validation;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Request\ListAccountsRequest;
 use App\Services\Nordigen\Response\ListAccountsResponse;
+use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +40,7 @@ class NewJobDataCollector
     public function collectAccounts(ImportJob $importJob): MessageBag
     {
         $messageBag    = new MessageBag();
+        $repository    = new ImportJobRepository();
         $configuration = $importJob->getConfiguration();
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $requisitions = $configuration->getNordigenRequisitions();
@@ -49,12 +52,11 @@ class NewJobDataCollector
         }
         foreach ($requisitions as $requisition) {
             $inCache = Cache::has($requisition) && config('importer.use_cache');
-            // if cached, r
-            //eturn it.
+            // if cached, return it.
             if ($inCache) {
                 $result = Cache::get($requisition);
                 foreach ($result as $arr) {
-                    $return[] = NordigenAccount::fromLocalArray($arr);
+                    $return[] = NordigenAccount::fromArray($arr);
                 }
                 Log::debug('Grab accounts from cache', $result);
             }
@@ -83,6 +85,8 @@ class NewJobDataCollector
                 }
             }
             Cache::put($requisition, $cache, 1800); // half an hour
+            $importJob->setServiceAccounts($return);
+            $repository->saveToDisk($importJob);
         }
         return $messageBag;
         $this->importServiceAccounts = $return;

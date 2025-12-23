@@ -26,6 +26,8 @@ namespace App\Services\Nordigen\Conversion;
 
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
 use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;
@@ -54,26 +56,25 @@ class RoutineManager implements RoutineManagerInterface
     private FilterTransactions   $transactionFilter;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
+    private ImportJobRepository  $repository;
+    private ImportJob            $importJob;
 
     private array $downloaded;
 
-    public function __construct(?string $identifier)
+    public function __construct(string $identifier)
     {
         $this->allErrors            = [];
         $this->allWarnings          = [];
         $this->allMessages          = [];
         $this->allRateLimits        = [];
         $this->downloaded           = [];
-
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->identifier           = $identifier;
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
         $this->transactionFilter    = new FilterTransactions();
+        $this->repository           = new ImportJobRepository();
+        $this->importJob            = $this->repository->find($identifier);
+        $this->setConfiguration($this->importJob->getConfiguration());
     }
 
     #[Override]
@@ -85,7 +86,7 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         // save config
         $this->configuration = $configuration;
@@ -137,7 +138,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered     = $this->transactionFilter->filter($transactions);
+        $filtered = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
@@ -196,12 +197,12 @@ class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have no requests left for bank account "%s"', $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
                 $message .= sprintf(' (IBAN %s)', $account['iban']);
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
                 $message .= sprintf(' (account number %s)', $account['number']);
             }
             $message .= sprintf('. The limit resets in %s. ', Request::formatTime($rateLimit['reset']));
@@ -210,12 +211,12 @@ class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
                 $message .= sprintf(' (IBAN %s)', $account['iban']);
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
                 $message .= sprintf(' (account number %s)', $account['number']);
             }
             $message .= '. ';
@@ -228,7 +229,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        return array_find($accounts, fn ($account) => $account['id'] === $accountId);
+        return array_find($accounts, fn($account) => $account['id'] === $accountId);
 
     }
 
@@ -311,7 +312,7 @@ class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
-            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
             }
@@ -367,7 +368,7 @@ class RoutineManager implements RoutineManagerInterface
         $accounts = $this->configuration->getAccounts();
         foreach ($accounts as $key => $accountId) {
             if (0 === (int)$accountId) {
-                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
             }
         }
     }

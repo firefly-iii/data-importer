@@ -61,9 +61,8 @@ class AuthenticateController extends Controller
      *
      * @throws ImporterErrorException
      */
-    public function index(Request $request, ?string $flow = null)
+    public function index(Request $request, string $flow)
     {
-        throw new ImporterErrorException('[a] auth does not work yet.');
         // variables for page:
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
@@ -89,7 +88,7 @@ class AuthenticateController extends Controller
         }
 
         if (AuthenticationStatus::AUTHENTICATED === $result) {
-            Log::debug(sprintf('[a] Return redirect to %s', route('003-upload.index')));
+            Log::debug('[a] Return redirect to already authenticated view');
 
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
@@ -135,7 +134,6 @@ class AuthenticateController extends Controller
 
     private function getValidator(string $flow): ?AuthenticationValidatorInterface
     {
-        throw new ImporterErrorException('[c] auth does not work yet.');
         // need a switch here to validate all possible flows.
         switch ($flow) {
             case 'spectre':

@@ -62,11 +62,11 @@ class ConfigurationController extends Controller
     public function index(Request $request, string $identifier)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle           = 'Configuration';
-        $subTitle            = 'Configure your import';
-        $doParse             = 'true' === $request->get('parse');
-        $importJob           = $this->repository->find($identifier);
-        $flow                = $importJob->getFlow();
+        $mainTitle = 'Configuration';
+        $subTitle  = 'Configure your import';
+        $doParse   = 'true' === $request->get('parse');
+        $importJob = $this->repository->find($identifier);
+        $flow      = $importJob->getFlow();
 
         // if the job is "contains_content", redirect to a step that will fix this, and show the user an intermediate page.
         if (!$doParse && 'contains_content' === $importJob->getState()) {
@@ -77,12 +77,12 @@ class ConfigurationController extends Controller
             $messages = $this->repository->parseImportJob($importJob);
 
             if ($messages->count() > 0) {
-
                 // missing_requisitions
                 // if the job has no requisitions (Nordigen!) need to redirect to get some?
-                if($messages->has('missing_requisitions') && 'true' === $messages->get('missing_requisitions')) {
+                if ($messages->has('missing_requisitions') && 'true' === (string)$messages->get('missing_requisitions')[0]) {
                     $importJob->setState('needs_connection_details');
                     $this->repository->saveToDisk($importJob);
+                    return redirect()->route('select-bank.index', [$identifier]);
                 }
 
 
@@ -95,8 +95,8 @@ class ConfigurationController extends Controller
 
 
         // if configuration says to skip this configuration step, skip it:
-        $configuration       = $importJob->getConfiguration();
-        $doNotSkip           = 'true' === $request->get('do_not_skip');
+        $configuration = $importJob->getConfiguration();
+        $doNotSkip     = 'true' === $request->get('do_not_skip');
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
             return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
@@ -115,11 +115,11 @@ class ConfigurationController extends Controller
     {
         Log::debug(sprintf('Method %s', __METHOD__));
 
-        $dateObj           = new Date();
+        $dateObj = new Date();
         [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
 
         /** @var Carbon $date */
-        $date              = today()->locale($locale);
+        $date = today()->locale($locale);
 
         return response()->json(['result' => $date->translatedFormat($format)]);
     }
@@ -130,7 +130,7 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
-        $fromRequest   = $request->getAll();
+        $fromRequest = $request->getAll();
 
         // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
         $importJob     = $this->repository->find($identifier);
@@ -158,6 +158,7 @@ class ConfigurationController extends Controller
 
     private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
     {
+        Log::debug(sprintf('Now running %s', __METHOD__));
         $generic = match ($flow) {
             'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),

@@ -24,11 +24,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatus;
+use App\Services\SimpleFIN\Model\Account as SimpleFINAccount;
 use Carbon\Carbon;
+use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 /*
@@ -47,21 +52,21 @@ use Ramsey\Uuid\Uuid;
 class ImportJob implements Arrayable
 {
     // job meta-data:
-    public string            $identifier;
-    private Carbon           $createdAt;
-    private string           $state;
-    private string           $flow                 = '';
-    private string           $configurationString  = '';
-    private string           $importableFileString = '';
-    private ?Configuration   $configuration        = null;
+    public string           $identifier;
+    private Carbon          $createdAt;
+    private string          $state;
+    private string          $flow                  = '';
+    private string          $configurationString   = '';
+    private string          $importableFileString  = '';
+    private ?Configuration  $configuration         = null;
     public ConversionStatus $conversionStatus;
     public SubmissionStatus $submissionStatus;
-    private array $convertedTransactions           = [];
+    private array           $convertedTransactions = [];
 
     // collected Firefly III data.
-    private array $applicationAccounts             = [];
-    private array $currencies                      = [];
-    private array $serviceAccounts                 = [];
+    private array $applicationAccounts = [];
+    private array $currencies          = [];
+    private array $serviceAccounts     = [];
 
     public static function createNew(): self
     {
@@ -74,6 +79,7 @@ class ImportJob implements Arrayable
 
     public static function createFromJson(string $json): self
     {
+        Log::debug('ImportJob::createFromJson()');
         $array = json_decode($json, true);
 
         return self::fromArray($array);
@@ -81,25 +87,45 @@ class ImportJob implements Arrayable
 
     public static function fromArray(array $array): self
     {
-        $importJob                        = new self();
-        $importJob->identifier            = $array['identifier'];
-        $importJob->createdAt             = Carbon::parse($array['created_at']);
-        $importJob->state                 = $array['state'];
-        $importJob->flow                  = $array['flow'];
-        $importJob->configurationString   = $array['configuration_string'];
-        $importJob->importableFileString  = $array['importable_file_string'];
+        Log::debug('ImportJob::toArray()');
+        $importJob                       = new self();
+        $importJob->identifier           = $array['identifier'];
+        $importJob->createdAt            = Carbon::parse($array['created_at']);
+        $importJob->state                = $array['state'];
+        $importJob->flow                 = $array['flow'];
+        $importJob->configurationString  = $array['configuration_string'];
+        $importJob->importableFileString = $array['importable_file_string'];
 
         // only create configuration object when there is configuration to be parsed.
-        $importJob->configuration         = null;
+        $importJob->configuration = null;
         if (0 !== count($array['configuration'])) {
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
         $importJob->conversionStatus      = ConversionStatus::fromArray($array['conversion_status']);
         $importJob->submissionStatus      = SubmissionStatus::fromArray($array['submission_status']);
         $importJob->convertedTransactions = $array['converted_transactions'];
-        $importJob->applicationAccounts   = $array['application_accounts'];
-        $importJob->serviceAccounts       = $array['service_accounts'];
-        $importJob->currencies            = $array['currencies'];
+
+        $importJob->applicationAccounts = [];
+        $importJob->serviceAccounts     = [];
+
+        Log::debug('Restoring service accounts');
+        /** @var array $item */
+        foreach ($array['service_accounts'] as $item) {
+            $class                        = $item['class'];
+            $importJob->serviceAccounts[] = $class::fromArray($item);
+        }
+        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        foreach($keys as $key) {
+            $importJob->applicationAccounts[$key] = [];
+            if(array_key_exists($key, $array['application_accounts'])) {
+                /** @var array $item */
+                foreach($array['application_accounts'][$key] as $item) {
+                    $importJob->applicationAccounts[$key][] = Account::fromArray($item);
+                }
+            }
+        }
+        Log::debug('Restored application accounts');
+        $importJob->currencies          = $array['currencies'];
 
         return $importJob;
     }
@@ -120,6 +146,21 @@ class ImportJob implements Arrayable
 
     public function toArray(): array
     {
+        Log::debug('ImportJob::toArray()');
+        $serviceAccounts     = [];
+        $applicationAccounts = [];
+        /** @var SimpleFINAccount|NordigenAccount $serviceAccount */
+        foreach ($this->serviceAccounts as $serviceAccount) {
+            $serviceAccounts[] = $serviceAccount->toArray();
+        }
+        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        foreach ($keys as $key) {
+            $applicationAccounts[$key] ??= [];
+            foreach ($this->applicationAccounts[$key] ?? [] as $current) {
+                $applicationAccounts[$key][] = $current->toArray();
+            }
+        }
+
         return
             [
                 'identifier'             => $this->identifier,
@@ -132,8 +173,8 @@ class ImportJob implements Arrayable
                 'conversion_status'      => $this->conversionStatus->toArray(),
                 'submission_status'      => $this->submissionStatus->toArray(),
                 'converted_transactions' => $this->convertedTransactions,
-                'application_accounts'   => $this->applicationAccounts,
-                'service_accounts'       => $this->serviceAccounts,
+                'application_accounts'   => $applicationAccounts,
+                'service_accounts'       => $serviceAccounts,
                 'currencies'             => $this->currencies,
             ];
     }
@@ -207,6 +248,7 @@ class ImportJob implements Arrayable
 
     public function setApplicationAccounts(array $applicationAccounts): void
     {
+        Log::debug('setApplicationAccounts()', $applicationAccounts);
         $this->applicationAccounts = $applicationAccounts;
     }
 
@@ -237,11 +279,13 @@ class ImportJob implements Arrayable
 
     public function getServiceAccounts(): array
     {
+        Log::debug(__METHOD__);
         return $this->serviceAccounts;
     }
 
     public function setServiceAccounts(array $serviceAccounts): void
     {
+        Log::debug(__METHOD__);
         $this->serviceAccounts = $serviceAccounts;
     }
 }
