@@ -171,9 +171,9 @@ class UploadController extends Controller
                 $collector->setupToken = (string)$request->get('simplefin_token');
                 $errors                = $collector->validate($importJob);
                 break;
-//            case 'nordigen':
-//                return $this->processNordigen($configuration);
-//
+            case 'nordigen':
+                Log::debug('No extra steps for Nordigen.');
+                break;
 //            case 'lunchflow':
 //                return $this->processLunchFlow($configuration);
 //

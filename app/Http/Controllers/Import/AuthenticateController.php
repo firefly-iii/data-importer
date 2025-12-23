@@ -63,6 +63,7 @@ class AuthenticateController extends Controller
      */
     public function index(Request $request, ?string $flow = null)
     {
+        throw new ImporterErrorException('[a] auth does not work yet.');
         // variables for page:
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
@@ -105,6 +106,7 @@ class AuthenticateController extends Controller
      */
     public function postIndex(Request $request, string $flow)
     {
+        throw new ImporterErrorException('[b] auth does not work yet.');
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
         $subTitle  = ucfirst($flow);
@@ -133,6 +135,7 @@ class AuthenticateController extends Controller
 
     private function getValidator(string $flow): ?AuthenticationValidatorInterface
     {
+        throw new ImporterErrorException('[c] auth does not work yet.');
         // need a switch here to validate all possible flows.
         switch ($flow) {
             case 'spectre':

@@ -33,6 +33,7 @@ use Ramsey\Uuid\Uuid;
  * ImportJob states:
  * - new: totally new, no data or anything.
  * - contains_content: has config content and importable file content loaded, but nothing else has been done.
+ * - needs_connection_details: parsed and processed, but still needs more meta-data (like a session) to continue to configuration
  * - is_parsed: configuration is parsed and processed. More meta-data exists in the import job.
  * - is_configured: configuration is set and validated. Also check on new to be created accounts. But not yet created!
  * - configured_and_roles_defined: file imports with this state are configured and have roles for their data. are ready to be mapped. may be AFTER conversion.

@@ -62,6 +62,7 @@ class LinkController extends Controller
      */
     public function build(): Redirector|RedirectResponse
     {
+        throw new ImporterHttpException('[a] should not be here.');
         Log::debug(sprintf('Now at %s', __METHOD__));
         // grab config of user:
         // create a new config thing
@@ -134,6 +135,7 @@ class LinkController extends Controller
      */
     public function callback(Request $request)
     {
+        throw new ImporterHttpException('[b] should not be here.');
         $reference     = (string) $request->get('ref');
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('Reference is "%s"', $reference));

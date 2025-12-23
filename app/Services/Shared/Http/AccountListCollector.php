@@ -66,10 +66,10 @@ class AccountListCollector
             case 'file':
                 return [];
 
-            case 'nordigen':
-                $this->collectGoCardlessAccounts();
-
-                break;
+//            case 'nordigen':
+//                $this->collectGoCardlessAccounts();
+//
+//                break;
 
 //            case 'simplefin':
 //                $this->collectSimpleFINAccounts();

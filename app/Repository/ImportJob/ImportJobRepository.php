@@ -24,11 +24,12 @@ namespace App\Repository\ImportJob;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
+use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
-use App\Services\SimpleFIN\Validation\NewJobDataCollector;
+use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
@@ -131,7 +132,12 @@ class ImportJobRepository
                 }
                 break;
             case 'simplefin':
-                $validator  = new NewJobDataCollector();
+                $validator  = new SimpleFINNewJobDataCollector();
+                $messageBag = $validator->collectAccounts($importJob);
+                break;
+            case 'nordigen':
+                // nordigen, download list of accounts.
+                $validator  = new NordigenNewJobDataCollector();
                 $messageBag = $validator->collectAccounts($importJob);
                 break;
             default:
@@ -139,10 +145,11 @@ class ImportJobRepository
                 $messageBag->add('config_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));
         }
 
-
         // save configuration and return it.
+        if (0 === count($messageBag)) {
+            $importJob->setState('is_parsed');
+        }
         $importJob = $this->setConfiguration($importJob, $configuration);
-        $importJob->setState('is_parsed');
         $this->saveToDisk($importJob);
 
         // if parse errors, display to user with a redirect to upload?

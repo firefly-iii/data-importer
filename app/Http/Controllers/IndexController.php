@@ -26,11 +26,12 @@ namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class IndexController
@@ -50,16 +51,16 @@ class IndexController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget([
-            Constants::UPLOAD_DATA_FILE,
-            Constants::UPLOAD_CONFIG_FILE,
-            Constants::IMPORT_JOB_IDENTIFIER,
-            Constants::READY_FOR_CONVERSION,
-            Constants::CONVERSION_COMPLETE_INDICATOR,
-            Constants::MAPPING_COMPLETE_INDICATOR,
-            Constants::CONNECTION_SELECTED_INDICATOR,
-            Constants::ROLES_COMPLETE_INDICATOR,
-            Constants::SELECTED_BANK_COUNTRY,
-        ]);
+                              Constants::UPLOAD_DATA_FILE,
+                              Constants::UPLOAD_CONFIG_FILE,
+                              Constants::IMPORT_JOB_IDENTIFIER,
+                              Constants::READY_FOR_CONVERSION,
+                              Constants::CONVERSION_COMPLETE_INDICATOR,
+                              Constants::MAPPING_COMPLETE_INDICATOR,
+                              Constants::CONNECTION_SELECTED_INDICATOR,
+                              Constants::ROLES_COMPLETE_INDICATOR,
+                              Constants::SELECTED_BANK_COUNTRY,
+                          ]);
         session()->flush();
         session()->regenerate(true);
         $cookies = [cookie(Constants::FLOW_COOKIE, '')];
@@ -76,54 +77,62 @@ class IndexController extends Controller
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
 
-        $validInfo         = SecretManager::hasValidSecrets();
+        $validInfo = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             Log::debug('No valid secrets, redirect to token.index');
 
             return redirect(route('token.index'));
         }
 
+        $path    = storage_path('import-jobs');
+        $warning = '';
+        if (!is_dir($path)) {
+            $warning = sprintf('The data import needs the folder <code>%s</code> to exist. Please fix this manually.', $path);
+        }
+        if (!is_writable($path)) {
+            $warning = sprintf('The data import needs the folder <code>%s</code> to be writeable. Please fix this manually.', $path);
+        }
+        if ('' === $warning) {
+            $this->clearOldJobs();
+        }
+
+
         // display to user the method of authentication
-        $clientId          = (string) config('importer.client_id');
-        $url               = (string) config('importer.url');
-        $accessTokenConfig = (string) config('importer.access_token');
+        $clientId          = (string)config('importer.client_id');
+        $url               = (string)config('importer.url');
+        $accessTokenConfig = (string)config('importer.access_token');
 
         Log::debug('IndexController authentication detection', [
             'client_id'           => $clientId,
             'url'                 => $url,
-            'access_token_config' => substr($accessTokenConfig, 0, 25).'...',
+            'access_token_config' => substr($accessTokenConfig, 0, 25) . '...',
             'access_token_empty'  => '' === $accessTokenConfig,
         ]);
 
-        $pat               = false;
+        $pat = false;
         if ('' !== $accessTokenConfig) {
             $pat = true;
         }
-        $clientIdWithURL   = false;
+        $clientIdWithURL = false;
         if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
-        $URLonly           = false;
+        $URLonly = false;
         if ('' !== $url && '' === $clientId && '' === $accessTokenConfig) {
             $URLonly = true;
         }
-        $flexible          = false;
+        $flexible = false;
         if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
 
-        Log::debug('IndexController authentication type flags', [
-            'pat'             => $pat,
-            'clientIdWithURL' => $clientIdWithURL,
-            'URLonly'         => $URLonly,
-            'flexible'        => $flexible,
-        ]);
+        Log::debug('IndexController authentication type flags', ['pat' => $pat, 'clientIdWithURL' => $clientIdWithURL, 'URLonly' => $URLonly, 'flexible' => $flexible,]);
 
-        $isDocker          = config('importer.docker.is_docker', false);
-        $identifier        = substr(session()->getId(), 0, 10);
-        $enabled           = config('importer.enabled_flows');
+        $isDocker   = config('importer.docker.is_docker', false);
+        $identifier = substr(session()->getId(), 0, 10);
+        $enabled    = config('importer.enabled_flows');
 
-        return view('index', compact('pat', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
+        return view('index', compact('pat', 'warning', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
     }
 
     public function postIndex(Request $request): mixed
@@ -136,7 +145,7 @@ class IndexController extends Controller
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
             // redirect directly to upload step.
-            if('file' === $flow) {
+            if ('file' === $flow) {
                 return redirect(route('003-upload.index'))->withCookies($cookies);
             }
 
@@ -145,5 +154,25 @@ class IndexController extends Controller
         Log::debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
 
         return redirect(route('index'));
+    }
+
+    private function clearOldJobs(): void
+    {
+        $disk  = Storage::disk('import-jobs');
+        $now   = now();
+        $files = $disk->files();
+        foreach ($files as $file) {
+            if (!str_ends_with($file, 'json')) {
+                continue;
+            }
+            $content = $disk->get($file);
+            $json    = json_decode($content, true);
+            if (is_array($json)) {
+                $createdAt = Carbon::parse($json['createdAt'] ?? date('Y-m-d H:i:s'));
+                if ($now->diffInDays($createdAt, true) > 90) {
+                    $disk->delete($file);
+                }
+            }
+        }
     }
 }

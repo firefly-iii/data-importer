@@ -65,6 +65,7 @@ class SelectionController extends Controller
      */
     public function index()
     {
+        throw new ImporterHttpException('[c] should not be here.');
         Log::debug(sprintf('Now at %s', __METHOD__));
         $countries     = config('nordigen.countries');
         $mainTitle     = 'Select your country and bank';
@@ -110,6 +111,7 @@ class SelectionController extends Controller
      */
     public function postIndex(SelectionRequest $request)
     {
+        throw new ImporterHttpException('[d] should not be here.');
         Log::debug(sprintf('Now at %s', __METHOD__));
         // create a new config thing
         $configuration = $this->restoreConfiguration();

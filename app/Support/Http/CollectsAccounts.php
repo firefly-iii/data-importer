@@ -44,6 +44,7 @@ declare(strict_types=1);
 
 namespace App\Support\Http;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Shared\Authentication\SecretManager;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -55,6 +56,7 @@ trait CollectsAccounts
 {
     protected function collectAllTargetAccounts(): array
     {
+        throw new ImporterErrorException('Is this not duplicate with the account search in the configuration class?');
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         try {

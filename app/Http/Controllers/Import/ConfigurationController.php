@@ -77,11 +77,21 @@ class ConfigurationController extends Controller
             $messages = $this->repository->parseImportJob($importJob);
 
             if ($messages->count() > 0) {
+
+                // missing_requisitions
+                // if the job has no requisitions (Nordigen!) need to redirect to get some?
+                if($messages->has('missing_requisitions') && 'true' === $messages->get('missing_requisitions')) {
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+                }
+
+
                 // if there is any state for the job here forget about it, just remove it.
                 $this->repository->deleteImportJob($importJob);
                 return redirect()->route('new-import.index', [$flow])->withErrors($messages);
             }
         }
+
 
         // if configuration says to skip this configuration step, skip it:
         $configuration = $importJob->getConfiguration();
