@@ -77,12 +77,12 @@ class ConversionController extends Controller
         $flow                = $importJob->getFlow();
         $newAccountsToCreate = [];
         // default back to mapping
-        $jobBackUrl = $this->getJobBackUrl($flow, $identifier);
-        $flow       = $importJob->getFlow();
+        $jobBackUrl          = $this->getJobBackUrl($flow, $identifier);
+        $flow                = $importJob->getFlow();
 
-        $nextUrl = route('submit-data.index', [$identifier]);
+        $nextUrl             = route('submit-data.index', [$identifier]);
         // next URL is different when it's not a file flow (in those cases, its mapping)
-        if('file' !== $flow) {
+        if ('file' !== $flow) {
             $nextUrl = route('data-mapping.index', [$identifier]);
         }
 
@@ -140,9 +140,9 @@ class ConversionController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob     = $this->repository->find($identifier);
-        $configuration = $importJob->getConfiguration();
-        $routine       = null;
+        $importJob                           = $this->repository->find($identifier);
+        $configuration                       = $importJob->getConfiguration();
+        $routine                             = null;
 
         // Handle new account data for SimpleFIN
         if ('simplefin' === $importJob->getFlow()) {
@@ -173,7 +173,7 @@ class ConversionController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // now create the right class:
-        $flow = $importJob->getFlow();
+        $flow                                = $importJob->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
@@ -255,6 +255,7 @@ class ConversionController extends Controller
     public function status(Request $request, string $identifier): JsonResponse
     {
         $importJob = $this->repository->find($identifier);
+
         return response()->json($importJob->conversionStatus->toArray());
     }
 
@@ -267,6 +268,7 @@ class ConversionController extends Controller
         if ('file' !== $flow) {
             $jobBackUrl = route('configure-import.index', [$identifier]);
         }
+
         return $jobBackUrl;
     }
 }

@@ -33,6 +33,7 @@ trait RestoresConfiguration
 {
     /**
      * Restore configuration from session and drive.
+     *
      * @deprecated
      */
     protected function restoreConfiguration(?string $flow = null): Configuration

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Api\Controllers\ImportJob;
 
 use Illuminate\Http\JsonResponse;
@@ -29,7 +31,6 @@ use Illuminate\Support\Facades\Storage;
 
 class IndexController extends BaseController
 {
-
     public function index(): JsonResponse
     {
         $disk  = Storage::disk('import-jobs');
@@ -39,6 +40,7 @@ class IndexController extends BaseController
                 $files[] = $file;
             }
         }
+
         return response()->json($files);
     }
 
@@ -51,5 +53,4 @@ class IndexController extends BaseController
 
         return '';
     }
-
 }

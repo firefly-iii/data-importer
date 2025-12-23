@@ -96,6 +96,7 @@ trait IsReadyForStep
         if ('upload-files' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             // ready for this step if NO uploads.
             $res = !(session()->has(Constants::HAS_UPLOAD) && true === session()->get(Constants::HAS_UPLOAD));
@@ -115,6 +116,7 @@ trait IsReadyForStep
         if ('define-roles' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             $res = $this->isReadyToDefineRoles($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
@@ -124,6 +126,7 @@ trait IsReadyForStep
         if ('configuration' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             $res = $this->isReadyForConfiguration();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
@@ -133,6 +136,7 @@ trait IsReadyForStep
         if ('map' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             $res = $this->isReadyForMapping($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
@@ -142,6 +146,7 @@ trait IsReadyForStep
         if ('conversion' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             $res = $this->isReadyForConversion();
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));
@@ -151,6 +156,7 @@ trait IsReadyForStep
         if ('submit' === self::STEP) {
             // 2025-12-20 for importer 2.0 we always return true.
             Log::debug('ALWAYS return true');
+
             return true;
             $res = $this->isReadyForSubmission($flow);
             Log::debug(sprintf('isReadyForStep(flow: %s, step: %s) returns %s.', $flow, self::STEP, var_export($res, true)));

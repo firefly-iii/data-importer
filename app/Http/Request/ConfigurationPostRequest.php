@@ -44,9 +44,9 @@ class ConfigurationPostRequest extends Request
     public function getAll(): array
     {
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport    = $this->get('do_import') ?? [];
-        $accounts    = $this->get('accounts') ?? [];
-        $newAccounts = $this->get('new_accounts') ?? [];
+        $doImport     = $this->get('do_import') ?? [];
+        $accounts     = $this->get('accounts') ?? [];
+        $newAccounts  = $this->get('new_accounts') ?? [];
 
         // loop $accounts array, because it is always complete and present.
         $toImportFrom = [];
@@ -64,8 +64,8 @@ class ConfigurationPostRequest extends Request
         }
 
         // calculate dates
-        $notBefore = $this->getCarbonDate('date_not_before');
-        $notAfter  = $this->getCarbonDate('date_not_after');
+        $notBefore    = $this->getCarbonDate('date_not_before');
+        $notAfter     = $this->getCarbonDate('date_not_after');
 
         // reverse dates if they are bla bla bla.
         if ($notBefore instanceof Carbon && $notAfter instanceof Carbon) {
@@ -155,7 +155,7 @@ class ConfigurationPostRequest extends Request
             return [];
         }
 
-        $raw = $this->get('unique_column_index', '0');
+        $raw     = $this->get('unique_column_index', '0');
 
         // Parse column indices (handles both single "0" and multiple "0,3,5")
         $indices = array_map(trim(...), explode(',', (string)$raw));
@@ -168,7 +168,7 @@ class ConfigurationPostRequest extends Request
         }
 
         // Build pseudo identifier definition (same for single or multiple columns)
-        $type = $this->convertToString('unique_column_type');
+        $type    = $this->convertToString('unique_column_type');
 
         return [
             'source_columns' => $indices,
@@ -233,13 +233,13 @@ class ConfigurationPostRequest extends Request
      */
     public function withValidator(Validator $validator): void
     {
-//        $validator->after(function (Validator $validator): void {
-//            $repository = new ImportJobRepository();
-//            $identifier = request()->route()->parameter('identifier');
-//            $importJob  = $repository->find($identifier);
-//            $flow       = $importJob->getFlow();
-//            $data       = $validator->getData();
-//        });
+        //        $validator->after(function (Validator $validator): void {
+        //            $repository = new ImportJobRepository();
+        //            $identifier = request()->route()->parameter('identifier');
+        //            $importJob  = $repository->find($identifier);
+        //            $flow       = $importJob->getFlow();
+        //            $data       = $validator->getData();
+        //        });
     }
 
     private function getColumnOptions(string $flow): string
@@ -250,6 +250,7 @@ class ConfigurationPostRequest extends Request
         if ('simplefin' === $flow) {
             return implode(',', array_keys(config('simplefin.unique_column_options')));
         }
+
         return implode(',', array_keys(config('file.unique_column_options')));
     }
 

@@ -30,7 +30,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 
 /**
  * Class IndexController
@@ -136,7 +135,7 @@ class IndexController extends Controller
             $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
 
             // redirect directly to upload step.
-            if('file' === $flow) {
+            if ('file' === $flow) {
                 return redirect(route('003-upload.index'))->withCookies($cookies);
             }
 

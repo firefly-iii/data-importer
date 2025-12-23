@@ -76,36 +76,36 @@ Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('0
 
 // step 3: Upload CSV file + config file
 // check : Must not already have uploaded files (HAS_UPLOAD). If so redirect to configuration.
-//Route::get('/upload/{flow?}', 'Import\UploadController@index')->name('003-upload.index');
-//Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003-upload.upload']);
+// Route::get('/upload/{flow?}', 'Import\UploadController@index')->name('003-upload.index');
+// Route::post('/upload', ['uses' => 'Import\UploadController@upload', 'as' => '003-upload.upload']);
 
 // step 4: Configure import
 // check : must not already have done configuration. If so, redirect to roles by default.
-//Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
-//Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
+// Route::get('/import/configure', ['uses' => 'Import\ConfigurationController@index', 'as' => '004-configure.index']);
+// Route::post('/import/configure', ['uses' => 'Import\ConfigurationController@postIndex', 'as' => '004-configure.post']);
 
 Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDate', 'as' => '004-configure.php_date']);
 
 // step 5: Set column roles (CSV or other file types)
 // check : must be CSV and not config complete otherwise redirect to mapping.
-//Route::get('/import/roles', ['uses' => 'Import\File\RoleController@index', 'as' => '005-roles.index']);
-//Route::post('/import/roles', ['uses' => 'Import\File\RoleController@postIndex', 'as' => '005-roles.post']);
+// Route::get('/import/roles', ['uses' => 'Import\File\RoleController@index', 'as' => '005-roles.index']);
+// Route::post('/import/roles', ['uses' => 'Import\File\RoleController@postIndex', 'as' => '005-roles.post']);
 
 // step 6: mapping
 // check: must be [CSV and roles complete] or [not csv and conversion complete] or go to conversion?
-//Route::get('/import/mapping', ['uses' => 'Import\MapController@index', 'as' => '006-mapping.index']);
-//Route::post('/import/mapping', ['uses' => 'Import\MapController@postIndex', 'as' => '006-mapping.post']);
+// Route::get('/import/mapping', ['uses' => 'Import\MapController@index', 'as' => '006-mapping.index']);
+// Route::post('/import/mapping', ['uses' => 'Import\MapController@postIndex', 'as' => '006-mapping.post']);
 
 // step 7: convert any import to JSON transactions
 // check: config complete (see step 4) + mapping complete if CSV + roles complete  or not CSV.
-//Route::get('/import/convert', ['uses' => 'Import\ConversionController@index', 'as' => '007-convert.index']);
-//Route::any('/import/convert/start', ['uses' => 'Import\ConversionController@start', 'as' => '007-convert.start']);
-//Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);
+// Route::get('/import/convert', ['uses' => 'Import\ConversionController@index', 'as' => '007-convert.index']);
+// Route::any('/import/convert/start', ['uses' => 'Import\ConversionController@start', 'as' => '007-convert.start']);
+// Route::get('/import/convert/status', ['uses' => 'Import\ConversionController@status', 'as' => '007-convert.status']);
 
 // step 8: submit JSON to Firefly III
-//Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' => '008-submit.index']);
-//Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
-//Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
+// Route::get('/import/submit', ['uses' => 'Import\SubmitController@index', 'as' => '008-submit.index']);
+// Route::any('/import/submit/start', ['uses' => 'Import\SubmitController@start', 'as' => '008-submit.start']);
+// Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
 
 // step 9: Nordigen select a country + bank
 Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => '009-selection.index']);
@@ -122,12 +122,12 @@ Route::get('/import/spectre-connections/callback', ['uses' => 'Import\Spectre\Ca
 
 
 // routes to go back to other steps (also takes care of session vars)
-//Route::get('/back/start', 'NavController@toStart')->name('back.start');
-//Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
-//Route::get('/back/config', 'NavController@toConfig')->name('back.config');
-//Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
-//Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
-//Route::get('/back/conversion', 'NavController@toConversion')->name('back.conversion');
+// Route::get('/back/start', 'NavController@toStart')->name('back.start');
+// Route::get('/back/upload', 'NavController@toUpload')->name('back.upload');
+// Route::get('/back/config', 'NavController@toConfig')->name('back.config');
+// Route::get('/back/mapping', 'NavController@toRoles')->name('back.mapping');
+// Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
+// Route::get('/back/conversion', 'NavController@toConversion')->name('back.conversion');
 
 
 // import by POST

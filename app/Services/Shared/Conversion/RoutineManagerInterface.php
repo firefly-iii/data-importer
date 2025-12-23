@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
-use App\Services\Shared\Configuration\Configuration;
-
 /**
  * Interface RoutineManagerInterface
  */
@@ -34,7 +32,6 @@ interface RoutineManagerInterface
     public function getIdentifier(): string;
 
     public function getServiceAccounts(): array;
-
 
     public function start(): array;
 }
