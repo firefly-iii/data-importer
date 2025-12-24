@@ -41,7 +41,8 @@ class SubmissionStatusManager
     private static function getImportJob(string $identifier): ImportJob
     {
         $repository = new ImportJobRepository();
-
+        $importJob  = $repository->find($identifier);
+        $importJob->refreshInstanceIdentifier();
         return $repository->find($identifier);
     }
 
@@ -54,30 +55,30 @@ class SubmissionStatusManager
     public static function addError(string $identifier, int $index, string $error): void
     {
 
-        $lineNo                                        = $index + 1;
+        $lineNo = $index + 1;
         Log::debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
         $importJob                                     = self::getImportJob($identifier);
-        $importJob->submissionStatus->errors[$index] ??= [];
+        $importJob->submissionStatus->errors[$index]   ??= [];
         $importJob->submissionStatus->errors[$index][] = $error;
         self::storeImportJob($importJob);
     }
 
     public static function addMessage(string $identifier, int $index, string $message): void
     {
-        $lineNo                                          = $index + 1;
+        $lineNo = $index + 1;
         Log::debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
         $importJob                                       = self::getImportJob($identifier);
-        $importJob->submissionStatus->messages[$index] ??= [];
+        $importJob->submissionStatus->messages[$index]   ??= [];
         $importJob->submissionStatus->messages[$index][] = $message;
         self::storeImportJob($importJob);
     }
 
     public static function addWarning(string $identifier, int $index, string $warning): void
     {
-        $lineNo                                          = $index + 1;
+        $lineNo = $index + 1;
         Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
         $importJob                                       = self::getImportJob($identifier);
-        $importJob->submissionStatus->warnings[$index] ??= [];
+        $importJob->submissionStatus->warnings[$index]   ??= [];
         $importJob->submissionStatus->warnings[$index][] = $warning;
         self::storeImportJob($importJob);
 

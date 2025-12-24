@@ -182,6 +182,7 @@ class ConfigurationPostRequest extends Request
         $repository         = new ImportJobRepository();
         $identifier         = request()->route()->parameter('identifier');
         $importJob          = $repository->find($identifier);
+        $importJob->refreshInstanceIdentifier(); // should prevent changes from being written to disk.
         $flow               = $importJob->getFlow();
         $columnOptions      = $this->getColumnOptions($flow);
         $defaultAccountRule = $this->getDefaultAccountRule($flow);

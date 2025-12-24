@@ -142,6 +142,7 @@ class ConversionController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $importJob                           = $this->repository->find($identifier);
+        $importJob->refreshInstanceIdentifier(); // to prevent weird overwrites.
         $configuration                       = $importJob->getConfiguration();
         $routine                             = null;
 
@@ -211,7 +212,7 @@ class ConversionController extends Controller
         if (null === $routine) {
             throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
-        $importJob->conversionStatus->status = ConversionStatus::CONVERSION_RUNNING;
+        $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
         $this->repository->saveToDisk($importJob);
 
         try {
@@ -220,7 +221,8 @@ class ConversionController extends Controller
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             Log::error($e->getTraceAsString());
 
-            $importJob->conversionStatus->status = ConversionStatus::CONVERSION_ERRORED;
+            $importJob = $routine->getImportJob();
+            $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_ERRORED);
             $this->repository->saveToDisk($importJob);
 
             return response()->json($importJob->conversionStatus->toArray());
@@ -231,13 +233,14 @@ class ConversionController extends Controller
             // #10590 do not error out if no transactions are found.
             Log::warning('[b] Zero transactions found during conversion. Will not error out.');
 
-            $importJob->conversionStatus->status = ConversionStatus::CONVERSION_DONE;
-            $this->repository->saveToDisk($importJob);
+            $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
 
             // return response()->json($importJobStatus->toArray());
         }
+        $importJob = $routine->getImportJob();
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         $importJob->setConvertedTransactions($transactions);
+        $this->repository->saveToDisk($importJob);
 
 
         if ('file' !== $flow) {
@@ -248,7 +251,7 @@ class ConversionController extends Controller
             $importJob->setState('ready_for_submission');
         }
 
-        $importJob->conversionStatus->status = ConversionStatus::CONVERSION_DONE;
+        $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
         $this->repository->saveToDisk($importJob);
 
         return response()->json($importJob->conversionStatus->toArray());

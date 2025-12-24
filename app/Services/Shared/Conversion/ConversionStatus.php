@@ -24,23 +24,26 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
+use App\Exceptions\ImporterErrorException;
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class ConversionStatus
  */
 class ConversionStatus
 {
-    public const string CONVERSION_DONE    = 'conv_done';
+    public const string CONVERSION_DONE = 'conv_done';
 
     public const string CONVERSION_ERRORED = 'conv_errored';
 
     public const string CONVERSION_RUNNING = 'conv_running';
 
     public const string CONVERSION_WAITING = 'waiting_to_start';
-    public array  $errors;
-    public array  $messages;
-    public string $status;
-    public array  $warnings;
-    public array  $rateLimits;
+    public array   $errors;
+    public array   $messages;
+    private string $status;
+    public array   $warnings;
+    public array   $rateLimits;
 
     /**
      * ConversionStatus constructor.
@@ -53,6 +56,21 @@ class ConversionStatus
         $this->messages   = [];
         $this->rateLimits = [];
     }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        Log::debug(sprintf('Set conversion status: "%s"', $status));
+        if (ConversionStatus::CONVERSION_RUNNING === $this->status && ConversionStatus::CONVERSION_WAITING === $status) {
+            throw new ImporterErrorException(sprintf('Cowardly refuse to update conversion status from "%s" to "%s"', $this->status, $status));
+        }
+        $this->status = $status;
+    }
+
 
     /**
      * @return static

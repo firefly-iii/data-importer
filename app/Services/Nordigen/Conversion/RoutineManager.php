@@ -76,6 +76,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionFilter    = new FilterTransactions();
         $this->repository           = new ImportJobRepository();
         $this->importJob            = $this->repository->find($identifier);
+        $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
     }
 
@@ -91,11 +92,12 @@ class RoutineManager implements RoutineManagerInterface
      */
     private function setConfiguration(Configuration $configuration): void
     {
+        Log::debug('RoutineManager.setConfiguration');
         // save config
         $this->configuration = $configuration;
 
         // Step 0: configuration validation.
-        $this->validateAccounts();
+        // $this->validateAccounts();
 
         // share config
         $this->transactionProcessor->setImportJob($this->importJob);
@@ -257,6 +259,10 @@ class RoutineManager implements RoutineManagerInterface
 
             throw $e;
         }
+        // get updated import job from transaction processor, and spread it to others.
+        $this->importJob = $this->transactionProcessor->getImportJob();
+        $this->setConfiguration($this->importJob->getConfiguration());
+        $this->repository->saveToDisk($this->importJob);
     }
 
     private function collectRateLimits(): void
@@ -362,17 +368,21 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function validateAccounts(): void
+//    /**
+//     * @throws ImporterErrorException
+//     */
+//    private function validateAccounts(): void
+//    {
+//        Log::debug('Validating accounts in configuration.');
+//        $accounts = $this->configuration->getAccounts();
+//        foreach ($accounts as $key => $accountId) {
+//            if (0 === (int)$accountId) {
+//                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+//            }
+//        }
+//    }
+    public function getImportJob(): ImportJob
     {
-        Log::debug('Validating accounts in configuration.');
-        $accounts = $this->configuration->getAccounts();
-        foreach ($accounts as $key => $accountId) {
-            if (0 === (int)$accountId) {
-                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
-            }
-        }
+        return $this->importJob;
     }
 }

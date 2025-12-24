@@ -87,7 +87,7 @@ class TransactionProcessor
          * @var int $destinationId
          */
         foreach ($accounts as $account => $destinationId) {
-            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s"', config('importer.version'), $index, $total, $index, $account));
+            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)', config('importer.version'), $index, $total, $index, $account, $destinationId));
             $object = new Account();
             $object->setIdentifier($account);
             $fullInfo = null;
@@ -97,7 +97,6 @@ class TransactionProcessor
                 $destinationId = $this->createNewAccount($account);
                 Log::debug(sprintf('Newly created account #%d', $destinationId));
             }
-
 
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object);
@@ -255,6 +254,11 @@ class TransactionProcessor
         return $return;
     }
 
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
     public function getRateLimits(): array
     {
         return $this->rateLimits;
@@ -262,18 +266,21 @@ class TransactionProcessor
 
     private function createNewAccount(string $importServiceAccountId): int
     {
+        Log::debug(sprintf('Creating new account for GoCardless account "%s".', $importServiceAccountId));
         $configuration                            = $this->importJob->getConfiguration();
         $createdAccount                           = $this->createOrFindExistingAccount($importServiceAccountId);
         $updatedAccounts                          = $configuration->getAccounts();
         $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
         $configuration->setAccounts($updatedAccounts);
+        Log::debug('Saved new account details.', $updatedAccounts);
         $this->importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($this->importJob);
         return $createdAccount->id;
     }
 
     public function setImportJob(ImportJob $importJob): void
     {
+        Log::debug('setImportJob in TransactionProcessor.');
+        $importJob->refreshInstanceIdentifier();
         $this->repository    = new ImportJobRepository();
         $this->importJob     = $importJob;
         $this->configuration = $importJob->getConfiguration();

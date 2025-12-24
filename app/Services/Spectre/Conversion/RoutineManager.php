@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Conversion;
 
 use App\Exceptions\ImporterHttpException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
@@ -171,5 +172,9 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
+    }
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

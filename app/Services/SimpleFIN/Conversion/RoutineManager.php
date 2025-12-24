@@ -68,6 +68,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transformer      = new TransactionTransformer();
         $this->repository       = new ImportJobRepository();
         $this->importJob        = $this->repository->find($identifier);
+        $this->importJob->refreshInstanceIdentifier();
         $this->simpleFINService->setConfiguration($this->importJob->getConfiguration());
     }
 
@@ -180,5 +181,9 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return $transactions;
+    }
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

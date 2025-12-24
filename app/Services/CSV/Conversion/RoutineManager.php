@@ -69,6 +69,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->identifier    = $identifier;
         $this->repository    = new ImportJobRepository();
         $this->importJob     = $this->repository->find($identifier);
+        $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
 
     }
@@ -187,5 +188,9 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
+    }
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

@@ -77,7 +77,7 @@ class ImportJobRepository
         if (null === $content || '' === $content) {
             throw new ImporterErrorException(sprintf('The file for import job "%s" is empty.', $identifier));
         }
-        Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
+        //Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
 
         return ImportJob::createFromJson($content);
     }
@@ -86,6 +86,24 @@ class ImportJobRepository
     {
         $disk = $this->getDisk();
         $path = sprintf('%s.json', $importJob->identifier);
+        if ($disk->exists($path)) {
+            Log::debug('OVERWRITE current job file');
+            $content = trim((string)$disk->get($path));
+            if ('' !== $content) {
+                $valid = json_validate($content);
+                if ($valid) {
+                    $json                  = json_decode($content, true);
+                    $oldInstanceCounter = $json['instance_counter'];
+                    $newInstanceCounter   = $importJob->getInstanceCounter();
+                    $oldInstanceIdentifier = $json['instance_identifier'];
+                    $newInstanceIdentifier = $importJob->getInstanceIdentifier();
+                    Log::debug(sprintf('Old counter: %d, new counter: %d', $oldInstanceCounter, $newInstanceCounter));
+                    if ($oldInstanceCounter > $newInstanceCounter) {
+                        throw new ImporterErrorException('Cowardly to overwrite older import job file.');
+                    }
+                }
+            }
+        }
         $disk->put($path, $importJob->toString());
     }
 
@@ -254,7 +272,7 @@ class ImportJobRepository
 
             /** @var Account $account */
             foreach ($responseAsset as $account) {
-                Log::debug(sprintf('Class of account is %s', get_class($account)));
+                // Log::debug(sprintf('Class of account is %s', get_class($account)));
                 $accounts[Constants::ASSET_ACCOUNTS][$account->id] = $account;
             }
             Log::debug(sprintf('Fetched %d asset accounts.', count($accounts[Constants::ASSET_ACCOUNTS])));

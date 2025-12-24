@@ -37,8 +37,9 @@ class RoutineStatusManager
     private static function getImportJob(string $identifier): ImportJob
     {
         $repository = new ImportJobRepository();
-
-        return $repository->find($identifier);
+        $importJob =  $repository->find($identifier);
+        $importJob->refreshInstanceIdentifier();
+        return $importJob;
     }
 
     public static function addError(string $identifier, int $index, string $error): void
@@ -64,7 +65,7 @@ class RoutineStatusManager
 
     private static function storeImportJob(ImportJob $importJob): void
     {
-        Log::debug(sprintf('[%s] Now in storeConversionStatus(%s): %s', config('importer.version'), $importJob->identifier, $importJob->conversionStatus->status));
+        Log::debug(sprintf('[%s] Now in storeConversionStatus(%s): %s', config('importer.version'), $importJob->identifier, $importJob->conversionStatus->getStatus()));
         Log::debug(sprintf('Messages: %d, warnings: %d, errors: %d', count($importJob->conversionStatus->messages), count($importJob->conversionStatus->warnings), count($importJob->conversionStatus->errors)));
         $repository = new ImportJobRepository();
         $repository->saveToDisk($importJob);
@@ -97,7 +98,7 @@ class RoutineStatusManager
     {
         Log::debug(sprintf('Now in setConversionStatus(%s, %s)', $status, $identifier));
         $importJob                           = self::getImportJob($identifier);
-        $importJob->conversionStatus->status = $status;
+        $importJob->conversionStatus->setStatus($status);
         self::storeImportJob($importJob);
 
         return $importJob->conversionStatus;
