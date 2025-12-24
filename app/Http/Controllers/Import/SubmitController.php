@@ -99,7 +99,6 @@ class SubmitController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $importJob                           = $this->repository->find($identifier);
-        $configuration                       = $importJob->getConfiguration();
         Log::error('Start: Find import job status.');
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
@@ -116,9 +115,7 @@ class SubmitController extends Controller
 
         // Dispatch asynchronous job for processing
         ProcessImportSubmissionJob::dispatch(
-            $identifier,
-            $configuration,
-            $transactions,
+            $importJob,
             $accessToken,
             $baseUrl,
             $vanityUrl

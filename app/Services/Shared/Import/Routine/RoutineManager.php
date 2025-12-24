@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Support\Facades\Log;
 
@@ -40,7 +41,7 @@ class RoutineManager
     private InfoCollector $infoCollector;
     private array         $transactions;
 
-    public function __construct(private readonly string $identifier)
+    public function __construct(private ImportJob $importJob)
     {
         $this->transactions = [];
         $this->allMessages  = [];
@@ -53,6 +54,11 @@ class RoutineManager
         return $this->allErrors;
     }
 
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
     public function getAllMessages(): array
     {
         return $this->allMessages;
@@ -63,13 +69,11 @@ class RoutineManager
         return $this->allWarnings;
     }
 
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         $this->infoCollector = new InfoCollector();
         $this->apiSubmitter  = new ApiSubmitter();
-        $this->apiSubmitter->setIdentifier($this->identifier);
-        $this->apiSubmitter->setConfiguration($configuration);
-
+        $this->apiSubmitter->setImportJob($this->importJob);
         Log::debug('Created APISubmitter in RoutineManager');
     }
 
@@ -85,6 +89,7 @@ class RoutineManager
     public function start(): void
     {
         Log::debug('Start of shared import routine.');
+        $this->setConfiguration($this->importJob->getConfiguration());
 
         Log::debug('First collect account information from Firefly III.');
         $accountInfo       = $this->infoCollector->collectAccountTypes();
@@ -92,8 +97,7 @@ class RoutineManager
         Log::debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
         $this->apiSubmitter->setAccountInfo($accountInfo);
-        $this->apiSubmitter->setIdentifier($this->identifier);
-        $this->apiSubmitter->processTransactions($this->transactions);
+        $this->apiSubmitter->processTransactions();
         $this->allMessages = $this->apiSubmitter->getMessages();
         $this->allWarnings = $this->apiSubmitter->getWarnings();
         $this->allErrors   = $this->apiSubmitter->getErrors();

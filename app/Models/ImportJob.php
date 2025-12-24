@@ -214,6 +214,7 @@ class ImportJob implements Arrayable
 
     public function setConfiguration(Configuration $configuration): void
     {
+        $configuration->updateDateRange();;
         $this->configuration = $configuration;
 
     }

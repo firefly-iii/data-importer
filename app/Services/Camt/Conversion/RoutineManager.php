@@ -50,7 +50,6 @@ class RoutineManager implements RoutineManagerInterface
     use IsRunningCli;
     use ProgressInformation;
 
-    private string               $content;
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
@@ -60,7 +59,6 @@ class RoutineManager implements RoutineManagerInterface
     public function __construct(string $identifier)
     {
         Log::debug('Constructed CAMT RoutineManager');
-        $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
         $this->allMessages   = [];
@@ -87,11 +85,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionExtractor = new TransactionExtractor($configuration);
         $this->transactionConverter = new TransactionConverter($configuration);
         $this->transactionMapper    = new TransactionMapper($configuration);
-    }
-
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
     }
 
     public function start(): array

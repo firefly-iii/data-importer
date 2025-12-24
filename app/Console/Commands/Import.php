@@ -30,6 +30,7 @@ use App\Console\VerifyJSON;
 use App\Enums\ExitCode;
 use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -108,6 +109,21 @@ final class Import extends Command
 
             return ExitCode::CANNOT_PARSE_CONFIG->value;
         }
+
+        // 2025-12-20. Create new import job and use that instead.
+        // FIXME this could be handled the same as AutoImports::importFile
+        $this->importFileAsImportJob($config, $file);
+        exit;
+        $this->repository = new ImportJobRepository();
+        $importJob = $this->repository->create();
+        $importJob     = $this->repository->setFlow($importJob, $flow);
+        $importJob     = $this->repository->setConfigurationString($importJob, $this->configFileContent);
+        $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
+        $importJob     = $this->repository->markAs($importJob, 'contains_content');
+
+
+
+
         $configuration = Configuration::fromArray(json_decode((string) file_get_contents($config), true));
         if ('file' === $configuration->getFlow() && (!file_exists($file) || !is_file($file))) {
             $message = sprintf('The importer can\'t import: importable file "%s" does not exist or could not be read.', $file);
@@ -127,6 +143,7 @@ final class Import extends Command
         $this->line('Running...');
 
         // first do conversion based on the file:
+        // FIXME the routine below is suspiciously similar to AutoImports::importFile
         $this->startConversion($configuration, $file);
         $this->reportConversion();
 

@@ -142,6 +142,8 @@ class UploadController extends Controller
         $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
         $importJob     = $this->repository->markAs($importJob, 'contains_content');
 
+        // FIXME: this little routine belongs in a function or a helper.
+        // FIXME: it is duplicated
         // at this point, also parse and process the uploaded configuration file string.
         $configuration = Configuration::make();
         if ('' !== $this->configFileContent && null === $importJob->getConfiguration()) {

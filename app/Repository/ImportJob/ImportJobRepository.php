@@ -87,7 +87,6 @@ class ImportJobRepository
         $disk = $this->getDisk();
         $path = sprintf('%s.json', $importJob->identifier);
         if ($disk->exists($path)) {
-            Log::debug('OVERWRITE current job file');
             $content = trim((string)$disk->get($path));
             if ('' !== $content) {
                 $valid = json_validate($content);
@@ -95,11 +94,8 @@ class ImportJobRepository
                     $json                  = json_decode($content, true);
                     $oldInstanceCounter = $json['instance_counter'];
                     $newInstanceCounter   = $importJob->getInstanceCounter();
-                    $oldInstanceIdentifier = $json['instance_identifier'];
-                    $newInstanceIdentifier = $importJob->getInstanceIdentifier();
-                    Log::debug(sprintf('Old counter: %d, new counter: %d', $oldInstanceCounter, $newInstanceCounter));
                     if ($oldInstanceCounter > $newInstanceCounter) {
-                        throw new ImporterErrorException('Cowardly to overwrite older import job file.');
+                        throw new ImporterErrorException('Cowardly refuse to overwrite older import job file.');
                     }
                 }
             }

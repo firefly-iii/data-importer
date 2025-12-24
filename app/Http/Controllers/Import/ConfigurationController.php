@@ -74,6 +74,7 @@ class ConfigurationController extends Controller
         }
         // if the job is "contains_content", parse it. Redirect if errors occur.
         if ($doParse && 'contains_content' === $importJob->getState()) {
+            // FIXME this routine is the same as in AutoImports::importFileAsImportJob
             $messages = $this->repository->parseImportJob($importJob);
 
             if ($messages->count() > 0) {
