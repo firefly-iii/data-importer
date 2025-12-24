@@ -39,22 +39,18 @@ class ConversionStatus
     public const string CONVERSION_RUNNING = 'conv_running';
 
     public const string CONVERSION_WAITING = 'waiting_to_start';
-    public array   $errors;
-    public array   $messages;
+    public array   $errors     = [];
+    public array   $messages   = [];
     private string $status;
-    public array   $warnings;
-    public array   $rateLimits;
+    public array   $warnings   = [];
+    public array   $rateLimits = [];
 
     /**
      * ConversionStatus constructor.
      */
     public function __construct()
     {
-        $this->status     = self::CONVERSION_WAITING;
-        $this->errors     = [];
-        $this->warnings   = [];
-        $this->messages   = [];
-        $this->rateLimits = [];
+        $this->status = self::CONVERSION_WAITING;
     }
 
     public function getStatus(): string
@@ -96,5 +92,38 @@ class ConversionStatus
             'messages'    => $this->messages,
             'rate_limits' => $this->rateLimits,
         ];
+    }
+
+    public function addError(int $index, string $error): void
+    {
+        $lineNo = $index + 1;
+        Log::debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
+
+        $this->errors[$index]   ??= [];
+        $this->errors[$index][] = $error;
+    }
+
+    public function addRateLimit(int $index, string $message): void
+    {
+        Log::error(sprintf('[c] Add rate limit message to index #%d: %s', $index, $message));
+        $this->rateLimits           ??= [];
+        $this->rateLimits[$index]   ??= [];
+        $this->rateLimits[$index][] = $message;
+    }
+
+    public function addMessage(int $index, string $message): void
+    {
+        $lineNo = $index + 1;
+        Log::debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
+        $this->messages[$index]   ??= [];
+        $this->messages[$index][] = $message;
+    }
+
+    public function addWarning(int $index, string $warning): void
+    {
+        $lineNo = $index + 1;
+        Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
+        $this->warnings[$index]   ??= [];
+        $this->warnings[$index][] = $warning;
     }
 }

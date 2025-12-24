@@ -393,7 +393,6 @@ trait AutoImports
             exit(1);
         }
         Log::debug('About to call start()');
-        RoutineStatusManager::startOrFindConversion($importJob->identifier);
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
 
         // then push stuff into the routine:
