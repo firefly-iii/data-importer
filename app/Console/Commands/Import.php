@@ -111,64 +111,7 @@ final class Import extends Command
         }
 
         // 2025-12-20. Create new import job and use that instead.
-        // FIXME this could be handled the same as AutoImports::importFile
-        $this->importFileAsImportJob($config, $file);
-        exit;
-        $this->repository = new ImportJobRepository();
-        $importJob = $this->repository->create();
-        $importJob     = $this->repository->setFlow($importJob, $flow);
-        $importJob     = $this->repository->setConfigurationString($importJob, $this->configFileContent);
-        $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
-        $importJob     = $this->repository->markAs($importJob, 'contains_content');
-
-
-
-
-        $configuration = Configuration::fromArray(json_decode((string) file_get_contents($config), true));
-        if ('file' === $configuration->getFlow() && (!file_exists($file) || !is_file($file))) {
-            $message = sprintf('The importer can\'t import: importable file "%s" does not exist or could not be read.', $file);
-            $this->error($message);
-            Log::error($message);
-
-            Log::error(sprintf('Exit code is %s.', ExitCode::IMPORTABLE_FILE_NOT_FOUND->name));
-
-            return ExitCode::IMPORTABLE_FILE_NOT_FOUND->value;
-        }
-
-        $configuration->updateDateRange();
-        $this->line('The import routine is about to start.');
-        $this->line('This is invisible and may take quite some time.');
-        $this->line('Once finished, you will see a list of errors, warnings and messages (if applicable).');
-        $this->line('--------');
-        $this->line('Running...');
-
-        // first do conversion based on the file:
-        // FIXME the routine below is suspiciously similar to AutoImports::importFile
-        $this->startConversion($configuration, $file);
-        $this->reportConversion();
-
-        // crash here if the conversion failed.
-        $exitCode      = ExitCode::SUCCESS->value;
-        if (0 !== count($this->conversionErrors)) {
-            Log::error(sprintf('Exit code is %s.', ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
-            $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
-            // could still be that there were simply no transactions (from GoCardless). This can result
-            // in another exit code.
-            if ($this->isNothingDownloaded()) {
-                Log::debug(sprintf('[%s] Exit code changed to %s.', config('importer.version'), ExitCode::NOTHING_WAS_IMPORTED->name));
-                $exitCode = ExitCode::NOTHING_WAS_IMPORTED->value;
-            }
-
-            $this->error('There are many errors in the data conversion. The import will stop here.');
-        }
-        if (0 === count($this->conversionErrors)) {
-            $this->line(sprintf('Done converting from file %s using configuration %s.', $file, $config));
-            $this->startImport($configuration);
-            $this->reportImport();
-            $this->line('Done!');
-        }
-
-        $this->reportBalanceDifferences($configuration);
+        $exitCode = $this->importFileAsImportJob($config, $file);
 
         // merge things:
         $messages      = array_merge($this->importMessages, $this->conversionMessages);

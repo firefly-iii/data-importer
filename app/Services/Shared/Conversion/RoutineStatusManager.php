@@ -93,6 +93,7 @@ class RoutineStatusManager
 
     /**
      * @throws ImporterErrorException
+     * @deprecated
      */
     public static function setConversionStatus(string $status, string $identifier): ConversionStatus
     {
