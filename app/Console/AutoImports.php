@@ -194,7 +194,7 @@ trait AutoImports
         foreach ($files as $jsonFile => $importableFiles) {
             foreach ($importableFiles as $importableFile) {
                 try {
-                    $exitCodes[$importableFile] = $this->importFile($jsonFile, $importableFile);
+                    $exitCodes[$importableFile] = $this->importFileAsImportJob($jsonFile, $importableFile);
                 } catch (ImporterErrorException $e) {
                     Log::error(sprintf('Could not complete import from file "%s".', $importableFile));
                     Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
@@ -217,6 +217,7 @@ trait AutoImports
 
     /**
      * @throws ImporterErrorException
+     * @deprecated
      */
     private function importFile(string $jsonFile, string $importableFile): int
     {
