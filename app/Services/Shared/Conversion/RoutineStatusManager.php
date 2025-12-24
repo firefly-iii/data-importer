@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class RoutineStatusManager
+ * @deprecated
  */
 class RoutineStatusManager
 {
