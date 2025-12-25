@@ -74,34 +74,6 @@ class SubmissionStatusManager
         self::storeImportJob($importJob);
     }
 
-    public static function addWarning(string $identifier, int $index, string $warning): void
-    {
-        $lineNo = $index + 1;
-        Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
-        $importJob                                       = self::getImportJob($identifier);
-        $importJob->submissionStatus->warnings[$index]   ??= [];
-        $importJob->submissionStatus->warnings[$index][] = $warning;
-        self::storeImportJob($importJob);
 
-    }
 
-    public static function updateProgress(string $identifier, int $currentTransaction, int $totalTransactions): void
-    {
-        Log::debug(sprintf('Update progress for %s: %d/%d transactions', $identifier, $currentTransaction, $totalTransactions));
-        $importJob                                       = self::getImportJob($identifier);
-        $importJob->submissionStatus->currentTransaction = $currentTransaction;
-        $importJob->submissionStatus->totalTransactions  = $totalTransactions;
-        $importJob->submissionStatus->progressPercentage = $totalTransactions > 0 ? (int)round(($currentTransaction / $totalTransactions) * 100) : 0;
-        self::storeImportJob($importJob);
-    }
-
-    public static function setSubmissionStatus(string $status, ?string $identifier = null): SubmissionStatus
-    {
-        $importJob                           = self::getImportJob($identifier);
-        $importJob->submissionStatus->setStatus($status);
-
-        self::storeImportJob($importJob);
-
-        return $importJob->submissionStatus;
-    }
 }

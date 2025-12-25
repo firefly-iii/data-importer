@@ -112,19 +112,11 @@ class AuthenticateController extends Controller
         return null;
     }
 
-    /**
-     * @return Application|Redirector|RedirectResponse
-     *
-     * @throws ImporterErrorException
-     */
     public function postIndex(Request $request, string $flow)
     {
-        throw new ImporterErrorException('[b] auth does not work yet.');
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
         $subTitle  = ucfirst($flow);
-        // variables for page:
-        // $flow = $request->cookie(Constants::FLOW_COOKIE);
         $validator = $this->getValidator($flow);
         if (null === $validator) {
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));

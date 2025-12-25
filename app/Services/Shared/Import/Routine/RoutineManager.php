@@ -27,6 +27,7 @@ namespace App\Services\Shared\Import\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\Shared\Import\Status\SubmissionStatus;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -34,24 +35,12 @@ use Illuminate\Support\Facades\Log;
  */
 class RoutineManager
 {
-    private array         $allErrors;
-    private array         $allMessages;
-    private array         $allWarnings;
     private ApiSubmitter  $apiSubmitter;
     private InfoCollector $infoCollector;
-    private array         $transactions;
 
     public function __construct(private ImportJob $importJob)
     {
-        $this->transactions = [];
-        $this->allMessages  = [];
-        $this->allWarnings  = [];
-        $this->allErrors    = [];
-    }
-
-    public function getAllErrors(): array
-    {
-        return $this->allErrors;
+        $importJob->refreshInstanceIdentifier();
     }
 
     public function getImportJob(): ImportJob
@@ -59,28 +48,12 @@ class RoutineManager
         return $this->importJob;
     }
 
-    public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    private function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(): void
     {
         $this->infoCollector = new InfoCollector();
         $this->apiSubmitter  = new ApiSubmitter();
         $this->apiSubmitter->setImportJob($this->importJob);
         Log::debug('Created APISubmitter in RoutineManager');
-    }
-
-    public function setTransactions(array $transactions): void
-    {
-        $this->transactions = $transactions;
-        Log::debug(sprintf('Now have %d transaction(s) in RoutineManager', count($transactions)));
     }
 
     /**
@@ -89,8 +62,9 @@ class RoutineManager
     public function start(): void
     {
         Log::debug('Start of shared import routine.');
-        $this->setConfiguration($this->importJob->getConfiguration());
+        $this->setConfiguration();
 
+        // FIXME again with the collecting of accounts?
         Log::debug('First collect account information from Firefly III.');
         $accountInfo       = $this->infoCollector->collectAccountTypes();
 
@@ -98,9 +72,6 @@ class RoutineManager
         // submit transactions to API:
         $this->apiSubmitter->setAccountInfo($accountInfo);
         $this->apiSubmitter->processTransactions();
-        $this->allMessages = $this->apiSubmitter->getMessages();
-        $this->allWarnings = $this->apiSubmitter->getWarnings();
-        $this->allErrors   = $this->apiSubmitter->getErrors();
-        Log::debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d', count($this->allMessages), count($this->allWarnings), count($this->allErrors)));
+        Log::debug(sprintf('Routine manager: messages: %d, warnings: %d, errors: %d', count($this->importJob->submissionStatus->messages), count($this->importJob->submissionStatus->warnings), count($this->importJob->submissionStatus->errors)));
     }
 }

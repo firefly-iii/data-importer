@@ -13,7 +13,7 @@
                         {{ $subTitle }}
                     </div>
                     <div class="card-body">
-                        <p>In order to import using {{ config('importer.flow_titles' . $flow) }} you must enter the authentication data you received from this provider. You can read how to get the necessary codes in the <a target="_blank" href="https://docs.firefly-iii.org/how-to/data-importer/import/third-party-providers/">documentation</a></p>
+                        <p>In order to import using {{ config('importer.flow_titles.' . $flow) }} you must enter the authentication data you received from this provider. You can read how to get the necessary codes in the <a target="_blank" href="https://docs.firefly-iii.org/how-to/data-importer/import/third-party-providers/">documentation</a></p>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.start') }}" class="btn btn-secondary"><span
+                            <a href="{{ route('index') }}" class="btn btn-secondary"><span
                                     class="fas fa-arrow-left"></span> Go back to index</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>

@@ -25,6 +25,8 @@ declare(strict_types=1);
 namespace App\Services\LunchFlow\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\LunchFlow\Conversion\Routine\GenerateTransactions;
 use App\Services\LunchFlow\Conversion\Routine\TransactionProcessor;
 use App\Services\Shared\Authentication\IsRunningCli;
@@ -50,25 +52,26 @@ class RoutineManager implements RoutineManagerInterface
     private Configuration        $configuration;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
+    private ImportJobRepository  $repository;
 
     private array $downloaded;
 
-    public function __construct(?string $identifier)
+    public function __construct(string $identifier)
     {
-        $this->allErrors            = [];
-        $this->allWarnings          = [];
-        $this->allMessages          = [];
-        $this->allRateLimits        = [];
-        $this->downloaded           = [];
+        $this->allErrors     = [];
+        $this->allWarnings   = [];
+        $this->allMessages   = [];
+        $this->allRateLimits = [];
+        $this->downloaded    = [];
+        $this->identifier    = $identifier;
 
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->repository = new ImportJobRepository();
+        $this->importJob  = $this->repository->find($identifier);
+        $this->importJob->refreshInstanceIdentifier();
+
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
+        $this->setConfiguration();
     }
 
     #[Override]
@@ -80,18 +83,11 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(): void
     {
-        // save config
-        $this->configuration = $configuration;
-
-        // share config
-        $this->transactionProcessor->setConfiguration($configuration);
-        $this->transactionGenerator->setConfiguration($configuration);
-
-        // set identifier
-        $this->transactionProcessor->setIdentifier($this->identifier);
-        $this->transactionGenerator->setIdentifier($this->identifier);
+        $this->transactionProcessor->setImportJob($this->importJob);
+        // FIXME no need, will be overruled later anyway
+        $this->transactionGenerator->setImportJob($this->importJob);
     }
 
     /**
@@ -107,7 +103,12 @@ class RoutineManager implements RoutineManagerInterface
 
         // Step 3: Generate Firefly III-ready transactions.
         // first collect target accounts from Firefly III.
+        // FIXME this still feels weird. Part of this data is already inside the import job.
         $this->collectTargetAccounts();
+
+        // need to refresh local import job because of changes made by the previous step.
+        $this->importJob = $this->transactionProcessor->getImportJob();
+        $this->transactionGenerator->setImportJob($this->importJob);
 
 
         // then report and stop if nothing was even downloaded
@@ -221,5 +222,10 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return false;
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

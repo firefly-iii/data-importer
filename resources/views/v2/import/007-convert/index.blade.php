@@ -84,8 +84,8 @@
             </div>
         </div>
 
-        <!-- New Account Creation Section (SimpleFIN + Nordigen) -->
-        @if(('simplefin' === $flow || 'nordigen' === $flow) && count($newAccountsToCreate) > 0)
+        <!-- New Account Creation Section (SimpleFIN + Nordigen + Lunch Flow) -->
+        @if(in_array($flow, config('importer.supports_new_accounts'), true) && count($newAccountsToCreate) > 0)
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card border-warning">

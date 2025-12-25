@@ -68,6 +68,11 @@ return [
     'build_time'                    => 1766462326,
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
     'fake_data'                     => env('FAKE_DATA', false),
+    'supports_new_accounts' => [
+        'nordigen',
+        'simplefin',
+        'lunchflow'
+    ],
     'enabled_flows'                 => [
         'file'      => true,
         'sophtron'  => false,

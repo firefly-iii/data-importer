@@ -41,7 +41,6 @@ use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
 use Carbon\Carbon;
@@ -49,10 +48,8 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account as LocalAccount;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use JsonException;
 
 /**
  * Trait AutoImports
@@ -469,75 +466,76 @@ trait AutoImports
 
     private function startImport(Configuration $configuration): void
     {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        $routine  = new RoutineManager($this->identifier);
-        $disk     = \Storage::disk('jobs');
-        $fileName = sprintf('%s.json', $this->identifier);
-
-        // get files from disk:
-        if (!$disk->has($fileName)) {
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message = sprintf('[a100]: File "%s" not found, cannot continue.', $fileName);
-            $this->error($message);
-            SubmissionStatusManager::addError($this->identifier, 0, $message);
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
-
-            return;
-        }
-
-        try {
-            $json         = $disk->get($fileName);
-            $transactions = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
-            Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
-        } catch (FileNotFoundException|JsonException $e) {
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            $message = sprintf('[a101]: File "%s" could not be decoded, cannot continue..', $fileName);
-            $this->error($message);
-            SubmissionStatusManager::addError($this->identifier, 0, $message);
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
-
-            return;
-        }
-        if (0 === count($transactions)) {
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);
-            Log::error('No transactions in array, there is nothing to import.');
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
-
-            return;
-        }
-
-        $routine->setTransactions($transactions);
-
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING, $this->identifier);
-
-        // then push stuff into the routine:
-        $routine->setConfiguration($configuration);
-
-        try {
-            $routine->start();
-        } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
-            SubmissionStatusManager::addError($this->identifier, 0, $e->getMessage());
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
-
-            return;
-        }
-
-
-        // set done:
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);
-        $this->importMessages = $routine->getAllMessages();
-        $this->importWarnings = $routine->getAllWarnings();
-        $this->importErrors   = $routine->getAllErrors();
+        throw new ImporterErrorException('Needs refactoring.');
+//        Log::debug(sprintf('Now at %s', __METHOD__));
+//        $routine  = new RoutineManager($this->identifier);
+//        $disk     = \Storage::disk('jobs');
+//        $fileName = sprintf('%s.json', $this->identifier);
+//
+//        // get files from disk:
+//        if (!$disk->has($fileName)) {
+//            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
+//            $message = sprintf('[a100]: File "%s" not found, cannot continue.', $fileName);
+//            $this->error($message);
+//            SubmissionStatusManager::addError($this->identifier, 0, $message);
+//            $this->importMessages = $routine->getAllMessages();
+//            $this->importWarnings = $routine->getAllWarnings();
+//            $this->importErrors   = $routine->getAllErrors();
+//
+//            return;
+//        }
+//
+//        try {
+//            $json         = $disk->get($fileName);
+//            $transactions = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
+//            Log::debug(sprintf('Found %d transactions on the drive.', count($transactions)));
+//        } catch (FileNotFoundException|JsonException $e) {
+//            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
+//            $message = sprintf('[a101]: File "%s" could not be decoded, cannot continue..', $fileName);
+//            $this->error($message);
+//            SubmissionStatusManager::addError($this->identifier, 0, $message);
+//            $this->importMessages = $routine->getAllMessages();
+//            $this->importWarnings = $routine->getAllWarnings();
+//            $this->importErrors   = $routine->getAllErrors();
+//
+//            return;
+//        }
+//        if (0 === count($transactions)) {
+//            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);
+//            Log::error('No transactions in array, there is nothing to import.');
+//            $this->importMessages = $routine->getAllMessages();
+//            $this->importWarnings = $routine->getAllWarnings();
+//            $this->importErrors   = $routine->getAllErrors();
+//
+//            return;
+//        }
+//
+//        $routine->setTransactions($transactions);
+//
+//        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING, $this->identifier);
+//
+//        // then push stuff into the routine:
+//        $routine->setConfiguration($configuration);
+//
+//        try {
+//            $routine->start();
+//        } catch (ImporterErrorException $e) {
+//            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+//            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->identifier);
+//            SubmissionStatusManager::addError($this->identifier, 0, $e->getMessage());
+//            $this->importMessages = $routine->getAllMessages();
+//            $this->importWarnings = $routine->getAllWarnings();
+//            $this->importErrors   = $routine->getAllErrors();
+//
+//            return;
+//        }
+//
+//
+//        // set done:
+//        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $this->identifier);
+//        $this->importMessages = $routine->getAllMessages();
+//        $this->importWarnings = $routine->getAllWarnings();
+//        $this->importErrors   = $routine->getAllErrors();
     }
 
     private function startImportFromImportJob(ImportJob $importJob): void
@@ -546,7 +544,7 @@ trait AutoImports
         $routine = new RoutineManager($importJob);
 
         if (0 === count($importJob->getConvertedTransactions())) {
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $importJob->identifier);
+            $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
             Log::error('No transactions in array, there is nothing to import.');
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
@@ -555,14 +553,14 @@ trait AutoImports
             return;
         }
 
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_RUNNING, $importJob->identifier);
+        $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
 
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $importJob->identifier);
-            SubmissionStatusManager::addError($this->identifier, 0, $e->getMessage());
+            $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            $importJob->submissionStatus->addError(0, $e->getMessage());
             $this->importMessages = $routine->getAllMessages();
             $this->importWarnings = $routine->getAllWarnings();
             $this->importErrors   = $routine->getAllErrors();
@@ -572,7 +570,7 @@ trait AutoImports
 
 
         // set done:
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_DONE, $importJob->identifier);
+        $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
         $this->importMessages = $routine->getAllMessages();
         $this->importWarnings = $routine->getAllWarnings();
         $this->importErrors   = $routine->getAllErrors();
@@ -692,73 +690,74 @@ trait AutoImports
      */
     private function importUpload(string $jsonFile, string $importableFile): void
     {
-        $this->repository = new ImportJobRepository();
-        $importJob        = $this->repository->create();
-
-        // do JSON check
-        $jsonResult = $this->verifyJSON($jsonFile);
-        if (false === $jsonResult) {
-            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
-            $this->error($message);
-
-            return;
-        }
-        // FIXME this is a hack. Normally, the data importer would know what import flow to use from the user's selection.
-        // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
-        $jsonContent = file_get_contents($jsonFile);
-        $json        = json_decode($jsonContent, true);
-
-        $importableFileContent = '';
-        if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
-            $importableFileContent = file_get_contents($importableFile);
-        }
-
-
-        $importJob = $this->repository->setFlow($importJob, $json['flow']);
-        $importJob = $this->repository->setConfigurationString($importJob, $jsonContent);
-        $importJob = $this->repository->setImportableFileString($importJob, $importableFileContent);
-        $importJob = $this->repository->markAs($importJob, 'contains_content');
-
-        // FIXME: this little routine belongs in a function or a helper.
-        // FIXME: it is duplicated
-        // at this point, also parse and process the uploaded configuration file string.
-        $configuration = Configuration::make();
-        if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
-            $configuration = Configuration::fromArray(json_decode($jsonContent, true));
-        }
-        if (null !== $importJob->getConfiguration()) {
-            $configuration = $importJob->getConfiguration();
-        }
-        $importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($importJob);
-
-        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $json['flow']));
-
-        // this is it!
-        $this->startConversionFromImportJob($importJob);
-        $this->reportConversion();
-
-        // crash here if the conversion failed.
-        if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-
-            throw new ImporterErrorException('Too many errors in the data conversion.');
-        }
-
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        $this->startImport($configuration);
-        $this->reportImport();
-
-        $this->line('Done!');
-        event(
-            new ImportedTransactions(
-                basename($jsonFile),
-                array_merge($this->conversionMessages, $this->importMessages),
-                array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors),
-                $this->conversionRateLimits
-            )
-        );
+        throw new ImporterErrorException('Needs refactoring for new dec 2025 flow.');
+//        $this->repository = new ImportJobRepository();
+//        $importJob        = $this->repository->create();
+//
+//        // do JSON check
+//        $jsonResult = $this->verifyJSON($jsonFile);
+//        if (false === $jsonResult) {
+//            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
+//            $this->error($message);
+//
+//            return;
+//        }
+//        // FIXME this is a hack. Normally, the data importer would know what import flow to use from the user's selection.
+//        // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
+//        $jsonContent = file_get_contents($jsonFile);
+//        $json        = json_decode($jsonContent, true);
+//
+//        $importableFileContent = '';
+//        if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
+//            $importableFileContent = file_get_contents($importableFile);
+//        }
+//
+//
+//        $importJob = $this->repository->setFlow($importJob, $json['flow']);
+//        $importJob = $this->repository->setConfigurationString($importJob, $jsonContent);
+//        $importJob = $this->repository->setImportableFileString($importJob, $importableFileContent);
+//        $importJob = $this->repository->markAs($importJob, 'contains_content');
+//
+//        // FIXME: this little routine belongs in a function or a helper.
+//        // FIXME: it is duplicated
+//        // at this point, also parse and process the uploaded configuration file string.
+//        $configuration = Configuration::make();
+//        if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
+//            $configuration = Configuration::fromArray(json_decode($jsonContent, true));
+//        }
+//        if (null !== $importJob->getConfiguration()) {
+//            $configuration = $importJob->getConfiguration();
+//        }
+//        $importJob->setConfiguration($configuration);
+//        $this->repository->saveToDisk($importJob);
+//
+//        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $json['flow']));
+//
+//        // this is it!
+//        $this->startConversionFromImportJob($importJob);
+//        $this->reportConversion();
+//
+//        // crash here if the conversion failed.
+//        if (0 !== count($this->conversionErrors)) {
+//            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+//
+//            throw new ImporterErrorException('Too many errors in the data conversion.');
+//        }
+//
+//        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+//        $this->startImport($configuration);
+//        $this->reportImport();
+//
+//        $this->line('Done!');
+//        event(
+//            new ImportedTransactions(
+//                basename($jsonFile),
+//                array_merge($this->conversionMessages, $this->importMessages),
+//                array_merge($this->conversionWarnings, $this->importWarnings),
+//                array_merge($this->conversionErrors, $this->importErrors),
+//                $this->conversionRateLimits
+//            )
+//        );
     }
 
     protected function isNothingDownloaded(): bool

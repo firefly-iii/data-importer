@@ -26,15 +26,16 @@ namespace App\Services\SimpleFIN\Validation;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Session\Constants;
+use App\Services\Shared\Validation\NewJobDataCollectorInterface;
 use App\Services\SimpleFIN\SimpleFINService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector
+class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     public bool                 $useDemo    = false;
     public string               $setupToken = '';
+    private ImportJob           $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -42,12 +43,13 @@ class NewJobDataCollector
         $this->repository = new ImportJobRepository();
     }
 
-    public function validate(ImportJob $importJob): MessageBag
+    public function validate(): MessageBag
     {
-        $configuration    = $importJob->getConfiguration();
-        $errors           = new MessageBag();
-        $accessToken      = $configuration->getAccessToken();
-        Log::debug(sprintf('validate("%s") for SimpleFIN', $importJob->identifier));
+        $this->importJob->refreshInstanceIdentifier(); // to make sure the information stays fresh.
+        $configuration = $this->importJob->getConfiguration();
+        $errors        = new MessageBag();
+        $accessToken   = $configuration->getAccessToken();
+        Log::debug(sprintf('validate("%s") for SimpleFIN', $this->importJob->identifier));
 
         if ($this->useDemo) {
             Log::debug('Overrule info with demo info.');
@@ -82,25 +84,25 @@ class NewJobDataCollector
         }
         // update config, update import job and DONE.
         $configuration->setAccessToken($accessToken);
-        $importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($importJob);
+        $this->importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($this->importJob);
 
         return new MessageBag();
     }
 
-    public function collectAccounts(ImportJob $importJob): MessageBag
+    public function collectAccounts(): MessageBag
     {
-        $configuration    = $importJob->getConfiguration();
-        $errors           = new MessageBag();
-        $accessToken      = $configuration->getAccessToken();
-        Log::debug(sprintf('collectAccounts("%s")', $importJob->identifier));
+        $configuration = $this->importJob->getConfiguration();
+        $errors        = new MessageBag();
+        $accessToken   = $configuration->getAccessToken();
+        Log::debug(sprintf('collectAccounts("%s")', $this->importJob->identifier));
 
         // create service:
         /** @var SimpleFINService $simpleFINService */
         $simpleFINService = app(SimpleFINService::class);
         $simpleFINService->setConfiguration($configuration);
         $simpleFINService->setAccessToken($accessToken);
-        $accounts         = [];
+        $accounts = [];
 
         try {
             $accounts = $simpleFINService->fetchAccounts();
@@ -110,43 +112,24 @@ class NewJobDataCollector
 
             return $errors;
         }
-        $importJob->setServiceAccounts($accounts);
-        $this->repository->saveToDisk($importJob);
+        $this->importJob->setServiceAccounts($accounts);
+        $this->repository->saveToDisk($this->importJob);
 
         return new MessageBag();
     }
 
-//    private function collectSimpleFINAccounts(): void
-//    {
-//        Log::debug(sprintf('Now in %s', __METHOD__));
-//        $accountsData                = session()->get(Constants::SIMPLEFIN_ACCOUNTS_DATA, []);
-//        $accounts                    = [];
-//
-//        foreach ($accountsData ?? [] as $account) {
-//            // Ensure the account has required SimpleFIN protocol fields
-//            if (!array_key_exists('id', $account) || '' === (string)$account['id']) {
-//                Log::warning('SimpleFIN account data is missing a valid ID, skipping.', ['account_data' => $account]);
-//
-//                continue;
-//            }
-//
-//            if (!array_key_exists('name', $account) || null === $account['name']) {
-//                Log::warning('SimpleFIN account data is missing name field, adding default.', ['account_id' => $account['id']]);
-//                $account['name'] = sprintf('Unknown Account (ID: %s)', $account['id']);
-//            }
-//
-//            if (!array_key_exists('currency', $account) || null === $account['currency']) {
-//                Log::warning('SimpleFIN account data is missing currency field, this may cause issues.', ['account_id' => $account['id']]);
-//            }
-//
-//            if (!array_key_exists('balance', $account) || null === $account['balance']) {
-//                Log::warning('SimpleFIN account data is missing balance field, this may cause issues.', ['account_id' => $account['id']]);
-//            }
-//
-//            // Preserve raw SimpleFIN protocol data structure
-//            $accounts[] = $account;
-//        }
-//        Log::debug(sprintf('Collected %d SimpleFIN accounts from session.', count($accounts)));
-//        $this->importServiceAccounts = $accounts;
-//    }
+    public function getFlowName(): string
+    {
+        return 'simplefin';
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
+    }
 }

@@ -28,11 +28,9 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
-use App\Services\SimpleFIN\Validation\NewJobDataCollector;
-use App\Services\Storage\StorageService;
+use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
 use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\Upload\CollectsSettings;
 use App\Support\Http\Upload\ProcessesFileUpload;
@@ -190,14 +188,20 @@ class UploadController extends Controller
                 break;
 
             case 'simplefin':
-                $collector             = new NewJobDataCollector();
+                $collector = new SimpleFINNewJobDataCollector();
+                $collector->setImportJob($importJob);
                 $collector->useDemo    = $request->boolean('use_demo');
                 $collector->setupToken = (string)$request->get('simplefin_token');
-                $errors                = $collector->validate($importJob);
+                $errors                = $collector->validate();
+                $importJob             = $collector->getImportJob();
 
                 break;
             case 'nordigen':
                 Log::debug('No extra steps for Nordigen.');
+                break;
+            case 'lunchflow':
+                Log::debug('No extra steps for Lunch Flow.');
+
                 break;
 //            case 'lunchflow':
 //                return $this->processLunchFlow($configuration);
@@ -339,8 +343,8 @@ class UploadController extends Controller
     {
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
-            $content        = (string)$disk->get($selection);
+            $disk                    = Storage::disk('configurations');
+            $content                 = (string)$disk->get($selection);
             $this->configFileContent = $content;
         }
 

@@ -1,7 +1,6 @@
 <?php
-
 /*
- * ProgressInformation.php
+ * NewJobDataCollectorInterface.php
  * Copyright (c) 2025 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
@@ -20,40 +19,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-declare(strict_types=1);
+namespace App\Services\Shared\Validation;
 
-namespace App\Services\Shared\Submission;
+use App\Models\ImportJob;
+use Illuminate\Support\MessageBag;
 
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
-use Illuminate\Support\Facades\Log;
-
-/**
- * Trait ProgressInformation
- */
-trait ProgressInformation
+interface NewJobDataCollectorInterface
 {
-    protected array  $errors   = [];
-    protected string $identifier;
-    protected array  $messages = [];
-    protected array  $warnings = [];
+    public function getFlowName(): string;
 
-    final public function getErrors(): array
-    {
-        return $this->errors ?? [];
-    }
+    public function getImportJob(): ImportJob;
 
-    final public function getMessages(): array
-    {
-        return $this->messages ?? [];
-    }
+    public function setImportJob(ImportJob $importJob): void;
 
-    final public function getWarnings(): array
-    {
-        return $this->warnings ?? [];
-    }
+    public function validate(): MessageBag;
 
-    final public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
+    public function collectAccounts(): MessageBag;
 }

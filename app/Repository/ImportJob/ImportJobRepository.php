@@ -27,6 +27,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
+use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -91,9 +92,9 @@ class ImportJobRepository
             if ('' !== $content) {
                 $valid = json_validate($content);
                 if ($valid) {
-                    $json                  = json_decode($content, true);
+                    $json               = json_decode($content, true);
                     $oldInstanceCounter = $json['instance_counter'];
-                    $newInstanceCounter   = $importJob->getInstanceCounter();
+                    $newInstanceCounter = $importJob->getInstanceCounter();
                     if ($oldInstanceCounter > $newInstanceCounter) {
                         throw new ImporterErrorException(sprintf('Cowardly refuse to overwrite older (#%d) import job file with newer (#%d).', $oldInstanceCounter, $newInstanceCounter));
                     }
@@ -152,16 +153,31 @@ class ImportJobRepository
                 }
 
                 break;
-
+            case 'lunchflow':
+                $validator = new LunchFlowNewJobDataCollector();
+                $validator->setImportJob($importJob);
+                $messageBag = $validator->collectAccounts();
+                // get import job + configuration back:
+                $importJob     = $validator->getImportJob();
+                $configuration = $importJob->getConfiguration();
+                $configuration->setDuplicateDetectionMethod('cell');
+break;
             case 'simplefin':
-                $validator  = new SimpleFINNewJobDataCollector();
-                $messageBag = $validator->collectAccounts($importJob);
+                $validator = new SimpleFINNewJobDataCollector();
+                $validator->setImportJob($importJob);
+                $messageBag = $validator->collectAccounts();
+                // get import job + configuration back:
+                $importJob     = $validator->getImportJob();
+                $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
                 break;
             case 'nordigen':
                 // nordigen, download list of accounts.
                 $validator  = new NordigenNewJobDataCollector();
-                $messageBag = $validator->collectAccounts($importJob);
+                $messageBag = $validator->collectAccounts();
+                // get import job + configuration back:
+                $importJob     = $validator->getImportJob();
+                $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
                 break;
 

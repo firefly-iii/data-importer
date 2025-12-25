@@ -30,18 +30,26 @@ use App\Services\Nordigen\Request\ListAccountsRequest;
 use App\Services\Nordigen\Response\ListAccountsResponse;
 use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
+use App\Services\Shared\Validation\NewJobDataCollectorInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector
+class NewJobDataCollector implements NewJobDataCollectorInterface
 {
+    private ImportJob $importJob;
+    private ImportJobRepository $repository;
 
-    public function collectAccounts(ImportJob $importJob): MessageBag
+    public function __construct()
     {
+        $this->repository = new ImportJobRepository();
+    }
+
+    public function collectAccounts(): MessageBag
+    {
+        $this->importJob->refreshInstanceIdentifier();
         $messageBag    = new MessageBag();
-        $repository    = new ImportJobRepository();
-        $configuration = $importJob->getConfiguration();
+        $configuration = $this->importJob->getConfiguration();
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $requisitions = $configuration->getNordigenRequisitions();
         $return       = [];
@@ -85,11 +93,29 @@ class NewJobDataCollector
                 }
             }
             Cache::put($requisition, $cache, 1800); // half an hour
-            $importJob->setServiceAccounts($return);
-            $repository->saveToDisk($importJob);
+            $this->importJob->setServiceAccounts($return);
+            $this->repository->saveToDisk($this->importJob);
         }
         return $messageBag;
-        $this->importServiceAccounts = $return;
+    }
 
+    public function getFlowName(): string
+    {
+        return 'nordigen';
+    }
+
+    public function validate(): MessageBag
+    {
+        return new MessageBag();
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
     }
 }

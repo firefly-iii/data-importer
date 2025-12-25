@@ -25,6 +25,7 @@ namespace App\Models;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
@@ -154,7 +155,7 @@ class ImportJob implements Arrayable
         //Log::debug('ImportJob::toArray()');
         $serviceAccounts     = [];
         $applicationAccounts = [];
-        /** @var SimpleFINAccount|NordigenAccount $serviceAccount */
+        /** @var SimpleFINAccount|NordigenAccount|LunchFlowAccount $serviceAccount */
         foreach ($this->serviceAccounts as $serviceAccount) {
             $serviceAccounts[] = $serviceAccount->toArray();
         }

@@ -63,6 +63,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     {
         $this->importJob->refreshInstanceIdentifier();
         $this->repository = new ImportJobRepository();
+        $this->repository->saveToDisk($this->importJob);
     }
 
     /**
@@ -87,7 +88,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
         try {
             // Set initial running status
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
-
+            $this->repository->saveToDisk($this->importJob);
             // Initialize routine manager and execute import
             $routine = new RoutineManager($this->importJob);
 
@@ -103,6 +104,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
             $this->repository->saveToDisk($this->importJob);
 
+            // FIXME no longer necessary to collect all messages etc, it is in the importjob anway.
             Log::info('ProcessImportSubmissionJob completed successfully', [
                 'identifier' => $this->importJob->identifier,
                 'messages'   => count($routine->getAllMessages()),
@@ -135,7 +137,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
         ]);
 
         // Ensure error status is set even if job fails catastrophically
-        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->importJob->identifier);
+        $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
     }
 
     /**

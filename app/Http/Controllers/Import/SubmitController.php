@@ -60,15 +60,11 @@ class SubmitController extends Controller
         $this->repository = new ImportJobRepository();
     }
 
-    /**
-     * @return Application|Factory|View
-     */
     public function index(string $identifier)
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle     = 'Submit the data';
         $importJob     = $this->repository->find($identifier);
-        $statusManager = new SubmissionStatusManager();
         $flow          = $importJob->getFlow();
 
         if ('ready_for_submission' !== $importJob->getState()) {
@@ -93,9 +89,6 @@ class SubmitController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $importJob = $this->repository->find($identifier);
         Log::error('Start: Find import job status.');
-
-        // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
-        $transactions = $importJob->getConvertedTransactions();
 
         // Retrieve authentication credentials for job
         $accessToken = SecretManager::getAccessToken();

@@ -89,6 +89,8 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
+        // FIXME make a factory for this.
+
         /** @var null|RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
@@ -103,7 +105,6 @@ class ConversionController extends Controller
         }
         if ('nordigen' === $flow) {
             // Prepare new account creation data for Gocardless.
-            $newAccountsToCreate = $configuration->getNewAccounts();
             Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
@@ -113,15 +114,15 @@ class ConversionController extends Controller
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
-            throw new ImporterErrorException('Need to handle lunchflow');
             Log::debug('Create Lunch Flow routine manager.');
             $routine = new LunchFlowRoutineManager($identifier);
         }
         if ('simplefin' === $flow) {
             Log::debug('Create SimpleFIN routine manager.');
-            // Prepare new account creation data for SimpleFIN
-            $newAccountsToCreate = $configuration->getNewAccounts();
             $routine             = new SimpleFINRoutineManager($identifier);
+        }
+        if (in_array($flow, config('importer.supports_new_accounts', true))) {
+            $newAccountsToCreate = $configuration->getNewAccounts();
         }
 
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
@@ -159,7 +160,7 @@ class ConversionController extends Controller
 
         // Handle new account data for SimpleFIN
         $flow = $importJob->getFlow();
-        if ('simplefin' === $flow || 'nordigen' === $flow) {
+        if (in_array($flow, config('importer.supports_new_accounts', true))) {
             Log::debug('Will see if new accounts need to be created.');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
@@ -193,6 +194,7 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
+        // FIXME use a factory.
         /** @var null|RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
@@ -216,7 +218,6 @@ class ConversionController extends Controller
             $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
-            throw new ImporterErrorException('cannot go here C');
             $routine = new LunchFlowRoutineManager($identifier);
         }
 

@@ -46,30 +46,31 @@ class AutoUploadController extends Controller
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
+        throw new ImporterErrorException('Needs refactoring for new dec 2025 flow.');
 
-        $secret       = (string)($request->get('secret') ?? '');
-        $systemSecret = (string)config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
-            throw new ImporterErrorException('Bad secret, not allowed to import.');
-        }
-
-        $access = $this->haveAccess();
-        if (false === $access) {
-            throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
-        }
-
-        $json           = $request->file('json');
-        $importable     = $request->file('importable');
-        $importablePath = (string)$importable?->getPathname();
-
-        try {
-            $this->importUpload((string)$json?->getPathname(), $importablePath);
-        } catch (ImporterErrorException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
-        }
-
-        return ' ';
+//        $secret       = (string)($request->get('secret') ?? '');
+//        $systemSecret = (string)config('importer.auto_import_secret');
+//        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+//            throw new ImporterErrorException('Bad secret, not allowed to import.');
+//        }
+//
+//        $access = $this->haveAccess();
+//        if (false === $access) {
+//            throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
+//        }
+//
+//        $json           = $request->file('json');
+//        $importable     = $request->file('importable');
+//        $importablePath = (string)$importable?->getPathname();
+//
+//        try {
+//            $this->importUpload((string)$json?->getPathname(), $importablePath);
+//        } catch (ImporterErrorException $e) {
+//            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+//            $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
+//        }
+//
+//        return ' ';
     }
 
     public function error($string, $verbosity = null): void
