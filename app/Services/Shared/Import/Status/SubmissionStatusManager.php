@@ -97,7 +97,7 @@ class SubmissionStatusManager
     public static function setSubmissionStatus(string $status, ?string $identifier = null): SubmissionStatus
     {
         $importJob                           = self::getImportJob($identifier);
-        $importJob->submissionStatus->status = $status;
+        $importJob->submissionStatus->setStatus($status);
 
         self::storeImportJob($importJob);
 

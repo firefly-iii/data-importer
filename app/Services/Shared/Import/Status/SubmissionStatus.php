@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Import\Status;
 
+use Illuminate\Support\Facades\Log;
+
 class SubmissionStatus
 {
     public const string SUBMISSION_DONE    = 'submission_done';
@@ -32,7 +34,7 @@ class SubmissionStatus
     public const string SUBMISSION_WAITING = 'waiting_to_start';
     public array  $errors;
     public array  $messages;
-    public string $status;
+    private string $status;
     public array  $warnings;
     public int    $currentTransaction;
     public int    $totalTransactions;
@@ -51,6 +53,14 @@ class SubmissionStatus
         $this->totalTransactions  = 0;
         $this->progressPercentage = 0;
     }
+
+    public function setStatus(string $status): void
+    {
+        Log::debug(sprintf('Set submission status to "%s"', $status));
+        $this->status = $status;
+    }
+
+
 
     /**
      * @return static

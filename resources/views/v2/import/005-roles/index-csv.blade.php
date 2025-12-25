@@ -49,6 +49,9 @@
                             <li class="text-danger">{{ $error }}</li>
                             @endforeach
                         </ul>
+                        <p>
+                            Some of these errors can be ignored. To try again pretending nothing of this ever happened, please select the checkbox below. You may still see errors, those you won't be able to skip.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -164,7 +167,23 @@
                                 </tr>
                                 @endforeach
                             </table>
-                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                            <div class="row">
+                                <div class="col">
+                                    @if(!$errors->isEmpty())
+                                        <div class="form-check">
+                                            <input type="checkbox" @if($ignoreWarnings)checked @endif name="ignore_warnings" id="ignore_warnings" value="1"/>
+                                            <label class="form-check-label" for="ignore_warnings">
+                                                Ignore the warnings in the role selection
+                                            </label>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                                </div>
+                            </div>
+
+
                         </form>
                     </div>
                 </div>

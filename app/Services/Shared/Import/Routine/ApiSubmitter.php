@@ -66,6 +66,10 @@ class ApiSubmitter
         $importJob->refreshInstanceIdentifier();
         $this->configuration = $importJob->getConfiguration();
         $this->mapping       = $this->configuration->getMapping();
+
+        // FIXME remove this line to crash the submission routine without the user getting an error,
+        $this->addTag        = $this->configuration->isAddImportTag();
+
         $this->importJob     = $importJob;
         $this->identifier    = $importJob->identifier;
     }
@@ -535,11 +539,9 @@ class ApiSubmitter
         $this->accountInfo = $accountInfo;
     }
 
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         $this->configuration = $configuration;
-        $this->setAddTag($configuration->isAddImportTag());
-        $this->setMapping($configuration->getMapping());
     }
 
     public function setAddTag(bool $addTag): void

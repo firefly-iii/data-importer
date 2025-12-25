@@ -29,7 +29,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Jobs\ProcessImportSubmissionJob;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
 use App\Services\Shared\Import\Status\SubmissionStatusManager;
@@ -79,7 +78,7 @@ class SubmitController extends Controller
         }
 
         // The step immediately preceding submit (008) is always convert (007)
-        $jobBackUrl    = route('data-conversion.index', [$identifier]);
+        $jobBackUrl = route('data-conversion.index', [$identifier]);
 
         // validate flow
         if (!in_array($flow, config('importer.flows'), true)) {
@@ -88,38 +87,29 @@ class SubmitController extends Controller
 
         Log::debug(sprintf('Submit (import) routine manager identifier is "%s"', $identifier));
 
-        // store identifier in session so the status can get it.
-        session()->put(Constants::IMPORT_JOB_IDENTIFIER, $identifier);
-        Log::debug(sprintf('Stored "%s" under "%s"', $identifier, Constants::IMPORT_JOB_IDENTIFIER));
-
         return view('import.008-submit.index', compact('mainTitle', 'identifier', 'jobBackUrl'));
     }
 
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob                           = $this->repository->find($identifier);
+        $importJob = $this->repository->find($identifier);
         Log::error('Start: Find import job status.');
 
         // search for transactions on disk using the import routine's identifier, NOT the submission routine's:
-        $transactions                        = $importJob->getConvertedTransactions();
+        $transactions = $importJob->getConvertedTransactions();
 
         // Retrieve authentication credentials for job
-        $accessToken                         = SecretManager::getAccessToken();
-        $baseUrl                             = SecretManager::getBaseUrl();
-        $vanityUrl                           = SecretManager::getVanityUrl();
+        $accessToken = SecretManager::getAccessToken();
+        $baseUrl     = SecretManager::getBaseUrl();
+        $vanityUrl   = SecretManager::getVanityUrl();
 
         // Set initial running status before dispatching job
-        $importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_RUNNING;
+        $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
         $this->repository->saveToDisk($importJob);
 
         // Dispatch asynchronous job for processing
-        ProcessImportSubmissionJob::dispatch(
-            $importJob,
-            $accessToken,
-            $baseUrl,
-            $vanityUrl
-        );
+        ProcessImportSubmissionJob::dispatch($importJob, $accessToken, $baseUrl, $vanityUrl);
 
         // Return immediate response indicating job was dispatched
         return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
@@ -130,6 +120,6 @@ class SubmitController extends Controller
         $importJob = $this->repository->find($identifier);
         Log::debug(sprintf('Now at %s(%s)', __METHOD__, $identifier));
 
-        return response()->json($importJob->submissionStatus);
+        return response()->json($importJob->submissionStatus->toArray());
     }
 }

@@ -85,7 +85,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
 
         try {
             // Set initial running status
-            $this->importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_RUNNING;
+            $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
 
             // Initialize routine manager and execute import
             $routine = new RoutineManager($this->importJob);
@@ -99,7 +99,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             $this->importJob = $routine->getImportJob();
 
             // Set completion status
-            $this->importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_DONE;
+            $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
             $this->repository->saveToDisk($this->importJob);
 
             Log::info('ProcessImportSubmissionJob completed successfully', [
@@ -116,7 +116,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             ]);
 
             // Set error status
-            $this->importJob->submissionStatus->status = SubmissionStatus::SUBMISSION_ERRORED;
+            $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
             $this->repository->saveToDisk($this->importJob);
             // Re-throw to mark job as failed
             throw $e;
@@ -129,15 +129,12 @@ class ProcessImportSubmissionJob implements ShouldQueue
     public function failed(Throwable $exception): void
     {
         Log::error('ProcessImportSubmissionJob marked as failed', [
-            'identifier' => $this->identifier,
+            'identifier' => $this->importJob->identifier,
             'exception'  => $exception->getMessage(),
         ]);
 
         // Ensure error status is set even if job fails catastrophically
-        SubmissionStatusManager::setSubmissionStatus(
-            SubmissionStatus::SUBMISSION_ERRORED,
-            $this->identifier
-        );
+        SubmissionStatusManager::setSubmissionStatus(SubmissionStatus::SUBMISSION_ERRORED, $this->importJob->identifier);
     }
 
     /**

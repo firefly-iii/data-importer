@@ -107,10 +107,7 @@ class RoleController extends Controller
         // Extract column examples and pseudo identifier examples
         $examples       = $exampleData['columns'];
         $pseudoExamples = $exampleData['pseudo_identifier'];
-
-        // submit mapping from config.
-        $mapping = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-
+        $ignoreWarnings = '1' === request()->old('ignore_warnings');
         // roles
         $roles = config('csv.import_roles');
         ksort($roles);
@@ -118,8 +115,11 @@ class RoleController extends Controller
         // configuration (if it is set)
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
-
-        return view('import.005-roles.index-csv', compact('mainTitle', 'warning', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
+        $old = request()->old('roles');
+        if(null !== $old && count($old) > 0) {
+            $configuredRoles = $old;
+        }
+        return view('import.005-roles.index-csv', compact('mainTitle', 'warning','ignoreWarnings', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping'));
     }
 
     private function camtIndex(ImportJob $importJob, string $warning): View
