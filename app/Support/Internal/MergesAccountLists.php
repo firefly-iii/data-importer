@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Support\Internal;
 
-use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Model\ImportServiceAccount;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -41,10 +40,7 @@ trait MergesAccountLists
         foreach ($generic as $account) {
             Log::debug(sprintf('Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")', $account->name, $account->id, $account->iban, $account->bban));
 
-            $iban             = $account->iban;
-            $number           = $account->bban;
-            $currency         = $account->currencyCode;
-            $entry            = [
+            $entry    = [
                 'import_account'       => $account,
                 'firefly_iii_accounts' => [
                     Constants::ASSET_ACCOUNTS => [],
@@ -53,50 +49,64 @@ trait MergesAccountLists
             ];
 
             // Always show all accounts, but sort matches to the top
-            $filteredByNumber = $this->filterByAccountNumber($fireflyIII, $iban, $number);
+            $filtered = $this->filterByAccountInfo($fireflyIII, $account);
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                $matching                            = $filteredByNumber[$key];
-                $all                                 = $fireflyIII[$key];
+                $matching = $filtered[$key];
+                $all      = $fireflyIII[$key];
 
-                Log::debug(sprintf('There are %d accounts in $fireflyIII[%s]', count($fireflyIII[$key]), $key));
+                Log::debug(sprintf('There are %d accounts in $fireflyIII[%s], and %d (is) are matching', count($fireflyIII[$key]), $key, count($matching)));
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching                         = array_udiff($all, $matching, fn (Account $a, Account $b) => $a->id <=> $b->id);
+                $nonMatching = array_udiff($all, $matching, fn(Account $a, Account $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
             }
-            $return[]         = $entry;
+            $return[] = $entry;
         }
         Log::debug('done with mergeGenericAccountList');
 
         return $return;
     }
 
-    protected function filterByAccountNumber(array $fireflyIII, string $iban, string $number): array
+    private function filterByAccountInfo(array $applicationAccounts, ImportServiceAccount $importServiceAccount): array
     {
-        Log::debug(sprintf('Now filtering Firefly III accounts by IBAN "%s" or number "%s".', $iban, $number));
-        // FIXME this check should also check the number of the account.
-        if ('' === $iban) {
-            return [
-                Constants::ASSET_ACCOUNTS => [],
-                Constants::LIABILITIES    => [],
-            ];
-        }
+        Log::debug(sprintf('Now filtering Firefly III accounts by IBAN "%s", number "%s" or name "%s" (in that order).', $importServiceAccount->iban, $importServiceAccount->bban, $importServiceAccount->name));
         $result = [
             Constants::ASSET_ACCOUNTS => [],
             Constants::LIABILITIES    => [],
         ];
 
-        foreach ($fireflyIII as $key => $accounts) {
-            /** @var Account $account */
-            foreach ($accounts as $account) {
-                if ($iban === $account->iban || $number === $account->number || $iban === $account->number || $number === $account->iban) {
-                    $result[$key][] = $account;
+        foreach ($applicationAccounts as $key => $set) {
+            /** @var Account $applicationAccount */
+            foreach ($set as $applicationAccount) {
+                // match on IBAN!
+                if ('' !== $importServiceAccount->iban && $importServiceAccount->iban === $applicationAccount->iban) {
+                    $applicationAccount->match = true;
+                    $result[$key][] = $applicationAccount;
+                    continue;
+                }
+                // match on IBAN, but based on the "number" field.
+                if ('' !== $importServiceAccount->iban && $importServiceAccount->iban === $applicationAccount->accountNumber) {
+                    $applicationAccount->match = true;
+                    $result[$key][] = $applicationAccount;
+                    continue;
+                }
+                // match on account number
+                if ('' !== $importServiceAccount->bban && $importServiceAccount->bban === $applicationAccount->accountNumber) {
+                    $applicationAccount->match = true;
+                    $result[$key][] = $applicationAccount;
+                    continue;
+                }
+
+                // match on name.
+                if('' !== $importServiceAccount->name && $importServiceAccount->name === $applicationAccount->name) {
+                    $applicationAccount->match = true;
+                    $result[$key][] = $applicationAccount;
+                    continue;
                 }
             }
         }
-
         return $result;
     }
 
@@ -124,19 +134,19 @@ trait MergesAccountLists
         return $result;
     }
 
-    protected function mergeSpectreAccountLists(array $spectre, array $fireflyIII): array
+    protected function mergeSpectreAccountLists(array $spectre, array $applicationAccounts): array
     {
         Log::debug('Now merging Spectre account lists.');
         $generic = ImportServiceAccount::convertSpectreArray($spectre);
 
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 
-    protected function mergeLunchFlowAccountLists(array $lunchFlow, array $fireflyIII): array
+    protected function mergeLunchFlowAccountLists(array $lunchFlow, array $applicationAccounts): array
     {
         Log::debug('Now merging Lunch Flow account lists.');
         $generic = ImportServiceAccount::convertLunchFlowArray($lunchFlow);
 
-        return $this->mergeGenericAccountList($generic, $fireflyIII);
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 }

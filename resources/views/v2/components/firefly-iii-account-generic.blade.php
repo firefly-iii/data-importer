@@ -88,7 +88,7 @@
             const createIndicator = document.getElementById('create-new-indicator-' + accountId);
             if (createIndicator) {
                 createIndicator.value = isCreateNew ? '1' : '0';
-                console.log('Updated create indicator for account:', accountId, 'value:', createIndicator.value);
+                // console.log('Updated create indicator for account:', accountId, 'value:', createIndicator.value);
             } else {
                 console.warn('Create new indicator not found for account:', accountId);
             }
@@ -197,7 +197,7 @@
             const accountId = '{{ $account['import_account']->id }}';
 
             if (select) {
-                console.log('Initializing account selection for:', accountId);
+                //console.log('Initializing account selection for:', accountId);
 
                 // Set up change event listener with enhanced handling
                 select.addEventListener('change', function(event) {

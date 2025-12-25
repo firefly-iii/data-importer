@@ -522,6 +522,7 @@
 
         // Initialize duplicate checking
         if (window.updateDuplicateStatus) {
+            console.log('[a] Call to updateDuplicateStatus('+accountId+')');
             window.updateDuplicateStatus(accountId);
         }
 

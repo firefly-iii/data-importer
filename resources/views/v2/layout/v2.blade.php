@@ -226,6 +226,7 @@ window.commitAccountNameEdit = function(accountId) {
         window.toggleAccountNameEdit(accountId, false);
 
         // Trigger duplicate check after name commit
+        console.log('[b] Call to updateDuplicateStatus('+accountId+')');
         window.updateDuplicateStatus(accountId);
 
         return true;
@@ -335,7 +336,9 @@ window.toggleAccountNameEditing = function(accountId, isCreateNew) {
             widget.classList.add('show');
             // Trigger validation check when widget is shown for "Create New Account"
             if (window.updateDuplicateStatus) {
-                setTimeout(() => window.updateDuplicateStatus(accountId), 100);
+                console.warn('[c] SKIP Call (timed out) to updateDuplicateStatus('+accountId+')');
+                // console.log('[c] Call (timed out) to updateDuplicateStatus('+accountId+')');
+                // setTimeout(() => window.updateDuplicateStatus(accountId), 100);
             }
         } else {
             widget.classList.remove('show');
@@ -467,6 +470,7 @@ window.updateAccountRoleVisibility = function(accountId) {
 
         // Trigger duplicate check when account type changes
         if (window.updateDuplicateStatus) {
+            console.log('[d] Call to updateDuplicateStatus('+accountId+')');
             window.updateDuplicateStatus(accountId);
         }
         return true;

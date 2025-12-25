@@ -15,7 +15,7 @@
                     <div class="card-body">
                         <p>Hi there!</p>
                         <p>
-                            Your configuration file needs some parsing. This intermediate page will disappear as soon as
+                            Your configuration file needs some parsing. Please wait and do not refresh this page. It will disappear as soon as
                             you have read it.
                         </p>
                         <noscript>

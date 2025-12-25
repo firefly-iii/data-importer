@@ -156,12 +156,13 @@ class ImportJobRepository
             case 'simplefin':
                 $validator  = new SimpleFINNewJobDataCollector();
                 $messageBag = $validator->collectAccounts($importJob);
+                $configuration->setDuplicateDetectionMethod('cell');
                 break;
             case 'nordigen':
                 // nordigen, download list of accounts.
                 $validator  = new NordigenNewJobDataCollector();
                 $messageBag = $validator->collectAccounts($importJob);
-
+                $configuration->setDuplicateDetectionMethod('cell');
                 break;
 
             default:

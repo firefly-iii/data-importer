@@ -108,9 +108,9 @@ class ConfigurationController extends Controller
         $serviceAccounts     = $importJob->getServiceAccounts();
         $currencies          = $importJob->getCurrencies();
         $accounts            = $this->mergeAccountLists($flow, $applicationAccounts, $serviceAccounts);
-        $camtType = $configuration->getCamtType();
+        $camtType            = $configuration->getCamtType();
 
-        return view('import.004-configure.index', compact('camtType','identifier', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'accounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('camtType', 'identifier', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'accounts', 'uniqueColumns', 'currencies'));
     }
 
     public function phpDate(Request $request): JsonResponse
