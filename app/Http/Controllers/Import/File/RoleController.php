@@ -200,6 +200,12 @@ class RoleController extends Controller
                 ],
             ];
         }
+
+        $old = request()->old('roles');
+        if(null !== $old && count($old) > 0) {
+            $roles = $old;
+        }
+
         $levels = $this->mergeLevelsAndRoles($levels, $roles);
 
         return view('import.005-roles.index-camt', compact('mainTitle', 'warning', 'identifier', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));

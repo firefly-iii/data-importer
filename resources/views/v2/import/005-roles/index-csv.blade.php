@@ -99,12 +99,7 @@
                                         <td>
                                             @if(count($pseudoExamples) > 0)
                                                 @foreach($pseudoExamples as $example)
-                                                    @if($example['hashed'] !== null)
-                                                        <pre style="color:#999;margin-bottom:0;font-size:0.85em;">{{ $example['raw'] }}</pre>
-                                                        <pre style="color:#e83e8c;margin-bottom:0;">{{ $example['hashed'] }}</pre>
-                                                    @else
-                                                        <pre style="color:#e83e8c;margin-bottom:0;">{{ $example['raw'] }}</pre>
-                                                    @endif
+                                                    <pre style="color:#999;margin-bottom:0;font-size:0.85em;">{{ $example['raw'] }}</pre>
                                                 @endforeach
                                             @endif
                                         </td>

@@ -1156,8 +1156,6 @@ class Configuration
         $this->pendingTransactions         = $request['pending_transactions'];
         $this->customTag                   = $request['custom_tag'];
         $this->duplicateDetectionMethod    = $request['duplicate_detection_method'];
-        $this->uniqueColumnIndex           = $request['unique_column_index'];
-        $this->uniqueColumnType            = $request['unique_column_type'];
         $this->ignoreSpectreCategories     = $request['ignore_spectre_categories'];
         $this->mapAllData                  = $request['map_all_data'];
         $this->dateRange                   = $request['date_range'];
@@ -1173,5 +1171,16 @@ class Configuration
         $this->newAccounts                 = $request['to_create'];
         $this->accounts                    = $request['to_import_from'];
 
+
+        // config for "cell":
+        $this->uniqueColumnIndex           = $request['unique_column_index'] ?? 0;
+        $this->uniqueColumnType            = $request['unique_column_type'] ?? '';
+
+        // config for pseudo identifier (composite identifiers):
+        $this->pseudoIdentifier            = $request['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $this->migrateSingleIdentifierToPseudoIdentifier();
+        $this->updateDateRange();
     }
 }
