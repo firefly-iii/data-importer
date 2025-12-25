@@ -60,7 +60,7 @@ Route::get('/submit-data/{identifier}/status', ['uses' => 'Import\SubmitControll
 
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
-Route::post('/', 'IndexController@postIndex')->name('index.post');
+//Route::post('/', 'IndexController@postIndex')->name('index.post');
 Route::get('/debug', 'DebugController@index')->name('debug');
 Route::get('/health', 'HealthcheckController@check')->name('health');
 

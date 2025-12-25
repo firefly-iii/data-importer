@@ -38,7 +38,6 @@ use App\Services\Nordigen\Model\Balance;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
-use App\Services\Shared\Conversion\RoutineStatusManager;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;

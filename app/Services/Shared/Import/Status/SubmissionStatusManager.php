@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class SubmissionStatusManager
+ * @deprecated
  */
 class SubmissionStatusManager
 {

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use Carbon\Carbon;
@@ -63,10 +64,9 @@ class IndexController extends Controller
                           ]);
         session()->flush();
         session()->regenerate(true);
-        $cookies = [cookie(Constants::FLOW_COOKIE, '')];
         Artisan::call('cache:clear');
 
-        return redirect(route('index'))->withCookies($cookies);
+        return redirect(route('index'));
     }
 
     public function index(Request $request): mixed
@@ -133,27 +133,6 @@ class IndexController extends Controller
         $enabled    = config('importer.enabled_flows');
 
         return view('index', compact('pat', 'warning', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
-    }
-
-    public function postIndex(Request $request): mixed
-    {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        // set cookie with flow:
-        $flow = $request->get('flow');
-        if (in_array($flow, config('importer.flows'), true)) {
-            Log::debug(sprintf('%s is a valid flow, redirect to authenticate.', $flow));
-            $cookies = [cookie(Constants::FLOW_COOKIE, $flow)];
-
-            // redirect directly to upload step.
-            if ('file' === $flow) {
-                return redirect(route('003-upload.index'))->withCookies($cookies);
-            }
-
-            return redirect(route('002-authenticate.index'))->withCookies($cookies);
-        }
-        Log::debug(sprintf('"%s" is not a valid flow, redirect to index.', $flow));
-
-        return redirect(route('index'));
     }
 
     private function clearOldJobs(): void
