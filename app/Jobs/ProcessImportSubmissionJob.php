@@ -105,12 +105,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             $this->repository->saveToDisk($this->importJob);
 
             // FIXME no longer necessary to collect all messages etc, it is in the importjob anway.
-            Log::info('ProcessImportSubmissionJob completed successfully', [
-                'identifier' => $this->importJob->identifier,
-                'messages'   => count($routine->getAllMessages()),
-                'warnings'   => count($routine->getAllWarnings()),
-                'errors'     => count($routine->getAllErrors()),
-            ]);
+            Log::info('ProcessImportSubmissionJob completed successfully', ['identifier' => $this->importJob->identifier,]);
         } catch (Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->importJob->identifier,

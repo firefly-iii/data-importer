@@ -545,10 +545,11 @@ trait AutoImports
 
         if (0 === count($importJob->getConvertedTransactions())) {
             $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
+            $this->repository->saveToDisk($importJob);
             Log::error('No transactions in array, there is nothing to import.');
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
+            $this->importMessages = $importJob->submissionStatus->messages;
+            $this->importWarnings = $importJob->submissionStatus->warnings;
+            $this->importErrors   = $importJob->submissionStatus->errors;
 
             return;
         }
@@ -561,9 +562,10 @@ trait AutoImports
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
             $importJob->submissionStatus->addError(0, $e->getMessage());
-            $this->importMessages = $routine->getAllMessages();
-            $this->importWarnings = $routine->getAllWarnings();
-            $this->importErrors   = $routine->getAllErrors();
+            $this->repository->saveToDisk($importJob);
+            $this->importMessages = $importJob->submissionStatus->messages;
+            $this->importWarnings = $importJob->submissionStatus->warnings;
+            $this->importErrors   = $importJob->submissionStatus->errors;
 
             return;
         }
@@ -571,9 +573,9 @@ trait AutoImports
 
         // set done:
         $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
-        $this->importMessages = $routine->getAllMessages();
-        $this->importWarnings = $routine->getAllWarnings();
-        $this->importErrors   = $routine->getAllErrors();
+        $this->importMessages = $importJob->submissionStatus->messages;
+        $this->importWarnings = $importJob->submissionStatus->warnings;
+        $this->importErrors   = $importJob->submissionStatus->errors;
     }
 
     private function reportImport(): void
