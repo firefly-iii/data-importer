@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import\File;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
@@ -53,7 +52,6 @@ class RoleController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Define roles');
-        $this->middleware(RoleControllerMiddleware::class);
         $this->repository = new ImportJobRepository();
     }
 
@@ -115,11 +113,11 @@ class RoleController extends Controller
         // configuration (if it is set)
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
-        $old = request()->old('roles');
-        if(null !== $old && count($old) > 0) {
+        $old                 = request()->old('roles');
+        if (null !== $old && count($old) > 0) {
             $configuredRoles = $old;
         }
-        return view('import.005-roles.index-csv', compact('mainTitle', 'warning','ignoreWarnings', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping'));
+        return view('import.005-roles.index-csv', compact('mainTitle', 'warning', 'ignoreWarnings', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping'));
     }
 
     private function camtIndex(ImportJob $importJob, string $warning): View
@@ -202,7 +200,7 @@ class RoleController extends Controller
         }
 
         $old = request()->old('roles');
-        if(null !== $old && count($old) > 0) {
+        if (null !== $old && count($old) > 0) {
             $roles = $old;
         }
 
@@ -216,6 +214,45 @@ class RoleController extends Controller
         $allFields = config('camt.fields');
 
         return array_filter($allFields, fn($field) => $level === $field['level']);
+    }
+
+    private function mergeLevelsAndRoles(array $levels, array $roles): array
+    {
+        Log::debug('Now in mergeLevelsAndRoles');
+        foreach ($levels as $letter => $info) {
+            Log::debug(sprintf('Now at level %s', $letter));
+            foreach ($info['fields'] as $index => $field) {
+                $title         = $field['title'];
+                $selected      = $field['default_role'] ?? '_impossible';
+                $possibleRoles = [];
+                Log::debug(sprintf('Analysing level "%s" field "%s"', $letter, $title));
+                if (array_key_exists('roles', $field)) {
+                    $possibleRoles = array_keys(config(sprintf('camt.roles.%s', $field['roles'])) ?? []);
+                }
+                if (array_key_exists($title, $roles)) {
+                    Log::debug(sprintf('Start: User has role "%s" pre-selected for level %s field "%s"', $roles[$title], $letter, $title));
+                    $selected = $roles[$title];
+                    if (!in_array($selected, $possibleRoles)) {
+                        $selected = '_ignore';
+                        Log::debug('User selected impossible role, will be ignored.');
+                    }
+//                    if ('_ignore' === $roles[$title]) {
+//                        $selected = '_ignore';
+//                        Log::debug(sprintf('Make default role "_ignore" for level %s field "%s"', $letter, $title));
+//                    }
+//                    if ($roles[$title] === $field['default_role']) {
+//                        // $selected = $field['default_role'];
+//                        Log::debug(sprintf('User has selected role "%s" for level %s field "%s"', $roles[$title], $letter, $title));
+//                    }
+                }
+                if (!array_key_exists($title, $roles)) {
+                    Log::debug(sprintf('User has no role pre-selected for level %s field "%s"', $letter, $title));
+                }
+                $levels[$letter]['fields'][$index]['selected'] = $selected;
+            }
+        }
+
+        return $levels;
     }
 
     public function postIndex(RolesPostRequest $request, string $identifier): RedirectResponse
@@ -260,44 +297,5 @@ class RoleController extends Controller
         }
 
         return $need;
-    }
-
-    private function mergeLevelsAndRoles(array $levels, array $roles): array
-    {
-        Log::debug('Now in mergeLevelsAndRoles');
-        foreach ($levels as $letter => $info) {
-            Log::debug(sprintf('Now at level %s', $letter));
-            foreach ($info['fields'] as $index => $field) {
-                $title    = $field['title'];
-                $selected = $field['default_role'] ?? '_impossible';
-                $possibleRoles = [];
-                Log::debug(sprintf('Analysing level "%s" field "%s"', $letter, $title));
-                if(array_key_exists('roles', $field)) {
-                    $possibleRoles = array_keys(config(sprintf('camt.roles.%s', $field['roles'])) ?? []);
-                }
-                if (array_key_exists($title, $roles)) {
-                    Log::debug(sprintf('Start: User has role "%s" pre-selected for level %s field "%s"', $roles[$title], $letter, $title));
-                    $selected = $roles[$title];
-                    if (!in_array($selected, $possibleRoles)) {
-                        $selected = '_ignore';
-                        Log::debug('User selected impossible role, will be ignored.');
-                    }
-//                    if ('_ignore' === $roles[$title]) {
-//                        $selected = '_ignore';
-//                        Log::debug(sprintf('Make default role "_ignore" for level %s field "%s"', $letter, $title));
-//                    }
-//                    if ($roles[$title] === $field['default_role']) {
-//                        // $selected = $field['default_role'];
-//                        Log::debug(sprintf('User has selected role "%s" for level %s field "%s"', $roles[$title], $letter, $title));
-//                    }
-                }
-                if (!array_key_exists($title, $roles)) {
-                    Log::debug(sprintf('User has no role pre-selected for level %s field "%s"', $letter, $title));
-                }
-                $levels[$letter]['fields'][$index]['selected'] = $selected;
-            }
-        }
-
-        return $levels;
     }
 }

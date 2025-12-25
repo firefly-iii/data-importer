@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
@@ -55,7 +54,6 @@ class ConfigurationController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Configuration');
-        $this->middleware(ConfigurationControllerMiddleware::class);
         $this->repository = new ImportJobRepository();
     }
 
@@ -113,6 +111,20 @@ class ConfigurationController extends Controller
         return view('import.004-configure.index', compact('camtType', 'identifier', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'accounts', 'uniqueColumns', 'currencies'));
     }
 
+    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
+    {
+        Log::debug(sprintf('Now running %s', __METHOD__));
+        $generic = match ($flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
+            'file'      => [],
+            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow)),
+        };
+
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
+    }
+
     public function phpDate(Request $request): JsonResponse
     {
         Log::debug(sprintf('Method %s', __METHOD__));
@@ -156,19 +168,5 @@ class ConfigurationController extends Controller
 
         // can now redirect to conversion, because that will be the next step.
         return redirect()->route('data-conversion.index', [$identifier]);
-    }
-
-    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
-    {
-        Log::debug(sprintf('Now running %s', __METHOD__));
-        $generic = match ($flow) {
-            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
-            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
-            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
-            'file'      => [],
-            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow)),
-        };
-
-        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 }

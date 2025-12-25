@@ -25,14 +25,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
-use Exception;
-
 use const PHP_SAPI;
 
 class DebugController extends Controller
@@ -44,8 +43,8 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
-        $now        = Carbon::now()->format('Y-m-d H:i:s e');
-        $table      = $this->getTable();
+        $now   = Carbon::now()->format('Y-m-d H:i:s e');
+        $table = $this->getTable();
 
         /** @var Logger $logger */
         $logger     = Log::driver();
@@ -109,7 +108,7 @@ class DebugController extends Controller
         if (true === $isDocker) {
             try {
                 if (file_exists('/var/www/counter-main.txt')) {
-                    $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
+                    $build = trim((string)file_get_contents('/var/www/counter-main.txt'));
                 }
             } catch (Exception $e) {
                 Log::debug('Could not check build counter, but that\'s ok.');
@@ -119,8 +118,8 @@ class DebugController extends Controller
                 $baseBuild = (string)config('importer.docker.base_build');
             }
         }
-        $search    = ['~', '#'];
-        $replace   = ['\~', '# '];
+        $search  = ['~', '#'];
+        $replace = ['\~', '# '];
 
         return [
             'is_docker'   => $isDocker,

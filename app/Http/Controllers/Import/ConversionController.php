@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ConversionControllerMiddleware;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
@@ -61,7 +60,6 @@ class ConversionController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ConversionControllerMiddleware::class)->except(['status', 'start']);
         $this->repository = new ImportJobRepository();
     }
 
@@ -77,10 +75,10 @@ class ConversionController extends Controller
         $flow                = $importJob->getFlow();
         $newAccountsToCreate = [];
         // default back to mapping
-        $jobBackUrl          = $this->getJobBackUrl($flow, $identifier);
-        $flow                = $importJob->getFlow();
+        $jobBackUrl = $this->getJobBackUrl($flow, $identifier);
+        $flow       = $importJob->getFlow();
 
-        $nextUrl             = route('submit-data.index', [$identifier]);
+        $nextUrl = route('submit-data.index', [$identifier]);
         // next URL is different when it's not a file flow (in those cases, its mapping)
         if ('file' !== $flow) {
             $nextUrl = route('data-mapping.index', [$identifier]);
@@ -138,13 +136,26 @@ class ConversionController extends Controller
         return view('import.007-convert.index', compact('mainTitle', 'identifier', 'jobBackUrl', 'flow', 'nextUrl', 'newAccountsToCreate'));
     }
 
+    private function getJobBackUrl(string $flow, string $identifier): string
+    {
+        $jobBackUrl = route('configure-roles.index', [$identifier]);
+
+        // Set appropriate back URL based on flow
+        // All flows but the file flow go back to configuration
+        if ('file' !== $flow) {
+            $jobBackUrl = route('configure-import.index', [$identifier]);
+        }
+
+        return $jobBackUrl;
+    }
+
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob                           = $this->repository->find($identifier);
+        $importJob = $this->repository->find($identifier);
         $importJob->refreshInstanceIdentifier(); // to prevent weird overwrites.
-        $configuration                       = $importJob->getConfiguration();
-        $routine                             = null;
+        $configuration = $importJob->getConfiguration();
+        $routine       = null;
 
         // Handle new account data for SimpleFIN
         $flow = $importJob->getFlow();
@@ -177,7 +188,7 @@ class ConversionController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // now create the right class:
-        $flow                                = $importJob->getFlow();
+        $flow = $importJob->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
@@ -262,18 +273,5 @@ class ConversionController extends Controller
         $importJob = $this->repository->find($identifier);
 
         return response()->json($importJob->conversionStatus->toArray());
-    }
-
-    private function getJobBackUrl(string $flow, string $identifier): string
-    {
-        $jobBackUrl = route('configure-roles.index', [$identifier]);
-
-        // Set appropriate back URL based on flow
-        // All flows but the file flow go back to configuration
-        if ('file' !== $flow) {
-            $jobBackUrl = route('configure-import.index', [$identifier]);
-        }
-
-        return $jobBackUrl;
     }
 }

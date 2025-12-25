@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\SubmitControllerMiddleware;
 use App\Jobs\ProcessImportSubmissionJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Authentication\SecretManager;
@@ -58,7 +57,6 @@ class SubmitController extends Controller
     {
         parent::__construct();
         view()->share('pageTitle', 'Submit data to Firefly III');
-        $this->middleware(SubmitControllerMiddleware::class);
         $this->repository = new ImportJobRepository();
     }
 

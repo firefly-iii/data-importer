@@ -53,11 +53,10 @@ class Controller extends BaseController
         //        $vanityUrl   = (string) env('VANITY_URL', '');
 
         // experimental. Use config instead
-        $accessToken = (string) config('importer.access_token', '');
-        $clientId    = (string) config('importer.client_id', '');
-        $baseUrl     = (string) config('importer.url', '');
-        $vanityUrl   = (string) config('importer.vanity_url', '');
-
+        $accessToken = (string)config('importer.access_token', '');
+        $clientId    = (string)config('importer.client_id', '');
+        $baseUrl     = (string)config('importer.url', '');
+        $vanityUrl   = (string)config('importer.vanity_url', '');
 
 
         // access token AND client ID cannot be set together
@@ -74,8 +73,8 @@ class Controller extends BaseController
             exit;
         }
 
-        $path        = config('importer.upload_path');
-        $writable    = is_dir($path) && is_writable($path);
+        $path     = config('importer.upload_path');
+        $writable = is_dir($path) && is_writable($path);
         if (false === $writable) {
             echo sprintf('Make sure that directory "%s" exists and is writeable.', $path);
 

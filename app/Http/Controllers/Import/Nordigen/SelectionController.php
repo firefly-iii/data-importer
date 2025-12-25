@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\SelectionControllerMiddleware;
 use App\Http\Request\SelectionRequest;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Request\ListBanksRequest;
@@ -56,7 +55,6 @@ class SelectionController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->middleware(SelectionControllerMiddleware::class);
         $this->repository = new ImportJobRepository();
     }
 

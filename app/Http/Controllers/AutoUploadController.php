@@ -24,12 +24,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class AutoUploadController extends Controller
@@ -47,23 +47,23 @@ class AutoUploadController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret         = (string) ($request->get('secret') ?? '');
-        $systemSecret   = (string) config('importer.auto_import_secret');
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $access         = $this->haveAccess();
+        $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
         }
 
         $json           = $request->file('json');
         $importable     = $request->file('importable');
-        $importablePath = (string) $importable?->getPathname();
+        $importablePath = (string)$importable?->getPathname();
 
         try {
-            $this->importUpload((string) $json?->getPathname(), $importablePath);
+            $this->importUpload((string)$json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
@@ -84,7 +84,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     public function info($string, $verbosity = null): void
@@ -93,7 +93,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     public function warn($string, $verbosity = null): void

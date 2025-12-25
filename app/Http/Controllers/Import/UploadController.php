@@ -27,7 +27,6 @@ namespace App\Http\Controllers\Import;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\UploadControllerMiddleware;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
@@ -65,10 +64,10 @@ class UploadController extends Controller
     use RestoresConfiguration;
     use VerifyJSON;
 
+    private string              $configFileContent     = '';
     private string              $configFileName;
     private string              $contentType;
     private string              $importableFileContent = '';
-    private string              $configFileContent     = '';
     private ImportJobRepository $repository;
 
     /**
@@ -78,7 +77,6 @@ class UploadController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
-        $this->middleware(UploadControllerMiddleware::class);
         // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType    = 'unknown';
         $this->configFileName = '';
@@ -101,6 +99,26 @@ class UploadController extends Controller
         return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow', 'settings'));
     }
 
+    private function getConfigurations(): array
+    {
+        // get existing configurations.
+        $disk = Storage::disk('configurations');
+        Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
+        $all = $disk->files();
+
+        // remove files from list
+        $list    = [];
+        $ignored = config('importer.ignored_files');
+        foreach ($all as $entry) {
+            if (!in_array($entry, $ignored, true)) {
+                $list[] = $entry;
+            }
+        }
+        Log::debug('List of files:', $list);
+
+        return $list;
+    }
+
     /**
      * @return Redirector|RedirectResponse
      *
@@ -113,12 +131,12 @@ class UploadController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // need to process two possible file uploads:
-        $importedFile  = $request->file('importable_file');
-        $configFile    = $request->file('config_file');
-        $errors        = new MessageBag();
+        $importedFile = $request->file('importable_file');
+        $configFile   = $request->file('config_file');
+        $errors       = new MessageBag();
 
         // process uploaded file (if present)
-        $errors        = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
         // content of importable file is now in $this->importableFileContent
 
         // process config file (if present)
@@ -128,7 +146,7 @@ class UploadController extends Controller
         // at this point the config (unprocessed) is in $this->configFileContent
 
         // process pre-selected file (if present):
-        $errors        = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
         // the config in $this->configFileContent may now be overruled.
 
         // stop here if any errors:
@@ -136,11 +154,11 @@ class UploadController extends Controller
             return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
         }
         // at this point, create a new import job. With raw content of the config + importable file.
-        $importJob     = $this->repository->create();
-        $importJob     = $this->repository->setFlow($importJob, $flow);
-        $importJob     = $this->repository->setConfigurationString($importJob, $this->configFileContent);
-        $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
-        $importJob     = $this->repository->markAs($importJob, 'contains_content');
+        $importJob = $this->repository->create();
+        $importJob = $this->repository->setFlow($importJob, $flow);
+        $importJob = $this->repository->setConfigurationString($importJob, $this->configFileContent);
+        $importJob = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
+        $importJob = $this->repository->markAs($importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated
@@ -214,7 +232,7 @@ class UploadController extends Controller
             return $errors;
         }
 
-        $errorNumber       = $file->getError();
+        $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('importable_file', $this->getError($errorNumber));
 
@@ -233,7 +251,7 @@ class UploadController extends Controller
                 // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                 // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                 // This one is for you: 🤦‍♀️
-                $eol     = $this->detectEOL($content);
+                $eol = $this->detectEOL($content);
                 if ("\r" === $eol) {
                     Log::error('Your bank is dumb. Tell them to fix their CSV files.');
                     $content = str_replace("\r", "\n", $content);
@@ -267,9 +285,9 @@ class UploadController extends Controller
     private function detectEOL(string $string): string
     {
         $eols     = ['\n\r' => "\n\r", // 0x0A - 0x0D - acorn BBC
-            '\r\n'          => "\r\n", // 0x0D - 0x0A - Windows, DOS OS/2
-            '\n'            => "\n", // 0x0A -      - Unix, OSX
-            '\r'            => "\r", // 0x0D -      - Apple ][, TRS80
+                     '\r\n' => "\r\n", // 0x0D - 0x0A - Windows, DOS OS/2
+                     '\n'   => "\n", // 0x0A -      - Unix, OSX
+                     '\r'   => "\r", // 0x0D -      - Apple ][, TRS80
         ];
         $curCount = 0;
         $curEol   = '';
@@ -292,7 +310,7 @@ class UploadController extends Controller
     private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
     {
         Log::debug('Config file is present.');
-        $errorNumber             = $file->getError();
+        $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('config_file', (string)$errorNumber);
 
@@ -301,8 +319,8 @@ class UploadController extends Controller
 
         // upload the file to a temp directory and use it from there.
         Log::debug('Config file uploaded.');
-        $path                    = $file->getPathname();
-        $validation              = $this->verifyJSON($path);
+        $path       = $file->getPathname();
+        $validation = $this->verifyJSON($path);
         if (false === $validation) {
             $errors->add('config_file', $this->errorMessage);
 
@@ -321,34 +339,14 @@ class UploadController extends Controller
     {
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk                    = Storage::disk('configurations');
-            $content                 = (string)$disk->get($selection);
-            $configFileName          = StorageService::storeContent($content);
+            $disk           = Storage::disk('configurations');
+            $content        = (string)$disk->get($selection);
+            $configFileName = StorageService::storeContent($content);
 
             session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             $this->configFileContent = $content;
         }
 
         return $errors;
-    }
-
-    private function getConfigurations(): array
-    {
-        // get existing configurations.
-        $disk    = Storage::disk('configurations');
-        Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all     = $disk->files();
-
-        // remove files from list
-        $list    = [];
-        $ignored = config('importer.ignored_files');
-        foreach ($all as $entry) {
-            if (!in_array($entry, $ignored, true)) {
-                $list[] = $entry;
-            }
-        }
-        Log::debug('List of files:', $list);
-
-        return $list;
     }
 }

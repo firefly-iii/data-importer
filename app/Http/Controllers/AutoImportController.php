@@ -24,11 +24,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -48,14 +48,14 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
 
-        $secret       = (string) ($request->get('secret') ?? '');
-        $systemSecret = (string) config('importer.auto_import_secret');
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $argument     = (string) ($request->get('directory') ?? './');
-        $directory    = realpath($argument);
+        $argument  = (string)($request->get('directory') ?? './');
+        $directory = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
@@ -64,7 +64,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access       = $this->haveAccess();
+        $access = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }
@@ -72,7 +72,7 @@ class AutoImportController extends Controller
         // take code from auto importer.
         Log::info(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
-        $files        = $this->getFiles($directory);
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
             return response('');
         }

@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import\Spectre;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ConnectionControllerMiddleware;
 use App\Services\Session\Constants;
 use App\Services\Spectre\Authentication\SecretManager as SpectreSecretManager;
 use App\Services\Spectre\Model\Customer;
@@ -59,7 +58,6 @@ class ConnectionController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->middleware(ConnectionControllerMiddleware::class);
         app('view')->share('pageTitle', 'Connection selection      nice ey?');
     }
 
@@ -68,22 +66,22 @@ class ConnectionController extends Controller
      */
     public function index()
     {
-        $mainTitle         = 'Select your financial organisation';
-        $subTitle          = 'Select your financial organisation';
-        $url               = config('spectre.url');
+        $mainTitle = 'Select your financial organisation';
+        $subTitle  = 'Select your financial organisation';
+        $url       = config('spectre.url');
 
-        $appId             = SpectreSecretManager::getAppId();
-        $secret            = SpectreSecretManager::getSecret();
+        $appId  = SpectreSecretManager::getAppId();
+        $secret = SpectreSecretManager::getSecret();
 
         // check if already has the correct customer:
-        $hasCustomer       = false;
-        $request           = new ListCustomersRequest($url, $appId, $secret);
+        $hasCustomer = false;
+        $request     = new ListCustomersRequest($url, $appId, $secret);
 
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var ErrorResponse|ListCustomersResponse $list */
-        $list              = $request->get();
-        $identifier        = null;
+        $list       = $request->get();
+        $identifier = null;
 
         if ($list instanceof ErrorResponse) {
             throw new ImporterErrorException(sprintf('%s: %s', $list->class, $list->message));
@@ -99,22 +97,22 @@ class ConnectionController extends Controller
 
         if (false === $hasCustomer) {
             // create new one
-            $request             = new PostCustomerRequest($url, $appId, $secret);
+            $request = new PostCustomerRequest($url, $appId, $secret);
             $request->setTimeOut(config('importer.connection.timeout'));
             $request->identifier = config('spectre.customer_identifier', 'default_ff3_customer');
 
             /** @var PostCustomerResponse $customer */
-            $customer            = $request->post();
-            $identifier          = $customer->customer->id;
+            $customer   = $request->post();
+            $identifier = $customer->customer->id;
         }
 
         // store identifier in config
         // skip next time?
-        $configuration     = $this->restoreConfiguration();
+        $configuration = $this->restoreConfiguration();
         $configuration->setIdentifier($identifier);
 
         // save config
-        $json              = '[]';
+        $json = '[]';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);
@@ -126,7 +124,7 @@ class ConnectionController extends Controller
         session()->put(Constants::CONFIGURATION, $configuration->toArray());
 
         Log::debug('About to get connections.');
-        $request           = new ListConnectionsRequest($url, $appId, $secret);
+        $request = new ListConnectionsRequest($url, $appId, $secret);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->customer = $identifier;
         $list              = $request->get();
@@ -148,16 +146,16 @@ class ConnectionController extends Controller
 
         if ('00' === $connectionId) {
             // make a new connection.
-            $url                = config('spectre.url');
-            $appId              = SpectreSecretManager::getAppId();
-            $secret             = SpectreSecretManager::getSecret();
-            $newToken           = new PostConnectSessionsRequest($url, $appId, $secret);
+            $url      = config('spectre.url');
+            $appId    = SpectreSecretManager::getAppId();
+            $secret   = SpectreSecretManager::getSecret();
+            $newToken = new PostConnectSessionsRequest($url, $appId, $secret);
             $newToken->setTimeOut(config('importer.connection.timeout'));
             $newToken->customer = $configuration->getIdentifier();
             $newToken->url      = route('011-connections.callback');
 
             /** @var PostConnectSessionResponse $result */
-            $result             = $newToken->post();
+            $result = $newToken->post();
 
             return redirect($result->connect_url);
         }
@@ -169,7 +167,7 @@ class ConnectionController extends Controller
         $configuration->setConnection($connectionId);
 
         // save config
-        $json          = '[]';
+        $json = '[]';
 
         try {
             $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR);

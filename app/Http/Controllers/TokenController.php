@@ -77,8 +77,8 @@ class TokenController extends Controller
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
         }
         // always POST to the base URL, never the vanity URL.
-        $finalURL     = sprintf('%s/oauth/token', $baseURL);
-        $params       = [
+        $finalURL = sprintf('%s/oauth/token', $baseURL);
+        $params   = [
             'form_params' => [
                 'grant_type'    => 'authorization_code',
                 'client_id'     => $clientId,
@@ -91,7 +91,7 @@ class TokenController extends Controller
         Log::debug('Params for access token', $params);
         Log::debug(sprintf('Will contact "%s" for a token.', $finalURL));
 
-        $opts         = [
+        $opts = [
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
             'headers'         => [
@@ -140,11 +140,11 @@ class TokenController extends Controller
     public function doValidate(): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $response        = ['result' => 'OK', 'message' => null];
+        $response = ['result' => 'OK', 'message' => null];
 
         // Check if OAuth is configured but no session token exists
-        $clientId        = (string)config('importer.client_id');
-        $configToken     = (string)config('importer.access_token');
+        $clientId    = (string)config('importer.client_id');
+        $configToken = (string)config('importer.access_token');
         // Corrected: Use the constant value directly with session helper
         $sessionHasToken = session()->has(Constants::SESSION_ACCESS_TOKEN) && '' !== session()->get(Constants::SESSION_ACCESS_TOKEN);
 
@@ -155,9 +155,9 @@ class TokenController extends Controller
         }
 
         // get values from secret manager:
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
-        $infoRequest     = new SystemInformationRequest($url, $token);
+        $url         = SecretManager::getBaseUrl();
+        $token       = SecretManager::getAccessToken();
+        $infoRequest = new SystemInformationRequest($url, $token);
 
         $infoRequest->setVerify(config('importer.connection.verify'));
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
@@ -177,8 +177,8 @@ class TokenController extends Controller
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum         = (string)config('importer.minimum_version');
-        $compare         = version_compare($minimum, $result->version);
+        $minimum = (string)config('importer.minimum_version');
+        $compare = version_compare($minimum, $result->version);
 
         if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
@@ -200,7 +200,7 @@ class TokenController extends Controller
         if (1 === $compare) {
             $errorMessage = sprintf('Your Firefly III version %s is below the minimum required version %s', $result->version, $minimum);
             Log::error(sprintf('Could not link to Firefly III: %s', $errorMessage));
-            $response     = ['result' => 'NOK', 'message' => $errorMessage];
+            $response = ['result' => 'NOK', 'message' => $errorMessage];
         }
         Log::debug('Result is', $response);
 
@@ -218,7 +218,7 @@ class TokenController extends Controller
      */
     public function index(Request $request)
     {
-        $pageTitle   = 'Data importer';
+        $pageTitle = 'Data importer';
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         $accessToken = SecretManager::getAccessToken();
@@ -252,7 +252,7 @@ class TokenController extends Controller
         }
 
         // Option 3: either is empty, ask for client ID and/or base URL:
-        $clientId    = 0 === $clientId ? '' : $clientId;
+        $clientId = 0 === $clientId ? '' : $clientId;
 
         // if the vanity url is the same as the base url, just give this view an empty string
         if ($vanityUrl === $baseUrl) {
@@ -267,21 +267,21 @@ class TokenController extends Controller
      */
     private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, int $clientId): RedirectResponse
     {
-        $baseURL               = rtrim($baseURL, '/');
-        $vanityURL             = rtrim($vanityURL, '/');
+        $baseURL   = rtrim($baseURL, '/');
+        $vanityURL = rtrim($vanityURL, '/');
 
         Log::debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state                 = Str::random(40);
-        $codeVerifier          = Str::random(128);
+        $state        = Str::random(40);
+        $codeVerifier = Str::random(128);
         $request->session()->put('state', $state);
         $request->session()->put('code_verifier', $codeVerifier);
         $request->session()->put('form_client_id', $clientId);
         $request->session()->put('form_base_url', $baseURL);
         $request->session()->put('form_vanity_url', $vanityURL);
 
-        $codeChallenge         = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
-        $params                = ['client_id' => $clientId, 'redirect_uri' => route('token.callback'), 'response_type' => 'code', 'scope' => '', 'state' => $state, 'code_challenge' => $codeChallenge, 'code_challenge_method' => 'S256'];
-        $query                 = http_build_query($params);
+        $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
+        $params        = ['client_id' => $clientId, 'redirect_uri' => route('token.callback'), 'response_type' => 'code', 'scope' => '', 'state' => $state, 'code_challenge' => $codeChallenge, 'code_challenge_method' => 'S256'];
+        $query         = http_build_query($params);
 
         $oauthAuthorizeBaseUrl = $vanityURL;
 
@@ -292,11 +292,11 @@ class TokenController extends Controller
             $oauthAuthorizeBaseUrl = rtrim((string)config('importer.url'), '/');
         }
 
-        $finalURL              = sprintf('%s/oauth/authorize?', $oauthAuthorizeBaseUrl);
+        $finalURL = sprintf('%s/oauth/authorize?', $oauthAuthorizeBaseUrl);
         Log::debug('Query parameters are', $params);
         Log::debug(sprintf('Now redirecting to "%s" (params omitted)', $finalURL));
 
-        return redirect($finalURL.$query);
+        return redirect($finalURL . $query);
     }
 
     /**
@@ -308,10 +308,10 @@ class TokenController extends Controller
     public function submitClientId(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
+        $data = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
-        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {
+        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string)$data['base_url'], 'https://')) {
             $request->session()->flash('secure_url', 'URL must start with https://');
 
             return redirect(route('token.index'));
@@ -320,9 +320,9 @@ class TokenController extends Controller
         $data['client_id'] = (int)$data['client_id'];
 
         // grab base URL from config first, otherwise from submitted data:
-        $baseURL           = config('importer.url');
+        $baseURL = config('importer.url');
         Log::debug(sprintf('[a] Base URL is "%s" (based on "FIREFLY_III_URL")', $baseURL));
-        $vanityURL         = $baseURL;
+        $vanityURL = $baseURL;
 
         Log::debug(sprintf('[b] Vanity URL is now "%s" (based on "FIREFLY_III_URL")', $vanityURL));
 

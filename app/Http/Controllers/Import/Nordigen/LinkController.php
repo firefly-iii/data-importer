@@ -27,7 +27,6 @@ namespace App\Http\Controllers\Import\Nordigen;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\LinkControllerMiddleware;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
@@ -44,7 +43,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
-use function Symfony\Component\String\s;
 
 /**
  * Class LinkController
@@ -58,7 +56,6 @@ class LinkController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->middleware(LinkControllerMiddleware::class);
         $this->repository = new ImportJobRepository();
     }
 
@@ -149,7 +146,7 @@ class LinkController extends Controller
         }
 
         // create a new config thing
-        $importJob = $this->repository->find($identifier);
+        $importJob     = $this->repository->find($identifier);
         $configuration = $importJob->getConfiguration();
         $requisition   = $configuration->getRequisition($reference);
         if (null === $requisition) {

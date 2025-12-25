@@ -51,7 +51,7 @@ class NavController extends Controller
             session()->forget(Constants::CONFIG_COMPLETE_INDICATOR);
         }
 
-        return redirect(route('004-configure.index').'?overruleskip=true');
+        return redirect(route('004-configure.index') . '?overruleskip=true');
     }
 
     public function toConversion(): RedirectResponse

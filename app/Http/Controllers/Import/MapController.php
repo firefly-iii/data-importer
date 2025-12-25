@@ -25,9 +25,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
-use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\MapControllerMiddleware;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Mapper\MapperInterface;
@@ -62,7 +60,6 @@ class MapController extends Controller
         parent::__construct();
 
         app('view')->share('pageTitle', 'Map data');
-        $this->middleware(MapControllerMiddleware::class);
         $this->repository = app(ImportJobRepository::class);
     }
 
@@ -344,35 +341,6 @@ class MapController extends Controller
         return array_unique($filtered);
     }
 
-    private function getExpenseRevenueAccounts(ImportJob $importJob): array
-    {
-        $transactions   = $importJob->getConvertedTransactions();
-        $expenseRevenue = [];
-        $total          = count($transactions);
-
-        /** @var array $transaction */
-        foreach ($transactions as $index => $transaction) {
-            Log::debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
-
-            /** @var array $row */
-            foreach ($transaction['transactions'] as $row) {
-                // Extract expense/revenue destination names from SimpleFIN transactions
-                $destinationName = (string)(array_key_exists('destination_name', $row) ? $row['destination_name'] : '');
-                $sourceName      = (string)(array_key_exists('source_name', $row) ? $row['source_name'] : '');
-
-                // Add both source and destination names as potential expense/revenue accounts
-                if ('' !== $destinationName) {
-                    $expenseRevenue[] = $destinationName;
-                }
-                if ('' !== $sourceName) {
-                    $expenseRevenue[] = $sourceName;
-                }
-            }
-        }
-
-        return array_unique($expenseRevenue);
-    }
-
     private function getCategories(ImportJob $importJob): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
@@ -404,6 +372,35 @@ class MapController extends Controller
         );
 
         return array_unique($filtered);
+    }
+
+    private function getExpenseRevenueAccounts(ImportJob $importJob): array
+    {
+        $transactions   = $importJob->getConvertedTransactions();
+        $expenseRevenue = [];
+        $total          = count($transactions);
+
+        /** @var array $transaction */
+        foreach ($transactions as $index => $transaction) {
+            Log::debug(sprintf('[%s/%s] Parsing transaction for expense/revenue accounts', $index + 1, $total));
+
+            /** @var array $row */
+            foreach ($transaction['transactions'] as $row) {
+                // Extract expense/revenue destination names from SimpleFIN transactions
+                $destinationName = (string)(array_key_exists('destination_name', $row) ? $row['destination_name'] : '');
+                $sourceName      = (string)(array_key_exists('source_name', $row) ? $row['source_name'] : '');
+
+                // Add both source and destination names as potential expense/revenue accounts
+                if ('' !== $destinationName) {
+                    $expenseRevenue[] = $destinationName;
+                }
+                if ('' !== $sourceName) {
+                    $expenseRevenue[] = $sourceName;
+                }
+            }
+        }
+
+        return array_unique($expenseRevenue);
     }
 
     public function postIndex(Request $request, string $identifier): RedirectResponse
