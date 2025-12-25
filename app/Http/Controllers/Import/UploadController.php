@@ -341,9 +341,6 @@ class UploadController extends Controller
             Log::debug('User selected a config file from the store.');
             $disk           = Storage::disk('configurations');
             $content        = (string)$disk->get($selection);
-            $configFileName = StorageService::storeContent($content);
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
             $this->configFileContent = $content;
         }
 

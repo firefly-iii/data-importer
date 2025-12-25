@@ -44,17 +44,6 @@ class FileReader
             }
         }
 
-        return Reader::createFromString($content);
-    }
-
-    /**
-     * Get a CSV file reader and fill it with data from CSV file.
-     */
-    public static function getReaderFromSession(bool $convert = false): Reader
-    {
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $convert);
-
-        // room for config
-        return Reader::createFromString($content);
+        return Reader::fromString($content);
     }
 }

@@ -344,34 +344,34 @@ class MapController extends Controller
     private function getCategories(ImportJob $importJob): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        throw new ImporterErrorException('???');
-        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        $disk               = Storage::disk(self::DISK_NAME);
-        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
-
-        try {
-            $array = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        }
-        $categories = [];
-        $total      = count($array);
-
-        /** @var array $transaction */
-        foreach ($array as $index => $transaction) {
-            Log::debug(sprintf('[%s/%s] Parsing transaction (2)', $index + 1, $total));
-
-            /** @var array $row */
-            foreach ($transaction['transactions'] as $row) {
-                $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
-            }
-        }
-        $filtered = array_filter(
-            $categories,
-            static fn(string $value) => '' !== $value
-        );
-
-        return array_unique($filtered);
+        throw new ImporterErrorException('No longer used?');
+//        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
+//        $disk               = Storage::disk(self::DISK_NAME);
+//        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
+//
+//        try {
+//            $array = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
+//        } catch (JsonException $e) {
+//            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
+//        }
+//        $categories = [];
+//        $total      = count($array);
+//
+//        /** @var array $transaction */
+//        foreach ($array as $index => $transaction) {
+//            Log::debug(sprintf('[%s/%s] Parsing transaction (2)', $index + 1, $total));
+//
+//            /** @var array $row */
+//            foreach ($transaction['transactions'] as $row) {
+//                $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
+//            }
+//        }
+//        $filtered = array_filter(
+//            $categories,
+//            static fn(string $value) => '' !== $value
+//        );
+//
+//        return array_unique($filtered);
     }
 
     private function getExpenseRevenueAccounts(ImportJob $importJob): array

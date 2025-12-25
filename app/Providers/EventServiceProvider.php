@@ -51,20 +51,8 @@ class EventServiceProvider extends ServiceProvider
             ImportedTransactions::class        => [
                 'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
             ],
-            ProvidedDataUpload::class          => [
-                'App\Handlers\Events\ImportFlowHandler@handleProvidedDataUpload',
-            ],
-            ProvidedConfigUpload::class        => [
-                'App\Handlers\Events\ImportFlowHandler@handleProvidedConfigUpload',
-            ],
             DownloadedSimpleFINAccounts::class => [
                 'App\Handlers\Events\ImportFlowHandler@handleDownloadedSimpleFINAccounts',
-            ],
-            CompletedConversion::class         => [
-                'App\Handlers\Events\ImportFlowHandler@handleCompletedConversion',
-            ],
-            CompletedMapping::class            => [
-                'App\Handlers\Events\ImportFlowHandler@handleCompletedMapping',
             ],
         ];
 }
