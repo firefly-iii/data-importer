@@ -68,25 +68,6 @@ class ImportFlowHandler
 
     }
 
-    public function handleCompletedConfiguration(CompletedConfiguration $event): void
-    {
-        $configuration = $event->configuration;
-        session()->put(Constants::CONFIG_COMPLETE_INDICATOR, true);
-
-        if ('file' !== $configuration->getFlow()) {
-            // at this point, lunchbox, nordigen, spectre, and simplefin are ready for data conversion.
-            Log::debug('Mark READY_FOR_CONVERSION = true');
-            session()->put(Constants::READY_FOR_CONVERSION, true);
-        }
-        // if the user does not want to map data, this step is now complete:
-        if (!$configuration->isMapAllData()) {
-            Log::debug('Fire next event.');
-            event(new CompletedMapping($configuration));
-        }
-
-
-    }
-
     public function handleProvidedDataUpload(ProvidedDataUpload $event): void
     {
         if ('' !== $event->fileName) {

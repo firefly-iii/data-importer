@@ -51,9 +51,6 @@ class EventServiceProvider extends ServiceProvider
             ImportedTransactions::class        => [
                 'App\Handlers\Events\ImportedTransactionsEventHandler@sendReportOverMail',
             ],
-            CompletedConfiguration::class      => [
-                'App\Handlers\Events\ImportFlowHandler@handleCompletedConfiguration',
-            ],
             ProvidedDataUpload::class          => [
                 'App\Handlers\Events\ImportFlowHandler@handleProvidedDataUpload',
             ],

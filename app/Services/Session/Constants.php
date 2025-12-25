@@ -33,13 +33,11 @@ class Constants
     public const string ASSET_ACCOUNTS                = 'assets';
     public const string CONFIGURATION                 = 'configuration';
     public const string CONFIG_COMPLETE_INDICATOR     = 'config_complete';
-    public const string CONFIG_FILE_PATHS             = 'config_file_paths';
 
     // session value constants:
     public const string CONNECTION_SELECTED_INDICATOR = 'connection_selected_ind';
     public const string CONVERSION_COMPLETE_INDICATOR = 'conversion_complete';
     public const string CONVERSION_JOB_IDENTIFIER     = 'conversion_job_id';
-    public const string FLOW_COOKIE                   = 'flow';
 
     // upload config values:
     public const string HAS_UPLOAD                    = 'has_uploaded_file';

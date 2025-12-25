@@ -66,6 +66,7 @@ class ConnectionController extends Controller
      */
     public function index()
     {
+        throw new ImporterErrorException('Do not use.');
         $mainTitle = 'Select your financial organisation';
         $subTitle  = 'Select your financial organisation';
         $url       = config('spectre.url');
@@ -141,6 +142,7 @@ class ConnectionController extends Controller
      */
     public function post(Request $request)
     {
+        throw new ImporterErrorException('Do not use.');
         $connectionId  = $request->get('spectre_connection_id');
         $configuration = $this->restoreConfiguration();
 
@@ -175,9 +177,6 @@ class ConnectionController extends Controller
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         }
         StorageService::storeContent($json);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-        session()->put(Constants::CONNECTION_SELECTED_INDICATOR, true);
 
         // redirect to job configuration
         return redirect(route('004-configure.index'));
