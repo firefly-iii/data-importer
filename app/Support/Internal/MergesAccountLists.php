@@ -51,13 +51,13 @@ trait MergesAccountLists
             // Always show all accounts, but sort matches to the top
             $filtered = $this->filterByAccountInfo($fireflyIII, $account);
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                $matching = $filtered[$key];
-                $all      = $fireflyIII[$key];
+                $matching                            = $filtered[$key];
+                $all                                 = $fireflyIII[$key];
 
                 Log::debug(sprintf('There are %d accounts in $fireflyIII[%s], and %d (is) are matching', count($fireflyIII[$key]), $key, count($matching)));
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching = array_udiff($all, $matching, fn(Account $a, Account $b) => $a->id <=> $b->id);
+                $nonMatching                         = array_udiff($all, $matching, fn (Account $a, Account $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
@@ -83,30 +83,35 @@ trait MergesAccountLists
                 // match on IBAN!
                 if ('' !== $importServiceAccount->iban && $importServiceAccount->iban === $applicationAccount->iban) {
                     $applicationAccount->match = true;
-                    $result[$key][] = $applicationAccount;
+                    $result[$key][]            = $applicationAccount;
+
                     continue;
                 }
                 // match on IBAN, but based on the "number" field.
                 if ('' !== $importServiceAccount->iban && $importServiceAccount->iban === $applicationAccount->accountNumber) {
                     $applicationAccount->match = true;
-                    $result[$key][] = $applicationAccount;
+                    $result[$key][]            = $applicationAccount;
+
                     continue;
                 }
                 // match on account number
                 if ('' !== $importServiceAccount->bban && $importServiceAccount->bban === $applicationAccount->accountNumber) {
                     $applicationAccount->match = true;
-                    $result[$key][] = $applicationAccount;
+                    $result[$key][]            = $applicationAccount;
+
                     continue;
                 }
 
                 // match on name.
-                if('' !== $importServiceAccount->name && $importServiceAccount->name === $applicationAccount->name) {
+                if ('' !== $importServiceAccount->name && $importServiceAccount->name === $applicationAccount->name) {
                     $applicationAccount->match = true;
-                    $result[$key][] = $applicationAccount;
+                    $result[$key][]            = $applicationAccount;
+
                     continue;
                 }
             }
         }
+
         return $result;
     }
 

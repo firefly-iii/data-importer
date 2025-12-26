@@ -140,6 +140,7 @@ class TokenManager
 
             return false;
         }
+
         throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
     }
 

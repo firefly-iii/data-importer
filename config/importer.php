@@ -64,14 +64,14 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2025-12-23',
-    'build_time'                    => 1766462326,
+    'version'                       => 'develop/2025-12-26',
+    'build_time'                    => 1766759271,
     'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
     'fake_data'                     => env('FAKE_DATA', false),
-    'supports_new_accounts' => [
+    'supports_new_accounts'         => [
         'nordigen',
         'simplefin',
-        'lunchflow'
+        'lunchflow',
     ],
     'enabled_flows'                 => [
         'file'      => true,

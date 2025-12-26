@@ -53,7 +53,7 @@ class Iban implements ConverterInterface
     {
         $value   = strtoupper(trim((string) app('steam')->cleanStringAndNewlines($value)));
         $value   = str_replace("\x20", '', $value);
-        //Log::debug(sprintf('Trim: isValidIBAN("%s")', $value));
+        // Log::debug(sprintf('Trim: isValidIBAN("%s")', $value));
         $search  = [' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
         $replace = [
             '',

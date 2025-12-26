@@ -181,24 +181,24 @@ class Account
 
     public function getFullName(): string
     {
-        //Log::debug('Account::getFullName()');
+        // Log::debug('Account::getFullName()');
         if ('' !== $this->getName()) {
-//            Log::debug(sprintf('Return getName(): "%s"', $this->getName()));
+            //            Log::debug(sprintf('Return getName(): "%s"', $this->getName()));
 
             return $this->getName();
         }
         if ('' !== $this->getDisplayName()) {
-//            Log::debug(sprintf('Return getDisplayName(): "%s"', $this->getDisplayName()));
+            //            Log::debug(sprintf('Return getDisplayName(): "%s"', $this->getDisplayName()));
 
             return $this->getDisplayName();
         }
         if ('' !== $this->getOwnerName()) {
-//            Log::debug(sprintf('Return getOwnerName(): "%s"', $this->getOwnerName()));
+            //            Log::debug(sprintf('Return getOwnerName(): "%s"', $this->getOwnerName()));
 
             return $this->getOwnerName();
         }
         if ('' !== $this->getIban()) {
-//            Log::debug(sprintf('Return getIban(): "%s"', $this->getIban()));
+            //            Log::debug(sprintf('Return getIban(): "%s"', $this->getIban()));
 
             return $this->getIban();
         }

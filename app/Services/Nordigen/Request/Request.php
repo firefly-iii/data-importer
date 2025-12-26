@@ -309,10 +309,10 @@ abstract class Request
         $headers     = $res->getHeaders();
 
         // raw header values for debugging:
-//        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
-//        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
-//        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
-//        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
 
         // first the normal rate limit:
         $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);

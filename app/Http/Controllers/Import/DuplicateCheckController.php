@@ -71,7 +71,7 @@ class DuplicateCheckController extends Controller
             );
         }
         // Validate account type
-        $validTypes = ['asset', 'liability'];
+        $validTypes          = ['asset', 'liability'];
         if (!in_array($type, $validTypes, true)) {
             Log::warning('DUPLICATE_CHECK: Invalid account type provided', [
                 'type'        => $type,
@@ -85,19 +85,20 @@ class DuplicateCheckController extends Controller
                 ]
             );
         }
-        $arrayToCheck = [
+        $arrayToCheck        = [
             'asset'     => Constants::ASSET_ACCOUNTS,
             'liability' => Constants::LIABILITIES,
         ];
-        $array        = $applicationAccounts[$arrayToCheck[$type]] ?? [];
-        $isDuplicate  = false;
+        $array               = $applicationAccounts[$arrayToCheck[$type]] ?? [];
+        $isDuplicate         = false;
+
         /** @var Account $account */
         foreach ($array as $account) {
             if (strtolower($name) === strtolower($account->name)) {
                 $isDuplicate = true;
             }
         }
-        $message = null;
+        $message             = null;
         if ($isDuplicate) {
             $message = sprintf('%s <em>%s</em> already exists!', ucfirst($type), $name);
         }

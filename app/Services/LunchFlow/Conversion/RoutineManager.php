@@ -58,15 +58,15 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(string $identifier)
     {
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
-        $this->downloaded    = [];
-        $this->identifier    = $identifier;
+        $this->allErrors            = [];
+        $this->allWarnings          = [];
+        $this->allMessages          = [];
+        $this->allRateLimits        = [];
+        $this->downloaded           = [];
+        $this->identifier           = $identifier;
 
-        $this->repository = new ImportJobRepository();
-        $this->importJob  = $this->repository->find($identifier);
+        $this->repository           = new ImportJobRepository();
+        $this->importJob            = $this->repository->find($identifier);
         $this->importJob->refreshInstanceIdentifier();
 
         $this->transactionProcessor = new TransactionProcessor();
@@ -117,7 +117,7 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         // then generate the transactions
-        $transactions = $this->transactionGenerator->getTransactions($this->downloaded);
+        $transactions    = $this->transactionGenerator->getTransactions($this->downloaded);
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // collect errors from transactionProcessor.

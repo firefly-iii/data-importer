@@ -198,7 +198,7 @@ class SimpleFINService
 
             return [];
         }
-        
+
         $transactions = $accounts[0]->getTransactions();
 
         // add a little filter to remove transactions that are pending.

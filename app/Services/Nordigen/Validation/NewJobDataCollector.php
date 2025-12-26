@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * NewJobDataCollector.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -51,11 +53,12 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $messageBag    = new MessageBag();
         $configuration = $this->importJob->getConfiguration();
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $requisitions = $configuration->getNordigenRequisitions();
-        $return       = [];
-        $cache        = [];
+        $requisitions  = $configuration->getNordigenRequisitions();
+        $return        = [];
+        $cache         = [];
         if (0 === count($requisitions)) {
             $messageBag->add('missing_requisitions', 'true');
+
             return $messageBag;
         }
         foreach ($requisitions as $requisition) {
@@ -81,7 +84,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
-                $total = count($response);
+                $total       = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
 
                 /** @var NordigenAccount $account */
@@ -96,6 +99,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
             $this->importJob->setServiceAccounts($return);
             $this->repository->saveToDisk($this->importJob);
         }
+
         return $messageBag;
     }
 

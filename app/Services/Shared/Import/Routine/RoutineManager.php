@@ -26,8 +26,6 @@ namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Import\Status\SubmissionStatus;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -66,7 +64,7 @@ class RoutineManager
 
         // FIXME again with the collecting of accounts?
         Log::debug('First collect account information from Firefly III.');
-        $accountInfo       = $this->infoCollector->collectAccountTypes();
+        $accountInfo = $this->infoCollector->collectAccountTypes();
 
         Log::debug('Now starting submission by calling API Submitter');
         // submit transactions to API:

@@ -24,9 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Submission;
 
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
-use Illuminate\Support\Facades\Log;
-
 /**
  * Trait ProgressInformation
  */
