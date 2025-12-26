@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
+use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
@@ -55,7 +55,7 @@ class ImportJob implements Arrayable
     // job meta-data:
     public string           $identifier;
     private string          $instanceIdentifier    = '';
-    private int           $instanceCounter         = 0;
+    private int             $instanceCounter       = 0;
     private Carbon          $createdAt;
     private string          $state;
     private string          $flow                  = '';
@@ -65,15 +65,16 @@ class ImportJob implements Arrayable
     public ConversionStatus $conversionStatus;
     public SubmissionStatus $submissionStatus;
     private array           $convertedTransactions = [];
+    private bool            $initialized           = false;
 
     // collected Firefly III data.
-    private array $applicationAccounts             = [];
-    private array $currencies                      = [];
-    private array $serviceAccounts                 = [];
+    private array $applicationAccounts = [];
+    private array $currencies          = [];
+    private array $serviceAccounts     = [];
 
     public static function createNew(): self
     {
-        $job                   = new self();
+        $job = new self();
         $job->refreshInstanceIdentifier();
         $job->conversionStatus = new ConversionStatus();
         $job->submissionStatus = new SubmissionStatus();
@@ -92,18 +93,19 @@ class ImportJob implements Arrayable
     public static function fromArray(array $array): self
     {
         // Log::debug('ImportJob::toArray()');
-        $importJob                        = new self();
-        $importJob->instanceIdentifier    = $array['instance_identifier'];
-        $importJob->instanceCounter       = $array['instance_counter'];
-        $importJob->identifier            = $array['identifier'];
-        $importJob->createdAt             = Carbon::parse($array['created_at']);
-        $importJob->state                 = $array['state'];
-        $importJob->flow                  = $array['flow'];
-        $importJob->configurationString   = $array['configuration_string'];
-        $importJob->importableFileString  = $array['importable_file_string'];
+        $importJob                       = new self();
+        $importJob->instanceIdentifier   = $array['instance_identifier'];
+        $importJob->instanceCounter      = $array['instance_counter'];
+        $importJob->identifier           = $array['identifier'];
+        $importJob->initialized          = $array['initialized'];
+        $importJob->createdAt            = Carbon::parse($array['created_at']);
+        $importJob->state                = $array['state'];
+        $importJob->flow                 = $array['flow'];
+        $importJob->configurationString  = $array['configuration_string'];
+        $importJob->importableFileString = $array['importable_file_string'];
 
         // only create configuration object when there is configuration to be parsed.
-        $importJob->configuration         = null;
+        $importJob->configuration = null;
         if (0 !== count($array['configuration'])) {
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
@@ -111,8 +113,8 @@ class ImportJob implements Arrayable
         $importJob->submissionStatus      = SubmissionStatus::fromArray($array['submission_status']);
         $importJob->convertedTransactions = $array['converted_transactions'];
 
-        $importJob->applicationAccounts   = [];
-        $importJob->serviceAccounts       = [];
+        $importJob->applicationAccounts = [];
+        $importJob->serviceAccounts     = [];
 
         // Log::debug('Restoring service accounts');
         /** @var array $item */
@@ -120,7 +122,7 @@ class ImportJob implements Arrayable
             $class                        = $item['class'];
             $importJob->serviceAccounts[] = $class::fromArray($item);
         }
-        $keys                             = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
         foreach ($keys as $key) {
             $importJob->applicationAccounts[$key] = [];
             if (array_key_exists($key, $array['application_accounts'])) {
@@ -131,7 +133,7 @@ class ImportJob implements Arrayable
             }
         }
         // Log::debug('Restored application accounts');
-        $importJob->currencies            = $array['currencies'];
+        $importJob->currencies = $array['currencies'];
 
         return $importJob;
     }
@@ -160,7 +162,7 @@ class ImportJob implements Arrayable
         foreach ($this->serviceAccounts as $serviceAccount) {
             $serviceAccounts[] = $serviceAccount->toArray();
         }
-        $keys                = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
         foreach ($keys as $key) {
             $applicationAccounts[$key] ??= [];
             foreach ($this->applicationAccounts[$key] ?? [] as $current) {
@@ -173,6 +175,7 @@ class ImportJob implements Arrayable
                 'identifier'             => $this->identifier,
                 'instance_identifier'    => $this->instanceIdentifier,
                 'instance_counter'       => $this->instanceCounter,
+                'initialized'            => $this->initialized,
                 'created_at'             => $this->createdAt->toW3cString(),
                 'state'                  => $this->state,
                 'flow'                   => $this->flow,
@@ -315,4 +318,16 @@ class ImportJob implements Arrayable
     {
         return $this->instanceCounter;
     }
+
+    public function isInitialized(): bool
+    {
+        return $this->initialized;
+    }
+
+    public function setInitialized(bool $initialized): void
+    {
+        $this->initialized = $initialized;
+    }
+
+
 }

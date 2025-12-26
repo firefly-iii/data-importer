@@ -119,6 +119,9 @@ class ImportJobRepository
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
+        if(true === $importJob->isInitialized()) {
+            return new MessageBag();
+        }
         Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
         $messageBag    = new MessageBag();
         $configuration = $importJob->getConfiguration();
@@ -141,6 +144,8 @@ class ImportJobRepository
 
         Log::debug(sprintf('Now in flow("%s")', $importJob->getFlow()));
 
+        // FIXME this routine must also be followed when doing uploads and POST and what not.
+        // FIXME aka this should be part of the routine.
         // validate stuff (from simplefin etc).
         switch ($importJob->getFlow()) {
             case 'file':
@@ -199,6 +204,7 @@ class ImportJobRepository
         if (0 === count($messageBag)) {
             $importJob->setState('is_parsed');
         }
+        $importJob->setInitialized(true);
         $importJob     = $this->setConfiguration($importJob, $configuration);
         $this->saveToDisk($importJob);
 

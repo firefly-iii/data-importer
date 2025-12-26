@@ -317,12 +317,12 @@ trait AutoImports
             return $exitCode;
         }
 
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        Log::debug(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImportFromImportJob($importJob);
         $this->reportImport();
         $this->reportBalanceDifferences($importJob);
 
-        $this->line('Done!');
+        Log::debug('Done!');
 
         // merge things:
         $messages = array_merge($this->importMessages, $this->conversionMessages);
@@ -357,9 +357,13 @@ trait AutoImports
         $this->conversionRateLimits = [];
         $flow                       = $importJob->getFlow();
         $configuration              = $importJob->getConfiguration();
+        $this->repository->parseImportJob($importJob);
+        $this->repository->saveToDisk($importJob);
 
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
+        // FIXME this has to be a factory
+        Log::debug('Create a routine.');
         $manager = null;
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
@@ -394,6 +398,7 @@ trait AutoImports
 
             exit(1);
         }
+        Log::debug(sprintf('Routine created: %s.', $manager::class));
         Log::debug('About to call start()');
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
 
@@ -518,9 +523,10 @@ trait AutoImports
             'error' => $this->importErrors,
         ];
 
-        $this->info(sprintf('There are %d message(s)', count($this->importMessages)));
-        $this->info(sprintf('There are %d warning(s)', count($this->importWarnings)));
-        $this->info(sprintf('There are %d error(s)', count($this->importErrors)));
+        // FIXME this reports to info() which ends up in the result.
+        Log::info(sprintf('There are %d message(s)', count($this->importMessages)));
+        Log::info(sprintf('There are %d warning(s)', count($this->importWarnings)));
+        Log::info(sprintf('There are %d error(s)', count($this->importErrors)));
 
         foreach ($list as $func => $set) {
             /**
@@ -624,6 +630,7 @@ trait AutoImports
      */
     private function importUpload(string $jsonFile, string $importableFile): void
     {
+        Log::debug('Start of importUpload');
         $this->repository = new ImportJobRepository();
         $importJob        = $this->repository->create();
 
@@ -644,7 +651,6 @@ trait AutoImports
         if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
             $importableFileContent = file_get_contents($importableFile);
         }
-
 
         $importJob = $this->repository->setFlow($importJob, $json['flow']);
         $importJob = $this->repository->setConfigurationString($importJob, $jsonContent);
@@ -678,11 +684,11 @@ trait AutoImports
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
 
-        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        Log::debug(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImportFromImportJob($importJob);
         $this->reportImport();
 
-        $this->line('Done!');
+        Log::debug('Done!');
         event(
             new ImportedTransactions(
                 basename($jsonFile),

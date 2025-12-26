@@ -81,6 +81,7 @@ class RoutineManager implements RoutineManagerInterface
     #[Override]
     public function getServiceAccounts(): array
     {
+        Log::debug('Return getServiceAccounts from RoutineManager.');
         return $this->importJob->getServiceAccounts();
     }
 
@@ -90,6 +91,13 @@ class RoutineManager implements RoutineManagerInterface
     public function start(): array
     {
         $this->existingServiceAccounts = $this->getServiceAccounts();
+
+        if(0 === count($this->existingServiceAccounts)) {
+            // retry downloading existing service accounts.
+            Log::debug('Do not have service accounts from SimpleFIN, redownload.');
+        }
+
+
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $transactions                  = [];
         $configuration                 = $this->importJob->getConfiguration();
@@ -101,6 +109,7 @@ class RoutineManager implements RoutineManagerInterface
          * @var int    $applicationAccountId
          */
         foreach ($accounts as $importServiceAccountId => $applicationAccountId) {
+            Log::debug(sprintf('Now processing account "%s": #%d', $importServiceAccountId, $applicationAccountId));
             array_push($transactions, ...$this->processAccount($importServiceAccountId, $applicationAccountId));
         }
 
@@ -121,7 +130,6 @@ class RoutineManager implements RoutineManagerInterface
 
         if (null === $currentSimpleFINAccountData) {
             Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', ['simplefin_account_id_sought' => $importServiceAccountId]);
-            Log::debug('Done with downloading new data.');
 
             // If the account data for this ID isn't found, we can't process its transactions.
             // This might indicate an inconsistency in session data or configuration.
