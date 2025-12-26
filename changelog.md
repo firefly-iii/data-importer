@@ -2,6 +2,31 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.0.0 - 2026-01-xx
+
+Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with and easier to extend.
+
+### Added
+- New import data provider "[Sophtron](https://sophtron.com/index)". In the interest of full disclosure, they have sponsored me to add their API to the data importer. [Their support (and yours!)](https://docs.firefly-iii.org/explanation/more-information/donations/) allows me to spend more time on Firefly III and the data importer, and I'm grateful for their support.
+- https://github.com/firefly-iii/data-importer/pull/1037
+- https://github.com/firefly-iii/data-importer/pull/1035
+
+
+
+### Changed
+- Import jobs are no longer managed using session data. This is a technical change, and it means that import jobs are easier to monitor, update and (in the future) can be re-run using new settings. This allows for a whole new range of flexibility.
+- A lot of code has been rewritten to make it easier to manage an import job. Thanks to the previously mentioned changed, it is easier to switch back and forth between the necessary steps of an import job.
+- A small API is now in place (with documentation to follow), that allows you to communicate with the data importer more easily. This will not be relevant for a lot of folks but the "auto import" and "auto upload" endpoints for example, will be documented [just like the Firefly III API documentation](https://api-docs.firefly-iii.org/).
+
+### Deprecated
+- The "Spectre" import routine created and supported by Salt Edge, has been officially deprecated and can no longer be used.
+
+### Fixed
+- #11162
+- #11172
+- #11327
+- #11377
+
 ## v1.9.2 - 2025-11-08
 
 ### Added
