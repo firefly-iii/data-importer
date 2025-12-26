@@ -275,7 +275,7 @@ trait AutoImports
             return ExitCode::GENERAL_ERROR->value;
         }
 
-        $this->line(sprintf('Going to convert from file %s using configuration %s and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
+        $this->line(sprintf('[a] Going to convert from file "%s" using configuration %s and flow "%s".', $importableFile, $jsonFile, $configuration->getFlow()));
         $this->importJob = $importJob;
         $this->repository->saveToDisk($importJob);
         // this is it!
@@ -698,74 +698,74 @@ trait AutoImports
      */
     private function importUpload(string $jsonFile, string $importableFile): void
     {
-        throw new ImporterErrorException('Needs refactoring for new dec 2025 flow.');
-        //        $this->repository = new ImportJobRepository();
-        //        $importJob        = $this->repository->create();
-        //
-        //        // do JSON check
-        //        $jsonResult = $this->verifyJSON($jsonFile);
-        //        if (false === $jsonResult) {
-        //            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
-        //            $this->error($message);
-        //
-        //            return;
-        //        }
-        //        // FIXME this is a hack. Normally, the data importer would know what import flow to use from the user's selection.
-        //        // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
-        //        $jsonContent = file_get_contents($jsonFile);
-        //        $json        = json_decode($jsonContent, true);
-        //
-        //        $importableFileContent = '';
-        //        if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
-        //            $importableFileContent = file_get_contents($importableFile);
-        //        }
-        //
-        //
-        //        $importJob = $this->repository->setFlow($importJob, $json['flow']);
-        //        $importJob = $this->repository->setConfigurationString($importJob, $jsonContent);
-        //        $importJob = $this->repository->setImportableFileString($importJob, $importableFileContent);
-        //        $importJob = $this->repository->markAs($importJob, 'contains_content');
-        //
-        //        // FIXME: this little routine belongs in a function or a helper.
-        //        // FIXME: it is duplicated
-        //        // at this point, also parse and process the uploaded configuration file string.
-        //        $configuration = Configuration::make();
-        //        if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
-        //            $configuration = Configuration::fromArray(json_decode($jsonContent, true));
-        //        }
-        //        if (null !== $importJob->getConfiguration()) {
-        //            $configuration = $importJob->getConfiguration();
-        //        }
-        //        $importJob->setConfiguration($configuration);
-        //        $this->repository->saveToDisk($importJob);
-        //
-        //        $this->line(sprintf('Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $json['flow']));
-        //
-        //        // this is it!
-        //        $this->startConversionFromImportJob($importJob);
-        //        $this->reportConversion();
-        //
-        //        // crash here if the conversion failed.
-        //        if (0 !== count($this->conversionErrors)) {
-        //            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
-        //
-        //            throw new ImporterErrorException('Too many errors in the data conversion.');
-        //        }
-        //
-        //        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        //        $this->startImport($configuration);
-        //        $this->reportImport();
-        //
-        //        $this->line('Done!');
-        //        event(
-        //            new ImportedTransactions(
-        //                basename($jsonFile),
-        //                array_merge($this->conversionMessages, $this->importMessages),
-        //                array_merge($this->conversionWarnings, $this->importWarnings),
-        //                array_merge($this->conversionErrors, $this->importErrors),
-        //                $this->conversionRateLimits
-        //            )
-        //        );
+        $this->repository = new ImportJobRepository();
+        $importJob        = $this->repository->create();
+
+        // do JSON check
+        $jsonResult = $this->verifyJSON($jsonFile);
+        if (false === $jsonResult) {
+            $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
+            Log::error($message);
+
+            return;
+        }
+        // FIXME this is a hack. Normally, the data importer would know what import flow to use from the user's selection.
+        // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
+        $jsonContent = file_get_contents($jsonFile);
+        $json        = json_decode($jsonContent, true);
+
+        $importableFileContent = '';
+        if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
+            $importableFileContent = file_get_contents($importableFile);
+        }
+
+
+        $importJob = $this->repository->setFlow($importJob, $json['flow']);
+        $importJob = $this->repository->setConfigurationString($importJob, $jsonContent);
+        $importJob = $this->repository->setImportableFileString($importJob, $importableFileContent);
+        $importJob = $this->repository->markAs($importJob, 'contains_content');
+
+        // FIXME: this little routine belongs in a function or a helper.
+        // FIXME: it is duplicated
+        // at this point, also parse and process the uploaded configuration file string.
+        $configuration = Configuration::make();
+        if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
+            $configuration = Configuration::fromArray(json_decode($jsonContent, true));
+        }
+        if (null !== $importJob->getConfiguration()) {
+            $configuration = $importJob->getConfiguration();
+        }
+        $configuration->setFlow($importJob->getFlow());
+        $importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($importJob);
+
+        Log::debug(sprintf('[b] Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $json['flow']));
+
+        // this is it!
+        $this->startConversionFromImportJob($importJob);
+        $this->reportConversion();
+
+        // crash here if the conversion failed.
+        if (0 !== count($this->conversionErrors)) {
+            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+
+            throw new ImporterErrorException('Too many errors in the data conversion.');
+        }
+
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        $this->startImportFromImportJob($importJob);
+        $this->reportImport();
+
+        $this->line('Done!');
+        event(
+            new ImportedTransactions(
+                basename($jsonFile),
+                array_merge($this->conversionMessages, $this->importMessages),
+                array_merge($this->conversionWarnings, $this->importWarnings),
+                array_merge($this->conversionErrors, $this->importErrors),
+                $this->conversionRateLimits
+            )
+        );
     }
 
     protected function isNothingDownloaded(): bool

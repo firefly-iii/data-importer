@@ -22,6 +22,10 @@
 
 declare(strict_types=1);
 
+// import by POST
+Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
+Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
+
 // new routes that use less session data and redirects.
 Route::get('/authenticate-flow/{flow?}', 'Import\AuthenticateController@index')->name('authenticate-flow.index');
 Route::post('/authenticate-flow/{flow}', 'Import\AuthenticateController@postIndex')->name('authenticate-flow.post');
@@ -138,9 +142,6 @@ Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDat
 // Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
 
 
-// import by POST
-Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
-Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 
 //
 // // start import thing.

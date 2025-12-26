@@ -55,7 +55,7 @@ final class Import extends Command
      */
     public function handle(): int
     {
-        $access     = $this->haveAccess();
+        $access     = $this->haveAccess(true);
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             Log::error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));

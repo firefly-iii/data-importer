@@ -35,15 +35,42 @@ use Illuminate\Support\Facades\Log;
  */
 trait HaveAccess
 {
-    private function haveAccess(): bool
+    private function sendMessage(bool $console, string $line): void
     {
-        $url             = (string) config('importer.url');
-        $token           = SecretManager::getAccessToken();
+        if ($console) {
+            $this->line($line);
+            return;
+        }
+        Log::debug($line);
+    }
 
-        $this->line(sprintf('Trying to connect to %s...', $url));
-        $this->line(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
+    private function sendError(bool $console, string $line): void
+    {
+        if ($console) {
+            $this->error($line);
+            return;
+        }
+        Log::error($line);
+    }
 
-        $request         = new SystemInformationRequest($url, $token);
+    private function sendWarning(bool $console, string $line): void
+    {
+        if ($console) {
+            $this->warn($line);
+            return;
+        }
+        Log::warning($line);
+    }
+
+    protected function haveAccess(bool $console): bool
+    {
+        $url   = (string)config('importer.url');
+        $token = SecretManager::getAccessToken();
+
+        $this->sendMessage($console, sprintf('Trying to connect to %s...', $url));
+        $this->sendMessage($console, sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
+
+        $request = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -52,8 +79,8 @@ trait HaveAccess
             /** @var SystemInformationResponse $result */
             $result = $request->get();
         } catch (ApiHttpException $e) {
-            $this->error(sprintf('ApiHttpException: Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
-            $this->error(sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
+            $this->sendError($console, sprintf('ApiHttpException: Could not connect to Firefly III at %s: %s', $url, $e->getMessage()));
+            $this->sendError($console, sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
             return false;
         }
@@ -62,21 +89,21 @@ trait HaveAccess
             $reportedVersion = substr($reportedVersion, 1);
         }
         if (str_starts_with($reportedVersion, 'v')) {
-            $this->line(sprintf('Connected to Firefly III v%s', $reportedVersion));
+            $this->sendMessage($console, sprintf('Connected to Firefly III v%s', $reportedVersion));
         }
         if (str_starts_with($reportedVersion, 'develop')) {
-            $this->line(sprintf('Connected to Firefly III %s', $reportedVersion));
-            $this->warn('You are connected to a development version of Firefly III.');
+            $this->sendMessage($console, sprintf('Connected to Firefly III %s', $reportedVersion));
+            $this->sendWarning($console, 'You are connected to a development version of Firefly III.');
         }
 
         if (str_starts_with($reportedVersion, 'branch')) {
-            $this->line(sprintf('Connected to Firefly III %s', $reportedVersion));
-            $this->warn('You are connected to a branch version of Firefly III.');
+            $this->sendMessage($console, sprintf('Connected to Firefly III %s', $reportedVersion));
+            $this->sendWarning($console, 'You are connected to a branch version of Firefly III.');
         }
 
-        $compare         = version_compare($reportedVersion, config('importer.minimum_version'));
+        $compare = version_compare($reportedVersion, config('importer.minimum_version'));
         if (-1 === $compare && !str_starts_with($reportedVersion, 'develop') && !str_starts_with($reportedVersion, 'branch')) {
-            $this->error(sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
+            $this->sendError($console, sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
 
             return false;
         }
@@ -85,7 +112,7 @@ trait HaveAccess
     }
 
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     abstract public function error($string, $verbosity = null);
@@ -113,7 +140,7 @@ trait HaveAccess
             if ($current === $path) {
                 return true;
             }
-            if (str_starts_with($path, (string) $current)) {
+            if (str_starts_with($path, (string)$current)) {
                 Log::debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
 
                 return true;

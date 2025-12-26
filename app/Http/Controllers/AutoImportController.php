@@ -39,11 +39,17 @@ class AutoImportController extends Controller
     use HaveAccess;
     use VerifyJSON;
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * @throws ImporterErrorException
      */
     public function index(Request $request): Response
     {
+        die('here we are');
         if (false === config('importer.can_post_autoimport')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
@@ -64,7 +70,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access       = $this->haveAccess();
+        $access       = $this->haveAccess(false);
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }

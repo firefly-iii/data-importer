@@ -30,6 +30,7 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class AutoUploadController extends Controller
@@ -41,37 +42,34 @@ class AutoUploadController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(AutoUploadRequest $request): string
+    public function index(AutoUploadRequest $request): JsonResponse
     {
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
+        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+            throw new ImporterErrorException('Bad secret, not allowed to import.');
+        }
 
-        throw new ImporterErrorException('Needs refactoring for new dec 2025 flow.');
+        $access = $this->haveAccess(false);
+        if (false === $access) {
+            throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
+        }
+        $json           = $request->file('json');
+        $importable     = $request->file('importable');
+        $importablePath = (string)$importable?->getPathname();
+        //
+        try {
+            $this->importUpload((string)$json?->getPathname(), $importablePath);
+        } catch (ImporterErrorException $e) {
+            $message = sprintf('[%s]: %s', config('importer.version'), $e->getMessage());
+            Log::error($message);
+            return response()->json(['TODO' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
+        }
 
-        //        $secret       = (string)($request->get('secret') ?? '');
-        //        $systemSecret = (string)config('importer.auto_import_secret');
-        //        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
-        //            throw new ImporterErrorException('Bad secret, not allowed to import.');
-        //        }
-        //
-        //        $access = $this->haveAccess();
-        //        if (false === $access) {
-        //            throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
-        //        }
-        //
-        //        $json           = $request->file('json');
-        //        $importable     = $request->file('importable');
-        //        $importablePath = (string)$importable?->getPathname();
-        //
-        //        try {
-        //            $this->importUpload((string)$json?->getPathname(), $importablePath);
-        //        } catch (ImporterErrorException $e) {
-        //            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-        //            $this->line(sprintf('Import exception (see the logs): %s', $e->getMessage()));
-        //        }
-        //
-        //        return ' ';
+        return response()->json(['TODO' => 'Translate the import result to a JSON thing.']);
     }
 
     public function error($string, $verbosity = null): void
@@ -86,7 +84,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     public function info($string, $verbosity = null): void
@@ -95,7 +93,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     public function warn($string, $verbosity = null): void
