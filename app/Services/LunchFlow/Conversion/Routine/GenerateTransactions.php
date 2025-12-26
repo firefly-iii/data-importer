@@ -28,8 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\LunchFlow\Model\Transaction;
-use App\Services\LunchFlow\Request\GetAccountInformationRequest;
-use App\Services\LunchFlow\TokenManager;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
@@ -118,7 +116,7 @@ class GenerateTransactions
         $return = [];
 
         /**
-         * @var int $accountId
+         * @var int   $accountId
          * @var array $entries
          */
         foreach ($transactions as $accountId => $entries) {
@@ -126,7 +124,7 @@ class GenerateTransactions
             Log::debug(sprintf('Going to parse account %s with %d transaction(s).', $accountId, $total));
 
             /**
-             * @var int $index
+             * @var int         $index
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
@@ -148,15 +146,15 @@ class GenerateTransactions
      */
     private function generateTransaction(int $accountId, Transaction $entry): array
     {
-        $configuration = $this->importJob->getConfiguration();
+        $configuration            = $this->importJob->getConfiguration();
         Log::debug(sprintf('Lunch Flow transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currency, $entry->amount));
 
-        $return      = [
+        $return                   = [
             'apply_rules'             => $configuration->isRules(),
             'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
-        $transaction = [
+        $transaction              = [
             'type'          => 'withdrawal',
             'date'          => $entry->getDate()->toW3cString(),
             'datetime'      => $entry->getDate()->toW3cString(),
@@ -194,18 +192,18 @@ class GenerateTransactions
     private function appendPositiveAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
         // amount is positive: deposit or transfer. Lunch Flow account is the destination
-        $transaction['type']   = 'deposit';
-        $transaction['amount'] = $entry->amount;
+        $transaction['type']           = 'deposit';
+        $transaction['amount']         = $entry->amount;
 
         // destination is a Lunch Flow account (has to be!)
         $transaction['destination_id'] = (int)$this->accounts[$accountId];
         Log::debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
 
         // append source iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'source');
+        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
 
         // TODO clean up mapping
-        $mappedId = null;
+        $mappedId                      = null;
         if (isset($transaction['source_name'])) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
             $mappedId = $this->getMappedAccountId($transaction['source_name']);
@@ -232,7 +230,7 @@ class GenerateTransactions
             }
         }
 
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, '', '');
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, '', '');
 
         Log::debug(sprintf('destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['destination_id'] ?? '', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
 
@@ -367,7 +365,7 @@ class GenerateTransactions
 
             return $accountType;
         }
-        $type = $configuration->getAccountTypes()[$mappedId] ?? 'expense';
+        $type          = $configuration->getAccountTypes()[$mappedId] ?? 'expense';
         Log::debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $type));
 
         return $type;
@@ -378,8 +376,8 @@ class GenerateTransactions
      */
     private function getAccountType(int $accountId): string
     {
-        $token = SecretManager::getAccessToken();
-        $url   = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
         Log::debug(sprintf('Going to download account #%d', $accountId));
         $request = new GetAccountRequest($url, $token);
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -391,7 +389,7 @@ class GenerateTransactions
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
-        $type = $result->getAccount()->type;
+        $type    = $result->getAccount()->type;
 
         Log::debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
 
@@ -433,9 +431,9 @@ class GenerateTransactions
         $transaction['source_id'] = (int)$this->accounts[$accountId]; // TODO entry may not exist, then what?
 
         // append source iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'destination');
+        $transaction              = $this->appendAccountFields($transaction, $entry, 'destination');
 
-        $mappedId = null;
+        $mappedId                 = null;
         if (isset($transaction['destination_name'])) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['destination_name']));
             $mappedId = $this->getMappedAccountId($transaction['destination_name']);
@@ -446,7 +444,7 @@ class GenerateTransactions
 
         if (null !== $mappedId && 0 !== $mappedId) {
             Log::debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['destination_name'], $mappedId));
-            $mappedType = $this->getMappedAccountType($mappedId);
+            $mappedType                    = $this->getMappedAccountType($mappedId);
 
             $originalDestName              = $transaction['destination_name'];
             $transaction['destination_id'] = $mappedId;
@@ -463,7 +461,7 @@ class GenerateTransactions
             }
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), '');
+        $transaction              = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), '');
 
         Log::debug(sprintf('source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"', $transaction['source_id'], $transaction['destination_id'] ?? '', $transaction['destination_name'] ?? '', $transaction['destination_iban'] ?? ''));
 
@@ -565,7 +563,7 @@ class GenerateTransactions
     {
         $this->importJob  = $importJob;
         $this->identifier = $importJob->identifier;
-        $this->accounts = $importJob->getConfiguration()->getAccounts();
+        $this->accounts   = $importJob->getConfiguration()->getAccounts();
         $this->importJob->refreshInstanceIdentifier();
     }
 }

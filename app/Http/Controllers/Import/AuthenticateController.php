@@ -63,7 +63,7 @@ class AuthenticateController extends Controller
         // variables for page:
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
-        $flow      ??= 'file';
+        $flow ??= 'file';
         $subTitle  = ucfirst($flow);
         $error     = Session::get('error');
         Log::debug(sprintf('Now in AuthenticateController::index (/authenticate) with flow "%s"', $flow));
@@ -75,7 +75,7 @@ class AuthenticateController extends Controller
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
 
-        $result = $validator->validate();
+        $result    = $validator->validate();
 
         if (AuthenticationStatus::NODATA === $result) {
             // need to get and present the auth data in the system (yes it is always empty).
@@ -114,10 +114,10 @@ class AuthenticateController extends Controller
 
     public function postIndex(Request $request, string $flow)
     {
-        $mainTitle = 'Authentication';
-        $pageTitle = 'Authentication';
-        $subTitle  = ucfirst($flow);
-        $validator = $this->getValidator($flow);
+        $mainTitle  = 'Authentication';
+        $pageTitle  = 'Authentication';
+        $subTitle   = ucfirst($flow);
+        $validator  = $this->getValidator($flow);
         if (null === $validator) {
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
@@ -126,7 +126,7 @@ class AuthenticateController extends Controller
         $submission = [];
         foreach ($all as $name => $value) {
             if (str_starts_with((string)$name, $flow)) {
-                $shortName = str_replace(sprintf('%s_', $flow), '', $name);
+                $shortName              = str_replace(sprintf('%s_', $flow), '', $name);
                 if ('' === (string)$value) {
                     return redirect(route(self::AUTH_ROUTE, [$flow]))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
                 }

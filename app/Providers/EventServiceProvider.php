@@ -24,13 +24,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Events\CompletedConfiguration;
-use App\Events\CompletedConversion;
-use App\Events\CompletedMapping;
 use App\Events\DownloadedSimpleFINAccounts;
 use App\Events\ImportedTransactions;
-use App\Events\ProvidedConfigUpload;
-use App\Events\ProvidedDataUpload;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;

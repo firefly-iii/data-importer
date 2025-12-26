@@ -37,7 +37,7 @@ Route::post('/check-duplicate-account/{identifier}', ['uses' => 'Import\Duplicat
 // for GoCardless / Nordigen we have another step if you have no requisitions.
 // 1. Select a bank
 // 2. Redirect to Nordigen.
-Route::get('/gocardless-select-bank/{identifier}',  ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => 'select-bank.index']);
+Route::get('/gocardless-select-bank/{identifier}', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => 'select-bank.index']);
 Route::post('/gocardless-select-bank/{identifier}', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => 'select-bank.post']);
 
 Route::get('/gocardless-connect/{identifier}', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => 'gocardless-connect.index']);
@@ -60,7 +60,7 @@ Route::get('/submit-data/{identifier}/status', ['uses' => 'Import\SubmitControll
 
 // index: no checks
 Route::get('/', 'IndexController@index')->name('index');
-//Route::post('/', 'IndexController@postIndex')->name('index.post');
+// Route::post('/', 'IndexController@postIndex')->name('index.post');
 Route::get('/debug', 'DebugController@index')->name('debug');
 Route::get('/health', 'HealthcheckController@check')->name('health');
 
@@ -113,17 +113,17 @@ Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDat
 // Route::get('/import/submit/status', ['uses' => 'Import\SubmitController@status', 'as' => '008-submit.status']);
 
 // step 9: Nordigen select a country + bank
-//Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => '009-selection.index']);
-//Route::post('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => '009-selection.post']);
+// Route::get('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@index', 'as' => '009-selection.index']);
+// Route::post('/import/selection', ['uses' => 'Import\Nordigen\SelectionController@postIndex', 'as' => '009-selection.post']);
 
 // step 10: Get redirected to + callback from Nordigen for permission:
-//Route::get('/import/link-nordigen/build', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => '010-build-link.index']);
-//Route::get('/import/link-nordigen/callback', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => '010-build-link.callback']);
+// Route::get('/import/link-nordigen/build', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => '010-build-link.index']);
+// Route::get('/import/link-nordigen/callback', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => '010-build-link.callback']);
 
 // step 11: list tokens (can be skipped)
-//Route::get('/import/spectre-connections', ['uses' => 'Import\Spectre\ConnectionController@index', 'as' => '011-connections.index']);
-//Route::post('/import/spectre-connections/submit', ['uses' => 'Import\Spectre\ConnectionController@post', 'as' => '011-connections.post']);
-//Route::get('/import/spectre-connections/callback', ['uses' => 'Import\Spectre\CallbackController@index', 'as' => '011-connections.callback']);
+// Route::get('/import/spectre-connections', ['uses' => 'Import\Spectre\ConnectionController@index', 'as' => '011-connections.index']);
+// Route::post('/import/spectre-connections/submit', ['uses' => 'Import\Spectre\ConnectionController@post', 'as' => '011-connections.post']);
+// Route::get('/import/spectre-connections/callback', ['uses' => 'Import\Spectre\CallbackController@index', 'as' => '011-connections.callback']);
 //
 
 // routes to go back to other steps (also takes care of session vars)
@@ -134,8 +134,8 @@ Route::get('/import/php_date', ['uses' => 'Import\ConfigurationController@phpDat
 // Route::get('/back/roles', 'NavController@toRoles')->name('back.roles');
 // Route::get('/back/conversion', 'NavController@toConversion')->name('back.conversion');
 
-//Route::get('/authenticate/{flow?}', 'Import\AuthenticateController@index')->name('002-authenticate.index');
-//Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
+// Route::get('/authenticate/{flow?}', 'Import\AuthenticateController@index')->name('002-authenticate.index');
+// Route::post('/authenticate', 'Import\AuthenticateController@postIndex')->name('002-authenticate.post');
 
 
 // import by POST

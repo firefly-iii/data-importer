@@ -30,11 +30,7 @@ use App\Jobs\ProcessImportSubmissionJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use App\Support\Http\RestoresConfiguration;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -63,9 +59,9 @@ class SubmitController extends Controller
     public function index(string $identifier)
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $mainTitle     = 'Submit the data';
-        $importJob     = $this->repository->find($identifier);
-        $flow          = $importJob->getFlow();
+        $mainTitle  = 'Submit the data';
+        $importJob  = $this->repository->find($identifier);
+        $flow       = $importJob->getFlow();
 
         if ('ready_for_submission' !== $importJob->getState()) {
             exit(sprintf('Job is in state "%s", expected ready_for_submission.', $importJob->getState()));
@@ -87,7 +83,7 @@ class SubmitController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob = $this->repository->find($identifier);
+        $importJob   = $this->repository->find($identifier);
         Log::error('Start: Find import job status.');
 
         // Retrieve authentication credentials for job

@@ -39,8 +39,6 @@ trait CreatesAccounts
         $this->existingServiceAccounts = $existingServiceAccounts;
     }
 
-
-
     protected function createOrFindExistingAccount(string $importServiceId): Account
     {
         Log::debug(sprintf('Starting account creation process for account "%s".', $importServiceId));
@@ -54,10 +52,11 @@ trait CreatesAccounts
             if (is_array($entry)) {
                 return (string)$entry['id'] === $importServiceId;
             }
-            if($entry instanceof NordigenAccount) {
+            if ($entry instanceof NordigenAccount) {
                 return $entry->getIdentifier() === $importServiceId;
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
+
             return (string)$entry->id === $importServiceId;
         });
 

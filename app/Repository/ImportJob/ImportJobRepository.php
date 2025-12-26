@@ -69,8 +69,8 @@ class ImportJobRepository
 
     public function find(string $identifier): ImportJob
     {
-        $disk = $this->getDisk();
-        $file = sprintf('%s.json', $identifier);
+        $disk    = $this->getDisk();
+        $file    = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
@@ -78,7 +78,7 @@ class ImportJobRepository
         if (null === $content || '' === $content) {
             throw new ImporterErrorException(sprintf('The file for import job "%s" is empty.', $identifier));
         }
-        //Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
+        // Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
 
         return ImportJob::createFromJson($content);
     }
@@ -126,8 +126,8 @@ class ImportJobRepository
         // collect Firefly III accounts, if not already in place for this job.
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
 
-        $allAccounts = $importJob->getApplicationAccounts();
-        $count       = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
+        $allAccounts   = $importJob->getApplicationAccounts();
+        $count         = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
         if (0 === $count) {
             Log::debug('No asset accounts or liabilities found, will collect them now.');
             $applicationAccounts = $this->getApplicationAccounts();
@@ -140,13 +140,14 @@ class ImportJobRepository
 
 
         Log::debug(sprintf('Now in flow("%s")', $importJob->getFlow()));
+
         // validate stuff (from simplefin etc).
         switch ($importJob->getFlow()) {
             case 'file':
                 // do file content sherlock things.
-                $detector = new FileContentSherlock();
-                $content  = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
-                $fileType = $detector->detectContentTypeFromContent($content);
+                $detector      = new FileContentSherlock();
+                $content       = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
+                $fileType      = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
                     $camtType = $detector->getCamtType();
@@ -154,33 +155,39 @@ class ImportJobRepository
                 }
 
                 break;
+
             case 'lunchflow':
-                $validator = new LunchFlowNewJobDataCollector();
+                $validator     = new LunchFlowNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
+
                 break;
+
             case 'simplefin':
-                $validator = new SimpleFINNewJobDataCollector();
+                $validator     = new SimpleFINNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
+
                 break;
+
             case 'nordigen':
                 // nordigen, download list of accounts.
-                $validator  = new NordigenNewJobDataCollector();
+                $validator     = new NordigenNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
+
                 break;
 
             default:
@@ -192,7 +199,7 @@ class ImportJobRepository
         if (0 === count($messageBag)) {
             $importJob->setState('is_parsed');
         }
-        $importJob = $this->setConfiguration($importJob, $configuration);
+        $importJob     = $this->setConfiguration($importJob, $configuration);
         $this->saveToDisk($importJob);
 
         // if parse errors, display to user with a redirect to upload?
@@ -268,8 +275,8 @@ class ImportJobRepository
         $url      = null;
 
         try {
-            $url   = SecretManager::getBaseUrl();
-            $token = SecretManager::getAccessToken();
+            $url           = SecretManager::getBaseUrl();
+            $token         = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
                 Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
@@ -279,7 +286,7 @@ class ImportJobRepository
 
             // Fetch ASSET accounts
             Log::debug('Fetching asset accounts from Firefly III.', ['url' => $url]);
-            $requestAsset = new GetAccountsRequest($url, $token);
+            $requestAsset  = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
@@ -303,7 +310,7 @@ class ImportJobRepository
 
         try {
             Log::debug('Fetching liability accounts from Firefly III.', ['url' => $url]);
-            $requestLiability = new GetAccountsRequest($url, $token);
+            $requestLiability  = new GetAccountsRequest($url, $token);
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);

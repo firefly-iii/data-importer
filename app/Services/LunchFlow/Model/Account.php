@@ -40,9 +40,7 @@ class Account
     /**
      * Account constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @return static
@@ -71,7 +69,7 @@ class Account
             'provider'         => $this->provider,
             'currency'         => $this->currency,
             'status'           => $this->status,
-            'class' => self::class,
+            'class'            => self::class,
         ];
     }
 }

@@ -189,6 +189,7 @@ class RoutineManager implements RoutineManagerInterface
             $count
         );
     }
+
     public function getImportJob(): ImportJob
     {
         return $this->importJob;

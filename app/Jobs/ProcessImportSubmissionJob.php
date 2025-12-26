@@ -28,7 +28,6 @@ use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Import\Routine\RoutineManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,7 +47,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
     /**
      * The number of times the job may be attempted.
      */
-    public int $tries = 1;
+    public int $tries   = 1;
     private ImportJobRepository $repository;
 
     /**
@@ -90,7 +89,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
             $this->repository->saveToDisk($this->importJob);
             // Initialize routine manager and execute import
-            $routine = new RoutineManager($this->importJob);
+            $routine         = new RoutineManager($this->importJob);
 
             Log::debug(sprintf('Starting submission routine execution for import job "%s"', $this->importJob->identifier));
 
@@ -105,7 +104,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             $this->repository->saveToDisk($this->importJob);
 
             // FIXME no longer necessary to collect all messages etc, it is in the importjob anway.
-            Log::info('ProcessImportSubmissionJob completed successfully', ['identifier' => $this->importJob->identifier,]);
+            Log::info('ProcessImportSubmissionJob completed successfully', ['identifier' => $this->importJob->identifier]);
         } catch (Throwable $e) {
             Log::error('ProcessImportSubmissionJob failed', [
                 'identifier' => $this->importJob->identifier,
@@ -116,6 +115,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
             // Set error status
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
             $this->repository->saveToDisk($this->importJob);
+
             // Re-throw to mark job as failed
             throw $e;
         }

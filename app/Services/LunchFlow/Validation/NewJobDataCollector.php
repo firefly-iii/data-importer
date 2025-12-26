@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * NewJobDataCollector.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -71,11 +73,12 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $req->setTimeOut(config('importer.connection.timeout'));
 
         /** @var ErrorResponse|GetAccountsResponse $accounts */
-        $accounts = $req->get();
+        $accounts   = $req->get();
 
         if ($accounts instanceof ErrorResponse) {
             $message = (string)config(sprintf('importer.http_codes.%d', $accounts->statusCode));
             $messageBag->add('config_file', sprintf('LunchFlow API error with HTTP code %d: %s', $accounts->statusCode, $message));
+
             return $messageBag;
         }
 
@@ -83,6 +86,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
             $return[] = $account;
         }
         $this->importJob->setServiceAccounts($return);
+
         return new MessageBag();
     }
 }

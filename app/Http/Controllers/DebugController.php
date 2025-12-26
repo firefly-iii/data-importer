@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
+
 use const PHP_SAPI;
 
 class DebugController extends Controller
@@ -43,8 +44,8 @@ class DebugController extends Controller
      */
     public function index(Request $request)
     {
-        $now   = Carbon::now()->format('Y-m-d H:i:s e');
-        $table = $this->getTable();
+        $now        = Carbon::now()->format('Y-m-d H:i:s e');
+        $table      = $this->getTable();
 
         /** @var Logger $logger */
         $logger     = Log::driver();
@@ -118,8 +119,8 @@ class DebugController extends Controller
                 $baseBuild = (string)config('importer.docker.base_build');
             }
         }
-        $search  = ['~', '#'];
-        $replace = ['\~', '# '];
+        $search    = ['~', '#'];
+        $replace   = ['\~', '# '];
 
         return [
             'is_docker'   => $isDocker,

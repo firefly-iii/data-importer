@@ -49,10 +49,10 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
+    use CreatesAccounts;
     use GeneratesIdentifier;
     use IsRunningCli;
     use ProgressInformation;
-    use CreatesAccounts;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
@@ -84,6 +84,7 @@ class RoutineManager implements RoutineManagerInterface
     public function getServiceAccounts(): array
     {
         Log::debug(sprintf('RoutineManager.getServiceAccounts(%d)', count($this->importJob->getServiceAccounts())));
+
         return $this->importJob->getServiceAccounts();
     }
 
@@ -143,7 +144,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
@@ -234,7 +235,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        return array_find($accounts, fn($account) => $account['id'] === $accountId);
+        return array_find($accounts, fn ($account) => $account['id'] === $accountId);
 
     }
 
@@ -321,7 +322,7 @@ class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
-            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
             }
@@ -368,19 +369,19 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-//    /**
-//     * @throws ImporterErrorException
-//     */
-//    private function validateAccounts(): void
-//    {
-//        Log::debug('Validating accounts in configuration.');
-//        $accounts = $this->configuration->getAccounts();
-//        foreach ($accounts as $key => $accountId) {
-//            if (0 === (int)$accountId) {
-//                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
-//            }
-//        }
-//    }
+    //    /**
+    //     * @throws ImporterErrorException
+    //     */
+    //    private function validateAccounts(): void
+    //    {
+    //        Log::debug('Validating accounts in configuration.');
+    //        $accounts = $this->configuration->getAccounts();
+    //        foreach ($accounts as $key => $accountId) {
+    //            if (0 === (int)$accountId) {
+    //                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+    //            }
+    //        }
+    //    }
     public function getImportJob(): ImportJob
     {
         return $this->importJob;
