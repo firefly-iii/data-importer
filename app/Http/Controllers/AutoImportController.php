@@ -29,6 +29,7 @@ use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -47,9 +48,8 @@ class AutoImportController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
-        die('here we are');
         if (false === config('importer.can_post_autoimport')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
@@ -80,7 +80,7 @@ class AutoImportController extends Controller
 
         $files        = $this->getFiles($directory);
         if (0 === count($files)) {
-            return response('');
+            return response()->json(['TODO' => 'No files found.']);
         }
         Log::info(sprintf('[%s] Found %d (importable +) JSON file sets in %s', config('importer.version'), count($files), $directory));
 
@@ -92,27 +92,26 @@ class AutoImportController extends Controller
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
 
-        return response('');
+        return response()->json(['TODO' => 'Seems to have worked!']);
     }
 
     public function info(mixed $string): void
     {
-        $this->line($string);
+        Log::info($string);
     }
 
     public function line(string $string): void
     {
-        echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
+        Log::debug(sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string));
     }
 
     public function error($string, $verbosity = null): void
     {
         Log::error($string);
-        $this->line($string);
     }
 
     public function warn(mixed $string): void
     {
-        $this->line($string);
+        Log::warning($string);
     }
 }

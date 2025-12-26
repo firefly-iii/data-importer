@@ -317,12 +317,12 @@ trait AutoImports
             return $exitCode;
         }
 
-        Log::debug(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImportFromImportJob($importJob);
         $this->reportImport();
         $this->reportBalanceDifferences($importJob);
 
-        Log::debug('Done!');
+        $this->line('Done!');
 
         // merge things:
         $messages = array_merge($this->importMessages, $this->conversionMessages);
@@ -684,11 +684,11 @@ trait AutoImports
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
 
-        Log::debug(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
+        $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImportFromImportJob($importJob);
         $this->reportImport();
 
-        Log::debug('Done!');
+        $this->line('Done!');
         event(
             new ImportedTransactions(
                 basename($jsonFile),
