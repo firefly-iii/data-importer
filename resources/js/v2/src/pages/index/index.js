@@ -68,16 +68,16 @@ let index = function () {
                             // only needs to stop loading, it defaults to "unauthenticated".
                             this.importFlows[flow].loading = false;
                         }
-                        if ('NOK' === message) {
+                        if ('NOK' === result) {
                             this.importFlows[flow].loading       = false;
                             this.importFlows[flow].authenticated = false;
                             this.importFlows[flow].error         = true;
                             this.importFlows[flow].errorMessage  = message;
                         }
-                        // if ('OK' === message) {
-                        //     this.importFlows[flow].loading       = false;
-                        //     this.importFlows[flow].authenticated = true;
-                        // }
+                        if ('OK' === result) {
+                            this.importFlows[flow].loading       = false;
+                            this.importFlows[flow].authenticated = true;
+                        }
                     }).catch((error) => {
                         console.warn(flow + ' is broken');
                         this.importFlows[flow].loading      = false;

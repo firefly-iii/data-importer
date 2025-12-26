@@ -156,12 +156,12 @@
                                         <small x-show="!flow.error && !flow.loading && !flow.enabled" class="text-danger">Not available yet.</small>
                                         <span  x-show="!flow.error && !flow.loading &&  flow.enabled && !flow.authenticated" class="text-primary">Needs authentication details</span>
                                         <span  x-show="!flow.error && !flow.loading &&  flow.enabled &&  flow.authenticated" class="text-success">Available</span>
-                                        <span  x-show="flow.error" class="text-primary">Some error</span>
+                                        <span  x-show="flow.error" class="text-danger" x-text="flow.errorMessage"></span>
                                     </td>
                                     <td>
                                         <span x-show="flow.loading" class="fas fa-cog fa-spin"></span>
-                                        <a x-show="!flow.loading && true === flow.enabled && false === flow.authenticated" :href="'{{ route('authenticate-flow.index', ['']) }}/' + flow.key" class="btn btn-sm btn-primary">Authenticate</a>
-                                        <a x-show="!flow.loading && true === flow.enabled && flow.authenticated" :href="'{{ route('new-import.index', ['']) }}/' + flow.key" class="btn btn-sm btn-success">Start</a>
+                                        <a x-show="!flow.error && !flow.loading && true === flow.enabled && false === flow.authenticated" :href="'{{ route('authenticate-flow.index', ['']) }}/' + flow.key" class="btn btn-sm btn-primary">Authenticate</a>
+                                        <a x-show="!flow.error && !flow.loading && true === flow.enabled && flow.authenticated" :href="'{{ route('new-import.index', ['']) }}/' + flow.key" class="btn btn-sm btn-success">Start</a>
                                     </td>
                                 </tr>
                             </template>
