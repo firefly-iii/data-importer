@@ -26,8 +26,8 @@ namespace App\Repository\ImportJob;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
-use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
 use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
+use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
@@ -161,7 +161,7 @@ class ImportJobRepository
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
-break;
+                break;
             case 'simplefin':
                 $validator = new SimpleFINNewJobDataCollector();
                 $validator->setImportJob($importJob);
@@ -174,6 +174,7 @@ break;
             case 'nordigen':
                 // nordigen, download list of accounts.
                 $validator  = new NordigenNewJobDataCollector();
+                $validator->setImportJob($importJob);
                 $messageBag = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();

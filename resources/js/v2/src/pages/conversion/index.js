@@ -139,12 +139,12 @@ let index = function () {
             const statusUrl = './data-conversion/' + this.identifier + '/status';
             window.axios.get(statusUrl).then((response) => {
                 this.pageStatus.status = response.data.status;
-                console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ')');
+                console.log('[a] Status is now ' + response.data.status + ' (' + this.checkCount + ')');
 
                 if (this.checkCount >= this.maxCheckCount) {
                     // error
                     this.pageStatus.status = 'too_long_checks';
-                    console.log('Status is now ' + this.pageStatus.status + ' (' + this.checkCount + ')');
+                    console.log('[b] Status is now ' + this.pageStatus.status + ' (' + this.checkCount + ')');
                 }
 
                 // process messages, warnings and errors:

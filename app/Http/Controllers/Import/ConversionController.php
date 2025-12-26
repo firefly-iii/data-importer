@@ -194,7 +194,11 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
+        $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
+        $this->repository->saveToDisk($importJob);
+
         // FIXME use a factory.
+        // FIXME needs no identifier, needs the job itself.
         /** @var null|RoutineManagerInterface $routine */
         if ('file' === $flow) {
             $contentType = $configuration->getContentType();
@@ -224,8 +228,6 @@ class ConversionController extends Controller
         if (null === $routine) {
             throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }
-        $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
-        $this->repository->saveToDisk($importJob);
 
         try {
             $transactions = $routine->start();
@@ -272,7 +274,9 @@ class ConversionController extends Controller
     public function status(Request $request, string $identifier): JsonResponse
     {
         $importJob = $this->repository->find($identifier);
-
-        return response()->json($importJob->conversionStatus->toArray());
+        $array = $importJob->conversionStatus->toArray();
+        $array['instance_counter']  = $importJob->getInstanceCounter();
+        $array['instance_identifier'] = $importJob->getInstanceIdentifier();
+        return response()->json($array);
     }
 }
