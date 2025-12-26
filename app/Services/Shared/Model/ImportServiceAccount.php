@@ -29,6 +29,7 @@ use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
+use App\Services\SimpleFIN\Model\Account;
 use App\Services\Spectre\Model\Account as SpectreAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -159,8 +160,10 @@ class ImportServiceAccount
     {
         $return = [];
 
+        /** @var Account $account */
         foreach ($accounts as $account) {
-            $timestamp  = (int)$account['balance-date'] ?? 0;
+            ;
+            $timestamp  = $account->getBalanceDate();
             $dateString = '';
             if ($timestamp > 100) {
                 $carbon     = Carbon::createFromTimestamp($timestamp);
@@ -168,20 +171,20 @@ class ImportServiceAccount
             }
             $current = self::fromArray(
                 [
-                    'id'            => $account['id'], // Expected by component for form elements, and by getMappedTo (as 'identifier')
-                    'name'          => $account['name'], // Expected by getMappedTo, display in component
-                    'currency_code' => $account['currency'] ?? null, // SimpleFIN currency field
+                    'id'            => $account->getId(), // Expected by component for form elements, and by getMappedTo (as 'identifier')
+                    'name'          => $account->getName(), // Expected by getMappedTo, display in component
+                    'currency_code' => $account->getCurrency(), // SimpleFIN currency field
                     'iban'          => null,
                     'bban'          => '',
                     'status'        => 'active', // Expected by view for status checks
                     'extra'         => [
-                        'Balance'      => $account['balance'] ?? null, // SimpleFIN balance (numeric string)
+                        'Balance'      => $account->getBalance() ?? null, // SimpleFIN balance (numeric string)
                         'Balance date' => $dateString, // SimpleFIN balance timestamp
-                        'Organization' => $account['org']['name'] ?? null, // SimpleFIN organization data
+                        'Organization' => $account->getOrganizationName(), // SimpleFIN organization data
                     ],
                 ]
             );
-            foreach ($account['extra'] ?? [] as $key => $value) {
+            foreach ($account->getExtra() as $key => $value) {
                 if (!array_key_exists($key, $current->extra)) {
                     $current->extra[$key] = $value;
                 }

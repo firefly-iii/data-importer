@@ -30,6 +30,7 @@ use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
+use App\Services\SimpleFIN\Model\Account;
 use App\Services\SimpleFIN\SimpleFINService;
 use Illuminate\Support\Facades\Log;
 use Override;
@@ -114,7 +115,8 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $applicationAccountId) {
             $this->createNewAccount($importServiceAccountId);
         }
-        $currentSimpleFINAccountData = array_find($this->existingServiceAccounts, fn ($accountDataFromArrayInLoop) => isset($accountDataFromArrayInLoop['id']) && $accountDataFromArrayInLoop['id'] === $importServiceAccountId);
+        /** @var Account|null $currentSimpleFINAccountData */
+        $currentSimpleFINAccountData = array_find($this->existingServiceAccounts, fn (Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId);
 
         if (null === $currentSimpleFINAccountData) {
             Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', ['simplefin_account_id_sought' => $importServiceAccountId]);
@@ -139,10 +141,10 @@ class RoutineManager implements RoutineManagerInterface
         $this->repository->saveToDisk($this->importJob);
     }
 
-    private function getTransactions(string $importServiceAccountId, array $simpleFINAccount): array
+    private function getTransactions(string $importServiceAccountId, Account $simpleFINAccount): array
     {
         Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
-        $accounts            = $this->importJob->getServiceAccounts();
+        $serviceAccounts            = $this->importJob->getServiceAccounts();
         // Fetch transactions for the current account using the new method signature,
         // passing the complete SimpleFIN accounts data retrieved from the session.
         // Pass the full dataset
@@ -162,7 +164,7 @@ class RoutineManager implements RoutineManagerInterface
             $transformedTransaction = $this->transformer->transform(
                 $transactionData,
                 $simpleFINAccount, // The specific SimpleFIN account data for this transaction's parent
-                $accounts, // Current mapping with actual account IDs
+                $serviceAccounts, // Current mapping with actual account IDs
                 $this->importJob->getConfiguration()->getNewAccounts() // User-provided account configuration data
             );
 

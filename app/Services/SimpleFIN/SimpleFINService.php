@@ -27,6 +27,7 @@ namespace App\Services\SimpleFIN;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\SimpleFIN\Model\Account;
 use App\Services\SimpleFIN\Request\AccountsRequest;
 use Carbon\Carbon;
 use Exception;
@@ -189,6 +190,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
+        /** @var array<Account> $accounts */
         $accounts     = $response->getAccounts();
 
         if (0 === count($accounts)) {
@@ -196,9 +198,8 @@ class SimpleFINService
 
             return [];
         }
-
-        /** @var array $transactions */
-        $transactions = $accounts[0]['transactions'] ?? [];
+        
+        $transactions = $accounts[0]->getTransactions();
 
         // add a little filter to remove transactions that are pending.
         $transactions = $this->filterForPending($transactions);

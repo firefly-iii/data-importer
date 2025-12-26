@@ -139,6 +139,7 @@ class ImportJobRepository
         }
 
 
+        Log::debug(sprintf('Now in flow("%s")', $importJob->getFlow()));
         // validate stuff (from simplefin etc).
         switch ($importJob->getFlow()) {
             case 'file':
