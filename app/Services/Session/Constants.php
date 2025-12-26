@@ -30,41 +30,41 @@ namespace App\Services\Session;
 class Constants
 {
     // constants to remember Nordigen access token, refresh token and validity:
-    public const string ASSET_ACCOUNTS                = 'assets';
-    public const string CONFIGURATION                 = 'configuration';
+    public const string ASSET_ACCOUNTS               = 'assets';
+    public const string CONFIGURATION                = 'configuration';
 
 
 
 
     // stores the configuration array
-    public const string LIABILITIES                   = 'liabilities';
+    public const string LIABILITIES                  = 'liabilities';
 
     // if the user is done with specific steps:
-    public const string NORDIGEN_ACCESS_EXPIRY_TIME   = 'nordigen_access_expiry_time';
-    public const string NORDIGEN_ACCESS_TOKEN         = 'nordigen_access_token';
-    public const string NORDIGEN_REFRESH_EXPIRY_TIME  = 'nordigen_refresh_expiry_time';
-    public const string NORDIGEN_REFRESH_TOKEN        = 'nordigen_refresh_token';
-    public const string REQUISITION_REFERENCE         = 'requisition_reference';
+    public const string NORDIGEN_ACCESS_EXPIRY_TIME  = 'nordigen_access_expiry_time';
+    public const string NORDIGEN_ACCESS_TOKEN        = 'nordigen_access_token';
+    public const string NORDIGEN_REFRESH_EXPIRY_TIME = 'nordigen_refresh_expiry_time';
+    public const string NORDIGEN_REFRESH_TOKEN       = 'nordigen_refresh_token';
+    public const string REQUISITION_REFERENCE        = 'requisition_reference';
 
     // spectre specific steps:
 
     // nordigen specific steps
-    public const string SELECTED_BANK_COUNTRY         = 'selected_bank_country';
+    public const string SELECTED_BANK_COUNTRY        = 'selected_bank_country';
 
     // nordigen specific constants
-    public const string SESSION_ACCESS_TOKEN          = 'session_token';
+    public const string SESSION_ACCESS_TOKEN         = 'session_token';
 
     // constants for data conversion job:
-    public const string SESSION_BASE_URL              = 'base_url';
-    public const string SESSION_CLIENT_ID             = 'client_id';
+    public const string SESSION_BASE_URL             = 'base_url';
+    public const string SESSION_CLIENT_ID            = 'client_id';
 
     // specific variables for the ability to upload multiple (config) files at once
 
     // other variables
-    public const string SESSION_REFRESH_TOKEN         = 'refresh_token';
+    public const string SESSION_REFRESH_TOKEN        = 'refresh_token';
 
     // session variable names:
-    public const string SESSION_VANITY_URL            = 'vanity_url';
-    public const string UPLOAD_CONFIG_FILE            = 'config_file_path';
+    public const string SESSION_VANITY_URL           = 'vanity_url';
+    public const string UPLOAD_CONFIG_FILE           = 'config_file_path';
 
 }

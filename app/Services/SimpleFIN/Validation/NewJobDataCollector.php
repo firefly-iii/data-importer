@@ -46,9 +46,9 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
     public function validate(): MessageBag
     {
         $this->importJob->refreshInstanceIdentifier(); // to make sure the information stays fresh.
-        $configuration = $this->importJob->getConfiguration();
-        $errors        = new MessageBag();
-        $accessToken   = $configuration->getAccessToken();
+        $configuration    = $this->importJob->getConfiguration();
+        $errors           = new MessageBag();
+        $accessToken      = $configuration->getAccessToken();
         Log::debug(sprintf('validate("%s") for SimpleFIN', $this->importJob->identifier));
 
         if ($this->useDemo) {
@@ -92,9 +92,9 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
 
     public function collectAccounts(): MessageBag
     {
-        $configuration = $this->importJob->getConfiguration();
-        $errors        = new MessageBag();
-        $accessToken   = $configuration->getAccessToken();
+        $configuration    = $this->importJob->getConfiguration();
+        $errors           = new MessageBag();
+        $accessToken      = $configuration->getAccessToken();
         Log::debug(sprintf('collectAccounts("%s")', $this->importJob->identifier));
 
         // create service:
@@ -102,7 +102,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $simpleFINService = app(SimpleFINService::class);
         $simpleFINService->setConfiguration($configuration);
         $simpleFINService->setAccessToken($accessToken);
-        $accounts = [];
+        $accounts         = [];
 
         try {
             $accounts = $simpleFINService->fetchAccounts();

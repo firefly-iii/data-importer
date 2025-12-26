@@ -56,7 +56,7 @@ trait CollectsAccounts
 {
     /**
      * FIXME Is this not duplicate with the account search in the configuration class?
-     * @return array
+     *
      * @throws ImporterErrorException
      */
     protected function collectAllTargetAccounts(): array

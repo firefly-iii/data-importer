@@ -68,7 +68,7 @@ class AccountsResponse extends SimpleFINResponse
 
         // SimpleFIN API returns accounts in the 'accounts' array
         if (isset($data['accounts']) && is_array($data['accounts'])) {
-            foreach($data['accounts'] as $account) {
+            foreach ($data['accounts'] as $account) {
                 $this->accounts[] = Account::fromArray($account);
             }
 

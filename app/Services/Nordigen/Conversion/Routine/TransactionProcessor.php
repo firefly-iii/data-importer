@@ -46,18 +46,17 @@ use Illuminate\Support\Facades\Log;
  */
 class TransactionProcessor
 {
-    use ProgressInformation;
     use CreatesAccounts;
+    use ProgressInformation;
 
     /** @var string */
-    private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    private array               $accounts = [];
+    private const string DATE_TIME_FORMAT  = 'Y-m-d H:i:s';
+    private array               $accounts  = [];
     private Configuration       $configuration;
     private ?Carbon             $notAfter  = null;
     private ?Carbon             $notBefore = null;
     private ImportJob           $importJob;
     private ImportJobRepository $repository;
-
 
     /**
      * @throws ImporterErrorException
@@ -76,21 +75,22 @@ class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        $accounts = $this->configuration->getAccounts();
+        $accounts        = $this->configuration->getAccounts();
 
-        $return = [];
+        $return          = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total = count($accounts);
-        $index = 1;
+        $total           = count($accounts);
+        $index           = 1;
+
         /**
          * @var string $account
-         * @var int $destinationId
+         * @var int    $destinationId
          */
         foreach ($accounts as $account => $destinationId) {
             Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)', config('importer.version'), $index, $total, $index, $account, $destinationId));
-            $object = new Account();
+            $object                     = new Account();
             $object->setIdentifier($account);
-            $fullInfo = null;
+            $fullInfo                   = null;
 
             if (0 === $destinationId) {
                 Log::debug('No destination ID found, create account');
@@ -112,11 +112,12 @@ class TransactionProcessor
                     $this->addError(0, $e->json['detail']);
                 }
                 $return[$account] = [];
-                $index++;
+                ++$index;
+
                 continue;
             }
             Log::debug('Done downloading information for debug purposes.');
-            $this->accounts[] = $fullInfo;
+            $this->accounts[]           = $fullInfo;
 
             try {
                 $accessToken = TokenManager::getAccessToken();
@@ -126,8 +127,8 @@ class TransactionProcessor
 
                 continue;
             }
-            $url     = config('nordigen.url');
-            $request = new GetTransactionsRequest($url, $accessToken, $account, $this->configuration->getDateNotBefore(), $this->configuration->getDateNotAfter());
+            $url                        = config('nordigen.url');
+            $request                    = new GetTransactionsRequest($url, $accessToken, $account, $this->configuration->getDateNotBefore(), $this->configuration->getDateNotAfter());
             $request->setTimeOut(config('importer.connection.timeout'));
 
             /** @var GetTransactionsResponse $transactions */
@@ -137,26 +138,28 @@ class TransactionProcessor
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 $this->addWarning(0, $e->getMessage());
-                $return[$account] = [];
+                $return[$account]           = [];
 
                 // save the rate limits:
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),
                     'reset'     => $request->getReset(),
                 ];
-                $index++;
+                ++$index;
+
                 continue;
             } catch (AgreementExpiredException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
-                $return[$account] = [];
+                $return[$account]           = [];
                 $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = [
                     'remaining' => $request->getRemaining(),
                     'reset'     => $request->getReset(),
                 ];
-                $index++;
+                ++$index;
+
                 continue;
             }
             $this->rateLimits[$account] = [
@@ -164,9 +167,9 @@ class TransactionProcessor
                 'reset'     => $request->getReset(),
             ];
 
-            $return[$account] = $this->filterTransactions($transactions);
+            $return[$account]           = $this->filterTransactions($transactions);
             Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $index, $total, $index, $account));
-            $index++;
+            ++$index;
         }
         Log::debug('Done with download of transactions.');
 
@@ -201,7 +204,7 @@ class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if (!$getPending && 'pending' === $transaction->key) {
                 Log::debug(sprintf('Skip pending transaction made on "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
@@ -274,6 +277,7 @@ class TransactionProcessor
         $configuration->setAccounts($updatedAccounts);
         Log::debug('Saved new account details.', $updatedAccounts);
         $this->importJob->setConfiguration($configuration);
+
         return $createdAccount->id;
     }
 

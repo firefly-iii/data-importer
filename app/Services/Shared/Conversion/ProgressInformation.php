@@ -72,8 +72,8 @@ trait ProgressInformation
     final protected function addError(int $index, string $error): void
     {
         Log::error(sprintf('[c] Add error to index #%d: %s', $index, $error));
-        $this->errors           ??= [];
-        $this->errors[$index]   ??= [];
+        $this->errors         ??= [];
+        $this->errors[$index] ??= [];
         $this->errors[$index][] = $error;
 
         // FIXME write errors to import job too (why two places?)
@@ -83,8 +83,8 @@ trait ProgressInformation
     final protected function addRateLimit(int $index, string $message): void
     {
         Log::error(sprintf('[c] Add rate limit message to index #%d: %s', $index, $message));
-        $this->rateLimits           ??= [];
-        $this->rateLimits[$index]   ??= [];
+        $this->rateLimits         ??= [];
+        $this->rateLimits[$index] ??= [];
         $this->rateLimits[$index][] = $message;
 
         // FIXME write rate limits to import job too (why two places?)
@@ -94,8 +94,8 @@ trait ProgressInformation
     final protected function addMessage(int $index, string $message): void
     {
         Log::info(sprintf('[c] Add message to index #%d: %s', $index, $message));
-        $this->messages           ??= [];
-        $this->messages[$index]   ??= [];
+        $this->messages         ??= [];
+        $this->messages[$index] ??= [];
         $this->messages[$index][] = $message;
 
         // FIXME write messages to import job too (why two places?)
@@ -105,8 +105,8 @@ trait ProgressInformation
     final protected function addWarning(int $index, string $warning): void
     {
         Log::error(sprintf('[c] Add warning to index #%d: %s', $index, $warning));
-        $this->warnings           ??= [];
-        $this->warnings[$index]   ??= [];
+        $this->warnings         ??= [];
+        $this->warnings[$index] ??= [];
         $this->warnings[$index][] = $warning;
 
         // FIXME write warnings to import job too (why two places?)

@@ -39,6 +39,6 @@ enum ExitCode: int
     case TOO_MANY_ERRORS_PROCESSING  = 72;
     case NOTHING_WAS_IMPORTED        = 73;
     case AGREEMENT_EXPIRED           = 74;
-    case NO_REQUISITIONS_PRESENT = 75;
+    case NO_REQUISITIONS_PRESENT     = 75;
 
 }

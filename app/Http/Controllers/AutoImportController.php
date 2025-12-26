@@ -54,8 +54,8 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $argument  = (string)($request->get('directory') ?? './');
-        $directory = realpath($argument);
+        $argument     = (string)($request->get('directory') ?? './');
+        $directory    = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
@@ -64,7 +64,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access = $this->haveAccess();
+        $access       = $this->haveAccess();
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }
@@ -72,7 +72,7 @@ class AutoImportController extends Controller
         // take code from auto importer.
         Log::info(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
-        $files = $this->getFiles($directory);
+        $files        = $this->getFiles($directory);
         if (0 === count($files)) {
             return response('');
         }

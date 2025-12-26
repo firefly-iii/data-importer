@@ -54,10 +54,10 @@ class TransactionTransformer
     /**
      * Transform SimpleFIN transaction data (array) to Firefly III transaction format
      *
-     * @param array $transactionData      Raw transaction data from SimpleFIN JSON
+     * @param array   $transactionData      Raw transaction data from SimpleFIN JSON
      * @param Account $simpleFINAccountData Raw account data from SimpleFIN JSON for the account this transaction belongs to
-     * @param array $accountMapping       Mapping configuration for Firefly III accounts
-     * @param array $newAccountConfig     User-provided new account configuration data
+     * @param array   $accountMapping       Mapping configuration for Firefly III accounts
+     * @param array   $newAccountConfig     User-provided new account configuration data
      */
     public function transform(array $transactionData, Account $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {

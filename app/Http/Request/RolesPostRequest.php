@@ -79,41 +79,42 @@ class RolesPostRequest extends Request
     {
         $data                 = $validator->getData(); // @phpstan-ignore-line
         $roles                = $data['roles'] ?? [];
-        $ignoreWarnings = '1' === ($data['ignore_warnings'] ?? false);
+        $ignoreWarnings       = '1' === ($data['ignore_warnings'] ?? false);
         $count                = 0;
         $countDates           = 0;
         $countTransactionDate = 0;
-        $hasDescription = false;
-        $total = count($roles);
-        $ignored = 0;
+        $hasDescription       = false;
+        $total                = count($roles);
+        $ignored              = 0;
         foreach ($roles as $role) {
-            if('_ignore' === $role) {
-                $ignored++;
+            if ('_ignore' === $role) {
+                ++$ignored;
+
                 continue;
             }
             if (in_array($role, ['amount', 'amount_negated', 'amount_debit', 'amount_credit'], true)) {
                 ++$count;
             }
-            if (in_array($role, ['date_interest', 'date_book', 'date_process', 'date_due','date_payment','date_invoice'], true)) {
+            if (in_array($role, ['date_interest', 'date_book', 'date_process', 'date_due', 'date_payment', 'date_invoice'], true)) {
                 ++$countDates;
             }
-            if('date_transaction' === $role) {
-                $countTransactionDate++;
+            if ('date_transaction' === $role) {
+                ++$countTransactionDate;
             }
-            if('description' === $role) {
+            if ('description' === $role) {
                 $hasDescription = true;
             }
         }
-        if($ignored === $total) {
+        if ($ignored === $total) {
             $validator->errors()->add('roles.0', 'You must select some roles to continue.');
         }
-        if(!$hasDescription && !$ignoreWarnings) {
+        if (!$hasDescription && !$ignoreWarnings) {
             $validator->errors()->add('roles.0', 'Without a column with the role "Description", your transactions will be imported with the description "(no description)".');
         }
-        if(0 === $countTransactionDate && $countDates > 0 && !$ignoreWarnings) {
+        if (0 === $countTransactionDate && $countDates > 0 && !$ignoreWarnings) {
             $validator->errors()->add('roles.0', 'You selected a date, but not "Date (primary transaction date)". If you do not give any column the "Date (primary transaction date)" role, all your transactions will be imported with today\'s date.');
         }
-        if(0 === $countTransactionDate && 0 === $countDates && !$ignoreWarnings) {
+        if (0 === $countTransactionDate && 0 === $countDates && !$ignoreWarnings) {
             $validator->errors()->add('roles.0', 'You have not set a column to the role of "Date (primary transaction date)". All your transactions will be imported with today\'s date.');
         }
         if (0 === $count) {

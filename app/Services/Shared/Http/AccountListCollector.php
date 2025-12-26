@@ -53,43 +53,43 @@ class AccountListCollector
     /**
      * @throws AgreementExpiredException|ImporterErrorException
      */
-//    public function collect(): array
-//    {
-//        Log::debug(sprintf('Now in %s', __METHOD__));
-//
-//        // no choice but to split based on flow.
-//
-//        switch ($this->flow) {
-//            default:
-//                throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
-//
-//            case 'file':
-//                return [];
-//
-////            case 'nordigen':
-////                $this->collectGoCardlessAccounts();
-////
-////                break;
-//
-//                //            case 'simplefin':
-//                //                $this->collectSimpleFINAccounts();
-//                //
-//                //                break;
-//
-//            case 'spectre':
-//                $this->collectSpectreAccounts();
-//
-//                break;
-//
-//            case 'lunchflow':
-//                $this->collectLunchFlowAccounts();
-//        }
-//
-//        // $this->collectImportServiceAccounts();
-//        $this->mergeAccounts();
-//
-//        return $this->mergedAccounts;
-//    }
+    //    public function collect(): array
+    //    {
+    //        Log::debug(sprintf('Now in %s', __METHOD__));
+    //
+    //        // no choice but to split based on flow.
+    //
+    //        switch ($this->flow) {
+    //            default:
+    //                throw new ImporterErrorException(sprintf('Cannot collect accounts for flow "%s"', $this->flow));
+    //
+    //            case 'file':
+    //                return [];
+    //
+    // //            case 'nordigen':
+    // //                $this->collectGoCardlessAccounts();
+    // //
+    // //                break;
+    //
+    //                //            case 'simplefin':
+    //                //                $this->collectSimpleFINAccounts();
+    //                //
+    //                //                break;
+    //
+    //            case 'spectre':
+    //                $this->collectSpectreAccounts();
+    //
+    //                break;
+    //
+    //            case 'lunchflow':
+    //                $this->collectLunchFlowAccounts();
+    //        }
+    //
+    //        // $this->collectImportServiceAccounts();
+    //        $this->mergeAccounts();
+    //
+    //        return $this->mergedAccounts;
+    //    }
 
     private function collectGoCardlessAccounts(): void
     {
@@ -183,7 +183,7 @@ class AccountListCollector
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
                 $matching                            = $filteredByData[$key];
                 $all                                 = $this->existingAccounts[$key];
-                Log::debug(sprintf('Found %d accounts in array "%s"',count($all), $key));
+                Log::debug(sprintf('Found %d accounts in array "%s"', count($all), $key));
 
                 // Remove matching from all to avoid duplicates
                 $nonMatching                         = array_udiff($all, $matching, fn ($a, $b) => $a->id <=> $b->id);

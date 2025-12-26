@@ -50,8 +50,8 @@ class TransactionProcessor
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private array   $accounts;
-    private ?Carbon $notAfter  = null;
-    private ?Carbon $notBefore = null;
+    private ?Carbon $notAfter             = null;
+    private ?Carbon $notBefore            = null;
 
     /**
      * @throws ImporterErrorException
@@ -59,10 +59,10 @@ class TransactionProcessor
     public function download(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $this->notBefore = null;
-        $this->notAfter  = null;
-        $this->accounts  = [];
-        $configuration   = $this->importJob->getConfiguration();
+        $this->notBefore               = null;
+        $this->notAfter                = null;
+        $this->accounts                = [];
+        $configuration                 = $this->importJob->getConfiguration();
         if ('' !== $configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($configuration->getDateNotBefore());
         }
@@ -70,9 +70,9 @@ class TransactionProcessor
         if ('' !== $configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($configuration->getDateNotAfter());
         }
-        $accounts = $configuration->getAccounts();
+        $accounts                      = $configuration->getAccounts();
         Log::debug(sprintf('Found the following accounts in config: %s', json_encode($accounts)));
-        $return = [];
+        $return                        = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
         $this->existingServiceAccounts = $this->getLunchFlowAccounts($configuration);
 
@@ -94,9 +94,9 @@ class TransactionProcessor
             }
 
 
-            $apiToken = SecretManager::getApiKey($configuration);
+            $apiToken                        = SecretManager::getApiKey($configuration);
 
-            $request = new GetTransactionsRequest($apiToken, $importServiceAccountId);
+            $request                         = new GetTransactionsRequest($apiToken, $importServiceAccountId);
             $request->setBase(config('lunchflow.api_url'));
             $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -148,8 +148,8 @@ class TransactionProcessor
         if ($this->notAfter instanceof Carbon) {
             Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
-        $return     = [];
-        $getPending = $configuration->getPendingTransactions();
+        $return        = [];
+        $getPending    = $configuration->getPendingTransactions();
         if ($getPending) {
             Log::info('Will include pending transactions.');
         }
@@ -157,7 +157,7 @@ class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(sprintf('Skip transaction because "%s" is before "%s".', $madeOn->format(self::DATE_TIME_FORMAT), $this->notBefore->format(self::DATE_TIME_FORMAT)));

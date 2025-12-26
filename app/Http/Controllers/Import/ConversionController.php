@@ -75,10 +75,10 @@ class ConversionController extends Controller
         $flow                = $importJob->getFlow();
         $newAccountsToCreate = [];
         // default back to mapping
-        $jobBackUrl = $this->getJobBackUrl($flow, $identifier);
-        $flow       = $importJob->getFlow();
+        $jobBackUrl          = $this->getJobBackUrl($flow, $identifier);
+        $flow                = $importJob->getFlow();
 
-        $nextUrl = route('submit-data.index', [$identifier]);
+        $nextUrl             = route('submit-data.index', [$identifier]);
         // next URL is different when it's not a file flow (in those cases, its mapping)
         if ('file' !== $flow) {
             $nextUrl = route('data-mapping.index', [$identifier]);
@@ -119,9 +119,9 @@ class ConversionController extends Controller
         }
         if ('simplefin' === $flow) {
             Log::debug('Create SimpleFIN routine manager.');
-            $routine             = new SimpleFINRoutineManager($identifier);
+            $routine = new SimpleFINRoutineManager($identifier);
         }
-        if (in_array($flow, config('importer.supports_new_accounts', true))) {
+        if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
 
@@ -153,14 +153,14 @@ class ConversionController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob = $this->repository->find($identifier);
+        $importJob     = $this->repository->find($identifier);
         $importJob->refreshInstanceIdentifier(); // to prevent weird overwrites.
         $configuration = $importJob->getConfiguration();
         $routine       = null;
 
         // Handle new account data for SimpleFIN
-        $flow = $importJob->getFlow();
-        if (in_array($flow, config('importer.supports_new_accounts', true))) {
+        $flow          = $importJob->getFlow();
+        if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             Log::debug('Will see if new accounts need to be created.');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
@@ -189,7 +189,7 @@ class ConversionController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // now create the right class:
-        $flow = $importJob->getFlow();
+        $flow          = $importJob->getFlow();
         if (!in_array($flow, config('importer.flows'), true)) {
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
@@ -251,7 +251,7 @@ class ConversionController extends Controller
 
             // return response()->json($importJobStatus->toArray());
         }
-        $importJob = $routine->getImportJob();
+        $importJob     = $routine->getImportJob();
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         $importJob->setConvertedTransactions($transactions);
         $this->repository->saveToDisk($importJob);
@@ -273,10 +273,11 @@ class ConversionController extends Controller
 
     public function status(Request $request, string $identifier): JsonResponse
     {
-        $importJob = $this->repository->find($identifier);
-        $array = $importJob->conversionStatus->toArray();
-        $array['instance_counter']  = $importJob->getInstanceCounter();
+        $importJob                    = $this->repository->find($identifier);
+        $array                        = $importJob->conversionStatus->toArray();
+        $array['instance_counter']    = $importJob->getInstanceCounter();
         $array['instance_identifier'] = $importJob->getInstanceIdentifier();
+
         return response()->json($array);
     }
 }

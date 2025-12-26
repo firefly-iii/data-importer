@@ -115,7 +115,8 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $applicationAccountId) {
             $this->createNewAccount($importServiceAccountId);
         }
-        /** @var Account|null $currentSimpleFINAccountData */
+
+        /** @var null|Account $currentSimpleFINAccountData */
         $currentSimpleFINAccountData = array_find($this->existingServiceAccounts, fn (Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId);
 
         if (null === $currentSimpleFINAccountData) {
@@ -144,7 +145,7 @@ class RoutineManager implements RoutineManagerInterface
     private function getTransactions(string $importServiceAccountId, Account $simpleFINAccount): array
     {
         Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
-        $serviceAccounts            = $this->importJob->getServiceAccounts();
+        $serviceAccounts     = $this->importJob->getServiceAccounts();
         // Fetch transactions for the current account using the new method signature,
         // passing the complete SimpleFIN accounts data retrieved from the session.
         // Pass the full dataset
@@ -184,6 +185,7 @@ class RoutineManager implements RoutineManagerInterface
 
         return $transactions;
     }
+
     public function getImportJob(): ImportJob
     {
         return $this->importJob;

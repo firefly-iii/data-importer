@@ -46,8 +46,8 @@ class PostNewRequisitionRequest extends Request
         $this->setToken($token);
         $this->identifier = $identifier;
         $this->setUrl('api/v2/requisitions/');
-        $this->reference = '';
-        $this->agreement = '';
+        $this->reference  = '';
+        $this->agreement  = '';
     }
 
     public function get(): Response
