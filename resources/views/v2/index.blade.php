@@ -153,10 +153,10 @@
                                     </td>
                                     <td>
                                         <span x-show="flow.loading" class="fas fa-cog fa-spin"></span>
-                                        <small x-show="!flow.loading && !flow.enabled" class="text-danger">Not built yet, stay tuned!</small>
-                                        <span x-show="!flow.loading && flow.enabled && flow.authenticated && !flow.loading" class="text-success">Available</span>
-                                        <span x-show="!flow.loading && flow.enabled && !flow.authenticated" class="text-primary">Needs authentication details</span>
-
+                                        <small x-show="!flow.error && !flow.loading && !flow.enabled" class="text-danger">Not available yet.</small>
+                                        <span  x-show="!flow.error && !flow.loading &&  flow.enabled && !flow.authenticated" class="text-primary">Needs authentication details</span>
+                                        <span  x-show="!flow.error && !flow.loading &&  flow.enabled &&  flow.authenticated" class="text-success">Available</span>
+                                        <span  x-show="flow.error" class="text-primary">Some error</span>
                                     </td>
                                     <td>
                                         <span x-show="flow.loading" class="fas fa-cog fa-spin"></span>

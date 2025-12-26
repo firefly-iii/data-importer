@@ -27,43 +27,6 @@ let index = function () {
             connectionError: false,
             connectionErrorMessage: '',
         },
-        importJobs: [],
-        loadingFunctions: {
-            file: true,
-            gocardless: true,
-            spectre: true,
-            simplefin: true,
-            lunchflow: true,
-            obg: true,
-            eb: true,
-            teller: true,
-            fints: true,
-            basiq: true,
-        },
-        errors: {
-            spectre: '',
-            gocardless: '',
-            simplefin: '',
-            lunchflow: '',
-            obg: '',
-            eb: '',
-            teller: '',
-            fints: '',
-            basiq: '',
-        },
-        loading: true,
-        importFunctions: {
-            file: false,
-            gocardless: false,
-            spectre: false,
-            simplefin: false,
-            lunchflow: false,
-            obg: false,
-            eb: false,
-            teller: false,
-            fints: false,
-            basiq: false,
-        },
         importFlows: {},
         init() {
             this.checkFireflyIIIConnection();
@@ -76,6 +39,9 @@ let index = function () {
                     if (flows.hasOwnProperty(i)) {
                         let flow                   = flows[i];
                         flow.loading               = true;
+                        flow.errorMessage          = '';
+                        flow.error                 = false;
+                        flow.authenticated         = false;
                         this.importFlows[flow.key] = flow;
                     }
 
@@ -95,27 +61,37 @@ let index = function () {
                     }
                     let validateUrl = './api/import-flows/validate/' + flow;
                     window.axios.get(validateUrl).then((response) => {
-                        let message = response.data.result;
-                        console.log('Result for ' + flow + ' = ' + message);
-                        if ('NODATA' === message) {
+                        let result  = response.data.result;
+                        let message = response.data.message;
+                        console.log('Result for ' + flow + ' = ' + result);
+                        if ('NODATA' === result) {
+                            // only needs to stop loading, it defaults to "unauthenticated".
                             this.importFlows[flow].loading = false;
                         }
-                        if ('OK' === message) {
+                        if ('NOK' === message) {
                             this.importFlows[flow].loading       = false;
-                            this.importFlows[flow].authenticated = true;
+                            this.importFlows[flow].authenticated = false;
+                            this.importFlows[flow].error         = true;
+                            this.importFlows[flow].errorMessage  = message;
                         }
+                        // if ('OK' === message) {
+                        //     this.importFlows[flow].loading       = false;
+                        //     this.importFlows[flow].authenticated = true;
+                        // }
                     }).catch((error) => {
                         console.warn(flow + ' is broken');
-                        this.importFlows[flow].loading = false;
+                        this.importFlows[flow].loading      = false;
+                        this.importFlows[flow].error        = true;
+                        this.importFlows[flow].errorMessage = 'Could not load import provider';
                     });
                 }
             }
         },
         checkFireflyIIIConnection() {
-            let validateUrl  = './api/firefly-iii/validate';
+            let validateUrl = './api/firefly-iii/validate';
             //window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
             window.axios.get(validateUrl).then((response) => {
-                let result = response.data.result;
+                let result     = response.data.result;
                 let statusCode = response.data.status_code;
                 console.log('Result is ', result)
 
@@ -130,7 +106,7 @@ let index = function () {
                     return;
                 }
                 console.log(statusCode);
-                if(401 === statusCode) {
+                if (401 === statusCode) {
                     this.pageProperties.connectionError        = true;
                     this.pageProperties.connectionErrorMessage = 'Firefly III refused the connection. It believes you are not authenticated properly. Perhaps you\'ve not copy-pasted the access token correctly, or it has expired.';
                     return;
@@ -140,7 +116,7 @@ let index = function () {
                 this.pageProperties.connectionError        = true;
                 this.pageProperties.connectionErrorMessage = response.data.message;
             }).catch((error) => {
-                if(500 === error.response.status) {
+                if (500 === error.response.status) {
                     this.pageProperties.connectionError        = true;
                     this.pageProperties.connectionErrorMessage = 'A "500"-error occurred inside the data importer while trying to check the connection to Firefly III. Sorry about that. Please follow the link to the documentation and consult the log files to see what happened. Sorry about this!';
                     return;

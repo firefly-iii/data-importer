@@ -75,7 +75,7 @@ return [
     ],
     'enabled_flows'                 => [
         'file'      => true,
-        'sophtron'  => false,
+        'sophtron'  => true,
         'nordigen'  => true,
         // 'spectre'   => true,
         'simplefin' => true,
