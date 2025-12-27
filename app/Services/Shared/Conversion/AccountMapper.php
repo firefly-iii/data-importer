@@ -27,7 +27,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Model\ImportServiceAccount;
-use App\Services\SimpleFIN\Model\Account as SimpleFINAccount;
 use App\Services\SimpleFIN\Request\PostAccountRequest;
 use App\Services\SimpleFIN\Response\PostAccountResponse;
 use Carbon\Carbon;
@@ -53,7 +52,6 @@ class AccountMapper
         // Defer account loading until actually needed to avoid authentication errors
         // during constructor when authentication context may not be available
     }
-
 
     /**
      * Find a matching Firefly III account for a SimpleFIN account

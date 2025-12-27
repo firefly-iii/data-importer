@@ -119,7 +119,7 @@ class ImportJobRepository
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
-        if(true === $importJob->isInitialized()) {
+        if (true === $importJob->isInitialized()) {
             return new MessageBag();
         }
         Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));

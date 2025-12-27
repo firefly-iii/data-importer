@@ -28,7 +28,6 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Nordigen\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
-use App\Services\Shared\Authentication\IsRunningCli;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -36,7 +35,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));

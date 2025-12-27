@@ -82,6 +82,7 @@ class RoutineManager implements RoutineManagerInterface
     public function getServiceAccounts(): array
     {
         Log::debug('Return getServiceAccounts from RoutineManager.');
+
         return $this->importJob->getServiceAccounts();
     }
 
@@ -92,7 +93,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->existingServiceAccounts = $this->getServiceAccounts();
 
-        if(0 === count($this->existingServiceAccounts)) {
+        if (0 === count($this->existingServiceAccounts)) {
             // retry downloading existing service accounts.
             Log::debug('Do not have service accounts from SimpleFIN, redownload.');
         }

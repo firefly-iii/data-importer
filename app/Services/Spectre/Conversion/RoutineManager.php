@@ -28,7 +28,6 @@ use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;

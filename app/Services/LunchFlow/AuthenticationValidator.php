@@ -27,7 +27,6 @@ namespace App\Services\LunchFlow;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
-use App\Services\Shared\Authentication\IsRunningCli;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -35,7 +34,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));

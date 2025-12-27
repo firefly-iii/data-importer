@@ -47,25 +47,26 @@ class AutoUploadController extends Controller
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Disabled, not allowed to import.');
         }
-        $secret       = (string)($request->get('secret') ?? '');
-        $systemSecret = (string)config('importer.auto_import_secret');
+        $secret         = (string)($request->get('secret') ?? '');
+        $systemSecret   = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Bad secret, not allowed to import.');
         }
 
-        $access = $this->haveAccess(false);
+        $access         = $this->haveAccess(false);
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Could not connect / get access to your local Firefly III instance at %s.', config('importer.url')));
         }
         $json           = $request->file('json');
         $importable     = $request->file('importable');
         $importablePath = (string)$importable?->getPathname();
-        //
+
         try {
             $this->importUpload((string)$json?->getPathname(), $importablePath);
         } catch (ImporterErrorException $e) {
             $message = sprintf('[%s]: %s', config('importer.version'), $e->getMessage());
             Log::error($message);
+
             return response()->json(['TODO' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
         }
 
@@ -84,7 +85,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
      * @param mixed $string
      */
     public function info($string, $verbosity = null): void
@@ -93,7 +94,7 @@ class AutoUploadController extends Controller
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
      * @param mixed $string
      */
     public function warn($string, $verbosity = null): void
