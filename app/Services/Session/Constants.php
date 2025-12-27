@@ -65,6 +65,5 @@ class Constants
 
     // session variable names:
     public const string SESSION_VANITY_URL           = 'vanity_url';
-    public const string UPLOAD_CONFIG_FILE           = 'config_file_path';
 
 }

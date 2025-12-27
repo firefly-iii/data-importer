@@ -51,7 +51,6 @@ class IndexController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget([
-            Constants::UPLOAD_CONFIG_FILE,
             Constants::SELECTED_BANK_COUNTRY,
         ]);
         session()->flush();
