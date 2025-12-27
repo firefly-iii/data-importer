@@ -39,6 +39,7 @@ trait HaveAccess
     {
         if ($console) {
             $this->line($line);
+
             return;
         }
         Log::debug($line);
@@ -48,6 +49,7 @@ trait HaveAccess
     {
         if ($console) {
             $this->error($line);
+
             return;
         }
         Log::error($line);
@@ -57,6 +59,7 @@ trait HaveAccess
     {
         if ($console) {
             $this->warn($line);
+
             return;
         }
         Log::warning($line);
@@ -64,13 +67,13 @@ trait HaveAccess
 
     protected function haveAccess(bool $console): bool
     {
-        $url   = (string)config('importer.url');
-        $token = SecretManager::getAccessToken();
+        $url             = (string)config('importer.url');
+        $token           = SecretManager::getAccessToken();
 
         $this->sendMessage($console, sprintf('Trying to connect to %s...', $url));
         $this->sendMessage($console, sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
-        $request = new SystemInformationRequest($url, $token);
+        $request         = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -101,7 +104,7 @@ trait HaveAccess
             $this->sendWarning($console, 'You are connected to a branch version of Firefly III.');
         }
 
-        $compare = version_compare($reportedVersion, config('importer.minimum_version'));
+        $compare         = version_compare($reportedVersion, config('importer.minimum_version'));
         if (-1 === $compare && !str_starts_with($reportedVersion, 'develop') && !str_starts_with($reportedVersion, 'branch')) {
             $this->sendError($console, sprintf('The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.', $reportedVersion, config('importer.minimum_version')));
 
@@ -112,7 +115,7 @@ trait HaveAccess
     }
 
     /**
-     * @param null $verbosity
+     * @param null  $verbosity
      * @param mixed $string
      */
     abstract public function error($string, $verbosity = null);

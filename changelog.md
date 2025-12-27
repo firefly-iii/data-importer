@@ -20,10 +20,10 @@ Version 2.0 of the Firefly III data importer introduces some big architectural c
 - The "Spectre" import routine created and supported by Salt Edge, has been officially deprecated and can no longer be used.
 
 ### Fixed
-- #11162
-- #11172
-- #11327
-- #11377
+- [Discussion 11162](https://github.com/orgs/firefly-iii/discussions/11162) (Importer account generation via account number) started by @ahmetpekbas
+- [Issue 11172](https://github.com/firefly-iii/firefly-iii/issues/11172) (Special characters not sorted correctly in account mapping) reported by @empeig
+- [Issue 11327](https://github.com/firefly-iii/firefly-iii/issues/11327) (SimpleFIN import fails with "Account mappings cannot be empty" even when "Map data: NO" is selected) reported by @metalchef1
+- [Issue 11377](https://github.com/firefly-iii/firefly-iii/issues/11377) (Importer ignores date option set in config file) reported by @rmu1987
 
 ## v1.9.2 - 2025-11-08
 
