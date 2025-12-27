@@ -43,7 +43,6 @@ class ConfigurationController extends Controller
 {
     use CollectsAccounts;
     use MergesAccountLists;
-    use RestoresConfiguration;
 
     private ImportJobRepository $repository;
 

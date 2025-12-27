@@ -34,13 +34,11 @@ abstract class AbstractTransaction
 
     public function getCurrencyCode(int $index): string
     {
-        // TODO loop level D for the date that belongs to the index
         return (string) $this->levelC->getAmount()->getCurrency()->getCode();
     }
 
     public function getAmount(int $index): string
     {
-        // TODO loop level D for the date that belongs to the index
         return (string) $this->getDecimalAmount($this->levelC->getAmount());
     }
 
@@ -57,7 +55,7 @@ abstract class AbstractTransaction
 
     public function getDate(int $index): string
     {
-        // TODO loop level D for the date that belongs to the index
+        // FIXME loop level D for the date that belongs to the index
         return (string) $this->levelC->getValueDate()->format(self::TIME_FORMAT);
     }
 
@@ -197,7 +195,7 @@ abstract class AbstractTransaction
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     Log::debug('There is no info for this thing.');
 
-                    // TODO return nothing?
+                    // FIXME return nothing?
                     return $result;
                 }
 
@@ -218,12 +216,12 @@ abstract class AbstractTransaction
             case 'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
-                    // TODO return nothing?
+                    // FIXME return nothing?
                     return '';
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index]; // TODO, check if always readable or if we need some checks like with "unstructuredBlockMessage"
+                $info            = $this->levelD[$index]; // FIXME, check if always readable or if we need some checks like with "unstructuredBlockMessage"
 
                 // like the unstructured block, these could be multiple blocks, so loop:
                 if (null !== $info->getRemittanceInformation() && count($info->getRemittanceInformation()->getStructuredBlocks()) > 0) {
@@ -413,7 +411,7 @@ abstract class AbstractTransaction
     private function getOpposingName(RelatedParty $relatedParty): string
     {
         $opposingName = '';
-        // TODO make depend on configuration
+        // FIXME make depend on configuration
         if ('' === (string) $relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());

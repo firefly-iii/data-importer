@@ -48,7 +48,6 @@ use Illuminate\View\View;
  */
 class SelectionController extends Controller
 {
-    use RestoresConfiguration;
 
     private ImportJobRepository $repository;
 

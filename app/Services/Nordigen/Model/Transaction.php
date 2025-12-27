@@ -249,7 +249,7 @@ class Transaction
         // undocumented values:
         $object->endToEndId                             = $array['end_to_end_id'];
 
-        // TODO copy paste code.
+        // FIXME copy paste code.
         $object->debtorAccountIban                      = array_key_exists('iban', $array['debtor_account']) ? $array['debtor_account']['iban'] : '';
         $object->creditorAccountIban                    = array_key_exists('iban', $array['creditor_account']) ? $array['creditor_account']['iban'] : '';
 

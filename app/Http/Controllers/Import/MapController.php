@@ -44,7 +44,6 @@ use InvalidArgumentException;
  */
 class MapController extends Controller
 {
-    use RestoresConfiguration;
 
     protected const string DISK_NAME = 'jobs';
     private ImportJobRepository $repository;
@@ -108,8 +107,8 @@ class MapController extends Controller
 
     /**
      * Return the map data necessary for the importable file mapping based on some weird helpers.
-     * TODO needs refactoring and proper splitting into helpers.
-     * TODO needs renaming or specific CAMT counterpart.
+     * FIXME needs refactoring and proper splitting into helpers.
+     * FIXME needs renaming or specific CAMT counterpart.
      */
     private function getCSVMapInformation(ImportJob $importJob): array
     {
@@ -157,7 +156,7 @@ class MapController extends Controller
         // get columns from file
         $content         = $importJob->getImportableFileString();
         $delimiter       = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
-        $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $configuration->getSpecifics(), $data);
+        $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $data);
 
         // sort the column on if they're mapped or not.
         foreach ($result as $index => $set) {
@@ -178,7 +177,7 @@ class MapController extends Controller
 
     /**
      * Return the map data necessary for the importable file mapping based on some weird helpers.
-     * TODO needs refactoring and proper splitting into helpers.
+     * FIXME needs refactoring and proper splitting into helpers.
      */
     private function getCamtMapInformation(ImportJob $importJob): array
     {
@@ -247,7 +246,7 @@ class MapController extends Controller
          * - opposing account names (this is preordained).
          */
         if ('nordigen' === $importJob->getFlow() || 'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
-            // TODO should be in a helper or something generic.
+            // FIXME should be in a helper or something generic.
             // index 0, opposing account name:
             $index                        = 0;
             $opposingName                 = config('csv.import_roles.opposing-name') ?? null;

@@ -67,10 +67,10 @@ class AutoUploadController extends Controller
             $message = sprintf('[%s]: %s', config('importer.version'), $e->getMessage());
             Log::error($message);
 
-            return response()->json(['TODO' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
+            return response()->json(['error' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
         }
 
-        return response()->json(['TODO' => 'Translate the import result to a JSON thing.']);
+        return response()->json(['message' => 'Translate the import result to a JSON thing.']);
     }
 
     public function error($string, $verbosity = null): void

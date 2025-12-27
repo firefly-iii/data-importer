@@ -47,7 +47,6 @@ class PostAccountRequest extends Request
 
     public function get(): Response
     {
-        // TODO: Implement get() method.
     }
 
     public function post(): Response
@@ -76,11 +75,9 @@ class PostAccountRequest extends Request
 
     public function put(): Response
     {
-        // TODO: Implement put() method.
     }
 
     public function delete(): Response
     {
-        // TODO: Implement delete() method.
     }
 }

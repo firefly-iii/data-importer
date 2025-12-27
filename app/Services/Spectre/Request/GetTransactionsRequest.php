@@ -86,11 +86,9 @@ class GetTransactionsRequest extends Request
 
     public function post(): Response
     {
-        // TODO: Implement post() method.
     }
 
     public function put(): Response
     {
-        // TODO: Implement put() method.
     }
 }

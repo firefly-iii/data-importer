@@ -41,7 +41,6 @@ use Illuminate\View\View;
  */
 class RoleController extends Controller
 {
-    use RestoresConfiguration;
 
     private ImportJobRepository $repository;
 

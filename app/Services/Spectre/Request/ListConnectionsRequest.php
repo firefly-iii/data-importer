@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class ListConnectionsRequest
- * TODO is not yet paginated.
  */
 class ListConnectionsRequest extends Request
 {

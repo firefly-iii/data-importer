@@ -49,7 +49,6 @@ use Ramsey\Uuid\Uuid;
  */
 class LinkController extends Controller
 {
-    use RestoresConfiguration;
 
     private ImportJobRepository $repository;
 

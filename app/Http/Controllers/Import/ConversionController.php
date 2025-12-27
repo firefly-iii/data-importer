@@ -48,9 +48,7 @@ use Illuminate\Support\Facades\Log;
  */
 class ConversionController extends Controller
 {
-    use RestoresConfiguration;
 
-    protected const string DISK_NAME = 'jobs'; // TODO stored in several places
     private ImportJobRepository $repository;
 
     /**

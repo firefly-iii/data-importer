@@ -80,7 +80,6 @@ class GenerateTransactions
         /** @var Transaction $entry */
         foreach ($spectre as $entry) {
             $return[] = $this->generateTransaction($entry);
-            // TODO error handling at this point.
         }
 
         // $this->addMessage(0, sprintf('Parsed %d Spectre transactions for further processing.', count($return)));

@@ -79,7 +79,7 @@ class AutoImportController extends Controller
 
         $files        = $this->getFiles($directory);
         if (0 === count($files)) {
-            return response()->json(['TODO' => 'No files found.']);
+            return response()->json(['error' => 'No files found.']);
         }
         Log::info(sprintf('[%s] Found %d (importable +) JSON file sets in %s', config('importer.version'), count($files), $directory));
 
@@ -91,7 +91,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
 
-        return response()->json(['TODO' => 'Seems to have worked!']);
+        return response()->json(['message' => 'Seems to have worked!']);
     }
 
     public function info(mixed $string): void

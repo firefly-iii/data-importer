@@ -39,7 +39,6 @@ use stdClass;
  */
 class DownloadController extends Controller
 {
-    use RestoresConfiguration;
 
     private ImportJobRepository $repository;
 

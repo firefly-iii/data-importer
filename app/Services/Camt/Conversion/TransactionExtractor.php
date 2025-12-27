@@ -62,7 +62,6 @@ class TransactionExtractor
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 Log::debug(sprintf('[%s] [%d/%d] Now working on entry with %d detail entries.', config('importer.version'), $ii + 1, $entryCount, $count));
                 if (0 === $count) {
-                    // TODO Create a single transaction, I guess?
                     $transactions[] = TransactionFactory::create($camtType, $message, $statement, $entry, []);
                 }
                 if (0 !== $count) {

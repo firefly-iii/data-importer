@@ -42,11 +42,10 @@ class MapperService
 {
     /**
      * Appends the given array with data from the CSV file in the config.
-     * TODO remove reference to specifics.
      *
      * @throws ImporterErrorException
      */
-    public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $specifics, array $data): array
+    public static function getMapData(string $content, string $delimiter, bool $hasHeaders, array $data): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         // make file reader first.
@@ -78,7 +77,6 @@ class MapperService
         // loop each row, apply specific:
         Log::debug('Going to loop all records to collect information');
         foreach ($records as $row) {
-            // $row = SpecificService::runSpecifics($row, $specifics);
             // loop each column, put in $data
             foreach ($row as $columnIndex => $column) {
                 if (!array_key_exists($columnIndex, $data)) {
@@ -142,7 +140,7 @@ class MapperService
             foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
-                    // TODO Create a single transaction, I guess?
+                    // FIXME Create a single transaction, I guess?
                     $transactions[] = new Transaction($camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {

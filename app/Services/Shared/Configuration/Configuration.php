@@ -100,7 +100,6 @@ class Configuration
 
     // configuration for "classic" method:
     private bool  $skipForm         = false;
-    private array $specifics        = [];
 
     // configuration for "cell" method:
     private int    $uniqueColumnIndex;
@@ -279,7 +278,6 @@ class Configuration
         }
 
         // array values
-        $object->specifics                   = [];
         $object->roles                       = [];
         $object->doMapping                   = [];
         $object->mapping                     = [];
@@ -457,7 +455,6 @@ class Configuration
     private static function fromVersionThree(array $data): self
     {
         $object            = self::fromArray($data);
-        $object->specifics = [];
 
         return $object;
     }
@@ -557,12 +554,6 @@ class Configuration
             Log::debug(sprintf('Configuration overruled from none: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
         }
 
-        $object->specifics                   = [];
-        foreach ($array['specifics'] as $key => $enabled) {
-            if (true === $enabled) {
-                $object->specifics[] = $key;
-            }
-        }
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
             $object->contentType = 'csv';
@@ -796,11 +787,6 @@ class Configuration
         $this->pendingTransactions = $pendingTransactions;
     }
 
-    public function getSpecifics(): array
-    {
-        return $this->specifics;
-    }
-
     public function getUniqueColumnIndex(): int
     {
         return $this->uniqueColumnIndex;
@@ -876,11 +862,6 @@ class Configuration
     public function getPendingTransactions(): bool
     {
         return $this->pendingTransactions;
-    }
-
-    public function hasSpecific(string $name): bool
-    {
-        return in_array($name, $this->specifics, true);
     }
 
     public function isAddImportTag(): bool

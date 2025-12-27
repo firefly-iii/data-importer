@@ -242,7 +242,6 @@ class RoleService
             foreach ($entries as $entry) {                       // -> Level C
                 $count = count($entry->getTransactionDetails()); // count level D entries.
                 if (0 === $count) {
-                    // TODO Create a single transaction, I guess?
                     $transactions[] = TransactionFactory::create($camtType, $camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {

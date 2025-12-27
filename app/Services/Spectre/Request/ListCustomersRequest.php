@@ -34,7 +34,6 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class ListCustomersRequest
- * TODO is not yet paginated.
  */
 class ListCustomersRequest extends Request
 {

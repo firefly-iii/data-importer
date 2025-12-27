@@ -40,7 +40,6 @@ use Illuminate\Support\Facades\Log;
  */
 class SubmitController extends Controller
 {
-    use RestoresConfiguration;
 
     protected const string DISK_NAME = 'jobs';
 
