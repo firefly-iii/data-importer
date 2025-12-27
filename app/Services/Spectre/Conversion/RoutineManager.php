@@ -46,7 +46,6 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
     use ProgressInformation;
 
     private array                $allErrors;
@@ -68,7 +67,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionGenerator = new GenerateTransactions();
         $this->transactionFilter    = new FilterTransactions();
         if (null === $identifier) {
-            $this->generateIdentifier();
+            // $this->generateIdentifier();
         }
         if (null !== $identifier) {
             $this->identifier = $identifier;

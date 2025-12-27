@@ -54,75 +54,6 @@ class AccountMapper
         // during constructor when authentication context may not be available
     }
 
-    /**
-     * Map SimpleFIN accounts to Firefly III accounts
-     */
-    public function mapAccounts(array $simplefinAccounts, array $configuration = []): array
-    {
-        $mapping = [];
-
-        foreach ($simplefinAccounts as $simplefinAccount) {
-            if (!$simplefinAccount instanceof SimpleFINAccount) {
-                continue;
-            }
-
-            $accountKey = $simplefinAccount->getId();
-
-            // Check if mapping is already configured
-            if (isset($configuration['account_mapping'][$accountKey])) {
-                $mappingConfig = $configuration['account_mapping'][$accountKey];
-
-                if ('map' === $mappingConfig['action'] && isset($mappingConfig['firefly_account_id'])) {
-                    // Map to existing account
-                    $fireflyAccount = $this->getFireflyAccountById((int)$mappingConfig['firefly_account_id']);
-                    if ($fireflyAccount instanceof Account) {
-                        $mapping[$accountKey] = [
-                            'simplefin_account'    => $simplefinAccount,
-                            'firefly_account_id'   => $fireflyAccount->id,
-                            'firefly_account_name' => $fireflyAccount->name,
-                            'action'               => 'map',
-                        ];
-                    }
-                }
-                if ('create' === $mappingConfig['action']) {
-                    // Create new account
-                    $fireflyAccount = $this->createFireflyIIIAccount($simplefinAccount, $mappingConfig);
-                    if ($fireflyAccount instanceof Account) {
-                        $mapping[$accountKey] = [
-                            'simplefin_account'    => $simplefinAccount,
-                            'firefly_account_id'   => $fireflyAccount->id,
-                            'firefly_account_name' => $fireflyAccount->name,
-                            'action'               => 'create',
-                        ];
-                    }
-                }
-            }
-            if (!isset($configuration['account_mapping'][$accountKey])) {
-                // Auto-map by searching for existing accounts
-                $converted      = ImportServiceAccount::convertSingleAccount($simplefinAccount);
-                $fireflyAccount = $this->findMatchingFireflyIIIAccount($converted);
-                if ($fireflyAccount instanceof Account) {
-                    $mapping[$accountKey] = [
-                        'simplefin_account'    => $simplefinAccount,
-                        'firefly_account_id'   => $fireflyAccount->id,
-                        'firefly_account_name' => $fireflyAccount->name,
-                        'action'               => 'auto_map',
-                    ];
-                }
-                if (!$fireflyAccount instanceof Account) {
-                    // No mapping found - will need user input
-                    $mapping[$accountKey] = [
-                        'simplefin_account'    => $simplefinAccount,
-                        'firefly_account_id'   => null,
-                        'firefly_account_name' => null,
-                        'action'               => 'unmapped',
-                    ];
-                }
-            }
-        }
-
-        return $mapping;
-    }
 
     /**
      * Find a matching Firefly III account for a SimpleFIN account
@@ -162,6 +93,7 @@ class AccountMapper
     }
 
     /**
+     * FIXME merge with trait CreatesAccounts
      * Create account immediately via Firefly III API
      */
     public function createFireflyIIIAccount(ImportServiceAccount $importServiceAccount, array $config): ?Account
@@ -285,17 +217,6 @@ class AccountMapper
     }
 
     /**
-     * Get Firefly III account by ID
-     */
-    private function getFireflyAccountById(int $id): ?Account
-    {
-        $this->loadFireflyIIIAccounts();
-
-        return array_find($this->fireflyIIIAccounts, fn ($account) => $account->id === $id);
-
-    }
-
-    /**
      * Load all Firefly III accounts
      */
     private function loadFireflyIIIAccounts(): void
@@ -404,56 +325,5 @@ class AccountMapper
 
         return array_any($retryableErrors, fn ($retryableError) => false !== stripos($errorMessage, $retryableError));
 
-    }
-
-    /**
-     * Get mapping options for UI
-     *
-     * @return array<string,mixed>
-     */
-    public function getMappingOptions(SimpleFINAccount $simplefinAccount): array
-    {
-        $this->loadFireflyAccounts();
-
-        $options   = [
-            'account_name'      => $simplefinAccount->getName(),
-            'account_id'        => $simplefinAccount->getId(),
-            'currency'          => $simplefinAccount->getCurrency(),
-            'balance'           => $simplefinAccount->getBalance(),
-            'organization'      => $simplefinAccount->getOrganizationName() ?? $simplefinAccount->getOrganizationDomain(),
-            'firefly_accounts'  => [],
-            'suggested_account' => null,
-        ];
-
-        // Add all available Firefly accounts as options
-        foreach ($this->fireflyIIIAccounts as $account) {
-            $options['firefly_accounts'][] = [
-                'id'            => $account->id,
-                'name'          => $account->name,
-                'type'          => $account->type,
-                'currency_code' => $account->currencyCode ?? 'EUR',
-            ];
-        }
-
-        // Try to suggest a matching account
-        $converted = ImportServiceAccount::convertSingleAccount($simplefinAccount);
-        $suggested = $this->findMatchingFireflyIIIAccount($converted);
-        if ($suggested instanceof Account) {
-            $options['suggested_account'] = [
-                'id'   => $suggested->id,
-                'name' => $suggested->name,
-                'type' => $suggested->type,
-            ];
-        }
-
-        return $options;
-    }
-
-    /**
-     * Get created accounts during this session
-     */
-    public function getCreatedAccounts(): array
-    {
-        return $this->createdAccounts;
     }
 }

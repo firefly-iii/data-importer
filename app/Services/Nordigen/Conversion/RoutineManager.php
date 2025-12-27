@@ -50,8 +50,6 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
     use CreatesAccounts;
-    use GeneratesIdentifier;
-    use IsRunningCli;
     use ProgressInformation;
 
     private Configuration        $configuration;

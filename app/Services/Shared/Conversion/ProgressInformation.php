@@ -30,6 +30,10 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Trait ProgressInformation
+ *
+ * Replace this with references to then import job, where messages must be stored anyway.
+ *
+ * @deprecated
  */
 trait ProgressInformation
 {

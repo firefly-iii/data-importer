@@ -32,7 +32,6 @@ use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
 use App\Services\CSV\Conversion\Routine\LineProcessor;
 use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
-use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\GeneratesIdentifier;
@@ -47,8 +46,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
-    use IsRunningCli;
     use ProgressInformation;
 
     private ColumnValueConverter       $columnValueConverter;

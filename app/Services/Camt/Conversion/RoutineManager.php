@@ -46,8 +46,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
-    use IsRunningCli;
     use ProgressInformation;
 
     private TransactionConverter $transactionConverter;

@@ -35,7 +35,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-    use IsRunningCli;
 
     public function validate(): AuthenticationStatus
     {
