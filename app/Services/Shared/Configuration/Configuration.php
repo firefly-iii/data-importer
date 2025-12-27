@@ -454,9 +454,7 @@ class Configuration
      */
     private static function fromVersionThree(array $data): self
     {
-        $object            = self::fromArray($data);
-
-        return $object;
+        return self::fromArray($data);
     }
 
     /**

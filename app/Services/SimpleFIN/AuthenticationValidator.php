@@ -56,7 +56,5 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         ];
     }
 
-    public function setData(array $data): void
-    {
-    }
+    public function setData(array $data): void {}
 }

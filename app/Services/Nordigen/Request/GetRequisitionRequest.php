@@ -70,13 +70,7 @@ class GetRequisitionRequest extends Request
         return new GetRequisitionResponse($response);
     }
 
-    public function post(): Response
-    {
+    public function post(): Response {}
 
-    }
-
-    public function put(): Response
-    {
-
-    }
+    public function put(): Response {}
 }

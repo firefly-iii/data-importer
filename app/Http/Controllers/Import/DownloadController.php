@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import;
 
 use App\Http\Controllers\Controller;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Support\Http\RestoresConfiguration;
 use Carbon\Carbon;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -39,7 +38,6 @@ use stdClass;
  */
 class DownloadController extends Controller
 {
-
     private ImportJobRepository $repository;
 
     public function __construct()
