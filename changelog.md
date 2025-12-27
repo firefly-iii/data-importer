@@ -8,10 +8,8 @@ Version 2.0 of the Firefly III data importer introduces some big architectural c
 
 ### Added
 - New import data provider "[Sophtron](https://sophtron.com/index)". In the interest of full disclosure, they have sponsored me to add their API to the data importer. [Their support (and yours!)](https://docs.firefly-iii.org/explanation/more-information/donations/) allows me to spend more time on Firefly III and the data importer, and I'm grateful for their support.
-- https://github.com/firefly-iii/data-importer/pull/1037
-- https://github.com/firefly-iii/data-importer/pull/1035
-
-
+- [PR 1035](https://github.com/firefly-iii/data-importer/pull/1035) (Add support for CAMT.052)  by @beatbesmer
+- [PR 1037](https://github.com/firefly-iii/data-importer/pull/1037) (Syntax error in debug logging) by @beatbesmer
 
 ### Changed
 - Import jobs are no longer managed using session data. This is a technical change, and it means that import jobs are easier to monitor, update and (in the future) can be re-run using new settings. This allows for a whole new range of flexibility.
