@@ -30,7 +30,6 @@ use App\Http\Request\RolesPostRequest;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Roles\RoleService;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +40,6 @@ use Illuminate\View\View;
  */
 class RoleController extends Controller
 {
-
     private ImportJobRepository $repository;
 
     /**

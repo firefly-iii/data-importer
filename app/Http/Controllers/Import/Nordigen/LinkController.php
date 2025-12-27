@@ -36,7 +36,6 @@ use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,7 +48,6 @@ use Ramsey\Uuid\Uuid;
  */
 class LinkController extends Controller
 {
-
     private ImportJobRepository $repository;
 
     public function __construct()

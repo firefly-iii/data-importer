@@ -34,8 +34,6 @@ use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
-use App\Services\Spectre\Conversion\RoutineManager as SpectreRoutineManager;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -48,7 +46,6 @@ use Illuminate\Support\Facades\Log;
  */
 class ConversionController extends Controller
 {
-
     private ImportJobRepository $repository;
 
     /**

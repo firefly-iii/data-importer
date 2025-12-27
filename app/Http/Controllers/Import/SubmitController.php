@@ -30,7 +30,6 @@ use App\Jobs\ProcessImportSubmissionJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Import\Status\SubmissionStatus;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +39,6 @@ use Illuminate\Support\Facades\Log;
  */
 class SubmitController extends Controller
 {
-
     protected const string DISK_NAME = 'jobs';
 
     private ImportJobRepository $repository;
