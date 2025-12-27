@@ -186,6 +186,11 @@ class UploadController extends Controller
                 $importJob             = $collector->getImportJob();
 
                 break;
+            case 'sophtron':
+                // FIXME not actually sure.
+                Log::debug('No extra steps for Sophtron.');
+
+                break;
 
             case 'nordigen':
                 Log::debug('No extra steps for Nordigen.');

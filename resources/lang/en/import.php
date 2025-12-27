@@ -38,6 +38,14 @@ return [
     'placeholder_lunchflow_api_key' => 'Lunch Flow API key',
     'help_lunchflow_api_key'        => 'Enter your Lunch Flow API key',
 
+    // sophtron auth
+    'label_sophtron_user_id' => 'Sophtron User ID',
+    'label_sophtron_access_key' => 'Sophtron Access Key',
+    'help_sophtron_user_id' => 'You can find this value in your Sophtron API settings',
+    'placeholder_sophtron_user_id' => 'Sophtron User ID',
+    'placeholder_sophtron_access_key' => 'Sophtron Access Key',
+    'help_sophtron_access_key' => 'You can find this value in your Sophtron API settings',
+
     'label_spectre_app_id'          => 'Spectre / Salt Edge App Id',
     'label_spectre_secret'          => 'Spectre / Salt Edge Secret',
     'placeholder_spectre_app_id'    => 'Spectre / Salt Edge App Id',

@@ -77,7 +77,6 @@ return [
         'file'      => true,
         'sophtron'  => true,
         'nordigen'  => true,
-        // 'spectre'   => true,
         'simplefin' => true,
         'lunchflow' => true,
         'obg'       => false,

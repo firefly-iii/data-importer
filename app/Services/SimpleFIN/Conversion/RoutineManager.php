@@ -55,7 +55,7 @@ class RoutineManager implements RoutineManagerInterface
      *
      * @param mixed $identifier
      */
-    public function __construct($identifier)
+    public function __construct(ImportJob $importJob)
     {
         $this->allErrors        = [];
         $this->allWarnings      = [];
@@ -64,11 +64,10 @@ class RoutineManager implements RoutineManagerInterface
 
         Log::debug('Constructed SimpleFIN RoutineManager');
 
-        $this->identifier       = $identifier;
         $this->simpleFINService = app(SimpleFINService::class);
         $this->transformer      = new TransactionTransformer();
         $this->repository       = new ImportJobRepository();
-        $this->importJob        = $this->repository->find($identifier);
+        $this->importJob        = $importJob;
         $this->importJob->refreshInstanceIdentifier();
         $this->simpleFINService->setConfiguration($this->importJob->getConfiguration());
     }

@@ -28,7 +28,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
-use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
+use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -39,8 +39,8 @@ class ValidationController extends Controller
         return match ($flow) {
             'nordigen', 'gocardless' => $this->validateGoCardless(),
             'simplefin'              => $this->validateSimpleFIN(),
-            'spectre'                => $this->validateSpectre(),
             'lunchflow'              => $this->validateLunchFlow(),
+            'sophtron' => $this->validateSophtron(),
             'file'                   => response()->json(['result' => 'OK']),
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
         };
@@ -103,19 +103,25 @@ class ValidationController extends Controller
         return response()->json(['result' => 'OK']);
     }
 
-    public function validateSpectre(): JsonResponse
+    private function validateSophtron(): JsonResponse
     {
-        $validator = new SpectreValidator();
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $validator = new SophtronValidator();
         $result    = $validator->validate();
 
         if (AuthenticationStatus::ERROR === $result) {
             // send user error:
+            Log::error('Error: Could not validate app key.');
+
             return response()->json(['result' => 'NOK']);
         }
         if (AuthenticationStatus::NODATA === $result) {
             // send user error:
+            Log::error('No data: Could not validate app key.');
+
             return response()->json(['result' => 'NODATA']);
         }
+        Log::info(sprintf('[%s] All OK in validateSimpleFIN.', config('importer.version')));
 
         return response()->json(['result' => 'OK']);
     }

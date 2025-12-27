@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Authentication;
 
+use App\Models\ImportJob;
 use App\Services\Session\Constants;
 use Illuminate\Support\Facades\Log;
 
@@ -32,6 +33,46 @@ use Illuminate\Support\Facades\Log;
  */
 class SecretManager
 {
+    public static function getSophtronAccessKey(?ImportJob $importJob = null): string
+    {
+        // FIXME needs to use constants.
+        return self::getField('access_key', 'sophtron.access_key', 'sophtron_access_key', $importJob);
+    }
+
+    public static function getSophtronUserId(?ImportJob $importJob = null): string
+    {
+        // FIXME needs to use constants.
+        return self::getField('user_id', 'sophtron.user_id', 'sophtron_user_id', $importJob);
+    }
+
+    private static function getField(string $fieldName, string $configName, string $sessionField, ?ImportJob $importJob = null): string
+    {
+        $identifier = $importJob ? $importJob->identifier : 'NULL';
+        Log::debug(sprintf('Now in getField("%s","%s","%s", "%s")', $fieldName, $configName, $sessionField, $identifier));
+        $result = '';
+        // check: session
+        if (session()->has($sessionField)) {
+            Log::debug(sprintf('There is a "%s" in the session.', $sessionField));
+            $result = (string)session()->get($sessionField);
+        }
+        // check: import job.
+        if ('' === $result && null !== $importJob) {
+            Log::debug(sprintf('Check if "%s" is in the import job.', $fieldName));
+            $details = $importJob->getAuthenticationDetails();
+            if (array_key_exists($fieldName, $details)) {
+                $result = (string)$details[$fieldName];
+            }
+        }
+        // check: config
+        if ('' === $result) {
+            Log::debug(sprintf('Check if "%s" is in the config.', $fieldName));
+            $result = (string)config($configName);
+        }
+        Log::debug(sprintf('Return result. strlen=%d', strlen($result)));
+        return $result;
+    }
+
+
     /**
      * Will return the access token. From a cookie or header if it's there, otherwise from configuration.
      */
@@ -53,7 +94,7 @@ class SecretManager
 
         $token = request()?->header('Authorization', '') ?? '';
         if (is_array($token)) {
-            $token = (string) reset($token);
+            $token = (string)reset($token);
         }
         if ('' === $token) {
             Log::debug('Access token in header is empty, will be ignored.');
@@ -115,7 +156,7 @@ class SecretManager
     private static function hasClientId(): bool
     {
         return session()->has(Constants::SESSION_CLIENT_ID)
-            && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
+               && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getVanityUrl(): string
@@ -193,6 +234,19 @@ class SecretManager
     {
         session()->put(Constants::SESSION_REFRESH_TOKEN, $token);
     }
+
+    /**
+     *
+     *
+     * @param string $key
+     * @param string $value
+     * @return void
+     */
+    public static function saveValueInSession(string $key, string $value): void
+    {
+        session()->put($key, $value);
+    }
+
 
     /**
      * Store access token.

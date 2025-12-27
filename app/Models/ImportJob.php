@@ -71,6 +71,7 @@ class ImportJob implements Arrayable
     private array $applicationAccounts             = [];
     private array $currencies                      = [];
     private array $serviceAccounts                 = [];
+    private array $authenticationDetails = [];
 
     public static function createNew(): self
     {
@@ -103,6 +104,7 @@ class ImportJob implements Arrayable
         $importJob->flow                  = $array['flow'];
         $importJob->configurationString   = $array['configuration_string'];
         $importJob->importableFileString  = $array['importable_file_string'];
+        $importJob->authenticationDetails = $array['authentication_details'];
 
         // only create configuration object when there is configuration to be parsed.
         $importJob->configuration         = null;
@@ -180,6 +182,7 @@ class ImportJob implements Arrayable
                 'state'                  => $this->state,
                 'flow'                   => $this->flow,
                 'configuration_string'   => $this->configurationString,
+                'authentication_details' => $this->authenticationDetails,
                 'importable_file_string' => $this->importableFileString,
                 'configuration'          => null === $this->configuration ? [] : $this->configuration->toArray(),
                 'conversion_status'      => $this->conversionStatus->toArray(),
@@ -328,4 +331,11 @@ class ImportJob implements Arrayable
     {
         $this->initialized = $initialized;
     }
+
+    public function getAuthenticationDetails(): array
+    {
+        return $this->authenticationDetails;
+    }
+
+
 }

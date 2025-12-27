@@ -30,6 +30,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
+use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -108,6 +109,8 @@ class AuthenticateController extends Controller
 
             case 'lunchflow':
                 return new LunchFlowValidator();
+            case 'sophtron':
+                return new SophtronValidator();
         }
 
         return null;

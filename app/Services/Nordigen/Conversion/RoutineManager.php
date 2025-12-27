@@ -59,19 +59,18 @@ class RoutineManager implements RoutineManagerInterface
 
     private array $downloaded;
 
-    public function __construct(string $identifier)
+    public function __construct(ImportJob $importJob)
     {
         $this->allErrors            = [];
         $this->allWarnings          = [];
         $this->allMessages          = [];
         $this->allRateLimits        = [];
         $this->downloaded           = [];
-        $this->identifier           = $identifier;
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
         $this->transactionFilter    = new FilterTransactions();
         $this->repository           = new ImportJobRepository();
-        $this->importJob            = $this->repository->find($identifier);
+        $this->importJob            = $importJob;
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
     }
@@ -140,7 +139,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered     = $this->transactionFilter->filter($transactions);
+        $filtered = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // collect errors from transactionProcessor.
@@ -231,7 +230,7 @@ class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        return array_find($accounts, fn ($account) => $account['id'] === $accountId);
+        return array_find($accounts, fn($account) => $account['id'] === $accountId);
 
     }
 
@@ -318,7 +317,7 @@ class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
-            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->addWarning(0, $message);
             }

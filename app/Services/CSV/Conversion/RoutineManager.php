@@ -55,16 +55,14 @@ class RoutineManager implements RoutineManagerInterface
     private ImportJob                  $importJob;
     private ImportJobRepository        $repository;
 
-    public function __construct(string $identifier)
+    public function __construct(ImportJob $importJob)
     {
-        $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        $this->identifier    = $identifier;
+        $this->importJob = $importJob;
         $this->repository    = new ImportJobRepository();
-        $this->importJob     = $this->repository->find($identifier);
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
 

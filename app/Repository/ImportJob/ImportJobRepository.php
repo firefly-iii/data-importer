@@ -194,6 +194,9 @@ class ImportJobRepository
                 $configuration->setDuplicateDetectionMethod('cell');
 
                 break;
+            case 'sophtron':
+                
+                break;
 
             default:
                 $messageBag->add('importable_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));

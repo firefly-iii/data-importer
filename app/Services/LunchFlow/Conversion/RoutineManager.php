@@ -52,17 +52,15 @@ class RoutineManager implements RoutineManagerInterface
 
     private array $downloaded;
 
-    public function __construct(string $identifier)
+    public function __construct(ImportJob $importJob)
     {
         $this->allErrors            = [];
         $this->allWarnings          = [];
         $this->allMessages          = [];
         $this->allRateLimits        = [];
         $this->downloaded           = [];
-        $this->identifier           = $identifier;
-
         $this->repository           = new ImportJobRepository();
-        $this->importJob            = $this->repository->find($identifier);
+        $this->importJob            = $importJob;
         $this->importJob->refreshInstanceIdentifier();
 
         $this->transactionProcessor = new TransactionProcessor();
