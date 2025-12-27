@@ -31,12 +31,7 @@ use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
-use App\Support\Http\RestoresConfiguration;
 use App\Support\Http\Upload\CollectsSettings;
-use App\Support\Http\Upload\ProcessesFileUpload;
-use App\Support\Http\Upload\ProcessesLunchFlowUpload;
-use App\Support\Http\Upload\ProcessesNordigenUpload;
-use App\Support\Http\Upload\ProcessesSpectreUpload;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -55,11 +50,6 @@ use Storage;
 class UploadController extends Controller
 {
     use CollectsSettings;
-    use ProcessesFileUpload;
-    use ProcessesLunchFlowUpload;
-    use ProcessesNordigenUpload;
-    use ProcessesSpectreUpload;
-    use RestoresConfiguration;
     use VerifyJSON;
 
     private string              $configFileContent     = '';
