@@ -108,11 +108,6 @@ class ConversionController extends Controller
             Log::debug('Create GoCardless routine manager.');
             $routine = new NordigenRoutineManager($identifier);
         }
-        if ('spectre' === $flow) {
-            throw new ImporterErrorException('Need to handle spectre');
-            Log::debug('Create Spectre routine manager.');
-            $routine = new SpectreRoutineManager($identifier);
-        }
         if ('lunchflow' === $flow) {
             Log::debug('Create Lunch Flow routine manager.');
             $routine = new LunchFlowRoutineManager($identifier);
@@ -216,10 +211,6 @@ class ConversionController extends Controller
 
         if ('nordigen' === $flow) {
             $routine = new NordigenRoutineManager($identifier);
-        }
-        if ('spectre' === $flow) {
-            throw new ImporterErrorException('cannot go here B');
-            $routine = new SpectreRoutineManager($identifier);
         }
         if ('lunchflow' === $flow) {
             $routine = new LunchFlowRoutineManager($identifier);

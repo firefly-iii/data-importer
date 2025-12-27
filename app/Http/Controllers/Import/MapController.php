@@ -267,27 +267,6 @@ class MapController extends Controller
             $opposingName['mapped']       = $existingMapping[$index] ?? [];
             $data[]                       = $opposingName;
         }
-        if ('spectre' === $importJob->getFlow()) {
-            // index 1: category (TODO)
-            // index 0, category name:
-            $index                    = 1;
-            $category                 = config('csv.import_roles.category-name') ?? null;
-            $category['role']         = 'category-name';
-            $category['values']       = $this->getCategories($importJob);
-
-            // create the "mapper" class which will get data from Firefly III.
-            $class                    = sprintf('App\Services\CSV\Mapper\%s', $category['mapper']);
-            if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class %s does not exist.', $class));
-            }
-            Log::debug(sprintf('Associated class is %s', $class));
-
-            /** @var MapperInterface $object */
-            $object                   = app($class);
-            $category['mapping_data'] = $object->getMap();
-            $category['mapped']       = $existingMapping[$index] ?? [];
-            $data[]                   = $category;
-        }
         if ('simplefin' === $importJob->getFlow()) {
 
             // index 0: expense/revenue account mapping
@@ -336,40 +315,6 @@ class MapController extends Controller
         );
 
         return array_unique($filtered);
-    }
-
-    private function getCategories(ImportJob $importJob): array
-    {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-
-        throw new ImporterErrorException('No longer used?');
-        //        $downloadIdentifier = session()->get(Constants::CONVERSION_JOB_IDENTIFIER);
-        //        $disk               = Storage::disk(self::DISK_NAME);
-        //        $json               = $disk->get(sprintf('%s.json', $downloadIdentifier));
-        //
-        //        try {
-        //            $array = json_decode((string)$json, true, 512, JSON_THROW_ON_ERROR);
-        //        } catch (JsonException $e) {
-        //            throw new ImporterErrorException(sprintf('Could not decode download: %s', $e->getMessage()), 0, $e);
-        //        }
-        //        $categories = [];
-        //        $total      = count($array);
-        //
-        //        /** @var array $transaction */
-        //        foreach ($array as $index => $transaction) {
-        //            Log::debug(sprintf('[%s/%s] Parsing transaction (2)', $index + 1, $total));
-        //
-        //            /** @var array $row */
-        //            foreach ($transaction['transactions'] as $row) {
-        //                $categories[] = (string)(array_key_exists('category_name', $row) ? $row['category_name'] : '');
-        //            }
-        //        }
-        //        $filtered = array_filter(
-        //            $categories,
-        //            static fn(string $value) => '' !== $value
-        //        );
-        //
-        //        return array_unique($filtered);
     }
 
     private function getExpenseRevenueAccounts(ImportJob $importJob): array

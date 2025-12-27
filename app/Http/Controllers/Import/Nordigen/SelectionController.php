@@ -78,6 +78,7 @@ class SelectionController extends Controller
         $country       = $configuration->getNordigenCountry();
         $bank          = $configuration->getNordigenBank();
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
+            // FIXME
             throw new ImporterErrorException('Do not redirect as it stands now.');
             session()->put(Constants::CONFIGURATION, $configuration->toArray());
             session()->put(Constants::SELECTED_BANK_COUNTRY, true);

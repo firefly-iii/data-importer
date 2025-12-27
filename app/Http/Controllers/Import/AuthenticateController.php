@@ -70,6 +70,7 @@ class AuthenticateController extends Controller
 
         // if the flow is actually validated, or not validateable (like the "file" flow),
         // give a friendly error page.
+        // FIXME needs to be a factory.
         $validator = $this->getValidator($flow);
         if (null === $validator) {
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));

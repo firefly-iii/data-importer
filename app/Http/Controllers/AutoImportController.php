@@ -50,13 +50,13 @@ class AutoImportController extends Controller
     public function index(Request $request): JsonResponse
     {
         if (false === config('importer.can_post_autoimport')) {
-            throw new ImporterErrorException('Disabled, not allowed to import.');
+            throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
         }
 
         $secret       = (string)($request->get('secret') ?? '');
         $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
-            throw new ImporterErrorException('Bad secret, not allowed to import.');
+            throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 
         $argument     = (string)($request->get('directory') ?? './');
