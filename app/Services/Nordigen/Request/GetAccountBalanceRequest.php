@@ -72,13 +72,7 @@ class GetAccountBalanceRequest extends Request
         $this->identifier = $identifier;
     }
 
-    public function post(): Response
-    {
+    public function post(): Response {}
 
-    }
-
-    public function put(): Response
-    {
-
-    }
+    public function put(): Response {}
 }

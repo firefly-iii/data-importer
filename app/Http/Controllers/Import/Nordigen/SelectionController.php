@@ -35,7 +35,6 @@ use App\Services\Nordigen\Request\ListBanksRequest;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +47,6 @@ use Illuminate\View\View;
  */
 class SelectionController extends Controller
 {
-
     private ImportJobRepository $repository;
 
     public function __construct()
