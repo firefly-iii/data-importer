@@ -83,6 +83,8 @@ class ConfigurationController extends Controller
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
 
+                // if Sophtron needs authentication details, now is the time.
+
 
                 // if there is any state for the job here forget about it, just remove it.
                 $this->repository->deleteImportJob($importJob);

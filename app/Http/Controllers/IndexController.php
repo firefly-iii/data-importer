@@ -26,6 +26,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
+use App\Services\Sophtron\Request\GetInstitutionsRequest;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,8 +52,8 @@ class IndexController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         session()->forget([
-            Constants::SELECTED_BANK_COUNTRY,
-        ]);
+                              Constants::SELECTED_BANK_COUNTRY,
+                          ]);
         session()->flush();
         session()->regenerate(true);
         Artisan::call('cache:clear');
@@ -68,15 +69,15 @@ class IndexController extends Controller
         // it's up to the manager to provide them.
         // if invalid values, redirect to token index.
 
-        $validInfo         = SecretManager::hasValidSecrets();
+        $validInfo = SecretManager::hasValidSecrets();
         if (!$validInfo) {
             Log::debug('No valid secrets, redirect to token.index');
 
             return redirect(route('token.index'));
         }
 
-        $path              = storage_path('import-jobs');
-        $warning           = '';
+        $path    = storage_path('import-jobs');
+        $warning = '';
         if (!is_dir($path)) {
             $warning = sprintf('The data import needs the folder <code>%s</code> to exist. Please fix this manually.', $path);
         }
@@ -96,32 +97,32 @@ class IndexController extends Controller
         Log::debug('IndexController authentication detection', [
             'client_id'           => $clientId,
             'url'                 => $url,
-            'access_token_config' => substr($accessTokenConfig, 0, 25).'...',
+            'access_token_config' => substr($accessTokenConfig, 0, 25) . '...',
             'access_token_empty'  => '' === $accessTokenConfig,
         ]);
 
-        $pat               = false;
+        $pat = false;
         if ('' !== $accessTokenConfig) {
             $pat = true;
         }
-        $clientIdWithURL   = false;
+        $clientIdWithURL = false;
         if ('' !== $url && '' !== $clientId) {
             $clientIdWithURL = true;
         }
-        $URLonly           = false;
+        $URLonly = false;
         if ('' !== $url && '' === $clientId && '' === $accessTokenConfig) {
             $URLonly = true;
         }
-        $flexible          = false;
+        $flexible = false;
         if ('' === $url && '' === $clientId) {
             $flexible = true;
         }
 
         Log::debug('IndexController authentication type flags', ['pat' => $pat, 'clientIdWithURL' => $clientIdWithURL, 'URLonly' => $URLonly, 'flexible' => $flexible]);
 
-        $isDocker          = config('importer.docker.is_docker', false);
-        $identifier        = substr(session()->getId(), 0, 10);
-        $enabled           = config('importer.enabled_flows');
+        $isDocker   = config('importer.docker.is_docker', false);
+        $identifier = substr(session()->getId(), 0, 10);
+        $enabled    = config('importer.enabled_flows');
 
         return view('index', compact('pat', 'warning', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
     }

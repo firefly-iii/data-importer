@@ -28,11 +28,13 @@ use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
 use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
+use App\Services\Sophtron\Validation\NewJobDataCollector as SophtronNewJobDataCollector;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
+use App\Services\Sophtron\Request\GetInstitutionsRequest;
 use Exception;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -194,9 +196,19 @@ class ImportJobRepository
                 $configuration->setDuplicateDetectionMethod('cell');
 
                 break;
-            case 'sophtron':
-                
-                break;
+//            case 'sophtron':
+//                //         $request = new GetInstitutionsRequest(config('sophtron.user_id'), config('sophtron.access_key'));
+//                //        $response = $request->get();
+//                $collector = new SophotronNewJobDataCollector();
+//                $collector->setImportJob($importJob);
+//                $messageBag    = $collector->collectAccounts();
+//                $messageBag    = $collector->collectAccounts();
+//                // get import job + configuration back:
+//                $importJob     = $validator->getImportJob();
+//                $configuration = $importJob->getConfiguration();
+//                $configuration->setDuplicateDetectionMethod('cell');
+//
+//                break;
 
             default:
                 $messageBag->add('importable_file', sprintf('Cannot yet process import flow "%s"', $importJob->getFlow()));

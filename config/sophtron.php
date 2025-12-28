@@ -19,7 +19,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+$useSandbox = env('SOPHTRON_SANDBOX', false);
 
 return [
-    'user_id' => envNonEmpty('SOPHTRON_USER_ID', ''),
+    'url'        => $useSandbox ? 'https://api.sophtron-prod.com' : 'https://api.sophtron.com',
+    'user_id'    => envNonEmpty('SOPHTRON_USER_ID', ''),
+    'access_key' => envNonEmpty('SOPHTRON_ACCESS_KEY', ''),
 ];
