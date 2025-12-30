@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * AuthenticationValidator.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -28,7 +30,6 @@ use Illuminate\Support\Facades\Log;
 
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));

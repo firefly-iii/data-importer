@@ -52,8 +52,6 @@ class RoutineManager implements RoutineManagerInterface
 
     /**
      * RoutineManager constructor.
-     *
-     * @param mixed $identifier
      */
     public function __construct(ImportJob $importJob)
     {

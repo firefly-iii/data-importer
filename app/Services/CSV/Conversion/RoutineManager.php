@@ -61,7 +61,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        $this->importJob = $importJob;
+        $this->importJob     = $importJob;
         $this->repository    = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * GetInstitutionsResponse.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -34,20 +36,21 @@ class GetInstitutionsResponse extends Response implements Iterator, Countable
 
     public function __construct(array $data)
     {
-        $countCountries    = 0;
-        $countInstitutions = 0;
-        $this->institutions= [];
+        $countCountries     = 0;
+        $countInstitutions  = 0;
+        $this->institutions = [];
+
         /** @var array $array */
         foreach ($data as $array) {
-            $institution = Institution::fromArray($array);
+            $institution                                                     = Institution::fromArray($array);
             if (!array_key_exists($institution->countryCode, $this->institutions)) {
-                $countCountries++;
+                ++$countCountries;
                 $this->institutions[$institution->countryCode] = [
                     'country_code' => $institution->countryCode,
                     'institutions' => [],
                 ];
             }
-            $countInstitutions++;
+            ++$countInstitutions;
             $this->institutions[$institution->countryCode]['institutions'][] = $institution;
         }
         Log::debug(sprintf('Downloaded %d institution(s) from %d country(ies).', $countInstitutions, $countCountries));

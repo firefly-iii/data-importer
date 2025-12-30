@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * NewJobDataCollector.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -62,17 +64,18 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
     public function downloadInstitutions(): void
     {
         Log::debug('Now in downloadInstitutions()');
-        $count = count($this->importJob->getSophtronInstitutions());
+        $count     = count($this->importJob->getSophtronInstitutions());
         if (0 !== $count) {
             Log::debug(sprintf('There are %d institutions already, do not download.', $count));
+
             return;
         }
         $userId    = SecretManager::getSophtronUserId($this->importJob);
         $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
 
-        $request  = new GetInstitutionsRequest($userId, $accessKey);
-        $response = $request->get();
-        $array    = [];
+        $request   = new GetInstitutionsRequest($userId, $accessKey);
+        $response  = $request->get();
+        $array     = [];
         foreach ($response as $country) {
             /** @var Institution $institution */
             foreach ($country['institutions'] as $institution) {
