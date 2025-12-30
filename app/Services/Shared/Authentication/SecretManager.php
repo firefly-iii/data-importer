@@ -49,7 +49,7 @@ class SecretManager
     {
         $identifier = $importJob ? $importJob->identifier : 'NULL';
         Log::debug(sprintf('Now in getField("%s","%s","%s", "%s")', $fieldName, $configName, $sessionField, $identifier));
-        $result = '';
+        $result     = '';
         // check: session
         if (session()->has($sessionField)) {
             Log::debug(sprintf('There is a "%s" in the session.', $sessionField));
@@ -69,9 +69,9 @@ class SecretManager
             $result = (string)config($configName);
         }
         Log::debug(sprintf('Return result. strlen=%d', strlen($result)));
+
         return $result;
     }
-
 
     /**
      * Will return the access token. From a cookie or header if it's there, otherwise from configuration.
@@ -235,18 +235,10 @@ class SecretManager
         session()->put(Constants::SESSION_REFRESH_TOKEN, $token);
     }
 
-    /**
-     *
-     *
-     * @param string $key
-     * @param string $value
-     * @return void
-     */
     public static function saveValueInSession(string $key, string $value): void
     {
         session()->put($key, $value);
     }
-
 
     /**
      * Store access token.

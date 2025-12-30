@@ -109,6 +109,7 @@ class AuthenticateController extends Controller
 
             case 'lunchflow':
                 return new LunchFlowValidator();
+
             case 'sophtron':
                 return new SophtronValidator();
         }

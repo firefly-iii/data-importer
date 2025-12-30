@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * ConversionRoutineFactory.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -56,10 +58,12 @@ class ConversionRoutineFactory
             }
             if ('unknown' === $contentType || 'csv' === $contentType) {
                 Log::debug(sprintf('Content type is "%s" in startConversion(), use the CSV routine.', $contentType));
+
                 return new CSVRoutineManager($this->importJob);
             }
             if ('camt' === $contentType) {
                 Log::debug('Content type is "camt" in startConversion(), use the CAMT routine.');
+
                 return new CamtRoutineManager($this->importJob);
             }
         }
@@ -72,6 +76,7 @@ class ConversionRoutineFactory
         if ('lunchflow' === $flow) {
             return new LunchFlowRoutineManager($this->importJob);
         }
+
         throw new ImporterErrorException(sprintf('ConversionRoutineFactory cannot create a routine for import flow "%s"', $flow));
     }
 }

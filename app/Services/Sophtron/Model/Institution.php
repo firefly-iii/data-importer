@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * Institution.php
  * Copyright (c) 2025 james@firefly-iii.org
@@ -37,11 +39,9 @@ class Institution
     public string $routingNumber     = '';
     public array  $loginFormFields   = [];
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
-    public static function fromArray(array $data): Institution
+    public static function fromArray(array $data): self
     {
         $institution               = new self();
         $institution->id           = $data['InstitutionID'];
@@ -54,33 +54,44 @@ class Institution
 
         // LoginFormUserName is connected to LoginFormFields[x][DisplayText]
 
-        $fields = ['LoginFormUserName', 'LoginFormPassword', 'RoutingNumber', 'LoginFormFields', 'MultipleRoutingNumbers'];
+        $fields                    = ['LoginFormUserName', 'LoginFormPassword', 'RoutingNumber', 'LoginFormFields', 'MultipleRoutingNumbers'];
         if (array_key_exists('InstitutionDetail', $data) && is_array($data['InstitutionDetail'])) {
             foreach ($data['InstitutionDetail'] as $field => $value) {
-                if (!in_array($field, $fields)) {
+                if (!in_array($field, $fields, true)) {
                     throw new ImporterHttpException(sprintf('Institution has unknown field "%s": %s', $field, json_encode($value)));
                 }
+
                 switch ($field) {
                     case 'MultipleRoutingNumbers':
                         if (is_string($value)) {
                             $institution->routingNumber = $value;
+
                             break;
                         }
+
                         throw new ImporterHttpException(sprintf('Institution has non-string field "%s": %s', $field, json_encode($value)));
+
                     case 'LoginFormUserName':
                         $institution->loginFormUserName = $value;
+
                         break;
+
                     case 'LoginFormPassword':
                         $institution->loginFormPassword = $value;
+
                         break;
+
                     case 'RoutingNumber':
-                        $institution->routingNumber = $value;
+                        $institution->routingNumber     = $value;
+
                         break;
+
                     case 'LoginFormFields':
                         if (!is_array($value)) {
                             throw new ImporterHttpException('Institution field "LoginFormFields" is not an array.', $field);
                         }
-                        $institution->loginFormFields = $value;
+                        $institution->loginFormFields   = $value;
+
                         break;
                 }
             }
@@ -109,5 +120,4 @@ class Institution
             ],
         ];
     }
-
 }
