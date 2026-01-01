@@ -40,7 +40,7 @@ class ValidationController extends Controller
             'nordigen', 'gocardless' => $this->validateGoCardless(),
             'simplefin'              => $this->validateSimpleFIN(),
             'lunchflow'              => $this->validateLunchFlow(),
-            'sophtron' => $this->validateSophtron(),
+            'sophtron'               => $this->validateSophtron(),
             'file'                   => response()->json(['result' => 'OK']),
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
         };
