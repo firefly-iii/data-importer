@@ -97,12 +97,7 @@ class RoutineManager implements RoutineManagerInterface
 
         // share config
         $this->transactionProcessor->setImportJob($this->importJob);
-        $this->transactionGenerator->setConfiguration($configuration);
-
-        // set identifier
-        $this->transactionProcessor->setIdentifier($this->identifier);
-        $this->transactionGenerator->setIdentifier($this->identifier);
-        $this->transactionFilter->setIdentifier($this->identifier);
+        $this->transactionGenerator->setImportJob($this->importJob);
     }
 
     /**
