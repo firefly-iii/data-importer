@@ -34,7 +34,6 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Illuminate\Support\Facades\Log;
-use JsonException;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -42,18 +41,18 @@ use Psr\Http\Message\ResponseInterface;
  */
 abstract class Request
 {
-    private string $base;
-    protected string $method   = 'GET';
-    private string $authString = '';
-    private array  $parameters;
-    private float  $timeOut    = 3.14;
+    private string   $base;
+    protected string $method     = 'GET';
+    private string   $authString = '';
+    private array    $parameters;
+    private float    $timeOut    = 3.14;
 
     protected string $userId;
     protected string $accessKey;
     protected string $url;
 
-    private int $remaining     = -1;
-    private int $reset         = -1;
+    private int $remaining = -1;
+    private int $reset     = -1;
 
     /**
      * @throws ImporterHttpException
@@ -78,13 +77,19 @@ abstract class Request
 
     protected function calculateAuthString(): void
     {
-        $url              = substr($this->url, strpos($this->url, '/'));
-        $integrationKey   = base64_decode($this->accessKey, true);
-        $plainKey         = strtoupper($this->method)."\n".$url;
+        $url            = strtolower(substr($this->url, strpos($this->url, '/')));
+        $integrationKey = base64_decode($this->accessKey, true);
+        $plainKey       = strtoupper($this->method) . "\n" . $url;
+
+        Log::debug('calculateAuthString', [$url, $integrationKey, $plainKey]);
+
         // algo, data, key.
         $signature        = hash_hmac('sha256', $plainKey, $integrationKey, true);
         $base64sig        = base64_encode($signature);
-        $authString       = 'FIApiAUTH:'.$this->userId.':'.$base64sig.':'.$url;
+        $authString       = 'FIApiAUTH:' . $this->userId . ':' . $base64sig . ':' . $url;
+
+        Log::debug('calculateAuthString', ['base64_sig' => $base64sig, 'authString' => $authString]);
+
         $this->authString = $authString;
     }
 
@@ -101,68 +106,18 @@ abstract class Request
      */
     protected function authenticatedGet(): array
     {
-        $fullUrl = sprintf('%s/%s', config('sophtron.url'), $this->getUrl());
-        Log::debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client  = $this->getClient();
+        return $this->authenticatedByMethod('GET', []);
+    }
 
-        try {
-            $res = $client->request(
-                'GET',
-                $fullUrl,
-                [
-                    'headers' => [
-                        'Accept'        => 'application/json',
-                        'Content-Type'  => 'application/json',
-                        'Authorization' => sprintf('%s', $this->authString),
-                        'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
-                    ],
-                ]
-            );
-        } catch (ClientException|GuzzleException|TransferException $e) {
-            $statusCode      = $e->getCode();
-            if (429 === $statusCode) {
-                Log::debug(sprintf('Ran into exception: %s', $e::class));
-
-                return [];
-            }
-            Log::error(sprintf('Original error: %s: %s', $e::class, $e->getMessage()));
-
-            // crash but there is a response, log it.
-            if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $response = $e->getResponse();
-                Log::error(sprintf('%s', $response->getBody()->getContents()));
-            }
-
-            // if no response, parse as normal error response
-            if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
-                throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
-            }
-
-            // if app can get response, parse it.
-            $json            = [];
-            if (method_exists($e, 'getResponse')) {
-                $body = (string) $e->getResponse()->getBody();
-                $json = json_decode($body, true) ?? [];
-            }
-            if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
-                $exception       = new AgreementExpiredException();
-                $exception->json = $json;
-
-                throw $exception;
-            }
-
-            // if status code is 503, the account does not exist.
-            $exception       = new ImporterErrorException(sprintf('%s: %s', $e::class, $e->getMessage()), 0, $e);
-            $exception->json = $json;
-
-            throw $exception;
-        }
-        $body    = (string)$res->getBody();
-        if (json_validate($body)) {
-            return json_decode($body, true) ?? [];
-        }
-
-        throw new ImporterErrorException('The body returned was not valid JSON');
+    /**
+     * @throws ImporterErrorException
+     * @throws ImporterHttpException
+     * @throws AgreementExpiredException
+     * @throws RateLimitException
+     */
+    protected function authenticatedPost(array $body): array
+    {
+        return $this->authenticatedByMethod('POST', $body);
     }
 
     public function getBase(): string
@@ -252,6 +207,76 @@ abstract class Request
         //        }
         //
         //        return $json;
+    }
+
+    private function authenticatedByMethod(string $method, array $body): array
+    {
+        $fullUrl = sprintf('%s/%s', config('sophtron.url'), $this->getUrl());
+        Log::debug(sprintf('authenticatedMethod(%s, %s)', $method, $fullUrl));
+        $client = $this->getClient();
+
+        try {
+            $opts = [
+                'headers' => [
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => sprintf('%s', $this->authString),
+                    'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
+                ],
+            ];
+            if (count($body) > 0) {
+                $opts['json'] = $body;
+            }
+            $res = $client->request(
+                $method,
+                $fullUrl,
+                $opts
+            );
+        } catch (ClientException|GuzzleException|TransferException $e) {
+            $statusCode = $e->getCode();
+            if (429 === $statusCode) {
+                Log::debug(sprintf('Ran into exception: %s', $e::class));
+
+                return [];
+            }
+            Log::error(sprintf('Original error: %s: %s', $e::class, $e->getMessage()));
+
+            // crash but there is a response, log it.
+            if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
+                $response = $e->getResponse();
+                Log::error(sprintf('%s', $response->getBody()->getContents()));
+            }
+
+            // if no response, parse as normal error response
+            if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
+                throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()), 0, $e);
+            }
+
+            // if app can get response, parse it.
+            $json = [];
+            if (method_exists($e, 'getResponse')) {
+                $body = (string)$e->getResponse()->getBody();
+                $json = json_decode($body, true) ?? [];
+            }
+            if (array_key_exists('summary', $json) && str_contains((string)$json['summary'], 'expired')) {
+                $exception       = new AgreementExpiredException();
+                $exception->json = $json;
+
+                throw $exception;
+            }
+
+            // if status code is 503, the account does not exist.
+            $exception       = new ImporterErrorException(sprintf('%s: %s', $e::class, $e->getMessage()), 0, $e);
+            $exception->json = $json;
+
+            throw $exception;
+        }
+        $body = (string)$res->getBody();
+        if (json_validate($body)) {
+            return json_decode($body, true) ?? [];
+        }
+
+        throw new ImporterErrorException('The body returned was not valid JSON');
     }
 
     private function logRateLimitHeaders(ResponseInterface $res, bool $fromErrorSituation): void

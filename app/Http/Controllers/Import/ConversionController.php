@@ -31,6 +31,7 @@ use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
+use App\Services\Shared\Conversion\ConversionRoutineFactory;
 use App\Services\Shared\Conversion\ConversionStatus;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
@@ -84,33 +85,9 @@ class ConversionController extends Controller
             throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
         }
 
-        // FIXME make a factory for this.
+        $factory = new ConversionRoutineFactory($importJob);
+        $routine = $factory->createManager();
 
-        /** @var null|RoutineManagerInterface $routine */
-        if ('file' === $flow) {
-            $contentType = $configuration->getContentType();
-            if ('unknown' === $contentType || 'csv' === $contentType) {
-                Log::debug('Create CSV routine manager.');
-                $routine = new CSVRoutineManager($identifier);
-            }
-            if ('camt' === $contentType) {
-                Log::debug('Create CAMT routine manager.');
-                $routine = new CamtRoutineManager($identifier);
-            }
-        }
-        if ('nordigen' === $flow) {
-            // Prepare new account creation data for Gocardless.
-            Log::debug('Create GoCardless routine manager.');
-            $routine = new NordigenRoutineManager($identifier);
-        }
-        if ('lunchflow' === $flow) {
-            Log::debug('Create Lunch Flow routine manager.');
-            $routine = new LunchFlowRoutineManager($identifier);
-        }
-        if ('simplefin' === $flow) {
-            Log::debug('Create SimpleFIN routine manager.');
-            $routine = new SimpleFINRoutineManager($identifier);
-        }
         if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
@@ -187,33 +164,8 @@ class ConversionController extends Controller
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
         $this->repository->saveToDisk($importJob);
 
-        // FIXME use a factory.
-        // FIXME needs no identifier, needs the job itself.
-        /** @var null|RoutineManagerInterface $routine */
-        if ('file' === $flow) {
-            $contentType = $configuration->getContentType();
-            if ('unknown' === $contentType || 'csv' === $contentType) {
-                $routine = new CSVRoutineManager($identifier);
-            }
-            if ('camt' === $contentType) {
-                $routine = new CamtRoutineManager($identifier);
-            }
-        }
-        if ('simplefin' === $flow) {
-            $routine = new SimpleFINRoutineManager($identifier);
-            Log::debug('SimpleFIN routine manager created successfully in start method.');
-        }
-
-        if ('nordigen' === $flow) {
-            $routine = new NordigenRoutineManager($identifier);
-        }
-        if ('lunchflow' === $flow) {
-            $routine = new LunchFlowRoutineManager($identifier);
-        }
-
-        if (null === $routine) {
-            throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
-        }
+        $factory = new ConversionRoutineFactory($importJob);
+        $routine = $factory->createManager();
 
         try {
             $transactions = $routine->start();

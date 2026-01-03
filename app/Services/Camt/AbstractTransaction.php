@@ -316,19 +316,31 @@ abstract class AbstractTransaction
                 return $return;
 
             case 'entryDetailOpposingAccountIban':
+                Log::debug('Now at entryDetailOpposingAccountIban');
                 $result          = '';
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    Log::debug('There is no info for field "entryDetailOpposingAccountIban", return blank');
                     return $result;
                 }
 
                 /** @var null|EntryTransactionDetail $info */
                 $info            = $this->levelD[$index] ?? null;
                 if (null !== $info) {
+                    Log::debug('Found info.');
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                    if(null === $opposingAccount) {
+                        Log::debug('Found NULL account for entryDetailOpposingAccountIban, so return nothing.');
+                        return '';
+                    }
+
                     if (is_object($opposingAccount) && IbanAccount::class === $opposingAccount::class) {
                         $result = (string) $opposingAccount->getIdentification();
+                        Log::debug(sprintf('Found account for entryDetailOpposingAccountIban: "%s"', $result));
                     }
+                }
+                if (null === $info) {
+                    Log::debug(sprintf('entryDetailOpposingAccountIban: LevelD info index #%d is NULL, return "".', $index));
                 }
 
                 return $result;
@@ -391,7 +403,7 @@ abstract class AbstractTransaction
             Log::debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
         }
 
-        if (null !== $amount && $amount > 0) { // which part in this array is the interesting one?
+        if (null !== $amount && '' !== $amount && $amount > 0) { // which part in this array is the interesting one?
             Log::debug('getOpposingParty(), interested in Debtor!');
             $targetRelatedPartyObject = Debtor::class;
         }

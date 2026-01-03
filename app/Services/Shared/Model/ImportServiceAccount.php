@@ -223,6 +223,11 @@ class ImportServiceAccount
         return $account;
     }
 
+    public static function convertSophtronArray(array $serviceAccounts): array
+    {
+        var_dump($serviceAccounts);exit;
+    }
+
     public static function convertSpectreArray(array $spectre): array
     {
         $return = [];

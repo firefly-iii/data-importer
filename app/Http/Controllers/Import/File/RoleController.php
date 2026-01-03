@@ -120,6 +120,7 @@ class RoleController extends Controller
 
     private function camtIndex(ImportJob $importJob, string $warning): View
     {
+        Log::debug(sprintf('Now in camtIndex("%s", "%s")', $importJob->identifier, $warning));
         $mainTitle      = 'Role definition';
         $identifier     = $importJob->identifier;
         $configuration  = $importJob->getConfiguration();

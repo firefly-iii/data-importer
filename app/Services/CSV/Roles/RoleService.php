@@ -24,18 +24,19 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\Roles;
 
+use App\Services\Camt\AbstractTransaction;
 use App\Services\Camt\TransactionFactory;
 use App\Services\Shared\Configuration\Configuration;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\Reader as CamtReader;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use League\Csv\Exception;
 use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use League\Csv\UnableToProcessCsv;
-use InvalidArgumentException;
 
 /**
  * Class RoleService
@@ -51,7 +52,7 @@ class RoleService
      */
     public static function getColumns(string $content, Configuration $configuration): array
     {
-        $reader    = Reader::createFromString($content);
+        $reader = Reader::createFromString($content);
 
         // configure reader:
         $delimiter = $configuration->getDelimiter();
@@ -74,7 +75,7 @@ class RoleService
                 break;
         }
 
-        $headers   = [];
+        $headers = [];
         if (true === $configuration->isHeaders()) {
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
@@ -116,10 +117,10 @@ class RoleService
      */
     public static function getExampleData(string $content, Configuration $configuration): array
     {
-        $reader         = Reader::createFromString($content);
+        $reader = Reader::createFromString($content);
 
         // configure reader:
-        $delimiter      = $configuration->getDelimiter();
+        $delimiter = $configuration->getDelimiter();
 
         switch ($delimiter) {
             default:
@@ -156,7 +157,7 @@ class RoleService
         /** @codeCoverageIgnoreEnd */
 
         // grab the records:
-        $records        = $stmt->process($reader);
+        $records = $stmt->process($reader);
 
         /** @var array $line */
         foreach ($records as $line) {
@@ -181,7 +182,7 @@ class RoleService
                     $rawValue      = $combinedValue;
 
                     // Hash composite identifiers (multiple columns) to match actual processing
-                    $count         = count($pseudoIdentifier['source_columns']);
+                    $count = count($pseudoIdentifier['source_columns']);
                     if ($count > 1) {
                         $combinedValue    = substr(hash('sha256', $combinedValue), 0, 8);
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
@@ -193,8 +194,8 @@ class RoleService
             }
 
             foreach ($line as $index => $cell) {
-                if (strlen((string) $cell) > self::EXAMPLE_LENGTH) {
-                    $cell = sprintf('%s...', substr((string) $cell, 0, self::EXAMPLE_LENGTH));
+                if (strlen((string)$cell) > self::EXAMPLE_LENGTH) {
+                    $cell = sprintf('%s...', substr((string)$cell, 0, self::EXAMPLE_LENGTH));
                 }
                 $examples[$index][] = $cell;
                 $examples[$index]   = array_unique($examples[$index]);
@@ -219,6 +220,7 @@ class RoleService
 
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array
     {
+        Log::debug('Now in getExampleDataFromCamt()');
         $camtReader   = new CamtReader(Config::getDefault());
         $camtMessage  = $camtReader->readString($content); // -> Level A
         $camtType     = $configuration->getCamtType();
@@ -227,6 +229,7 @@ class RoleService
         $fieldNames   = array_keys(config('camt.fields'));
         foreach ($fieldNames as $name) {
             $examples[$name] = [];
+            Log::debug(sprintf('Create example array for field "%s"', $name));
         }
 
         /**
@@ -234,46 +237,62 @@ class RoleService
          * even when the user indicates these details should be splits or ignored entirely.
          * This is because we still need to extract possible example data from these transaction details.
          */
-        $statements   = $camtMessage->getRecords();
+        $statements = $camtMessage->getRecords();
+        Log::debug(sprintf('Found %d statement(s) in camtMessage.', count($statements)));
 
         /** @var CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
+            Log::debug('Processing statement');
             $entries = $statement->getEntries();
+            Log::debug(sprintf('Found %d entry(s)', count($entries)));
             foreach ($entries as $entry) {                       // -> Level C
+                Log::debug('Processing entry');
                 $count = count($entry->getTransactionDetails()); // count level D entries.
+                Log::debug(sprintf('Found %d level D split(s)', $count));
                 if (0 === $count) {
+                    Log::debug('Create transaction with no splits.');
                     $transactions[] = TransactionFactory::create($camtType, $camtMessage, $statement, $entry, []);
                 }
                 if (0 !== $count) {
-                    foreach ($entry->getTransactionDetails() as $detail) {
+                    foreach ($entry->getTransactionDetails() as $i => $detail) {
+                        Log::debug(sprintf('Create transaction for split #%d', $i + 1));
                         $transactions[] = TransactionFactory::create($camtType, $camtMessage, $statement, $entry, [$detail]);
                     }
                 }
+                Log::debug('Done processing entry');
             }
+            Log::debug('Done processing statement');
         }
-        $count        = 0;
-
-        /** @var Transaction $transaction */
+        $count = 0;
+        Log::debug(sprintf('Ended up with %d transaction(s)', count($transactions)));
+        /** @var AbstractTransaction $transaction */
         foreach ($transactions as $transaction) {
+            Log::debug('Processing transaction for examples');
             if (15 === $count) { // do not check more than 15 transactions to fill the example-data
+                Log::debug('Already have 15, full stop.');
                 break;
             }
             foreach ($fieldNames as $name) {
-                $name   = (string)$name;
+                $name = (string)$name;
                 if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
                     if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
+                        Log::debug(sprintf('Already have 5 examples for "%s", stop.', $name));
                         continue;
                     }
                 } // otherwise, try to fetch data
                 $splits = $transaction->countSplits();
+                Log::debug(sprintf('Counted %d split(s)', $splits));
                 if (0 === $splits) {
+                    Log::debug('Zero splits, get example from index 0.');
                     $value = $transaction->getFieldByIndex($name, 0);
                     if ('' !== $value) {
                         $examples[$name][] = $value;
                     }
                 }
                 if ($splits > 0) {
+                    Log::debug(sprintf('%d split(s), get example from all of them.', $splits));
                     for ($index = 0; $index < $splits; ++$index) {
+                        Log::debug(sprintf('Getting example from index #%d', $index));
                         $value = $transaction->getFieldByIndex($name, $index);
                         if ('' !== $value) {
                             $examples[$name][] = $value;
@@ -282,6 +301,7 @@ class RoleService
                 }
             }
             ++$count;
+            Log::debug('Done processing transaction for examples');
         }
         foreach ($examples as $key => $list) {
             $examples[$key] = array_unique($list);
