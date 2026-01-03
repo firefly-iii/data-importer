@@ -81,8 +81,9 @@ class ConversionController extends Controller
         }
 
         // switch based on flow:
-        if (!in_array($flow, config('importer.flows'), true)) {
-            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        if (null === $enabled || false === $enabled) {
+            throw new ImporterErrorException(sprintf('[a] Not a supported flow: "%s"', $flow));
         }
 
         $factory = new ConversionRoutineFactory($importJob);
@@ -157,8 +158,9 @@ class ConversionController extends Controller
 
         // now create the right class:
         $flow          = $importJob->getFlow();
-        if (!in_array($flow, config('importer.flows'), true)) {
-            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        if (null === $enabled || false === $enabled) {
+            throw new ImporterErrorException(sprintf('[b] Not a supported flow: "%s"', $flow));
         }
 
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);

@@ -102,7 +102,7 @@ class ConfigurationController extends Controller
         }
 
         // unique column options (this depends on the flow):
-        $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow));
+        $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow)) ?? [];
         $applicationAccounts = $importJob->getApplicationAccounts();
         $serviceAccounts     = $importJob->getServiceAccounts();
         $currencies          = $importJob->getCurrencies();

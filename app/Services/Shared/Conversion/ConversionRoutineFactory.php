@@ -26,6 +26,7 @@ namespace App\Services\Shared\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
+use App\Services\Sophtron\Conversion\RoutineManager as SophtronRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
@@ -66,6 +67,9 @@ class ConversionRoutineFactory
 
                 return new CamtRoutineManager($this->importJob);
             }
+        }
+        if('sophtron' === $flow) {
+            return new SophtronRoutineManager($this->importJob);
         }
         if ('nordigen' === $flow) {
             return new NordigenRoutineManager($this->importJob);

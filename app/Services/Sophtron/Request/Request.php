@@ -81,14 +81,14 @@ abstract class Request
         $integrationKey = base64_decode($this->accessKey, true);
         $plainKey       = strtoupper($this->method) . "\n" . $url;
 
-        Log::debug('calculateAuthString', [$url, $integrationKey, $plainKey]);
+        // Log::debug('calculateAuthString', [$url, $integrationKey, $plainKey]);
 
         // algo, data, key.
         $signature        = hash_hmac('sha256', $plainKey, $integrationKey, true);
         $base64sig        = base64_encode($signature);
         $authString       = 'FIApiAUTH:' . $this->userId . ':' . $base64sig . ':' . $url;
 
-        Log::debug('calculateAuthString', ['base64_sig' => $base64sig, 'authString' => $authString]);
+        // Log::debug('calculateAuthString', ['base64_sig' => $base64sig, 'authString' => $authString]);
 
         $this->authString = $authString;
     }
@@ -212,7 +212,7 @@ abstract class Request
     private function authenticatedByMethod(string $method, array $body): array
     {
         $fullUrl = sprintf('%s/%s', config('sophtron.url'), $this->getUrl());
-        Log::debug(sprintf('authenticatedMethod(%s, %s)', $method, $fullUrl));
+        Log::debug(sprintf('authenticatedMethod(%s, %s)', $method, $fullUrl), $body);
         $client = $this->getClient();
 
         try {
@@ -227,11 +227,7 @@ abstract class Request
             if (count($body) > 0) {
                 $opts['json'] = $body;
             }
-            $res = $client->request(
-                $method,
-                $fullUrl,
-                $opts
-            );
+            $res = $client->request($method, $fullUrl, $opts);
         } catch (ClientException|GuzzleException|TransferException $e) {
             $statusCode = $e->getCode();
             if (429 === $statusCode) {

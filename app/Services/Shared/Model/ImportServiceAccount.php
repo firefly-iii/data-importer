@@ -29,7 +29,8 @@ use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
-use App\Services\SimpleFIN\Model\Account;
+use App\Services\SimpleFIN\Model\Account as SimpleFinAccount;
+use App\Services\Sophtron\Model\UserInstitutionAccount as SophtronAccount;
 use App\Services\Spectre\Model\Account as SpectreAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -106,8 +107,33 @@ class ImportServiceAccount
                 ]
             );
         }
+        if ($account instanceof SophtronAccount) {
+            $iban = $account->accountNumber;
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
+            return self::fromArray(
+                [
+                    'id'            => $account->id,
+                    'name'          => $account->accountName,
+                    'currency_code' => $account->balanceCurrency,
+                    'iban'          => $iban,
+                    'bban'          => $account->accountNumber,
+                    'status'        => $account->status,
+                    'extra'         => [
+                        'Bank name'         => $account->userInstitution?->companyName,
+                        'Balance'           => $account->balance,
+                        'Available balance' => $account->availableBalance,
+                        'Currency'          => $account->balanceCurrency,
+                        'IBAN'              => $iban,
+                        'BBAN'              => $account->accountNumber,
+                    ],
+                ]
+            );
+        }
 
-        throw new ImporterErrorException(sprintf('Cannot convert object of class %s to ImportServiceAccount.', $account::class));
+        throw new ImporterErrorException(sprintf('Cannot convert object of class %s to ImportServiceAccount in ImportServiceAccount class .', $account::class));
     }
 
     /**
@@ -120,13 +146,13 @@ class ImportServiceAccount
 
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
-            $iban     = $account->getIban();
+            $iban = $account->getIban();
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
 
-            $current  = self::fromArray(
+            $current = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getFullName(),
@@ -160,7 +186,7 @@ class ImportServiceAccount
     {
         $return = [];
 
-        /** @var Account $account */
+        /** @var SimpleFinAccount $account */
         foreach ($accounts as $account) {
 
             $timestamp  = $account->getBalanceDate();
@@ -169,7 +195,7 @@ class ImportServiceAccount
                 $carbon     = Carbon::createFromTimestamp($timestamp);
                 $dateString = $carbon->format('Y-m-d H:i:s');
             }
-            $current    = self::fromArray(
+            $current = self::fromArray(
                 [
                     'id'            => $account->getId(), // Expected by component for form elements, and by getMappedTo (as 'identifier')
                     'name'          => $account->getName(), // Expected by getMappedTo, display in component
@@ -189,7 +215,7 @@ class ImportServiceAccount
                     $current->extra[$key] = $value;
                 }
             }
-            $return[]   = $current;
+            $return[] = $current;
             //            $return[] = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
             //                         'mapped_to'            => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
             //                         'type'                 => 'source', // Indicates it's an account from the import source
@@ -206,7 +232,7 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         Log::debug('Create generic account from', $array);
-        $iban                  = (string)($array['iban'] ?? '');
+        $iban = (string)($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
@@ -225,7 +251,36 @@ class ImportServiceAccount
 
     public static function convertSophtronArray(array $serviceAccounts): array
     {
-        var_dump($serviceAccounts);exit;
+        $return = [];
+
+        /** @var SophtronAccount $account */
+        foreach ($serviceAccounts as $account) {
+            $iban = $account->accountNumber;
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
+            $return[] = self::fromArray(
+                [
+                    'id'            => $account->id,
+                    'name'          => $account->accountName,
+                    'currency_code' => $account->balanceCurrency,
+                    'iban'          => $iban,
+                    'bban'          => $account->accountNumber,
+                    'status'        => $account->status,
+                    'extra'         => [
+                        'Bank name'         => $account->userInstitution?->companyName,
+                        'Balance'           => $account->balance,
+                        'Available balance' => $account->availableBalance,
+                        'Currency'          => $account->balanceCurrency,
+                        'IBAN'              => $iban,
+                        'BBAN'              => $account->accountNumber,
+                    ],
+                ]
+            );
+        }
+
+        return $return;
     }
 
     public static function convertSpectreArray(array $spectre): array
@@ -234,7 +289,7 @@ class ImportServiceAccount
 
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban     = (string)$account->iban;
+            $iban = (string)$account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';

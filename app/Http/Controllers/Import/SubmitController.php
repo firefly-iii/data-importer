@@ -68,8 +68,9 @@ class SubmitController extends Controller
         $jobBackUrl = route('data-conversion.index', [$identifier]);
 
         // validate flow
-        if (!in_array($flow, config('importer.flows'), true)) {
-            throw new ImporterErrorException(sprintf('Not a supported flow: "%s"', $flow));
+        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        if (null === $enabled || false === $enabled) {
+            throw new ImporterErrorException(sprintf('[c] Not a supported flow: "%s"', $flow));
         }
 
         Log::debug(sprintf('Submit (import) routine manager identifier is "%s"', $identifier));
