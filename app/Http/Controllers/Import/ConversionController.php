@@ -92,7 +92,7 @@ class ConversionController extends Controller
         if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
-
+        // FIXME needs a better way.
         if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
             throw new ImporterErrorException('Need to handle redirect.');
             Log::debug('Will redirect to mapping after conversion.');

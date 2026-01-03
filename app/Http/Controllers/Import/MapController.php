@@ -291,8 +291,6 @@ class MapController extends Controller
             return $data;
         }
         throw new ImporterErrorException(sprintf('Cannot map data for import flow "%s"', $importJob->getFlow()));
-
-        return $data;
     }
 
     private function getOpposingAccounts(ImportJob $importJob): array
@@ -391,7 +389,7 @@ class MapController extends Controller
 
         // FIXME needs better redirect or state.
         $flow            = $importJob->getFlow();
-        if (in_array($flow, ['nordigen', 'spectre', 'lunchflow', 'simplefin'], true)) {
+        if (in_array($flow, ['nordigen', 'spectre','sophtron', 'lunchflow', 'simplefin'], true)) {
             $importJob->setState('ready_for_submission');
             $this->repository->saveToDisk($importJob);
 

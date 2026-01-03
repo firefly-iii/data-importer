@@ -71,6 +71,7 @@ return [
         'nordigen',
         'simplefin',
         'lunchflow',
+        'sophtron'
     ],
     'enabled_flows'                 => [
         'file'      => true,
