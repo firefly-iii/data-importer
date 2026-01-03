@@ -101,6 +101,7 @@ class ImportJobRepository
                 }
             }
         }
+        Log::debug(sprintf('Saved import job with key "%s" to disk.', $importJob->identifier));
         $disk->put($path, $importJob->toString());
     }
 

@@ -24,6 +24,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Log;
+use ValueError;
+
 /**
  * Class Steam
  */
@@ -147,5 +150,25 @@ class Steam
         ];
 
         return trim(str_replace($search, '', $iban));
+    }
+
+    public function positive(string $amount): string
+    {
+        if ('' === $amount) {
+            return '0';
+        }
+
+        try {
+            if (-1 === bccomp($amount, '0')) {
+                $amount = bcmul($amount, '-1');
+            }
+        } catch (ValueError $e) {
+            Log::error(sprintf('ValueError in Steam::positive("%s"): %s', $amount, $e->getMessage()));
+            Log::error($e->getTraceAsString());
+
+            return '0';
+        }
+
+        return $amount;
     }
 }

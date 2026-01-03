@@ -26,6 +26,7 @@ use Carbon\Carbon;
 class Transaction
 {
     public ?Carbon $createdDateUtc           = null;
+    public string $id                       = '';
     public Carbon  $lastModifiedUtc;
     public string  $userId                   = '';
     public string  $transactionId            = '';
@@ -49,6 +50,7 @@ class Transaction
     public static function fromArray(array $array): self
     {
         $object                           = new self();
+        $object->id                       = $array['ID'] ?? '';
         $object->createdDateUtc           = array_key_exists('CreatedDateUtc', $array) ? Carbon::parse($array['CreatedDateUtc']) : null;
         $object->lastModifiedUtc          = array_key_exists('LastModifiedUtc', $array) ? Carbon::parse($array['LastModifiedUtc']) : null;
         $object->userId                   = $array['UserID'];
@@ -75,6 +77,8 @@ class Transaction
     public function toArray(): array
     {
         return [
+            'class'                    => self::class,
+            'ID'                       => $this->id,
             'CreatedDateUtc'           => $this->createdDateUtc->toW3cString(),
             'LastModifiedUtc'          => $this->lastModifiedUtc->toW3cString(),
             'UserID'                   => $this->userId,

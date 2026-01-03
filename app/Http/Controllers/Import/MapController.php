@@ -75,6 +75,7 @@ class MapController extends Controller
             exit(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
 
+        // file things
         if ('file' === $importJob->getFlow() && 'csv' === $configuration->getContentType()) {
             Log::debug('Get mapping data for CSV file');
             $roles = $configuration->getRoles();
@@ -243,7 +244,9 @@ class MapController extends Controller
          * that contains:
          * - opposing account names (this is preordained).
          */
-        if ('nordigen' === $importJob->getFlow() || 'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
+        if (
+            'nordigen' === $importJob->getFlow() || 'sophtron' === $importJob->getFlow() ||
+            'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
             // FIXME should be in a helper or something generic.
             // index 0, opposing account name:
             $index                        = 0;
@@ -263,6 +266,7 @@ class MapController extends Controller
             $opposingName['mapping_data'] = $object->getMap();
             $opposingName['mapped']       = $existingMapping[$index] ?? [];
             $data[]                       = $opposingName;
+            return $data;
         }
         if ('simplefin' === $importJob->getFlow()) {
 
@@ -284,7 +288,9 @@ class MapController extends Controller
             $expenseRevenue['mapping_data'] = $object->getMap();
             $expenseRevenue['mapped']       = $existingMapping[$index] ?? [];
             $data[]                         = $expenseRevenue;
+            return $data;
         }
+        throw new ImporterErrorException(sprintf('Cannot map data for import flow "%s"', $importJob->getFlow()));
 
         return $data;
     }
