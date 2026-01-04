@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * UserInstitution.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -56,17 +58,20 @@ class UserInstitution
             }
         }
 
-        $object->lastModified = Carbon::parse($data['LastModified']);
+        $object->lastModified      = Carbon::parse($data['LastModified']);
+
         return $object;
     }
 
     public function toArray(): array
     {
         $accounts = [];
+
         /** @var UserInstitutionAccount $account */
         foreach ($this->accounts as $account) {
             $accounts[] = $account->toArray();
         }
+
         return [
             'UserInstitutionID' => $this->userInstitutionId,
             'UserID'            => $this->userId,
@@ -78,9 +83,10 @@ class UserInstitution
             'Phone'             => $this->phone,
             'Email'             => $this->email,
             'Accounts'          => $accounts,
-            'LastModified'      => $this->lastModified->toW3cString()
+            'LastModified'      => $this->lastModified->toW3cString(),
         ];
     }
+
     public function toArrayWithoutAccounts(): array
     {
         return [
@@ -94,8 +100,7 @@ class UserInstitution
             'Phone'             => $this->phone,
             'Email'             => $this->email,
             'Accounts'          => [],
-            'LastModified'      => $this->lastModified->toW3cString()
+            'LastModified'      => $this->lastModified->toW3cString(),
         ];
     }
-
 }

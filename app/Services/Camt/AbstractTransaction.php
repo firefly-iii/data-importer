@@ -321,6 +321,7 @@ abstract class AbstractTransaction
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     Log::debug('There is no info for field "entryDetailOpposingAccountIban", return blank');
+
                     return $result;
                 }
 
@@ -329,8 +330,9 @@ abstract class AbstractTransaction
                 if (null !== $info) {
                     Log::debug('Found info.');
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
-                    if(null === $opposingAccount) {
+                    if (null === $opposingAccount) {
                         Log::debug('Found NULL account for entryDetailOpposingAccountIban, so return nothing.');
+
                         return '';
                     }
 

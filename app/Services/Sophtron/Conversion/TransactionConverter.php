@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * TransactionConverter.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -28,7 +30,6 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionConverter
 {
-
     private ImportJob $importJob;
     private bool      $isRules        = true;
     private bool      $errorIfHash    = true;
@@ -50,6 +51,7 @@ class TransactionConverter
             $original = Transaction::fromArray($transaction);
             $result[] = $this->convertTransaction($original);
         }
+
         return $result;
     }
 
@@ -60,12 +62,12 @@ class TransactionConverter
 
     private function convertTransaction(Transaction $original): array
     {
-        $return = [
+        $return                   = [
             'apply_rules'             => $this->isRules,
             'error_if_duplicate_hash' => $this->errorIfHash,
             'transactions'            => [],
         ];
-        $split  = [
+        $split                    = [
             'type'          => 'withdrawal',
             'date'          => null === $original->date ? now()->toW3cString() : $original->date->toW3cString(),
             'amount'        => Steam::positive($original->amount),
@@ -81,8 +83,8 @@ class TransactionConverter
             //      "destination_id": "2",
             //      "destination_name": "Buy and Large",
 
-            "book_date"    => null === $original->postDate ? '' : $original->postDate->toW3cString(),
-            "process_date" => null === $original->transactionDate ? '' : $original->transactionDate->toW3cString(),
+            'book_date'     => null === $original->postDate ? '' : $original->postDate->toW3cString(),
+            'process_date'  => null === $original->transactionDate ? '' : $original->transactionDate->toW3cString(),
         ];
 
         if (1 === bccomp($original->amount, '0', 2)) {
@@ -96,6 +98,7 @@ class TransactionConverter
         }
         $return['transactions'][] = $split;
         Log::debug(sprintf('[%s] Parsed Sophtron transaction "%s".', config('importer.version'), $original->id), $split);
+
         return $return;
     }
 
@@ -105,6 +108,7 @@ class TransactionConverter
         $appAccountId              = $this->importJob->getConfiguration()->getAccounts()[$accountId] ?? $this->defaultAccount;
         $split['source_id']        = $appAccountId;
         $split['destination_name'] = '' === $original->merchant ? '(unknown expense account)' : $original->merchant;
+
         return $split;
     }
 
@@ -115,7 +119,7 @@ class TransactionConverter
         $split['type']           = 'deposit';
         $split['source_name']    = '' === $original->merchant ? '(unknown revenue account)' : $original->merchant;
         $split['destination_id'] = $appAccountId;
+
         return $split;
     }
-
 }

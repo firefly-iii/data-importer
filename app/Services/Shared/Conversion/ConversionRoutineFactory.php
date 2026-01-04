@@ -68,7 +68,7 @@ class ConversionRoutineFactory
                 return new CamtRoutineManager($this->importJob);
             }
         }
-        if('sophtron' === $flow) {
+        if ('sophtron' === $flow) {
             return new SophtronRoutineManager($this->importJob);
         }
         if ('nordigen' === $flow) {

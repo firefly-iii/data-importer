@@ -68,7 +68,7 @@ class SubmitController extends Controller
         $jobBackUrl = route('data-conversion.index', [$identifier]);
 
         // validate flow
-        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        $enabled    = config(sprintf('importer.enabled_flows.%s', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[c] Not a supported flow: "%s"', $flow));
         }

@@ -24,20 +24,18 @@ declare(strict_types=1);
 namespace App\Services\Sophtron\Response;
 
 use App\Services\Shared\Response\Response;
-use App\Services\Sophtron\Model\Institution;
 use App\Services\Sophtron\Model\UserInstitution;
 use Countable;
-use Illuminate\Support\Facades\Log;
 use Iterator;
 
 class PostGetInstitutionsByUserResponse extends Response implements Iterator, Countable
 {
     private array $institutions = [];
-    private int   $position = 0;
+    private int   $position     = 0;
 
     public function __construct(array $data)
     {
-        foreach($data as $array) {
+        foreach ($data as $array) {
             $this->institutions[] = UserInstitution::fromArray($array);
         }
     }

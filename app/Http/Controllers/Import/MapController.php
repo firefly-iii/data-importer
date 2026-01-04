@@ -245,8 +245,8 @@ class MapController extends Controller
          * - opposing account names (this is preordained).
          */
         if (
-            'nordigen' === $importJob->getFlow() || 'sophtron' === $importJob->getFlow() ||
-            'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
+            'nordigen' === $importJob->getFlow() || 'sophtron' === $importJob->getFlow()
+            || 'spectre' === $importJob->getFlow() || 'lunchflow' === $importJob->getFlow()) {
             // FIXME should be in a helper or something generic.
             // index 0, opposing account name:
             $index                        = 0;
@@ -266,6 +266,7 @@ class MapController extends Controller
             $opposingName['mapping_data'] = $object->getMap();
             $opposingName['mapped']       = $existingMapping[$index] ?? [];
             $data[]                       = $opposingName;
+
             return $data;
         }
         if ('simplefin' === $importJob->getFlow()) {
@@ -288,8 +289,10 @@ class MapController extends Controller
             $expenseRevenue['mapping_data'] = $object->getMap();
             $expenseRevenue['mapped']       = $existingMapping[$index] ?? [];
             $data[]                         = $expenseRevenue;
+
             return $data;
         }
+
         throw new ImporterErrorException(sprintf('Cannot map data for import flow "%s"', $importJob->getFlow()));
     }
 
@@ -389,7 +392,7 @@ class MapController extends Controller
 
         // FIXME needs better redirect or state.
         $flow            = $importJob->getFlow();
-        if (in_array($flow, ['nordigen', 'spectre','sophtron', 'lunchflow', 'simplefin'], true)) {
+        if (in_array($flow, ['nordigen', 'spectre', 'sophtron', 'lunchflow', 'simplefin'], true)) {
             $importJob->setState('ready_for_submission');
             $this->repository->saveToDisk($importJob);
 
