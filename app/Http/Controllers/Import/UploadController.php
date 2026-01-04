@@ -163,7 +163,7 @@ class UploadController extends Controller
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);
 
-
+        // FIXME: validation needs to be in a factory or something.
         // do validation for all configurations.
         switch ($flow) {
             default:
@@ -190,7 +190,6 @@ class UploadController extends Controller
                 $collector = new SophtronNewJobDataCollector();
                 $collector->setImportJob($importJob);
                 $collector->downloadInstitutionsByUser();
-                // could also download accounts, why not?
                 $importJob = $collector->getImportJob();
                 $this->repository->saveToDisk($importJob);
                 break;

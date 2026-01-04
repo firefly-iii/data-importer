@@ -66,6 +66,15 @@ class ConfigurationController extends Controller
 
         // if the job is "contains_content", redirect to a step that will fix this, and show the user an intermediate page.
         if (!$doParse && 'contains_content' === $importJob->getState()) {
+
+            // extra check for Sophtron, if it has no institutions or accounts.
+            if('sophtron' === $flow && 0 === count($importJob->getServiceAccounts())) {
+                return view('import.004-configure.sophtron-needs-institutions')->with(compact('mainTitle', 'subTitle', 'identifier'));
+            }
+
+
+
+
             return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
         // if the job is "contains_content", parse it. Redirect if errors occur.
@@ -82,9 +91,6 @@ class ConfigurationController extends Controller
 
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
-
-                // if Sophtron needs authentication details, now is the time.
-
 
                 // if there is any state for the job here forget about it, just remove it.
                 $this->repository->deleteImportJob($importJob);

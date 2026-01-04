@@ -32,6 +32,7 @@ use App\Services\Sophtron\Model\UserInstitutionAccount;
 use App\Services\Sophtron\Request\GetInstitutionsRequest;
 use App\Services\Sophtron\Request\PostGetInstitutionsByUserRequest;
 use App\Services\Sophtron\Request\PostGetUserInstitutionAccountsRequest;
+use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
@@ -101,7 +102,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $userId    = SecretManager::getSophtronUserId($this->importJob);
         $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
 
-        $request     = new PostGetInstitutionsByUserRequest($userId, $accessKey);
+        $request = new PostGetInstitutionsByUserRequest($userId, $accessKey);
+        /** @var PostGetInstitutionsByUserResponse $response */
         $response    = $request->post();
         $array       = [];
         $allAccounts = [];
