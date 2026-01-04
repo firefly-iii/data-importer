@@ -4,10 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.0.0 - 2026-01-xx
 
-Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with and easier to extend.
+Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with, and easier to extend.
 
 ### Added
-- New import data provider "[Sophtron](https://sophtron.com/index)". In the interest of full disclosure, they have sponsored me to add their API to the data importer. [Their support (and yours!)](https://docs.firefly-iii.org/explanation/more-information/donations/) allows me to spend more time on Firefly III and the data importer, and I'm grateful for their support.
+- New import data provider "[Sophtron](https://sophtron.com/index)". In the interest of full disclosure, they have sponsored me to add their API to the data importer. [Their support (and yours!)](https://docs.firefly-iii.org/explanation/more-information/donations/) allows me to spend more time on Firefly III and the data importer, and I'm very grateful for it.
 - [PR 1035](https://github.com/firefly-iii/data-importer/pull/1035) (Add support for CAMT.052)  by @beatbesmer
 - [PR 1037](https://github.com/firefly-iii/data-importer/pull/1037) (Syntax error in debug logging) by @beatbesmer
 
