@@ -392,6 +392,7 @@ abstract class AbstractTransaction
         Log::debug('getOpposingParty(), interested in Creditor.');
         $relatedParties           = $transactionDetail->getRelatedParties();
         $targetRelatedPartyObject = Creditor::class;
+        Log::debug(sprintf('Found %d related parties.', count($relatedParties)));
 
         // get amount from "getAmount":
         $amount                   = $transactionDetail?->getAmount()?->getAmount();

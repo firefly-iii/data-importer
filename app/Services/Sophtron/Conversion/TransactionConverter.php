@@ -112,6 +112,7 @@ class TransactionConverter
     {
         $accountId               = $original->userInstitutionAccountId;
         $appAccountId            = $this->importJob->getConfiguration()->getAccounts()[$accountId] ?? $this->defaultAccount;
+        $split['type']           = 'deposit';
         $split['source_name']    = '' === $original->merchant ? '(unknown revenue account)' : $original->merchant;
         $split['destination_id'] = $appAccountId;
         return $split;
