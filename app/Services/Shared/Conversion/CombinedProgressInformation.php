@@ -29,9 +29,9 @@ namespace App\Services\Shared\Conversion;
  */
 trait CombinedProgressInformation
 {
-    private array $allErrors = [];
-    private array $allMessages = [];
-    private array $allWarnings = [];
+    private array $allErrors     = [];
+    private array $allMessages   = [];
+    private array $allWarnings   = [];
     private array $allRateLimits = [];
 
     final public function getAllErrors(): array

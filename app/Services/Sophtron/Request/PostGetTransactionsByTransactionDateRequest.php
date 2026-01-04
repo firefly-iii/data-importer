@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * PostGetTransactionsByTransactionDate.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -50,7 +52,7 @@ class PostGetTransactionsByTransactionDateRequest extends Request
 
     public function post(): Response
     {
-        $body = [
+        $body   = [
             'accountID' => $this->accountId,
             'startDate' => '1970-01-01',
             'endDate'   => date('Y-m-d'),
@@ -62,6 +64,7 @@ class PostGetTransactionsByTransactionDateRequest extends Request
             $body['endDate'] = $this->end;
         }
         $result = $this->authenticatedPost($body);
+
         return new PostGetTransactionsByTransactionDateResponse($result);
         // Implement post() method.
     }

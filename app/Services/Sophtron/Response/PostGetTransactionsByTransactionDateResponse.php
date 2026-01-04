@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * PostGetTransactionsByTransactionDateResponse.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -28,13 +30,12 @@ use Iterator;
 
 class PostGetTransactionsByTransactionDateResponse extends Response implements Iterator, Countable
 {
-
     private array $transactions = [];
-    private int   $position = 0;
+    private int   $position     = 0;
 
     public function __construct(array $data)
     {
-        foreach($data as $array) {
+        foreach ($data as $array) {
             $this->transactions[] = Transaction::fromArray($array);
         }
     }

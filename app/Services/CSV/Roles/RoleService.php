@@ -52,7 +52,7 @@ class RoleService
      */
     public static function getColumns(string $content, Configuration $configuration): array
     {
-        $reader = Reader::createFromString($content);
+        $reader    = Reader::createFromString($content);
 
         // configure reader:
         $delimiter = $configuration->getDelimiter();
@@ -75,7 +75,7 @@ class RoleService
                 break;
         }
 
-        $headers = [];
+        $headers   = [];
         if (true === $configuration->isHeaders()) {
             try {
                 $stmt    = new Statement()->limit(1)->offset(0);
@@ -117,10 +117,10 @@ class RoleService
      */
     public static function getExampleData(string $content, Configuration $configuration): array
     {
-        $reader = Reader::createFromString($content);
+        $reader         = Reader::createFromString($content);
 
         // configure reader:
-        $delimiter = $configuration->getDelimiter();
+        $delimiter      = $configuration->getDelimiter();
 
         switch ($delimiter) {
             default:
@@ -157,7 +157,7 @@ class RoleService
         /** @codeCoverageIgnoreEnd */
 
         // grab the records:
-        $records = $stmt->process($reader);
+        $records        = $stmt->process($reader);
 
         /** @var array $line */
         foreach ($records as $line) {
@@ -182,7 +182,7 @@ class RoleService
                     $rawValue      = $combinedValue;
 
                     // Hash composite identifiers (multiple columns) to match actual processing
-                    $count = count($pseudoIdentifier['source_columns']);
+                    $count         = count($pseudoIdentifier['source_columns']);
                     if ($count > 1) {
                         $combinedValue    = substr(hash('sha256', $combinedValue), 0, 8);
                         $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
@@ -237,7 +237,7 @@ class RoleService
          * even when the user indicates these details should be splits or ignored entirely.
          * This is because we still need to extract possible example data from these transaction details.
          */
-        $statements = $camtMessage->getRecords();
+        $statements   = $camtMessage->getRecords();
         Log::debug(sprintf('Found %d statement(s) in camtMessage.', count($statements)));
 
         /** @var CamtStatement $statement */
@@ -263,20 +263,23 @@ class RoleService
             }
             Log::debug('Done processing statement');
         }
-        $count = 0;
+        $count        = 0;
         Log::debug(sprintf('Ended up with %d transaction(s)', count($transactions)));
+
         /** @var AbstractTransaction $transaction */
         foreach ($transactions as $transaction) {
             Log::debug('Processing transaction for examples');
             if (15 === $count) { // do not check more than 15 transactions to fill the example-data
                 Log::debug('Already have 15, full stop.');
+
                 break;
             }
             foreach ($fieldNames as $name) {
-                $name = (string)$name;
+                $name   = (string)$name;
                 if (array_key_exists($name, $examples)) { // there is at least one example, so we can check how many
                     if (count($examples[$name]) > 5) { // there are already five examples, so jump to next field
                         Log::debug(sprintf('Already have 5 examples for "%s", stop.', $name));
+
                         continue;
                     }
                 } // otherwise, try to fetch data

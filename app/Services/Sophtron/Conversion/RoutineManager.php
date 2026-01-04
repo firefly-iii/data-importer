@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * RoutineManager.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -30,12 +32,12 @@ use Illuminate\Support\Facades\Log;
 
 class RoutineManager implements RoutineManagerInterface
 {
+    use CombinedProgressInformation;
+    use ProgressInformation;
     private ImportJob             $importJob;
     private ImportJobRepository   $repository;
     private TransactionDownloader $downloader;
     private TransactionConverter  $converter;
-    use ProgressInformation;
-    use CombinedProgressInformation;
 
     public function __construct(ImportJob $importJob)
     {
@@ -62,14 +64,15 @@ class RoutineManager implements RoutineManagerInterface
         $downloaded       = $this->downloader->download();
 
         // get import job back from downloader.
-        $this->importJob = $this->downloader->getImportJob();
+        $this->importJob  = $this->downloader->getImportJob();
         $this->repository->saveToDisk($this->importJob);
 
         // convert to Firefly III compatible arrays, fixes mapping if necessary.
-        $this->converter = new TransactionConverter($this->importJob);
-        $transactions    = $this->converter->convert($downloaded);
-        $this->importJob = $this->converter->getImportJob();
+        $this->converter  = new TransactionConverter($this->importJob);
+        $transactions     = $this->converter->convert($downloaded);
+        $this->importJob  = $this->converter->getImportJob();
         $this->repository->saveToDisk($this->importJob);
+
         return $transactions;
     }
 }

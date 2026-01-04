@@ -113,6 +113,7 @@ class ImportServiceAccount
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
+
             return self::fromArray(
                 [
                     'id'            => $account->id,
@@ -146,13 +147,13 @@ class ImportServiceAccount
 
         /** @var NordigenAccount $account */
         foreach ($accounts as $account) {
-            $iban = $account->getIban();
+            $iban     = $account->getIban();
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
 
-            $current = self::fromArray(
+            $current  = self::fromArray(
                 [
                     'id'            => $account->getIdentifier(),
                     'name'          => $account->getFullName(),
@@ -195,7 +196,7 @@ class ImportServiceAccount
                 $carbon     = Carbon::createFromTimestamp($timestamp);
                 $dateString = $carbon->format('Y-m-d H:i:s');
             }
-            $current = self::fromArray(
+            $current    = self::fromArray(
                 [
                     'id'            => $account->getId(), // Expected by component for form elements, and by getMappedTo (as 'identifier')
                     'name'          => $account->getName(), // Expected by getMappedTo, display in component
@@ -215,7 +216,7 @@ class ImportServiceAccount
                     $current->extra[$key] = $value;
                 }
             }
-            $return[] = $current;
+            $return[]   = $current;
             //            $return[] = ['import_account'       => $importAccountRepresentation, // The DTO-like object for the component
             //                         'mapped_to'            => $this->getMappedTo((object)['identifier' => $importAccountRepresentation->id, 'name' => $importAccountRepresentation->name], $fireflyAccounts), // getMappedTo needs 'identifier'
             //                         'type'                 => 'source', // Indicates it's an account from the import source
@@ -232,7 +233,7 @@ class ImportServiceAccount
     public static function fromArray(array $array): self
     {
         Log::debug('Create generic account from', $array);
-        $iban = (string)($array['iban'] ?? '');
+        $iban                  = (string)($array['iban'] ?? '');
         if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
             Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
             $iban = '';
@@ -255,7 +256,7 @@ class ImportServiceAccount
 
         /** @var SophtronAccount $account */
         foreach ($serviceAccounts as $account) {
-            $iban = $account->accountNumber;
+            $iban     = $account->accountNumber;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
@@ -289,7 +290,7 @@ class ImportServiceAccount
 
         /** @var SpectreAccount $account */
         foreach ($spectre as $account) {
-            $iban = (string)$account->iban;
+            $iban     = (string)$account->iban;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';

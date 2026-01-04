@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * Transaction.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -26,7 +28,7 @@ use Carbon\Carbon;
 class Transaction
 {
     public ?Carbon $createdDateUtc           = null;
-    public string $id                       = '';
+    public string $id                        = '';
     public Carbon  $lastModifiedUtc;
     public string  $userId                   = '';
     public string  $transactionId            = '';
@@ -71,6 +73,7 @@ class Transaction
         $object->memo                     = $array['Memo'] ?? '';
         $object->checkImage               = $array['CheckImage'] ?? '';
         $object->lastModified             = array_key_exists('LastModified', $array) ? Carbon::parse($array['LastModified']) : null;
+
         return $object;
     }
 
