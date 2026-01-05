@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * PostGetUserInstitutionAccountsRequest.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -47,9 +49,10 @@ class PostGetUserInstitutionAccountsRequest extends Request
     {
         $data = $this->authenticatedPost(
             [
-                'userInstitutionID' => $this->userInstitutionId
+                'userInstitutionID' => $this->userInstitutionId,
             ]
         );
+
         return new PostGetUserInstitutionAccountsResponse($data);
     }
 

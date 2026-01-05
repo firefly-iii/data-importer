@@ -29,7 +29,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Services\Shared\Response\Response;
-use App\Services\Sophtron\Response\GetInstitutionsResponse;
 use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
 
 /**

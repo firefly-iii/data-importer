@@ -68,7 +68,7 @@ class ConfigurationController extends Controller
         if (!$doParse && 'contains_content' === $importJob->getState()) {
 
             // extra check for Sophtron, if it has no institutions or accounts.
-            if('sophtron' === $flow && 0 === count($importJob->getServiceAccounts())) {
+            if ('sophtron' === $flow && 0 === count($importJob->getServiceAccounts())) {
                 return view('import.004-configure.sophtron-needs-institutions')->with(compact('mainTitle', 'subTitle', 'identifier'));
             }
 
@@ -125,7 +125,7 @@ class ConfigurationController extends Controller
             'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
             'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
-            'sophtron' => ImportServiceAccount::convertSophtronArray($serviceAccounts),
+            'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
             'file'      => [],
             default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow)),
         };

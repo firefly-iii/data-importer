@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /*
  * UserInstitutionAccount.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -42,7 +44,6 @@ class UserInstitutionAccount
     public Carbon           $lastModifiedUtc;
     public ?UserInstitution $userInstitution   = null;
 
-
     public static function fromArray(array $array): self
     {
         $object                    = new self();
@@ -64,6 +65,7 @@ class UserInstitutionAccount
         if (array_key_exists('UserInstitution', $array) && null !== $array['UserInstitution']) {
             $object->userInstitution = UserInstitution::fromArray($array['UserInstitution']);
         }
+
         return $object;
     }
 
@@ -73,6 +75,7 @@ class UserInstitutionAccount
         if (null !== $this->userInstitution) {
             $userInstitution = $this->userInstitution->toArrayWithoutAccounts();
         }
+
         return [
             'class'             => self::class,
             'UserInstitutionID' => $this->userInstitutionId,

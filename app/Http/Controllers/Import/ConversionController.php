@@ -27,14 +27,8 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
-use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
-use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
-use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\Conversion\ConversionRoutineFactory;
 use App\Services\Shared\Conversion\ConversionStatus;
-use App\Services\Shared\Conversion\RoutineManagerInterface;
-use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -81,13 +75,13 @@ class ConversionController extends Controller
         }
 
         // switch based on flow:
-        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        $enabled             = config(sprintf('importer.enabled_flows.%s', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[a] Not a supported flow: "%s"', $flow));
         }
 
-        $factory = new ConversionRoutineFactory($importJob);
-        $routine = $factory->createManager();
+        $factory             = new ConversionRoutineFactory($importJob);
+        $routine             = $factory->createManager();
 
         if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             $newAccountsToCreate = $configuration->getNewAccounts();
@@ -158,7 +152,7 @@ class ConversionController extends Controller
 
         // now create the right class:
         $flow          = $importJob->getFlow();
-        $enabled = config(sprintf('importer.enabled_flows.%s', $flow));
+        $enabled       = config(sprintf('importer.enabled_flows.%s', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[b] Not a supported flow: "%s"', $flow));
         }
@@ -166,8 +160,8 @@ class ConversionController extends Controller
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
         $this->repository->saveToDisk($importJob);
 
-        $factory = new ConversionRoutineFactory($importJob);
-        $routine = $factory->createManager();
+        $factory       = new ConversionRoutineFactory($importJob);
+        $routine       = $factory->createManager();
 
         try {
             $transactions = $routine->start();

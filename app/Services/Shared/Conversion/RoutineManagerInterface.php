@@ -36,6 +36,4 @@ interface RoutineManagerInterface
     public function getImportJob(): ImportJob;
 
     public function start(): array;
-
-
 }
