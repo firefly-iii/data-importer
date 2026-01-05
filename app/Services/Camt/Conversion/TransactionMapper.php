@@ -96,7 +96,7 @@ class TransactionMapper
             if (null === $polishedJournal) {
                 // give warning, skip transaction.
             }
-            // TODO loop over $current and clean up if necessary.
+            // FIXME loop over $current and clean up if necessary.
             $result['transactions'][] = $polishedJournal;
         }
         Log::debug('Firefly III transaction is', $result);
@@ -164,7 +164,7 @@ class TransactionMapper
                     break;
 
                 case 'note':
-                    // TODO perhaps lift into separate method?
+                    // FIXME perhaps lift into separate method?
                     $current['notes']       ??= '';
                     $addition                = "  \n".implode("  \n", $data['data']);
                     $current['notes'] .= $addition;
@@ -173,28 +173,28 @@ class TransactionMapper
                     break;
 
                 case 'date_process':
-                    // TODO perhaps lift into separate method?
+                    // FIXMEperhaps lift into separate method?
                     $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                     $current['process_date'] = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_transaction':
-                    // TODO perhaps lift into separate method?
+                    // FIXME perhaps lift into separate method?
                     $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                     $current['date']         = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_payment':
-                    // TODO perhaps lift into separate method?
+                    // FIXME perhaps lift into separate method?
                     $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                     $current['payment_date'] = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_book':
-                    // TODO perhaps lift into separate method?
+                    // FIXME perhaps lift into separate method?
                     $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
                     $current['book_date']    = $carbon->toIso8601String();
                     $current['date']         = $carbon->toIso8601String();
@@ -225,17 +225,17 @@ class TransactionMapper
 
                     break;
 
-                case 'description': // TODO think about a config value to use both values from level C and D
+                case 'description': // FIXME think about a config value to use both values from level C and D
                     $current['description'] ??= '';
                     $addition                = '';
                     if ('group' === $groupHandling || 'split' === $groupHandling) {
                         // use first description
-                        // TODO use named field?
+                        // FIXME use named field?
                         $addition = reset($data['data']);
                     }
                     if ('single' === $groupHandling) {
                         // just use the last description
-                        // TODO use named field?
+                        // FIXME use named field?
                         $addition = end($data['data']);
                     }
                     $current['description'] .= $addition;
@@ -250,7 +250,7 @@ class TransactionMapper
                     if ('group' === $groupHandling || 'split' === $groupHandling) {
                         Log::debug(sprintf('Group handling is "%s"', $groupHandling));
                         // if multiple values, use biggest (... at index 0?)
-                        // TODO this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
+                        // FIXME this will never work because $current['amount'] is NULL the first time and abs() can't handle that.
                         foreach ($data['data'] as $amount) {
                             if (null === $amount) {
                                 // #8367 skip null values
@@ -553,7 +553,7 @@ class TransactionMapper
             }
         }
 
-        // TODO catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/fxirefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
+        // FIXME catch all cases according lines 281 - 285 and https://docs.firefly-iii.org/fxirefly-iii/financial-concepts/transactions/#:~:text=In%20Firefly%20III%2C%20a%20transaction,slightly%20different%20from%20one%20another.
         $sourceIsNull    = null === $accountType['source'];
         $sourceIsAsset   = 'asset' === $accountType['source'];
         $sourceIsRevenue = 'revenue' === $accountType['source'];
@@ -725,7 +725,7 @@ class TransactionMapper
     {
         // search for existing IBAN
         // search for existing number
-        // search for existing name, TODO under which types?
+        // search for existing name, FIXME under which types?
         foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
             $field = sprintf('%s_%s', $direction, $accountIdentificationSuffix);
             if (array_key_exists($field, $current)) {

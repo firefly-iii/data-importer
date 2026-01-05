@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class GetAccountsRequest
- * TODO is not yet paginated.
  */
 class GetAccountsRequest extends Request
 {

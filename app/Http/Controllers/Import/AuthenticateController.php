@@ -26,11 +26,11 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\AuthenticateControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
-use App\Services\Session\Constants;
+use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
+use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -46,13 +46,12 @@ use Session;
  */
 class AuthenticateController extends Controller
 {
-    private const string AUTH_ROUTE = '002-authenticate.index';
+    private const string AUTH_ROUTE = 'authenticate-flow.index';
 
     public function __construct()
     {
         parent::__construct();
         Log::debug('Now in AuthenticateController, calling middleware.');
-        $this->middleware(AuthenticateControllerMiddleware::class);
     }
 
     /**
@@ -60,37 +59,22 @@ class AuthenticateController extends Controller
      *
      * @throws ImporterErrorException
      */
-    public function index(Request $request)
+    public function index(Request $request, string $flow)
     {
         // variables for page:
         $mainTitle = 'Authentication';
         $pageTitle = 'Authentication';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
+        $flow ??= 'file';
         $subTitle  = ucfirst($flow);
         $error     = Session::get('error');
         Log::debug(sprintf('Now in AuthenticateController::index (/authenticate) with flow "%s"', $flow));
 
-        // need a switch here to validate all possible flows.
-        switch ($flow) {
-            case 'spectre':
-                $validator = new SpectreValidator();
-
-                break;
-
-            case 'nordigen':
-                $validator = new NordigenValidator();
-
-                break;
-
-            case 'lunchflow':
-                $validator = new LunchFlowValidator();
-
-                break;
-
-            default:
-                Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
-
-                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+        // if the flow is actually validated, or not validateable (like the "file" flow),
+        // give a friendly error page.
+        // FIXME needs to be a factory.
+        $validator = $this->getValidator($flow);
+        if (null === $validator) {
+            return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
 
         $result    = $validator->validate();
@@ -103,60 +87,59 @@ class AuthenticateController extends Controller
         }
 
         if (AuthenticationStatus::AUTHENTICATED === $result) {
-            Log::debug(sprintf('[a] Return redirect to %s', route('003-upload.index')));
+            Log::debug('[a] Return redirect to already authenticated view');
 
-            return redirect(route('003-upload.index'));
+            return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
 
         Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
 
-        throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+        throw new ImporterErrorException(sprintf('[b] Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
     }
 
-    /**
-     * @return Application|Redirector|RedirectResponse
-     *
-     * @throws ImporterErrorException
-     */
-    public function postIndex(Request $request)
+    private function getValidator(string $flow): ?AuthenticationValidatorInterface
     {
-        // variables for page:
-        $flow       = $request->cookie(Constants::FLOW_COOKIE);
-
+        // need a switch here to validate all possible flows.
         switch ($flow) {
             case 'spectre':
-                $validator = new SpectreValidator();
-
-                break;
+                return new SpectreValidator();
 
             case 'nordigen':
-                $validator = new NordigenValidator();
-
-                break;
+                return new NordigenValidator();
 
             case 'lunchflow':
-                $validator = new LunchFlowValidator();
+                return new LunchFlowValidator();
 
-                break;
-
-            default:
-                Log::debug(sprintf('Throwing ImporterErrorException for flow "%s"', $flow ?? 'NULL'));
-
-                throw new ImporterErrorException(sprintf('Impossible flow exception. Unexpected flow "%s" encountered.', $flow ?? 'NULL'));
+            case 'sophtron':
+                return new SophtronValidator();
         }
+
+        return null;
+    }
+
+    public function postIndex(Request $request, string $flow)
+    {
+        $mainTitle  = 'Authentication';
+        $pageTitle  = 'Authentication';
+        $subTitle   = ucfirst($flow);
+        $validator  = $this->getValidator($flow);
+        if (null === $validator) {
+            return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
+        }
+
         $all        = $request->all();
         $submission = [];
         foreach ($all as $name => $value) {
-            if (str_starts_with((string) $name, $flow)) {
+            if (str_starts_with((string)$name, $flow)) {
                 $shortName              = str_replace(sprintf('%s_', $flow), '', $name);
-                if ('' === (string) $value) {
-                    return redirect(route(self::AUTH_ROUTE))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
+                if ('' === (string)$value) {
+                    return redirect(route(self::AUTH_ROUTE, [$flow]))->with(['error' => sprintf('The "%s"-field must be filled in.', $shortName)]);
                 }
-                $submission[$shortName] = (string) $value;
+                $submission[$shortName] = (string)$value;
             }
         }
         $validator->setData($submission);
 
-        return redirect(route(self::AUTH_ROUTE));
+        return redirect(route('new-import.index', [$flow]));
     }
 }

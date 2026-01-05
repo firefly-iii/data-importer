@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\SimpleFIN\Conversion;
 
 use App\Services\CSV\Converter\Amount;
+use App\Services\SimpleFIN\Model\Account;
 use App\Support\Http\CollectsAccounts;
 use Carbon\Carbon;
 use App\Services\Shared\Authentication\SecretManager;
@@ -53,12 +54,12 @@ class TransactionTransformer
     /**
      * Transform SimpleFIN transaction data (array) to Firefly III transaction format
      *
-     * @param array $transactionData      Raw transaction data from SimpleFIN JSON
-     * @param array $simpleFINAccountData Raw account data from SimpleFIN JSON for the account this transaction belongs to
-     * @param array $accountMapping       Mapping configuration for Firefly III accounts
-     * @param array $newAccountConfig     User-provided new account configuration data
+     * @param array   $transactionData      Raw transaction data from SimpleFIN JSON
+     * @param Account $simpleFINAccountData Raw account data from SimpleFIN JSON for the account this transaction belongs to
+     * @param array   $accountMapping       Mapping configuration for Firefly III accounts
+     * @param array   $newAccountConfig     User-provided new account configuration data
      */
-    public function transform(array $transactionData, array $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
+    public function transform(array $transactionData, Account $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {
         // Ensure amount is a float. SimpleFIN provides it as a string.
         $amount                = $transactionData['amount'] ?? '0.0';
@@ -123,9 +124,9 @@ class TransactionTransformer
     /**
      * Get the Firefly III account information from mapping or account data
      */
-    private function getFireflyAccount(array $simpleFINAccountData, array $accountMapping, array $newAccountConfig = []): array
+    private function getFireflyAccount(Account $simpleFINAccountData, array $accountMapping, array $newAccountConfig = []): array
     {
-        $accountKey       = $simpleFINAccountData['id'] ?? null;
+        $accountKey       = $simpleFINAccountData->getId() ?? null;
 
         // Check for user-provided account name first, then fall back to SimpleFIN account name
         $userProvidedName = null;
@@ -133,7 +134,7 @@ class TransactionTransformer
             $userProvidedName = $newAccountConfig[$accountKey]['name'];
         }
 
-        $accountName      = $userProvidedName ?? $simpleFINAccountData['name'] ?? 'Unknown SimpleFIN Account';
+        $accountName      = $userProvidedName ?? $simpleFINAccountData->getName() ?? 'Unknown SimpleFIN Account';
 
         // Check if account is mapped and has a valid (non-zero) Firefly III account ID
         if ($accountKey && isset($accountMapping[$accountKey]) && $accountMapping[$accountKey] > 0) {
@@ -268,9 +269,9 @@ class TransactionTransformer
     /**
      * Get currency code, handling custom currencies
      */
-    private function getCurrencyCode(array $simpleFINAccountData): string
+    private function getCurrencyCode(Account $simpleFINAccountData): string
     {
-        $currency = $simpleFINAccountData['currency'] ?? 'EUR'; // Default to EUR if not present
+        $currency = $simpleFINAccountData->getCurrency() ?? 'EUR'; // Default to EUR if not present
 
         // Replicate basic logic from SimpleFINAccount::isCustomCurrency() if it checked for 'XXX' or non-standard codes.
         // For now, pass through, or use a simple check. Let Firefly III handle currency validation.
@@ -362,9 +363,9 @@ class TransactionTransformer
     /**
      * Build external ID for transaction
      */
-    private function buildExternalId(array $transactionData, array $simpleFINAccountData): string
+    private function buildExternalId(array $transactionData, Account $simpleFINAccountData): string
     {
-        return sprintf('ff3-%s-%s', $simpleFINAccountData['id'] ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
+        return sprintf('ff3-%s-%s', $simpleFINAccountData->getId() ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
     }
 
     /**

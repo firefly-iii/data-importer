@@ -84,13 +84,7 @@ class GetTransactionsRequest extends Request
         return new GetTransactionsResponse($transactions);
     }
 
-    public function post(): Response
-    {
-        // TODO: Implement post() method.
-    }
+    public function post(): Response {}
 
-    public function put(): Response
-    {
-        // TODO: Implement put() method.
-    }
+    public function put(): Response {}
 }

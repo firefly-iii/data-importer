@@ -25,14 +25,12 @@ declare(strict_types=1);
 namespace App\Services\Camt\Conversion;
 
 use App\Exceptions\ImporterErrorException;
-use App\Services\Session\Constants;
-use App\Services\Shared\Authentication\IsRunningCli;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
-use App\Services\Storage\StorageService;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\Exception\InvalidMessageException;
@@ -46,29 +44,25 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
-    use IsRunningCli;
     use ProgressInformation;
 
-    private string               $content;
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
+    private ImportJob            $importJob;
+    private ImportJobRepository  $repository;
 
-    public function __construct(?string $identifier)
+    public function __construct(ImportJob $importJob)
     {
         Log::debug('Constructed CAMT RoutineManager');
-        $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->importJob     = $importJob;
+        $this->repository    = new ImportJobRepository();
+        $this->importJob->refreshInstanceIdentifier();
+        $this->setConfiguration($this->importJob->getConfiguration());
     }
 
     #[Override]
@@ -80,17 +74,12 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         // make objects
         $this->transactionExtractor = new TransactionExtractor($configuration);
         $this->transactionConverter = new TransactionConverter($configuration);
         $this->transactionMapper    = new TransactionMapper($configuration);
-    }
-
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
     }
 
     public function start(): array
@@ -140,22 +129,14 @@ class RoutineManager implements RoutineManagerInterface
     private function getCamtMessage(): ?Message
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $camtReader  = new Reader(Config::getDefault());
-        $camtMessage = null;
+        $camtReader = new Reader(Config::getDefault());
 
         try {
-            // check if CLI or not and read as appropriate:
-            if ('' !== $this->content) {
-                // seems the CLI part
-                $camtMessage = $camtReader->readString($this->content); // -> Level A
-            }
-            if ('' === $this->content) {
-                $camtMessage = $camtReader->readString(StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE))); // -> Level A
-            }
+            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString()); // -> Level A
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $this->addError(0, sprintf('[a104]: Could not convert CAMT.053 file: %s', $e->getMessage()));
+            $this->addError(0, sprintf('[a104]: Could not convert CAMT.x file: %s', $e->getMessage()));
 
             return null;
         }
@@ -200,5 +181,10 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

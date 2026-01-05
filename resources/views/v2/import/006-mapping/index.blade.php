@@ -54,7 +54,7 @@
                         Form
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('006-mapping.post') }}" accept-charset="UTF-8">
+                        <form method="post" action="{{ route('data-mapping.index', [$identifier]) }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                             @foreach($data as $index => $row)
                             <h3>{{ $index }}: {{ __('import.column_'.$row['role']) }}</h3>
@@ -114,7 +114,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.roles') }}" class="btn btn-secondary"><span
+                            <a href="{{ route('configure-roles.index', [$identifier]) }}" class="btn btn-secondary"><span
                                     class="fas fa-arrow-left"></span> Go back to the previous step</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>

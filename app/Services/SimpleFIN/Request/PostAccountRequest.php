@@ -45,10 +45,7 @@ class PostAccountRequest extends Request
         $this->setUri('accounts');
     }
 
-    public function get(): Response
-    {
-        // TODO: Implement get() method.
-    }
+    public function get(): Response {}
 
     public function post(): Response
     {
@@ -74,8 +71,7 @@ class PostAccountRequest extends Request
         return new PostAccountResponse($data['data'] ?? []);
     }
 
-    public function put(): Response
-    {
-        // TODO: Implement put() method.
-    }
+    public function put(): Response {}
+
+    public function delete(): Response {}
 }

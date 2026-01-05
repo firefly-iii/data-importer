@@ -24,18 +24,16 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
-use App\Services\Shared\Configuration\Configuration;
+use App\Models\ImportJob;
 
 /**
  * Interface RoutineManagerInterface
  */
 interface RoutineManagerInterface
 {
-    public function getIdentifier(): string;
-
     public function getServiceAccounts(): array;
 
-    public function setConfiguration(Configuration $configuration): void;
+    public function getImportJob(): ImportJob;
 
     public function start(): array;
 }

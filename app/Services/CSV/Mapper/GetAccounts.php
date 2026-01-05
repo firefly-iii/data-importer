@@ -174,13 +174,14 @@ trait GetAccounts
             }
 
             // add optgroup to result:
-            $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
+            $group                        = (string)trans(sprintf('import.account_types_%s', $account->type));
             $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
         $newResult    = [];
         foreach ($result as $group => $array) {
-            asort($array, SORT_STRING);
+            setlocale(LC_ALL, 'en_US.UTF-8');
+            asort($array, SORT_LOCALE_STRING);
             $newResult[$group] = $array;
         }
         unset($result, $array);
@@ -207,7 +208,7 @@ trait GetAccounts
             if (null !== $account->iban) {
                 $name                         = sprintf('%s (%s)', $account->name, $account->iban);
                 // add optgroup to result:
-                $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
+                $group                        = (string)trans(sprintf('import.account_types_%s', $account->type));
                 $result[$group] ??= [];
                 $result[$group][$account->id] = $name;
             }

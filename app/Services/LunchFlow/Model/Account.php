@@ -29,11 +29,11 @@ namespace App\Services\LunchFlow\Model;
  */
 class Account
 {
-    public int         $id;
-    public string      $institutionLogo;
-    public string      $institutionName;
-    public string      $name;
-    public string      $provider;
+    public int     $id;
+    public string  $institutionLogo;
+    public string  $institutionName;
+    public string  $name;
+    public string  $provider;
     public ?string $currency = null;
     public ?string $status   = null;
 
@@ -57,5 +57,19 @@ class Account
         $model->status          = $data['status'] ?? null;
 
         return $model;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id'               => $this->id,
+            'institution_logo' => $this->institutionLogo,
+            'institution_name' => $this->institutionName,
+            'name'             => $this->name,
+            'provider'         => $this->provider,
+            'currency'         => $this->currency,
+            'status'           => $this->status,
+            'class'            => self::class,
+        ];
     }
 }

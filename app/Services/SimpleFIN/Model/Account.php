@@ -165,6 +165,7 @@ class Account
     public function toArray(): array
     {
         return [
+            'class'             => self::class,
             'org'               => $this->org,
             'id'                => $this->id,
             'name'              => $this->name,

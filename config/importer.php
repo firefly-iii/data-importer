@@ -27,6 +27,7 @@ declare(strict_types=1);
  * The preferred order for ALL workflows is as follows:
  *
  * FILE workflow
+ * - 1: INDEX
  * - 2: Upload
  * - 3: Configuration
  * - 4: Role selection
@@ -34,26 +35,48 @@ declare(strict_types=1);
  * - 6: Convert data
  * - 7: Submit data
  *
- *  NORDIGEN / GOCARDLESS workflow
+ * LUNCH FLOW
+ *
+ * 1: INDEX
+ * 2: Upload
+ * 3: Configuration
+ * 4: Convert data
+ * 5: Map data
+ * 6: Submit data
+ *
+ *  GOCARDLESS workflow
  *  - 1: Authentication
  *  - 2: Upload
- *  - 8: Select country and bank.
- *  - 3: Configuration
- *  - 4: Role selection
- *  - 5: Map data
- *  - 6: Convert data
+ *  - 3: Select country and bank.
+ *  - 4: Configuration
+ *  - 5: Convert data
+ *  - 6: Map data
  *  - 7: Submit data
+ *
+ * Previous version decided, using all kinds of variables, if the user was "ready".
+ * This is no longer viable. User must be able to switch between each step effortlessly.
+ *
+ * Which means:
+ *
+ * Function to tell you which step is next, based on current step.
+ * Every step is valid. if not, friendly notification will redirect you.
+ *
  */
 
 return [
-    'version'                       => '1.9.1',
-    'build_time'                    => 1762026880,
-    'flows'                         => ['nordigen', 'spectre', 'file', 'simplefin', 'lunchflow', 'obg', 'eb', 'teller', 'fints', 'basiq'],
+    'version'                       => '2.0.0',
+    'build_time'                    => 1767639856,
     'fake_data'                     => env('FAKE_DATA', false),
+    'supports_new_accounts'         => [
+        'nordigen',
+        'simplefin',
+        'lunchflow',
+        'sophtron',
+    ],
     'enabled_flows'                 => [
-        'nordigen'  => true,
-        'spectre'   => true,
         'file'      => true,
+        'sophtron'  => true,
+        'nordigen'  => true,
         'simplefin' => true,
         'lunchflow' => true,
         'obg'       => false,
@@ -65,6 +88,7 @@ return [
     'flow_titles'                   => [
         'file'      => 'File',
         'nordigen'  => 'GoCardless',
+        'sophtron'  => 'Sophtron',
         'spectre'   => 'Spectre',
         'simplefin' => 'SimpleFIN',
         'lunchflow' => 'Lunch Flow',
@@ -73,6 +97,19 @@ return [
         'teller'    => 'Teller.io',
         'fints'     => 'FinTS/HBCI',
         'basiq'     => 'Basiq.io',
+    ],
+    'flow_explanations'             => [
+        'file'      => 'CSV or CAMT.* files',
+        'nordigen'  => '',
+        'sophtron'  => '',
+        'spectre'   => '',
+        'simplefin' => '',
+        'lunchflow' => '',
+        'obg'       => '',
+        'eb'        => '',
+        'teller'    => '',
+        'fints'     => '',
+        'basiq'     => '',
     ],
     'simplefin'                     => [
         'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
@@ -119,7 +156,7 @@ return [
     'ignore_not_found_transactions' => env('IGNORE_NOT_FOUND_TRANSACTIONS', false),
     'namespace'                     => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'                     => env('USE_CACHE', false),
-    'minimum_version'               => '6.4.2',
+    'minimum_version'               => '6.4.14',
     'cache_api_calls'               => false,
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),

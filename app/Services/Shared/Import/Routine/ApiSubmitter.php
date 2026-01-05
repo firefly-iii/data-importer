@@ -25,10 +25,9 @@ declare(strict_types=1);
 namespace App\Services\Shared\Import\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Import\Status\SubmissionStatusManager;
-use App\Services\Shared\Submission\ProgressInformation;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
@@ -48,8 +47,6 @@ use Illuminate\Support\Facades\Log;
  */
 class ApiSubmitter
 {
-    use ProgressInformation;
-
     private array         $accountInfo;
     private bool          $addTag;
     private Configuration $configuration;
@@ -58,12 +55,25 @@ class ApiSubmitter
     private string        $tag;
     private string        $tagDate;
     private string        $vanityURL;
+    private ImportJob     $importJob;
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $importJob->refreshInstanceIdentifier();
+        $this->configuration = $importJob->getConfiguration();
+        $this->mapping       = $this->configuration->getMapping();
+
+        // FIXME remove this line to crash the submission routine without the user getting an error,
+        $this->addTag        = $this->configuration->isAddImportTag();
+        $this->importJob     = $importJob;
+    }
 
     /**
      * @throws ImporterErrorException
      */
-    public function processTransactions(array $lines): void
+    public function processTransactions(): void
     {
+        $lines            = $this->importJob->getConvertedTransactions();
         $this->createdTag = false;
         $this->tag        = $this->parseTag();
         $this->tagDate    = Carbon::now()->format('Y-m-d');
@@ -72,7 +82,7 @@ class ApiSubmitter
         Log::info(sprintf('Going to submit %d transactions to your Firefly III instance.', $count));
 
         if (0 === $count) {
-            $this->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
+            $this->importJob->submissionStatus->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
         }
 
         $this->vanityURL  = SecretManager::getVanityURL();
@@ -87,7 +97,7 @@ class ApiSubmitter
             Log::debug(sprintf('Now submitting transaction %d/%d', $index + 1, $count));
 
             // Update progress tracking
-            SubmissionStatusManager::updateProgress($this->identifier, $index + 1, $count);
+            $this->importJob->submissionStatus->updateProgress($index + 1, $count);
 
             // first do local duplicate transaction check (the "cell" method):
             $unique    = $this->uniqueTransaction($index, $line);
@@ -182,7 +192,7 @@ class ApiSubmitter
                     bcround($searchResult['amount'], $searchResult['decimal_places'])
                 );
                 if (false === config('importer.ignore_duplicate_errors')) {
-                    $this->addError($index, $message);
+                    $this->importJob->submissionStatus->addError($index, $message);
                 }
 
                 return false;
@@ -261,7 +271,7 @@ class ApiSubmitter
                 }
             }
             if (true === $isDeleted && false === config('importer.ignore_not_found_transactions')) {
-                $this->addWarning($index, 'The transaction was created, but deleted by a rule.');
+                $this->importJob->submissionStatus->addWarning($index, 'The transaction was created, but deleted by a rule.');
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
                 return $return;
@@ -273,7 +283,7 @@ class ApiSubmitter
             }
             $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $this->addError($index, $message);
+            $this->importJob->submissionStatus->addError($index, $message);
 
             return $return;
         }
@@ -284,7 +294,7 @@ class ApiSubmitter
                 foreach ($errors as $error) {
                     $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
-                        $this->addError($index, $msg);
+                        $this->importJob->submissionStatus->addError($index, $msg);
                     }
                     Log::error(sprintf('[%s]: %s', config('importer.version'), $msg));
                 }
@@ -299,7 +309,7 @@ class ApiSubmitter
             if (null === $group) {
                 $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
                 Log::error(sprintf('[%s] %s', config('importer.version'), $message), $response->getRawData());
-                $this->addError($index, $message);
+                $this->importJob->submissionStatus->addError($index, $message);
 
                 return $return;
             }
@@ -308,7 +318,7 @@ class ApiSubmitter
             if (0 === count($group->transactions)) {
                 $message = '[a119]: Could not create transaction. Transaction-count from Firefly III is zero. Check the logs.';
                 Log::error(sprintf('[%s] %s', config('importer.version'), $message), $response->getRawData());
-                $this->addError($index, $message);
+                $this->importJob->submissionStatus->addError($index, $message);
 
                 return $return;
             }
@@ -325,7 +335,7 @@ class ApiSubmitter
                     round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces) // float but only for display purposes
                 );
                 // plus 1 to keep the count.
-                $this->addMessage($index, $message);
+                $this->importJob->submissionStatus->addMessage($index, $message);
                 $this->compareArrays($index, $line, $group);
                 Log::info(sprintf('[%s] %s', config('importer.version'), $message));
                 $return['journals'][$transaction->id] = $transaction->tags;
@@ -428,11 +438,11 @@ class ApiSubmitter
         foreach ($group->transactions as $index => $transaction) {
             // compare currency ID
             if (array_key_exists('currency_id', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_id'] && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId) {
-                $this->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_id'], (int)$transaction->currencyId));
+                $this->importJob->submissionStatus->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_id'], (int)$transaction->currencyId));
             }
             // compare currency code:
             if (array_key_exists('currency_code', $line['transactions'][$index]) && null !== $line['transactions'][$index]['currency_code'] && $line['transactions'][$index]['currency_code'] !== $transaction->currencyCode) {
-                $this->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_code'], $transaction->currencyCode));
+                $this->importJob->submissionStatus->addWarning($lineIndex, sprintf('Line #%d may have had its currency changed (from "%s" to "%s"). This happens because the associated asset account overrules the currency of the transaction.', $lineIndex, $line['transactions'][$index]['currency_code'], $transaction->currencyCode));
             }
         }
     }
@@ -478,7 +488,7 @@ class ApiSubmitter
         } catch (ApiHttpException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
-            $this->addError(0, '[a120]: Could not store transaction: see the log files.');
+            $this->importJob->submissionStatus->addError(0, '[a120]: Could not store transaction: see the log files.');
         }
         Log::debug(sprintf('Added import tag to transaction group #%d', $groupId));
     }
@@ -504,7 +514,7 @@ class ApiSubmitter
         } catch (ApiHttpException $e) {
             $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
             Log::error(sprintf('[%s] %s', config('importer.version'), $message));
-            $this->addError(0, $message);
+            $this->importJob->submissionStatus->addError(0, $message);
 
             return;
         }
@@ -521,22 +531,5 @@ class ApiSubmitter
     public function setAccountInfo(array $accountInfo): void
     {
         $this->accountInfo = $accountInfo;
-    }
-
-    public function setConfiguration(Configuration $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->setAddTag($configuration->isAddImportTag());
-        $this->setMapping($configuration->getMapping());
-    }
-
-    public function setAddTag(bool $addTag): void
-    {
-        $this->addTag = $addTag;
-    }
-
-    public function setMapping(array $mapping): void
-    {
-        $this->mapping = $mapping;
     }
 }

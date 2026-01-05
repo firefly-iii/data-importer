@@ -53,11 +53,10 @@ class Controller extends BaseController
         //        $vanityUrl   = (string) env('VANITY_URL', '');
 
         // experimental. Use config instead
-        $accessToken = (string) config('importer.access_token', '');
-        $clientId    = (string) config('importer.client_id', '');
-        $baseUrl     = (string) config('importer.url', '');
-        $vanityUrl   = (string) config('importer.vanity_url', '');
-
+        $accessToken = (string)config('importer.access_token', '');
+        $clientId    = (string)config('importer.client_id', '');
+        $baseUrl     = (string)config('importer.url', '');
+        $vanityUrl   = (string)config('importer.vanity_url', '');
 
 
         // access token AND client ID cannot be set together

@@ -24,10 +24,10 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN;
 
-use App\Events\DownloadedSimpleFINAccounts;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Configuration\Configuration;
+use App\Services\SimpleFIN\Model\Account;
 use App\Services\SimpleFIN\Request\AccountsRequest;
 use Carbon\Carbon;
 use Exception;
@@ -41,9 +41,9 @@ use Illuminate\Support\Facades\Log;
  */
 class SimpleFINService
 {
-    private string        $accessToken = '';
-    private string        $setupToken  = '';
+    private string        $setupToken = '';
     private Configuration $configuration;
+    private string $accessToken       = '';
 
     /**
      * @throws ImporterErrorException
@@ -145,13 +145,11 @@ class SimpleFINService
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
-            event(new DownloadedSimpleFINAccounts());
 
             return [];
         }
 
         Log::debug(sprintf('SimpleFIN fetched %d accounts successfully', count($accounts)));
-        event(new DownloadedSimpleFINAccounts());
 
         return $accounts;
     }
@@ -172,7 +170,7 @@ class SimpleFINService
         Log::debug(sprintf('SimpleFIN download transactions for account ID: "%s" from provided data structure.', $accountId));
 
         $request      = new AccountsRequest();
-        $request->setAccessToken($this->accessToken);
+        $request->setAccessToken($this->configuration->getAccessToken());
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions
@@ -192,6 +190,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
+        /** @var array<Account> $accounts */
         $accounts     = $response->getAccounts();
 
         if (0 === count($accounts)) {
@@ -200,8 +199,7 @@ class SimpleFINService
             return [];
         }
 
-        /** @var array $transactions */
-        $transactions = $accounts[0]['transactions'] ?? [];
+        $transactions = $accounts[0]->getTransactions();
 
         // add a little filter to remove transactions that are pending.
         $transactions = $this->filterForPending($transactions);

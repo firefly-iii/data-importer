@@ -24,13 +24,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class AutoImportController extends Controller
@@ -39,22 +39,27 @@ class AutoImportController extends Controller
     use HaveAccess;
     use VerifyJSON;
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * @throws ImporterErrorException
      */
-    public function index(Request $request): Response
+    public function index(Request $request): JsonResponse
     {
         if (false === config('importer.can_post_autoimport')) {
-            throw new ImporterErrorException('Disabled, not allowed to import.');
+            throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
         }
 
-        $secret       = (string) ($request->get('secret') ?? '');
-        $systemSecret = (string) config('importer.auto_import_secret');
+        $secret       = (string)($request->get('secret') ?? '');
+        $systemSecret = (string)config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
-            throw new ImporterErrorException('Bad secret, not allowed to import.');
+            throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 
-        $argument     = (string) ($request->get('directory') ?? './');
+        $argument     = (string)($request->get('directory') ?? './');
         $directory    = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
@@ -64,7 +69,7 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access       = $this->haveAccess();
+        $access       = $this->haveAccess(false);
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }
@@ -74,7 +79,7 @@ class AutoImportController extends Controller
 
         $files        = $this->getFiles($directory);
         if (0 === count($files)) {
-            return response('');
+            return response()->json(['error' => 'No files found.']);
         }
         Log::info(sprintf('[%s] Found %d (importable +) JSON file sets in %s', config('importer.version'), count($files), $directory));
 
@@ -86,27 +91,26 @@ class AutoImportController extends Controller
             throw new ImporterErrorException(sprintf('Import exception (see the logs): %s', $e->getMessage()), 0, $e);
         }
 
-        return response('');
+        return response()->json(['message' => 'Seems to have worked!']);
     }
 
     public function info(mixed $string): void
     {
-        $this->line($string);
+        Log::info($string);
     }
 
     public function line(string $string): void
     {
-        echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
+        Log::debug(sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string));
     }
 
     public function error($string, $verbosity = null): void
     {
         Log::error($string);
-        $this->line($string);
     }
 
     public function warn(mixed $string): void
     {
-        $this->line($string);
+        Log::warning($string);
     }
 }

@@ -27,7 +27,7 @@ namespace App\Http\Controllers\Import\Nordigen;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\LinkControllerMiddleware;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Request\GetRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewRequisitionRequest;
 use App\Services\Nordigen\Request\PostNewUserAgreement;
@@ -36,7 +36,6 @@ use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Nordigen\Response\NewUserAgreementResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Session\Constants;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,27 +48,28 @@ use Ramsey\Uuid\Uuid;
  */
 class LinkController extends Controller
 {
-    use RestoresConfiguration;
+    private ImportJobRepository $repository;
 
     public function __construct()
     {
         parent::__construct();
-        $this->middleware(LinkControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
     /**
      * @throws ImporterHttpException
      */
-    public function build(): Redirector|RedirectResponse
+    public function build(string $identifier): Redirector|RedirectResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
+        $importJob         = $this->repository->find($identifier);
         // grab config of user:
         // create a new config thing
-        $configuration     = $this->restoreConfiguration();
+        $configuration     = $importJob->getConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
             Log::debug('Return back to selection because bank is XX');
 
-            return redirect(route('back.selection'));
+            return redirect()->route('select-bank.index', [$identifier]);
         }
 
         TokenManager::validateAllTokens();
@@ -77,6 +77,8 @@ class LinkController extends Controller
         // if already a requisition in config file, no need to make a new one unless its invalid.
         $requisitions      = $configuration->getNordigenRequisitions();
         if (1 === count($requisitions)) {
+            // FIXME build me.
+            throw new ImporterErrorException('Not yet.');
             $url         = config('nordigen.url');
             $accessToken = TokenManager::getAccessToken();
             $reference   = array_shift($requisitions);
@@ -107,7 +109,7 @@ class LinkController extends Controller
         /** @var NewUserAgreementResponse $agreementResponse */
         $agreementResponse = $agreementRequest->post();
 
-        $request           = new PostNewRequisitionRequest($url, $accessToken);
+        $request           = new PostNewRequisitionRequest($url, $accessToken, $identifier);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
@@ -123,8 +125,8 @@ class LinkController extends Controller
 
         // save config!
         $configuration->addRequisition($uuid, $response->id);
-
-        session()->put(Constants::CONFIGURATION, $configuration->toArray());
+        $importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($importJob);
 
         return redirect($response->link);
     }
@@ -132,9 +134,9 @@ class LinkController extends Controller
     /**
      * @return Application|Redirector|RedirectResponse
      */
-    public function callback(Request $request)
+    public function callback(Request $request, string $identifier)
     {
-        $reference     = (string) $request->get('ref');
+        $reference     = trim((string)$request->get('ref'));
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('Reference is "%s"', $reference));
 
@@ -143,14 +145,16 @@ class LinkController extends Controller
         }
 
         // create a new config thing
-        $configuration = $this->restoreConfiguration();
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
         $requisition   = $configuration->getRequisition($reference);
         if (null === $requisition) {
             throw new ImporterErrorException('No such requisition.');
         }
-        // continue!
-        session()->put(Constants::REQUISITION_REFERENCE, $reference);
+        // update the config.
+        $importJob->setState('contains_content');
+        $this->repository->saveToDisk($importJob);
 
-        return redirect(route('004-configure.index'));
+        return redirect(route('configure-import.index', [$identifier]));
     }
 }

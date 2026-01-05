@@ -25,9 +25,9 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Conversion;
 
 use App\Exceptions\ImporterHttpException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;
@@ -45,7 +45,6 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
     use ProgressInformation;
 
     private array                $allErrors;
@@ -67,7 +66,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionGenerator = new GenerateTransactions();
         $this->transactionFilter    = new FilterTransactions();
         if (null === $identifier) {
-            $this->generateIdentifier();
+            // $this->generateIdentifier();
         }
         if (null !== $identifier) {
             $this->identifier = $identifier;
@@ -171,5 +170,10 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

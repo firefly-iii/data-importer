@@ -25,21 +25,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Import;
 
 use App\Console\VerifyJSON;
-use App\Events\ProvidedDataUpload;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\UploadControllerMiddleware;
-use App\Services\CSV\Configuration\ConfigFileProcessor;
-use App\Services\Session\Constants;
+use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\File\FileContentSherlock;
-use App\Services\Storage\StorageService;
-use App\Support\Http\RestoresConfiguration;
+use App\Services\SimpleFIN\Validation\NewJobDataCollector as SimpleFINNewJobDataCollector;
+use App\Services\Sophtron\Validation\NewJobDataCollector as SophtronNewJobDataCollector;
 use App\Support\Http\Upload\CollectsSettings;
-use App\Support\Http\Upload\ProcessesFileUpload;
-use App\Support\Http\Upload\ProcessesLunchFlowUpload;
-use App\Support\Http\Upload\ProcessesNordigenUpload;
-use App\Support\Http\Upload\ProcessesSimpleFINUpload;
-use App\Support\Http\Upload\ProcessesSpectreUpload;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -58,16 +51,13 @@ use Storage;
 class UploadController extends Controller
 {
     use CollectsSettings;
-    use ProcessesFileUpload;
-    use ProcessesLunchFlowUpload;
-    use ProcessesNordigenUpload;
-    use ProcessesSimpleFINUpload;
-    use ProcessesSpectreUpload;
-    use RestoresConfiguration;
     use VerifyJSON;
 
-    private string $configFileName;
-    private string $contentType;
+    private string              $configFileContent     = '';
+    private string              $configFileName;
+    private string              $contentType;
+    private string              $importableFileContent = '';
+    private ImportJobRepository $repository;
 
     /**
      * UploadController constructor.
@@ -76,34 +66,38 @@ class UploadController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Upload files');
-        $this->middleware(UploadControllerMiddleware::class);
         // This variable is used to make sure the configuration object also knows the file type.
         $this->contentType    = 'unknown';
         $this->configFileName = '';
+        $this->repository     = new ImportJobRepository();
     }
 
     /**
      * @return Factory|View
      */
-    public function index(Request $request)
+    public function index(Request $request, string $flow)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Upload your file(s)';
         $subTitle  = 'Start page and instructions';
-        $flow      = $request->cookie(Constants::FLOW_COOKIE);
-
         $settings  = [
             'simplefin' => $this->getSimpleFINSettings(),
         ];
+        $list      = $this->getConfigurations();
 
-        // get existing configs.
-        $disk      = Storage::disk('configurations');
+        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow', 'settings'));
+    }
+
+    private function getConfigurations(): array
+    {
+        // get existing configurations.
+        $disk    = Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all       = $disk->files();
+        $all     = $disk->files();
 
         // remove files from list
-        $list      = [];
-        $ignored   = config('importer.ignored_files');
+        $list    = [];
+        $ignored = config('importer.ignored_files');
         foreach ($all as $entry) {
             if (!in_array($entry, $ignored, true)) {
                 $list[] = $entry;
@@ -111,7 +105,7 @@ class UploadController extends Controller
         }
         Log::debug('List of files:', $list);
 
-        return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow', 'settings'));
+        return $list;
     }
 
     /**
@@ -121,55 +115,105 @@ class UploadController extends Controller
      * @throws FilesystemException
      * @throws ImporterErrorException
      */
-    public function upload(Request $request)
+    public function upload(Request $request, string $flow)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // need to process two possible file uploads:
         $importedFile  = $request->file('importable_file');
         $configFile    = $request->file('config_file');
-        $flow          = $request->cookie(Constants::FLOW_COOKIE);
         $errors        = new MessageBag();
 
         // process uploaded file (if present)
         $errors        = $this->processUploadedFile($flow, $errors, $importedFile);
+        // content of importable file is now in $this->importableFileContent
 
         // process config file (if present)
         if (0 === count($errors) && null !== $configFile) {
             $errors = $this->processConfigFile($errors, $configFile);
         }
+        // at this point the config (unprocessed) is in $this->configFileContent
 
         // process pre-selected file (if present):
         $errors        = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
+        // the config in $this->configFileContent may now be overruled.
 
         // stop here if any errors:
         if ($errors->count() > 0) {
-            return redirect(route('003-upload.index'))->withErrors($errors)->withInput();
+            return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
         }
-        // at this point its possible there is a config file, but there may not be.
-        $configuration = $this->restoreConfiguration($flow);
-        $configuration->setFlow($flow); // at least set the flow.
+        // at this point, create a new import job. With raw content of the config + importable file.
+        $importJob     = $this->repository->create();
+        $importJob     = $this->repository->setFlow($importJob, $flow);
+        $importJob     = $this->repository->setConfigurationString($importJob, $this->configFileContent);
+        $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
+        $importJob     = $this->repository->markAs($importJob, 'contains_content');
 
+        // FIXME: this little routine belongs in a function or a helper.
+        // FIXME: it is duplicated
+        // at this point, also parse and process the uploaded configuration file string.
+        $configuration = Configuration::make();
+        if ('' !== $this->configFileContent && null === $importJob->getConfiguration()) {
+            $configuration = Configuration::fromArray(json_decode($this->configFileContent, true));
+        }
+        if (null !== $importJob->getConfiguration()) {
+            $configuration = $importJob->getConfiguration();
+        }
+        $configuration->setFlow($importJob->getFlow());
+        $importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($importJob);
+
+        // FIXME: validation needs to be in a factory or something.
         // do validation for all configurations.
         switch ($flow) {
             default:
                 throw new ImporterErrorException(sprintf('The data importer cannot deal with workflow "%s".', $flow));
 
-            case 'simplefin':
-                return $this->processSimpleFIN($request, $configuration);
-
             case 'file':
-                return $this->processFileUpload($request, $configuration);
+                Log::debug('No extra steps.');
+
+                break;
+
+            case 'simplefin':
+                $collector             = new SimpleFINNewJobDataCollector();
+                $collector->setImportJob($importJob);
+                $collector->useDemo    = $request->boolean('use_demo');
+                $collector->setupToken = (string)$request->get('simplefin_token');
+                $errors                = $collector->validate();
+                $importJob             = $collector->getImportJob();
+                $this->repository->saveToDisk($importJob);
+
+                break;
+
+            case 'sophtron':
+                // download institutions for user.
+                $collector             = new SophtronNewJobDataCollector();
+                $collector->setImportJob($importJob);
+                $collector->downloadInstitutionsByUser();
+                $importJob             = $collector->getImportJob();
+                $this->repository->saveToDisk($importJob);
+
+                break;
 
             case 'nordigen':
-                return $this->processNordigen($configuration);
+                Log::debug('No extra steps for Nordigen.');
+
+                break;
 
             case 'lunchflow':
-                return $this->processLunchFlow($configuration);
+                Log::debug('No extra steps for Lunch Flow.');
 
-            case 'spectre':
-                return $this->processSpectreUpload($configuration);
+                break;
         }
+
+        // stop again if any errors:
+        if ($errors->count() > 0) {
+            return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
+        }
+
+        // redirect to configuration controller.
+        return redirect()->route('configure-import.index', [$importJob->identifier]);
+
     }
 
     /**
@@ -178,51 +222,53 @@ class UploadController extends Controller
      */
     private function processUploadedFile(string $flow, MessageBag $errors, ?UploadedFile $file): MessageBag
     {
+        // add errors if not "file" flow, otherwise don't care about it.
         if (!$file instanceof UploadedFile && 'file' === $flow) {
             $errors->add('importable_file', 'No file was uploaded.');
 
             return $errors;
         }
-        if ('file' === $flow) {
-            $errorNumber = $file->getError();
-            if (0 !== $errorNumber) {
-                $errors->add('importable_file', $this->getError($errorNumber));
-            }
+        if ('file' !== $flow) {
+            return $errors;
+        }
 
-            // upload the file to a temp directory and use it from there.
-            if (0 === $errorNumber) {
-                $detector          = new FileContentSherlock();
-                $this->contentType = $detector->detectContentType($file->getPathname());
-                $content           = null;
+        $errorNumber       = $file->getError();
+        if (0 !== $errorNumber) {
+            $errors->add('importable_file', $this->getError($errorNumber));
 
-                switch ($this->contentType) {
-                    case 'csv':
-                        $content = (string)file_get_contents($file->getPathname());
+            return $errors;
+        }
 
-                        // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
-                        // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
-                        // This one is for you: 🤦‍♀️
-                        $eol     = $this->detectEOL($content);
-                        if ("\r" === $eol) {
-                            Log::error('Your bank is dumb. Tell them to fix their CSV files.');
-                            $content = str_replace("\r", "\n", $content);
-                        }
+        // upload the file to a temp directory and use it from there.
+        $detector          = new FileContentSherlock();
+        $this->contentType = $detector->detectContentType($file->getPathname());
+        $content           = null;
 
-                        break;
+        switch ($this->contentType) {
+            case 'csv':
+                $content = (string)file_get_contents($file->getPathname());
 
-                    case 'camt':
-                        $content = (string)file_get_contents($file->getPathname());
-
-                        break;
-
-                    default:
-                        $errors->add('importable_file', sprintf('The file type of your upload is "%s". This file type is not supported. Please check the logs, and start over. Sorry about this.', $this->contentType));
+                // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+                // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
+                // This one is for you: 🤦‍♀️
+                $eol     = $this->detectEOL($content);
+                if ("\r" === $eol) {
+                    Log::error('Your bank is dumb. Tell them to fix their CSV files.');
+                    $content = str_replace("\r", "\n", $content);
                 }
-                if (null !== $content && '' !== $content) {
-                    $fileName = StorageService::storeContent($content);
-                    event(new ProvidedDataUpload($fileName));
-                }
-            }
+
+                break;
+
+            case 'camt':
+                $content = (string)file_get_contents($file->getPathname());
+
+                break;
+
+            default:
+                $errors->add('importable_file', sprintf('The file type of your upload is "%s". This file type is not supported. Please check the logs, and start over. Sorry about this.', $this->contentType));
+        }
+        if (null !== $content && '' !== $content) {
+            $this->importableFileContent = $content;
         }
 
         return $errors;
@@ -264,45 +310,24 @@ class UploadController extends Controller
     private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
     {
         Log::debug('Config file is present.');
-        $errorNumber = $file->getError();
+        $errorNumber             = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('config_file', (string)$errorNumber);
+
+            return $errors;
         }
+
         // upload the file to a temp directory and use it from there.
-        if (0 === $errorNumber) {
-            Log::debug('Config file uploaded.');
-            $path                 = $file->getPathname();
-            $validation           = $this->verifyJSON($path);
-            if (false === $validation) {
-                $errors->add('config_file', $this->errorMessage);
+        Log::debug('Config file uploaded.');
+        $path                    = $file->getPathname();
+        $validation              = $this->verifyJSON($path);
+        if (false === $validation) {
+            $errors->add('config_file', $this->errorMessage);
 
-                return $errors;
-            }
-
-            $content              = (string)file_get_contents($path);
-            $this->configFileName = StorageService::storeContent($content);
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
-
-            // process the config file
-            $success              = false;
-            $configuration        = null;
-
-            try {
-                $configuration = ConfigFileProcessor::convertConfigFile($this->configFileName);
-                $configuration->setContentType($this->contentType);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-                $success       = true;
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
-            }
-            // if conversion of the config file was a success, store the new version again:
-            if (true === $success) {
-                $configuration->updateDateRange();
-                $this->configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-                session()->put(Constants::UPLOAD_CONFIG_FILE, $this->configFileName);
-            }
+            return $errors;
         }
+
+        $this->configFileContent = (string)file_get_contents($path);
 
         return $errors;
     }
@@ -314,18 +339,9 @@ class UploadController extends Controller
     {
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
-            $disk           = Storage::disk('configurations');
-            $configFileName = StorageService::storeContent($disk->get($selection));
-
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // process the config file
-            try {
-                $configuration = ConfigFileProcessor::convertConfigFile($configFileName);
-                session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            } catch (ImporterErrorException $e) {
-                $errors->add('config_file', $e->getMessage());
-            }
+            $disk                    = Storage::disk('configurations');
+            $content                 = (string)$disk->get($selection);
+            $this->configFileContent = $content;
         }
 
         return $errors;

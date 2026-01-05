@@ -66,7 +66,7 @@ let index = function () {
             return this.progress.totalTransactions > 0;
         },
         showJobMessages() {
-            console.log(this.messages);
+            //console.log(this.messages);
             return Object.values(this.messages.messages).length > 0 || Object.values(this.messages.warnings).length > 0 || Object.values(this.messages.errors).length > 0;
         },
         showStartButton() {
@@ -108,10 +108,11 @@ let index = function () {
             this.postJobStart();
         },
         postJobStart() {
+            console.log('postJobStart');
             this.triedToStart = true;
             this.post.running = true;
-            const jobStartUrl = './import/submit/start';
-            window.axios.post(jobStartUrl, null,{params: {identifier: this.identifier}}).then((response) => {
+            const jobStartUrl = './submit-data/' + this.identifier + '/start';
+            window.axios.post(jobStartUrl, null).then((response) => {
                 console.log('POST was OK');
                 this.getJobStatus();
                 this.post.running = false;
@@ -149,15 +150,15 @@ let index = function () {
                 this.manualRefreshAvailable = true;
                 return;
             }
-            const submitUrl = './import/submit/status';
-            window.axios.get(submitUrl, {params: {identifier: this.identifier}}).then((response) => {
+            const submitUrl = './submit-data/' + this.identifier + '/status';
+            window.axios.get(submitUrl).then((response) => {
                 this.pageStatus.status = response.data.status;
-                console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ')');
+                console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ') ('+this.pageStatus.triedToStart+')');
 
                 if (this.checkCount >= this.maxCheckCount) {
                     // error
                     this.pageStatus.status = 'too_long_checks';
-                    console.log('Status is now ' + this.pageStatus.status + ' (' + this.checkCount + ')');
+                    console.log('Status is now ' + response.data.status + ' (' + this.checkCount + ') ('+this.pageStatus.triedToStart+')');
                 }
 
                 // process messages, warnings and errors:
@@ -196,8 +197,10 @@ let index = function () {
                 }
                 if ('submission_errored' === this.pageStatus.status) {
                     console.error('Job is kill.');
-                    console.error(response.data);
-                    return;
+                    this.status = response.data.status;
+                    this.pageStatus.triedToStart = true;
+                    this.pageStatus.status = this.status;
+                    this.post.errored = true;
                 }
             }).catch((error) => {
                 console.error('JOB HAS FAILED :(');

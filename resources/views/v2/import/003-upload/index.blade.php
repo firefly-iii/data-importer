@@ -57,7 +57,7 @@
                         Form
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('003-upload.upload') }}" accept-charset="UTF-8" id="store"
+                        <form method="post" action="{{ route('new-import.post', [$flow]) }}" accept-charset="UTF-8" id="store"
                               enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
@@ -88,9 +88,7 @@
                 <div class="card mt-3">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.start') }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span> Go back to
-                                index</a>
+                            <a href="{{ route('index') }}" class="btn btn-secondary"><span class="fas fa-arrow-left"></span> Go back to the index</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white"><span class="fas fa-redo-alt"></span>
                                 Start over entirely</a>
                         </div>

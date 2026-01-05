@@ -48,7 +48,7 @@ final class AutoImport extends Command
      */
     public function handle(): int
     {
-        $access    = $this->haveAccess();
+        $access    = $this->haveAccess(true);
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::NO_CONNECTION->name));

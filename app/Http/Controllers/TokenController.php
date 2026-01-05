@@ -311,7 +311,7 @@ class TokenController extends Controller
         $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
-        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {
+        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string)$data['base_url'], 'https://')) {
             $request->session()->flash('secure_url', 'URL must start with https://');
 
             return redirect(route('token.index'));

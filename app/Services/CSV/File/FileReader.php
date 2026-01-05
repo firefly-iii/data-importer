@@ -24,8 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\CSV\File;
 
-use App\Services\Session\Constants;
-use App\Services\Storage\StorageService;
 use Illuminate\Support\Facades\Log;
 use League\Csv\Reader;
 
@@ -44,17 +42,6 @@ class FileReader
             }
         }
 
-        return Reader::createFromString($content);
-    }
-
-    /**
-     * Get a CSV file reader and fill it with data from CSV file.
-     */
-    public static function getReaderFromSession(bool $convert = false): Reader
-    {
-        $content = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $convert);
-
-        // room for config
-        return Reader::createFromString($content);
+        return Reader::fromString($content);
     }
 }

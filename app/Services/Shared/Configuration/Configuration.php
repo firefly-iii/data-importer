@@ -41,6 +41,7 @@ class Configuration
     private bool   $addImportTag    = true;
     private string $connection      = '0';
     private string $contentType     = 'csv';
+    private string $camtType        = '';
     private bool   $conversion;
     private string $customTag       = '';
     private string $date            = 'Y-m-d';
@@ -99,12 +100,15 @@ class Configuration
 
     // configuration for "classic" method:
     private bool  $skipForm         = false;
-    private array $specifics        = [];
 
     // configuration for "cell" method:
     private int    $uniqueColumnIndex;
     private string $uniqueColumnType;
-    private bool   $useEntireOpposingAddress;
+
+    // configuration for pseudo identifier (composite identifiers):
+    private array $pseudoIdentifier = [];
+
+    private bool $useEntireOpposingAddress;
 
     // configuration for utf-8
     private int $version;
@@ -210,6 +214,7 @@ class Configuration
         $object->rules                       = $data['apply-rules'] ?? true;
         $object->flow                        = $data['flow'] ?? 'file';
         $object->contentType                 = $data['content_type'] ?? 'csv';
+        $object->camtType                    = $data['camt_type'] ?? '';
         $object->customTag                   = $data['custom_tag'] ?? '';
 
         // camt settings
@@ -273,7 +278,6 @@ class Configuration
         }
 
         // array values
-        $object->specifics                   = [];
         $object->roles                       = [];
         $object->doMapping                   = [];
         $object->mapping                     = [];
@@ -339,7 +343,7 @@ class Configuration
         $delimiters                          = config('csv.delimiters_reversed');
         $object                              = new self();
         $object->headers                     = $array['headers'] ?? false;
-        $object->date                        = $array['date'] ?? '';
+        $object->date                        = $array['date'] ?? 'Y-m-d';
         $object->defaultAccount              = $array['default_account'] ?? 0;
         $object->delimiter                   = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
         $object->rules                       = $array['rules'] ?? true;
@@ -351,6 +355,7 @@ class Configuration
         $object->version                     = self::VERSION;
         $object->flow                        = $array['flow'] ?? 'file';
         $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
         // Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
@@ -423,6 +428,12 @@ class Configuration
         $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
 
+        // config for pseudo identifier (composite identifiers):
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $object->migrateSingleIdentifierToPseudoIdentifier();
+
         // utf8
         $object->conversion                  = $array['conversion'] ?? false;
 
@@ -443,10 +454,7 @@ class Configuration
      */
     private static function fromVersionThree(array $data): self
     {
-        $object            = self::fromArray($data);
-        $object->specifics = [];
-
-        return $object;
+        return self::fromArray($data);
     }
 
     /**
@@ -468,6 +476,7 @@ class Configuration
         $object->mapping                     = $array['mapping'] ?? [];
         $object->doMapping                   = $array['do_mapping'] ?? [];
         $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
 
         Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
@@ -521,6 +530,12 @@ class Configuration
         $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
         $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
 
+        // config for pseudo identifier (composite identifiers):
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $object->migrateSingleIdentifierToPseudoIdentifier();
+
         // utf8 conversion
         $object->conversion                  = $array['conversion'] ?? false;
 
@@ -537,12 +552,6 @@ class Configuration
             Log::debug(sprintf('Configuration overruled from none: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
         }
 
-        $object->specifics                   = [];
-        foreach ($array['specifics'] as $key => $enabled) {
-            if (true === $enabled) {
-                $object->specifics[] = $key;
-            }
-        }
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
             $object->contentType = 'csv';
@@ -556,7 +565,7 @@ class Configuration
      */
     public static function make(): self
     {
-        return new self();
+        return self::fromArray([]);
     }
 
     public function addRequisition(string $key, string $identifier): void
@@ -607,6 +616,16 @@ class Configuration
     public function setContentType(string $contentType): void
     {
         $this->contentType = $contentType;
+    }
+
+    public function getCamtType(): string
+    {
+        return $this->camtType;
+    }
+
+    public function setCamtType(string $camtType): void
+    {
+        $this->camtType = $camtType;
     }
 
     public function getCustomTag(): string
@@ -766,11 +785,6 @@ class Configuration
         $this->pendingTransactions = $pendingTransactions;
     }
 
-    public function getSpecifics(): array
-    {
-        return $this->specifics;
-    }
-
     public function getUniqueColumnIndex(): int
     {
         return $this->uniqueColumnIndex;
@@ -781,14 +795,71 @@ class Configuration
         return $this->uniqueColumnType;
     }
 
+    public function getPseudoIdentifier(): ?array
+    {
+        return count($this->pseudoIdentifier) > 0 ? $this->pseudoIdentifier : null;
+    }
+
+    public function hasPseudoIdentifier(): bool
+    {
+        return count($this->pseudoIdentifier) > 0;
+    }
+
+    public function setPseudoIdentifier(array $pseudoIdentifier): void
+    {
+        $this->pseudoIdentifier = $pseudoIdentifier;
+    }
+
+    /**
+     * Get unique column index display value (comma-separated if pseudo identifier exists).
+     * This is used for displaying in the UI form.
+     */
+    public function getUniqueColumnIndexDisplay(): string
+    {
+        // If pseudo identifier exists, return comma-separated source columns
+        if ($this->hasPseudoIdentifier() && isset($this->pseudoIdentifier['source_columns'])) {
+            return implode(',', $this->pseudoIdentifier['source_columns']);
+        }
+
+        // Otherwise return single index
+        return (string)$this->uniqueColumnIndex;
+    }
+
+    /**
+     * Migrate old single-column identifier format to unified pseudo identifier format.
+     * This ensures backward compatibility while unifying the behavior.
+     */
+    private function migrateSingleIdentifierToPseudoIdentifier(): void
+    {
+        // Only migrate if:
+        // 1. Using identifier-based detection ('cell')
+        // 2. No pseudo identifier exists yet (old format)
+        // 3. Have a valid unique column type
+        if ('cell' !== $this->duplicateDetectionMethod) {
+            return;
+        }
+
+        if (count($this->pseudoIdentifier) > 0) {
+            return; // Already using new format
+        }
+
+        if ('' === $this->uniqueColumnType) {
+            return; // No identifier configured
+        }
+
+        // Create pseudo identifier from old single-column format
+        Log::debug(sprintf('Migrating old identifier format to pseudo identifier: index=%d, type=%s', $this->uniqueColumnIndex, $this->uniqueColumnType));
+
+        $this->pseudoIdentifier = [
+            'source_columns' => [$this->uniqueColumnIndex],
+            'separator'      => '|',
+            'role'           => $this->uniqueColumnType,
+        ];
+    }
+
     public function getPendingTransactions(): bool
     {
         return $this->pendingTransactions;
-    }
-
-    public function hasSpecific(string $name): bool
-    {
-        return in_array($name, $this->specifics, true);
     }
 
     public function isAddImportTag(): bool
@@ -857,65 +928,67 @@ class Configuration
     public function toArray(): array
     {
         $array                                  = [
-            'version'                       => $this->version,
-            'source'                        => sprintf('ff3-importer-%s', config('importer.version')),
-            'created_at'                    => date(DateTimeInterface::W3C),
-            'date'                          => $this->date,
-            'default_account'               => $this->defaultAccount,
-            'delimiter'                     => $this->delimiter,
-            'headers'                       => $this->headers,
-            'rules'                         => $this->rules,
-            'skip_form'                     => $this->skipForm,
-            'add_import_tag'                => $this->addImportTag,
-            'roles'                         => $this->roles,
-            'do_mapping'                    => $this->doMapping,
-            'mapping'                       => $this->mapping,
-            'duplicate_detection_method'    => $this->duplicateDetectionMethod,
-            'ignore_duplicate_lines'        => $this->ignoreDuplicateLines,
-            'unique_column_index'           => $this->uniqueColumnIndex,
-            'unique_column_type'            => $this->uniqueColumnType,
-            'flow'                          => $this->flow,
-            'content_type'                  => $this->contentType,
-            'custom_tag'                    => $this->customTag,
+            'version'                      => $this->version,
+            'source'                       => sprintf('ff3-importer-%s', config('importer.version')),
+            'created_at'                   => date(DateTimeInterface::W3C),
+            'date'                         => $this->date,
+            'default_account'              => $this->defaultAccount,
+            'delimiter'                    => $this->delimiter,
+            'headers'                      => $this->headers,
+            'rules'                        => $this->rules,
+            'skip_form'                    => $this->skipForm,
+            'add_import_tag'               => $this->addImportTag,
+            'roles'                        => $this->roles,
+            'do_mapping'                   => $this->doMapping,
+            'mapping'                      => $this->mapping,
+            'duplicate_detection_method'   => $this->duplicateDetectionMethod,
+            'ignore_duplicate_lines'       => $this->ignoreDuplicateLines,
+            'unique_column_index'          => $this->uniqueColumnIndex,
+            'unique_column_type'           => $this->uniqueColumnType,
+            'pseudo_identifier'            => $this->pseudoIdentifier,
+            'flow'                         => $this->flow,
+            'content_type'                 => $this->contentType,
+            'camt_type'                    => $this->camtType,
+            'custom_tag'                   => $this->customTag,
 
             // spectre
-            'identifier'                    => $this->identifier,
-            'connection'                    => $this->connection,
-            'ignore_spectre_categories'     => $this->ignoreSpectreCategories,
+            'identifier'                   => $this->identifier,
+            'connection'                   => $this->connection,
+            'ignore_spectre_categories'    => $this->ignoreSpectreCategories,
 
             // camt:
-            'grouped_transaction_handling'  => $this->groupedTransactionHandling,
-            'use_entire_opposing_address'   => $this->useEntireOpposingAddress,
+            'grouped_transaction_handling' => $this->groupedTransactionHandling,
+            'use_entire_opposing_address'  => $this->useEntireOpposingAddress,
 
             // mapping for spectre + nordigen
-            'map_all_data'                  => $this->mapAllData,
+            'map_all_data'                 => $this->mapAllData,
 
             // simplefin configuration
-            'pending_transactions'          => $this->pendingTransactions,
-            'access_token'                  => $this->accessToken,
+            'pending_transactions'         => $this->pendingTransactions,
+            'access_token'                 => $this->accessToken,
 
             // settings for spectre + nordigen
-            'accounts'                      => $this->accounts,
-            'new_accounts'                  => $this->newAccounts,
+            'accounts'                     => $this->accounts,
+            'new_accounts'                 => $this->newAccounts,
 
             // date range settings:
-            'date_range'                    => $this->dateRange,
-            'date_range_number'             => $this->dateRangeNumber,
-            'date_range_unit'               => $this->dateRangeUnit,
-            'date_range_not_after_unit'     => $this->dateRangeNotAfterUnit,
-            'date_range_not_after_number'   => $this->dateRangeNotAfterNumber,
-            'date_not_before'               => $this->dateNotBefore,
-            'date_not_after'                => $this->dateNotAfter,
+            'date_range'                   => $this->dateRange,
+            'date_range_number'            => $this->dateRangeNumber,
+            'date_range_unit'              => $this->dateRangeUnit,
+            'date_range_not_after_unit'    => $this->dateRangeNotAfterUnit,
+            'date_range_not_after_number'  => $this->dateRangeNotAfterNumber,
+            'date_not_before'              => $this->dateNotBefore,
+            'date_not_after'               => $this->dateNotAfter,
 
             // nordigen information:
-            'nordigen_country'              => $this->nordigenCountry,
-            'nordigen_bank'                 => $this->nordigenBank,
-            'nordigen_requisitions'         => $this->nordigenRequisitions,
-            'nordigen_max_days'             => $this->nordigenMaxDays,
-            'lunch_flow_api_key'            => $this->lunchFlowApiKey,
+            'nordigen_country'             => $this->nordigenCountry,
+            'nordigen_bank'                => $this->nordigenBank,
+            'nordigen_requisitions'        => $this->nordigenRequisitions,
+            'nordigen_max_days'            => $this->nordigenMaxDays,
+            'lunch_flow_api_key'           => $this->lunchFlowApiKey,
 
             // utf8
-            'conversion'                    => $this->conversion,
+            'conversion'                   => $this->conversion,
         ];
 
         // make sure that "ignore duplicate transactions" is turned off
@@ -1041,5 +1114,52 @@ class Configuration
     public function setDuplicateDetectionMethod(string $duplicateDetectionMethod): void
     {
         $this->duplicateDetectionMethod = $duplicateDetectionMethod;
+    }
+
+    public function setHeaders(bool $headers): void
+    {
+        $this->headers = $headers;
+    }
+
+    public function updateFromRequest(array $request): void
+    {
+        $this->headers                     = $request['headers'];
+        $this->delimiter                   = $request['delimiter'];
+        $this->date                        = $request['date'];
+        $this->defaultAccount              = $request['default_account'];
+        $this->rules                       = $request['rules'];
+        $this->ignoreDuplicateLines        = $request['ignore_duplicate_lines'];
+        $this->ignoreDuplicateTransactions = $request['ignore_duplicate_transactions'];
+        $this->skipForm                    = $request['skip_form'];
+        $this->addImportTag                = $request['add_import_tag'];
+        $this->pendingTransactions         = $request['pending_transactions'];
+        $this->customTag                   = $request['custom_tag'];
+        $this->duplicateDetectionMethod    = $request['duplicate_detection_method'];
+        $this->ignoreSpectreCategories     = $request['ignore_spectre_categories'];
+        $this->mapAllData                  = $request['map_all_data'];
+        $this->dateRange                   = $request['date_range'];
+        $this->dateRangeNumber             = $request['date_range_number'];
+        $this->dateRangeUnit               = $request['date_range_unit'];
+        $this->dateRangeNotAfterNumber     = $request['date_range_not_after_number'];
+        $this->dateRangeNotAfterUnit       = $request['date_range_not_after_unit'];
+        $this->dateNotBefore               = (string)$request['date_not_before'];
+        $this->dateNotAfter                = (string)$request['date_not_after'];
+        $this->conversion                  = $request['conversion'];
+        $this->groupedTransactionHandling  = $request['grouped_transaction_handling'];
+        $this->useEntireOpposingAddress    = $request['use_entire_opposing_address'];
+        $this->newAccounts                 = $request['to_create'];
+        $this->accounts                    = $request['to_import_from'];
+
+
+        // config for "cell":
+        $this->uniqueColumnIndex           = $request['unique_column_index'] ?? 0;
+        $this->uniqueColumnType            = $request['unique_column_type'] ?? '';
+
+        // config for pseudo identifier (composite identifiers):
+        $this->pseudoIdentifier            = $request['pseudo_identifier'] ?? [];
+
+        // Migrate old single-column identifier to pseudo identifier format
+        $this->migrateSingleIdentifierToPseudoIdentifier();
+        $this->updateDateRange();
     }
 }

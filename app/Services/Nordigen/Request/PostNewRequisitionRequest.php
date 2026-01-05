@@ -37,15 +37,17 @@ class PostNewRequisitionRequest extends Request
     private string $agreement;
     private string $bank;
     private string $reference;
+    private string $identifier;
 
-    public function __construct(string $url, string $token)
+    public function __construct(string $url, string $token, string $identifier)
     {
         $this->setParameters([]);
         $this->setBase($url);
         $this->setToken($token);
+        $this->identifier = $identifier;
         $this->setUrl('api/v2/requisitions/');
-        $this->reference = '';
-        $this->agreement = '';
+        $this->reference  = '';
+        $this->agreement  = '';
     }
 
     public function get(): Response
@@ -61,7 +63,7 @@ class PostNewRequisitionRequest extends Request
         Log::debug(sprintf('Now at %s', __METHOD__));
         $array
                 = [
-                    'redirect'       => route('010-build-link.callback'),
+                    'redirect'       => route('gocardless-connect.callback', [$this->identifier]),
                     'institution_id' => $this->bank,
                     'reference'      => $this->reference,
                     'agreement'      => $this->agreement,

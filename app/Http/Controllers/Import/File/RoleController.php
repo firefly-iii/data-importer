@@ -26,13 +26,10 @@ namespace App\Http\Controllers\Import\File;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\RoleControllerMiddleware;
 use App\Http\Request\RolesPostRequest;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Roles\RoleService;
-use App\Services\Session\Constants;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\Storage\StorageService;
-use App\Support\Http\RestoresConfiguration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +40,7 @@ use Illuminate\View\View;
  */
 class RoleController extends Controller
 {
-    use RestoresConfiguration;
+    private ImportJobRepository $repository;
 
     /**
      * RoleController constructor.
@@ -52,54 +49,60 @@ class RoleController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Define roles');
-        $this->middleware(RoleControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
     /**
      * @return View|void
      */
-    public function index(Request $request)
+    public function index(Request $request, string $identifier)
     {
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $flow          = $request->cookie(Constants::FLOW_COOKIE);
+        $importJob     = $this->repository->find($identifier);
+        $flow          = $importJob->getFlow();
+        $mainTitle     = 'Role definition';
+        $subTitle      = 'Data role definition';
         if ('file' !== $flow) {
-            exit('redirect or something');
+            return view('import.005-roles.no-define-roles')->with(compact('flow', 'mainTitle', 'subTitle'));
         }
+        $state         = $importJob->getState();
+        if ('new' === $state || 'contains_content' === $state || 'is_parsed' === $state) {
+            exit(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
+        }
+
+        $warning       = '';
+        if ('configured_and_roles_defined' === $importJob->getState() || 'configured_roles_map_in_place' === $importJob->getState()) {
+            $warning = trans('import.roles_defined_warning');
+        }
+
         // get configuration object.
-        $configuration = $this->restoreConfiguration();
+        $configuration = $importJob->getConfiguration();
         $contentType   = $configuration->getContentType();
 
         if ('csv' === $contentType) {
-            return $this->csvIndex($request, $configuration);
+            return $this->csvIndex($importJob, $warning);
         }
         if ('camt' === $contentType) {
-            return $this->camtIndex($request, $configuration);
+            return $this->camtIndex($importJob, $warning);
         }
 
         throw new ImporterErrorException(sprintf('Cannot handle file type "%s"', $contentType));
     }
 
-    private function csvIndex(Request $request, Configuration $configuration): View
+    private function csvIndex(ImportJob $importJob, string $warning): View
     {
         $mainTitle           = 'Role definition';
         $subTitle            = 'Configure the role of each column in your file';
-        $sessionUploadFile   = session()->get(Constants::UPLOAD_DATA_FILE);
-        if (null === $sessionUploadFile) {
-            Log::error('No data file in session, give big fat error.');
-            Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
-
-            throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
-        }
-
-
         // get columns from file
-        $content             = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
+        $identifier          = $importJob->identifier;
+        $configuration       = $importJob->getConfiguration();
+        $content             = $importJob->getImportableFileString();
         $columns             = RoleService::getColumns($content, $configuration);
-        $examples            = RoleService::getExampleData($content, $configuration);
+        $exampleData         = RoleService::getExampleData($content, $configuration);
 
-        // submit mapping from config.
-        $mapping             = base64_encode(json_encode($configuration->getMapping(), JSON_THROW_ON_ERROR));
-
+        // Extract column examples and pseudo identifier examples
+        $examples            = $exampleData['columns'];
+        $pseudoExamples      = $exampleData['pseudo_identifier'];
+        $ignoreWarnings      = '1' === request()->old('ignore_warnings');
         // roles
         $roles               = config('csv.import_roles');
         ksort($roles);
@@ -107,38 +110,36 @@ class RoleController extends Controller
         // configuration (if it is set)
         $configuredRoles     = $configuration->getRoles();
         $configuredDoMapping = $configuration->getDoMapping();
-
-        return view('import.005-roles.index-csv', compact('mainTitle', 'configuration', 'subTitle', 'columns', 'examples', 'roles', 'configuredRoles', 'configuredDoMapping', 'mapping'));
-    }
-
-    private function camtIndex(Request $request, Configuration $configuration): View
-    {
-        $mainTitle         = 'Role definition';
-        $subTitle          = 'Configure the role of each field in your camt.053 file';
-
-        $sessionUploadFile = session()->get(Constants::UPLOAD_DATA_FILE);
-
-        if (null === $sessionUploadFile) {
-            Log::error('No data file in session, give big fat error.');
-            Log::error('This often happens when you access the data importer over its IP:port combo. Not all browsers like this.');
-
-            throw new ImporterErrorException('The Firefly III data importer forgot where your uploaded data is. This may happen when cookies get lost. Please check the logs for more info.');
+        $old                 = request()->old('roles');
+        if (null !== $old && count($old) > 0) {
+            $configuredRoles = $old;
         }
 
+        return view('import.005-roles.index-csv', compact('mainTitle', 'warning', 'ignoreWarnings', 'identifier', 'configuration', 'subTitle', 'columns', 'examples', 'pseudoExamples', 'roles', 'configuredRoles', 'configuredDoMapping'));
+    }
+
+    private function camtIndex(ImportJob $importJob, string $warning): View
+    {
+        Log::debug(sprintf('Now in camtIndex("%s", "%s")', $importJob->identifier, $warning));
+        $mainTitle      = 'Role definition';
+        $identifier     = $importJob->identifier;
+        $configuration  = $importJob->getConfiguration();
+        $camtType       = $configuration->getCamtType();
+        $subTitle       = sprintf('Configure the role of each field in your camt.%s file', $camtType);
+
         // get example data from file.
-        $content           = StorageService::getContent($sessionUploadFile, $configuration->isConversion());
-        $examples          = RoleService::getExampleDataFromCamt($content, $configuration);
-        $roles             = $configuration->getRoles();
-        $doMapping         = $configuration->getDoMapping();
+        $examples       = RoleService::getExampleDataFromCamt($importJob->getImportableFileString(), $configuration);
+        $roles          = $configuration->getRoles();
+        $doMapping      = $configuration->getDoMapping();
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
-        $levels            = [];
-        $levels['A']       = [
+        $levels         = [];
+        $levels['A']    = [
             'title'       => trans('camt.level_A'),
             'explanation' => trans('camt.explain_A'),
             'fields'      => $this->getFieldsForLevel('A'),
         ];
-        $levels['B']       = [
+        $levels['B']    = [
             'title'       => trans('camt.level_B'),
             'explanation' => trans('camt.explain_B'),
             'fields'      => $this->getFieldsForLevel('B'),
@@ -146,7 +147,7 @@ class RoleController extends Controller
         //        var_dump($levels['B']);
         //        var_dump($roles);
         //        exit;
-        $levels['C']       = [
+        $levels['C']    = [
             'title'       => trans('camt.level_C'),
             'explanation' => trans('camt.explain_C'),
             'fields'      => [
@@ -165,7 +166,7 @@ class RoleController extends Controller
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
             ],
         ];
-        $group_handling    = $configuration->getGroupedTransactionHandling();
+        $group_handling = $configuration->getGroupedTransactionHandling();
         if ('group' === $group_handling) {
             $levels['D'] = [
                 'title'       => trans('camt.level_D'),
@@ -196,9 +197,15 @@ class RoleController extends Controller
                 ],
             ];
         }
-        $levels            = $this->mergeLevelsAndRoles($levels, $roles);
 
-        return view('import.005-roles.index-camt', compact('mainTitle', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
+        $old            = request()->old('roles');
+        if (null !== $old && count($old) > 0) {
+            $roles = $old;
+        }
+
+        $levels         = $this->mergeLevelsAndRoles($levels, $roles);
+
+        return view('import.005-roles.index-camt', compact('mainTitle', 'warning', 'identifier', 'configuration', 'subTitle', 'levels', 'doMapping', 'examples', 'roles'));
     }
 
     private function getFieldsForLevel(string $level): array
@@ -208,50 +215,72 @@ class RoleController extends Controller
         return array_filter($allFields, fn ($field) => $level === $field['level']);
     }
 
-    public function postIndex(RolesPostRequest $request): RedirectResponse
+    private function mergeLevelsAndRoles(array $levels, array $roles): array
     {
-        // the request object must be able to handle all file types.
-        $configuration = $this->restoreConfiguration();
+        Log::debug('Now in mergeLevelsAndRoles');
+        foreach ($levels as $letter => $info) {
+            Log::debug(sprintf('Now at level %s', $letter));
+            foreach ($info['fields'] as $index => $field) {
+                $title                                         = $field['title'];
+                $selected                                      = $field['default_role'] ?? '_impossible';
+                $possibleRoles                                 = [];
+                Log::debug(sprintf('Analysing level "%s" field "%s"', $letter, $title));
+                if (array_key_exists('roles', $field)) {
+                    $possibleRoles = array_keys(config(sprintf('camt.roles.%s', $field['roles'])) ?? []);
+                }
+                if (array_key_exists($title, $roles)) {
+                    Log::debug(sprintf('Start: User has role "%s" pre-selected for level %s field "%s"', $roles[$title], $letter, $title));
+                    $selected = $roles[$title];
+                    if (!in_array($selected, $possibleRoles, true)) {
+                        $selected = '_ignore';
+                        Log::debug('User selected impossible role, will be ignored.');
+                    }
+                    //                    if ('_ignore' === $roles[$title]) {
+                    //                        $selected = '_ignore';
+                    //                        Log::debug(sprintf('Make default role "_ignore" for level %s field "%s"', $letter, $title));
+                    //                    }
+                    //                    if ($roles[$title] === $field['default_role']) {
+                    //                        // $selected = $field['default_role'];
+                    //                        Log::debug(sprintf('User has selected role "%s" for level %s field "%s"', $roles[$title], $letter, $title));
+                    //                    }
+                }
+                if (!array_key_exists($title, $roles)) {
+                    Log::debug(sprintf('User has no role pre-selected for level %s field "%s"', $letter, $title));
+                }
+                $levels[$letter]['fields'][$index]['selected'] = $selected;
+            }
+        }
 
-        return $this->processPostIndex($request, $configuration);
+        return $levels;
     }
 
-    private function processPostIndex(RolesPostRequest $request, Configuration $configuration): RedirectResponse
+    public function postIndex(RolesPostRequest $request, string $identifier): RedirectResponse
     {
-        $data           = $request->getAllForFile();
-        $needsMapping   = $this->needMapping($data['do_mapping']);
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
+        $data          = $request->getAllForFile();
+        $needsMapping  = $this->needMapping($data['do_mapping']);
         $configuration->setRoles($data['roles']);
         $configuration->setDoMapping($data['do_mapping']);
 
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-
-        // then this is the new, full array:
-        $fullArray      = $configuration->toArray();
-
-        // and it can be saved on disk:
-        $configFileName = StorageService::storeArray($fullArray);
-        Log::debug(sprintf('Old configuration was stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // this is a new config file name.
-        session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-        Log::debug(sprintf('New configuration is stored under key "%s".', session()->get(Constants::UPLOAD_CONFIG_FILE)));
-
-        // set role config as complete.
-        session()->put(Constants::ROLES_COMPLETE_INDICATOR, true);
-        Log::debug('Set ROLES_COMPLETE_INDICATOR = true');
-        // redirect to mapping thing.
-        if (true === $needsMapping) {
-            Log::debug('Redirect to mapping, because $needsMapping is true.');
-
-            return redirect()->route('006-mapping.index');
+        if (false === $needsMapping) {
+            // job needs no data mapping, so the state can be set:
+            $importJob->setState('configured_roles_map_in_place');
         }
-        // otherwise, store empty mapping, and continue:
-        // set map config as complete.
-        Log::debug('Set READY_FOR_CONVERSION = true + redirect to conversion, because $needsMapping is false.');
-        session()->put(Constants::READY_FOR_CONVERSION, true);
+        if (true === $needsMapping) {
+            // needs mapping still:
+            $importJob->setState('configured_and_roles_defined');
+        }
 
-        return redirect()->route('007-convert.index');
+        $importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($importJob);
+
+        if (true === $needsMapping) {
+            // redirect to the route to set mapping:
+            return redirect()->route('data-mapping.index', [$identifier]);
+        }
+
+        return redirect()->route('data-conversion.index', [$identifier]);
     }
 
     /**
@@ -267,32 +296,5 @@ class RoleController extends Controller
         }
 
         return $need;
-    }
-
-    private function mergeLevelsAndRoles(array $levels, array $roles): array
-    {
-        foreach ($levels as $letter => $info) {
-            foreach ($info['fields'] as $index => $field) {
-                $title                                         = $field['title'];
-                $selected                                      = $field['default_role'] ?? '_impossible';
-                Log::debug(sprintf('Analysing level %s field "%s"', $letter, $title));
-                if (array_key_exists($title, $roles)) {
-                    if ('_ignore' === $roles[$title]) {
-                        $selected = '_ignore';
-                        Log::debug(sprintf('Make default role "_ignore" for level %s field "%s"', $letter, $title));
-                    }
-                    if ($roles[$title] === $field['default_role']) {
-                        // $selected = $field['default_role'];
-                        Log::debug(sprintf('User has selected role "%s" for level %s field "%s"', $roles[$title], $letter, $title));
-                    }
-                }
-                if (!array_key_exists($title, $roles)) {
-                    Log::debug(sprintf('User has no role pre-selected for level %s field "%s"', $letter, $title));
-                }
-                $levels[$letter]['fields'][$index]['selected'] = $selected;
-            }
-        }
-
-        return $levels;
     }
 }

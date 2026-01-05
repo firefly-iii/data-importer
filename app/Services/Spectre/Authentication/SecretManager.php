@@ -50,7 +50,6 @@ class SecretManager
 
     /**
      * Will verify if the user has a Spectre App ID (in a cookie)
-     * TODO is a cookie the best place?
      */
     private static function hasAppId(): bool
     {
@@ -59,7 +58,6 @@ class SecretManager
 
     /**
      * Will return the Nordigen ID. From a cookie if its there, otherwise from configuration.
-     * TODO is a cookie the best place?
      */
     public static function getSecret(): string
     {
@@ -82,7 +80,6 @@ class SecretManager
 
     /**
      * Store app ID.
-     * TODO is a cookie the best place?
      */
     public static function saveAppId(string $appId): void
     {
@@ -91,7 +88,6 @@ class SecretManager
 
     /**
      * Store access token in a cookie.
-     * TODO is a cookie the best place?
      */
     public static function saveSecret(string $secret): void
     {

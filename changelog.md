@@ -2,6 +2,51 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.0.0 - 2026-01-xx
+
+Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with, and easier to extend.
+
+> [!WARNING]
+> This release introduces many new things, so there will be bugs. Some changes in this release may also unexpectedly lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped. 
+
+### Added
+- New import data provider "[Sophtron](https://sophtron.com/index)". In the interest of full disclosure, they have sponsored me to add their API to the data importer. [Their support (and yours!)](https://docs.firefly-iii.org/explanation/more-information/donations/) allows me to spend more time on Firefly III and the data importer, and I'm very grateful for it.
+- [PR 1035](https://github.com/firefly-iii/data-importer/pull/1035) (Add support for CAMT.052)  by @beatbesmer
+- [PR 1037](https://github.com/firefly-iii/data-importer/pull/1037) (Syntax error in debug logging) by @beatbesmer
+
+### Changed
+- Import jobs are no longer managed using session data. This is a technical change, and it means that import jobs are easier to monitor, update and (in the future) can be re-run using new settings. This allows for a whole new range of flexibility.
+- A lot of code has been rewritten to make it easier to manage an import job. Thanks to the previously mentioned changed, it is easier to switch back and forth between the necessary steps of an import job.
+- A small API is now in place (with documentation to follow), that allows you to communicate with the data importer more easily. This will not be relevant for a lot of folks but the "auto import" and "auto upload" endpoints for example, will be documented [just like the Firefly III API documentation](https://api-docs.firefly-iii.org/).
+
+### Deprecated
+- The "Spectre" import routine created and supported by Salt Edge, has been officially deprecated and can no longer be used.
+
+### Fixed
+- [Discussion 11162](https://github.com/orgs/firefly-iii/discussions/11162) (Importer account generation via account number) started by @ahmetpekbas
+- [Issue 11172](https://github.com/firefly-iii/firefly-iii/issues/11172) (Special characters not sorted correctly in account mapping) reported by @empeig
+- [Issue 11327](https://github.com/firefly-iii/firefly-iii/issues/11327) (SimpleFIN import fails with "Account mappings cannot be empty" even when "Map data: NO" is selected) reported by @metalchef1
+- [Issue 11377](https://github.com/firefly-iii/firefly-iii/issues/11377) (Importer ignores date option set in config file) reported by @rmu1987
+
+## v1.9.2 - 2025-11-08
+
+### Added
+- Support for composite transaction identifiers, by @pingu8007
+- Support for camt.052, by @beatbesmer
+
+### Fixed
+- [Discussion 11162](https://github.com/orgs/firefly-iii/discussions/11162) (Importer account generation via account number) started by @ahmetpekbas
+- [Issue 11172](https://github.com/firefly-iii/firefly-iii/issues/11172) (Special characters not sorted correctly in account mapping) reported by @empeig
+
+## v1.9.1 - 2025-11-02
+
+### Fixed
+
+- [Issue 11090](https://github.com/firefly-iii/firefly-iii/issues/11090) (Importer - Getting error "..redirected you too many times") reported by @hiyan
+- [Issue 11100](https://github.com/firefly-iii/firefly-iii/issues/11100) (Camt 052.001.08 xml import error) reported by @bestlinuxgamers
+- [Issue 11151](https://github.com/firefly-iii/firefly-iii/issues/11151) (Submitting import before /import/check-duplicate returns breaks importer) reported by @grgar
+- [Issue 11118](https://github.com/firefly-iii/firefly-iii/issues/11118) (Camt importer ignoring config role definitions) reported by @bestlinuxgamers
+
 ## v1.9.0 - 2025-10-19
 
 > [!NOTE]

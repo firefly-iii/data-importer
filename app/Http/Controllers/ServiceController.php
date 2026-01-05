@@ -24,12 +24,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\ServiceControllerMiddleware;
 use App\Services\Enums\AuthenticationStatus;
-use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
-use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
-use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
+use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
+use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
+use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -46,41 +45,23 @@ class ServiceController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Importing data...');
-        $this->middleware(ServiceControllerMiddleware::class);
     }
 
     public function validateProvider(string $provider): JsonResponse
     {
         return match ($provider) {
             'nordigen', 'gocardless' => $this->validateNordigen(),
-            'simplefin' => $this->validateSimpleFIN(),
-            'spectre'   => $this->validateSpectre(request()),
-            'lunchflow' => $this->validateLunchFlow(),
-            'file'      => response()->json(['result' => 'OK']),
-            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
+            'simplefin'              => $this->validateSimpleFIN(),
+            'spectre'                => $this->validateSpectre(request()),
+            'lunchflow'              => $this->validateLunchFlow(),
+            'file'                   => response()->json(['result' => 'OK']),
+            default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider']),
         };
     }
 
     public function validateNordigen(): JsonResponse
     {
         $validator = new NordigenValidator();
-        $result    = $validator->validate();
-
-        if (AuthenticationStatus::ERROR === $result) {
-            // send user error:
-            return response()->json(['result' => 'NOK']);
-        }
-        if (AuthenticationStatus::NODATA === $result) {
-            // send user error:
-            return response()->json(['result' => 'NODATA']);
-        }
-
-        return response()->json(['result' => 'OK']);
-    }
-
-    public function validateLunchFlow(): JsonResponse
-    {
-        $validator = new LunchFlowValidator();
         $result    = $validator->validate();
 
         if (AuthenticationStatus::ERROR === $result) {
@@ -121,6 +102,23 @@ class ServiceController extends Controller
     public function validateSpectre(Request $request): JsonResponse
     {
         $validator = new SpectreValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            // send user error:
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    public function validateLunchFlow(): JsonResponse
+    {
+        $validator = new LunchFlowValidator();
         $result    = $validator->validate();
 
         if (AuthenticationStatus::ERROR === $result) {

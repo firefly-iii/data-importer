@@ -24,12 +24,15 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
+/**
+ * @deprecated
+ */
 trait CombinedProgressInformation
 {
-    private array $allErrors;
-    private array $allMessages;
-    private array $allWarnings;
-    private array $allRateLimits;
+    private array $allErrors     = [];
+    private array $allMessages   = [];
+    private array $allWarnings   = [];
+    private array $allRateLimits = [];
 
     final public function getAllErrors(): array
     {

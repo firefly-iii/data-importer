@@ -24,18 +24,25 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Conversion;
 
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Trait ProgressInformation
+ *
+ * Replace this with references to then import job, where messages must be stored anyway.
+ *
+ * @deprecated
  */
 trait ProgressInformation
 {
-    protected array  $errors     = [];
-    protected string $identifier;
-    protected array  $messages   = [];
-    protected array  $warnings   = [];
-    protected array  $rateLimits = [];
+    protected array   $errors     = [];
+    protected string  $identifier;
+    protected array   $messages   = [];
+    protected array   $warnings   = [];
+    protected array   $rateLimits = [];
+    private ImportJob $importJob;
 
     final public function getErrors(): array
     {
@@ -61,6 +68,9 @@ trait ProgressInformation
     {
         Log::debug(sprintf('Set identifier to "%s"', $identifier));
         $this->identifier = $identifier;
+        $repository       = new ImportJobRepository();
+        $this->importJob  = $repository->find($identifier);
+        $this->importJob->refreshInstanceIdentifier();
     }
 
     final protected function addError(int $index, string $error): void
@@ -70,8 +80,8 @@ trait ProgressInformation
         $this->errors[$index] ??= [];
         $this->errors[$index][] = $error;
 
-        // write errors to disk
-        RoutineStatusManager::addError($this->identifier, $index, $error);
+        // FIXME write errors to import job too (why two places?)
+        $this->importJob->conversionStatus->addError($index, $error);
     }
 
     final protected function addRateLimit(int $index, string $message): void
@@ -81,8 +91,8 @@ trait ProgressInformation
         $this->rateLimits[$index] ??= [];
         $this->rateLimits[$index][] = $message;
 
-        // write errors to disk
-        RoutineStatusManager::addRateLimit($this->identifier, $index, $message);
+        // FIXME write rate limits to import job too (why two places?)
+        $this->importJob->conversionStatus->addRateLimit($index, $message);
     }
 
     final protected function addMessage(int $index, string $message): void
@@ -92,8 +102,8 @@ trait ProgressInformation
         $this->messages[$index] ??= [];
         $this->messages[$index][] = $message;
 
-        // write message
-        RoutineStatusManager::addMessage($this->identifier, $index, $message);
+        // FIXME write messages to import job too (why two places?)
+        $this->importJob->conversionStatus->addMessage($index, $message);
     }
 
     final protected function addWarning(int $index, string $warning): void
@@ -103,7 +113,7 @@ trait ProgressInformation
         $this->warnings[$index] ??= [];
         $this->warnings[$index][] = $warning;
 
-        // write warning
-        RoutineStatusManager::addWarning($this->identifier, $index, $warning);
+        // FIXME write warnings to import job too (why two places?)
+        $this->importJob->conversionStatus->addWarning($index, $warning);
     }
 }

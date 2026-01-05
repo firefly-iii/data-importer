@@ -26,7 +26,6 @@ namespace App\Services\SimpleFIN;
 
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
-use App\Services\Shared\Authentication\IsRunningCli;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -34,8 +33,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-    use IsRunningCli;
-
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
@@ -59,8 +56,5 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         ];
     }
 
-    public function setData(array $data): void
-    {
-        // TODO: Implement setData() method.
-    }
+    public function setData(array $data): void {}
 }

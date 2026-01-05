@@ -24,32 +24,66 @@ declare(strict_types=1);
 
 namespace App\Services\Shared\Import\Status;
 
+use Illuminate\Support\Facades\Log;
+
 class SubmissionStatus
 {
     public const string SUBMISSION_DONE    = 'submission_done';
     public const string SUBMISSION_ERRORED = 'submission_errored';
     public const string SUBMISSION_RUNNING = 'submission_running';
     public const string SUBMISSION_WAITING = 'waiting_to_start';
-    public array  $errors;
-    public array  $messages;
-    public string $status;
-    public array  $warnings;
-    public int    $currentTransaction;
-    public int    $totalTransactions;
-    public int    $progressPercentage;
+    public array   $errors                 = [];
+    public array   $messages               = [];
+    private string $status;
+    public array   $warnings               = [];
+    public int     $currentTransaction     = 0;
+    public int     $totalTransactions      = 0;
+    public int     $progressPercentage     = 0;
 
     /**
      * ImportJobStatus constructor.
      */
     public function __construct()
     {
-        $this->status             = self::SUBMISSION_WAITING;
-        $this->errors             = [];
-        $this->warnings           = [];
-        $this->messages           = [];
-        $this->currentTransaction = 0;
-        $this->totalTransactions  = 0;
-        $this->progressPercentage = 0;
+        $this->status = self::SUBMISSION_WAITING;
+    }
+
+    public function setStatus(string $status): void
+    {
+        Log::debug(sprintf('Set submission status to "%s"', $status));
+        $this->status = $status;
+    }
+
+    public function addError(int $index, string $error): void
+    {
+        $lineNo                 = $index + 1;
+        Log::debug(sprintf('Add error on index #%d (line no. %d): %s', $index, $lineNo, $error));
+        $this->errors[$index] ??= [];
+        $this->errors[$index][] = $error;
+    }
+
+    public function addWarning(int $index, string $warning): void
+    {
+        $lineNo                   = $index + 1;
+        Log::debug(sprintf('Add warning on index #%d (line no. %d): %s', $index, $lineNo, $warning));
+        $this->warnings[$index] ??= [];
+        $this->warnings[$index][] = $warning;
+    }
+
+    public function addMessage(int $index, string $message): void
+    {
+        $lineNo                   = $index + 1;
+        Log::debug(sprintf('Add message on index #%d (line no. %d): %s', $index, $lineNo, $message));
+        $this->messages[$index] ??= [];
+        $this->messages[$index][] = $message;
+    }
+
+    public function updateProgress(int $currentTransaction, int $totalTransactions): void
+    {
+        Log::debug(sprintf('Update progress: %d/%d transactions', $currentTransaction, $totalTransactions));
+        $this->currentTransaction = $currentTransaction;
+        $this->totalTransactions  = $totalTransactions;
+        $this->progressPercentage = $totalTransactions > 0 ? (int)round(($currentTransaction / $totalTransactions) * 100) : 0;
     }
 
     /**

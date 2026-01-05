@@ -26,14 +26,15 @@ namespace App\Services\Nordigen\Conversion;
 
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Conversion\Routine\FilterTransactions;
 use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
 use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;
 use App\Services\Nordigen\Request\Request;
-use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\GeneratesIdentifier;
+use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
@@ -46,61 +47,57 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
-    use IsRunningCli;
+    use CreatesAccounts;
     use ProgressInformation;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
+    private ImportJobRepository  $repository;
+    private ImportJob            $importJob;
 
     private array $downloaded;
 
-    public function __construct(?string $identifier)
+    public function __construct(ImportJob $importJob)
     {
         $this->allErrors            = [];
         $this->allWarnings          = [];
         $this->allMessages          = [];
         $this->allRateLimits        = [];
         $this->downloaded           = [];
-
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
         $this->transactionFilter    = new FilterTransactions();
+        $this->repository           = new ImportJobRepository();
+        $this->importJob            = $importJob;
+        $this->importJob->refreshInstanceIdentifier();
+        $this->setConfiguration($this->importJob->getConfiguration());
     }
 
     #[Override]
     public function getServiceAccounts(): array
     {
-        return $this->transactionProcessor->getAccounts();
+        Log::debug(sprintf('RoutineManager.getServiceAccounts(%d)', count($this->importJob->getServiceAccounts())));
+
+        return $this->importJob->getServiceAccounts();
     }
 
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
+        Log::debug('RoutineManager.setConfiguration');
         // save config
         $this->configuration = $configuration;
 
         // Step 0: configuration validation.
-        $this->validateAccounts();
+        // $this->validateAccounts();
 
         // share config
-        $this->transactionProcessor->setConfiguration($configuration);
-        $this->transactionGenerator->setConfiguration($configuration);
-
-        // set identifier
-        $this->transactionProcessor->setIdentifier($this->identifier);
-        $this->transactionGenerator->setIdentifier($this->identifier);
-        $this->transactionFilter->setIdentifier($this->identifier);
+        $this->transactionProcessor->setImportJob($this->importJob);
+        $this->transactionGenerator->setImportJob($this->importJob);
     }
 
     /**
@@ -110,7 +107,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         Log::debug(sprintf('The GoCardless API URL is %s', config('nordigen.url')));
-
+        $this->transactionProcessor->setExistingServiceAccounts($this->getServiceAccounts());
         // Step 1: get transactions from GoCardless
         $this->downloadFromGoCardless();
 
@@ -154,7 +151,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->allMessages = $this->mergeArrays(
             [
                 $this->getMessages(),
-                $this->transactionFilter->getMessages(),
                 $this->transactionGenerator->getMessages(),
                 $this->transactionProcessor->getMessages(),
             ],
@@ -167,7 +163,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->allWarnings = $this->mergeArrays(
             [
                 $this->getWarnings(),
-                $this->transactionFilter->getWarnings(),
                 $this->transactionGenerator->getWarnings(),
                 $this->transactionProcessor->getWarnings(),
             ],
@@ -180,7 +175,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->allErrors = $this->mergeArrays(
             [
                 $this->getErrors(),
-                $this->transactionFilter->getErrors(),
                 $this->transactionGenerator->getErrors(),
                 $this->transactionProcessor->getErrors(),
             ],
@@ -196,12 +190,12 @@ class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have no requests left for bank account "%s"', $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
                 $message .= sprintf(' (IBAN %s)', $account['iban']);
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
                 $message .= sprintf(' (account number %s)', $account['number']);
             }
             $message .= sprintf('. The limit resets in %s. ', Request::formatTime($rateLimit['reset']));
@@ -210,12 +204,12 @@ class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
                 $message .= sprintf(' (IBAN %s)', $account['iban']);
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
                 $message .= sprintf(' (account number %s)', $account['number']);
             }
             $message .= '. ';
@@ -253,6 +247,10 @@ class RoutineManager implements RoutineManagerInterface
 
             throw $e;
         }
+        // get updated import job from transaction processor, and spread it to others.
+        $this->importJob = $this->transactionProcessor->getImportJob();
+        $this->setConfiguration($this->importJob->getConfiguration());
+        $this->repository->saveToDisk($this->importJob);
     }
 
     private function collectRateLimits(): void
@@ -358,17 +356,21 @@ class RoutineManager implements RoutineManagerInterface
         }
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function validateAccounts(): void
+    //    /**
+    //     * @throws ImporterErrorException
+    //     */
+    //    private function validateAccounts(): void
+    //    {
+    //        Log::debug('Validating accounts in configuration.');
+    //        $accounts = $this->configuration->getAccounts();
+    //        foreach ($accounts as $key => $accountId) {
+    //            if (0 === (int)$accountId) {
+    //                // throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
+    //            }
+    //        }
+    //    }
+    public function getImportJob(): ImportJob
     {
-        Log::debug('Validating accounts in configuration.');
-        $accounts = $this->configuration->getAccounts();
-        foreach ($accounts as $key => $accountId) {
-            if (0 === (int)$accountId) {
-                throw new ImporterErrorException(sprintf('Cannot import GoCardless account "%s" into Firefly III account #%d. Recreate your configuration file.', $key, $accountId));
-            }
-        }
+        return $this->importJob;
     }
 }

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Response;
 
+use App\Services\SimpleFIN\Model\Account;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
 
@@ -67,7 +68,10 @@ class AccountsResponse extends SimpleFINResponse
 
         // SimpleFIN API returns accounts in the 'accounts' array
         if (isset($data['accounts']) && is_array($data['accounts'])) {
-            $this->accounts = $data['accounts'];
+            foreach ($data['accounts'] as $account) {
+                $this->accounts[] = Account::fromArray($account);
+            }
+
             Log::debug(sprintf('SimpleFIN AccountsResponse: Parsed %d accounts', count($this->accounts)));
 
             return;

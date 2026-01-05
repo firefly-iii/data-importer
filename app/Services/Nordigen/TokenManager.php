@@ -141,13 +141,13 @@ class TokenManager
             return false;
         }
 
-        exit(__METHOD__);
+        throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
     }
 
     #[NoReturn]
     public static function getFreshAccessToken(): void
     {
-        exit(__METHOD__);
+        throw new ImporterErrorException('getFreshAccessToken: Do not use this method, store token somewhere else.');
     }
 
     /**
@@ -164,7 +164,7 @@ class TokenManager
         /** @var TokenSetResponse $result */
         $result = $client->post();
 
-        // store in session:
+        // store in session, there is no configuration to put it yet.
         session()->put(Constants::NORDIGEN_ACCESS_TOKEN, $result->accessToken);
         session()->put(Constants::NORDIGEN_REFRESH_TOKEN, $result->refreshToken);
 

@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 return [
 
+    'roles_defined_warning' => 'It looks like you already defined the roles for this import job. If you change the settings below, your data mapping settings may become inaccurate.',
+
     // labels for authentication
     'label_nordigen_identifier'       => 'GoCardless Identifier',
     'label_nordigen_key'              => 'GoCardless Key',
@@ -35,6 +37,14 @@ return [
     'label_lunchflow_api_key'       => 'Lunch Flow API key',
     'placeholder_lunchflow_api_key' => 'Lunch Flow API key',
     'help_lunchflow_api_key'        => 'Enter your Lunch Flow API key',
+
+    // sophtron auth
+    'label_sophtron_user_id' => 'Sophtron User ID',
+    'label_sophtron_access_key' => 'Sophtron Access Key',
+    'help_sophtron_user_id' => 'You can find this value in your Sophtron API settings',
+    'placeholder_sophtron_user_id' => 'Sophtron User ID',
+    'placeholder_sophtron_access_key' => 'Sophtron Access Key',
+    'help_sophtron_access_key' => 'You can find this value in your Sophtron API settings',
 
     'label_spectre_app_id'          => 'Spectre / Salt Edge App Id',
     'label_spectre_secret'          => 'Spectre / Salt Edge Secret',
@@ -66,13 +76,13 @@ return [
     'column_currency-id'            => 'Currency ID (matching FF3)',
     'column_currency-name'          => 'Currency name (matching FF3)',
     'column_currency-symbol'        => 'Currency symbol (matching FF3)',
-    'column_date_interest'          => 'Interest calculation date',
-    'column_date_book'              => 'Transaction booking date',
-    'column_date_process'           => 'Transaction process date',
-    'column_date_transaction'       => 'Transaction date',
-    'column_date_due'               => 'Transaction due date',
-    'column_date_payment'           => 'Transaction payment date',
-    'column_date_invoice'           => 'Transaction invoice date',
+    'column_date_interest'          => 'Date (interest date)',
+    'column_date_book'              => 'Date (booking date)',
+    'column_date_process'           => 'Date (transaction processing date)',
+    'column_date_transaction'       => 'Date (primary transaction date)',
+    'column_date_due'               => 'Date (due date)',
+    'column_date_payment'           => 'Date (payment date)',
+    'column_date_invoice'           => 'Date (invoice date)',
     'column_description'            => 'Description',
     'column_opposing-iban'          => 'Opposing account (IBAN)',
     'column_opposing-bic'           => 'Opposing account (BIC)',
@@ -97,6 +107,14 @@ return [
     'column_opposing-number'        => 'Opposing account (account number)',
     'column_note'                   => 'Note(s)',
     'column_internal_reference'     => 'Internal reference',
+
+    // pseudo identifiers for identifier-based deduplication:
+    'pseudo_identifier_label'       => 'Identifier',
+    'pseudo_identifier_badge'       => 'Pseudo Identifier',
+    'pseudo_identifier_combines'    => 'Combines columns:',
+    'pseudo_identifier_locked_to'   => 'This pseudo identifier is locked to',
+    'pseudo_identifier_used_in'     => 'Used in pseudo identifier',
+
     'account_types_asset'           => 'Asset accounts',
     'account_types_liabilities'     => 'Liabilities',
     'account_types_revenue'         => 'Revenue accounts',

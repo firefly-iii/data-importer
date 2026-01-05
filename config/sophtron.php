@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+/*
+ * sophtron.php
+ * Copyright (c) 2025 james@firefly-iii.org
+ *
+ * This file is part of Firefly III (https://github.com/firefly-iii).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+$useSandbox = env('SOPHTRON_SANDBOX', false);
+
+return [
+    'url'                   => $useSandbox ? 'https://api.sophtron-prod.com' : 'https://api.sophtron.com',
+    'user_id'               => envNonEmpty('SOPHTRON_USER_ID', ''),
+    'access_key'            => envNonEmpty('SOPHTRON_ACCESS_KEY', ''),
+    'unique_column_options' => [
+        'external-id' => 'External identifier',
+    ],
+];

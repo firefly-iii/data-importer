@@ -25,20 +25,18 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Conversion\Routine\ColumnValueConverter;
 use App\Services\CSV\Conversion\Routine\CSVFileProcessor;
 use App\Services\CSV\Conversion\Routine\LineProcessor;
 use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
-use App\Services\Shared\Authentication\IsRunningCli;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\GeneratesIdentifier;
 use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Override;
 
 /**
@@ -47,30 +45,27 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use GeneratesIdentifier;
-    use IsRunningCli;
     use ProgressInformation;
 
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;
-    private string                     $content;
     private CSVFileProcessor           $csvFileProcessor;
     private LineProcessor              $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
+    private ImportJob                  $importJob;
+    private ImportJobRepository        $repository;
 
-    public function __construct(?string $identifier)
+    public function __construct(ImportJob $importJob)
     {
-        $this->content       = '';    // used in CLI
         $this->allErrors     = [];
         $this->allWarnings   = [];
         $this->allMessages   = [];
         $this->allRateLimits = [];
-        if (null === $identifier) {
-            $this->generateIdentifier();
-        }
-        if (null !== $identifier) {
-            $this->identifier = $identifier;
-        }
+        $this->importJob     = $importJob;
+        $this->repository    = new ImportJobRepository();
+        $this->importJob->refreshInstanceIdentifier();
+        $this->setConfiguration($this->importJob->getConfiguration());
+
     }
 
     #[Override]
@@ -82,7 +77,7 @@ class RoutineManager implements RoutineManagerInterface
     /**
      * @throws ImporterErrorException
      */
-    public function setConfiguration(Configuration $configuration): void
+    private function setConfiguration(Configuration $configuration): void
     {
         // save config
         $this->configuration              = $configuration;
@@ -100,11 +95,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->pseudoTransactionProcessor->setIdentifier($this->identifier);
     }
 
-    public function setContent(string $content): void
-    {
-        $this->content = $content;
-    }
-
     /**
      * @throws ImporterErrorException
      */
@@ -116,17 +106,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());
         $this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
 
-        // check if CLI or not and read as appropriate:
-        if ('' !== $this->content) {
-            $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->content, $this->configuration->isConversion()));
-        }
-        if ('' === $this->content) {
-            try {
-                $this->csvFileProcessor->setReader(FileReader::getReaderFromSession($this->configuration->isConversion()));
-            } catch (ContainerExceptionInterface|NotFoundExceptionInterface $e) {
-                throw new ImporterErrorException($e->getMessage(), 0, $e);
-            }
-        }
+        $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString(), $this->configuration->isConversion()));
 
         $CSVLines     = $this->csvFileProcessor->processCSVFile();
 
@@ -202,5 +182,10 @@ class RoutineManager implements RoutineManagerInterface
             ],
             $count
         );
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

@@ -24,36 +24,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Import;
 
-use App\Events\CompletedConfiguration;
-use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\ConfigurationControllerMiddleware;
 use App\Http\Request\ConfigurationPostRequest;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
-use App\Services\CSV\Mapper\TransactionCurrencies;
-use App\Services\Session\Constants;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\File\FileContentSherlock;
-use App\Services\Shared\Http\AccountListCollector;
-use App\Services\SimpleFIN\Validation\ConfigurationContractValidator;
-use App\Services\Storage\StorageService;
-use App\Support\Http\RestoresConfiguration;
+use App\Services\Shared\Model\ImportServiceAccount;
 use App\Support\Internal\CollectsAccounts;
 use App\Support\Internal\MergesAccountLists;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use JsonException;
 
 class ConfigurationController extends Controller
 {
     use CollectsAccounts;
     use MergesAccountLists;
-    use RestoresConfiguration;
+
+    private ImportJobRepository $repository;
 
     /**
      * StartController constructor.
@@ -62,83 +52,85 @@ class ConfigurationController extends Controller
     {
         parent::__construct();
         app('view')->share('pageTitle', 'Configuration');
-        $this->middleware(ConfigurationControllerMiddleware::class);
+        $this->repository = new ImportJobRepository();
     }
 
-    public function index(Request $request)
+    public function index(Request $request, string $identifier)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle          = 'Configuration';
-        $subTitle           = 'Configure your import';
-        $flow               = $request->cookie(Constants::FLOW_COOKIE);
-        $configuration      = $this->restoreConfiguration();
+        $mainTitle           = 'Configuration';
+        $subTitle            = 'Configure your import';
+        $doParse             = 'true' === $request->get('parse');
+        $importJob           = $this->repository->find($identifier);
+        $flow                = $importJob->getFlow();
 
-        // if config says to skip it, skip it:
-        $overruleSkip       = 'true' === $request->get('overruleskip');
-        if (true === $configuration->isSkipForm() && false === $overruleSkip) {
-            Log::debug('Skip configuration, go straight to the next step.');
-            // set config as complete.
-            event(new CompletedConfiguration($configuration));
+        // if the job is "contains_content", redirect to a step that will fix this, and show the user an intermediate page.
+        if (!$doParse && 'contains_content' === $importJob->getState()) {
 
-            // skipForm
-            return redirect()->route('005-roles.index');
+            // extra check for Sophtron, if it has no institutions or accounts.
+            if ('sophtron' === $flow && 0 === count($importJob->getServiceAccounts())) {
+                return view('import.004-configure.sophtron-needs-institutions')->with(compact('mainTitle', 'subTitle', 'identifier'));
+            }
+
+
+
+
+            return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
+        }
+        // if the job is "contains_content", parse it. Redirect if errors occur.
+        if ($doParse && 'contains_content' === $importJob->getState()) {
+            // FIXME this routine is the same as in AutoImports::importFileAsImportJob
+            $messages = $this->repository->parseImportJob($importJob);
+
+            if ($messages->count() > 0) {
+                // missing_requisitions
+                // if the job has no requisitions (Nordigen!) need to redirect to get some?
+                if ($messages->has('missing_requisitions') && 'true' === (string)$messages->get('missing_requisitions')[0]) {
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+
+                    return redirect()->route('select-bank.index', [$identifier]);
+                }
+
+                // if there is any state for the job here forget about it, just remove it.
+                $this->repository->deleteImportJob($importJob);
+
+                return redirect()->route('new-import.index', [$flow])->withErrors($messages);
+            }
         }
 
-        // collect Firefly III accounts
-        // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
-        $fireflyIIIAccounts = $this->getFireflyIIIAccounts();
 
-        // unique column options:
-        $uniqueColumns      = config(sprintf('%s.unique_column_options', $flow));
-
-        // also get the importer service accounts, if any.
-        $collector          = new AccountListCollector($configuration, $flow, $fireflyIIIAccounts);
-
-        try {
-            $importerAccounts = $collector->collect();
-        } catch (AgreementExpiredException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-
-            // remove thing from configuration
-            $configuration->clearRequisitions();
-
-            // save configuration in session and on disk:
-            session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
-            $configFileName = StorageService::storeContent((string)json_encode($configuration->toArray(), JSON_PRETTY_PRINT));
-            session()->put(Constants::UPLOAD_CONFIG_FILE, $configFileName);
-
-            // redirect to selection.
-            return redirect()->route('009-selection.index');
+        // if configuration says to skip this configuration step, skip it:
+        $configuration       = $importJob->getConfiguration();
+        $doNotSkip           = 'true' === $request->get('do_not_skip');
+        if (true === $configuration->isSkipForm() && false === $doNotSkip) {
+            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
 
-        if ('file' === $flow) {
-            // detect content type and save to config object.
-            $detector = new FileContentSherlock();
-            $content  = StorageService::getContent(session()->get(Constants::UPLOAD_DATA_FILE), $configuration->isConversion());
-            $fileType = $detector->detectContentTypeFromContent($content);
-            $configuration->setContentType($fileType);
-        }
-        // Get currency data for account creation widget
-        $currencies         = $this->getCurrencies();
+        // unique column options (this depends on the flow):
+        $uniqueColumns       = config(sprintf('%s.unique_column_options', $flow)) ?? [];
+        $applicationAccounts = $importJob->getApplicationAccounts();
+        $serviceAccounts     = $importJob->getServiceAccounts();
+        $currencies          = $importJob->getCurrencies();
+        $accounts            = $this->mergeAccountLists($flow, $applicationAccounts, $serviceAccounts);
+        $camtType            = $configuration->getCamtType();
 
-        return view('import.004-configure.index', compact('mainTitle', 'subTitle', 'fireflyIIIAccounts', 'configuration', 'flow', 'importerAccounts', 'uniqueColumns', 'currencies'));
+        return view('import.004-configure.index', compact('camtType', 'identifier', 'mainTitle', 'subTitle', 'applicationAccounts', 'configuration', 'flow', 'accounts', 'uniqueColumns', 'currencies'));
     }
 
-    /**
-     * Get available currencies from Firefly III for account creation
-     */
-    private function getCurrencies(): array
+    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
     {
-        try {
-            /** @var TransactionCurrencies $mapper */
-            $mapper = app(TransactionCurrencies::class);
+        Log::debug(sprintf('Now running %s', __METHOD__));
+        $generic = match ($flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
+            'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
+            'file'      => [],
+            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow)),
+        };
 
-            return $mapper->getMap();
-        } catch (Exception $e) {
-            Log::error(sprintf('Failed to load currencies: %s', $e->getMessage()));
-
-            return [];
-        }
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 
     public function phpDate(Request $request): JsonResponse
@@ -157,62 +149,32 @@ class ConfigurationController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function postIndex(ConfigurationPostRequest $request): RedirectResponse
+    public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
         $fromRequest   = $request->getAll();
-        $configuration = Configuration::fromRequest($fromRequest);
-        $configuration->setFlow($request->cookie(Constants::FLOW_COOKIE));
 
-        // Store do_import selections in session for validation
-        session()->put('do_import', $fromRequest['do_import'] ?? []);
-
-        // Validate configuration contract for SimpleFIN
-        if ('simplefin' === $configuration->getFlow()) {
-            $validator          = new ConfigurationContractValidator();
-
-            // Validate form structure first
-            $formValidation     = $validator->validateFormFieldStructure($fromRequest);
-            if (!$formValidation->isValid()) {
-                Log::error('SimpleFIN form validation failed', $formValidation->getErrors());
-
-                return redirect()->back()->withErrors($formValidation->getErrorMessages())->withInput();
-            }
-
-            // Validate complete configuration contract
-            $contractValidation = $validator->validateConfigurationContract($configuration);
-            if (!$contractValidation->isValid()) {
-                Log::error('SimpleFIN configuration contract validation failed', $contractValidation->getErrors());
-
-                return redirect()->back()->withErrors($contractValidation->getErrorMessages())->withInput();
-            }
-
-            if ($contractValidation->hasWarnings()) {
-                Log::warning('SimpleFIN configuration contract warnings', $contractValidation->getWarnings());
-            }
-
-        }
+        // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
+        $configuration->updateFromRequest($request->getAll());
         $configuration->updateDateRange();
-        // Map data option is now user-selectable for SimpleFIN via checkbox
+        $importJob->setConfiguration($configuration);
 
-        try {
-            $json = json_encode($configuration->toArray(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-        } catch (JsonException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+        $importJob->setState('is_configured');
+        $this->repository->saveToDisk($importJob);
 
-            throw new ImporterErrorException($e->getMessage(), 0, $e);
+        // at this moment the config should be valid and saved.
+        // file import ONLY needs roles before it is complete. After completion, can go to overview.
+        if ('file' === $importJob->getFlow()) {
+            return redirect()->route('configure-roles.index', [$identifier]);
         }
-        StorageService::storeContent($json);
 
-        session()->put(Constants::CONFIGURATION, $configuration->toSessionArray());
+        // simplefin and others are now complete.
+        $importJob->setState('configured_and_roles_defined');
+        $this->repository->saveToDisk($importJob);
 
-        // set config as complete.
-        event(new CompletedConfiguration($configuration));
-
-        // always redirect to roles, even if this isn't the step yet
-        // for nordigen, spectre, and simplefin, roles will be skipped right away.
-        Log::debug('Redirect to roles');
-
-        return redirect(route('005-roles.index'));
+        // can now redirect to conversion, because that will be the next step.
+        return redirect()->route('data-conversion.index', [$identifier]);
     }
 }

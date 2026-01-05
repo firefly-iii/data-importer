@@ -257,7 +257,7 @@ abstract class Request
                 ]
             );
         } catch (ClientException $e) {
-            // TODO error response, not an exception.
+            // FIXME error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
         $body    = (string) $res->getBody();
@@ -267,7 +267,7 @@ abstract class Request
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            // TODO error response, not an exception.
+            // FIXME error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         }
 
@@ -309,10 +309,10 @@ abstract class Request
         $headers     = $res->getHeaders();
 
         // raw header values for debugging:
-        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
-        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
-        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
-        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
+        //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
 
         // first the normal rate limit:
         $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);

@@ -24,6 +24,13 @@
                                 the documentation</a> to learn more
                             about this process.
                         </p>
+                        <p>
+                            Make sure you map at least, or the import will fail:
+                        </p>
+                        <ul>
+                            <li>Amount</li>
+                            <li>Transaction date</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -42,12 +49,23 @@
                             <li class="text-danger">{{ $error }}</li>
                             @endforeach
                         </ul>
+                        <p>
+                            Some of these errors can be ignored. To try again pretending nothing of this ever happened, please select the checkbox below. You may still see errors, those you won't be able to skip.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
         @endif
-
+        @if('' !== $warning)
+        <div class="row mt-3">
+            <div class="col-lg-12">
+                <div class="alert alert-warning" role="alert">
+                    {{$warning}}
+                </div>
+            </div>
+        </div>
+        @endif
         <div class="row mt-3">
             <div class="col-lg-12">
                 <div class="card">
@@ -55,7 +73,7 @@
                         Role configuration
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{{ route('005-roles.post') }}" accept-charset="UTF-8">
+                        <form method="post" action="{{ route('configure-roles.post', [$identifier]) }}" accept-charset="UTF-8">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                             <table class="table">
                                 <tr>
@@ -64,14 +82,58 @@
                                     <th>Role</th>
                                     <th>Map data?</th>
                                 </tr>
-                                @foreach($columns as $index => $column)
-                                <tr>
-                                    <td>{{ $column }}
-                                        @if($index === $configuration->getUniqueColumnIndex() && 'cell' === $configuration->getDuplicateDetectionMethod())
-                                        <br/>
-                                        <span class="text-muted small">This is the unique column</span>
-                                        @endif
+                                @if($configuration->hasPseudoIdentifier())
+                                    @php
+                                        $pseudoIdentifier = $configuration->getPseudoIdentifier();
+                                    @endphp
+                                    <tr style="background-color: #f8f9fa;">
+                                        <td>
+                                            <strong>{{ __('import.pseudo_identifier_label') }}</strong>
+                                            <br/>
+                                            <span class="badge bg-info text-white">{{ __('import.pseudo_identifier_badge') }}</span>
+                                            <br/>
+                                            <span class="text-muted small">
+                                                {{ __('import.pseudo_identifier_combines') }} {{ implode(', ', $pseudoIdentifier['source_columns']) }}
+                                            </span>
                                         </td>
+                                        <td>
+                                            @if(count($pseudoExamples) > 0)
+                                                @foreach($pseudoExamples as $example)
+                                                    <pre style="color:#999;margin-bottom:0;font-size:0.85em;">{{ $example['raw'] }}</pre>
+                                                @endforeach
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <p class="form-text">
+                                                <span class="text-muted small">{{ __('import.pseudo_identifier_locked_to') }}</span>
+                                                <code class="small">{{ $pseudoIdentifier['role'] ?? 'unknown' }}</code>
+                                            </p>
+                                            <input type="hidden" name="pseudo_role" value="{{ $pseudoIdentifier['role'] ?? '' }}"/>
+                                        </td>
+                                        <td>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+                                @endif
+                                @foreach($columns as $index => $column)
+                                @php
+                                    // Check if this column is part of the pseudo identifier (for display purposes)
+                                    $isInPseudoIdentifier = false;
+                                    if ($configuration->hasPseudoIdentifier()) {
+                                        $pseudoIdentifier = $configuration->getPseudoIdentifier();
+                                        if (in_array($index, $pseudoIdentifier['source_columns'] ?? [], true)) {
+                                            $isInPseudoIdentifier = true;
+                                        }
+                                    }
+                                @endphp
+                                <tr>
+                                    <td>
+                                        {{ $column }}
+                                        @if($isInPseudoIdentifier)
+                                        <br/>
+                                        <span class="badge bg-secondary">{{ __('import.pseudo_identifier_used_in') }}</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if(count($examples[$index] ?? []) > 0)
                                             @foreach($examples[$index] as $example)
@@ -80,16 +142,6 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($index === $configuration->getUniqueColumnIndex() && 'cell' === $configuration->getDuplicateDetectionMethod())
-                                        <p class="form-text">
-                                                    <span class="text-muted small">
-                                                        This column is your unique identifier, so it will be fixed to
-                                                    </span>
-                                            <code class="small">{{ $configuration->getUniqueColumnType() }}</code>
-                                        </p>
-                                        <input type="hidden" name="roles[{{ $index }}]"
-                                               value="{{ $configuration->getUniqueColumnType() }}"/>
-                                        @else
                                         <select name="roles[{{ $index }}]" id="roles_{{ $index }}"
                                                 class="form-control">
                                             @foreach($roles as $key => $role)
@@ -98,25 +150,35 @@
                                                     label="{{ __('import.column_' . $key) }}">{{ __('import.column_'. $key) }}</option>
                                             @endforeach
                                         </select>
-                                        @endif
                                     </td>
                                     <td>
                                         <label for="do_mapping_{{ $index }}">
-                                            {{--  reverse if statement is pretty sloppy but OK. --}}
-                                            @if($index === $configuration->getUniqueColumnIndex() && 'cell' === $configuration->getDuplicateDetectionMethod())
-                                            &nbsp;
-                                            @else
                                             <input type="checkbox"
                                                    @if($configuredDoMapping[$index] ?? false) checked @endif
                                                    name="do_mapping[{{ $index }}]" id="do_mapping_{{ $index }}"
                                                    value="1"/>
-                                            @endif
                                         </label>
                                     </td>
                                 </tr>
                                 @endforeach
                             </table>
-                            <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                            <div class="row">
+                                <div class="col">
+                                    @if(!$errors->isEmpty())
+                                        <div class="form-check">
+                                            <input type="checkbox" @if($ignoreWarnings)checked @endif name="ignore_warnings" id="ignore_warnings" value="1"/>
+                                            <label class="form-check-label" for="ignore_warnings">
+                                                Ignore the warnings in the role selection
+                                            </label>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="float-end btn btn-primary">Submit &rarr;</button>
+                                </div>
+                            </div>
+
+
                         </form>
                     </div>
                 </div>
@@ -127,7 +189,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('back.config') }}" class="btn btn-secondary"><span
+                            <a href="{{ route('configure-import.index', [$identifier]) }}" class="btn btn-secondary"><span
                                     class="fas fa-arrow-left"></span> Go back to configuration</a>
                             <a href="{{ route('flush') }}" class="btn btn-danger text-white btn-sm"><span
                                     class="fas fa-redo-alt"></span> Start over</a>

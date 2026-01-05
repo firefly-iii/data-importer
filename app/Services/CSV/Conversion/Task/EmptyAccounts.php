@@ -51,20 +51,22 @@ class EmptyAccounts extends AbstractTask
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         if ('withdrawal' === $transaction['type']) {
-            $destName = $transaction['destination_name'] ?? '';
-            $destId   = (int) ($transaction['destination_id'] ?? 0);
-            $destIban = $transaction['destination_iban'] ?? '';
-            if ('' === $destName && 0 === $destId && '' === $destIban) {
-                Log::debug('Destination name + ID + IBAN of withdrawal are empty, set to "(no name)".');
+            $destName   = $transaction['destination_name'] ?? '';
+            $destId     = (int) ($transaction['destination_id'] ?? 0);
+            $destIban   = $transaction['destination_iban'] ?? '';
+            $destNumber = $transaction['destination_number'] ?? '';
+            if ('' === $destName && 0 === $destId && '' === $destIban && 0 === $destNumber) {
+                Log::debug('Destination name + ID + IBAN + number of withdrawal are empty, set to "(no name)".');
                 $transaction['destination_name'] = '(no name)';
             }
         }
         if ('deposit' === $transaction['type']) {
-            $sourceName = $transaction['source_name'] ?? '';
-            $sourceId   = (int) ($transaction['source_id'] ?? 0);
-            $sourceIban = $transaction['source_iban'] ?? '';
-            if ('' === $sourceName && 0 === $sourceId && '' === $sourceIban) {
-                Log::debug('Source name + IBAN + ID of deposit are empty, set to "(no name)".');
+            $sourceName   = $transaction['source_name'] ?? '';
+            $sourceId     = (int) ($transaction['source_id'] ?? 0);
+            $sourceIban   = $transaction['source_iban'] ?? '';
+            $sourceNumber = $transaction['source_number'] ?? '';
+            if ('' === $sourceName && 0 === $sourceId && '' === $sourceIban && '' === $sourceNumber) {
+                Log::debug('Source name + IBAN + ID + number of deposit are empty, set to "(no name)".');
                 $transaction['source_name'] = '(no name)';
             }
         }

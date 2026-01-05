@@ -7,7 +7,7 @@
             <div class="card-body">
                 <p>Map your {{ config('importer.flow_titles.' . $flow) }} accounts to Firefly III accounts. You can link to existing accounts or create new ones during import.</p>
 
-                @if(count($importerAccounts) > 0)
+                @if(count($accounts) > 0)
                     <div class="table-responsive">
                         <table class="table table-sm table-borderless">
                             <thead>
@@ -18,7 +18,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($importerAccounts as $information)
+                            @foreach($accounts as $information)
                                 <x-importer-account :account="$information" :configuration="$configuration" :currencies="$currencies" :flow="$flow"/>
                             @endforeach
                             </tbody>
