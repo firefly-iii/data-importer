@@ -29,56 +29,5 @@ namespace App\Services\Shared\Conversion;
  */
 trait CombinedProgressInformation
 {
-    private array $allErrors     = [];
-    private array $allMessages   = [];
-    private array $allWarnings   = [];
-    private array $allRateLimits = [];
 
-    final public function getAllErrors(): array
-    {
-        return $this->allErrors;
-    }
-
-    final public function getAllRateLimits(): array
-    {
-        return $this->allRateLimits;
-    }
-
-    final public function getAllMessages(): array
-    {
-        return $this->allMessages;
-    }
-
-    final public function getAllWarnings(): array
-    {
-        return $this->allWarnings;
-    }
-
-    final protected function mergeArrays(array $collection, int $count): array
-    {
-        $return = [];
-        foreach ($collection as $set) {
-            if (0 === count($set)) {
-                continue;
-            }
-            for ($i = 0; $i < $count; ++$i) {
-                if (array_key_exists($i, $set)) {
-                    $return[$i] = array_key_exists($i, $return) ? $return[$i] : [];
-                    $return[$i] = array_merge($return[$i], $set[$i]);
-                }
-            }
-        }
-
-        // sanity check (should not be necessary)
-        foreach ($return as $index => $set) {
-            if (0 === count($set)) {
-                unset($return[$index]);
-            }
-        }
-        if (0 === count($return)) {
-            return [];
-        }
-
-        return $return;
-    }
 }

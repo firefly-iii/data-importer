@@ -43,7 +43,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
 
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
@@ -54,10 +53,6 @@ class RoutineManager implements RoutineManagerInterface
     public function __construct(ImportJob $importJob)
     {
         Log::debug('Constructed CAMT RoutineManager');
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
         $this->importJob     = $importJob;
         $this->repository    = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();

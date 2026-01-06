@@ -32,7 +32,6 @@ use Illuminate\Support\Facades\Log;
 
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
     private ImportJob             $importJob;
     private ImportJobRepository   $repository;
     private TransactionDownloader $downloader;

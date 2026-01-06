@@ -44,7 +44,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
 
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;
@@ -56,10 +55,6 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(ImportJob $importJob)
     {
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
         $this->importJob     = $importJob;
         $this->configuration = $importJob->getConfiguration();
         $this->repository    = new ImportJobRepository();

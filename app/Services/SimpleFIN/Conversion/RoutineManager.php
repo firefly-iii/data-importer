@@ -40,7 +40,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
     use CreatesAccounts;
 
     private readonly AccountMapper          $accountMapper;
@@ -55,13 +54,7 @@ class RoutineManager implements RoutineManagerInterface
      */
     public function __construct(ImportJob $importJob)
     {
-        $this->allErrors        = [];
-        $this->allWarnings      = [];
-        $this->allMessages      = [];
-        $this->allRateLimits    = [];
-
         Log::debug('Constructed SimpleFIN RoutineManager');
-
         $this->simpleFINService = app(SimpleFINService::class);
         $this->transformer      = new TransactionTransformer();
         $this->repository       = new ImportJobRepository();
