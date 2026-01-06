@@ -32,8 +32,6 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionConverter
 {
-    use ProgressInformation;
-
     public function __construct(private Configuration $configuration)
     {
         Log::debug('Constructed TransactionConverter.');
@@ -48,7 +46,7 @@ class TransactionConverter
         Log::debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
         $result = [];
 
-        /** @var Transaction $transaction */
+        /** @var AbstractTransaction $transaction */
         foreach ($transactions as $index => $transaction) {
             Log::debug(sprintf('[%s] [%d/%d] Now working on transaction.', config('importer.version'), $index + 1, $total));
             $result[] = $this->convertSingle($transaction);

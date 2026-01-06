@@ -45,7 +45,6 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
     use CombinedProgressInformation;
-    use ProgressInformation;
 
     private array                $allErrors;
     private array                $allMessages;
@@ -137,10 +136,10 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->allMessages = $this->mergeArrays(
             [
-                $this->getMessages(),
-                $this->transactionFilter->getMessages(),
-                $this->transactionProcessor->getMessages(),
-                $this->transactionGenerator->getMessages(),
+//                $this->getMessages(),
+//                $this->transactionFilter->getMessages(),
+//                $this->transactionProcessor->getMessages(),
+//                $this->transactionGenerator->getMessages(),
             ],
             $count
         );
@@ -150,10 +149,10 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->allWarnings = $this->mergeArrays(
             [
-                $this->getWarnings(),
-                $this->transactionFilter->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
+//                $this->getWarnings(),
+//                $this->transactionFilter->getWarnings(),
+//                $this->transactionProcessor->getWarnings(),
+//                $this->transactionGenerator->getWarnings(),
             ],
             $count
         );
@@ -163,10 +162,10 @@ class RoutineManager implements RoutineManagerInterface
     {
         $this->allErrors = $this->mergeArrays(
             [
-                $this->getErrors(),
-                $this->transactionFilter->getErrors(),
-                $this->transactionProcessor->getErrors(),
-                $this->transactionGenerator->getErrors(),
+                // $this->getErrors(),
+//                $this->transactionFilter->getErrors(),
+//                $this->transactionProcessor->getErrors(),
+//                $this->transactionGenerator->getErrors(),
             ],
             $count
         );

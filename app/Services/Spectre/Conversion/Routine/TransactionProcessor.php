@@ -40,13 +40,13 @@ use Illuminate\Support\Facades\Log;
  */
 class TransactionProcessor
 {
-    use ProgressInformation;
 
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private Configuration $configuration;
     private string        $downloadIdentifier;
     private ?Carbon       $notAfter       = null;
     private ?Carbon       $notBefore      = null;
+
 
     /**
      * @throws ImporterHttpException

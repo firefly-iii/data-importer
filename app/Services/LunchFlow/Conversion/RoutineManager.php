@@ -43,7 +43,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use ProgressInformation;
 
     private Configuration        $configuration;
     private GenerateTransactions $transactionGenerator;
@@ -51,6 +50,7 @@ class RoutineManager implements RoutineManagerInterface
     private ImportJobRepository  $repository;
 
     private array $downloaded;
+    private ImportJob $importJob;
 
     public function __construct(ImportJob $importJob)
     {
@@ -114,49 +114,8 @@ class RoutineManager implements RoutineManagerInterface
         $transactions    = $this->transactionGenerator->getTransactions($this->downloaded);
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
-        // collect errors from transactionProcessor.
-        $this->mergeMessages(count($transactions));
-        $this->mergeWarnings(count($transactions));
-        $this->mergeErrors(count($transactions));
-
         // return everything.
         return $transactions;
-    }
-
-    private function mergeMessages(int $count): void
-    {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionGenerator->getMessages(),
-                $this->transactionProcessor->getMessages(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionGenerator->getErrors(),
-                $this->transactionProcessor->getErrors(),
-            ],
-            $count
-        );
     }
 
     /**
@@ -174,9 +133,7 @@ class RoutineManager implements RoutineManagerInterface
 
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             throw $e;
         }
@@ -190,9 +147,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
             $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
@@ -208,9 +163,7 @@ class RoutineManager implements RoutineManagerInterface
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             return true;
         }

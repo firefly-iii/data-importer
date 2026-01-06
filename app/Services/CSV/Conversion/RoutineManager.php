@@ -45,7 +45,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use ProgressInformation;
 
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;

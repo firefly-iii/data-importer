@@ -37,7 +37,6 @@ use Illuminate\Support\Facades\Log;
 class TransactionMapper
 {
     use GetAccounts;
-    use ProgressInformation;
 
     private array         $accountIdentificationSuffixes;
     private array         $allAccounts;

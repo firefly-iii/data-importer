@@ -40,7 +40,6 @@ class GenerateTransactions
 {
     use CollectsAccounts;
     use DuplicateSafetyCatch;
-    use ProgressInformation;
 
     private array         $accounts;
     private Configuration $configuration;

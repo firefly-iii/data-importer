@@ -44,7 +44,6 @@ use Illuminate\Support\Facades\Log;
  */
 class PseudoTransactionProcessor
 {
-    use ProgressInformation;
 
     private Account             $defaultAccount;
     private TransactionCurrency $primaryCurrency;

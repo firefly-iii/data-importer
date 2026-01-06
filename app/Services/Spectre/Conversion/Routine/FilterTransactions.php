@@ -31,7 +31,6 @@ use App\Services\Shared\Conversion\ProgressInformation;
  */
 class FilterTransactions
 {
-    use ProgressInformation;
 
     /**
      * FilterTransactions constructor.

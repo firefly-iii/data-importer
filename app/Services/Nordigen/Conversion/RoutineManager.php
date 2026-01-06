@@ -48,7 +48,6 @@ class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
     use CreatesAccounts;
-    use ProgressInformation;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
@@ -137,49 +136,8 @@ class RoutineManager implements RoutineManagerInterface
         $filtered     = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
-        // collect errors from transactionProcessor.
-        $this->mergeMessages(count($transactions));
-        $this->mergeWarnings(count($transactions));
-        $this->mergeErrors(count($transactions));
-
         // return everything.
         return $filtered;
-    }
-
-    private function mergeMessages(int $count): void
-    {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionGenerator->getMessages(),
-                $this->transactionProcessor->getMessages(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionGenerator->getErrors(),
-                $this->transactionProcessor->getErrors(),
-            ],
-            $count
-        );
     }
 
     private function generateRateLimitMessage(array $account, array $rateLimit): string
@@ -241,9 +199,7 @@ class RoutineManager implements RoutineManagerInterface
 
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             throw $e;
         }
@@ -257,7 +213,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         // collect accounts from the configuration, and join them with the rate limits
         $configAccounts = $this->configuration->getAccounts();
-        foreach ($this->transactionProcessor->getRateLimits() as $account => $rateLimit) {
+        foreach ($this->importJob->conversionStatus->rateLimits as $account => $rateLimit) {
             Log::debug(sprintf('Rate limit for account %s: %d request(s) left, %d second(s)', $account, $rateLimit['remaining'], $rateLimit['reset']));
             if (!array_key_exists($account, $configAccounts)) {
                 Log::error(sprintf('Account "%s" was not found in your configuration.', $account));
@@ -276,9 +232,7 @@ class RoutineManager implements RoutineManagerInterface
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
             $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
@@ -329,9 +283,7 @@ class RoutineManager implements RoutineManagerInterface
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             return true;
         }
@@ -348,9 +300,7 @@ class RoutineManager implements RoutineManagerInterface
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         } catch (AgreementExpiredException $e) {
             $this->importJob->conversionStatus->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }

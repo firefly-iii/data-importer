@@ -45,7 +45,7 @@ class TransactionProcessor
 {
     use CollectsAccounts;
     use CreatesAccounts;
-    use ProgressInformation;
+    private ImportJob $importJob;
 
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
@@ -133,11 +133,6 @@ class TransactionProcessor
         return $this->accounts;
     }
 
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
     private function filterTransactions(GetTransactionsResponse $transactions): array
     {
         $configuration = $this->importJob->getConfiguration();
@@ -189,7 +184,6 @@ class TransactionProcessor
     public function setImportJob(ImportJob $importJob): void
     {
         $this->importJob  = $importJob;
-        $this->identifier = $importJob->identifier;
         $this->importJob->refreshInstanceIdentifier();
     }
 
@@ -198,8 +192,4 @@ class TransactionProcessor
         return $this->importJob;
     }
 
-    public function getRateLimits(): array
-    {
-        return $this->rateLimits;
-    }
 }

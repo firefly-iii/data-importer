@@ -43,7 +43,6 @@ class GenerateTransactions
 {
     use CollectsAccounts;
     use DuplicateSafetyCatch;
-    use ProgressInformation;
 
     public const string NUMBER_FORMAT = 'nr_%s';
 

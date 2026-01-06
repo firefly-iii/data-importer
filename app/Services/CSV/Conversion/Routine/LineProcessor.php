@@ -39,7 +39,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LineProcessor
 {
-    use ProgressInformation;
 
     private Configuration $configuration;
     private string        $dateFormat;

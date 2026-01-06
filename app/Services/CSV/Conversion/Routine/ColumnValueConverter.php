@@ -40,7 +40,7 @@ use UnexpectedValueException;
  */
 class ColumnValueConverter
 {
-    use ProgressInformation;
+
 
     private array         $roleToTransaction;
     private Configuration $configuration;

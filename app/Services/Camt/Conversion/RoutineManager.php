@@ -44,7 +44,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CombinedProgressInformation;
-    use ProgressInformation;
 
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
@@ -91,12 +90,7 @@ class RoutineManager implements RoutineManagerInterface
         if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->importJob->conversionStatus->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
-            // at this point there are very few (if not zero) errors from other steps in the routine.
-            // Still: merge errors so they can be reported to the user:
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
-
+            $this->repository->saveToDisk($this->importJob);
             return [];
         }
         // get raw messages
@@ -111,17 +105,11 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === count($transactions)) {
             Log::error('No transactions found in CAMT file');
             $this->importJob->conversionStatus->addError(0, '[a103]: No transactions found in CAMT file.');
-
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->repository->saveToDisk($this->importJob);
 
             return [];
         }
-
-        $this->mergeMessages(count($transactions));
-        $this->mergeWarnings(count($transactions));
-        $this->mergeErrors(count($transactions));
+        $this->repository->saveToDisk($this->importJob);
 
         return $transactions;
     }
@@ -142,45 +130,6 @@ class RoutineManager implements RoutineManagerInterface
         }
 
         return $camtMessage;
-    }
-
-    private function mergeMessages(int $count): void
-    {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionConverter->getMessages(),
-                $this->transactionExtractor->getMessages(),
-                $this->transactionMapper->getMessages(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionConverter->getWarnings(),
-                $this->transactionExtractor->getWarnings(),
-                $this->transactionMapper->getWarnings(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionConverter->getErrors(),
-                $this->transactionExtractor->getErrors(),
-                $this->transactionMapper->getErrors(),
-            ],
-            $count
-        );
     }
 
     public function getImportJob(): ImportJob

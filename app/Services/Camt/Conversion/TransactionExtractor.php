@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionExtractor
 {
-    use ProgressInformation;
 
     public function __construct(private Configuration $configuration)
     {

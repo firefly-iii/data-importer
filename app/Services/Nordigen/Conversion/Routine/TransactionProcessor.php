@@ -47,7 +47,6 @@ use Illuminate\Support\Facades\Log;
 class TransactionProcessor
 {
     use CreatesAccounts;
-    use ProgressInformation;
 
     /** @var string */
     private const string DATE_TIME_FORMAT  = 'Y-m-d H:i:s';

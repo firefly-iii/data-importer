@@ -40,11 +40,11 @@ use JsonException;
  */
 class CSVFileProcessor
 {
-    use ProgressInformation;
     private string        $delimiter;
     private bool          $hasHeaders;
     private Reader        $reader;
     private ImportJob $importJob;
+
 
     /**
      * CSVFileProcessor constructor.

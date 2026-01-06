@@ -25,8 +25,6 @@ declare(strict_types=1);
 namespace App\Services\Shared\Conversion;
 
 use App\Models\ImportJob;
-use App\Repository\ImportJob\ImportJobRepository;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Trait ProgressInformation
@@ -44,24 +42,5 @@ trait ProgressInformation
     protected array   $rateLimits = [];
     private ImportJob $importJob;
 
-    final public function getErrors(): array
-    {
-        return $this->errors ?? [];
-    }
-
-    public function getRateLimits(): array
-    {
-        return $this->rateLimits ?? [];
-    }
-
-    final public function getMessages(): array
-    {
-        return $this->messages ?? [];
-    }
-
-    final public function getWarnings(): array
-    {
-        return $this->warnings ?? [];
-    }
 
 }
