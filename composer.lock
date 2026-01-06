@@ -8918,12 +8918,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "7a3274e2a6132010a02e1c0f707e55cf6e3bf63a"
+                "reference": "9a341b84b3ebb8ad254193ce440b44c7d4375a4f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/7a3274e2a6132010a02e1c0f707e55cf6e3bf63a",
-                "reference": "7a3274e2a6132010a02e1c0f707e55cf6e3bf63a",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/9a341b84b3ebb8ad254193ce440b44c7d4375a4f",
+                "reference": "9a341b84b3ebb8ad254193ce440b44c7d4375a4f",
                 "shasum": ""
             },
             "conflict": {
@@ -9564,7 +9564,7 @@
                 "rap2hpoutre/laravel-log-viewer": "<0.13",
                 "react/http": ">=0.7,<1.9",
                 "really-simple-plugins/complianz-gdpr": "<6.4.2",
-                "redaxo/source": "<5.20.1",
+                "redaxo/source": "<=5.20.1",
                 "remdex/livehelperchat": "<4.29",
                 "renolit/reint-downloadmanager": "<4.0.2|>=5,<5.0.1",
                 "reportico-web/reportico": "<=8.1",
@@ -9916,7 +9916,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-05T18:09:37+00:00"
+            "time": "2026-01-05T20:06:42+00:00"
         },
         {
             "name": "sebastian/cli-parser",
