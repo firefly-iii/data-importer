@@ -51,7 +51,7 @@ class CSVFileProcessor
     public function __construct(ImportJob $importJob)
     {
         $importJob->refreshInstanceIdentifier();
-        $this->importJob = $importJob;
+        $this->importJob     = $importJob;
         $this->configuration = $importJob->getConfiguration();
     }
 
