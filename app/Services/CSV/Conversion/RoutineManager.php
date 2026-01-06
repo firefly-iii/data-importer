@@ -33,8 +33,6 @@ use App\Services\CSV\Conversion\Routine\LineProcessor;
 use App\Services\CSV\Conversion\Routine\PseudoTransactionProcessor;
 use App\Services\CSV\File\FileReader;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
 use Override;
@@ -44,7 +42,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-
     private ColumnValueConverter       $columnValueConverter;
     private Configuration              $configuration;
     private CSVFileProcessor           $csvFileProcessor;
@@ -55,9 +52,9 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(ImportJob $importJob)
     {
-        $this->importJob     = $importJob;
-        $this->configuration = $importJob->getConfiguration();
-        $this->repository    = new ImportJobRepository();
+        $this->importJob                  = $importJob;
+        $this->configuration              = $importJob->getConfiguration();
+        $this->repository                 = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
 
         $this->csvFileProcessor           = new CSVFileProcessor($this->importJob);
@@ -101,23 +98,24 @@ class RoutineManager implements RoutineManagerInterface
 
         // convert value arrays into (pseudo) transactions with fresh import job, and get import job back.
         $this->columnValueConverter->setImportJob($importJob);
-        $pseudo = $this->columnValueConverter->processValueArrays($valueArrays);
+        $pseudo          = $this->columnValueConverter->processValueArrays($valueArrays);
         $importJob       = $this->columnValueConverter->getImportJob();
         $this->importJob = $importJob;
         $this->repository->saveToDisk($importJob);
 
         // convert pseudo transactions into actual transactions, with fresh import job, and get import job back.
         $this->pseudoTransactionProcessor->setImportJob($importJob);
-        $transactions = $this->pseudoTransactionProcessor->processPseudo($pseudo);
+        $transactions    = $this->pseudoTransactionProcessor->processPseudo($pseudo);
         $importJob       = $this->pseudoTransactionProcessor->getImportJob();
         $this->importJob = $importJob;
         $this->repository->saveToDisk($importJob);
 
-        $count = count($CSVLines);
+        $count           = count($CSVLines);
 
         if (0 === $count) {
             $this->importJob->conversionStatus->addError(0, '[a105]: No transactions found in CSV file.');
             $this->repository->saveToDisk($this->importJob);
+
             return [];
         }
 

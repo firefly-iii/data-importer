@@ -33,7 +33,6 @@ use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\LunchFlow\Request\GetTransactionsRequest;
 use App\Services\LunchFlow\Response\GetTransactionsResponse;
 use App\Services\Shared\Conversion\CreatesAccounts;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Internal\CollectsAccounts;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -183,7 +182,7 @@ class TransactionProcessor
 
     public function setImportJob(ImportJob $importJob): void
     {
-        $this->importJob  = $importJob;
+        $this->importJob = $importJob;
         $this->importJob->refreshInstanceIdentifier();
     }
 
@@ -191,5 +190,4 @@ class TransactionProcessor
     {
         return $this->importJob;
     }
-
 }

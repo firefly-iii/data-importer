@@ -37,7 +37,6 @@ use App\Services\Nordigen\Services\AccountInformationCollector;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\CreatesAccounts;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
