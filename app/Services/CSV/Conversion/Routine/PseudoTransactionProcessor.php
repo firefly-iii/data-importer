@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\CSV\Conversion\Task\AbstractTask;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\ProgressInformation;
@@ -48,18 +49,33 @@ class PseudoTransactionProcessor
     private Account             $defaultAccount;
     private TransactionCurrency $primaryCurrency;
     private array               $tasks;
+    private ImportJob           $importJob;
 
     /**
      * PseudoTransactionProcessor constructor.
      *
      * @throws ImporterErrorException
      */
-    public function __construct(?int $defaultAccountId)
+    public function __construct(ImportJob $importJob)
     {
-        $this->tasks = config('csv.transaction_tasks');
+        $this->importJob  = $importJob;
+        $defaultAccountId = $importJob->getConfiguration()->getDefaultAccount();
+        $this->tasks      = config('csv.transaction_tasks');
         $this->getDefaultAccount($defaultAccountId);
         $this->getPrimaryCurrency();
     }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
+    }
+
+
 
     /**
      * @throws ImporterErrorException
@@ -72,14 +88,14 @@ class PseudoTransactionProcessor
 
         if (null !== $accountId) {
             // in cache perhaps?
-            $inCache              = RequestCache::has($cacheKey, $token);
+            $inCache = RequestCache::has($cacheKey, $token);
             if ($inCache) {
                 $this->defaultAccount = RequestCache::get($cacheKey, $token);
 
                 return;
             }
 
-            $accountRequest       = new GetAccountRequest($url, $token);
+            $accountRequest = new GetAccountRequest($url, $token);
             $accountRequest->setVerify(config('importer.connection.verify'));
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
@@ -102,8 +118,8 @@ class PseudoTransactionProcessor
      */
     private function getPrimaryCurrency(): void
     {
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
+        $url   = SecretManager::getBaseUrl();
+        $token = SecretManager::getAccessToken();
 
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
@@ -154,7 +170,7 @@ class PseudoTransactionProcessor
                 $object->setTransactionCurrency($this->primaryCurrency);
             }
 
-            $line   = $object->process($line);
+            $line = $object->process($line);
         }
         Log::debug('Final transaction: ', $line);
 

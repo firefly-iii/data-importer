@@ -106,7 +106,7 @@ class TransactionProcessor
                 Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
-                $this->addWarning(0, $e->getMessage());
+                $this->importJob->conversionStatus->addWarning(0, $e->getMessage());
                 $return[$importServiceAccountId] = [];
 
 
@@ -115,7 +115,7 @@ class TransactionProcessor
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
                 $return[$importServiceAccountId] = [];
-                $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
+                $this->importJob->conversionStatus->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
 
                 continue;
             }
@@ -171,7 +171,7 @@ class TransactionProcessor
             }
             // add error if amount is zero:
             if (0 === bccomp('0', $transaction->amount)) {
-                $this->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..', $transaction->id, $transaction->account, $transaction->getDestinationName(), $transaction->getDescription()));
+                $this->importJob->conversionStatus->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..', $transaction->id, $transaction->account, $transaction->getDestinationName(), $transaction->getDescription()));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->amount));
 
                 continue;

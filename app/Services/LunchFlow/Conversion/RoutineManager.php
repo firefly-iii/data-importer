@@ -173,7 +173,7 @@ class RoutineManager implements RoutineManagerInterface
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // add error to current error thing:
-            $this->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -189,7 +189,7 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -207,7 +207,7 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $total) {
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
-            $this->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
+            $this->importJob->conversionStatus->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);

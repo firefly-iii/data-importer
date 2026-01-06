@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Trait ProgressInformation
  *
- * Replace this with references to then import job, where messages must be stored anyway.
+ * Replace this with references to the import job, where messages must be stored anyway.
  *
  * @deprecated
  */
@@ -64,56 +64,4 @@ trait ProgressInformation
         return $this->warnings ?? [];
     }
 
-    final public function setIdentifier(string $identifier): void
-    {
-        Log::debug(sprintf('Set identifier to "%s"', $identifier));
-        $this->identifier = $identifier;
-        $repository       = new ImportJobRepository();
-        $this->importJob  = $repository->find($identifier);
-        $this->importJob->refreshInstanceIdentifier();
-    }
-
-    final protected function addError(int $index, string $error): void
-    {
-        Log::error(sprintf('[c] Add error to index #%d: %s', $index, $error));
-        $this->errors         ??= [];
-        $this->errors[$index] ??= [];
-        $this->errors[$index][] = $error;
-
-        // FIXME write errors to import job too (why two places?)
-        $this->importJob->conversionStatus->addError($index, $error);
-    }
-
-    final protected function addRateLimit(int $index, string $message): void
-    {
-        Log::error(sprintf('[c] Add rate limit message to index #%d: %s', $index, $message));
-        $this->rateLimits         ??= [];
-        $this->rateLimits[$index] ??= [];
-        $this->rateLimits[$index][] = $message;
-
-        // FIXME write rate limits to import job too (why two places?)
-        $this->importJob->conversionStatus->addRateLimit($index, $message);
-    }
-
-    final protected function addMessage(int $index, string $message): void
-    {
-        Log::info(sprintf('[c] Add message to index #%d: %s', $index, $message));
-        $this->messages         ??= [];
-        $this->messages[$index] ??= [];
-        $this->messages[$index][] = $message;
-
-        // FIXME write messages to import job too (why two places?)
-        $this->importJob->conversionStatus->addMessage($index, $message);
-    }
-
-    final protected function addWarning(int $index, string $warning): void
-    {
-        Log::error(sprintf('[c] Add warning to index #%d: %s', $index, $warning));
-        $this->warnings         ??= [];
-        $this->warnings[$index] ??= [];
-        $this->warnings[$index][] = $warning;
-
-        // FIXME write warnings to import job too (why two places?)
-        $this->importJob->conversionStatus->addWarning($index, $warning);
-    }
 }
