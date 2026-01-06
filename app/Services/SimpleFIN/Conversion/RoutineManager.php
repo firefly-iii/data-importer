@@ -27,7 +27,6 @@ namespace App\Services\SimpleFIN\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\SimpleFIN\Model\Account;

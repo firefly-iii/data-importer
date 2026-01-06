@@ -27,7 +27,6 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use UnexpectedValueException;
@@ -40,8 +39,6 @@ use UnexpectedValueException;
  */
 class ColumnValueConverter
 {
-
-
     private array         $roleToTransaction;
     private Configuration $configuration;
 
@@ -64,7 +61,6 @@ class ColumnValueConverter
         $this->importJob     = $importJob;
         $this->configuration = $this->importJob->getConfiguration();
     }
-
 
     /**
      * @throws ImporterErrorException
@@ -90,7 +86,7 @@ class ColumnValueConverter
      */
     private function processValueArray(array $line): array
     {
-        $count = count($line);
+        $count       = count($line);
         Log::debug(sprintf('Now in %s with %d columns in this line.', __METHOD__, $count));
         // make a new transaction:
         $transaction = [
@@ -122,7 +118,7 @@ class ColumnValueConverter
         ];
 
         /**
-         * @var int $columnIndex
+         * @var int         $columnIndex
          * @var ColumnValue $value
          */
         foreach ($line as $columnIndex => $value) {
@@ -176,7 +172,7 @@ class ColumnValueConverter
                 $transaction['transactions'][0][$transactionField] = $parsedValue;
             }
             // if this is an account field, AND the column is mapped, store the original value just in case.
-            $saveRoles = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
+            $saveRoles        = ['account-name', 'opposing-name', 'account-iban', 'opposing-iban', 'account-number', 'opposing-number'];
             if (0 !== $value->getMappedValue() && in_array($value->getOriginalRole(), $saveRoles, true)) {
                 Log::debug(
                     sprintf(

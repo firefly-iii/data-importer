@@ -28,8 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
@@ -43,7 +41,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
@@ -53,8 +50,8 @@ class RoutineManager implements RoutineManagerInterface
     public function __construct(ImportJob $importJob)
     {
         Log::debug('Constructed CAMT RoutineManager');
-        $this->importJob     = $importJob;
-        $this->repository    = new ImportJobRepository();
+        $this->importJob  = $importJob;
+        $this->repository = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
     }
@@ -86,6 +83,7 @@ class RoutineManager implements RoutineManagerInterface
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->importJob->conversionStatus->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
             $this->repository->saveToDisk($this->importJob);
+
             return [];
         }
         // get raw messages

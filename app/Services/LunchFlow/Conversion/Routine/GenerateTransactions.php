@@ -29,7 +29,6 @@ use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\LunchFlow\Model\Transaction;
 use App\Services\Shared\Authentication\SecretManager;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;

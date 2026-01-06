@@ -27,7 +27,4 @@ namespace App\Services\Shared\Conversion;
 /**
  * @deprecated
  */
-trait CombinedProgressInformation
-{
-
-}
+trait CombinedProgressInformation {}

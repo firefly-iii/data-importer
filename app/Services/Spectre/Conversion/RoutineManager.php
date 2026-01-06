@@ -27,8 +27,6 @@ namespace App\Services\Spectre\Conversion;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;
 use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
@@ -133,41 +131,41 @@ class RoutineManager implements RoutineManagerInterface
 
     private function mergeMessages(int $count): void
     {
-//        $this->allMessages = $this->mergeArrays(
-//            [
-////                $this->getMessages(),
-////                $this->transactionFilter->getMessages(),
-////                $this->transactionProcessor->getMessages(),
-////                $this->transactionGenerator->getMessages(),
-//            ],
-//            $count
-//        );
+        //        $this->allMessages = $this->mergeArrays(
+        //            [
+        // //                $this->getMessages(),
+        // //                $this->transactionFilter->getMessages(),
+        // //                $this->transactionProcessor->getMessages(),
+        // //                $this->transactionGenerator->getMessages(),
+        //            ],
+        //            $count
+        //        );
     }
 
     private function mergeWarnings(int $count): void
     {
-//        $this->allWarnings = $this->mergeArrays(
-//            [
-////                $this->getWarnings(),
-////                $this->transactionFilter->getWarnings(),
-////                $this->transactionProcessor->getWarnings(),
-////                $this->transactionGenerator->getWarnings(),
-//            ],
-//            $count
-//        );
+        //        $this->allWarnings = $this->mergeArrays(
+        //            [
+        // //                $this->getWarnings(),
+        // //                $this->transactionFilter->getWarnings(),
+        // //                $this->transactionProcessor->getWarnings(),
+        // //                $this->transactionGenerator->getWarnings(),
+        //            ],
+        //            $count
+        //        );
     }
 
     private function mergeErrors(int $count): void
     {
-//        $this->allErrors = $this->mergeArrays(
-//            [
-//                // $this->getErrors(),
-////                $this->transactionFilter->getErrors(),
-////                $this->transactionProcessor->getErrors(),
-////                $this->transactionGenerator->getErrors(),
-//            ],
-//            $count
-//        );
+        //        $this->allErrors = $this->mergeArrays(
+        //            [
+        //                // $this->getErrors(),
+        // //                $this->transactionFilter->getErrors(),
+        // //                $this->transactionProcessor->getErrors(),
+        // //                $this->transactionGenerator->getErrors(),
+        //            ],
+        //            $count
+        //        );
     }
 
     public function getImportJob(): ImportJob

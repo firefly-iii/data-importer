@@ -27,7 +27,6 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -39,7 +38,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LineProcessor
 {
-
     private Configuration $configuration;
     private string        $dateFormat;
     private array         $doMapping;
@@ -75,7 +73,6 @@ class LineProcessor
         $this->configuration = $this->importJob->getConfiguration();
     }
 
-
     public function processCSVLines(array $lines): array
     {
         $processed = [];
@@ -109,8 +106,8 @@ class LineProcessor
     private function process(array $line): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $count  = count($line);
-        $return = [];
+        $count       = count($line);
+        $return      = [];
         foreach ($line as $columnIndex => $value) {
             Log::debug(sprintf('Now at column %d/%d', $columnIndex + 1, $count));
             $value        = trim((string)$value);
@@ -128,13 +125,13 @@ class LineProcessor
             }
 
             // is a mapped value present?
-            $mapped = $this->mapping[$columnIndex][$value] ?? 0;
+            $mapped       = $this->mapping[$columnIndex][$value] ?? 0;
             Log::debug(sprintf('ColumnIndex is %s', var_export($columnIndex, true)));
             Log::debug(sprintf('Value is %s', var_export($value, true)));
             // Log::debug('Local mapping (will not be printed)');
             // the role might change because of the mapping.
-            $role        = $this->getRoleForColumn($columnIndex, $mapped);
-            $appendValue = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
+            $role         = $this->getRoleForColumn($columnIndex, $mapped);
+            $appendValue  = config(sprintf('csv.import_roles.%s.append_value', $originalRole));
 
             if (null === $appendValue) {
                 $appendValue = false;
@@ -142,7 +139,7 @@ class LineProcessor
 
             // Log::debug(sprintf('Append value config: %s', sprintf('csv.import_roles.%s.append_value', $originalRole)));
 
-            $columnValue = new ColumnValue();
+            $columnValue  = new ColumnValue();
             $columnValue->setValue($value);
             $columnValue->setRole($role);
             $columnValue->setAppendValue($appendValue);
@@ -155,7 +152,7 @@ class LineProcessor
                 $columnValue->setConfiguration($this->dateFormat);
             }
 
-            $return[] = $columnValue;
+            $return[]     = $columnValue;
         }
 
         // Process pseudo identifier if it exists
@@ -164,7 +161,7 @@ class LineProcessor
             $pseudoIdentifier = $this->configuration->getPseudoIdentifier();
 
             // Combine values from source columns
-            $combinedParts = [];
+            $combinedParts    = [];
             foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
                 $value = isset($line[$sourceIndex]) ? trim((string)$line[$sourceIndex]) : '';
                 if ('' !== $value) {
@@ -174,8 +171,8 @@ class LineProcessor
 
             // Only create pseudo identifier if we have values
             if (count($combinedParts) > 0) {
-                $separator     = $pseudoIdentifier['separator'];
-                $combinedValue = implode($separator, $combinedParts);
+                $separator             = $pseudoIdentifier['separator'];
+                $combinedValue         = implode($separator, $combinedParts);
 
                 // Hash composite identifiers (multiple columns) to avoid long values
                 if (count($pseudoIdentifier['source_columns']) > 1) {
@@ -189,7 +186,7 @@ class LineProcessor
                 $pseudoIdentifierValue->setMappedValue(0);
                 $pseudoIdentifierValue->setAppendValue(false);
 
-                $return[] = $pseudoIdentifierValue;
+                $return[]              = $pseudoIdentifierValue;
                 Log::debug(sprintf('Added pseudo identifier with value: %s', $combinedValue));
             }
         }
@@ -200,7 +197,7 @@ class LineProcessor
         $columnValue->setMappedValue(0);
         $columnValue->setAppendValue(false);
         $columnValue->setRole('original-source');
-        $return[] = $columnValue;
+        $return[]    = $columnValue;
         Log::debug(sprintf('Added column #%d to denote the original source.', count($return)));
 
         return $return;
@@ -217,7 +214,7 @@ class LineProcessor
      */
     private function getRoleForColumn(int $column, int $mapped): string
     {
-        $role = $this->roles[$column] ?? '_ignore';
+        $role                           = $this->roles[$column] ?? '_ignore';
         if (0 === $mapped) {
             Log::debug(sprintf('Column #%d with role "%s" is not mapped.', $column + 1, $role));
 
@@ -230,7 +227,7 @@ class LineProcessor
 
             return $role;
         }
-        $roleMapping = [
+        $roleMapping                    = [
             'account-id'            => 'account-id',
             'account-name'          => 'account-id',
             'account-iban'          => 'account-id',
@@ -255,7 +252,7 @@ class LineProcessor
         if (!array_key_exists($role, $roleMapping)) {
             throw new ImporterErrorException(sprintf('Cannot indicate new role for mapped role "%s"', $role)); // @codeCoverageIgnore
         }
-        $newRole = $roleMapping[$role];
+        $newRole                        = $roleMapping[$role];
         if ($newRole !== $role) {
             Log::debug(sprintf('Role was "%s", but because of mapping (mapped to #%d), role becomes "%s"', $role, $mapped, $newRole));
         }

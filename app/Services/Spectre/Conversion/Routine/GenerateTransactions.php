@@ -26,7 +26,6 @@ namespace App\Services\Spectre\Conversion\Routine;
 
 use Carbon\Carbon;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Spectre\Model\Transaction;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;

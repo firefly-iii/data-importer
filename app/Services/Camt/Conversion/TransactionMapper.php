@@ -27,7 +27,6 @@ namespace App\Services\Camt\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Mapper\GetAccounts;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 

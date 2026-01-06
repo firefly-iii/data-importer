@@ -25,8 +25,6 @@ namespace App\Services\Sophtron\Conversion;
 
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
 

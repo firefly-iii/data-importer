@@ -26,8 +26,6 @@ namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
-use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -45,11 +43,11 @@ class CSVFileProcessor
     private Reader        $reader;
     private ImportJob $importJob;
 
-
     /**
      * CSVFileProcessor constructor.
      */
-    public function __construct(ImportJob $importJob) {
+    public function __construct(ImportJob $importJob)
+    {
         $importJob->refreshInstanceIdentifier();
         $this->importJob = $importJob;
     }
@@ -199,6 +197,4 @@ class CSVFileProcessor
     {
         return $this->importJob;
     }
-
-
 }

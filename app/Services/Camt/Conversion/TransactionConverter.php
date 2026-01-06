@@ -27,7 +27,6 @@ namespace App\Services\Camt\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Services\Camt\AbstractTransaction;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 
 class TransactionConverter
