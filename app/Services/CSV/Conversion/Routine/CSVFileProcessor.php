@@ -26,6 +26,7 @@ namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
+use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Support\Facades\Log;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -42,6 +43,7 @@ class CSVFileProcessor
     private bool          $hasHeaders;
     private Reader        $reader;
     private ImportJob $importJob;
+    private Configuration $configuration;
 
     /**
      * CSVFileProcessor constructor.
@@ -50,6 +52,7 @@ class CSVFileProcessor
     {
         $importJob->refreshInstanceIdentifier();
         $this->importJob = $importJob;
+        $this->configuration = $importJob->getConfiguration();
     }
 
     /**
