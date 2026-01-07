@@ -153,7 +153,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        $content         = $importJob->getImportableFileString();
+        $content         = $importJob->getImportableFileString($configuration->isConversion());
         $delimiter       = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
         $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $data);
 
@@ -228,7 +228,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        return MapperService::getMapDataForCamt($configuration, $importJob->getImportableFileString(), $data);
+        return MapperService::getMapDataForCamt($configuration, $importJob->getImportableFileString($configuration->isConversion()), $data);
     }
 
     /**

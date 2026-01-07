@@ -78,7 +78,7 @@ class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // get XML file
-        $camtMessage        = $this->getCamtMessage();
+        $camtMessage = $this->getCamtMessage();
         if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->importJob->conversionStatus->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
@@ -87,13 +87,13 @@ class RoutineManager implements RoutineManagerInterface
             return [];
         }
         // get raw messages
-        $rawTransactions    = $this->transactionExtractor->extractTransactions($camtMessage);
+        $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
 
         // get intermediate result (still needs processing like mapping etc)
         $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
 
         // put the result into firefly iii compatible arrays (and replace mapping when necessary)
-        $transactions       = $this->transactionMapper->map($pseudoTransactions);
+        $transactions = $this->transactionMapper->map($pseudoTransactions);
 
         if (0 === count($transactions)) {
             Log::error('No transactions found in CAMT file');
@@ -113,7 +113,7 @@ class RoutineManager implements RoutineManagerInterface
         $camtReader = new Reader(Config::getDefault());
 
         try {
-            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString()); // -> Level A
+            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString($this->importJob->getConfiguration()->isConversion())); // -> Level A
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));

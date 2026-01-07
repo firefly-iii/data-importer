@@ -95,7 +95,8 @@ class RoleController extends Controller
         // get columns from file
         $identifier          = $importJob->identifier;
         $configuration       = $importJob->getConfiguration();
-        $content             = $importJob->getImportableFileString();
+        $content             = $importJob->getImportableFileString($configuration->isConversion());
+
         $columns             = RoleService::getColumns($content, $configuration);
         $exampleData         = RoleService::getExampleData($content, $configuration);
 
@@ -128,7 +129,7 @@ class RoleController extends Controller
         $subTitle       = sprintf('Configure the role of each field in your camt.%s file', $camtType);
 
         // get example data from file.
-        $examples       = RoleService::getExampleDataFromCamt($importJob->getImportableFileString(), $configuration);
+        $examples       = RoleService::getExampleDataFromCamt($importJob->getImportableFileString($configuration->isConversion()), $configuration);
         $roles          = $configuration->getRoles();
         $doMapping      = $configuration->getDoMapping();
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of

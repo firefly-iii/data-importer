@@ -152,7 +152,7 @@ class ImportJobRepository
             case 'file':
                 // do file content sherlock things.
                 $detector      = new FileContentSherlock();
-                $content       = $this->convertString($importJob->getImportableFileString(), $configuration->isConversion());
+                $content       = $importJob->getImportableFileString($configuration->isConversion());
                 $fileType      = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
@@ -220,11 +220,8 @@ class ImportJobRepository
         return $messageBag;
     }
 
-    private function convertString(string $content, bool $convert): string
+    public static function convertString(string $content): string
     {
-        if (false === $convert) {
-            return $content;
-        }
         $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
         if (false === $encoding) {
             Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');

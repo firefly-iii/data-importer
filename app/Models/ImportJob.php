@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Exceptions\ImporterErrorException;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Session\Constants;
@@ -233,7 +234,7 @@ class ImportJob implements Arrayable
 
     public function setImportableFileString(string $importableFileString): void
     {
-        $this->importableFileString = $importableFileString;
+        $this->importableFileString = base64_encode($importableFileString);
     }
 
     public function getState(): string
@@ -272,9 +273,13 @@ class ImportJob implements Arrayable
         $this->applicationAccounts = $applicationAccounts;
     }
 
-    public function getImportableFileString(): string
+    public function getImportableFileString(bool $convert = false): string
     {
-        return $this->importableFileString;
+        $string = \Safe\base64_decode($this->importableFileString);
+        if(false === $convert) {
+            return $string;
+        }
+        return ImportJobRepository::convertString($string);
     }
 
     public function getCurrencies(): array

@@ -81,7 +81,7 @@ class RoutineManager implements RoutineManagerInterface
         $this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());
         $this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
 
-        $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString(), $this->configuration->isConversion()));
+        $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString($this->configuration->isConversion())));
 
         // parse CSV lines and get import job back.
         $CSVLines        = $this->csvFileProcessor->processCSVFile();
