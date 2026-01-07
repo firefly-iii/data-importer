@@ -64,8 +64,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-01-06',
-    'build_time'                    => 1767718025,
+    'version'                       => 'develop/2026-01-07',
+    'build_time'                    => 1767754164,
     'fake_data'                     => env('FAKE_DATA', false),
     'supports_new_accounts'         => [
         'nordigen',
