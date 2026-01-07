@@ -237,8 +237,8 @@ class RoutineManager implements RoutineManagerInterface
         $userAccounts = $this->transactionGenerator->getUserAccounts();
 
         // now we can report on target limits:
-        Log::debug('Add message about rate limits.');
-        foreach ($this->rateLimits as $accountId => $rateLimit) {
+        Log::debug('[a] Add message about rate limits.');
+        foreach ($this->importJob->conversionStatus->rateLimits as $accountId => $rateLimit) {
             // do not report if the remaining value is zero, but the reset time 1 or less.
             // this seems to be some kind of default value.
             // change: do not report when the reset time is less than 60 seconds.
