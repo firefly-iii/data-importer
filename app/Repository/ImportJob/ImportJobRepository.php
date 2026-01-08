@@ -120,10 +120,11 @@ class ImportJobRepository
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
     {
+        Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
         if (true === $importJob->isInitialized()) {
+            Log::debug('Import job is already initialized, do nothing.');
             return new MessageBag();
         }
-        Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
         $messageBag    = new MessageBag();
         $configuration = $importJob->getConfiguration();
 
@@ -211,8 +212,8 @@ class ImportJobRepository
         // save configuration and return it.
         if (0 === count($messageBag)) {
             $importJob->setState('is_parsed');
+            $importJob->setInitialized(true);
         }
-        $importJob->setInitialized(true);
         $importJob     = $this->setConfiguration($importJob, $configuration);
         $this->saveToDisk($importJob);
 

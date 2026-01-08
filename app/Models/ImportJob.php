@@ -338,6 +338,7 @@ class ImportJob implements Arrayable
 
     public function setInitialized(bool $initialized): void
     {
+        Log::debug(sprintf('Initialized is now set to: %s', var_export($initialized, true)));
         $this->initialized = $initialized;
     }
 
