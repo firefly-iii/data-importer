@@ -64,49 +64,49 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-01-07',
-    'build_time'                    => 1767754164,
+    'version'                       => 'develop/2026-01-09',
+    'build_time'                    => 1767935209,
     'fake_data'                     => env('FAKE_DATA', false),
 
-    'providers' => [
+    'providers'                     => [
         'file'      => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => false,
         ],
         'sophtron'  => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'nordigen'  => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'simplefin' => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'lunchflow' => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'obg'       => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'eb'        => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'teller'    => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
         'fints'     => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => false,
         ],
         'basiq'     => [
-            'enabled' => false,
+            'enabled'                   => false,
             'conversion_before_mapping' => true,
         ],
     ],
