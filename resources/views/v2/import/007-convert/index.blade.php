@@ -85,7 +85,7 @@
         </div>
 
         <!-- New Account Creation Section (SimpleFIN + Nordigen + Lunch Flow) -->
-        @if(in_array($flow, config('importer.supports_new_accounts'), true) && count($newAccountsToCreate) > 0)
+        @if(config('importer.providers.'.$flow.'.supports_new_accounts') && count($newAccountsToCreate) > 0)
             <div class="row mt-3">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card border-warning">
@@ -169,12 +169,12 @@
                     <div class="card-body">
                         <div class="btn-group btn-group-sm">
                             <a href="{{ $jobBackUrl }}" class="btn btn-secondary"><span
-                                    class="fas fa-arrow-left"></span>
+                                        class="fas fa-arrow-left"></span>
                                 Go back to the previous step</a>
                             <a class="btn btn-danger text-white btn-sm" href="{{ route('flush') }}"
                                data-bs-toggle="tooltip"
                                data-bs-placement="top" title="If the conversion seems stuck, you can reset it."><span
-                                    class="fas fa-redo-alt"></span> Start over</a>
+                                        class="fas fa-redo-alt"></span> Start over</a>
                             <a class="btn btn-info text-white btn-sm"
                                href="{{ route('configure-import.download', [$identifier]) }}"
                                data-bs-toggle="tooltip" data-bs-placement="top"

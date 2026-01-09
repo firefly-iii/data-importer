@@ -4,7 +4,7 @@
             <div class="card-header">
                 Account selection for
 
-                {{ config('importer.flow_titles.' . $flow) }}
+                {{ config('importer.providers.' . $flow . '.title') }}
                 import
             </div>
             <div class="card-body">
@@ -19,7 +19,7 @@
                             <thead>
                             <tr>
                                 <th>
-                                    {{ config('importer.flow_titles.' . $flow) }}
+                                    {{ config('importer.providers.' . $flow . '.title') }}
                                     account
                                 </th>
                                 <th>&nbsp;</th>
@@ -68,7 +68,7 @@
                             --}}
                             </tbody>
                             <caption>Select and match the
-                                {{ config('importer.flow_titles.' . $flow) }}
+                                {{ config('importer.providers.' . $flow . '.title') }}
                                 accounts you want to import into your Firefly III installation.
                             </caption>
                         </table>
