@@ -401,15 +401,18 @@ class MapController extends Controller
         $importJob->setConfiguration($configuration);
 
         $flow                    = $importJob->getFlow();
-        $conversionBeforeMapping = config(sprintf('importer.%s.conversion_before_mapping', $flow));
+        $conversionBeforeMapping = config(sprintf('importer.providers.%s.conversion_before_mapping', $flow));
+        Log::debug(sprintf('Conversion before mapping is %s', var_export($conversionBeforeMapping, true)));
         if ($conversionBeforeMapping) {
             // is already converted, so ready for submission.
             $importJob->setState('ready_for_submission');
             $this->repository->saveToDisk($importJob);
+            Log::debug('Redirect to submit data with state "ready_for_submission"');
 
             return redirect()->route('submit-data.index', [$identifier]);
         }
 
+        Log::debug('Redirect to conversion with state "configured_roles_map_in_place"');
         $importJob->setState('configured_roles_map_in_place');
         $this->repository->saveToDisk($importJob);
 

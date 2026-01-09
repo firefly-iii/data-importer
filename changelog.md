@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.2 - 2026-01-09
+
+This release fixes some issues left in v2.0.0 and a regression bug I introduced in v2.0.1.
+
+### Fixed
+- #11482
+
 ## v2.0.1 - 2026-01-09
 
 This release fixes some issues left in v2.0.0.
