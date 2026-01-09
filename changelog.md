@@ -9,9 +9,9 @@ This release fixes some issues left in v2.0.0.
 ### Fixed
 - Various code related bugs not reported as an issue.
 - Various issues reported in our Gitter.im chatroom, thank you!
+- #11459
 - [Issue 11460](https://github.com/firefly-iii/firefly-iii/issues/11460) (Importer does not create transactions with foreign_amount and foreign_currency_code from CAMT imports) reported by @vizzerdrix55
 - [Issue 11470](https://github.com/firefly-iii/firefly-iii/issues/11470) (Non UTF-8 files cannot be handled as file uploads) reported by @andyesten
-- [Discussion 11472](https://github.com/orgs/firefly-iii/discussions/11472) (Importer Error : $identifier must not be accessed before initialization) started by @BasilSaeedBari-bb09892
 - [Issue 11477](https://github.com/firefly-iii/firefly-iii/issues/11477) (Old redirect URL is not properly handled during data conversion) reported by @avee87
 
 ## v2.0.0 - 2026-01-05
