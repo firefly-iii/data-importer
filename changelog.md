@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 This release fixes some issues left in v2.0.0 and a regression bug I introduced in v2.0.1.
 
 ### Fixed
-- #11482
+- [Issue 11482](https://github.com/firefly-iii/firefly-iii/issues/11482) (Data importer loops from Convert -> Map -> Convert when importing from external providers) reported by @avee87
 
 ## v2.0.1 - 2026-01-09
 
