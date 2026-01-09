@@ -123,6 +123,7 @@ class ImportJobRepository
         Log::debug(sprintf('Now in parseImportJob("%s")', $importJob->identifier));
         if (true === $importJob->isInitialized()) {
             Log::debug('Import job is already initialized, do nothing.');
+
             return new MessageBag();
         }
         $messageBag    = new MessageBag();

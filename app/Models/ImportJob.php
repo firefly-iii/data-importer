@@ -276,9 +276,10 @@ class ImportJob implements Arrayable
     public function getImportableFileString(bool $convert = false): string
     {
         $string = \Safe\base64_decode($this->importableFileString);
-        if(false === $convert) {
+        if (false === $convert) {
             return $string;
         }
+
         return ImportJobRepository::convertString($string);
     }
 
