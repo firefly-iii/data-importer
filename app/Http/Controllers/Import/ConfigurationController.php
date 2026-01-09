@@ -74,9 +74,6 @@ class ConfigurationController extends Controller
                 return view('import.004-configure.sophtron-needs-institutions')->with(compact('mainTitle', 'subTitle', 'identifier'));
             }
 
-
-
-
             return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
         // if the job is "contains_content", parse it. Redirect if errors occur.
@@ -93,6 +90,20 @@ class ConfigurationController extends Controller
 
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
+                if ($messages->has('expired_agreement') && 'true' === (string)$messages->get('expired_agreement')[0]) {
+                    $importJob->setServiceAccounts([]);
+                    $configuration = $importJob->getConfiguration();
+                    $configuration->clearRequisitions();
+                    $importJob->setConfiguration($configuration);
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+                    $redirect = route('select-bank.index', [$identifier]);
+                    return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle','redirect'));
+
+                }
+                //
+                // if the agreement has expired, show error and exit gracefully.
+                // https://firefly-data.hades.internal/configure-import/2385f86b-0e50-4ba7-8b7c-e663471f2dd6?parse=true
 
                 // if there is any state for the job here forget about it, just remove it.
                 $this->repository->deleteImportJob($importJob);
