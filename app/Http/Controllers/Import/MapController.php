@@ -96,9 +96,8 @@ class MapController extends Controller
 
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
-            throw new ImporterErrorException('fix something.');
-
-            return redirect()->route('007-convert.index');
+            $redirect = route('data-conversion.index', [$identifier]);
+            return view('import.006-mapping.no-mapping', compact('mainTitle', 'subTitle', 'identifier', 'roles', 'data','redirect'));
         }
 
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'identifier', 'roles', 'data'));
