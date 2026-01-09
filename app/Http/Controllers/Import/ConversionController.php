@@ -65,23 +65,23 @@ class ConversionController extends Controller
         $flow                = $importJob->getFlow();
         $newAccountsToCreate = [];
         // default back to mapping
-        $jobBackUrl          = $this->getJobBackUrl($flow, $identifier);
-        $flow                = $importJob->getFlow();
+        $jobBackUrl = $this->getJobBackUrl($flow, $identifier);
+        $flow       = $importJob->getFlow();
 
-        $nextUrl             = route('submit-data.index', [$identifier]);
+        $nextUrl = route('submit-data.index', [$identifier]);
         // next URL is different when it's not a file flow (in ALL those cases, its mapping)
-        if ('file' !== $flow) {
+        if ('file' !== $flow && $configuration->getDoMapping()) {
             $nextUrl = route('data-mapping.index', [$identifier]);
         }
 
         // switch based on flow:
-        $enabled             = config(sprintf('importer.providers.%s.enabled', $flow));
+        $enabled = config(sprintf('importer.providers.%s.enabled', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[a] Not a supported flow: "%s"', $flow));
         }
 
-        $factory             = new ConversionRoutineFactory($importJob);
-        $routine             = $factory->createManager();
+        $factory = new ConversionRoutineFactory($importJob);
+        $routine = $factory->createManager();
         if (true === config(sprintf('importer.providers.%s.supports_new_accounts', $flow))) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
@@ -109,13 +109,13 @@ class ConversionController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob     = $this->repository->find($identifier);
+        $importJob = $this->repository->find($identifier);
         $importJob->refreshInstanceIdentifier(); // to prevent weird overwrites.
         $configuration = $importJob->getConfiguration();
         $routine       = null;
 
         // Handle new account data for SimpleFIN
-        $flow          = $importJob->getFlow();
+        $flow = $importJob->getFlow();
         if (true === config(sprintf('importer.providers.%s.supports_new_accounts', $flow))) {
             Log::debug('Will see if new accounts need to be created.');
             $newAccountData = $request->get('new_account_data', []);
@@ -145,8 +145,8 @@ class ConversionController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // now create the right class:
-        $flow          = $importJob->getFlow();
-        $enabled       = config(sprintf('importer.providers.%s.enabled', $flow));
+        $flow    = $importJob->getFlow();
+        $enabled = config(sprintf('importer.providers.%s.enabled', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[b] Not a supported flow: "%s"', $flow));
         }
@@ -154,8 +154,8 @@ class ConversionController extends Controller
         $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
         $this->repository->saveToDisk($importJob);
 
-        $factory       = new ConversionRoutineFactory($importJob);
-        $routine       = $factory->createManager();
+        $factory = new ConversionRoutineFactory($importJob);
+        $routine = $factory->createManager();
 
         try {
             $transactions = $routine->start();
@@ -179,7 +179,7 @@ class ConversionController extends Controller
 
             // return response()->json($importJobStatus->toArray());
         }
-        $importJob     = $routine->getImportJob();
+        $importJob = $routine->getImportJob();
         Log::debug(sprintf('Conversion routine "%s" yielded %d transaction(s).', $flow, count($transactions)));
         $importJob->setConvertedTransactions($transactions);
         $this->repository->saveToDisk($importJob);
@@ -188,6 +188,9 @@ class ConversionController extends Controller
         if ('file' !== $flow) {
             // all other workflows go to mapping (if requested from configuration?)
             $importJob->setState('configured_and_roles_defined');
+            if (!$configuration->getDoMapping()) {
+                $importJob->setState('ready_for_submission');
+            }
         }
         if ('file' === $flow) {
             $importJob->setState('ready_for_submission');

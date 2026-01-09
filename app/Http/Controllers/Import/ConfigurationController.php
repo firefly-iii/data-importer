@@ -166,7 +166,6 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
-        $fromRequest   = $request->getAll();
 
         // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
         $importJob     = $this->repository->find($identifier);
