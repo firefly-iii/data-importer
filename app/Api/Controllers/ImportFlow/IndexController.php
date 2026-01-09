@@ -33,13 +33,13 @@ class IndexController extends BaseController
     public function index(): JsonResponse
     {
         $flows = [];
-        foreach (config('importer.enabled_flows') as $key => $enabled) {
+        foreach (config('importer.providers') as $key => $data) {
             $flows[] = [
                 'key'           => $key,
-                'enabled'       => $enabled,
+                'enabled'       => $data['enabled'],
                 'authenticated' => false,
-                'explanation'   => config(sprintf('importer.flow_explanations.%s', $key)),
-                'title'         => config(sprintf('importer.flow_titles.%s', $key)),
+                'explanation'   => $data['explanation'],
+                'title'         => $data['title'],
             ];
         }
 

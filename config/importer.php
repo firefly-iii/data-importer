@@ -64,121 +64,93 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-01-09',
-    'build_time'                    => 1767945451,
-    'fake_data'                     => env('FAKE_DATA', false),
+    'version'    => 'develop/2026-01-09',
+    'build_time' => 1767945451,
+    'fake_data'  => env('FAKE_DATA', false),
 
-    'providers'                     => [
+    'providers' => [
         'file'      => [
-            'enabled'                   => false,
+            'title'                     => 'File',
+            'explanation'               => 'CSV or CAMT.* files',
+            'enabled'                   => true,
             'conversion_before_mapping' => false,
+            'supports_new_accounts'     => false,
         ],
         'sophtron'  => [
-            'enabled'                   => false,
+            'title'                     => 'Sophtron',
+            'enabled'                   => true,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'nordigen'  => [
-            'enabled'                   => false,
+            'title'                     => 'GoCardless',
+            'enabled'                   => true,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'simplefin' => [
-            'enabled'                   => false,
+            'title'                     => 'SimpleFIN',
+            'enabled'                   => true,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'lunchflow' => [
-            'enabled'                   => false,
+            'title'                     => 'Lunch Flow',
+            'enabled'                   => true,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'obg'       => [
+            'title'                     => 'Open Banking Gateway',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'eb'        => [
+            'title'                     => 'Enable Banking',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'teller'    => [
+            'title'                     => 'teller.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'fints'     => [
+            'title'                     => 'FinTS/HBCI',
             'enabled'                   => false,
             'conversion_before_mapping' => false,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
         'basiq'     => [
+            'title'                     => 'basiq.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
         ],
     ],
 
-    'supports_new_accounts'         => [
-        'nordigen',
-        'simplefin',
-        'lunchflow',
-        'sophtron',
-    ],
-    'enabled_flows'                 => [
-        'file'      => true,
-        'sophtron'  => true,
-        'nordigen'  => true,
-        'simplefin' => true,
-        'lunchflow' => true,
-        'obg'       => false,
-        'eb'        => false,
-        'teller'    => false,
-        'fints'     => false,
-        'basiq'     => false,
-    ],
-    'flow_titles'                   => [
-        'file'      => 'File',
-        'nordigen'  => 'GoCardless',
-        'sophtron'  => 'Sophtron',
-        'spectre'   => 'Spectre',
-        'simplefin' => 'SimpleFIN',
-        'lunchflow' => 'Lunch Flow',
-        'obg'       => 'Open Banking Gateway',
-        'eb'        => 'Enable Banking',
-        'teller'    => 'Teller.io',
-        'fints'     => 'FinTS/HBCI',
-        'basiq'     => 'Basiq.io',
-    ],
-    'flow_explanations'             => [
-        'file'      => 'CSV or CAMT.* files',
-        'nordigen'  => '',
-        'sophtron'  => '',
-        'spectre'   => '',
-        'simplefin' => '',
-        'lunchflow' => '',
-        'obg'       => '',
-        'eb'        => '',
-        'teller'    => '',
-        'fints'     => '',
-        'basiq'     => '',
-    ],
-    'simplefin'                     => [
+    // FIXME move to separate config file.
+    'simplefin'             => [
         'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
         'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
         'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
         'timeout'    => (int)env('SIMPLEFIN_TIMEOUT', 30),
     ],
 
-    // to determine which steps are possible for each import flow, the following properties have been defined.
-    'can_define_roles'              => [
-        // do you need to set roles (source, destination) for this flow?
-        'file'      => true,
-        'nordigen'  => false,
-        'spectre'   => false,
-        'simplefin' => false,
-        'lunchflow' => false,
-        'obg'       => false,
-        'eb'        => false,
-        'teller'    => false,
-        'fints'     => false,
-        'basiq'     => false,
-    ],
-
     // docker build info.
-    'docker'                        => [
+    'docker'                => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -256,7 +228,7 @@ return [
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
 
-    'http_codes'                    => [
+    'http_codes' => [
         0   => 'Unknown Error',
         100 => 'Continue',
         101 => 'Switching Protocols',
