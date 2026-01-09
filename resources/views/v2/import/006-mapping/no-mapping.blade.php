@@ -16,7 +16,7 @@
                         <p>Hi there!</p>
                         <p>
                             There is no data in your import that can be mapped to Firefly III data, so the data importer will now redirect you
-                            to the data conversion step. Please wait to be redirected.
+                            to the next import step. Please wait to be redirected.
                         </p>
                         <noscript>
                             <p>

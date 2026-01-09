@@ -67,6 +67,50 @@ return [
     'version'                       => 'develop/2026-01-07',
     'build_time'                    => 1767754164,
     'fake_data'                     => env('FAKE_DATA', false),
+
+    'providers' => [
+        'file'      => [
+            'enabled' => false,
+            'conversion_before_mapping' => false,
+        ],
+        'sophtron'  => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'nordigen'  => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'simplefin' => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'lunchflow' => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'obg'       => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'eb'        => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'teller'    => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+        'fints'     => [
+            'enabled' => false,
+            'conversion_before_mapping' => false,
+        ],
+        'basiq'     => [
+            'enabled' => false,
+            'conversion_before_mapping' => true,
+        ],
+    ],
+
     'supports_new_accounts'         => [
         'nordigen',
         'simplefin',
