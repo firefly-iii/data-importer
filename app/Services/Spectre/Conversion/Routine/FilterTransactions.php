@@ -24,15 +24,11 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Conversion\Routine;
 
-use App\Services\Shared\Conversion\ProgressInformation;
-
 /**
  * Class FilterTransactions
  */
 class FilterTransactions
 {
-    use ProgressInformation;
-
     /**
      * FilterTransactions constructor.
      */

@@ -33,7 +33,6 @@ use App\Services\LunchFlow\Authentication\SecretManager;
 use App\Services\LunchFlow\Request\GetTransactionsRequest;
 use App\Services\LunchFlow\Response\GetTransactionsResponse;
 use App\Services\Shared\Conversion\CreatesAccounts;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Internal\CollectsAccounts;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +44,7 @@ class TransactionProcessor
 {
     use CollectsAccounts;
     use CreatesAccounts;
-    use ProgressInformation;
+    private ImportJob $importJob;
 
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
@@ -106,7 +105,7 @@ class TransactionProcessor
                 Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
-                $this->addWarning(0, $e->getMessage());
+                $this->importJob->conversionStatus->addWarning(0, $e->getMessage());
                 $return[$importServiceAccountId] = [];
 
 
@@ -115,7 +114,7 @@ class TransactionProcessor
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
                 $return[$importServiceAccountId] = [];
-                $this->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
+                $this->importJob->conversionStatus->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
 
                 continue;
             }
@@ -131,11 +130,6 @@ class TransactionProcessor
     public function getAccounts(): array
     {
         return $this->accounts;
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     private function filterTransactions(GetTransactionsResponse $transactions): array
@@ -171,7 +165,7 @@ class TransactionProcessor
             }
             // add error if amount is zero:
             if (0 === bccomp('0', $transaction->amount)) {
-                $this->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..', $transaction->id, $transaction->account, $transaction->getDestinationName(), $transaction->getDescription()));
+                $this->importJob->conversionStatus->addWarning(0, sprintf('Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..', $transaction->id, $transaction->account, $transaction->getDestinationName(), $transaction->getDescription()));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->amount));
 
                 continue;
@@ -188,18 +182,12 @@ class TransactionProcessor
 
     public function setImportJob(ImportJob $importJob): void
     {
-        $this->importJob  = $importJob;
-        $this->identifier = $importJob->identifier;
+        $this->importJob = $importJob;
         $this->importJob->refreshInstanceIdentifier();
     }
 
     public function getImportJob(): ImportJob
     {
         return $this->importJob;
-    }
-
-    public function getRateLimits(): array
-    {
-        return $this->rateLimits;
     }
 }

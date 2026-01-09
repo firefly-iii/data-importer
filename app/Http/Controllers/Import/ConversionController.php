@@ -69,7 +69,7 @@ class ConversionController extends Controller
         $flow                = $importJob->getFlow();
 
         $nextUrl             = route('submit-data.index', [$identifier]);
-        // next URL is different when it's not a file flow (in those cases, its mapping)
+        // next URL is different when it's not a file flow (in ALL those cases, its mapping)
         if ('file' !== $flow) {
             $nextUrl = route('data-mapping.index', [$identifier]);
         }
@@ -86,12 +86,7 @@ class ConversionController extends Controller
         if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
-        // FIXME needs a better way.
-        if ($configuration->isMapAllData() && in_array($flow, ['spectre', 'nordigen', 'simplefin'], true)) {
-            throw new ImporterErrorException('Need to handle redirect.');
-            Log::debug('Will redirect to mapping after conversion.');
-            $nextUrl = route('006-mapping.index');
-        }
+
         if (null === $routine) {
             throw new ImporterErrorException(sprintf('Could not create routine manager for flow "%s"', $flow));
         }

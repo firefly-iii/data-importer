@@ -35,7 +35,6 @@ use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Nordigen\TokenManager;
 use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use Carbon\Carbon;
@@ -51,7 +50,6 @@ class GenerateTransactions
 {
     use CollectsAccounts;
     use DuplicateSafetyCatch;
-    use ProgressInformation;
 
     public const string NUMBER_FORMAT = 'nr_%s';
 

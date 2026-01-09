@@ -2,7 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## v2.0.0 - 2026-01-xx
+## v2.0.1 - 2026-01-09
+
+This release fixes some issues left in v2.0.0.
+
+### Fixed
+- Various code related bugs not reported as an issue.
+- Various issues reported in our Gitter.im chatroom, thank you!
+- [Issue 11459](https://github.com/firefly-iii/firefly-iii/issues/11459) (CVS data conversion crashes on missing field in conversion routine code) reported by @Sycoraxya
+- [Issue 11460](https://github.com/firefly-iii/firefly-iii/issues/11460) (Importer does not create transactions with foreign_amount and foreign_currency_code from CAMT imports) reported by @vizzerdrix55
+- [Issue 11470](https://github.com/firefly-iii/firefly-iii/issues/11470) (Non UTF-8 files cannot be handled as file uploads) reported by @andyesten
+- [Issue 11477](https://github.com/firefly-iii/firefly-iii/issues/11477) (Old redirect URL is not properly handled during data conversion) reported by @avee87
+
+## v2.0.0 - 2026-01-05
 
 Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with, and easier to extend.
 

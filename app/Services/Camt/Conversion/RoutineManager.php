@@ -28,8 +28,6 @@ use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Genkgo\Camt\Config;
 use Genkgo\Camt\DTO\Message;
@@ -43,9 +41,6 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
-    use ProgressInformation;
-
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
     private TransactionMapper    $transactionMapper;
@@ -55,12 +50,8 @@ class RoutineManager implements RoutineManagerInterface
     public function __construct(ImportJob $importJob)
     {
         Log::debug('Constructed CAMT RoutineManager');
-        $this->allErrors     = [];
-        $this->allWarnings   = [];
-        $this->allMessages   = [];
-        $this->allRateLimits = [];
-        $this->importJob     = $importJob;
-        $this->repository    = new ImportJobRepository();
+        $this->importJob  = $importJob;
+        $this->repository = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
     }
@@ -90,12 +81,8 @@ class RoutineManager implements RoutineManagerInterface
         $camtMessage        = $this->getCamtMessage();
         if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
-            $this->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
-            // at this point there are very few (if not zero) errors from other steps in the routine.
-            // Still: merge errors so they can be reported to the user:
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
+            $this->repository->saveToDisk($this->importJob);
 
             return [];
         }
@@ -110,18 +97,12 @@ class RoutineManager implements RoutineManagerInterface
 
         if (0 === count($transactions)) {
             Log::error('No transactions found in CAMT file');
-            $this->addError(0, '[a103]: No transactions found in CAMT file.');
-
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, '[a103]: No transactions found in CAMT file.');
+            $this->repository->saveToDisk($this->importJob);
 
             return [];
         }
-
-        $this->mergeMessages(count($transactions));
-        $this->mergeWarnings(count($transactions));
-        $this->mergeErrors(count($transactions));
+        $this->repository->saveToDisk($this->importJob);
 
         return $transactions;
     }
@@ -132,55 +113,16 @@ class RoutineManager implements RoutineManagerInterface
         $camtReader = new Reader(Config::getDefault());
 
         try {
-            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString()); // -> Level A
+            $camtMessage = $camtReader->readString($this->importJob->getImportableFileString($this->importJob->getConfiguration()->isConversion())); // -> Level A
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $this->addError(0, sprintf('[a104]: Could not convert CAMT.x file: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a104]: Could not convert CAMT.x file: %s', $e->getMessage()));
 
             return null;
         }
 
         return $camtMessage;
-    }
-
-    private function mergeMessages(int $count): void
-    {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionConverter->getMessages(),
-                $this->transactionExtractor->getMessages(),
-                $this->transactionMapper->getMessages(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionConverter->getWarnings(),
-                $this->transactionExtractor->getWarnings(),
-                $this->transactionMapper->getWarnings(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionConverter->getErrors(),
-                $this->transactionExtractor->getErrors(),
-                $this->transactionMapper->getErrors(),
-            ],
-            $count
-        );
     }
 
     public function getImportJob(): ImportJob

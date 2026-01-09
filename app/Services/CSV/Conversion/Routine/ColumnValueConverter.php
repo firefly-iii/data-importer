@@ -25,8 +25,8 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use UnexpectedValueException;
@@ -39,15 +39,27 @@ use UnexpectedValueException;
  */
 class ColumnValueConverter
 {
-    use ProgressInformation;
     private array         $roleToTransaction;
+    private Configuration $configuration;
 
     /**
      * ColumnValueConverter constructor.
      */
-    public function __construct(private Configuration $configuration)
+    public function __construct(private ImportJob $importJob)
     {
         $this->roleToTransaction = config('csv.role_to_transaction');
+        $this->configuration     = $this->importJob->getConfiguration();
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob     = $importJob;
+        $this->configuration = $this->importJob->getConfiguration();
     }
 
     /**
@@ -193,6 +205,6 @@ class ColumnValueConverter
             }
         }
 
-        return (string) $value;
+        return (string)$value;
     }
 }

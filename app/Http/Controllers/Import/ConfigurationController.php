@@ -64,6 +64,8 @@ class ConfigurationController extends Controller
         $importJob           = $this->repository->find($identifier);
         $flow                = $importJob->getFlow();
 
+        Log::debug(sprintf('Import job state is "%s", doParse is %s', $importJob->getState(), var_export($doParse, true)));
+
         // if the job is "contains_content", redirect to a step that will fix this, and show the user an intermediate page.
         if (!$doParse && 'contains_content' === $importJob->getState()) {
 
@@ -98,7 +100,8 @@ class ConfigurationController extends Controller
                 return redirect()->route('new-import.index', [$flow])->withErrors($messages);
             }
         }
-
+        $importJob->setInitialized(true);
+        $this->repository->saveToDisk($importJob);
 
         // if configuration says to skip this configuration step, skip it:
         $configuration       = $importJob->getConfiguration();

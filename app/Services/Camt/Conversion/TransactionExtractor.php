@@ -26,15 +26,12 @@ namespace App\Services\Camt\Conversion;
 
 use App\Services\Camt\TransactionFactory;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\DTO\Message;
 use Illuminate\Support\Facades\Log;
 
 class TransactionExtractor
 {
-    use ProgressInformation;
-
     public function __construct(private Configuration $configuration)
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));

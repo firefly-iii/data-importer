@@ -33,9 +33,7 @@ use App\Services\Nordigen\Conversion\Routine\GenerateTransactions;
 use App\Services\Nordigen\Conversion\Routine\TransactionProcessor;
 use App\Services\Nordigen\Request\Request;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
 use App\Services\Shared\Conversion\CreatesAccounts;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use Illuminate\Support\Facades\Log;
@@ -46,9 +44,7 @@ use Override;
  */
 class RoutineManager implements RoutineManagerInterface
 {
-    use CombinedProgressInformation;
     use CreatesAccounts;
-    use ProgressInformation;
 
     private Configuration        $configuration;
     private FilterTransactions   $transactionFilter;
@@ -61,10 +57,6 @@ class RoutineManager implements RoutineManagerInterface
 
     public function __construct(ImportJob $importJob)
     {
-        $this->allErrors            = [];
-        $this->allWarnings          = [];
-        $this->allMessages          = [];
-        $this->allRateLimits        = [];
         $this->downloaded           = [];
         $this->transactionProcessor = new TransactionProcessor();
         $this->transactionGenerator = new GenerateTransactions();
@@ -137,49 +129,8 @@ class RoutineManager implements RoutineManagerInterface
         $filtered     = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
-        // collect errors from transactionProcessor.
-        $this->mergeMessages(count($transactions));
-        $this->mergeWarnings(count($transactions));
-        $this->mergeErrors(count($transactions));
-
         // return everything.
         return $filtered;
-    }
-
-    private function mergeMessages(int $count): void
-    {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionGenerator->getMessages(),
-                $this->transactionProcessor->getMessages(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeWarnings(int $count): void
-    {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-            ],
-            $count
-        );
-    }
-
-    private function mergeErrors(int $count): void
-    {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionGenerator->getErrors(),
-                $this->transactionProcessor->getErrors(),
-            ],
-            $count
-        );
     }
 
     private function generateRateLimitMessage(array $account, array $rateLimit): string
@@ -240,10 +191,8 @@ class RoutineManager implements RoutineManagerInterface
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // add error to current error thing:
-            $this->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
+            $this->repository->saveToDisk($this->importJob);
 
             throw $e;
         }
@@ -257,7 +206,7 @@ class RoutineManager implements RoutineManagerInterface
     {
         // collect accounts from the configuration, and join them with the rate limits
         $configAccounts = $this->configuration->getAccounts();
-        foreach ($this->transactionProcessor->getRateLimits() as $account => $rateLimit) {
+        foreach ($this->importJob->conversionStatus->rateLimits as $account => $rateLimit) {
             Log::debug(sprintf('Rate limit for account %s: %d request(s) left, %d second(s)', $account, $rateLimit['remaining'], $rateLimit['reset']));
             if (!array_key_exists($account, $configAccounts)) {
                 Log::error(sprintf('Account "%s" was not found in your configuration.', $account));
@@ -275,10 +224,8 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
+            $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
@@ -290,8 +237,8 @@ class RoutineManager implements RoutineManagerInterface
         $userAccounts = $this->transactionGenerator->getUserAccounts();
 
         // now we can report on target limits:
-        Log::debug('Add message about rate limits.');
-        foreach ($this->rateLimits as $accountId => $rateLimit) {
+        Log::debug('[a] Add message about rate limits.');
+        foreach ($this->importJob->conversionStatus->rateLimits as $accountId => $rateLimit) {
             // do not report if the remaining value is zero, but the reset time 1 or less.
             // this seems to be some kind of default value.
             // change: do not report when the reset time is less than 60 seconds.
@@ -311,10 +258,10 @@ class RoutineManager implements RoutineManagerInterface
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
             $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
-                $this->addWarning(0, $message);
+                $this->importJob->conversionStatus->addWarning(0, $message);
             }
             if ($rateLimit['remaining'] > 0 && $rateLimit['remaining'] <= 3) {
-                $this->addRateLimit(0, $message);
+                $this->importJob->conversionStatus->addRateLimit(0, $message);
             }
         }
     }
@@ -328,10 +275,8 @@ class RoutineManager implements RoutineManagerInterface
         if (0 === $total) {
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
-            $this->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
+            $this->repository->saveToDisk($this->importJob);
 
             return true;
         }
@@ -347,10 +292,8 @@ class RoutineManager implements RoutineManagerInterface
             Log::error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         } catch (AgreementExpiredException $e) {
-            $this->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
-            $this->mergeMessages(1);
-            $this->mergeWarnings(1);
-            $this->mergeErrors(1);
+            $this->importJob->conversionStatus->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
+            $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }

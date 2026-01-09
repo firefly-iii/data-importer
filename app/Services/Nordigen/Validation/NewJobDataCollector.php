@@ -49,22 +49,25 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
 
     public function collectAccounts(): MessageBag
     {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $this->importJob->refreshInstanceIdentifier();
         $messageBag    = new MessageBag();
         $configuration = $this->importJob->getConfiguration();
-        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $requisitions  = $configuration->getNordigenRequisitions();
         $return        = [];
         $cache         = [];
         if (0 === count($requisitions)) {
+            Log::debug('No requisitions for import.');
             $messageBag->add('missing_requisitions', 'true');
 
             return $messageBag;
         }
+        Log::debug(sprintf('Have %d requisition(s) for import.', count($requisitions)));
         foreach ($requisitions as $requisition) {
             $inCache = Cache::has($requisition) && config('importer.use_cache');
             // if cached, return it.
             if ($inCache) {
+                Log::debug('Have accounts in cache.');
                 $result = Cache::get($requisition);
                 foreach ($result as $arr) {
                     $return[] = NordigenAccount::fromArray($arr);
@@ -72,6 +75,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 Log::debug('Grab accounts from cache', $result);
             }
             if (!$inCache) {
+                Log::debug('Have NO accounts in cache.');
                 // get banks and countries
                 $accessToken = TokenManager::getAccessToken();
                 $url         = config('nordigen.url');

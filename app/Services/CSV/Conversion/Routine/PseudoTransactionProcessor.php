@@ -25,9 +25,9 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\CSV\Conversion\Task\AbstractTask;
 use App\Services\Shared\Authentication\SecretManager;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Support\RequestCache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -43,22 +43,33 @@ use Illuminate\Support\Facades\Log;
  */
 class PseudoTransactionProcessor
 {
-    use ProgressInformation;
-
     private Account             $defaultAccount;
     private TransactionCurrency $primaryCurrency;
     private array               $tasks;
+    private ImportJob           $importJob;
 
     /**
      * PseudoTransactionProcessor constructor.
      *
      * @throws ImporterErrorException
      */
-    public function __construct(?int $defaultAccountId)
+    public function __construct(ImportJob $importJob)
     {
-        $this->tasks = config('csv.transaction_tasks');
+        $this->importJob  = $importJob;
+        $defaultAccountId = $importJob->getConfiguration()->getDefaultAccount();
+        $this->tasks      = config('csv.transaction_tasks');
         $this->getDefaultAccount($defaultAccountId);
         $this->getPrimaryCurrency();
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
     }
 
     /**

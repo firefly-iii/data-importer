@@ -55,7 +55,7 @@ class ConversionRoutineFactory
             if ('unknown' === $contentType) {
                 Log::debug('Content type is "unknown" in startConversion(), detect it.');
                 $detector    = new FileContentSherlock();
-                $contentType = $detector->detectContentType($this->importJob->getImportableFileString());
+                $contentType = $detector->detectContentType($this->importJob->getImportableFileString($configuration->isConversion()));
             }
             if ('unknown' === $contentType || 'csv' === $contentType) {
                 Log::debug(sprintf('Content type is "%s" in startConversion(), use the CSV routine.', $contentType));

@@ -25,8 +25,8 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 use League\Csv\Exception;
 use League\Csv\Reader;
@@ -39,15 +39,21 @@ use JsonException;
  */
 class CSVFileProcessor
 {
-    use ProgressInformation;
     private string        $delimiter;
     private bool          $hasHeaders;
     private Reader        $reader;
+    private ImportJob $importJob;
+    private Configuration $configuration;
 
     /**
      * CSVFileProcessor constructor.
      */
-    public function __construct(private Configuration $configuration) {}
+    public function __construct(ImportJob $importJob)
+    {
+        $importJob->refreshInstanceIdentifier();
+        $this->importJob     = $importJob;
+        $this->configuration = $importJob->getConfiguration();
+    }
 
     /**
      * Get a reader, and start looping over each line.
@@ -63,7 +69,7 @@ class CSVFileProcessor
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             // Log::error($e->getTraceAsString());
             $message = sprintf('[a106]: Could not set delimiter: %s', $e->getMessage());
-            $this->addError(0, $message);
+            $this->importJob->conversionStatus->addError(0, $message);
 
             return [];
         }
@@ -78,7 +84,7 @@ class CSVFileProcessor
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
             $message = sprintf('[a107]: Could not read CSV: %s', $e->getMessage());
-            $this->addError(0, $message);
+            $this->importJob->conversionStatus->addError(0, $message);
 
             return [];
         }
@@ -89,7 +95,7 @@ class CSVFileProcessor
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
             $message = sprintf('[a108]: Could not parse CSV: %s', $e->getMessage());
-            $this->addError(0, $message);
+            $this->importJob->conversionStatus->addError(0, $message);
 
             return [];
         }
@@ -168,7 +174,7 @@ class CSVFileProcessor
             if (in_array($hash, $hashes, true)) {
                 $message = sprintf('Going to skip line #%d because it\'s in the file twice. This may reset the count below.', $index);
                 Log::warning(sprintf('[%s] %s', config('importer.version'), $message));
-                $this->addWarning($index, $message);
+                $this->importJob->conversionStatus->addWarning($index, $message);
             }
             if (!in_array($hash, $hashes, true)) {
                 $hashes[] = $hash;
@@ -188,5 +194,10 @@ class CSVFileProcessor
     public function setReader(Reader $reader): void
     {
         $this->reader = $reader;
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
     }
 }

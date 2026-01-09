@@ -93,12 +93,22 @@ class MapController extends Controller
             $roles = [];
             $data  = $this->getImporterMapInformation($importJob);
         }
-
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
-            throw new ImporterErrorException('fix something.');
+            $flow                    = $importJob->getFlow();
+            $conversionBeforeMapping = config(sprintf('importer.%s.conversion_before_mapping', $flow));
+            if ($conversionBeforeMapping) {
+                // is already converted, so ready for submission.
+                $importJob->setState('ready_for_submission');
+                $redirect = route('submit-data.index', [$identifier]);
+            }
+            if (!$conversionBeforeMapping) {
+                $importJob->setState('configured_roles_map_in_place');
+                $redirect = route('data-conversion.index', [$identifier]);
+            }
+            $this->repository->saveToDisk($importJob);
 
-            return redirect()->route('007-convert.index');
+            return view('import.006-mapping.no-mapping', compact('mainTitle', 'subTitle', 'identifier', 'roles', 'data', 'redirect'));
         }
 
         return view('import.006-mapping.index', compact('mainTitle', 'subTitle', 'identifier', 'roles', 'data'));
@@ -153,7 +163,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        $content         = $importJob->getImportableFileString();
+        $content         = $importJob->getImportableFileString($configuration->isConversion());
         $delimiter       = (string)config(sprintf('csv.delimiters.%s', $configuration->getDelimiter()));
         $result          = MapperService::getMapData($content, $delimiter, $configuration->isHeaders(), $data);
 
@@ -228,7 +238,7 @@ class MapController extends Controller
         }
 
         // get columns from file
-        return MapperService::getMapDataForCamt($configuration, $importJob->getImportableFileString(), $data);
+        return MapperService::getMapDataForCamt($configuration, $importJob->getImportableFileString($configuration->isConversion()), $data);
     }
 
     /**
@@ -352,13 +362,13 @@ class MapController extends Controller
 
     public function postIndex(Request $request, string $identifier): RedirectResponse
     {
-        $values          = $request->get('values') ?? [];
-        $mapping         = $request->get('mapping') ?? [];
-        $values          = !is_array($values) ? [] : $values;
-        $mapping         = !is_array($mapping) ? [] : $mapping;
-        $data            = [];
-        $importJob       = $this->repository->find($identifier);
-        $configuration   = $importJob->getConfiguration();
+        $values                  = $request->get('values') ?? [];
+        $mapping                 = $request->get('mapping') ?? [];
+        $values                  = !is_array($values) ? [] : $values;
+        $mapping                 = !is_array($mapping) ? [] : $mapping;
+        $data                    = [];
+        $importJob               = $this->repository->find($identifier);
+        $configuration           = $importJob->getConfiguration();
 
         /*
          * Loop array with available columns.
@@ -383,16 +393,17 @@ class MapController extends Controller
 
         // at this point the $data array must be merged with the mapping as it is on the disk,
         // and then saved to disk once again in a new config file.
-        $originalMapping = $configuration->getMapping();
+        $originalMapping         = $configuration->getMapping();
 
         // loop $data and save values:
-        $mergedMapping   = $this->mergeMapping($originalMapping, $data);
+        $mergedMapping           = $this->mergeMapping($originalMapping, $data);
         $configuration->setMapping($mergedMapping);
         $importJob->setConfiguration($configuration);
 
-        // FIXME needs better redirect or state.
-        $flow            = $importJob->getFlow();
-        if (in_array($flow, ['nordigen', 'spectre', 'sophtron', 'lunchflow', 'simplefin'], true)) {
+        $flow                    = $importJob->getFlow();
+        $conversionBeforeMapping = config(sprintf('importer.%s.conversion_before_mapping', $flow));
+        if ($conversionBeforeMapping) {
+            // is already converted, so ready for submission.
             $importJob->setState('ready_for_submission');
             $this->repository->saveToDisk($importJob);
 

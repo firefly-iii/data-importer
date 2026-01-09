@@ -301,10 +301,10 @@ trait AutoImports
             event(
                 new ImportedTransactions(
                     basename($jsonFile),
-                    array_merge($this->conversionMessages, $this->importMessages),
-                    array_merge($this->conversionWarnings, $this->importWarnings),
-                    array_merge($this->conversionErrors, $this->importErrors),
-                    $this->conversionRateLimits
+                    array_merge($importJob->conversionStatus->messages, $importJob->submissionStatus->messages),
+                    array_merge($importJob->conversionStatus->warnings, $importJob->submissionStatus->warnings),
+                    array_merge($importJob->conversionStatus->errors, $importJob->submissionStatus->errors),
+                    $importJob->conversionStatus->rateLimits
                 )
             );
 
@@ -319,12 +319,12 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things:
-        $messages         = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings         = array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors           = array_merge($this->importErrors, $this->conversionErrors);
-        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->conversionRateLimits));
+        $messages         = array_merge($importJob->conversionStatus->messages, $importJob->submissionStatus->messages);
+        $warnings         = array_merge($importJob->conversionStatus->warnings, $importJob->submissionStatus->warnings);
+        $errors           = array_merge($importJob->conversionStatus->errors, $importJob->submissionStatus->errors);
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $importJob->conversionStatus->rateLimits));
 
-        if (count($this->importErrors) > 0 || count($this->conversionRateLimits) > 0) {
+        if (count($errors) > 0) {
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
 
             return ExitCode::GENERAL_ERROR->value;
@@ -370,10 +370,6 @@ trait AutoImports
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_ERRORED);
-            $this->conversionMessages   = $manager->getAllMessages();
-            $this->conversionWarnings   = $manager->getAllWarnings();
-            $this->conversionErrors     = $manager->getAllErrors();
-            $this->conversionRateLimits = $manager->getAllRateLimits();
             Log::debug('Caught error in start()');
         }
 
@@ -382,10 +378,6 @@ trait AutoImports
         if (0 === count($transactions)) {
             Log::error('[a] Zero transactions!');
             $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
-            $this->conversionMessages   = $manager->getAllMessages();
-            $this->conversionWarnings   = $manager->getAllWarnings();
-            $this->conversionErrors     = $manager->getAllErrors();
-            $this->conversionRateLimits = $manager->getAllRateLimits();
         }
         Log::debug('Grab import job back from manager.');
         $importJob                  = $manager->getImportJob();
@@ -395,11 +387,6 @@ trait AutoImports
 
         if (count($transactions) > 0) {
             $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
-
-            $this->conversionMessages   = $manager->getAllMessages();
-            $this->conversionWarnings   = $manager->getAllWarnings();
-            $this->conversionErrors     = $manager->getAllErrors();
-            $this->conversionRateLimits = $manager->getAllRateLimits();
         }
         $this->importerAccounts     = $manager->getServiceAccounts();
 

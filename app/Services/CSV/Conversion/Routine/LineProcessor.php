@@ -25,8 +25,8 @@ declare(strict_types=1);
 namespace App\Services\CSV\Conversion\Routine;
 
 use App\Exceptions\ImporterErrorException;
+use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\ProgressInformation;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -38,28 +38,39 @@ use Illuminate\Support\Facades\Log;
  */
 class LineProcessor
 {
-    use ProgressInformation;
-
     private Configuration $configuration;
-    private string $dateFormat;
-    private array  $doMapping;
-    private array  $mappedValues;
-    private array  $mapping;
-    private array  $roles;
+    private string        $dateFormat;
+    private array         $doMapping;
+    private array         $mappedValues;
+    private array         $mapping;
+    private array         $roles;
+    private ImportJob     $importJob;
 
     /**
      * LineProcessor constructor.
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(ImportJob $importJob)
     {
+        $this->setImportJob($importJob);
         Log::debug('Created LineProcessor()');
-        Log::debug('Roles', $configuration->getRoles());
+        Log::debug('Roles', $this->configuration->getRoles());
         Log::debug('Mapping (will not be printed)');
-        $this->configuration = $configuration;
-        $this->roles         = $configuration->getRoles();
-        $this->mapping       = $configuration->getMapping();
-        $this->doMapping     = $configuration->getDoMapping();
-        $this->dateFormat    = $configuration->getDate();
+        $this->roles      = $this->configuration->getRoles();
+        $this->mapping    = $this->configuration->getMapping();
+        $this->doMapping  = $this->configuration->getDoMapping();
+        $this->dateFormat = $this->configuration->getDate();
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $importJob->refreshInstanceIdentifier();
+        $this->importJob     = $importJob;
+        $this->configuration = $this->importJob->getConfiguration();
     }
 
     public function processCSVLines(array $lines): array
@@ -77,7 +88,7 @@ class LineProcessor
             } catch (ImporterErrorException $e) {
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 //                Log::error($e->getTraceAsString());
-                $this->addError(0, $e->getMessage());
+                $this->importJob->conversionStatus->addError(0, $e->getMessage());
             }
         }
 

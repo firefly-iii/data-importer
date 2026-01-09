@@ -27,8 +27,6 @@ namespace App\Services\Spectre\Conversion;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Shared\Conversion\CombinedProgressInformation;
-use App\Services\Shared\Conversion\ProgressInformation;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use App\Services\Spectre\Conversion\Routine\FilterTransactions;
 use App\Services\Spectre\Conversion\Routine\GenerateTransactions;
@@ -44,8 +42,6 @@ use Override;
 class RoutineManager implements RoutineManagerInterface
 {
     use CollectsAccounts;
-    use CombinedProgressInformation;
-    use ProgressInformation;
 
     private array                $allErrors;
     private array                $allMessages;
@@ -86,8 +82,8 @@ class RoutineManager implements RoutineManagerInterface
         $this->transactionProcessor->setConfiguration($configuration);
         $this->transactionProcessor->setDownloadIdentifier($this->getIdentifier());
         $this->transactionGenerator->setConfiguration($configuration);
-        $this->transactionGenerator->setIdentifier($this->getIdentifier());
-        $this->transactionFilter->setIdentifier($this->getIdentifier());
+        // $this->transactionGenerator->setIdentifier($this->getIdentifier());
+        // $this->transactionFilter->setIdentifier($this->getIdentifier());
     }
 
     /**
@@ -104,7 +100,7 @@ class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->addError(0, sprintf('[a122]: Cannot download Spectre accounts: %s', $e->getMessage()));
+            // $this->addError(0, sprintf('[a122]: Cannot download Spectre accounts: %s', $e->getMessage()));
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -115,7 +111,7 @@ class RoutineManager implements RoutineManagerInterface
         $converted    = $this->transactionGenerator->getTransactions($transactions);
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($converted)));
         if (0 === count($converted)) {
-            $this->addError(0, '[a123]: No transactions were converted, probably zero found at Spectre.');
+            // $this->addError(0, '[a123]: No transactions were converted, probably zero found at Spectre.');
             $this->mergeMessages(1);
             $this->mergeWarnings(1);
             $this->mergeErrors(1);
@@ -135,41 +131,41 @@ class RoutineManager implements RoutineManagerInterface
 
     private function mergeMessages(int $count): void
     {
-        $this->allMessages = $this->mergeArrays(
-            [
-                $this->getMessages(),
-                $this->transactionFilter->getMessages(),
-                $this->transactionProcessor->getMessages(),
-                $this->transactionGenerator->getMessages(),
-            ],
-            $count
-        );
+        //        $this->allMessages = $this->mergeArrays(
+        //            [
+        // //                $this->getMessages(),
+        // //                $this->transactionFilter->getMessages(),
+        // //                $this->transactionProcessor->getMessages(),
+        // //                $this->transactionGenerator->getMessages(),
+        //            ],
+        //            $count
+        //        );
     }
 
     private function mergeWarnings(int $count): void
     {
-        $this->allWarnings = $this->mergeArrays(
-            [
-                $this->getWarnings(),
-                $this->transactionFilter->getWarnings(),
-                $this->transactionProcessor->getWarnings(),
-                $this->transactionGenerator->getWarnings(),
-            ],
-            $count
-        );
+        //        $this->allWarnings = $this->mergeArrays(
+        //            [
+        // //                $this->getWarnings(),
+        // //                $this->transactionFilter->getWarnings(),
+        // //                $this->transactionProcessor->getWarnings(),
+        // //                $this->transactionGenerator->getWarnings(),
+        //            ],
+        //            $count
+        //        );
     }
 
     private function mergeErrors(int $count): void
     {
-        $this->allErrors = $this->mergeArrays(
-            [
-                $this->getErrors(),
-                $this->transactionFilter->getErrors(),
-                $this->transactionProcessor->getErrors(),
-                $this->transactionGenerator->getErrors(),
-            ],
-            $count
-        );
+        //        $this->allErrors = $this->mergeArrays(
+        //            [
+        //                // $this->getErrors(),
+        // //                $this->transactionFilter->getErrors(),
+        // //                $this->transactionProcessor->getErrors(),
+        // //                $this->transactionGenerator->getErrors(),
+        //            ],
+        //            $count
+        //        );
     }
 
     public function getImportJob(): ImportJob
