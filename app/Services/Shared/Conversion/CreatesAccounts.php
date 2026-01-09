@@ -39,6 +39,21 @@ trait CreatesAccounts
         $this->existingServiceAccounts = $existingServiceAccounts;
     }
 
+    protected function createNewAccount(string $importServiceAccountId): int
+    {
+        Log::debug(sprintf('Creating new account for account "%s".', $importServiceAccountId));
+        $configuration                            = $this->importJob->getConfiguration();
+        $createdAccount                           = $this->createOrFindExistingAccount($importServiceAccountId);
+        $updatedAccounts                          = $configuration->getAccounts();
+        $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
+        Log::debug(sprintf('Newly created account: #%d ("%s")', $createdAccount->id, $createdAccount->name));
+        $configuration->setAccounts($updatedAccounts);
+        $this->importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($this->importJob);
+
+        return $createdAccount->id;
+    }
+
     protected function createOrFindExistingAccount(string $importServiceId): Account
     {
         Log::debug(sprintf('Starting account creation process for account "%s".', $importServiceId));

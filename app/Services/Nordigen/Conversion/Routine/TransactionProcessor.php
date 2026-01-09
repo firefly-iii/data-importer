@@ -262,20 +262,6 @@ class TransactionProcessor
         return $this->rateLimits;
     }
 
-    private function createNewAccount(string $importServiceAccountId): int
-    {
-        Log::debug(sprintf('Creating new account for GoCardless account "%s".', $importServiceAccountId));
-        $configuration                            = $this->importJob->getConfiguration();
-        $createdAccount                           = $this->createOrFindExistingAccount($importServiceAccountId);
-        $updatedAccounts                          = $configuration->getAccounts();
-        $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
-        $configuration->setAccounts($updatedAccounts);
-        Log::debug('Saved new account details.', $updatedAccounts);
-        $this->importJob->setConfiguration($configuration);
-
-        return $createdAccount->id;
-    }
-
     public function setImportJob(ImportJob $importJob): void
     {
         Log::debug('setImportJob in TransactionProcessor.');

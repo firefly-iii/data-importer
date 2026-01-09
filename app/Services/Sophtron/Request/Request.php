@@ -192,7 +192,7 @@ abstract class Request
         //                ]
         //            );
         //        } catch (ClientException $e) {
-        //            // FIXME error response, not an exception.
+        //            // error response, not an exception.
         //            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         //        }
         //        $body    = (string) $res->getBody();
@@ -202,7 +202,7 @@ abstract class Request
         //        try {
         //            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         //        } catch (JsonException $e) {
-        //            // FIXME error response, not an exception.
+        //            //  error response, not an exception.
         //            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
         //        }
         //

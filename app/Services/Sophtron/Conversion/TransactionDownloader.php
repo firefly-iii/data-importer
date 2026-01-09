@@ -90,21 +90,6 @@ class TransactionDownloader
         return $this->getTransactions($importServiceAccountId);
     }
 
-    /**
-     * FIXME practically a duplicate of the simplefin method.
-     */
-    private function createNewAccount(string $accountId): void
-    {
-        Log::debug(sprintf('Creating new account for "%s"', $accountId));
-        $configuration               = $this->importJob->getConfiguration();
-        $createdAccount              = $this->createOrFindExistingAccount($accountId);
-        $updatedAccounts             = $configuration->getAccounts();
-        $updatedAccounts[$accountId] = $createdAccount->id;
-        $configuration->setAccounts($updatedAccounts);
-        $this->importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($this->importJob);
-    }
-
     private function getTransactions(string $accountId): array
     {
         $userId        = SecretManager::getSophtronUserId($this->importJob);

@@ -129,17 +129,6 @@ class RoutineManager implements RoutineManagerInterface
         return $this->getTransactions($importServiceAccountId, $currentSimpleFINAccountData);
     }
 
-    private function createNewAccount(string $importServiceAccountId): void
-    {
-        $configuration                            = $this->importJob->getConfiguration();
-        $createdAccount                           = $this->createOrFindExistingAccount($importServiceAccountId);
-        $updatedAccounts                          = $configuration->getAccounts();
-        $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
-        $configuration->setAccounts($updatedAccounts);
-        $this->importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($this->importJob);
-    }
-
     private function getTransactions(string $importServiceAccountId, Account $simpleFINAccount): array
     {
         Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
