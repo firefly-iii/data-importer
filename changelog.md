@@ -2,11 +2,19 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-2.0.1
+## v2.0.1 - 2026-01-09
 
-#11472 moet er ook bij Fixed.
+This release fixes some issues left in v2.0.0.
 
-## v2.0.0 - 2026-01-xx
+### Fixed
+- Various code related bugs not reported as an issue.
+- Various issues reported in our Gitter.im chatroom, thank you!
+- #11460
+- #11470
+- #11472
+- #11477
+
+## v2.0.0 - 2026-01-05
 
 Version 2.0 of the Firefly III data importer introduces some big architectural changes that should make it easier to work with, and easier to extend.
 
