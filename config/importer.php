@@ -141,14 +141,6 @@ return [
         ],
     ],
 
-    // FIXME move to separate config file.
-    'simplefin'             => [
-        'demo_url'   => env('SIMPLEFIN_DEMO_URL', 'https://demo:demo@beta-bridge.simplefin.org/simplefin'),
-        'demo_token' => env('SIMPLEFIN_DEMO_TOKEN', 'demo'), // This token is used as the password in the demo_url
-        'bridge_url' => env('SIMPLEFIN_BRIDGE_URL'),
-        'timeout'    => (int)env('SIMPLEFIN_TIMEOUT', 30),
-    ],
-
     // docker build info.
     'docker'                => [
         'is_docker'  => env('IS_DOCKER', false),
