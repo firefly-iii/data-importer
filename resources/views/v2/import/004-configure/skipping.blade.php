@@ -23,6 +23,12 @@
                                     Wait, I do want to configure my import job!
                                 </a>
                             </p>
+                        <noscript>
+                            <p>
+                                <a href="{{ $redirect }}">Please follow
+                                    this link to continue</a>.
+                            </p>
+                        </noscript>
                     </div>
                 </div>
             </div>
@@ -33,7 +39,7 @@
     <script type="text/javascript">
         window.onload = function () {
             setTimeout(function () {
-                window.location.href = '#?dont_know_where_to_go=true';
+                window.location.href = '{{ $redirect }}';
             }, 5000);
         };
     </script>

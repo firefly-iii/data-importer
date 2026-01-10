@@ -27,6 +27,7 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Request\ConfigurationPostRequest;
+use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
 use App\Services\Shared\Model\ImportServiceAccount;
@@ -118,7 +119,8 @@ class ConfigurationController extends Controller
         $configuration       = $importJob->getConfiguration();
         $doNotSkip           = 'true' === $request->get('do_not_skip');
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
-            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
+            $redirect = $this->redirectToNextstep($importJob);
+            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier','redirect'));
         }
 
         // unique column options (this depends on the flow):
@@ -174,13 +176,18 @@ class ConfigurationController extends Controller
         $configuration->updateDateRange();
         $importJob->setConfiguration($configuration);
 
+        return redirect($this->redirectToNextstep($importJob));
+    }
+
+    private function redirectToNextstep(ImportJob $importJob): string
+    {
         $importJob->setState('is_configured');
         $this->repository->saveToDisk($importJob);
 
         // at this moment the config should be valid and saved.
         // file import ONLY needs roles before it is complete. After completion, can go to overview.
         if ('file' === $importJob->getFlow()) {
-            return redirect()->route('configure-roles.index', [$identifier]);
+            return route('configure-roles.index', [$importJob->identifier]);
         }
 
         // simplefin and others are now complete.
@@ -188,6 +195,6 @@ class ConfigurationController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // can now redirect to conversion, because that will be the next step.
-        return redirect()->route('data-conversion.index', [$identifier]);
+        return route('data-conversion.index', [$importJob->identifier]);
     }
 }
