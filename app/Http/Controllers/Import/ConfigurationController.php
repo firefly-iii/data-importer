@@ -119,6 +119,7 @@ class ConfigurationController extends Controller
         $configuration       = $importJob->getConfiguration();
         $doNotSkip           = 'true' === $request->get('do_not_skip');
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
+            // FIXME must also skip roles and mapping.
             $redirect = $this->redirectToNextstep($importJob);
             return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier','redirect'));
         }
