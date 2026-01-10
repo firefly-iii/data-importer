@@ -30,7 +30,7 @@ use InvalidArgumentException;
 /**
  * Class Account
  */
-class   Account
+class Account
 {
     public array   $org;
     public string  $id;

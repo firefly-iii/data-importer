@@ -98,8 +98,9 @@ class ConfigurationController extends Controller
                     $importJob->setConfiguration($configuration);
                     $importJob->setState('needs_connection_details');
                     $this->repository->saveToDisk($importJob);
-                    $redirect = route('select-bank.index', [$identifier]);
-                    return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle','redirect'));
+                    $redirect      = route('select-bank.index', [$identifier]);
+
+                    return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle', 'redirect'));
 
                 }
                 //
@@ -121,7 +122,8 @@ class ConfigurationController extends Controller
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
             // FIXME must also skip roles and mapping.
             $redirect = $this->redirectToNextstep($importJob);
-            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier','redirect'));
+
+            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier', 'redirect'));
         }
 
         // unique column options (this depends on the flow):

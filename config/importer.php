@@ -64,10 +64,10 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => '2.0.2',
-    'build_time'                    => 1767945693,
+    'version'                       => 'develop/2026-01-10',
+    'build_time'                    => 1768025543,
     'fake_data'                     => env('FAKE_DATA', false),
-    'providers' => [
+    'providers'                     => [
         'file'      => [
             'title'                     => 'File',
             'explanation'               => 'CSV or CAMT.* files',
@@ -141,7 +141,7 @@ return [
     ],
 
     // docker build info.
-    'docker'                => [
+    'docker'                        => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -219,7 +219,7 @@ return [
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
 
-    'http_codes' => [
+    'http_codes'                    => [
         0   => 'Unknown Error',
         100 => 'Continue',
         101 => 'Switching Protocols',
