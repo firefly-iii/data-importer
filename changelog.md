@@ -10,10 +10,10 @@ This release fixes some issues left in v2.0.0.
 
 - Various issues reported in the [gitter.im](https://gitter.im/firefly-iii/firefly-iii)-chat room, thank you!
 - Various issues reported over mail, thanks!
-- #11485
-- #11486
-- #11487
-- #11491
+- [Issue 11485](https://github.com/firefly-iii/firefly-iii/issues/11485) (Importer doesn't skip mapping, fails to find accounts when using SimpleFIN) reported by @Kage1
+- [Issue 11486](https://github.com/firefly-iii/firefly-iii/issues/11486) (Importer fails non-gracefully with expired GoCardless requisition) reported by @molnarti
+- [Issue 11487](https://github.com/firefly-iii/firefly-iii/issues/11487) (Initial SimpleFIN import fails during data conversion with "Cannot access private property...") reported by @tmkowalewski
+- [Issue 11491](https://github.com/firefly-iii/firefly-iii/issues/11491) (Importer redirects without starting job when "skip configuration" is true) reported by @danielpngr
 
 ## v2.0.2 - 2026-01-09
 
