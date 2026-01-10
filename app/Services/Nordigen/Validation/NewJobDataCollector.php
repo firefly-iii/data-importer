@@ -89,12 +89,13 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
-                $total = count($response);
+                $total       = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
 
                 /** @var NordigenAccount $account */
                 foreach ($response as $index => $account) {
                     Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s', config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
+
                     try {
                         $account  = AccountInformationCollector::collectInformation($account, true);
                         $return[] = $account;
