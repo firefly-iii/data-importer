@@ -8,6 +8,8 @@ This release fixes some issues left in v2.0.0.
 
 ### Fixed
 
+- Various issues reported in the [gitter.im](https://gitter.im/firefly-iii/firefly-iii)-chat room, thank you!
+- Various issues reported over mail, thanks!
 - #11485
 - #11486
 - #11487
