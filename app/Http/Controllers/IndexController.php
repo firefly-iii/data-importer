@@ -121,9 +121,8 @@ class IndexController extends Controller
 
         $isDocker          = config('importer.docker.is_docker', false);
         $identifier        = substr(session()->getId(), 0, 10);
-        $enabled           = config('importer.enabled_flows');
 
-        return view('index', compact('pat', 'warning', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker', 'enabled'));
+        return view('index', compact('pat', 'warning', 'clientIdWithURL', 'URLonly', 'flexible', 'identifier', 'isDocker'));
     }
 
     private function clearOldJobs(): void

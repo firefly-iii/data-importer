@@ -27,6 +27,7 @@ namespace App\Http\Controllers\Import;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Request\ConfigurationPostRequest;
+use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\CSV\Converter\Date;
 use App\Services\Shared\Model\ImportServiceAccount;
@@ -74,9 +75,6 @@ class ConfigurationController extends Controller
                 return view('import.004-configure.sophtron-needs-institutions')->with(compact('mainTitle', 'subTitle', 'identifier'));
             }
 
-
-
-
             return view('import.004-configure.parsing')->with(compact('mainTitle', 'subTitle', 'identifier'));
         }
         // if the job is "contains_content", parse it. Redirect if errors occur.
@@ -93,6 +91,21 @@ class ConfigurationController extends Controller
 
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
+                if ($messages->has('expired_agreement') && 'true' === (string)$messages->get('expired_agreement')[0]) {
+                    $importJob->setServiceAccounts([]);
+                    $configuration = $importJob->getConfiguration();
+                    $configuration->clearRequisitions();
+                    $importJob->setConfiguration($configuration);
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+                    $redirect      = route('select-bank.index', [$identifier]);
+
+                    return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle', 'redirect'));
+
+                }
+                //
+                // if the agreement has expired, show error and exit gracefully.
+                // https://firefly-data.hades.internal/configure-import/2385f86b-0e50-4ba7-8b7c-e663471f2dd6?parse=true
 
                 // if there is any state for the job here forget about it, just remove it.
                 $this->repository->deleteImportJob($importJob);
@@ -107,7 +120,10 @@ class ConfigurationController extends Controller
         $configuration       = $importJob->getConfiguration();
         $doNotSkip           = 'true' === $request->get('do_not_skip');
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
-            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier'));
+            // FIXME must also skip roles and mapping.
+            $redirect = $this->redirectToNextstep($importJob);
+
+            return view('import.004-configure.skipping')->with(compact('mainTitle', 'subTitle', 'identifier', 'redirect'));
         }
 
         // unique column options (this depends on the flow):
@@ -155,7 +171,6 @@ class ConfigurationController extends Controller
     public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
     {
         Log::debug(sprintf('Now running %s', __METHOD__));
-        $fromRequest   = $request->getAll();
 
         // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
         $importJob     = $this->repository->find($identifier);
@@ -164,13 +179,18 @@ class ConfigurationController extends Controller
         $configuration->updateDateRange();
         $importJob->setConfiguration($configuration);
 
+        return redirect($this->redirectToNextstep($importJob));
+    }
+
+    private function redirectToNextstep(ImportJob $importJob): string
+    {
         $importJob->setState('is_configured');
         $this->repository->saveToDisk($importJob);
 
         // at this moment the config should be valid and saved.
         // file import ONLY needs roles before it is complete. After completion, can go to overview.
         if ('file' === $importJob->getFlow()) {
-            return redirect()->route('configure-roles.index', [$identifier]);
+            return route('configure-roles.index', [$importJob->identifier]);
         }
 
         // simplefin and others are now complete.
@@ -178,6 +198,6 @@ class ConfigurationController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // can now redirect to conversion, because that will be the next step.
-        return redirect()->route('data-conversion.index', [$identifier]);
+        return route('data-conversion.index', [$importJob->identifier]);
     }
 }

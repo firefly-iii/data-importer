@@ -66,7 +66,6 @@ class AccountInformationCollector
             }
         }
 
-
         if (config('nordigen.get_balance_details') || $overruleSettings) {
             Log::debug('Get account balance is ENABLED.');
 

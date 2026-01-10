@@ -132,7 +132,7 @@ class RoutineManager implements RoutineManagerInterface
     private function getTransactions(string $importServiceAccountId, Account $simpleFINAccount): array
     {
         Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
-        $serviceAccounts     = $this->importJob->getServiceAccounts();
+        $accountMapping      = $this->importJob->getConfiguration()->getAccounts();
         // Fetch transactions for the current account using the new method signature,
         // passing the complete SimpleFIN accounts data retrieved from the session.
         // Pass the full dataset
@@ -152,7 +152,7 @@ class RoutineManager implements RoutineManagerInterface
             $transformedTransaction = $this->transformer->transform(
                 $transactionData,
                 $simpleFINAccount, // The specific SimpleFIN account data for this transaction's parent
-                $serviceAccounts, // Current mapping with actual account IDs
+                $accountMapping, // Current mapping with actual account IDs
                 $this->importJob->getConfiguration()->getNewAccounts() // User-provided account configuration data
             );
 

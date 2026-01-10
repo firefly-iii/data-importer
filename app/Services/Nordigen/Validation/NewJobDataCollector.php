@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Validation;
 
+use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
@@ -39,7 +40,7 @@ use Illuminate\Support\MessageBag;
 
 class NewJobDataCollector implements NewJobDataCollectorInterface
 {
-    private ImportJob $importJob;
+    private ImportJob           $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -94,9 +95,14 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 /** @var NordigenAccount $account */
                 foreach ($response as $index => $account) {
                     Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s', config('importer.version'), $index + 1, $total, $account->getIdentifier()), $account->toLocalArray());
-                    $account  = AccountInformationCollector::collectInformation($account, true);
-                    $return[] = $account;
-                    $cache[]  = $account->toLocalArray();
+
+                    try {
+                        $account  = AccountInformationCollector::collectInformation($account, true);
+                        $return[] = $account;
+                        $cache[]  = $account->toLocalArray();
+                    } catch (AgreementExpiredException) {
+                        $messageBag->add('expired_agreement', 'true');
+                    }
                 }
             }
             Cache::put($requisition, $cache, 1800); // half an hour

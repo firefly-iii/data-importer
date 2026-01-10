@@ -138,6 +138,7 @@ abstract class Request
                 $json = json_decode($body, true) ?? [];
             }
             if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
+                Log::error('Detected EUA expired.');
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
 

@@ -15,18 +15,14 @@
                     <div class="card-body">
                         <p>Hi there!</p>
                         <p>
-                            According to your configuration file, you do not wish to re-configure this import job.
-                            You will be redirected in five (5) seconds. You don't need to do anything.
+                            It looks like the connection to your bank as expired. It has been removed from your configuration, and this page will reload momentarily.
                         </p>
-                            <p>
-                                <a class="btn btn-primary" href="{{ route('configure-import.index', [$identifier]) }}?do_not_skip=true">
-                                    Wait, I do want to configure my import job!
-                                </a>
-                            </p>
+                        <p>
+                            You will then get the opportunity to reconnect to your bank.
+                        </p>
                         <noscript>
                             <p>
-                                <a href="{{ $redirect }}">Please follow
-                                    this link to continue</a>.
+                                <a href="{{$redirect }}">Please follow this link to continue</a>.
                             </p>
                         </noscript>
                     </div>
@@ -39,8 +35,8 @@
     <script type="text/javascript">
         window.onload = function () {
             setTimeout(function () {
-                window.location.href = '{{ $redirect }}';
-            }, 5000);
+                window.location.href = '{{ $redirect  }}';
+            }, 2000);
         };
     </script>
 @endsection

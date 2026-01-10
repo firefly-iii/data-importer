@@ -70,20 +70,19 @@ class ConversionController extends Controller
 
         $nextUrl             = route('submit-data.index', [$identifier]);
         // next URL is different when it's not a file flow (in ALL those cases, its mapping)
-        if ('file' !== $flow) {
+        if ('file' !== $flow && $configuration->getDoMapping()) {
             $nextUrl = route('data-mapping.index', [$identifier]);
         }
 
         // switch based on flow:
-        $enabled             = config(sprintf('importer.enabled_flows.%s', $flow));
+        $enabled             = config(sprintf('importer.providers.%s.enabled', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[a] Not a supported flow: "%s"', $flow));
         }
 
         $factory             = new ConversionRoutineFactory($importJob);
         $routine             = $factory->createManager();
-
-        if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
+        if (true === config(sprintf('importer.providers.%s.supports_new_accounts', $flow))) {
             $newAccountsToCreate = $configuration->getNewAccounts();
         }
 
@@ -117,7 +116,7 @@ class ConversionController extends Controller
 
         // Handle new account data for SimpleFIN
         $flow          = $importJob->getFlow();
-        if (in_array($flow, config('importer.supports_new_accounts', true), true)) {
+        if (true === config(sprintf('importer.providers.%s.supports_new_accounts', $flow))) {
             Log::debug('Will see if new accounts need to be created.');
             $newAccountData = $request->get('new_account_data', []);
             if (count($newAccountData) > 0) {
@@ -147,7 +146,7 @@ class ConversionController extends Controller
 
         // now create the right class:
         $flow          = $importJob->getFlow();
-        $enabled       = config(sprintf('importer.enabled_flows.%s', $flow));
+        $enabled       = config(sprintf('importer.providers.%s.enabled', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[b] Not a supported flow: "%s"', $flow));
         }
@@ -189,6 +188,9 @@ class ConversionController extends Controller
         if ('file' !== $flow) {
             // all other workflows go to mapping (if requested from configuration?)
             $importJob->setState('configured_and_roles_defined');
+            if (!$configuration->getDoMapping()) {
+                $importJob->setState('ready_for_submission');
+            }
         }
         if ('file' === $flow) {
             $importJob->setState('ready_for_submission');
