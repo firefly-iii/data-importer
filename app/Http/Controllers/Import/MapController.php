@@ -96,7 +96,7 @@ class MapController extends Controller
         // if nothing to map, just set mappable to true and go to the next step:
         if (0 === count($data)) {
             $flow                    = $importJob->getFlow();
-            $conversionBeforeMapping = config(sprintf('importer.%s.conversion_before_mapping', $flow));
+            $conversionBeforeMapping = config(sprintf('importer.providers.%s.conversion_before_mapping', $flow));
             if ($conversionBeforeMapping) {
                 // is already converted, so ready for submission.
                 $importJob->setState('ready_for_submission');
