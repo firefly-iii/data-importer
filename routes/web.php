@@ -47,6 +47,12 @@ Route::post('/gocardless-select-bank/{identifier}', ['uses' => 'Import\Nordigen\
 Route::get('/gocardless-connect/{identifier}', ['uses' => 'Import\Nordigen\LinkController@build', 'as' => 'gocardless-connect.index']);
 Route::get('/gocardless-connected/{identifier}', ['uses' => 'Import\Nordigen\LinkController@callback', 'as' => 'gocardless-connect.callback']);
 
+// Enable Banking routes
+Route::get('/eb-select-bank/{identifier}', ['uses' => 'Import\EnableBanking\SelectionController@index', 'as' => 'eb-select-bank.index']);
+Route::post('/eb-select-bank/{identifier}', ['uses' => 'Import\EnableBanking\SelectionController@postIndex', 'as' => 'eb-select-bank.post']);
+Route::get('/eb-connect/{identifier}', ['uses' => 'Import\EnableBanking\LinkController@build', 'as' => 'eb-connect.index']);
+Route::get('/eb-callback', ['uses' => 'Import\EnableBanking\LinkController@callback', 'as' => 'eb-connect.callback']);
+
 Route::get('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@index', 'as' => 'configure-roles.index']);
 Route::post('/configure-roles/{identifier}', ['uses' => 'Import\File\RoleController@postIndex', 'as' => 'configure-roles.post']);
 

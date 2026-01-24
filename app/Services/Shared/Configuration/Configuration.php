@@ -93,6 +93,12 @@ class Configuration
 
     private string $lunchFlowApiKey = '';
 
+    // enable banking configuration
+    private string $enableBankingCountry = '';
+    private string $enableBankingBank = '';
+    private string $enableBankingAuthId = '';
+    private array $enableBankingSessions = [];
+
     // what type of import?
     private array $roles            = [];
 
@@ -143,6 +149,12 @@ class Configuration
 
         // lunch flow configuration
         $this->lunchFlowApiKey             = '';
+
+        // enable banking configuration
+        $this->enableBankingCountry        = '';
+        $this->enableBankingBank           = '';
+        $this->enableBankingAuthId         = '';
+        $this->enableBankingSessions       = [];
 
         // spectre
         $this->identifier                  = '0';
@@ -400,6 +412,12 @@ class Configuration
         // lunch flow configuration
         $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
 
+        // enable banking configuration
+        $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
+        $object->enableBankingBank           = $array['enable_banking_bank'] ?? '';
+        $object->enableBankingAuthId         = $array['enable_banking_auth_id'] ?? '';
+        $object->enableBankingSessions       = $array['enable_banking_sessions'] ?? [];
+
         // simplefin
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
@@ -497,6 +515,12 @@ class Configuration
 
         // lunch flow configuration
         $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
+
+        // enable banking:
+        $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
+        $object->enableBankingBank           = $array['enable_banking_bank'] ?? '';
+        $object->enableBankingAuthId         = $array['enable_banking_auth_id'] ?? '';
+        $object->enableBankingSessions       = $array['enable_banking_sessions'] ?? [];
 
         $object->groupedTransactionHandling  = $array['grouped_transaction_handling'] ?? 'single';
         $object->useEntireOpposingAddress    = $array['use_entire_opposing_address'] ?? false;
@@ -770,6 +794,51 @@ class Configuration
         return array_key_exists($key, $this->nordigenRequisitions) ? $this->nordigenRequisitions[$key] : null;
     }
 
+    public function getEnableBankingCountry(): string
+    {
+        return $this->enableBankingCountry;
+    }
+
+    public function setEnableBankingCountry(string $enableBankingCountry): void
+    {
+        $this->enableBankingCountry = $enableBankingCountry;
+    }
+
+    public function getEnableBankingBank(): string
+    {
+        return $this->enableBankingBank;
+    }
+
+    public function setEnableBankingBank(string $enableBankingBank): void
+    {
+        $this->enableBankingBank = $enableBankingBank;
+    }
+
+    public function getEnableBankingAuthId(): string
+    {
+        return $this->enableBankingAuthId;
+    }
+
+    public function setEnableBankingAuthId(string $enableBankingAuthId): void
+    {
+        $this->enableBankingAuthId = $enableBankingAuthId;
+    }
+
+    public function getEnableBankingSessions(): array
+    {
+        return $this->enableBankingSessions;
+    }
+
+    public function addEnableBankingSession(string $sessionId): void
+    {
+        $this->enableBankingSessions[] = $sessionId;
+    }
+
+    public function clearEnableBankingSessions(): void
+    {
+        $this->enableBankingSessions = [];
+    }
+
     public function getRoles(): array
     {
         return $this->roles ?? [];
@@ -986,6 +1055,12 @@ class Configuration
             'nordigen_requisitions'        => $this->nordigenRequisitions,
             'nordigen_max_days'            => $this->nordigenMaxDays,
             'lunch_flow_api_key'           => $this->lunchFlowApiKey,
+
+            // enable banking information:
+            'enable_banking_country'       => $this->enableBankingCountry,
+            'enable_banking_bank'          => $this->enableBankingBank,
+            'enable_banking_auth_id'       => $this->enableBankingAuthId,
+            'enable_banking_sessions'      => $this->enableBankingSessions,
 
             // utf8
             'conversion'                   => $this->conversion,

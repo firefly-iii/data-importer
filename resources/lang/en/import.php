@@ -53,6 +53,14 @@ return [
     'help_spectre_app_id'           => 'Enter your Spectre / Salt Edge App Id',
     'help_spectre_secret'           => 'Spectre / Salt Edge Secret',
 
+    // Enable Banking auth
+    'label_eb_app_id'               => 'Enable Banking Application ID',
+    'placeholder_eb_app_id'         => 'Enable Banking Application ID',
+    'help_eb_app_id'                => 'Enter your Enable Banking Application ID',
+    'label_eb_private_key'          => 'Enable Banking Private Key',
+    'placeholder_eb_private_key'    => 'Enable Banking Private Key (PEM format)',
+    'help_eb_private_key'           => 'Paste your Enable Banking private key in PEM format',
+
     // column roles for CSV import:
     'column__ignore'                => '(ignore this column)',
     'column_account-iban'           => 'Asset account (IBAN)',

@@ -36,11 +36,23 @@
                                 <div class="form-group row">
                                     <label for="date" class="col-sm-3 col-form-label">{{ trans(sprintf('import.label_%s_%s', $flow, $key)) }}</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="{{ sprintf('%s_%s', $flow, $key) }}" class="form-control" id="{{ sprintf('%s_%s', $flow, $key) }}"
-                                               placeholder="{{ trans(sprintf('import.placeholder_%s_%s', $flow, $key)) }}" value="{{ $value }}" aria-describedby="{{ sprintf('%s_%s', $flow, $key) }}_help">
-                                        <small id="{{ sprintf('%s_%s', $flow, $key) }}_help" class="form-text text-muted">
-                                            {{ trans(sprintf('import.help_%s_%s', $flow, $key)) }}
-                                        </small>
+                                        @if($key === 'private_key')
+                                            <input type="hidden" name="{{ sprintf('%s_%s', $flow, $key) }}" id="{{ sprintf('%s_%s', $flow, $key) }}" value="{{ $value }}">
+                                            <input type="file" class="form-control" id="{{ sprintf('%s_%s_file', $flow, $key) }}" accept=".pem"
+                                                   aria-describedby="{{ sprintf('%s_%s', $flow, $key) }}_help" data-target="{{ sprintf('%s_%s', $flow, $key) }}">
+                                            <small id="{{ sprintf('%s_%s', $flow, $key) }}_help" class="form-text text-muted">
+                                                {{ trans(sprintf('import.help_%s_%s', $flow, $key)) }}
+                                            </small>
+                                            @if($value !== '')
+                                                <small class="form-text text-success">A private key is already loaded.</small>
+                                            @endif
+                                        @else
+                                            <input type="text" name="{{ sprintf('%s_%s', $flow, $key) }}" class="form-control" id="{{ sprintf('%s_%s', $flow, $key) }}"
+                                                   placeholder="{{ trans(sprintf('import.placeholder_%s_%s', $flow, $key)) }}" value="{{ $value }}" aria-describedby="{{ sprintf('%s_%s', $flow, $key) }}_help">
+                                            <small id="{{ sprintf('%s_%s', $flow, $key) }}_help" class="form-text text-muted">
+                                                {{ trans(sprintf('import.help_%s_%s', $flow, $key)) }}
+                                            </small>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -66,4 +78,37 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle all file inputs for private keys
+            document.querySelectorAll('input[type="file"][data-target]').forEach(function(fileInput) {
+                const targetId = fileInput.getAttribute('data-target');
+                const hiddenInput = document.getElementById(targetId);
+
+                if (hiddenInput) {
+                    fileInput.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            if (!file.name.endsWith('.pem')) {
+                                alert('Please select a .pem file');
+                                fileInput.value = '';
+                                return;
+                            }
+
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                hiddenInput.value = event.target.result;
+                            };
+                            reader.onerror = function() {
+                                alert('Error reading file');
+                                fileInput.value = '';
+                            };
+                            reader.readAsText(file);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 @endsection

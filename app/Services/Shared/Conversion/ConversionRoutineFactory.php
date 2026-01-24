@@ -26,6 +26,7 @@ namespace App\Services\Shared\Conversion;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
+use App\Services\EnableBanking\Conversion\RoutineManager as EnableBankingRoutineManager;
 use App\Services\Sophtron\Conversion\RoutineManager as SophtronRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
@@ -79,6 +80,9 @@ class ConversionRoutineFactory
         }
         if ('lunchflow' === $flow) {
             return new LunchFlowRoutineManager($this->importJob);
+        }
+        if ('eb' === $flow) {
+            return new EnableBankingRoutineManager($this->importJob);
         }
 
         throw new ImporterErrorException(sprintf('ConversionRoutineFactory cannot create a routine for import flow "%s"', $flow));

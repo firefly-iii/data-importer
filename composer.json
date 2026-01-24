@@ -79,6 +79,7 @@
         "ext-bcmath": "*",
         "ext-intl": "*",
         "ext-json": "*",
+        "firebase/php-jwt": "^7.0",
         "firefly-iii/api-support-classes": "@dev",
         "genkgo/camt": ">=2.10.1",
         "guzzlehttp/guzzle": "^7.9",

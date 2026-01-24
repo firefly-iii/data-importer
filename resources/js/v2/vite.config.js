@@ -51,6 +51,7 @@ export default defineConfig({
                 'src/pages/conversion/index.js',
                 'src/pages/index/index.js',
                 'src/pages/selection/gocardless.js',
+                'src/pages/selection/enablebanking.js',
                 'src/pages/submit/index.js',
             ],
             publicDirectory: '../../../public',
