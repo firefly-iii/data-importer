@@ -35,5 +35,5 @@ return [
         'external-id'            => 'External identifier',
         'additional-information' => 'Additional information',
     ],
-    'countries'             => config('importer.countries'),
+    'countries'             => require __DIR__ . '/shared/countries.php',
 ];
