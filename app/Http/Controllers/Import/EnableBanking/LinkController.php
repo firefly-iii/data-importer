@@ -72,11 +72,6 @@ class LinkController extends Controller
         $url = config('enablebanking.url');
         $callbackUrl = route('eb-connect.callback');
 
-        // Enable Banking requires HTTPS redirect URLs
-        if (str_starts_with($callbackUrl, 'http://')) {
-            $callbackUrl = str_replace('http://', 'https://', $callbackUrl);
-        }
-
         Log::debug(sprintf('Enable Banking redirect URL: %s', $callbackUrl));
 
         $request = new PostAuthRequest($url);
