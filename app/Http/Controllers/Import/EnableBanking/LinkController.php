@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\EnableBanking\Model\Account;
 use App\Services\EnableBanking\Request\PostAuthRequest;
 use App\Services\EnableBanking\Request\PostSessionRequest;
 use App\Services\EnableBanking\Response\AuthResponse;
@@ -121,19 +122,57 @@ class LinkController extends Controller
         $importJob = $this->repository->find($identifier);
         $configuration = $importJob->getConfiguration();
 
+        // Check if we already have a session and accounts (e.g., user refreshed the callback page)
+        $existingSessions = $configuration->getEnableBankingSessions();
+        $existingAccounts = $importJob->getServiceAccounts();
+        if (count($existingSessions) > 0 && count($existingAccounts) > 0) {
+            Log::debug('Session already exists with accounts, redirecting to configuration.');
+
+            return redirect(route('configure-import.index', [$identifier]));
+        }
+
         // Exchange the code for a session
         $url = config('enablebanking.url');
         $sessionRequest = new PostSessionRequest($url, $code);
         $sessionRequest->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var SessionResponse $sessionResponse */
-        $sessionResponse = $sessionRequest->post();
+        try {
+            /** @var SessionResponse $sessionResponse */
+            $sessionResponse = $sessionRequest->post();
+        } catch (ImporterHttpException $e) {
+            // Handle "already authorized" error gracefully
+            if (str_contains($e->getMessage(), 'ALREADY_AUTHORIZED')) {
+                Log::warning('Session already authorized, redirecting to configuration.');
+
+                // If we have existing sessions, just redirect
+                if (count($existingSessions) > 0) {
+                    return redirect(route('configure-import.index', [$identifier]));
+                }
+
+                // Otherwise, redirect back to bank selection to start fresh
+                return redirect(route('eb-select-bank.index', [$identifier]))
+                    ->withErrors(['The authorization code has already been used. Please try connecting again.']);
+            }
+            throw $e;
+        }
 
         Log::debug(sprintf('Got session ID: %s', $sessionResponse->sessionId));
+        Log::debug(sprintf('Got %d accounts from session response', count($sessionResponse->accounts)));
 
         // Save the session ID
         $configuration->addEnableBankingSession($sessionResponse->sessionId);
         $importJob->setConfiguration($configuration);
+
+        // Parse and save accounts from the session response
+        $accounts = [];
+        foreach ($sessionResponse->accounts as $accountData) {
+            $accounts[] = Account::fromArray($accountData);
+        }
+        if (count($accounts) > 0) {
+            Log::debug(sprintf('Saving %d accounts to import job', count($accounts)));
+            $importJob->setServiceAccounts($accounts);
+        }
+
         $importJob->setState('contains_content');
         $this->repository->saveToDisk($importJob);
 

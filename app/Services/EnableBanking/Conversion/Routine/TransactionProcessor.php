@@ -90,6 +90,8 @@ class TransactionProcessor
             $dateFrom = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
             $dateTo = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
 
+            Log::debug(sprintf('GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s', $url, $accountUid, $dateFrom ?? 'null', $dateTo ?? 'null'));
+
             $request = new GetTransactionsRequest($url, $accountUid, $dateFrom, $dateTo);
             $request->setTimeOut(config('importer.connection.timeout'));
 

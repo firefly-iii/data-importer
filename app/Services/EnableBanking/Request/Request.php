@@ -130,12 +130,15 @@ abstract class Request
         }
 
         $body = (string) $res->getBody();
+        Log::debug(sprintf('Enable Banking raw response: %s', $body));
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw new ImporterHttpException(sprintf('Could not decode JSON: %s', $e->getMessage()));
         }
+
+        Log::debug(sprintf('Enable Banking parsed response keys: %s', implode(', ', array_keys($json ?? []))));
 
         return $json ?? [];
     }

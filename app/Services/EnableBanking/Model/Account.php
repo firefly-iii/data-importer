@@ -34,11 +34,15 @@ class Account
     private string $uid = '';
     private string $iban = '';
     private string $bban = '';
+    private string $otherIdentification = '';
+    private string $otherScheme = '';
     private string $currency = '';
     private string $ownerName = '';
     private string $displayName = '';
     private string $product = '';
-    private string $accountType = '';
+    private string $accountType = '';  // API: cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
+    private string $usage = '';
+    private string $details = '';
     private array $balances = [];
 
     public function __construct()
@@ -49,13 +53,29 @@ class Account
     {
         $account = new self();
         $account->uid = $array['uid'] ?? $array['account_uid'] ?? '';
-        $account->iban = $array['account_id']['iban'] ?? $array['iban'] ?? '';
-        $account->bban = $array['account_id']['bban'] ?? $array['bban'] ?? '';
+
+        // Handle account_id structure per API spec
+        // account_id can have: iban, other (with identification and scheme_name)
+        $accountId = $array['account_id'] ?? [];
+        $account->iban = $accountId['iban'] ?? $array['iban'] ?? '';
+
+        // Handle BBAN (not in main API spec but may be present)
+        $account->bban = $accountId['bban'] ?? $array['bban'] ?? '';
+
+        // Handle non-IBAN identification via "other" field
+        if (isset($accountId['other'])) {
+            $account->otherIdentification = $accountId['other']['identification'] ?? '';
+            $account->otherScheme = $accountId['other']['scheme_name'] ?? '';
+        }
+
         $account->currency = $array['currency'] ?? '';
         $account->ownerName = $array['owner_name'] ?? $array['account_holder_name'] ?? '';
         $account->displayName = $array['display_name'] ?? $array['name'] ?? '';
         $account->product = $array['product'] ?? '';
-        $account->accountType = $array['account_type'] ?? '';
+        // API uses cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
+        $account->accountType = $array['cash_account_type'] ?? $array['account_type'] ?? '';
+        $account->usage = $array['usage'] ?? '';
+        $account->details = $array['details'] ?? '';
 
         return $account;
     }
@@ -66,11 +86,15 @@ class Account
         $account->uid = $array['uid'] ?? '';
         $account->iban = $array['iban'] ?? '';
         $account->bban = $array['bban'] ?? '';
+        $account->otherIdentification = $array['other_identification'] ?? '';
+        $account->otherScheme = $array['other_scheme'] ?? '';
         $account->currency = $array['currency'] ?? '';
         $account->ownerName = $array['owner_name'] ?? '';
         $account->displayName = $array['display_name'] ?? '';
         $account->product = $array['product'] ?? '';
         $account->accountType = $array['account_type'] ?? '';
+        $account->usage = $array['usage'] ?? '';
+        $account->details = $array['details'] ?? '';
         $account->balances = $array['balances'] ?? [];
 
         return $account;
@@ -166,6 +190,46 @@ class Account
         $this->balances = $balances;
     }
 
+    public function getOtherIdentification(): string
+    {
+        return $this->otherIdentification;
+    }
+
+    public function setOtherIdentification(string $otherIdentification): void
+    {
+        $this->otherIdentification = $otherIdentification;
+    }
+
+    public function getOtherScheme(): string
+    {
+        return $this->otherScheme;
+    }
+
+    public function setOtherScheme(string $otherScheme): void
+    {
+        $this->otherScheme = $otherScheme;
+    }
+
+    public function getUsage(): string
+    {
+        return $this->usage;
+    }
+
+    public function setUsage(string $usage): void
+    {
+        $this->usage = $usage;
+    }
+
+    public function getDetails(): string
+    {
+        return $this->details;
+    }
+
+    public function setDetails(string $details): void
+    {
+        $this->details = $details;
+    }
+
     public function getFullName(): string
     {
         if ('' !== $this->displayName) {
@@ -176,6 +240,12 @@ class Account
         }
         if ('' !== $this->iban) {
             return $this->iban;
+        }
+        if ('' !== $this->otherIdentification) {
+            return $this->otherIdentification;
+        }
+        if ('' !== $this->bban) {
+            return $this->bban;
         }
         Log::warning('Account::getFullName(): no field with name, return "(no name)"');
 
@@ -190,15 +260,25 @@ class Account
     public function toLocalArray(): array
     {
         return [
+            'class' => self::class,
             'uid' => $this->uid,
             'iban' => $this->iban,
             'bban' => $this->bban,
+            'other_identification' => $this->otherIdentification,
+            'other_scheme' => $this->otherScheme,
             'currency' => $this->currency,
             'owner_name' => $this->ownerName,
             'display_name' => $this->displayName,
             'product' => $this->product,
             'account_type' => $this->accountType,
+            'usage' => $this->usage,
+            'details' => $this->details,
             'balances' => $this->balances,
         ];
+    }
+
+    public function toArray(): array
+    {
+        return $this->toLocalArray();
     }
 }

@@ -34,11 +34,14 @@ class AuthResponse extends Response
 {
     public string $url = '';
     public string $authId = '';
+    public string $psuIdHash = '';
 
     public function __construct(array $data = [])
     {
         $this->url = $data['url'] ?? '';
-        $this->authId = $data['auth_id'] ?? $data['id'] ?? '';
+        // API returns authorization_id per spec
+        $this->authId = $data['authorization_id'] ?? $data['auth_id'] ?? $data['id'] ?? '';
+        $this->psuIdHash = $data['psu_id_hash'] ?? '';
     }
 
     public static function fromArray(array $array): self

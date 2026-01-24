@@ -100,7 +100,9 @@ class SelectionController extends Controller
             }
         }
 
-        return view('import.009-selection.eb-index', compact('mainTitle', 'identifier', 'pageTitle', 'subTitle', 'response', 'countries', 'configuration', 'selectedCountry'));
+        $flow = 'eb';
+
+        return view('import.009-selection.index', compact('mainTitle', 'identifier', 'pageTitle', 'subTitle', 'response', 'countries', 'configuration', 'selectedCountry', 'flow'));
     }
 
     /**

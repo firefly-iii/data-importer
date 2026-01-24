@@ -1,5 +1,5 @@
 /*
- * enablebanking.js
+ * bank-selection.js
  * Copyright (c) 2025 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
@@ -21,22 +21,22 @@
 import '../../boot/bootstrap.js';
 
 
-let enablebanking = function () {
+let bankSelection = function () {
     return {
         selectedCountry: 'XX',
-        selectedBank: 'XX',
+        selectedBank: '',
         loadedCountry: '',
-        init() {
-            console.log('hello enablebanking');
+        flow: '',
 
-            // Get the currently selected country from the URL (the country we loaded banks for)
-            const urlParams = new URLSearchParams(window.location.search);
-            this.loadedCountry = urlParams.get('country') || '';
+        init() {
+            console.log('hello bankSelection');
+
+            // Get flow from data attribute
+            this.flow = this.$el.dataset.flow || 'nordigen';
 
             // Initialize selectedCountry from the dropdown's current value
             const countrySelect = document.querySelector('select[name="country"]');
             if (countrySelect) {
-                // Find the selected option
                 const selectedOption = countrySelect.querySelector('option[selected]');
                 if (selectedOption && selectedOption.value !== 'XX') {
                     this.selectedCountry = selectedOption.value;
@@ -52,6 +52,21 @@ let enablebanking = function () {
                 }
             }
 
+            if (this.flow === 'eb') {
+                this.initEnableBanking();
+            }
+
+            // Watch for bank selection changes to update days field
+            this.$watch('selectedBank', (value) => {
+                this.updateDaysFromBank(value);
+            });
+        },
+
+        initEnableBanking() {
+            // Get the currently selected country from the URL (the country we loaded banks for)
+            const urlParams = new URLSearchParams(window.location.search);
+            this.loadedCountry = urlParams.get('country') || '';
+
             // Watch for country changes - reload page if different country is selected
             this.$watch('selectedCountry', (value) => {
                 if (value && value !== 'XX' && value !== this.loadedCountry) {
@@ -62,12 +77,29 @@ let enablebanking = function () {
                 }
             });
         },
+
+        updateDaysFromBank(bankValue) {
+            // Find the selected option and get data-days
+            const bankSelect = document.querySelector('select[name^="bank_"]');
+            if (!bankSelect) return;
+
+            const selectedOption = bankSelect.querySelector(`option[value="${bankValue}"]`);
+            if (!selectedOption) return;
+
+            const days = selectedOption.dataset.days;
+            if (days) {
+                const daysInput = document.getElementById('days-input');
+                if (daysInput) {
+                    daysInput.value = days;
+                }
+            }
+        }
     }
 }
 
 
 function loadPage() {
-    Alpine.data('enablebanking', () => enablebanking());
+    Alpine.data('bankSelection', () => bankSelection());
     Alpine.start();
 }
 

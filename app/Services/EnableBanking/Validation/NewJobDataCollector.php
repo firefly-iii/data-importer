@@ -57,8 +57,6 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $messageBag = new MessageBag();
         $configuration = $this->importJob->getConfiguration();
         $sessions = $configuration->getEnableBankingSessions();
-        $return = [];
-        $cache = [];
 
         if (0 === count($sessions)) {
             Log::debug('No Enable Banking sessions for import.');
@@ -68,6 +66,18 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         }
 
         Log::debug(sprintf('Have %d session(s) for import.', count($sessions)));
+
+        // Check if accounts were already saved from the session response (callback)
+        $existingAccounts = $this->importJob->getServiceAccounts();
+        if (count($existingAccounts) > 0) {
+            Log::debug(sprintf('Already have %d accounts from session response, skipping API fetch.', count($existingAccounts)));
+
+            return $messageBag;
+        }
+
+        // No accounts saved yet, try to fetch from API (fallback for older sessions)
+        $return = [];
+        $cache = [];
 
         foreach ($sessions as $sessionId) {
             $cacheKey = sprintf('eb_session_%s', $sessionId);

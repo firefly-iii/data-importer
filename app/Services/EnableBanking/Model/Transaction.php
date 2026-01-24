@@ -54,11 +54,19 @@ class Transaction
         Log::debug('Enable Banking transaction from array', $array);
 
         $transaction = new self();
-        $transaction->transactionId = $array['transaction_id'] ?? '';
+        // API may return transaction_id or entry_reference as unique identifier
+        $transaction->transactionId = $array['transaction_id'] ?? $array['entry_reference'] ?? '';
         $transaction->accountUid = $array['account_uid'] ?? '';
 
-        // Handle transaction amount
-        $transaction->transactionAmount = (string) ($array['transaction_amount']['amount'] ?? '0');
+        // Handle transaction amount - apply sign based on credit_debit_indicator
+        $amount = (string) ($array['transaction_amount']['amount'] ?? '0');
+        $creditDebitIndicator = $array['credit_debit_indicator'] ?? '';
+
+        // DBIT = debit (money out, negative), CRDT = credit (money in, positive)
+        if ('DBIT' === $creditDebitIndicator && !str_starts_with($amount, '-')) {
+            $amount = '-' . $amount;
+        }
+        $transaction->transactionAmount = $amount;
         $transaction->currencyCode = $array['transaction_amount']['currency'] ?? '';
 
         // Handle dates
@@ -68,21 +76,31 @@ class Transaction
         if (isset($array['value_date'])) {
             $transaction->valueDate = Carbon::parse($array['value_date']);
         }
-
-        // Creditor info
-        $transaction->creditorName = $array['creditor_name'] ?? $array['creditor']['name'] ?? '';
-        $transaction->creditorIban = $array['creditor_account']['iban'] ?? '';
-
-        // Debtor info
-        $transaction->debtorName = $array['debtor_name'] ?? $array['debtor']['name'] ?? '';
-        $transaction->debtorIban = $array['debtor_account']['iban'] ?? '';
-
-        // Description
-        $transaction->remittanceInformation = $array['remittance_information'] ?? '';
-        if (is_array($transaction->remittanceInformation)) {
-            $transaction->remittanceInformation = implode(' ', $transaction->remittanceInformation);
+        // Also check transaction_date as fallback
+        if (null === $transaction->bookingDate && isset($array['transaction_date'])) {
+            $transaction->bookingDate = Carbon::parse($array['transaction_date']);
         }
-        $transaction->additionalInformation = $array['additional_information'] ?? '';
+
+        // Creditor info - handle nested structure
+        $transaction->creditorName = $array['creditor_name'] ?? $array['creditor']['name'] ?? '';
+        // API uses creditor_account.iban or creditor_account.identification
+        $transaction->creditorIban = $array['creditor_account']['iban']
+            ?? $array['creditor_account']['identification'] ?? '';
+
+        // Debtor info - handle nested structure
+        $transaction->debtorName = $array['debtor_name'] ?? $array['debtor']['name'] ?? '';
+        // API uses debtor_account.iban or debtor_account.identification
+        $transaction->debtorIban = $array['debtor_account']['iban']
+            ?? $array['debtor_account']['identification'] ?? '';
+
+        // Description - remittance_information is an array of strings per API spec
+        $remittanceInfo = $array['remittance_information'] ?? '';
+        if (is_array($remittanceInfo)) {
+            $transaction->remittanceInformation = implode(' ', $remittanceInfo);
+        } else {
+            $transaction->remittanceInformation = $remittanceInfo;
+        }
+        $transaction->additionalInformation = $array['additional_information'] ?? $array['note'] ?? '';
 
         $transaction->status = $array['status'] ?? 'booked';
 
@@ -91,7 +109,7 @@ class Transaction
             $transaction->tags[] = $transaction->status;
         }
 
-        // Generate transaction ID if empty
+        // Generate transaction ID if empty - use entry_reference or hash
         if ('' === $transaction->transactionId) {
             $hash = hash('sha256', (string) microtime());
             try {
