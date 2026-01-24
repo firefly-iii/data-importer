@@ -73,11 +73,17 @@ class UploadController extends Controller
     }
 
     /**
-     * @return Factory|View
+     * @return Factory|View|RedirectResponse
      */
     public function index(Request $request, string $flow)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
+
+        // Enable Banking flow doesn't use the upload page - redirect to authentication
+        if ('eb' === $flow) {
+            return redirect()->route('authenticate-flow.index', ['eb']);
+        }
+
         $mainTitle = 'Upload your file(s)';
         $subTitle  = 'Start page and instructions';
         $settings  = ['simplefin'  => $this->getSimpleFINSettings()];

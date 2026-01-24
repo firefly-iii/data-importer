@@ -26,10 +26,13 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Enums\AuthenticationStatus;
+use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
+use App\Services\Shared\Configuration\Configuration;
 use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
 use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
@@ -87,7 +90,21 @@ class AuthenticateController extends Controller
         }
 
         if (AuthenticationStatus::AUTHENTICATED === $result) {
-            Log::debug('[a] Return redirect to already authenticated view');
+            Log::debug('[a] Already authenticated');
+
+            // For Enable Banking, create job and redirect directly to bank selection
+            if ('eb' === $flow) {
+                $repository = new ImportJobRepository();
+                $importJob = $repository->create();
+                $importJob = $repository->setFlow($importJob, $flow);
+
+                $configuration = Configuration::make();
+                $configuration->setFlow($flow);
+                $importJob->setConfiguration($configuration);
+                $repository->saveToDisk($importJob);
+
+                return redirect()->route('eb-select-bank.index', [$importJob->identifier]);
+            }
 
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
@@ -112,6 +129,9 @@ class AuthenticateController extends Controller
 
             case 'sophtron':
                 return new SophtronValidator();
+
+            case 'eb':
+                return new EnableBankingValidator();
         }
 
         return null;
@@ -139,6 +159,20 @@ class AuthenticateController extends Controller
             }
         }
         $validator->setData($submission);
+
+        // For Enable Banking, skip upload page and go directly to bank selection
+        if ('eb' === $flow) {
+            $repository = new ImportJobRepository();
+            $importJob = $repository->create();
+            $importJob = $repository->setFlow($importJob, $flow);
+
+            $configuration = Configuration::make();
+            $configuration->setFlow($flow);
+            $importJob->setConfiguration($configuration);
+            $repository->saveToDisk($importJob);
+
+            return redirect()->route('eb-select-bank.index', [$importJob->identifier]);
+        }
 
         return redirect(route('new-import.index', [$flow]));
     }

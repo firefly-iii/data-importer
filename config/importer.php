@@ -112,7 +112,7 @@ return [
         ],
         'eb'        => [
             'title'                     => 'Enable Banking',
-            'enabled'                   => false,
+            'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,

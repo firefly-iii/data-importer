@@ -26,6 +26,7 @@ namespace App\Services\Shared\Model;
 
 use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Converter\Iban as IbanConverter;
+use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
@@ -327,6 +328,49 @@ class ImportServiceAccount
                 'status'        => $account->status,
                 'extra'         => ['Currency' => (string) $account->currency, 'IBAN'     => '', 'BBAN'     => ''],
             ]);
+        }
+
+        return $return;
+    }
+
+    public static function convertEnableBankingArray(array $accounts): array
+    {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $return = [];
+
+        /** @var EnableBankingAccount $account */
+        foreach ($accounts as $account) {
+            $iban     = $account->getIban();
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
+
+            $current  = self::fromArray(
+                [
+                    'id'            => $account->getIdentifier(),
+                    'name'          => $account->getFullName(),
+                    'currency_code' => $account->getCurrency(),
+                    'iban'          => $iban,
+                    'bban'          => $account->getBban(),
+                    'status'        => '',
+                    'extra'         => [
+                        'Owner name'   => $account->getOwnerName(),
+                        'Display name' => $account->getDisplayName(),
+                        'Product'      => $account->getProduct(),
+                        'Account type' => $account->getAccountType(),
+                        'Currency'     => $account->getCurrency(),
+                        'IBAN'         => $iban,
+                        'BBAN'         => $account->getBban(),
+                    ],
+                ]
+            );
+
+            foreach ($account->getBalances() as $balance) {
+                $key                  = sprintf('Balance (%s) (%s)', $balance['balance_type'] ?? 'unknown', $balance['currency'] ?? '');
+                $current->extra[$key] = $balance['amount'] ?? '';
+            }
+            $return[] = $current;
         }
 
         return $return;

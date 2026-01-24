@@ -90,6 +90,12 @@ class ConfigurationController extends Controller
 
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
+                if ($messages->has('missing_sessions') && 'true' === (string)$messages->get('missing_sessions')[0]) {
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+
+                    return redirect()->route('eb-select-bank.index', [$identifier]);
+                }
                 if ($messages->has('expired_agreement') && 'true' === (string) $messages->get('expired_agreement')[0]) {
                     $importJob->setServiceAccounts([]);
                     $configuration = $importJob->getConfiguration();
@@ -154,6 +160,7 @@ class ConfigurationController extends Controller
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
             'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
             'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
+            'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
             'file'      => [],
             default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow))
         };

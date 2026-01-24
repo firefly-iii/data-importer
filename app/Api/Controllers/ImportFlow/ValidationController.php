@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Api\Controllers\ImportFlow;
 
 use App\Api\Controllers\Controller;
+use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
@@ -42,6 +43,7 @@ class ValidationController extends Controller
             'simplefin' => $this->validateSimpleFIN(),
             'lunchflow' => $this->validateLunchFlow(),
             'sophtron'  => $this->validateSophtron(),
+            'eb'        => $this->validateEnableBanking(),
             'file'      => response()->json(['result' => 'OK']),
             default     => response()->json(['result'  => 'NOK', 'message' => 'Unknown provider'])
         };
@@ -123,6 +125,27 @@ class ValidationController extends Controller
             return response()->json(['result' => 'NODATA']);
         }
         Log::info(sprintf('[%s] All OK in validateSimpleFIN.', config('importer.version')));
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    private function validateEnableBanking(): JsonResponse
+    {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $validator = new EnableBankingValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            Log::error('Error: Could not validate Enable Banking credentials.');
+
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            Log::error('No data: Could not validate Enable Banking credentials.');
+
+            return response()->json(['result' => 'NODATA']);
+        }
+        Log::info(sprintf('[%s] All OK in validateEnableBanking.', config('importer.version')));
 
         return response()->json(['result' => 'OK']);
     }

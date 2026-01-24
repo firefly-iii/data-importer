@@ -16,7 +16,7 @@
                         <p>Hi there!</p>
                         <p>
                             It looks like you're already authenticated, and you are ready to use import
-                            provider "{{ config(sprintf('importer.flow_titles.%s',$flow)) }}".
+                            provider "{{ config(sprintf('importer.providers.%s.title', $flow)) }}".
                         </p>
                         <p>
                             Please continue to the <a href="{{ route('new-import.index', [$flow]) }}">next step to start your new import</a>.

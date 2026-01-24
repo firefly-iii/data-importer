@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
@@ -54,6 +55,7 @@ class ServiceController extends Controller
             'simplefin' => $this->validateSimpleFIN(),
             'spectre'   => $this->validateSpectre(request()),
             'lunchflow' => $this->validateLunchFlow(),
+            'eb'                     => $this->validateEnableBanking(),
             'file'      => response()->json(['result' => 'OK']),
             default     => response()->json(['result'  => 'NOK', 'message' => 'Unknown provider'])
         };
@@ -127,6 +129,21 @@ class ServiceController extends Controller
         }
         if (AuthenticationStatus::NODATA === $result) {
             // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    public function validateEnableBanking(): JsonResponse
+    {
+        $validator = new EnableBankingValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
             return response()->json(['result' => 'NODATA']);
         }
 

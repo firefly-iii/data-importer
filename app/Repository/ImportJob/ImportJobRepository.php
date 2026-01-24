@@ -27,6 +27,7 @@ namespace App\Repository\ImportJob;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
+use App\Services\EnableBanking\Validation\NewJobDataCollector as EnableBankingNewJobDataCollector;
 use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
 use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
 use App\Services\Session\Constants;
@@ -204,6 +205,16 @@ class ImportJobRepository
 
             case 'sophtron':
                 // get import job + configuration back:
+                $configuration = $importJob->getConfiguration();
+                $configuration->setDuplicateDetectionMethod('cell');
+
+                break;
+
+            case 'eb':
+                $validator     = new EnableBankingNewJobDataCollector();
+                $validator->setImportJob($importJob);
+                $messageBag    = $validator->collectAccounts();
+                $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
                 $configuration->setDuplicateDetectionMethod('cell');
 
