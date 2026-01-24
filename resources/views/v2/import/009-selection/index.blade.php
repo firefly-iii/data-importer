@@ -172,24 +172,16 @@
                 <div class="col-lg-10 offset-lg-1">
                     <div class="card">
                         <div class="card-header">
-                            @if($flow === 'eb')
-                            Number of days
-                            @else
                             Number of days the connection is valid
-                            @endif
                         </div>
                         <div class="card-body">
                             <div class="form-group row">
                                 <label for="days" class="col-sm-3 col-form-label">
-                                    @if($flow === 'eb')
-                                    Number of days
-                                    @else
                                     Number of days the connection is valid
-                                    @endif
                                 </label>
                                 <div class="col-sm-9">
                                     @if($flow === 'eb')
-                                    <input name="days" id="days-input" class="form-control" step="1" min="1" max="1000" type="number"
+                                    <input name="days" id="days-input" class="form-control" step="1" min="1" type="number"
                                            value="90" readonly/>
                                     <small class="form-text text-muted">
                                         Session validity is determined by the selected bank.

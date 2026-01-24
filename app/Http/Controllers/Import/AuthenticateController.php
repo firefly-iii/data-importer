@@ -90,21 +90,7 @@ class AuthenticateController extends Controller
         }
 
         if (AuthenticationStatus::AUTHENTICATED === $result) {
-            Log::debug('[a] Already authenticated');
-
-            // For Enable Banking, create job and redirect directly to bank selection
-            if ('eb' === $flow) {
-                $repository = new ImportJobRepository();
-                $importJob = $repository->create();
-                $importJob = $repository->setFlow($importJob, $flow);
-
-                $configuration = Configuration::make();
-                $configuration->setFlow($flow);
-                $importJob->setConfiguration($configuration);
-                $repository->saveToDisk($importJob);
-
-                return redirect()->route('eb-select-bank.index', [$importJob->identifier]);
-            }
+            Log::debug('[a] Return redirect to already authenticated view');
 
             return view('import.002-authenticate.already-authenticated')->with(compact('mainTitle', 'flow', 'subTitle', 'pageTitle'));
         }
@@ -159,20 +145,6 @@ class AuthenticateController extends Controller
             }
         }
         $validator->setData($submission);
-
-        // For Enable Banking, skip upload page and go directly to bank selection
-        if ('eb' === $flow) {
-            $repository = new ImportJobRepository();
-            $importJob = $repository->create();
-            $importJob = $repository->setFlow($importJob, $flow);
-
-            $configuration = Configuration::make();
-            $configuration->setFlow($flow);
-            $importJob->setConfiguration($configuration);
-            $repository->saveToDisk($importJob);
-
-            return redirect()->route('eb-select-bank.index', [$importJob->identifier]);
-        }
 
         return redirect(route('new-import.index', [$flow]));
     }
