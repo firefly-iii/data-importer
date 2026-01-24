@@ -107,6 +107,16 @@ class ConfigurationController extends Controller
 
                     return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle', 'redirect'));
                 }
+                if ($messages->has('no_accounts') && 'eb' === $flow) {
+                    $importJob->setServiceAccounts([]);
+                    $configuration = $importJob->getConfiguration();
+                    $configuration->clearEnableBankingSessions();
+                    $importJob->setConfiguration($configuration);
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+
+                    return redirect()->route('eb-select-bank.index', [$identifier])->withErrors($messages);
+                }
 
                 // if the agreement has expired, show error and exit gracefully.
                 // https://firefly-data.hades.internal/configure-import/2385f86b-0e50-4ba7-8b7c-e663471f2dd6?parse=true
