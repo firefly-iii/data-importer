@@ -37,29 +37,9 @@ class SecretManager
     public const string EB_PRIVATE_KEY = 'enable_banking_private_key';
 
     /**
-     * Will return the Enable Banking Application ID. From a cookie if its there, otherwise from configuration.
+     * Get the App ID from session, returns empty string if not found or on exception
      */
-    public static function getAppId(): string
-    {
-        if (!self::hasAppId()) {
-            Log::debug('No Enable Banking App ID in session, will return config variable.');
-
-            return (string) config('enablebanking.application_id');
-        }
-
-        try {
-            $id = (string) session()->get(self::EB_APP_ID);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
-            $id = '(super invalid)';
-        }
-
-        return $id;
-    }
-
-    /**
-     * Will verify if the user has an Enable Banking App ID (in a cookie)
-     */
-    private static function hasAppId(): bool
+    private static function getSessionAppId(): string
     {
         try {
             $id = (string) session()->get(self::EB_APP_ID);
@@ -67,33 +47,37 @@ class SecretManager
             $id = '';
         }
 
-        return '' !== $id;
+        return $id;
     }
 
     /**
-     * Will return the Enable Banking Private Key. From a cookie if its there, otherwise from configuration.
+     * Will return the Enable Banking Application ID. From a cookie if its there, otherwise from configuration.
      */
-    public static function getPrivateKey(): string
+    public static function getAppId(): string
     {
-        if (!self::hasPrivateKey()) {
-            Log::debug('No Enable Banking private key in session, will return config variable.');
+        $sessionId = self::getSessionAppId();
 
-            return (string) config('enablebanking.private_key');
+        if ('' === $sessionId) {
+            Log::debug('No Enable Banking App ID in session, will return config variable.');
+
+            return (string) config('enablebanking.application_id');
         }
 
-        try {
-            $key = (string) session()->get(self::EB_PRIVATE_KEY);
-        } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
-            $key = '(super invalid key)';
-        }
-
-        return $key;
+        return $sessionId;
     }
 
     /**
-     * Will verify if the user has an Enable Banking Private Key (in a cookie)
+     * Will verify if the user has an Enable Banking App ID (in a cookie)
      */
-    private static function hasPrivateKey(): bool
+    private static function hasAppId(): bool
+    {
+        return '' !== self::getSessionAppId();
+    }
+
+    /**
+     * Get the Private Key from session, returns empty string if not found or on exception
+     */
+    private static function getSessionPrivateKey(): string
     {
         try {
             $key = (string) session()->get(self::EB_PRIVATE_KEY);
@@ -101,7 +85,47 @@ class SecretManager
             $key = '';
         }
 
-        return '' !== $key;
+        return $key;
+    }
+
+    /**
+     * Will return the Enable Banking Private Key. From a cookie if its there, otherwise from configuration.
+     */
+    public static function getPrivateKey(): string
+    {
+        $sessionKey = self::getSessionPrivateKey();
+
+        if ('' === $sessionKey) {
+            Log::debug('No Enable Banking private key in session, will return config variable.');
+
+            return (string) config('enablebanking.private_key');
+        }
+
+        return $sessionKey;
+    }
+
+    /**
+     * Will verify if the user has an Enable Banking Private Key (in a cookie)
+     */
+    private static function hasPrivateKey(): bool
+    {
+        return '' !== self::getSessionPrivateKey();
+    }
+
+    /**
+     * Check if application ID is available (from session or config)
+     */
+    public static function hasAppIdAvailable(): bool
+    {
+        return '' !== self::getAppId();
+    }
+
+    /**
+     * Check if private key is available (from session or config)
+     */
+    public static function hasPrivateKeyAvailable(): bool
+    {
+        return '' !== self::getPrivateKey();
     }
 
     /**

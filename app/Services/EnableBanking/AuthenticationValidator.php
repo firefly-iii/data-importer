@@ -38,10 +38,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
 
-        $appId = SecretManager::getAppId();
-        $privateKey = SecretManager::getPrivateKey();
-
-        if ('' === $appId || '' === $privateKey) {
+        if (!SecretManager::hasAppIdAvailable() || !SecretManager::hasPrivateKeyAvailable()) {
             return AuthenticationStatus::NODATA;
         }
 

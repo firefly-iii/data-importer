@@ -26,7 +26,6 @@ namespace App\Services\EnableBanking\Model;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use JsonException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -63,8 +62,8 @@ class Transaction
         $creditDebitIndicator = $array['credit_debit_indicator'] ?? '';
 
         // DBIT = debit (money out, negative), CRDT = credit (money in, positive)
-        if ('DBIT' === $creditDebitIndicator && !str_starts_with($amount, '-')) {
-            $amount = '-' . $amount;
+        if ('DBIT' === $creditDebitIndicator && bccomp($amount, '0') >= 0) {
+            $amount = bcmul($amount, '-1');
         }
         $transaction->transactionAmount = $amount;
         $transaction->currencyCode = $array['transaction_amount']['currency'] ?? '';
@@ -112,10 +111,11 @@ class Transaction
         // Generate transaction ID if empty - use entry_reference or hash
         if ('' === $transaction->transactionId) {
             $hash = hash('sha256', (string) microtime());
-            try {
-                $hash = hash('sha256', json_encode($array, JSON_THROW_ON_ERROR));
-            } catch (JsonException $e) {
-                Log::error(sprintf('Could not parse array into JSON: %s', $e->getMessage()));
+            $encoded = json_encode($array);
+            if (json_validate($encoded)) {
+                $hash = hash('sha256', $encoded);
+            } else {
+                Log::error('Could not parse array into JSON');
             }
             $transaction->transactionId = sprintf('eb-%s', Uuid::uuid5(config('importer.namespace'), $hash));
         }
@@ -156,10 +156,7 @@ class Transaction
 
     public function getCleanDescription(): string
     {
-        $description = $this->getDescription();
-        $description = str_replace(["\n", "\t", "\r"], ' ', $description);
-
-        return trim($description);
+        return app('steam')->cleanStringAndNewlines($this->getDescription());
     }
 
     public function getTransactionId(): string

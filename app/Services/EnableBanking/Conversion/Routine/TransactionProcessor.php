@@ -51,6 +51,11 @@ class TransactionProcessor
     private ImportJob $importJob;
     private ImportJobRepository $repository;
 
+    public function __construct()
+    {
+        bcscale(12);
+    }
+
     /**
      * @throws ImporterErrorException
      */
@@ -137,9 +142,7 @@ class TransactionProcessor
         $return = [];
         $getPending = $this->configuration->getPendingTransactions();
 
-        if ($getPending) {
-            Log::info('Will include pending transactions.');
-        } else {
+        if (!$getPending) {
             Log::info('Will NOT include pending transactions.');
         }
 

@@ -159,7 +159,8 @@ class GenerateTransactions
 
         if (null !== $sourceName) {
             $transaction['source_name'] = $sourceName;
-        } elseif (!isset($transaction['source_id'])) {
+        }
+        if (null === $sourceName && !isset($transaction['source_id'])) {
             $transaction['source_name'] = '(unknown source)';
         }
 
@@ -187,7 +188,8 @@ class GenerateTransactions
 
         if (null !== $destName) {
             $transaction['destination_name'] = $destName;
-        } elseif (!isset($transaction['destination_id'])) {
+        }
+        if (null === $destName && !isset($transaction['destination_id'])) {
             $transaction['destination_name'] = '(unknown destination)';
         }
 

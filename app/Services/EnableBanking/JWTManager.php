@@ -67,9 +67,6 @@ class JWTManager
      */
     public static function hasValidCredentials(): bool
     {
-        $appId = SecretManager::getAppId();
-        $privateKey = SecretManager::getPrivateKey();
-
-        return '' !== $appId && '' !== $privateKey;
+        return SecretManager::hasAppIdAvailable() && SecretManager::hasPrivateKeyAvailable();
     }
 }
