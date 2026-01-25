@@ -119,6 +119,31 @@ class ImportServiceAccount
                 ],
             ]);
         }
+        if ($account instanceof EnableBankingAccount) {
+            $iban = $account->getIban();
+            if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {
+                Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
+                $iban = '';
+            }
+
+            return self::fromArray([
+                'id'            => $account->getUid(),
+                'name'          => $account->getFullName(),
+                'currency_code' => $account->getCurrency(),
+                'iban'          => $iban,
+                'bban'          => $account->getBban(),
+                'status'        => '',
+                'extra'         => [
+                    'Owner name'   => $account->getOwnerName(),
+                    'Display name' => $account->getDisplayName(),
+                    'Product'      => $account->getProduct(),
+                    'Account type' => $account->getAccountType(),
+                    'Currency'     => $account->getCurrency(),
+                    'IBAN'         => $iban,
+                    'BBAN'         => $account->getBban(),
+                ],
+            ]);
+        }
         if ($account instanceof SophtronAccount) {
             $iban = $account->accountNumber;
             if ('' !== $iban && false === IbanConverter::isValidIban($iban)) {

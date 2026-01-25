@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Shared\Model\ImportServiceAccount;
 use Carbon\Carbon;
@@ -69,6 +70,9 @@ trait CreatesAccounts
             }
             if ($entry instanceof NordigenAccount) {
                 return $entry->getIdentifier() === $importServiceId;
+            }
+            if ($entry instanceof EnableBankingAccount) {
+                return $entry->getUid() === $importServiceId;
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
 
