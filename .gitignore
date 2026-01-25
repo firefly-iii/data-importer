@@ -19,7 +19,3 @@ resources/js/v2/node_modules
 
 # ignore generated files.
 public/build
-
-# intellij files
-.idea/
-*.iml
