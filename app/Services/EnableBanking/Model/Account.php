@@ -59,13 +59,24 @@ class Account
         $accountId = $array['account_id'] ?? [];
         $account->iban = $accountId['iban'] ?? $array['iban'] ?? '';
 
-        // Handle BBAN (not in main API spec but may be present)
-        $account->bban = $accountId['bban'] ?? $array['bban'] ?? '';
-
         // Handle non-IBAN identification via "other" field
         if (isset($accountId['other'])) {
             $account->otherIdentification = $accountId['other']['identification'] ?? '';
             $account->otherScheme = $accountId['other']['scheme_name'] ?? '';
+        }
+
+        // Parse all_account_ids array for BBAN and other identifications
+        $allAccountIds = $array['all_account_ids'] ?? [];
+        foreach ($allAccountIds as $accountIdEntry) {
+            $schemeName = $accountIdEntry['scheme_name'] ?? '';
+            $identification = $accountIdEntry['identification'] ?? '';
+
+            if ('BBAN' === $schemeName && '' === $account->bban) {
+                $account->bban = $identification;
+            }
+            if ('IBAN' === $schemeName && '' === $account->iban) {
+                $account->iban = $identification;
+            }
         }
 
         $account->currency = $array['currency'] ?? '';
