@@ -149,6 +149,7 @@ class GenerateTransactions
 
         $return                   = [
             'apply_rules'             => $configuration->isRules(),
+            'fire_webhooks'           => $configuration->isWebhooks(),
             'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];

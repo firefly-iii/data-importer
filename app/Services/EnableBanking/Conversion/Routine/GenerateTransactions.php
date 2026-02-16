@@ -97,8 +97,9 @@ class GenerateTransactions
         Log::debug(sprintf('Enable Banking transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
 
         $return                   = [
-            'apply_rules'             => $this->configuration->isRules(),
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
+            'apply_rules'             => $this->configuration->isRules(),
+            'fire_webhooks'           => $this->configuration->isWebhooks(),
             'transactions'            => [],
         ];
 
