@@ -36,64 +36,64 @@ use UnexpectedValueException;
  */
 class Configuration
 {
-    public const int VERSION = 3;
+    public const int VERSION              = 3;
 
-    private array  $accounts     = [];
-    private array  $newAccounts  = [];
-    private bool   $addImportTag = true;
-    private string $connection   = '0';
-    private string $contentType  = 'csv';
-    private string $camtType     = '';
-    private bool   $conversion;
-    private string $customTag    = '';
-    private string $date         = 'Y-m-d';
+    private array  $accounts              = [];
+    private array  $newAccounts           = [];
+    private bool   $addImportTag          = true;
+    private string $connection            = '0';
+    private string $contentType           = 'csv';
+    private string $camtType              = '';
+    private bool $conversion;
+    private string $customTag             = '';
+    private string $date                  = 'Y-m-d';
     private string $dateNotAfter;
     private string $dateNotBefore;
     private string $dateRange;
-    private int    $dateRangeNumber;
+    private int $dateRangeNumber;
     private string $dateRangeUnit;
 
     // same date range settings but for earlier transactions.
-    private int    $dateRangeNotAfterNumber;
+    private int $dateRangeNotAfterNumber;
     private string $dateRangeNotAfterUnit;
 
-    private int $defaultAccount = 1;
+    private int $defaultAccount           = 1;
 
     // nordigen configuration
-    private string $delimiter = 'comma';
-    private array  $doMapping = [];
+    private string $delimiter             = 'comma';
+    private array  $doMapping             = [];
 
     // flow and file type
     private string $duplicateDetectionMethod;
-    private string $flow = 'file';
+    private string $flow                  = 'file';
 
     // csv config
     private string $groupedTransactionHandling;
 
     // spectre + nordigen configuration
-    private bool $headers = false;
+    private bool $headers                 = false;
 
     // spectre configuration
     private string $identifier;
-    private bool   $ignoreDuplicateLines;
-    private bool   $ignoreDuplicateTransactions;
+    private bool $ignoreDuplicateLines;
+    private bool $ignoreDuplicateTransactions;
 
     // camt configuration
     private bool $ignoreSpectreCategories;
     private bool $mapAllData;
 
     // simplefin configuration
-    private bool   $pendingTransactions;
+    private bool $pendingTransactions;
     private string $accessToken;
 
     // date range settings
-    private array  $mapping = [];
+    private array $mapping                = [];
     private string $nordigenBank;
     private string $nordigenCountry;
     private string $nordigenMaxDays;
-    private array  $nordigenRequisitions;
+    private array $nordigenRequisitions;
 
-    private string $lunchFlowApiKey = '';
+    private string $lunchFlowApiKey       = '';
 
     // enable banking configuration
     private string $enableBankingCountry  = '';
@@ -102,20 +102,20 @@ class Configuration
     private array  $enableBankingSessions = [];
 
     // what type of import?
-    private array $roles = [];
+    private array $roles                  = [];
 
-    private bool $rules    = true;
-    private bool $webhooks = true;
+    private bool $rules                   = true;
+    private bool $webhooks                = true;
 
     // configuration for "classic" method:
-    private bool $skipForm = false;
+    private bool $skipForm                = false;
 
     // configuration for "cell" method:
-    private int    $uniqueColumnIndex;
+    private int $uniqueColumnIndex;
     private string $uniqueColumnType;
 
     // configuration for pseudo identifier (composite identifiers):
-    private array $pseudoIdentifier = [];
+    private array $pseudoIdentifier       = [];
 
     private bool $useEntireOpposingAddress;
 
@@ -127,51 +127,51 @@ class Configuration
      */
     private function __construct()
     {
-        $this->customTag = '';
+        $this->customTag                   = '';
 
         // date range settings
-        $this->dateRange       = 'all';
-        $this->dateRangeNumber = 30;
-        $this->dateRangeUnit   = 'd';
+        $this->dateRange                   = 'all';
+        $this->dateRangeNumber             = 30;
+        $this->dateRangeUnit               = 'd';
         // by default, no "not after" settings.
-        $this->dateRangeNotAfterNumber = 0;
-        $this->dateRangeNotAfterUnit   = '';
+        $this->dateRangeNotAfterNumber     = 0;
+        $this->dateRangeNotAfterUnit       = '';
 
-        $this->dateNotBefore = '';
-        $this->dateNotAfter  = '';
+        $this->dateNotBefore               = '';
+        $this->dateNotAfter                = '';
 
         // camt settings
-        $this->groupedTransactionHandling = 'single';
-        $this->useEntireOpposingAddress   = false;
+        $this->groupedTransactionHandling  = 'single';
+        $this->useEntireOpposingAddress    = false;
 
         // nordigen configuration
-        $this->nordigenCountry      = '';
-        $this->nordigenBank         = '';
-        $this->nordigenRequisitions = [];
-        $this->nordigenMaxDays      = '90';
+        $this->nordigenCountry             = '';
+        $this->nordigenBank                = '';
+        $this->nordigenRequisitions        = [];
+        $this->nordigenMaxDays             = '90';
 
         // lunch flow configuration
-        $this->lunchFlowApiKey = '';
+        $this->lunchFlowApiKey             = '';
 
         // enable banking configuration
-        $this->enableBankingCountry  = '';
-        $this->enableBankingBank     = '';
-        $this->enableBankingAuthId   = '';
-        $this->enableBankingSessions = [];
+        $this->enableBankingCountry        = '';
+        $this->enableBankingBank           = '';
+        $this->enableBankingAuthId         = '';
+        $this->enableBankingSessions       = [];
 
         // spectre
-        $this->identifier              = '0';
-        $this->ignoreSpectreCategories = false;
+        $this->identifier                  = '0';
+        $this->ignoreSpectreCategories     = false;
 
         // mapping for spectre + nordigen
-        $this->mapAllData = false;
+        $this->mapAllData                  = false;
 
         // simplefin configuration
-        $this->pendingTransactions = true;
-        $this->accessToken         = '';
+        $this->pendingTransactions         = true;
+        $this->accessToken                 = '';
 
         // double transaction detection:
-        $this->duplicateDetectionMethod = 'classic';
+        $this->duplicateDetectionMethod    = 'classic';
 
         // config for "classic":
         // Log::debug('Configuration __construct. ignoreDuplicateTransactions = true');
@@ -179,13 +179,13 @@ class Configuration
         $this->ignoreDuplicateLines        = true;
 
         // config for "cell":
-        $this->uniqueColumnIndex = 0;
-        $this->uniqueColumnType  = 'internal_reference';
+        $this->uniqueColumnIndex           = 0;
+        $this->uniqueColumnType            = 'internal_reference';
 
         // utf8
-        $this->conversion = false;
+        $this->conversion                  = false;
 
-        $this->version = self::VERSION;
+        $this->version                     = self::VERSION;
     }
 
     /**
@@ -219,56 +219,56 @@ class Configuration
      */
     private static function fromClassicFile(array $data): self
     {
-        $delimiters             = config('csv.delimiters_reversed');
-        $classicRoleNames       = config('csv.classic_roles');
-        $object                 = new self();
-        $object->headers        = $data['has-headers'] ?? false;
-        $object->date           = $data['date-format'] ?? $object->date;
-        $object->delimiter      = $delimiters[$data['delimiter']] ?? 'comma';
-        $object->defaultAccount = $data['import-account'] ?? $object->defaultAccount;
-        $object->rules          = $data['apply-rules'] ?? true;
-        $object->webhooks       = $data['webhooks'] ?? true;
-        $object->flow           = $data['flow'] ?? 'file';
-        $object->contentType    = $data['content_type'] ?? 'csv';
-        $object->camtType       = $data['camt_type'] ?? '';
-        $object->customTag      = $data['custom_tag'] ?? '';
+        $delimiters                          = config('csv.delimiters_reversed');
+        $classicRoleNames                    = config('csv.classic_roles');
+        $object                              = new self();
+        $object->headers                     = $data['has-headers'] ?? false;
+        $object->date                        = $data['date-format'] ?? $object->date;
+        $object->delimiter                   = $delimiters[$data['delimiter']] ?? 'comma';
+        $object->defaultAccount              = $data['import-account'] ?? $object->defaultAccount;
+        $object->rules                       = $data['apply-rules'] ?? true;
+        $object->webhooks                    = $data['webhooks'] ?? true;
+        $object->flow                        = $data['flow'] ?? 'file';
+        $object->contentType                 = $data['content_type'] ?? 'csv';
+        $object->camtType                    = $data['camt_type'] ?? '';
+        $object->customTag                   = $data['custom_tag'] ?? '';
 
         // camt settings
-        $object->groupedTransactionHandling = $data['grouped_transaction_handling'] ?? 'single';
-        $object->useEntireOpposingAddress   = $data['use_entire_opposing_address'] ?? false;
+        $object->groupedTransactionHandling  = $data['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress    = $data['use_entire_opposing_address'] ?? false;
 
         // other settings (are not in v1 anyway)
-        $object->dateRange       = $data['date_range'] ?? 'all';
-        $object->dateRangeNumber = $data['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $data['date_range_unit'] ?? 'd';
+        $object->dateRange                   = $data['date_range'] ?? 'all';
+        $object->dateRangeNumber             = $data['date_range_number'] ?? 30;
+        $object->dateRangeUnit               = $data['date_range_unit'] ?? 'd';
 
         // by default, no "not after" settings (are not in v1 anyway)
-        $object->dateRangeNotAfterNumber = $data['date_range_not_after_number'] ?? 0;
-        $object->dateRangeNotAfterUnit   = $data['date_range_not_after_unit'] ?? '';
+        $object->dateRangeNotAfterNumber     = $data['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $data['date_range_not_after_unit'] ?? '';
 
-        $object->dateNotBefore = $data['date_not_before'] ?? '';
-        $object->dateNotAfter  = $data['date_not_after'] ?? '';
+        $object->dateNotBefore               = $data['date_not_before'] ?? '';
+        $object->dateNotAfter                = $data['date_not_after'] ?? '';
 
         // spectre settings (are not in v1 anyway)
-        $object->identifier              = $data['identifier'] ?? '0';
-        $object->connection              = $data['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $data['ignore_spectre_categories'] ?? false;
+        $object->identifier                  = $data['identifier'] ?? '0';
+        $object->connection                  = $data['connection'] ?? '0';
+        $object->ignoreSpectreCategories     = $data['ignore_spectre_categories'] ?? false;
 
         // nordigen settings (are not in v1 anyway)
-        $object->nordigenCountry      = $data['nordigen_country'] ?? '';
-        $object->nordigenBank         = $data['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $data['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $data['nordigen_max_days'] ?? '90';
+        $object->nordigenCountry             = $data['nordigen_country'] ?? '';
+        $object->nordigenBank                = $data['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions        = $data['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays             = $data['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $data['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $data['lunch_flow_api_key'] ?? '';
 
         // settings for spectre + nordigen (are not in v1 anyway)
-        $object->mapAllData = $data['map_all_data'] ?? false;
-        $object->accounts   = $data['accounts'] ?? [];
+        $object->mapAllData                  = $data['map_all_data'] ?? false;
+        $object->accounts                    = $data['accounts'] ?? [];
 
         // simplefin
-        $object->pendingTransactions = $data['pending_transactions'] ?? true;
+        $object->pendingTransactions         = $data['pending_transactions'] ?? true;
 
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
         Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
@@ -277,7 +277,7 @@ class Configuration
             Log::debug('Will ignore duplicates.');
             $object->ignoreDuplicateTransactions = true;
             Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
-            $object->duplicateDetectionMethod = 'classic';
+            $object->duplicateDetectionMethod    = 'classic';
         }
 
         if (isset($data['ignore_duplicates']) && false === $data['ignore_duplicates']) {
@@ -293,16 +293,16 @@ class Configuration
         }
 
         // array values
-        $object->roles     = [];
-        $object->doMapping = [];
-        $object->mapping   = [];
-        $object->accounts  = [];
+        $object->roles                       = [];
+        $object->doMapping                   = [];
+        $object->mapping                     = [];
+        $object->accounts                    = [];
 
         // utf8
-        $object->conversion = $data['conversion'] ?? false;
+        $object->conversion                  = $data['conversion'] ?? false;
 
         // loop roles from classic file:
-        $roles = $data['column-roles'] ?? [];
+        $roles                               = $data['column-roles'] ?? [];
         foreach ($roles as $index => $role) {
             // some roles have been given a new name some time in the past.
             $role   = $classicRoleNames[$role] ?? $role;
@@ -317,23 +317,23 @@ class Configuration
         ksort($object->roles);
 
         // loop do mapping from classic file.
-        $doMapping = $data['column-do-mapping'] ?? [];
+        $doMapping                           = $data['column-do-mapping'] ?? [];
         foreach ($doMapping as $index => $map) {
-            $index                     = (int)$index;
+            $index                     = (int) $index;
             $object->doMapping[$index] = $map;
         }
         ksort($object->doMapping);
 
         // loop mapping from classic file.
-        $mapping = $data['column-mapping-config'] ?? [];
+        $mapping                             = $data['column-mapping-config'] ?? [];
         foreach ($mapping as $index => $map) {
-            $index                   = (int)$index;
+            $index                   = (int) $index;
             $object->mapping[$index] = $map;
         }
         ksort($object->mapping);
 
         // set version to latest version and return.
-        $object->version = self::VERSION;
+        $object->version                     = self::VERSION;
 
         if ('csv' === $object->flow) {
             $object->flow = 'file';
@@ -355,24 +355,24 @@ class Configuration
      */
     public static function fromArray(array $array): self
     {
-        $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self();
-        $object->headers        = $array['headers'] ?? false;
-        $object->date           = $array['date'] ?? 'Y-m-d';
-        $object->defaultAccount = $array['default_account'] ?? 0;
-        $object->delimiter      = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
-        $object->rules          = $array['rules'] ?? true;
-        $object->webhooks       = $array['webhooks'] ?? true;
-        $object->skipForm       = $array['skip_form'] ?? false;
-        $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->roles          = $array['roles'] ?? [];
-        $object->mapping        = $array['mapping'] ?? [];
-        $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->version        = self::VERSION;
-        $object->flow           = $array['flow'] ?? 'file';
-        $object->contentType    = $array['content_type'] ?? 'csv';
-        $object->camtType       = $array['camt_type'] ?? '';
-        $object->customTag      = $array['custom_tag'] ?? '';
+        $delimiters                          = config('csv.delimiters_reversed');
+        $object                              = new self();
+        $object->headers                     = $array['headers'] ?? false;
+        $object->date                        = $array['date'] ?? 'Y-m-d';
+        $object->defaultAccount              = $array['default_account'] ?? 0;
+        $object->delimiter                   = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
+        $object->rules                       = $array['rules'] ?? true;
+        $object->webhooks                    = $array['webhooks'] ?? true;
+        $object->skipForm                    = $array['skip_form'] ?? false;
+        $object->addImportTag                = $array['add_import_tag'] ?? true;
+        $object->roles                       = $array['roles'] ?? [];
+        $object->mapping                     = $array['mapping'] ?? [];
+        $object->doMapping                   = $array['do_mapping'] ?? [];
+        $object->version                     = self::VERSION;
+        $object->flow                        = $array['flow'] ?? 'file';
+        $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
+        $object->customTag                   = $array['custom_tag'] ?? '';
 
         // Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
 
@@ -382,51 +382,51 @@ class Configuration
         ksort($object->roles);
 
         // settings for spectre + nordigen
-        $object->mapAllData  = $array['map_all_data'] ?? false;
-        $object->accounts    = $array['accounts'] ?? [];
-        $object->newAccounts = $array['new_accounts'] ?? [];
+        $object->mapAllData                  = $array['map_all_data'] ?? false;
+        $object->accounts                    = $array['accounts'] ?? [];
+        $object->newAccounts                 = $array['new_accounts'] ?? [];
 
         // spectre
-        $object->identifier              = $array['identifier'] ?? '0';
-        $object->connection              = $array['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
+        $object->identifier                  = $array['identifier'] ?? '0';
+        $object->connection                  = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories     = $array['ignore_spectre_categories'] ?? false;
 
         // date range settings
-        $object->dateRange       = $array['date_range'] ?? 'all';
-        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+        $object->dateRange                   = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber             = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit               = $array['date_range_unit'] ?? 'd';
 
         // add date range not after settings.
-        $object->dateRangeNotAfterNumber = $array['date_range_not_after_number'] ?? 0;
-        $object->dateRangeNotAfterUnit   = $array['date_range_not_after_unit'] ?? '';
+        $object->dateRangeNotAfterNumber     = $array['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $array['date_range_not_after_unit'] ?? '';
 
-        $object->dateNotBefore = $array['date_not_before'] ?? '';
-        $object->dateNotAfter  = $array['date_not_after'] ?? '';
+        $object->dateNotBefore               = $array['date_not_before'] ?? '';
+        $object->dateNotAfter                = $array['date_not_after'] ?? '';
 
         // camt
-        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
-        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
+        $object->groupedTransactionHandling  = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress    = $array['use_entire_opposing_address'] ?? false;
 
         // nordigen information:
-        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
-        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
+        $object->nordigenCountry             = $array['nordigen_country'] ?? '';
+        $object->nordigenBank                = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions        = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
 
         // enable banking configuration
-        $object->enableBankingCountry  = $array['enable_banking_country'] ?? '';
-        $object->enableBankingBank     = $array['enable_banking_bank'] ?? '';
-        $object->enableBankingAuthId   = $array['enable_banking_auth_id'] ?? '';
-        $object->enableBankingSessions = $array['enable_banking_sessions'] ?? [];
+        $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
+        $object->enableBankingBank           = $array['enable_banking_bank'] ?? '';
+        $object->enableBankingAuthId         = $array['enable_banking_auth_id'] ?? '';
+        $object->enableBankingSessions       = $array['enable_banking_sessions'] ?? [];
 
         // simplefin
-        $object->pendingTransactions = $array['pending_transactions'] ?? true;
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // duplicate transaction detection
-        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+        $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
@@ -450,21 +450,21 @@ class Configuration
         }
 
         // config for "cell":
-        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
-        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
+        $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
+        $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
 
         // config for pseudo identifier (composite identifiers):
-        $object->pseudoIdentifier = $array['pseudo_identifier'] ?? [];
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
 
         // Migrate old single-column identifier to pseudo identifier format
         $object->migrateSingleIdentifierToPseudoIdentifier();
 
         // utf8
-        $object->conversion = $array['conversion'] ?? false;
+        $object->conversion                  = $array['conversion'] ?? false;
 
         // simplefin configuration
-        $object->pendingTransactions = $array['pending_transactions'] ?? true;
-        $object->accessToken         = $array['access_token'] ?? '';
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
+        $object->accessToken                 = $array['access_token'] ?? '';
 
         if ('csv' === $object->flow) {
             $object->flow        = 'file';
@@ -487,71 +487,71 @@ class Configuration
      */
     public static function fromRequest(array $array): self
     {
-        $delimiters             = config('csv.delimiters_reversed');
-        $object                 = new self();
-        $object->version        = self::VERSION;
-        $object->headers        = $array['headers'] ?? false;
-        $object->date           = $array['date'];
-        $object->defaultAccount = $array['default_account'];
-        $object->delimiter      = $delimiters[$array['delimiter']] ?? 'comma';
-        $object->rules          = $array['rules'];
-        $object->webhooks       = $array['webhooks'];
-        $object->skipForm       = $array['skip_form'];
-        $object->addImportTag   = $array['add_import_tag'] ?? true;
-        $object->roles          = $array['roles'] ?? [];
-        $object->mapping        = $array['mapping'] ?? [];
-        $object->doMapping      = $array['do_mapping'] ?? [];
-        $object->contentType    = $array['content_type'] ?? 'csv';
-        $object->camtType       = $array['camt_type'] ?? '';
-        $object->customTag      = $array['custom_tag'] ?? '';
+        $delimiters                          = config('csv.delimiters_reversed');
+        $object                              = new self();
+        $object->version                     = self::VERSION;
+        $object->headers                     = $array['headers'] ?? false;
+        $object->date                        = $array['date'];
+        $object->defaultAccount              = $array['default_account'];
+        $object->delimiter                   = $delimiters[$array['delimiter']] ?? 'comma';
+        $object->rules                       = $array['rules'];
+        $object->webhooks                    = $array['webhooks'];
+        $object->skipForm                    = $array['skip_form'];
+        $object->addImportTag                = $array['add_import_tag'] ?? true;
+        $object->roles                       = $array['roles'] ?? [];
+        $object->mapping                     = $array['mapping'] ?? [];
+        $object->doMapping                   = $array['do_mapping'] ?? [];
+        $object->contentType                 = $array['content_type'] ?? 'csv';
+        $object->camtType                    = $array['camt_type'] ?? '';
+        $object->customTag                   = $array['custom_tag'] ?? '';
 
         Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
 
         // mapping for spectre + nordigen
-        $object->mapAllData = $array['map_all_data'] ?? false;
+        $object->mapAllData                  = $array['map_all_data'] ?? false;
 
         // spectre
-        $object->identifier              = $array['identifier'] ?? '0';
-        $object->connection              = $array['connection'] ?? '0';
-        $object->ignoreSpectreCategories = $array['ignore_spectre_categories'] ?? false;
+        $object->identifier                  = $array['identifier'] ?? '0';
+        $object->connection                  = $array['connection'] ?? '0';
+        $object->ignoreSpectreCategories     = $array['ignore_spectre_categories'] ?? false;
 
         // nordigen:
-        $object->nordigenCountry      = $array['nordigen_country'] ?? '';
-        $object->nordigenBank         = $array['nordigen_bank'] ?? '';
-        $object->nordigenRequisitions = $array['nordigen_requisitions'] ?? [];
-        $object->nordigenMaxDays      = $array['nordigen_max_days'] ?? '90';
+        $object->nordigenCountry             = $array['nordigen_country'] ?? '';
+        $object->nordigenBank                = $array['nordigen_bank'] ?? '';
+        $object->nordigenRequisitions        = $array['nordigen_requisitions'] ?? [];
+        $object->nordigenMaxDays             = $array['nordigen_max_days'] ?? '90';
 
         // lunch flow configuration
-        $object->lunchFlowApiKey = $array['lunch_flow_api_key'] ?? '';
+        $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
 
         // enable banking:
-        $object->enableBankingCountry  = $array['enable_banking_country'] ?? '';
-        $object->enableBankingBank     = $array['enable_banking_bank'] ?? '';
-        $object->enableBankingAuthId   = $array['enable_banking_auth_id'] ?? '';
-        $object->enableBankingSessions = $array['enable_banking_sessions'] ?? [];
+        $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
+        $object->enableBankingBank           = $array['enable_banking_bank'] ?? '';
+        $object->enableBankingAuthId         = $array['enable_banking_auth_id'] ?? '';
+        $object->enableBankingSessions       = $array['enable_banking_sessions'] ?? [];
 
-        $object->groupedTransactionHandling = $array['grouped_transaction_handling'] ?? 'single';
-        $object->useEntireOpposingAddress   = $array['use_entire_opposing_address'] ?? false;
+        $object->groupedTransactionHandling  = $array['grouped_transaction_handling'] ?? 'single';
+        $object->useEntireOpposingAddress    = $array['use_entire_opposing_address'] ?? false;
 
         // spectre + nordigen
-        $object->accounts    = $array['accounts'] ?? [];
-        $object->newAccounts = $array['new_accounts'] ?? [];
+        $object->accounts                    = $array['accounts'] ?? [];
+        $object->newAccounts                 = $array['new_accounts'] ?? [];
 
         // date range settings
-        $object->dateRange       = $array['date_range'] ?? 'all';
-        $object->dateRangeNumber = $array['date_range_number'] ?? 30;
-        $object->dateRangeUnit   = $array['date_range_unit'] ?? 'd';
+        $object->dateRange                   = $array['date_range'] ?? 'all';
+        $object->dateRangeNumber             = $array['date_range_number'] ?? 30;
+        $object->dateRangeUnit               = $array['date_range_unit'] ?? 'd';
 
         // date range settings for "not after"
-        $object->dateRangeNotAfterNumber = $array['date_range_not_after_number'] ?? 0;
-        $object->dateRangeNotAfterUnit   = $array['date_range_not_after_unit'] ?? '';
+        $object->dateRangeNotAfterNumber     = $array['date_range_not_after_number'] ?? 0;
+        $object->dateRangeNotAfterUnit       = $array['date_range_not_after_unit'] ?? '';
 
         // null or Carbon because fromRequest will give Carbon object.
-        $object->dateNotBefore = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
-        $object->dateNotAfter  = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
+        $object->dateNotBefore               = null === $array['date_not_before'] ? '' : $array['date_not_before']->format('Y-m-d');
+        $object->dateNotAfter                = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
-        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+        $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
@@ -559,24 +559,24 @@ class Configuration
         Log::debug(sprintf('Configuration fromRequest: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
 
         // config for "cell":
-        $object->uniqueColumnIndex = $array['unique_column_index'] ?? 0;
-        $object->uniqueColumnType  = $array['unique_column_type'] ?? '';
+        $object->uniqueColumnIndex           = $array['unique_column_index'] ?? 0;
+        $object->uniqueColumnType            = $array['unique_column_type'] ?? '';
 
         // config for pseudo identifier (composite identifiers):
-        $object->pseudoIdentifier = $array['pseudo_identifier'] ?? [];
+        $object->pseudoIdentifier            = $array['pseudo_identifier'] ?? [];
 
         // Migrate old single-column identifier to pseudo identifier format
         $object->migrateSingleIdentifierToPseudoIdentifier();
 
         // utf8 conversion
-        $object->conversion = $array['conversion'] ?? false;
+        $object->conversion                  = $array['conversion'] ?? false;
 
         // simplefin configuration
-        $object->pendingTransactions = $array['pending_transactions'] ?? true;
-        $object->accessToken         = $array['access_token'] ?? '';
+        $object->pendingTransactions         = $array['pending_transactions'] ?? true;
+        $object->accessToken                 = $array['access_token'] ?? '';
 
         // flow
-        $object->flow = $array['flow'] ?? 'file';
+        $object->flow                        = $array['flow'] ?? 'file';
 
         // overrule a setting:
         if ('none' === $object->duplicateDetectionMethod) {
@@ -754,7 +754,7 @@ class Configuration
 
     public function setMapping(array $mapping): void
     {
-        $newMap = [];
+        $newMap        = [];
         foreach ($mapping as $column => $map) {
             ksort($map);
             $newMap[$column] = $map;
@@ -899,7 +899,7 @@ class Configuration
         }
 
         // Otherwise return single index
-        return (string)$this->uniqueColumnIndex;
+        return (string) $this->uniqueColumnIndex;
     }
 
     /**
@@ -927,7 +927,7 @@ class Configuration
         // Create pseudo identifier from old single-column format
         Log::debug(sprintf('Migrating old identifier format to pseudo identifier: index=%d, type=%s', $this->uniqueColumnIndex, $this->uniqueColumnType));
 
-        $this->pseudoIdentifier = ['source_columns' => [$this->uniqueColumnIndex], 'separator' => '|', 'role' => $this->uniqueColumnType];
+        $this->pseudoIdentifier = ['source_columns' => [$this->uniqueColumnIndex], 'separator'      => '|', 'role'           => $this->uniqueColumnType];
     }
 
     public function getPendingTransactions(): bool
@@ -982,7 +982,6 @@ class Configuration
         return $this->webhooks;
     }
 
-
     public function isSkipForm(): bool
     {
         return $this->skipForm;
@@ -1006,7 +1005,7 @@ class Configuration
 
     public function toArray(): array
     {
-        $array = [
+        $array                                  = [
             'version'                      => $this->version,
             'source'                       => sprintf('ff3-importer-%s', config('importer.version')),
             'created_at'                   => date(DateTimeInterface::W3C),
@@ -1107,8 +1106,8 @@ class Configuration
 
             case 'partial':
                 Log::debug('Range is partial.');
-                $this->dateNotAfter  = '';
-                $this->dateNotBefore = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
+                $this->dateNotAfter            = '';
+                $this->dateNotBefore           = self::calcDateNotBefore($this->dateRangeUnit, $this->dateRangeNumber);
                 Log::debug(sprintf('dateNotBefore is now "%s"', $this->dateNotBefore));
                 if ('' === $this->dateRangeNotAfterUnit) {
                     Log::debug('dateRangeNotAfterUnit is "", dateNotAfter will be empty.');
@@ -1117,10 +1116,10 @@ class Configuration
                 }
                 if ('' !== $this->dateRangeNotAfterUnit && $this->dateRangeNotAfterNumber > 0) {
                     Log::debug(sprintf(
-                                   'dateRangeNotAfterUnit is "%s", count is %d, dateNotAfter will be calculated.',
-                                   $this->dateRangeNotAfterUnit,
-                                   $this->dateRangeNotAfterNumber
-                               ));
+                        'dateRangeNotAfterUnit is "%s", count is %d, dateNotAfter will be calculated.',
+                        $this->dateRangeNotAfterUnit,
+                        $this->dateRangeNotAfterNumber
+                    ));
                     $this->dateNotAfter = self::calcDateNotBefore($this->dateRangeNotAfterUnit, $this->dateRangeNotAfterNumber);
                     Log::debug(sprintf('dateNotAfter is now "%s"', $this->dateNotAfter));
                 }
@@ -1129,8 +1128,8 @@ class Configuration
 
             case 'range':
                 Log::debug('Range is "range", both will be created from a string.');
-                $before = trim($this->dateNotBefore); // string
-                $after  = trim($this->dateNotAfter); // string
+                $before                        = trim($this->dateNotBefore); // string
+                $after                         = trim($this->dateNotAfter); // string
                 if ('' !== $before) {
                     $before = Carbon::createFromFormat('Y-m-d', $before);
                 }
@@ -1142,8 +1141,8 @@ class Configuration
                     [$before, $after] = [$after, $before];
                 }
 
-                $this->dateNotBefore = '' === $before ? '' : $before->format('Y-m-d');
-                $this->dateNotAfter  = '' === $after ? '' : $after->format('Y-m-d');
+                $this->dateNotBefore           = '' === $before ? '' : $before->format('Y-m-d');
+                $this->dateNotAfter            = '' === $after ? '' : $after->format('Y-m-d');
                 Log::debug(sprintf('dateNotBefore is now "%s", dateNotAfter is "%s"', $this->dateNotBefore, $this->dateNotAfter));
         }
         // sanity check right away.
@@ -1152,10 +1151,10 @@ class Configuration
             $notAfter  = Carbon::createFromFormat('Y-m-d', $this->dateNotAfter);
             if ($notAfter->lt($notBefore)) {
                 throw new ImporterErrorException(sprintf(
-                                                     'The date range in your configuration is invalid. The "not before" date (%s) is after the "not after" date (%s). You must correct this manually.',
-                                                     $this->dateNotBefore,
-                                                     $this->dateNotAfter
-                                                 ));
+                    'The date range in your configuration is invalid. The "not before" date (%s) is after the "not after" date (%s). You must correct this manually.',
+                    $this->dateNotBefore,
+                    $this->dateNotAfter
+                ));
             }
         }
     }
@@ -1240,20 +1239,20 @@ class Configuration
             $request['date_not_after'] = $request['date_not_after']->format('Y-m-d');
         }
 
-        $this->dateNotBefore              = (string)$request['date_not_before'];
-        $this->dateNotAfter               = (string)$request['date_not_after'];
-        $this->conversion                 = $request['conversion'];
-        $this->groupedTransactionHandling = $request['grouped_transaction_handling'];
-        $this->useEntireOpposingAddress   = $request['use_entire_opposing_address'];
-        $this->newAccounts                = $request['to_create'];
-        $this->accounts                   = $request['to_import_from'];
+        $this->dateNotBefore               = (string) $request['date_not_before'];
+        $this->dateNotAfter                = (string) $request['date_not_after'];
+        $this->conversion                  = $request['conversion'];
+        $this->groupedTransactionHandling  = $request['grouped_transaction_handling'];
+        $this->useEntireOpposingAddress    = $request['use_entire_opposing_address'];
+        $this->newAccounts                 = $request['to_create'];
+        $this->accounts                    = $request['to_import_from'];
 
         // config for "cell":
-        $this->uniqueColumnIndex = $request['unique_column_index'] ?? 0;
-        $this->uniqueColumnType  = $request['unique_column_type'] ?? '';
+        $this->uniqueColumnIndex           = $request['unique_column_index'] ?? 0;
+        $this->uniqueColumnType            = $request['unique_column_type'] ?? '';
 
         // config for pseudo identifier (composite identifiers):
-        $this->pseudoIdentifier = $request['pseudo_identifier'] ?? [];
+        $this->pseudoIdentifier            = $request['pseudo_identifier'] ?? [];
 
         // Migrate old single-column identifier to pseudo identifier format
         $this->migrateSingleIdentifierToPseudoIdentifier();

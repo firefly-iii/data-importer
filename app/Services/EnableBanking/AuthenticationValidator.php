@@ -48,6 +48,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
         if ($res) {
             return AuthenticationStatus::AUTHENTICATED;
         }
+
         return AuthenticationStatus::ERROR;
     }
 
