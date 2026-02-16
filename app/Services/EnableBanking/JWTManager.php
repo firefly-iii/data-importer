@@ -27,6 +27,7 @@ namespace App\Services\EnableBanking;
 use App\Services\EnableBanking\Authentication\SecretManager;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Log;
+use DomainException;
 
 /**
  * Class JWTManager
@@ -63,9 +64,10 @@ class JWTManager
     public static function hasValidCredentials(): bool
     {
         $res = true;
+
         try {
             self::generateToken();
-        } catch(\DomainException $e) {
+        } catch (DomainException $e) {
             Log::error('Could not generate token from app ID and private key.');
             $res = false;
         }
