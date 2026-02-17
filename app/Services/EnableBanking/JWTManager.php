@@ -25,9 +25,9 @@ declare(strict_types=1);
 namespace App\Services\EnableBanking;
 
 use App\Services\EnableBanking\Authentication\SecretManager;
+use DomainException;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Log;
-use DomainException;
 
 /**
  * Class JWTManager
