@@ -60,7 +60,7 @@ class SecretManager
         if ('' === $sessionId) {
             Log::debug('No Enable Banking App ID in session, will return config variable.');
 
-            return (string) config('enablebanking.application_id');
+            return (string) config('eb.application_id');
         }
 
         return $sessionId;
@@ -98,7 +98,7 @@ class SecretManager
         if ('' === $sessionKey) {
             Log::debug('No Enable Banking private key in session, will return config variable.');
 
-            return (string) config('enablebanking.private_key');
+            return (string) config('eb.private_key');
         }
 
         return $sessionKey;

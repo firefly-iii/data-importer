@@ -84,7 +84,7 @@ class RoutineManager implements RoutineManagerInterface
     public function start(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        Log::debug(sprintf('The Enable Banking API URL is %s', config('enablebanking.url')));
+        Log::debug(sprintf('The Enable Banking API URL is %s', config('eb.url')));
 
         $this->transactionProcessor->setExistingServiceAccounts($this->getServiceAccounts());
 

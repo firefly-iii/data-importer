@@ -60,17 +60,18 @@ class SelectionController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
 
-        $countries       = config('enablebanking.countries');
-        $mainTitle       = 'Select your country and bank';
-        $pageTitle       = 'Select your country and bank';
-        $subTitle        = 'Select your country and the bank you wish to use.';
-        $importJob       = $this->repository->find($identifier);
-        $configuration   = $importJob->getConfiguration();
+        $countries     = config('eb.countries');
+        $mainTitle     = 'Select your country and bank';
+        $pageTitle     = 'Select your country and bank';
+        $subTitle      = 'Select your country and the bank you wish to use.';
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
 
         // Check if we already have a session
-        $sessions        = $configuration->getEnableBankingSessions();
-        $country         = $configuration->getEnableBankingCountry();
-        $bank            = $configuration->getEnableBankingBank();
+        $sessions = $configuration->getEnableBankingSessions();
+        $country  = $configuration->getEnableBankingCountry();
+        $bank     = $configuration->getEnableBankingBank();
+
 
         if (count($sessions) > 0 && '' !== $country && '' !== $bank) {
             Log::debug('Already have session, redirect to configuration.');
@@ -84,12 +85,12 @@ class SelectionController extends Controller
 
         // Only fetch banks if a country is selected
         if ('' !== $selectedCountry) {
-            $url = config('enablebanking.url');
+            $url = config('eb.url');
 
             try {
                 $bankRequest = new GetASPSPsRequest($url, $selectedCountry);
                 $bankRequest->setTimeOut(config('importer.connection.timeout'));
-                $response    = $bankRequest->get();
+                $response = $bankRequest->get();
             } catch (ImporterHttpException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
             }
@@ -99,7 +100,7 @@ class SelectionController extends Controller
             }
         }
 
-        $flow            = 'eb';
+        $flow = 'eb';
 
         return view('import.009-selection.index', compact(
             'mainTitle',
