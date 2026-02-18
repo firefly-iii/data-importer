@@ -42,7 +42,9 @@ class ApplicationResponse extends Response implements Countable, IteratorAggrega
 
     public function __construct(array $data = [])
     {
-        var_dump($data);exit;
+        var_dump($data);
+
+        exit;
         $accounts = $data['accounts'] ?? $data;
 
         // Handle null or non-array accounts (restricted clients without pre-authorization)
