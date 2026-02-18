@@ -26,7 +26,6 @@ namespace App\Services\EnableBanking\Request;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\AccountDetailsResponse;
-use App\Services\EnableBanking\Response\AccountsResponse;
 use App\Services\Shared\Response\Response;
 
 /**

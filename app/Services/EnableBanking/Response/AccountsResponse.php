@@ -55,7 +55,7 @@ class AccountsResponse extends Response implements Countable, IteratorAggregate
             if (is_array($account)) {
                 $this->accounts[] = Account::fromArray($account);
             }
-            if(is_string($account)) {
+            if (is_string($account)) {
                 $this->accounts[] = $account;
             }
         }
@@ -78,8 +78,6 @@ class AccountsResponse extends Response implements Countable, IteratorAggregate
     {
         $this->accounts = $accounts;
     }
-
-
 
     public function getSessionId(): string
     {

@@ -26,17 +26,14 @@ namespace App\Services\EnableBanking\Response;
 
 use App\Services\EnableBanking\Model\Account;
 use App\Services\Shared\Response\Response;
-use ArrayIterator;
-use Countable;
 use Illuminate\Support\Facades\Log;
-use IteratorAggregate;
-use Traversable;
 
 /**
  * Class AccountsResponse
  */
-class AccountDetailsResponse extends Response{
-    public Account  $account;
+class AccountDetailsResponse extends Response
+{
+    public Account $account;
 
     public function __construct(array $data = [])
     {

@@ -43,7 +43,7 @@ use Illuminate\Support\MessageBag;
  */
 class NewJobDataCollector implements NewJobDataCollectorInterface
 {
-    private ImportJob           $importJob;
+    private ImportJob $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -56,9 +56,9 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         $this->importJob->refreshInstanceIdentifier();
-        $messageBag    = new MessageBag();
-        $configuration = $this->importJob->getConfiguration();
-        $sessions      = $configuration->getEnableBankingSessions();
+        $messageBag       = new MessageBag();
+        $configuration    = $this->importJob->getConfiguration();
+        $sessions         = $configuration->getEnableBankingSessions();
 
         if (0 === count($sessions)) {
             Log::debug('No Enable Banking sessions for import.');
@@ -78,8 +78,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         }
 
         // No accounts saved yet, try to fetch from API (fallback for older sessions)
-        $return = [];
-        $cache  = [];
+        $return           = [];
+        $cache            = [];
 
         foreach ($sessions as $sessionId) {
             $cacheKey = sprintf('eb_session_%s', $sessionId);
@@ -97,8 +97,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
             if (!$inCache) {
                 Log::debug('Have NO accounts in cache.');
 
-                $url     = config('eb.url');
-                $request = new GetAccountsRequest($url, $sessionId);
+                $url      = config('eb.url');
+                $request  = new GetAccountsRequest($url, $sessionId);
                 $request->setTimeOut(config('importer.connection.timeout'));
 
                 try {
@@ -108,7 +108,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
 
-                $total = count($response);
+                $total    = count($response);
                 Log::debug(sprintf('Found %d Enable Banking accounts.', $total));
 
                 // loop the accounts, if they are string we must grab them once again.
@@ -116,14 +116,16 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 foreach ($response as $account) {
                     if (!is_string($account)) {
                         $accounts[] = $account;
+
                         continue;
                     }
                     $getAccountDetailRequest = new GetAccountDetailsRequest($url, $account);
+
                     /** @var AccountDetailsResponse $res */
-                    $res     = $getAccountDetailRequest->get();
-                    $accounts[] = $res->account;
+                    $res                     = $getAccountDetailRequest->get();
+                    $accounts[]              = $res->account;
                 }
-                $total = count($accounts);
+                $total    = count($accounts);
 
                 if (0 === $total) {
                     Log::warning(
@@ -137,12 +139,12 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
 
                 foreach ($accounts as $index => $account) {
                     Log::debug(sprintf(
-                                   '[%s] [%d/%d] Now collecting information for account %s',
-                                   config('importer.version'),
-                                   $index + 1,
-                                   $total,
-                                   $account->getUid()
-                               ));
+                        '[%s] [%d/%d] Now collecting information for account %s',
+                        config('importer.version'),
+                        $index + 1,
+                        $total,
+                        $account->getUid()
+                    ));
 
                     $return[] = $account;
                     $cache[]  = $account->toLocalArray();
