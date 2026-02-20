@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.1.1 - 2026-02-21
 
+> [!WARNING]
+> If no pressing issues get reported, this release will be followed by **v2.2.0**. It will be exactly the same but require PHP 8.5.
+
 ### Fixed
 - #11753
 
