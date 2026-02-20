@@ -34,6 +34,7 @@ class TransactionConverter
     private ImportJob $importJob;
     private bool $isRules        = true;
     private bool $errorIfHash    = true;
+    private bool $fireWebhooks   = true;
     private int  $defaultAccount = 0;
 
     public function __construct(ImportJob $importJob)
@@ -41,6 +42,7 @@ class TransactionConverter
         $importJob->refreshInstanceIdentifier();
         $this->importJob      = $importJob;
         $this->isRules        = $this->importJob->getConfiguration()->isRules();
+        $this->fireWebhooks   = $this->importJob->getConfiguration()->isWebhooks();
         $this->errorIfHash    = $this->importJob->getConfiguration()->isIgnoreDuplicateTransactions();
         $this->defaultAccount = $this->importJob->getConfiguration()->getDefaultAccount();
     }
@@ -63,7 +65,12 @@ class TransactionConverter
 
     private function convertTransaction(Transaction $original): array
     {
-        $return                   = ['apply_rules'             => $this->isRules, 'error_if_duplicate_hash' => $this->errorIfHash, 'transactions'            => []];
+        $return                   = [
+            'fire_webhooks'           => $this->fireWebhooks,
+            'apply_rules'             => $this->isRules,
+            'error_if_duplicate_hash' => $this->errorIfHash,
+            'transactions'            => [],
+        ];
         $split                    = [
             'type'          => 'withdrawal',
             'date'          => null === $original->date ? now()->toW3cString() : $original->date->toW3cString(),

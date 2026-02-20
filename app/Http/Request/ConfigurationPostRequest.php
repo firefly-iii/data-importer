@@ -44,9 +44,9 @@ class ConfigurationPostRequest extends Request
     public function getAll(): array
     {
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport     = $this->get('do_import') ?? [];
-        $accounts     = $this->get('accounts') ?? [];
-        $newAccounts  = $this->get('new_accounts') ?? [];
+        $doImport     = $this->input('do_import') ?? [];
+        $accounts     = $this->input('accounts') ?? [];
+        $newAccounts  = $this->input('new_accounts') ?? [];
 
         // loop $accounts array, because it is always complete and present.
         $toImportFrom = [];
@@ -80,7 +80,8 @@ class ConfigurationPostRequest extends Request
             'delimiter'                     => $this->convertToString('delimiter'),
             'date'                          => $this->convertToString('date'),
             'default_account'               => $this->convertToInteger('default_account'),
-            'rules'                         => $this->convertBoolean($this->get('rules')),
+            'rules'                         => $this->convertBoolean($this->input('rules')),
+            'webhooks'                      => $this->convertBoolean($this->input('webhooks')),
             'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
             'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
@@ -189,6 +190,7 @@ class ConfigurationPostRequest extends Request
             'date'                          => 'between:1,25',
             'default_account'               => $defaultAccountRule,
             'rules'                         => 'numeric|between:0,1',
+            'webhooks'                      => 'numeric|between:0,1',
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
             'ignore_duplicate_transactions' => 'numeric|between:0,1',
             'skip_form'                     => 'numeric|between:0,1',

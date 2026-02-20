@@ -28,22 +28,23 @@ use App\Services\EnableBanking\Model\Account;
 use App\Services\Shared\Response\Response;
 use ArrayIterator;
 use Countable;
-use Illuminate\Support\Facades\Log;
 use IteratorAggregate;
 use Traversable;
 
 /**
  * Class AccountsResponse
  */
-class AccountsResponse extends Response implements Countable, IteratorAggregate
+class ApplicationResponse extends Response implements Countable, IteratorAggregate
 {
-    /** @var array[<string|Account>] */
+    /** @var Account[] */
     private array  $accounts  = [];
     private string $sessionId = '';
 
     public function __construct(array $data = [])
     {
-        Log::debug('Going to construct AccountsResponse', $data);
+        var_dump($data);
+
+        exit;
         $accounts = $data['accounts'] ?? $data;
 
         // Handle null or non-array accounts (restricted clients without pre-authorization)
@@ -54,9 +55,6 @@ class AccountsResponse extends Response implements Countable, IteratorAggregate
         foreach ($accounts as $account) {
             if (is_array($account)) {
                 $this->accounts[] = Account::fromArray($account);
-            }
-            if (is_string($account)) {
-                $this->accounts[] = $account;
             }
         }
     }
@@ -72,11 +70,6 @@ class AccountsResponse extends Response implements Countable, IteratorAggregate
     public function getAccounts(): array
     {
         return $this->accounts;
-    }
-
-    public function setAccounts(array $accounts): void
-    {
-        $this->accounts = $accounts;
     }
 
     public function getSessionId(): string

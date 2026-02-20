@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\EnableBanking;
 
 use App\Services\EnableBanking\Authentication\SecretManager;
+use DomainException;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Log;
 
@@ -62,6 +63,15 @@ class JWTManager
      */
     public static function hasValidCredentials(): bool
     {
-        return SecretManager::hasAppIdAvailable() && SecretManager::hasPrivateKeyAvailable();
+        $res = true;
+
+        try {
+            self::generateToken();
+        } catch (DomainException $e) {
+            Log::error('Could not generate token from app ID and private key.');
+            $res = false;
+        }
+
+        return SecretManager::hasAppIdAvailable() && SecretManager::hasPrivateKeyAvailable() && $res;
     }
 }

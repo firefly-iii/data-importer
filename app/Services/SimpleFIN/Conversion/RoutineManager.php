@@ -168,6 +168,8 @@ class RoutineManager implements RoutineManagerInterface
             // Wrap transaction in group structure expected by Firefly III
             $transactionGroup       = [
                 'error_if_duplicate_hash' => $this->importJob->getConfiguration()->isIgnoreDuplicateTransactions(),
+                'apply_rules'             => $this->importJob->getConfiguration()->isRules(),
+                'fire_webhooks'           => $this->importJob->getConfiguration()->isWebhooks(),
                 'group_title'             => null,
                 'transactions'            => [$transformedTransaction],
             ];

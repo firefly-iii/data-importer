@@ -45,6 +45,23 @@
                     </div>
                 </div>
                 <div class="form-group row mb-3">
+                    <div class="col-sm-3">Run webhooks</div>
+                    <div class="col-sm-9">
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   @if($configuration->isWebhooks()) checked @endif
+                                   type="checkbox" id="webhooks" name="webhooks" value="1"
+                                   aria-describedby="webhooksHelp">
+                            <label class="form-check-label" for="webhooks">
+                                Yes
+                            </label>
+                            <small id="webhooksHelp" class="form-text text-muted">
+                                <br>Select if you want Firefly III to run webhooks for each transaction.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mb-3">
                     <div class="col-sm-3">Import tag</div>
                     <div class="col-sm-9">
                         <div class="form-check">

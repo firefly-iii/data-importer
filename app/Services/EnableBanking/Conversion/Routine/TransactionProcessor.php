@@ -98,7 +98,7 @@ class TransactionProcessor
                 Log::debug(sprintf('Newly created account #%d', $destinationId));
             }
 
-            $url                 = config('enablebanking.url');
+            $url                 = config('eb.url');
             $dateFrom            = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
             $dateTo              = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
 

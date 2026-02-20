@@ -60,7 +60,7 @@ class SelectionController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
 
-        $countries       = config('enablebanking.countries');
+        $countries       = config('eb.countries');
         $mainTitle       = 'Select your country and bank';
         $pageTitle       = 'Select your country and bank';
         $subTitle        = 'Select your country and the bank you wish to use.';
@@ -84,7 +84,7 @@ class SelectionController extends Controller
 
         // Only fetch banks if a country is selected
         if ('' !== $selectedCountry) {
-            $url = config('enablebanking.url');
+            $url = config('eb.url');
 
             try {
                 $bankRequest = new GetASPSPsRequest($url, $selectedCountry);

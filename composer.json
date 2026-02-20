@@ -90,7 +90,7 @@
         "swaggest/json-schema": "^0.12.43",
         "symfony/http-client": "^8.0",
         "symfony/mailgun-mailer": "^8.0",
-        "thecodingmachine/safe": "^3.3"
+        "thecodingmachine/safe": "^3.4"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",

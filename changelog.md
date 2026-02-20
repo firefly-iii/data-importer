@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.1.1 - 2026-02-21
+
+> [!WARNING]
+> If no pressing issues get reported, this release will be followed by **v2.2.0**. It will be exactly the same but require PHP 8.5.
+
+### Fixed
+- [Issue 11753](https://github.com/firefly-iii/firefly-iii/issues/11753) (Enable Banking importer doesn't work when re-using a config json) reported by @icewind1991
+
 ## v2.1.0 - 2026-02-01
 
 ### Added

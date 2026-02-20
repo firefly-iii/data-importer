@@ -29,7 +29,9 @@ use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\EnableBanking\Model\Account;
+use App\Services\EnableBanking\Request\GetAccountDetailsRequest;
 use App\Services\EnableBanking\Request\GetAccountsRequest;
+use App\Services\EnableBanking\Response\AccountDetailsResponse;
 use App\Services\EnableBanking\Response\AccountsResponse;
 use App\Services\Shared\Validation\NewJobDataCollectorInterface;
 use Illuminate\Support\Facades\Cache;
@@ -95,8 +97,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
             if (!$inCache) {
                 Log::debug('Have NO accounts in cache.');
 
-                $url     = config('enablebanking.url');
-                $request = new GetAccountsRequest($url, $sessionId);
+                $url      = config('eb.url');
+                $request  = new GetAccountsRequest($url, $sessionId);
                 $request->setTimeOut(config('importer.connection.timeout'));
 
                 try {
@@ -106,8 +108,24 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
 
-                $total   = count($response);
+                $total    = count($response);
                 Log::debug(sprintf('Found %d Enable Banking accounts.', $total));
+
+                // loop the accounts, if they are string we must grab them once again.
+                $accounts = [];
+                foreach ($response as $account) {
+                    if (!is_string($account)) {
+                        $accounts[] = $account;
+
+                        continue;
+                    }
+                    $getAccountDetailRequest = new GetAccountDetailsRequest($url, $account);
+
+                    /** @var AccountDetailsResponse $res */
+                    $res                     = $getAccountDetailRequest->get();
+                    $accounts[]              = $res->account;
+                }
+                $total    = count($accounts);
 
                 if (0 === $total) {
                     Log::warning(
@@ -119,7 +137,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                     );
                 }
 
-                foreach ($response as $index => $account) {
+                foreach ($accounts as $index => $account) {
                     Log::debug(sprintf(
                         '[%s] [%d/%d] Now collecting information for account %s',
                         config('importer.version'),

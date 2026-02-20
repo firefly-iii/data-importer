@@ -105,6 +105,7 @@ class Configuration
     private array $roles                  = [];
 
     private bool $rules                   = true;
+    private bool $webhooks                = true;
 
     // configuration for "classic" method:
     private bool $skipForm                = false;
@@ -226,6 +227,7 @@ class Configuration
         $object->delimiter                   = $delimiters[$data['delimiter']] ?? 'comma';
         $object->defaultAccount              = $data['import-account'] ?? $object->defaultAccount;
         $object->rules                       = $data['apply-rules'] ?? true;
+        $object->webhooks                    = $data['webhooks'] ?? true;
         $object->flow                        = $data['flow'] ?? 'file';
         $object->contentType                 = $data['content_type'] ?? 'csv';
         $object->camtType                    = $data['camt_type'] ?? '';
@@ -360,6 +362,7 @@ class Configuration
         $object->defaultAccount              = $array['default_account'] ?? 0;
         $object->delimiter                   = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
         $object->rules                       = $array['rules'] ?? true;
+        $object->webhooks                    = $array['webhooks'] ?? true;
         $object->skipForm                    = $array['skip_form'] ?? false;
         $object->addImportTag                = $array['add_import_tag'] ?? true;
         $object->roles                       = $array['roles'] ?? [];
@@ -492,6 +495,7 @@ class Configuration
         $object->defaultAccount              = $array['default_account'];
         $object->delimiter                   = $delimiters[$array['delimiter']] ?? 'comma';
         $object->rules                       = $array['rules'];
+        $object->webhooks                    = $array['webhooks'];
         $object->skipForm                    = $array['skip_form'];
         $object->addImportTag                = $array['add_import_tag'] ?? true;
         $object->roles                       = $array['roles'] ?? [];
@@ -973,6 +977,11 @@ class Configuration
         return $this->rules;
     }
 
+    public function isWebhooks(): bool
+    {
+        return $this->webhooks;
+    }
+
     public function isSkipForm(): bool
     {
         return $this->skipForm;
@@ -1005,6 +1014,7 @@ class Configuration
             'delimiter'                    => $this->delimiter,
             'headers'                      => $this->headers,
             'rules'                        => $this->rules,
+            'webhooks'                     => $this->webhooks,
             'skip_form'                    => $this->skipForm,
             'add_import_tag'               => $this->addImportTag,
             'roles'                        => $this->roles,
@@ -1206,6 +1216,7 @@ class Configuration
         $this->date                        = $request['date'];
         $this->defaultAccount              = $request['default_account'];
         $this->rules                       = $request['rules'];
+        $this->webhooks                    = $request['webhooks'];
         $this->ignoreDuplicateLines        = $request['ignore_duplicate_lines'];
         $this->ignoreDuplicateTransactions = $request['ignore_duplicate_transactions'];
         $this->skipForm                    = $request['skip_form'];

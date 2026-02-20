@@ -69,7 +69,7 @@ class LinkController extends Controller
             return redirect()->route('eb-select-bank.index', [$identifier]);
         }
 
-        $url           = config('enablebanking.url');
+        $url           = config('eb.url');
         $callbackUrl   = route('eb-connect.callback');
 
         Log::debug(sprintf('Enable Banking redirect URL: %s', $callbackUrl));
@@ -132,7 +132,7 @@ class LinkController extends Controller
         }
 
         // Exchange the code for a session
-        $url              = config('enablebanking.url');
+        $url              = config('eb.url');
         $sessionRequest   = new PostSessionRequest($url, $code);
         $sessionRequest->setTimeOut(config('importer.connection.timeout'));
 

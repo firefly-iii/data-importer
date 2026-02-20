@@ -44,7 +44,8 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
         // For Enable Banking, having the credentials is enough
         // The JWT is generated on-the-fly for each request
-        if (JWTManager::hasValidCredentials()) {
+        $res = JWTManager::hasValidCredentials();
+        if ($res) {
             return AuthenticationStatus::AUTHENTICATED;
         }
 

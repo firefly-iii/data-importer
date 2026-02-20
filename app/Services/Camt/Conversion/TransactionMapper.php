@@ -78,6 +78,8 @@ class TransactionMapper
         $result        = [
             'group_title'             => null,
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
+            'apply_rules'             => $this->configuration->isRules(),
+            'fire_webhooks'           => $this->configuration->isWebhooks(),
             'transactions'            => [],
         ];
         $splits        = $transaction['splits'] ?? 1;
