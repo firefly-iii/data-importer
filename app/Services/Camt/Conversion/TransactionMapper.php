@@ -48,7 +48,8 @@ class TransactionMapper
      */
     public function __construct(
         private Configuration $configuration
-    ) {
+    )
+    {
         bcscale(12);
         Log::debug('Constructed TransactionMapper.');
         $this->allAccounts                   = $this->getAllAccounts();
@@ -87,7 +88,7 @@ class TransactionMapper
         Log::debug(sprintf('Transaction has %d split(s)', $splits));
         for ($i = 0; $i < $splits; ++$i) {
             /** @var array|false $split */
-            $split           = $transaction['transactions'][$i] ?? false;
+            $split = $transaction['transactions'][$i] ?? false;
             if (false === $split) {
                 Log::warning(sprintf('No split #%d found, break.', $i));
 
@@ -111,7 +112,7 @@ class TransactionMapper
 
         /**
          * @var string $role
-         * @var array  $data
+         * @var array $data
          */
         foreach ($split as $role => $data) {
             // actual content of the field is in $data['data'], which is an array
@@ -164,69 +165,69 @@ class TransactionMapper
 
                 case 'note':
                     // FIXME perhaps lift into separate method?
-                    $current['notes']       ??= '';
-                    $addition                  = "  \n".implode("  \n", $data['data']);
+                    $current['notes'] ??= '';
+                    $addition         = "  \n" . implode("  \n", $data['data']);
                     $current['notes'] .= $addition;
-                    $current['notes']          = trim($current['notes']);
+                    $current['notes'] = trim($current['notes']);
 
                     break;
 
                 case 'date_process':
                     // FIXMEperhaps lift into separate method?
-                    $carbon                    = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                    $current['process_date']   = $carbon->toIso8601String();
+                    $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['process_date'] = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_transaction':
                     // FIXME perhaps lift into separate method?
-                    $carbon                    = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                    $current['date']           = $carbon->toIso8601String();
+                    $carbon          = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['date'] = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_payment':
                     // FIXME perhaps lift into separate method?
-                    $carbon                    = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                    $current['payment_date']   = $carbon->toIso8601String();
+                    $carbon                  = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['payment_date'] = $carbon->toIso8601String();
 
                     break;
 
                 case 'date_book':
                     // FIXME perhaps lift into separate method?
-                    $carbon                    = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
-                    $current['book_date']      = $carbon->toIso8601String();
-                    $current['date']           = $carbon->toIso8601String();
+                    $carbon               = Carbon::createFromFormat('Y-m-d H:i:s', reset($data['data']));
+                    $current['book_date'] = $carbon->toIso8601String();
+                    $current['date']      = $carbon->toIso8601String();
 
                     break;
 
                 case 'account-iban':
                     // could be multiple, could be mapped.
-                    $current                   = $this->mapAccount($current, 'iban', 'source', $data);
+                    $current = $this->mapAccount($current, 'iban', 'source', $data);
 
                     break;
 
                 case 'opposing-iban':
                     // could be multiple, could be mapped.
-                    $current                   = $this->mapAccount($current, 'iban', 'destination', $data);
+                    $current = $this->mapAccount($current, 'iban', 'destination', $data);
 
                     break;
 
                 case 'opposing-name':
                     // could be multiple, could be mapped.
-                    $current                   = $this->mapAccount($current, 'name', 'destination', $data);
+                    $current = $this->mapAccount($current, 'name', 'destination', $data);
 
                     break;
 
                 case 'external-id':
-                    $addition                  = implode(' ', $data['data']);
-                    $current['external_id']    = $addition;
+                    $addition               = implode(' ', $data['data']);
+                    $current['external_id'] = $addition;
 
                     break;
 
                 case 'description': // FIXME think about a config value to use both values from level C and D
                     $current['description'] ??= '';
-                    $addition                  = '';
+                    $addition               = '';
                     if ('group' === $groupHandling || 'split' === $groupHandling) {
                         // use first description
                         // FIXME use named field?
@@ -249,18 +250,18 @@ class TransactionMapper
                     break;
 
                 case 'amount':
-                    $current['amount']         = $this->processAmount($groupHandling, $data);
+                    $current['amount'] = $this->processAmount($groupHandling, $data);
                     Log::debug('Map normal amount', $data);
 
                     break;
 
                 case 'currency-code':
-                    $current                   = $this->mapCurrency($current, 'currency', $data);
+                    $current = $this->mapCurrency($current, 'currency', $data);
 
                     break;
 
                 case 'foreign-currency-code':
-                    $current                   = $this->mapCurrency($current, 'foreign_currency', $data);
+                    $current = $this->mapCurrency($current, 'foreign_currency', $data);
 
                     break;
             }
@@ -383,51 +384,51 @@ class TransactionMapper
         }
 
         // if is positive
-        if (1 === bccomp((string) $current['amount'], '0')) {
+        if (1 === bccomp((string)$current['amount'], '0')) {
             Log::debug('Swap accounts because amount is positive');
             // positive account is deposit (or transfer), so swap accounts.
             $current = $this->swapAccounts($current);
         }
 
-        $current                         = $this->determineTransactionType($current);
+        $current = $this->determineTransactionType($current);
         Log::debug(sprintf('Transaction type is %s', $current['type']));
 
         // the type is a withdrawal, but we did not recognize the type of the source account.
         // if that did not succeed we did not FIND the source account, and must fall back
         // on the default account.
-        if ('withdrawal' === $current['type'] && '' === (string) $current['source_type']) {
+        if ('withdrawal' === $current['type'] && '' === (string)$current['source_type']) {
             $current['source_id'] = $this->configuration->getDefaultAccount();
             unset($current['source_name'], $current['source_iban']);
             Log::warning(sprintf(
-                'Withdrawal, but did not recognize the type of the source account. It will be replaced with the default account (#%d).',
-                $current['source_id']
-            ));
+                             'Withdrawal, but did not recognize the type of the source account. It will be replaced with the default account (#%d).',
+                             $current['source_id']
+                         ));
         }
         // same for deposit:
-        if ('deposit' === $current['type'] && '' === (string) $current['destination_type']) {
+        if ('deposit' === $current['type'] && '' === (string)$current['destination_type']) {
             $current['destination_id'] = $this->configuration->getDefaultAccount();
             unset($current['destination_name'], $current['destination_iban']);
             Log::warning(sprintf(
-                'Deposit, but did not recognize the destination account. It will be replaced with the default account (#%d).',
-                $current['destination_id']
-            ));
+                             'Deposit, but did not recognize the destination account. It will be replaced with the default account (#%d).',
+                             $current['destination_id']
+                         ));
         }
         // at this point it is possible that either of the two actions above have accidentally
         // set BOTH accounts to be the same one. For example, source_id = 1 and destination_iban = ABC
         // (and they point to the same account). This sanity check must be done again. But not right now.
 
         // amount must be positive
-        if (-1 === bccomp((string) $current['amount'], '0')) {
+        if (-1 === bccomp((string)$current['amount'], '0')) {
             // negative amount is debit (or transfer)
-            $current['amount'] = bcmul((string) $current['amount'], '-1');
+            $current['amount'] = bcmul((string)$current['amount'], '-1');
         }
         // foreign amount must be positive if present and not ""
         if (
             array_key_exists('foreign_amount', $current)
-            && '' !== (string) $current['foreign_amount']
-            && -1 === bccomp((string) $current['foreign_amount'], '0')
+            && '' !== (string)$current['foreign_amount']
+            && -1 === bccomp((string)$current['foreign_amount'], '0')
         ) {
-            $current['foreign_amount'] = bcmul((string) $current['foreign_amount'], '-1');
+            $current['foreign_amount'] = bcmul((string)$current['foreign_amount'], '-1');
         }
 
         // no description?
@@ -435,7 +436,7 @@ class TransactionMapper
             Log::warning('Did not find a description in the transaction, added "(no description)"');
             $current['description'] = '(no description)';
         }
-        if (array_key_exists('description', $current) && '' === (string) $current['description']) {
+        if (array_key_exists('description', $current) && '' === (string)$current['description']) {
             Log::warning('Did not find a description in the transaction, added "(no description)"');
             $current['description'] = '(no description)';
         }
@@ -445,7 +446,7 @@ class TransactionMapper
             Log::warning(sprintf('Did not find a date in the transaction, added "%s"', Carbon::now()->format('Y-m-d')));
             $current['date'] = Carbon::now()->format('Y-m-d');
         }
-        if (array_key_exists('date', $current) && '' === (string) $current['date']) {
+        if (array_key_exists('date', $current) && '' === (string)$current['date']) {
             Log::warning(sprintf('Did not find a date in the transaction, added "%s"', Carbon::now()->format('Y-m-d')));
             $current['date'] = Carbon::now()->format('Y-m-d');
         }
@@ -472,12 +473,12 @@ class TransactionMapper
         $return = $currentTransaction;
 
         foreach ($this->accountIdentificationSuffixes as $suffix) {
-            $sourceKey   = sprintf('source_%s', $suffix);
-            $destKey     = sprintf('destination_%s', $suffix);
+            $sourceKey = sprintf('source_%s', $suffix);
+            $destKey   = sprintf('destination_%s', $suffix);
             // if source value exists, save it.
             $sourceValue = array_key_exists($sourceKey, $currentTransaction) ? $currentTransaction[$sourceKey] : null;
             // if destination value exists, save it.
-            $destValue   = array_key_exists($destKey, $currentTransaction) ? $currentTransaction[$destKey] : null;
+            $destValue = array_key_exists($destKey, $currentTransaction) ? $currentTransaction[$destKey] : null;
 
             // always unset source value
             Log::debug(sprintf('[1] Unset "%s" with value "%s"', $sourceKey, $sourceValue));
@@ -505,9 +506,9 @@ class TransactionMapper
     private function determineTransactionType(array $current): array
     {
         Log::debug('Determine transaction type.');
-        $directions      = ['source', 'destination'];
-        $accountType     = [];
-        $lessThanZero    = 1 === bccomp('0', (string) $current['amount']);
+        $directions   = ['source', 'destination'];
+        $accountType  = [];
+        $lessThanZero = 1 === bccomp('0', (string)$current['amount']);
         Log::debug(sprintf('Amount is "%s", so lessThanZero is %s', $current['amount'], var_export($lessThanZero, true)));
 
         foreach ($directions as $direction) {
@@ -519,8 +520,8 @@ class TransactionMapper
                 $key = sprintf('%s_%s', $direction, $suffix);
                 Log::debug(sprintf('Now working on key "%s".', $key));
                 // try to find the account
-                if (array_key_exists($key, $current) && '' !== (string) $current[$key]) {
-                    $foundDirection = $this->getAccountType($suffix, (string) $current[$key], $lessThanZero);
+                if (array_key_exists($key, $current) && '' !== (string)$current[$key]) {
+                    $foundDirection = $this->getAccountType($suffix, (string)$current[$key], $lessThanZero);
                     Log::debug(sprintf('Transaction array has a "%s"-field with value "%s", and its type is "%s".', $key, $current[$key], $foundDirection));
                     // should this overrule any existing account type? Since we work down from ID,
                     // if it's already known it should not be overruled.
@@ -559,7 +560,7 @@ class TransactionMapper
                 // there is no expense account, but the account was found under revenue, so we assume this is a withdrawal with a non-existing expense account
             case $sourceIsAsset && $destIsRevenue && $lessThanZero:
                 Log::debug('Based on types, this is a withdrawal');
-                $current['type']             = 'withdrawal';
+                $current['type'] = 'withdrawal';
 
                 break;
 
@@ -569,20 +570,20 @@ class TransactionMapper
             case $sourceIsRevenue && $destIsAsset:
             case $sourceIsAsset && $destIsExpense: // there is no revenue account, but the account was found under expense, so we assume this is a deposit with an non-existing revenue account
                 Log::debug('Based on types, this is a deposit');
-                $current['type']             = 'deposit';
+                $current['type'] = 'deposit';
 
                 break;
 
             case $sourceIsAsset && $destIsAsset:
                 Log::debug('Based on types, this is a transfer');
-                $current['type']             = 'transfer'; // line 382 / 383
+                $current['type'] = 'transfer'; // line 382 / 383
 
                 break;
 
             case $sourceIsExpense && $destIsExpense:
                 Log::warning('Both types are expense. Impossible. Lets make source_type = "" and type="withdrawal"');
-                $current['source_type']      = '';
-                $current['type']             = 'withdrawal';
+                $current['source_type'] = '';
+                $current['type']        = 'withdrawal';
 
                 break;
 
@@ -595,27 +596,27 @@ class TransactionMapper
 
             case $sourceIsExpense && $destIsNull:
                 Log::warning('The source is "expense" but the destination is a new account. Weird! Lets make source_type = "" and type="withdrawal"');
-                $current['source_type']      = '';
-                $current['type']             = 'withdrawal';
+                $current['source_type'] = '';
+                $current['type']        = 'withdrawal';
 
                 break;
 
             case $sourceIsExpense && $destIsAsset:
                 Log::warning('The source is "expense" but the destination is an asset. Weird! Lets make source_type = "" and type="deposit"');
-                $current['source_type']      = '';
-                $current['type']             = 'deposit';
+                $current['source_type'] = '';
+                $current['type']        = 'deposit';
 
                 break;
 
             default:
                 Log::error(sprintf(
-                    'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
-                    null !== $accountType['source'] && '' !== $accountType['source'] && '0' !== $accountType['source'] ? $accountType['source'] : null,
-                    null !== $accountType['destination'] && '' !== $accountType['destination'] && '0' !== $accountType['destination']
-                        ? $accountType['destination']
-                        : null
-                )); // 285
-                $current['type']             = 'withdrawal'; // line 382 / 383
+                               'Unknown transaction type: source = "%s", destination = "%s". Fall back to "withdrawal"',
+                               null !== $accountType['source'] && '' !== $accountType['source'] && '0' !== $accountType['source'] ? $accountType['source'] : null,
+                               null !== $accountType['destination'] && '' !== $accountType['destination'] && '0' !== $accountType['destination']
+                                   ? $accountType['destination']
+                                   : null
+                           )); // 285
+                $current['type'] = 'withdrawal'; // line 382 / 383
 
                 break;
         }
@@ -631,7 +632,7 @@ class TransactionMapper
         $hitField = null; // the field on which we found a match.
         foreach ($this->allAccounts as $account) {
             // we have a match!
-            if ((string) $account->{$field} === (string) $value) {
+            if ((string)$account->{$field} === (string)$value) {
                 // never found a match before!
                 if (0 === $count) {
                     Log::debug(sprintf('Recognized "%s" as a "%s"-account by its "%s".', $value, $account->type, $field));
@@ -642,13 +643,13 @@ class TransactionMapper
                 // we found a match before, and it's different too.
                 if (0 !== $count && $account->type !== $result) {
                     Log::warning(sprintf(
-                        'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
-                        $value,
-                        $result,
-                        $field,
-                        $account->type,
-                        $hitField
-                    ));
+                                     'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
+                                     $value,
+                                     $result,
+                                     $field,
+                                     $account->type,
+                                     $hitField
+                                 ));
                     // the previous result always trumps the current result because the order of accountIdentificationSuffixes
                     Log::debug(sprintf('System will keep the previous match and assume account with %s "%s" is a "%s" account', $field, $value, $result));
                     ++$count;
@@ -657,13 +658,13 @@ class TransactionMapper
                 $set = [$account->type, $result];
                 if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && $lessThanZero) {
                     Log::warning(sprintf(
-                        'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
-                        $value,
-                        $result,
-                        $field,
-                        $account->type,
-                        $hitField
-                    ));
+                                     'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
+                                     $value,
+                                     $result,
+                                     $field,
+                                     $account->type,
+                                     $hitField
+                                 ));
                     Log::debug('Because amount is less than zero, we assume "expense" is the correct type.');
                     $result = 'expense';
 
@@ -672,13 +673,13 @@ class TransactionMapper
                 // we found a match before and it's different. But: previous result was "expense", current result is "revenue"
                 if (0 !== $count && $account->type !== $result && in_array('revenue', $set, true) && in_array('expense', $set, true) && !$lessThanZero) {
                     Log::warning(sprintf(
-                        'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
-                        $value,
-                        $result,
-                        $field,
-                        $account->type,
-                        $hitField
-                    ));
+                                     'Recognized "%s" as a "%s"-account (on the "%s"-field) but ALSO as a "%s"-account (previous match was on the "%s"-field)!',
+                                     $value,
+                                     $result,
+                                     $field,
+                                     $account->type,
+                                     $hitField
+                                 ));
                     Log::debug('Because amount is more than zero, we assume "revenue" is the correct type.');
                     $result = 'revenue';
 
@@ -709,19 +710,19 @@ class TransactionMapper
                         if ($current['amount'] > 0) {
                             // seems a deposit or transfer
                             if (in_array($account->type, ['asset', 'revenue'], true)) {
-                                return (string) $account->id;
+                                return (string)$account->id;
                             }
                         }
 
                         if ($current['amount'] < 0) {
                             // seems a withtrawal or transfer
                             if (in_array($account->type, ['asset', 'expense'], true)) {
-                                return (string) $account->id;
+                                return (string)$account->id;
                             }
                         }
                         Log::warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
 
-                        return (string) $account->id;
+                        return (string)$account->id;
                     }
                 }
 
@@ -742,16 +743,16 @@ class TransactionMapper
         if ('group' === $groupHandling || 'split' === $groupHandling) {
             Log::debug(sprintf('Group handling is "%s"', $groupHandling));
             // if multiple values, use biggest (... at index 0?)
-            // FIXME this will never work because $return is NULL the first time and abs() can't handle that.
             foreach ($data['data'] as $amount) {
                 if (null === $amount) {
                     // #8367 skip null values
                     continue;
                 }
-                if (is_string($amount)) {
-                    $amount = (float) $amount;
+                // always make amount a string.
+                if (!is_string($amount)) {
+                    $amount = (string)$amount;
                 }
-                if (abs($return) < abs($amount)) {
+                if (-1 === bccomp($return, $amount, 12)) {
                     Log::debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $return));
                     $return = $amount;
                 }
@@ -767,28 +768,24 @@ class TransactionMapper
 
                     continue;
                 }
-                if (is_string($amount)) {
-                    $amount = (float) $amount;
+                if (!is_string($amount)) {
+                    $amount = (string)$amount;
                 }
                 Log::debug(sprintf('Amount is %s.', var_export($amount, true)));
                 // check for null first, should prevent null pointers in abs()
-                if (abs($return) < abs($amount)) {
+                if (-1 === bccomp($return, $amount, 12)) {
                     Log::debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $return));
                     $return = $amount;
                 }
             }
         }
-        if (0 === bccomp('0', (string) $return)) {
+        if (0 === bccomp('0.0', $return,12)) {
             Log::debug('Amount is ZERO, set to "0"');
             $return = '0';
         }
-        if (0 !== bccomp('0', (string) $return) && !is_string($return)) {
-            Log::debug(sprintf('Amount is %s, turn into string', var_export($return, true)));
-            $return = (string) $return;
-        }
         Log::debug(sprintf('Final amount is "%s"', $return));
 
-        return (string) $return;
+        return $return;
     }
 
     private function validAccountInfo(string $direction, array $current): bool
@@ -801,7 +798,7 @@ class TransactionMapper
             if (array_key_exists($field, $current)) {
                 // there is a value...
                 // so we check all accounts for a match
-                if (array_any($this->allAccounts, static fn ($account) => $current[$field] === $account->{$accountIdentificationSuffix})) {
+                if (array_any($this->allAccounts, static fn($account) => $current[$field] === $account->{$accountIdentificationSuffix})) {
                     return true;
                 }
             }

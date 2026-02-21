@@ -82,7 +82,6 @@ class SubmitController extends Controller
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $importJob   = $this->repository->find($identifier);
-        Log::error('Start: Find import job status.');
 
         // Retrieve authentication credentials for job
         $accessToken = SecretManager::getAccessToken();
