@@ -59,6 +59,7 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
 
         /** @var array $array */
         foreach ($this->data as $array) {
+            Log::debug('Collected Lunch Flow transaction', $array);
             $this->collection->push(Transaction::fromArray($array));
         }
         Log::debug('Done processing data in GetTransactionsResponse');
