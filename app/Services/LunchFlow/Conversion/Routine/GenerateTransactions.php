@@ -200,11 +200,11 @@ class GenerateTransactions
 
         // before we begin, log the source and dest info
         Log::debug(sprintf(
-                       'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
-                       $transaction['source_name'] ?? '',
-                       $transaction['source_iban'] ?? '',
-                       $transaction['source_id'] ?? ''
-                   ));
+            'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
+            $transaction['source_name'] ?? '',
+            $transaction['source_iban'] ?? '',
+            $transaction['source_id'] ?? ''
+        ));
 
         // append source name, iban and number (if present)
         $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
