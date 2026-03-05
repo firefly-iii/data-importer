@@ -512,7 +512,7 @@ class ApiSubmitter
 
         $groupId = (int) $groupInfo['group_id'];
         Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = ['fire_webhooks' => false, 'apply_rules'   => false, 'transactions'  => []];
+        $body    = ['fire_webhooks' => false, 'batch_submission' => true, 'apply_rules'   => false, 'transactions'  => []];
 
         /**
          * @var int   $journalId

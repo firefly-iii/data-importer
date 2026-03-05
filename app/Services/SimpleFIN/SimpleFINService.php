@@ -42,9 +42,9 @@ use SensitiveParameter;
  */
 class SimpleFINService
 {
-    private string $setupToken  = '';
+    private string        $setupToken  = '';
     private Configuration $configuration;
-    private string $accessToken = '';
+    private string        $accessToken = '';
 
     /**
      * @throws ImporterErrorException
@@ -73,7 +73,7 @@ class SimpleFINService
 
     private function getFetchParams(string $accountId): array
     {
-        $return     = [
+        $return = [
             // 'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
             'start-date' => 0,
             'account'    => $accountId,
@@ -88,7 +88,7 @@ class SimpleFINService
         if ('' !== $dateAfter) {
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
-                $carbon               = Carbon::parse($dateAfter, config('app.timezone'));
+                $carbon = Carbon::parse($dateAfter, config('app.timezone'));
                 $carbon->startOfDay();
                 Log::debug(sprintf('Set start-date to %s', $carbon->toW3cString()));
                 $return['start-date'] = $carbon->getTimestamp();
@@ -99,7 +99,7 @@ class SimpleFINService
         if ('' !== $dateBefore) {
             // although the data importer uses "Y-m-d", this code should handle most date formats.
             try {
-                $carbon             = Carbon::parse($dateBefore, config('app.timezone'));
+                $carbon = Carbon::parse($dateBefore, config('app.timezone'));
                 $carbon->endOfDay();
                 Log::debug(sprintf('Set end-date to %s', $carbon->toW3cString()));
                 $return['end-date'] = $carbon->getTimestamp();
@@ -119,7 +119,7 @@ class SimpleFINService
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('SimpleFIN fetching accounts from: %s', $this->accessToken));
 
-        $request    = new AccountsRequest();
+        $request = new AccountsRequest();
         $request->setAccessToken($this->accessToken);
         $request->setTimeOut($this->getTimeout());
 
@@ -140,7 +140,7 @@ class SimpleFINService
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
 
-        $accounts   = $response->getAccounts();
+        $accounts = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -168,13 +168,13 @@ class SimpleFINService
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('SimpleFIN download transactions for account ID: "%s" from provided data structure.', $accountId));
 
-        $request      = new AccountsRequest();
+        $request = new AccountsRequest();
         $request->setAccessToken($this->configuration->getAccessToken());
         $request->setTimeOut($this->getTimeout());
 
         // Set parameters to retrieve all transactions
         // #10599 and #10602 add date information.
-        $parameters   = $this->getFetchParams($accountId);
+        $parameters = $this->getFetchParams($accountId);
         $request->setParameters($parameters);
 
         Log::debug('SimpleFIN downloading all transactions with parameters', $parameters);
@@ -190,7 +190,7 @@ class SimpleFINService
         }
 
         /** @var array<Account> $accounts */
-        $accounts     = $response->getAccounts();
+        $accounts = $response->getAccounts();
 
         if (0 === count($accounts)) {
             Log::warning('SimpleFIN API returned no accounts');
@@ -222,7 +222,7 @@ class SimpleFINService
         }
 
         // Check if decoded string looks like a SimpleFIN claim URL
-        return (bool) preg_match('/^https?:\/\/.+\/simplefin\/claim\/.+$/', $decoded);
+        return (bool)preg_match('/^https?:\/\/.+\/simplefin\/claim\/.+$/', $decoded);
     }
 
     /**
@@ -242,21 +242,28 @@ class SimpleFINService
 
         Log::debug(sprintf('Decoded claim URL: %s', $claimUrl));
 
-        try {
-            $client    = new Client(['timeout' => $this->getTimeout(), 'verify'  => config('importer.connection.verify')]);
+        // do some URL validation on the claim URL.
+        $resolved = gethostbyname(parse_url($claimUrl, PHP_URL_HOST));
+        if (false === filter_var($resolved, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            throw new ImporterErrorException(sprintf('SimpleFIN token points to invalid IP address: %s', $resolved));
+        }
+        
 
-            $parts     = parse_url($claimUrl);
+        try {
+            $client = new Client(['timeout' => $this->getTimeout(), 'verify' => config('importer.connection.verify')]);
+
+            $parts = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));
-            $headers   = [
+            $headers = [
                 'Content-Length' => '0',
                 // 'Origin' => sprintf('%s://%s', $parts['scheme'] ?? 'https', $parts['host'] ?? 'localhost'),
                 'User-Agent'     => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_d')),
             ];
             Log::debug('Headers for claim URL exchange', $headers);
 
-            $response  = $client->post($claimUrl, ['headers' => $headers]);
+            $response = $client->post($claimUrl, ['headers' => $headers]);
 
-            $accessUrl = (string) $response->getBody();
+            $accessUrl = (string)$response->getBody();
 
             if ('' === $accessUrl) {
                 throw new ImporterErrorException('Empty access URL returned from SimpleFIN claim exchange');
@@ -272,7 +279,7 @@ class SimpleFINService
             return $accessUrl;
         } catch (ClientException $e) {
             $statusCode   = $e->getResponse()->getStatusCode();
-            $responseBody = (string) $e->getResponse()->getBody();
+            $responseBody = (string)$e->getResponse()->getBody();
 
             Log::error(sprintf('SimpleFIN claim URL exchange failed with HTTP %d: %s', $statusCode, $e->getMessage()));
             Log::error(sprintf('SimpleFIN 403 response body: %s', $responseBody));
@@ -282,16 +289,16 @@ class SimpleFINService
                 Log::error(sprintf('DETAILED 403 ERROR - URL: %s, Response: %s', $claimUrl, $responseBody));
 
                 throw new ImporterErrorException(sprintf(
-                    'SimpleFIN claim URL exchange failed (403 Forbidden): %s',
-                    '' !== $responseBody && '0' !== $responseBody ? $responseBody : 'No response body available'
-                ));
+                                                     'SimpleFIN claim URL exchange failed (403 Forbidden): %s',
+                                                     '' !== $responseBody && '0' !== $responseBody ? $responseBody : 'No response body available'
+                                                 ));
             }
 
             throw new ImporterErrorException(sprintf(
-                'Failed to exchange SimpleFIN claim URL: HTTP %d error - %s',
-                $statusCode,
-                '' !== $responseBody && '0' !== $responseBody ? $responseBody : $e->getMessage()
-            ));
+                                                 'Failed to exchange SimpleFIN claim URL: HTTP %d error - %s',
+                                                 $statusCode,
+                                                 '' !== $responseBody && '0' !== $responseBody ? $responseBody : $e->getMessage()
+                                             ));
         } catch (GuzzleException $e) {
             Log::error(sprintf('Failed to exchange SimpleFIN claim URL: %s', $e->getMessage()));
 
@@ -325,7 +332,7 @@ class SimpleFINService
 
     private function getTimeout(): float
     {
-        return (float) config('simplefin.connection_timeout', 30.0);
+        return (float)config('simplefin.connection_timeout', 30.0);
     }
 
     public function getAccessToken(): string
