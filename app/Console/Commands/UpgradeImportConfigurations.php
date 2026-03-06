@@ -41,7 +41,7 @@ final class UpgradeImportConfigurations extends Command
      */
     public function handle(): int
     {
-        $directory = (string) $this->argument('directory'); // @phpstan-ignore-line
+        $directory = (string) $this->argument('directory');
 
         if (!file_exists($directory)) {
             $this->error(sprintf('"%s" does not exist.', $directory));

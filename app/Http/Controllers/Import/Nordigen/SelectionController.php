@@ -94,7 +94,7 @@ final class SelectionController extends Controller
 
         try {
             $response = $request->get();
-        } catch (AgreementExpiredException|ImporterHttpException|RateLimitException $e) {
+        } catch (AgreementExpiredException|RateLimitException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 

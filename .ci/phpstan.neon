@@ -28,7 +28,7 @@ parameters:
   ignoreErrors:
     # these are actually interesting but not right now:
     - identifier: missingType.return
-
+    - identifier: method.dynamicName
     - identifier: larastan.noEnvCallsOutsideOfConfig
     - identifier: foreach.nonIterable
     - identifier: notIdentical.alwaysTrue

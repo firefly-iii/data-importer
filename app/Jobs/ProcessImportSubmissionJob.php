@@ -137,14 +137,4 @@ class ProcessImportSubmissionJob implements ShouldQueue
         // Ensure error status is set even if job fails catastrophically
         $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
     }
-
-    /**
-     * Get the tags that should be assigned to the job.
-     *
-     * @return array<int, string>
-     */
-    public function tags(): array
-    {
-        return ['import-submission', $this->identifier];
-    }
 }
