@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Nordigen\Request;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\Nordigen\Response\NewRequisitionResponse;
 use App\Services\Shared\Response\Response;
 use GuzzleHttp\Exception\GuzzleException;
@@ -53,7 +54,7 @@ class PostNewRequisitionRequest extends Request
 
     public function get(): Response
     {
-        // Implement get() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     /**
@@ -77,7 +78,7 @@ class PostNewRequisitionRequest extends Request
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function setAgreement(string $agreement): void

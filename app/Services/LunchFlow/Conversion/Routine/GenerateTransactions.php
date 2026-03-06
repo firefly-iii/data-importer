@@ -33,6 +33,7 @@ use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -394,8 +395,8 @@ class GenerateTransactions
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setId($accountId);
 
-        /** @var GetAccountResponse $result */
         try {
+            /** @var GetAccountResponse $result */
             $result = $request->get();
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);
@@ -582,7 +583,6 @@ class GenerateTransactions
     public function setImportJob(ImportJob $importJob): void
     {
         $this->importJob  = $importJob;
-        $this->identifier = $importJob->identifier;
         $this->accounts   = $importJob->getConfiguration()->getAccounts();
         $this->importJob->refreshInstanceIdentifier();
     }

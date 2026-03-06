@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Spectre\Request;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\GetTransactionsResponse;
 use Illuminate\Support\Facades\Log;
@@ -79,7 +80,12 @@ class GetTransactionsRequest extends Request
         return new GetTransactionsResponse($transactions);
     }
 
-    public function post(): Response {}
+    public function post(): Response {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
-    public function put(): Response {}
+    public function put(): Response {
+        throw new ImporterHttpException('Method not implemented');
+
+    }
 }

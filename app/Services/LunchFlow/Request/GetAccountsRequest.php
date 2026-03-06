@@ -82,7 +82,7 @@ class GetAccountsRequest extends Request
                 $response = $this->authenticatedGet();
             } catch (ImporterHttpException $e) {
                 // JSON thing.
-                return new ErrorResponse($e->json ?? ['statusCode' => $e->statusCode]);
+                return new ErrorResponse(property_exists($e, 'json') ? $e->json : ['statusCode' => $e->statusCode]);
             }
         }
 
@@ -91,11 +91,11 @@ class GetAccountsRequest extends Request
 
     public function post(): Response
     {
-        // Implement post() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\SimpleFIN\Request;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\SimpleFIN\Response\PostAccountResponse;
 use GrumpyDictator\FFIIIApiSupport\Request\Request;
 use GrumpyDictator\FFIIIApiSupport\Response\Response;
@@ -46,7 +47,9 @@ class PostAccountRequest extends Request
         $this->setUri('accounts');
     }
 
-    public function get(): Response {}
+    public function get(): Response {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
     public function post(): Response
     {
@@ -72,7 +75,11 @@ class PostAccountRequest extends Request
         return new PostAccountResponse($data['data'] ?? []);
     }
 
-    public function put(): Response {}
+    public function put(): Response {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
-    public function delete(): Response {}
+    public function delete(): Response {
+        throw new ImporterHttpException('Method not implemented');
+    }
 }

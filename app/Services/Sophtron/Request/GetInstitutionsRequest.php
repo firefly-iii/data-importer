@@ -61,11 +61,11 @@ class GetInstitutionsRequest extends Request
 
     public function post(): Response
     {
-        //  Implement post() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

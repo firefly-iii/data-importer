@@ -693,47 +693,6 @@ class TransactionMapper
         return $result;
     }
 
-    private function getAccountId($direction, $current): string
-    {
-        Log::debug('getAccountId');
-        foreach ($this->accountIdentificationSuffixes as $suffix) {
-            $field = sprintf('%s_%s', $direction, $suffix);
-            if (array_key_exists($field, $current)) {
-                // there is a value...
-                foreach ($this->allAccounts as $account) {
-                    // so we check all accounts for a match
-                    if ($current[$field] === $account->{$suffix}) {
-                        // we have a match
-
-                        // only select accounts that are suitable for the type of transaction
-                        if ($current['amount'] > 0) {
-                            // seems a deposit or transfer
-                            if (in_array($account->type, ['asset', 'revenue'], true)) {
-                                return (string) $account->id;
-                            }
-                        }
-
-                        if ($current['amount'] < 0) {
-                            // seems a withtrawal or transfer
-                            if (in_array($account->type, ['asset', 'expense'], true)) {
-                                return (string) $account->id;
-                            }
-                        }
-                        Log::warning(sprintf('Just mapped account "%s" (%s)', $account->id, $account->type));
-
-                        return (string) $account->id;
-                    }
-                }
-
-                // Log::warning(sprintf('Unable to map an account for "%s"',$current[$field]));
-            }
-
-            // Log::warning(sprintf('There is no field for "%s" in the transaction',$direction));
-        }
-
-        return '';
-    }
-
     private function processAmount(string $groupHandling, array $data): string
     {
         // #8367 default amount = 0
@@ -785,25 +744,6 @@ class TransactionMapper
         Log::debug(sprintf('Final amount is "%s"', $return));
 
         return $return;
-    }
-
-    private function validAccountInfo(string $direction, array $current): bool
-    {
-        // search for existing IBAN
-        // search for existing number
-        // search for existing name, FIXME under which types?
-        foreach ($this->accountIdentificationSuffixes as $accountIdentificationSuffix) {
-            $field = sprintf('%s_%s', $direction, $accountIdentificationSuffix);
-            if (array_key_exists($field, $current)) {
-                // there is a value...
-                // so we check all accounts for a match
-                if (array_any($this->allAccounts, static fn ($account) => $current[$field] === $account->{$accountIdentificationSuffix})) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     public function getImportJob(): ImportJob

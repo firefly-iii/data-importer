@@ -37,7 +37,7 @@ use Traversable;
  */
 class AccountsResponse extends Response implements Countable, IteratorAggregate
 {
-    /** @var array[<string|Account>] */
+    /** @var array<string|Account> */
     private array  $accounts  = [];
     private string $sessionId = '';
 

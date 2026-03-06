@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\Sophtron\Request;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Sophtron\Response\PostGetTransactionsByTransactionDateResponse;
 
@@ -47,7 +48,7 @@ class PostGetTransactionsByTransactionDateRequest extends Request
 
     public function get(): Response
     {
-        //  Implement get() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function post(): Response
@@ -68,6 +69,6 @@ class PostGetTransactionsByTransactionDateRequest extends Request
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

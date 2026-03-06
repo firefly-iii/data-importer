@@ -270,9 +270,6 @@ abstract class AbstractTransaction
                 }
 
                 return '';
-
-                break;
-
             case 'entryDetailAmount':
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
