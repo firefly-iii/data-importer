@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace App\Services\Camt;
 
 use App\Exceptions\ImporterErrorException;
+use Genkgo\Camt\Camt052\DTO\Report;
+use Genkgo\Camt\Camt053\DTO\Statement;
 use Genkgo\Camt\DTO\Account;
 use Genkgo\Camt\DTO\Address;
 use Genkgo\Camt\DTO\BBANAccount;
 use Genkgo\Camt\DTO\Creditor;
 use Genkgo\Camt\DTO\Debtor;
 use Genkgo\Camt\DTO\DomainBankTransactionCode;
+use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\EntryTransactionDetail;
 use Genkgo\Camt\DTO\IbanAccount;
+use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\OtherAccount;
 use Genkgo\Camt\DTO\ProprietaryAccount;
 use Genkgo\Camt\DTO\RelatedParty;
@@ -25,9 +29,13 @@ use Money\Money;
 
 abstract class AbstractTransaction
 {
+    protected Message $levelA;
+    protected Entry $levelC;
+    protected array $levelD;
+    protected Report|Statement $levelB;
     public const TIME_FORMAT = 'Y-m-d H:i:s';
 
-    public function countSplits(): int
+    final public function countSplits(): int
     {
         return count($this->levelD);
     }

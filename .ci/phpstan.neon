@@ -16,6 +16,10 @@ parameters:
       enabled: false
     privateInFinalClass:
       enabled: false
+    noIsset:
+      enabled: false
+    finalInAbstractClass:
+      enabled: false
   paths:
     - ../app
     - ../database
@@ -27,6 +31,7 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
+    - identifier: catch.neverThrown
     - identifier: missingType.return
     - identifier: method.dynamicName
     - identifier: larastan.noEnvCallsOutsideOfConfig
