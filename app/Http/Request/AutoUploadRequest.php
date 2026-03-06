@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace App\Http\Request;
 
-class AutoUploadRequest extends Request
+final class AutoUploadRequest extends Request
 {
     /**
      * Verify the request.

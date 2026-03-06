@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Spectre\Request;
 
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Spectre\Response\ErrorResponse;
 use App\Services\Spectre\Response\GetAccountsResponse;
@@ -71,11 +72,11 @@ class GetAccountsRequest extends Request
 
     public function post(): Response
     {
-        // Implement post() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

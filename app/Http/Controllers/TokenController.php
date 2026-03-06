@@ -49,7 +49,7 @@ use Throwable;
 /**
  * Class TokenController
  */
-class TokenController extends Controller
+final class TokenController extends Controller
 {
     /**
      * The user ends up here when they come back from Firefly III.

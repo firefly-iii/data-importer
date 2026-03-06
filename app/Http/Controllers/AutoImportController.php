@@ -33,16 +33,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class AutoImportController extends Controller
+final class AutoImportController extends Controller
 {
     use AutoImports;
     use HaveAccess;
     use VerifyJSON;
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * @throws ImporterErrorException
@@ -53,13 +48,13 @@ class AutoImportController extends Controller
             throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
         }
 
-        $secret       = (string) ($request->get('secret') ?? '');
+        $secret       = (string) ($request->input('secret') ?? '');
         $systemSecret = (string) config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+        if ('' === $secret || '' === $systemSecret || hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 
-        $argument     = (string) ($request->get('directory') ?? './');
+        $argument     = (string) ($request->input('directory') ?? './');
         $directory    = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));

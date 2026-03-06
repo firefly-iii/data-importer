@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionCamt052 extends AbstractTransaction
 {
-    public function __construct(
-        protected readonly Message $levelA,
-        protected readonly Report $levelB,
-        protected readonly Entry $levelC,
-        protected array $levelD
-    ) {
+    public function __construct(Message $levelA, Report $levelB, Entry $levelC, array $levelD)
+    {
+        $this->levelA = $levelA;
+        $this->levelB = $levelB;
+        $this->levelC = $levelC;
+        $this->levelD = $levelD;
         Log::debug('Constructed a CAMT.052 Transaction');
     }
 

@@ -39,7 +39,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ConfigurationController extends Controller
+final class ConfigurationController extends Controller
 {
     use CollectsAccounts;
     use MergesAccountLists;
@@ -167,7 +167,7 @@ class ConfigurationController extends Controller
         $generic = match ($flow) {
             'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
-            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
             'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
             'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
             'file'      => [],

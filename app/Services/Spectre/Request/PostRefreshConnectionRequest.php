@@ -49,7 +49,10 @@ class PostRefreshConnectionRequest extends Request
         $this->setUrl('connections/%s/refresh');
     }
 
-    public function get(): Response {}
+    public function get(): Response
+    {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
     /**
      * @throws ImporterErrorException
@@ -86,7 +89,10 @@ class PostRefreshConnectionRequest extends Request
         return new PostRefreshConnectionResponse([]);
     }
 
-    public function put(): Response {}
+    public function put(): Response
+    {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
     public function setConnection(string $connection): void
     {

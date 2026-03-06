@@ -26,6 +26,7 @@ namespace App\Services\Nordigen\Request;
 
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\ArrayResponse;
 use App\Services\Shared\Response\Response;
@@ -71,11 +72,11 @@ class GetAccountInformationRequest extends Request
 
     public function post(): Response
     {
-        // Implement post() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

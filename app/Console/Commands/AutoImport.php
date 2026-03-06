@@ -56,7 +56,8 @@ final class AutoImport extends Command
             return ExitCode::NO_CONNECTION->value;
         }
 
-        $argument  = (string) ($this->argument('directory') ?? './'); // @phpstan-ignore-line
+        $argument  = (string) $this->argument('directory');
+        $argument  = '' === $argument ? './' : $argument;
 
         $directory = realpath($argument);
         if (false === $directory) {

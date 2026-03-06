@@ -53,8 +53,9 @@ class SessionResponse extends Response
         // valid_until comes as RFC3339 string in access object, convert to timestamp
         $validUntil       = $data['access']['valid_until'] ?? null;
         if (is_string($validUntil)) {
-            $this->validUntil = strtotime($validUntil) ?: null;
-        } else {
+            $this->validUntil = strtotime($validUntil);
+        }
+        if (!is_string($validUntil)) {
             $this->validUntil = $validUntil;
         }
     }

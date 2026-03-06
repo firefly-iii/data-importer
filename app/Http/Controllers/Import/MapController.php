@@ -41,7 +41,7 @@ use InvalidArgumentException;
 /**
  * Class MapController
  */
-class MapController extends Controller
+final class MapController extends Controller
 {
     protected const string DISK_NAME = 'jobs';
 

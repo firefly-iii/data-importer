@@ -53,7 +53,7 @@ class PostGetInstitutionsByUserRequest extends Request
      */
     public function get(): Response
     {
-        // no implementado.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function post(): Response
@@ -65,6 +65,6 @@ class PostGetInstitutionsByUserRequest extends Request
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

@@ -242,6 +242,12 @@ class SimpleFINService
 
         Log::debug(sprintf('Decoded claim URL: %s', $claimUrl));
 
+        // do some URL validation on the claim URL.
+        $resolved = gethostbyname(parse_url($claimUrl, PHP_URL_HOST));
+        if (false === filter_var($resolved, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            throw new ImporterErrorException(sprintf('SimpleFIN token points to invalid IP address: %s', $resolved));
+        }
+
         try {
             $client    = new Client(['timeout' => $this->getTimeout(), 'verify'  => config('importer.connection.verify')]);
 

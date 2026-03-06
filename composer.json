@@ -42,9 +42,6 @@
         "transfers",
         "management"
     ],
-    "platform": {
-        "php": "8.4"
-    },
     "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/firefly-iii/data-importer",
     "type": "project",
@@ -75,7 +72,7 @@
         }
     ],
     "require": {
-        "php": ">=8.4",
+        "php": ">=8.5",
         "ext-bcmath": "*",
         "ext-intl": "*",
         "ext-json": "*",
@@ -95,7 +92,7 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
         "driftingly/rector-laravel": "^2.1",
-        "ergebnis/phpstan-rules": "^2.12",
+        "ergebnis/phpstan-rules": "^2",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.18",
         "fruitcake/laravel-debugbar": "^4.0",
@@ -135,8 +132,7 @@
             "App\\": "app/"
         },
         "classmap": [
-            "database/seeds",
-            "database/factories"
+            "database/seeds"
         ]
     },
     "autoload-dev": {

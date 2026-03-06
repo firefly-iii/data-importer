@@ -32,7 +32,7 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * Class Controller
  */
-class Controller extends BaseController
+abstract class Controller extends BaseController
 {
     use AuthorizesRequests;
     use DispatchesJobs;
@@ -46,6 +46,14 @@ class Controller extends BaseController
      */
     public function __construct()
     {
+        // this breaks when running < PHP 8.5 and is totally intentional.
+        $input       = ' James is cool';
+        $output      = $input
+            |> trim(...)
+            |> (fn (string $string) => str_replace(' ', '-', $string))
+            |> (fn (string $string) => str_replace(['.', '/', '…'], '', $string))
+            |> strtolower(...);
+
         // validate some env vars (skip over config)
         //        $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
         //        $clientId    = (string) env('FIREFLY_III_CLIENT_ID', '');

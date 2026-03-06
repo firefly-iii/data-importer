@@ -34,7 +34,7 @@ use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class ValidationController extends Controller
+final class ValidationController extends Controller
 {
     public function validateFlow(string $flow): JsonResponse
     {

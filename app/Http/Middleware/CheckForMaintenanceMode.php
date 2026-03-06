@@ -29,7 +29,7 @@ use Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode as Middleware;
 /**
  * Class CheckForMaintenanceMode
  */
-class CheckForMaintenanceMode extends Middleware
+final class CheckForMaintenanceMode extends Middleware
 {
     /**
      * The URIs that should be reachable while maintenance mode is enabled.

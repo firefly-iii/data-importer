@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\CSV\Mapper;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Camt\AbstractTransaction;
 use App\Services\Camt\TransactionCamt052 as Transaction052;
 use App\Services\Camt\TransactionCamt053 as Transaction053;
 use App\Services\Shared\Configuration\Configuration;
@@ -135,7 +136,7 @@ class MapperService
         // loop over records.
         $statements     = $camtMessage->getRecords();
 
-        /** @var CamtStatement $statement */
+        /** @var CamtReport|CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
             foreach ($entries as $entry) { // -> Level C
@@ -171,7 +172,7 @@ class MapperService
         }
         $mappableFields = self::getMappableFieldsForCamt();
 
-        /** @var Transaction $transaction */
+        /** @var AbstractTransaction $transaction */
         foreach ($transactions as $transaction) {
             // take all mappable fields from this transaction, and add to $values in the data thing
 

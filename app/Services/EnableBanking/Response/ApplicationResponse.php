@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Services\EnableBanking\Response;
 
+use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Model\Account;
 use App\Services\Shared\Response\Response;
 use ArrayIterator;
@@ -42,9 +43,7 @@ class ApplicationResponse extends Response implements Countable, IteratorAggrega
 
     public function __construct(array $data = [])
     {
-        var_dump($data);
-
-        exit;
+        throw new ImporterHttpException('This method is not in use.');
         $accounts = $data['accounts'] ?? $data;
 
         // Handle null or non-array accounts (restricted clients without pre-authorization)

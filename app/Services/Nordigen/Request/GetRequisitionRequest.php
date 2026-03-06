@@ -67,7 +67,13 @@ class GetRequisitionRequest extends Request
         return new GetRequisitionResponse($response);
     }
 
-    public function post(): Response {}
+    public function post(): Response
+    {
+        throw new ImporterHttpException('Method not implemented');
+    }
 
-    public function put(): Response {}
+    public function put(): Response
+    {
+        throw new ImporterHttpException('Method not implemented');
+    }
 }

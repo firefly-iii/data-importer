@@ -94,7 +94,8 @@ class Transaction
         $remittanceInfo                     = $array['remittance_information'] ?? '';
         if (is_array($remittanceInfo)) {
             $transaction->remittanceInformation = implode(' ', $remittanceInfo);
-        } else {
+        }
+        if (!is_array($remittanceInfo)) {
             $transaction->remittanceInformation = $remittanceInfo;
         }
         $transaction->additionalInformation = $array['additional_information'] ?? $array['note'] ?? '';
@@ -112,7 +113,8 @@ class Transaction
             $encoded                    = json_encode($array);
             if (json_validate($encoded)) {
                 $hash = hash('sha256', $encoded);
-            } else {
+            }
+            if (!json_validate($encoded)) {
                 Log::error('Could not parse array into JSON');
             }
             $transaction->transactionId = sprintf('eb-%s', Uuid::uuid5(config('importer.namespace'), $hash));

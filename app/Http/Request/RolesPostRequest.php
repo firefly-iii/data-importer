@@ -29,7 +29,7 @@ use Illuminate\Contracts\Validation\Validator;
 /**
  * Class RolesPostRequest
  */
-class RolesPostRequest extends Request
+final class RolesPostRequest extends Request
 {
     /**
      * Verify the request.
@@ -69,7 +69,7 @@ class RolesPostRequest extends Request
 
     protected function validateAmountRole(Validator $validator): void
     {
-        $data                 = $validator->getData(); // @phpstan-ignore-line
+        $data                 = $validator->getData();
         $roles                = $data['roles'] ?? [];
         $ignoreWarnings       = '1' === ($data['ignore_warnings'] ?? false);
         $count                = 0;

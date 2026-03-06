@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Class IndexController
  */
-class IndexController extends Controller
+final class IndexController extends Controller
 {
     /**
      * IndexController constructor.

@@ -28,7 +28,7 @@ use Illuminate\Http\Response;
 /**
  * Class HealthcheckController.
  */
-class HealthcheckController extends Controller
+final class HealthcheckController extends Controller
 {
     /**
      * Sends 'OK' info when app is alive

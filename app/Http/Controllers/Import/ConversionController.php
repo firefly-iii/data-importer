@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ConversionController
  */
-class ConversionController extends Controller
+final class ConversionController extends Controller
 {
     private ImportJobRepository $repository;
 

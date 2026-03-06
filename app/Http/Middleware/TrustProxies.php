@@ -31,7 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class TrustProxies
  */
-class TrustProxies extends Middleware
+final class TrustProxies extends Middleware
 {
     /**
      * The headers that should be used to detect proxies.

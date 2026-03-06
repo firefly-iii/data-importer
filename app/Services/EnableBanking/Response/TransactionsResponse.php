@@ -77,7 +77,8 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
                 $tx['status']             = 'pending';
                 $response->transactions[] = Transaction::fromArray($tx);
             }
-        } else {
+        }
+        if (!isset($transactions['booked']) && !isset($transactions['pending'])) {
             // Flat array format - each transaction has its own status field
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 

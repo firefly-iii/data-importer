@@ -33,11 +33,13 @@ use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionGroup;
+use GrumpyDictator\FFIIIApiSupport\Request\GetCountTransactionsRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\GetSearchTransactionsRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\PostFinishBatchRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTagRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\PostTransactionRequest;
 use GrumpyDictator\FFIIIApiSupport\Request\PutTransactionRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetCountTransactionsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\GetTransactionsResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostFinishBatchResponse;
 use GrumpyDictator\FFIIIApiSupport\Response\PostTagResponse;
@@ -97,7 +99,7 @@ class ApiSubmitter
 
         $this->vanityURL  = SecretManager::getVanityURL();
 
-        Log::debug(sprintf('Vanity URL : "%s"', $this->vanityURL));
+        Log::debug(sprintf('Vanity URL: "%s"', $this->vanityURL));
 
         /**
          * @var int   $index
@@ -221,6 +223,17 @@ class ApiSubmitter
 
                 return false;
             }
+            // could still be not unique because of deleted values.
+            $exists       = $this->searchFieldUsingCount($field, $value);
+            if ($exists) {
+                Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in a deleted transaction group. Return false', $field, $value));
+                $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', $field, $value);
+                if (false === config('importer.ignore_duplicate_errors')) {
+                    $this->importJob->submissionStatus->addError($index, $message);
+                }
+
+                return false;
+            }
         }
         Log::debug(sprintf('Looks like field "%s" with value "%s" is unique, return false.', $field, $value));
 
@@ -267,6 +280,59 @@ class ApiSubmitter
         Log::debug(sprintf('Found %d transaction(s). Return group ID #%d.', $response->count(), $first->id));
 
         return $array;
+    }
+
+    /**
+     * Do a search at Firefly III and return the ID of the group found.
+     */
+    private function searchFieldUsingCount(string $field, string $value): bool
+    {
+        Log::debug(sprintf('Going to searchFieldUsingCount field "%s" with value "%s".', $field, $value));
+
+        $url     = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $request = new GetCountTransactionsRequest($url, $token);
+        $request->setTimeOut(config('importer.connection.timeout'));
+        $request->setVerify(config('importer.connection.verify'));
+        $set     = false;
+        if ('note' === $field || 'notes' === $field) {
+            Log::debug('Search for notes');
+            $request->setNotes($value);
+            $set = true;
+        }
+        if ('external-id' === $field || 'external_id' === $field) {
+            $request->setExternalIdentifier($value);
+            Log::debug('Search for external identifier');
+            $set = true;
+        }
+        if ('description' === $field) {
+            Log::debug('Search for description');
+            $request->setDescription($value);
+            $set = true;
+        }
+        if ('internal-reference' === $field || 'internal_reference' === $field) {
+            Log::debug('Search for internal reference');
+            $request->setInternalReference($value);
+            $set = true;
+        }
+        if (false === $set) {
+            throw new ImporterErrorException(sprintf('Could not search for field "%s"', $field));
+        }
+
+        try {
+            /** @var GetCountTransactionsResponse $response */
+            $response = $request->get();
+        } catch (ApiHttpException $e) {
+            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+
+            return true;
+        }
+        Log::debug(sprintf('The search returned count: %d', $response->getCount()));
+        if (0 === $response->getCount()) {
+            return false;
+        }
+
+        return true;
     }
 
     private function processTransaction(int $index, array $line, bool $lastTransaction): array
@@ -512,7 +578,7 @@ class ApiSubmitter
 
         $groupId = (int) $groupInfo['group_id'];
         Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = ['fire_webhooks' => false, 'apply_rules'   => false, 'transactions'  => []];
+        $body    = ['fire_webhooks'    => false, 'batch_submission' => true, 'apply_rules'      => false, 'transactions'     => []];
 
         /**
          * @var int   $journalId

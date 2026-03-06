@@ -33,7 +33,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\SystemInformationResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class IndexController extends Controller
+final class IndexController extends Controller
 {
     public function validateConnection(): JsonResponse
     {

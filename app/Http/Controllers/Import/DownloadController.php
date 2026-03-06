@@ -36,7 +36,7 @@ use stdClass;
 /**
  * Class DownloadController
  */
-class DownloadController extends Controller
+final class DownloadController extends Controller
 {
     private ImportJobRepository $repository;
 

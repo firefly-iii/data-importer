@@ -28,7 +28,6 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Enums\ExitCode;
-use App\Events\ImportedTransactions;
 use App\Exceptions\ImporterErrorException;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -66,7 +65,7 @@ final class Import extends Command
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $file       = (string) $this->argument('file');
-        $config     = (string) $this->argument('config'); // @phpstan-ignore-line
+        $config     = (string) $this->argument('config');
 
         // validate config path:
         if ('' !== $config) {

@@ -57,6 +57,7 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
+        $response     = [];
         if (false === config('importer.fake_data')) {
             $response = $this->authenticatedGet();
         }
@@ -180,11 +181,11 @@ class GetTransactionsRequest extends Request
 
     public function post(): Response
     {
-        //  Implement post() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 
     public function put(): Response
     {
-        // Implement put() method.
+        throw new ImporterHttpException('Method not implemented');
     }
 }

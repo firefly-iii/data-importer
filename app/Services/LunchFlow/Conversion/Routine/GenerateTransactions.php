@@ -33,6 +33,7 @@ use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -190,15 +191,23 @@ class GenerateTransactions
      */
     private function appendPositiveAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
-        // amount is positive: deposit or transfer. Lunch Flow account is the destination
+        // amount is positive: deposit or transfer. Lunch Flow account could be the destination
         $transaction['type']           = 'deposit';
         $transaction['amount']         = $entry->amount;
 
         // destination is a Lunch Flow account (has to be!)
         $transaction['destination_id'] = (int) $this->accounts[$accountId];
-        Log::debug(sprintf('Destination ID is now #%d, which should be a Firefly III asset account.', $transaction['destination_id']));
+        Log::debug(sprintf('Destination ID is now #%d, which could be a Firefly III asset account.', $transaction['destination_id']));
 
-        // append source iban and number (if present)
+        // before we begin, log the source and dest info
+        Log::debug(sprintf(
+            'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
+            $transaction['source_name'] ?? '',
+            $transaction['source_iban'] ?? '',
+            $transaction['source_id'] ?? ''
+        ));
+
+        // append source name, iban and number (if present)
         $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
 
         // FIXME clean up mapping
@@ -244,7 +253,7 @@ class GenerateTransactions
 
     private function appendAccountFields(array $transaction, Transaction $entry, string $direction): array
     {
-        Log::debug(sprintf('Now in %s($transaction, $entry, "%s")', __METHOD__, $direction));
+        Log::debug(sprintf('Now in appendAccountFields($transaction, $entry, "%s")', $direction));
 
         // these are the values we're going to use:
         switch ($direction) {
@@ -254,7 +263,7 @@ class GenerateTransactions
             case 'source':
                 $iban      = '';
                 $number    = sprintf(self::NUMBER_FORMAT, '');
-                $name      = '';
+                $name      = $entry->getSourceName();
                 $idKey     = 'source_id';
                 $ibanKey   = 'source_iban';
                 $nameKey   = 'source_name';
@@ -386,8 +395,8 @@ class GenerateTransactions
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setId($accountId);
 
-        /** @var GetAccountResponse $result */
         try {
+            /** @var GetAccountResponse $result */
             $result = $request->get();
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);
@@ -573,9 +582,8 @@ class GenerateTransactions
 
     public function setImportJob(ImportJob $importJob): void
     {
-        $this->importJob  = $importJob;
-        $this->identifier = $importJob->identifier;
-        $this->accounts   = $importJob->getConfiguration()->getAccounts();
+        $this->importJob = $importJob;
+        $this->accounts  = $importJob->getConfiguration()->getAccounts();
         $this->importJob->refreshInstanceIdentifier();
     }
 }

@@ -113,6 +113,19 @@ class Transaction
     }
 
     /**
+     * Return name of the source account.
+     * This is ALSO the merchant field. Yes I know.
+     */
+    public function getSourceName(): ?string
+    {
+        if ('' === $this->merchant) {
+            return '(empty source)';
+        }
+
+        return $this->merchant;
+    }
+
+    /**
      * Call this "toLocalArray" because we want to confusion with "fromArray", which is really based
      * on Lunch Flow information. Likewise, there is also "fromLocalArray".
      */
