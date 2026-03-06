@@ -35,7 +35,7 @@ use Monolog\Logger;
 
 use const PHP_SAPI;
 
-class DebugController extends Controller
+final class DebugController extends Controller
 {
     /**
      * Show debug info.
@@ -59,6 +59,7 @@ class DebugController extends Controller
                         $logContent = (string) file_get_contents($logFile);
                     } catch (Exception) {
                         // @ignoreException
+                        Log::debug(sprintf('Could not get content of %s, but that is OK', $logFile));
                     }
                 }
             }

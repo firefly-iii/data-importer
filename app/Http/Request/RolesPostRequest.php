@@ -29,7 +29,7 @@ use Illuminate\Contracts\Validation\Validator;
 /**
  * Class RolesPostRequest
  */
-class RolesPostRequest extends Request
+final class RolesPostRequest extends Request
 {
     /**
      * Verify the request.

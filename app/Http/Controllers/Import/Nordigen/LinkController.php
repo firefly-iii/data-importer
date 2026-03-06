@@ -46,7 +46,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class LinkController
  */
-class LinkController extends Controller
+final class LinkController extends Controller
 {
     private ImportJobRepository $repository;
 

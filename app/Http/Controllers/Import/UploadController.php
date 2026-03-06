@@ -48,7 +48,7 @@ use Storage;
 /**
  * Class UploadController
  */
-class UploadController extends Controller
+final class UploadController extends Controller
 {
     use CollectsSettings;
     use VerifyJSON;

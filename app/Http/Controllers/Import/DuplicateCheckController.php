@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Provides AJAX endpoint for real-time duplicate account validation
  */
-class DuplicateCheckController extends Controller
+final class DuplicateCheckController extends Controller
 {
     private ImportJobRepository $repository;
 

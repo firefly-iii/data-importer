@@ -37,14 +37,6 @@ final class UpgradeImportConfigurations extends Command
     protected $signature   = 'importer:upgrade-import-configurations {directory}';
 
     /**
-     * Create a new command instance.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      */
     public function handle(): int

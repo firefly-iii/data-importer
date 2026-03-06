@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class SubmitController
  */
-class SubmitController extends Controller
+final class SubmitController extends Controller
 {
     protected const string DISK_NAME = 'jobs';
 

@@ -33,7 +33,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class AutoUploadController extends Controller
+final class AutoUploadController extends Controller
 {
     use AutoImports;
     use HaveAccess;
@@ -49,7 +49,7 @@ class AutoUploadController extends Controller
         }
         $secret         = (string) ($request->get('secret') ?? '');
         $systemSecret   = (string) config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || $secret !== config('importer.auto_import_secret') || strlen($systemSecret) < 16) {
+        if ('' === $secret || '' === $systemSecret ||hash_equals($secret, (string)config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 

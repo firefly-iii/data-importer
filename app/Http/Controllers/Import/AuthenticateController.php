@@ -45,7 +45,7 @@ use Session;
 /**
  * Class AuthenticateController
  */
-class AuthenticateController extends Controller
+final class AuthenticateController extends Controller
 {
     private const string AUTH_ROUTE = 'authenticate-flow.index';
 

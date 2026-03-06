@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class LinkController
  */
-class LinkController extends Controller
+final class LinkController extends Controller
 {
     private ImportJobRepository $repository;
 

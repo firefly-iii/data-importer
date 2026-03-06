@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ServiceController
  */
-class ServiceController extends Controller
+final class ServiceController extends Controller
 {
     /**
      * StartController constructor.

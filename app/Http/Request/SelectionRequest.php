@@ -29,7 +29,7 @@ use Illuminate\Contracts\Validation\Validator;
 /**
  * Class SelectionRequest
  */
-class SelectionRequest extends Request
+final class SelectionRequest extends Request
 {
     public function getAll(): array
     {

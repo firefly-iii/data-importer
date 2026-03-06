@@ -45,7 +45,7 @@ use Illuminate\View\View;
 /**
  * Class SelectionController
  */
-class SelectionController extends Controller
+final class SelectionController extends Controller
 {
     private ImportJobRepository $repository;
 

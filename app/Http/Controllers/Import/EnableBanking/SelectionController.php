@@ -41,7 +41,7 @@ use Illuminate\View\View;
 /**
  * Class SelectionController
  */
-class SelectionController extends Controller
+final class SelectionController extends Controller
 {
     private ImportJobRepository $repository;
 
@@ -79,7 +79,7 @@ class SelectionController extends Controller
         }
 
         // Get country from query parameter, or from configuration, or default to empty
-        $selectedCountry = $request->query('country', $country ?: '');
+        $selectedCountry = $request->query('country', $country);
         $response        = null;
 
         // Only fetch banks if a country is selected

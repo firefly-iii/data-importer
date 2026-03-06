@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * Class RedirectIfAuthenticated
  */
-class RedirectIfAuthenticated
+final class RedirectIfAuthenticated
 {
     /**
      * Handle an incoming request.

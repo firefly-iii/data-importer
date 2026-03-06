@@ -38,7 +38,7 @@ use Illuminate\View\View;
 /**
  * Class RoleController
  */
-class RoleController extends Controller
+final class RoleController extends Controller
 {
     private ImportJobRepository $repository;
 

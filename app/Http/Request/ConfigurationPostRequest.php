@@ -31,7 +31,7 @@ use Illuminate\Contracts\Validation\Validator;
 /**
  * Class ConfigurationPostRequest
  */
-class ConfigurationPostRequest extends Request
+final class ConfigurationPostRequest extends Request
 {
     /**
      * Verify the request.

@@ -32,7 +32,7 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * Class Controller
  */
-class Controller extends BaseController
+abstract class Controller extends BaseController
 {
     use AuthorizesRequests;
     use DispatchesJobs;

@@ -39,7 +39,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ConfigurationController extends Controller
+final class ConfigurationController extends Controller
 {
     use CollectsAccounts;
     use MergesAccountLists;
