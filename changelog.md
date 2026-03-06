@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.1.2 - 2026-03-06
+
+### Fixed
+- #11775
+- #11777
+- #11783
+
+### Security
+- Some AI bot found a mild security issue in SimpleFIN token parsing, so I fixed that.  
+
 ## v2.1.1 - 2026-02-21
 
 > [!WARNING]
