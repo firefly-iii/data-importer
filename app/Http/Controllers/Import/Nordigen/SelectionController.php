@@ -26,7 +26,6 @@ namespace App\Http\Controllers\Import\Nordigen;
 
 use App\Exceptions\AgreementExpiredException;
 use App\Exceptions\ImporterErrorException;
-use App\Exceptions\ImporterHttpException;
 use App\Exceptions\RateLimitException;
 use App\Http\Controllers\Controller;
 use App\Http\Request\SelectionRequest;
@@ -77,13 +76,14 @@ final class SelectionController extends Controller
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
             // FIXME
             throw new ImporterErrorException('Do not redirect as it stands now.');
-//            session()->put(Constants::CONFIGURATION, $configuration->toArray());
-//            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
-//
-//            // send to Nordigen for approval
-//            Log::debug('Redirect to GoCardless from selection controller.');
-//
-//            return redirect(route('gocardless-connect.index', [$identifier]));
+
+            //            session()->put(Constants::CONFIGURATION, $configuration->toArray());
+            //            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
+            //
+            //            // send to Nordigen for approval
+            //            Log::debug('Redirect to GoCardless from selection controller.');
+            //
+            //            return redirect(route('gocardless-connect.index', [$identifier]));
         }
         // get banks and countries
         $accessToken   = TokenManager::getAccessToken();

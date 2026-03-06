@@ -93,7 +93,7 @@ class Iban implements ConverterInterface
 
         try {
             $checksum = bcmod($iban, '97');
-        } catch (ValueError|DivisionByZeroError $e) {
+        } catch (DivisionByZeroError|ValueError $e) {
             Log::error(sprintf('Bad IBAN: %s', $e->getMessage()));
             $checksum = 2;
         }

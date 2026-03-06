@@ -5,9 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## v2.1.2 - 2026-03-06
 
 ### Fixed
-- #11775
-- #11777
-- #11783
+- [Issue 11775](https://github.com/firefly-iii/firefly-iii/issues/11775) (Data-importer 2.1.1 CAMT: Exception occurs parsing amount) reported by @lindely
+- [Issue 11777](https://github.com/firefly-iii/firefly-iii/issues/11777) (Fix for issue 11775 not working) reported by @lindely
+- [Issue 11783](https://github.com/firefly-iii/firefly-iii/issues/11783) (Firefly importer: Map income / transfer) reported by @Kiekeboe100
 
 ### Security
 - Some AI bot found a mild security issue in SimpleFIN token parsing, so I fixed that.  

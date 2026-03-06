@@ -41,7 +41,8 @@ class PostNewTokenRequest extends Request
         private readonly string $key
     ) {}
 
-    public function get(): Response {
+    public function get(): Response
+    {
         throw new ImporterHttpException('Method not implemented');
     }
 
@@ -70,7 +71,8 @@ class PostNewTokenRequest extends Request
         return new TokenSetResponse($json);
     }
 
-    public function put(): Response {
+    public function put(): Response
+    {
         throw new ImporterHttpException('Method not implemented');
     }
 }

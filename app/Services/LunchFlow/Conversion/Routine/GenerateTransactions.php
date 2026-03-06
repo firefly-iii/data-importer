@@ -582,8 +582,8 @@ class GenerateTransactions
 
     public function setImportJob(ImportJob $importJob): void
     {
-        $this->importJob  = $importJob;
-        $this->accounts   = $importJob->getConfiguration()->getAccounts();
+        $this->importJob = $importJob;
+        $this->accounts  = $importJob->getConfiguration()->getAccounts();
         $this->importJob->refreshInstanceIdentifier();
     }
 }

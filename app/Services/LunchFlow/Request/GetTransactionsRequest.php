@@ -57,7 +57,7 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
-        $response = [];
+        $response     = [];
         if (false === config('importer.fake_data')) {
             $response = $this->authenticatedGet();
         }

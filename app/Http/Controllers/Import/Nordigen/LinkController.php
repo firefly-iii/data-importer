@@ -79,21 +79,22 @@ final class LinkController extends Controller
         if (1 === count($requisitions)) {
             // FIXME build me.
             throw new ImporterErrorException('Not yet.');
-//            $url         = config('nordigen.url');
-//            $accessToken = TokenManager::getAccessToken();
-//            $reference   = array_shift($requisitions);
-//            $request     = new GetRequisitionRequest($url, $accessToken, $reference);
-//            $request->setTimeOut(config('importer.connection.timeout'));
-//
-//            /** @var GetRequisitionResponse $result */
-//            $result      = $request->get();
-//
-//            $configuration->setAccounts($result->accounts);
-//
-//            session()->put(Constants::REQUISITION_REFERENCE, $reference);
-//            Log::debug('Return redirect to configuration.');
-//
-//            return redirect(route('004-configure.index'));
+
+            //            $url         = config('nordigen.url');
+            //            $accessToken = TokenManager::getAccessToken();
+            //            $reference   = array_shift($requisitions);
+            //            $request     = new GetRequisitionRequest($url, $accessToken, $reference);
+            //            $request->setTimeOut(config('importer.connection.timeout'));
+            //
+            //            /** @var GetRequisitionResponse $result */
+            //            $result      = $request->get();
+            //
+            //            $configuration->setAccounts($result->accounts);
+            //
+            //            session()->put(Constants::REQUISITION_REFERENCE, $reference);
+            //            Log::debug('Return redirect to configuration.');
+            //
+            //            return redirect(route('004-configure.index'));
         }
 
         $uuid              = Uuid::uuid4()->toString();
