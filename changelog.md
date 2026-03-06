@@ -8,9 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 > This release is the same as 2.1.1, but only works on PHP 8.5 and higher. To continue using the latest version of the data importer, you must upgrade to (at least) PHP 8.5.0, or switch to the Docker containers.
 
 ### Fixed
-- #11775
-- #11777
-- #11783
+- [Issue 11775](https://github.com/firefly-iii/firefly-iii/issues/11775) (Data-importer 2.1.1 CAMT: Exception occurs parsing amount) reported by @lindely
+- [Issue 11777](https://github.com/firefly-iii/firefly-iii/issues/11777) (Fix for issue 11775 not working) reported by @lindely
+- [Issue 11783](https://github.com/firefly-iii/firefly-iii/issues/11783) (Firefly importer: Map income / transfer) reported by @Kiekeboe100
 
 ### Security
 - Some AI bot found a mild security issue in SimpleFIN token parsing, so I fixed that.  
