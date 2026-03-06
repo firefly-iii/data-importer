@@ -80,12 +80,13 @@ class GetTransactionsRequest extends Request
         return new GetTransactionsResponse($transactions);
     }
 
-    public function post(): Response {
+    public function post(): Response
+    {
         throw new ImporterHttpException('Method not implemented');
     }
 
-    public function put(): Response {
+    public function put(): Response
+    {
         throw new ImporterHttpException('Method not implemented');
-
     }
 }

@@ -136,7 +136,7 @@ class MapperService
         // loop over records.
         $statements     = $camtMessage->getRecords();
 
-        /** @var CamtStatement|CamtReport $statement */
+        /** @var CamtReport|CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
             $entries = $statement->getEntries();
             foreach ($entries as $entry) { // -> Level C

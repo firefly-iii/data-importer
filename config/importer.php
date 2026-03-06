@@ -64,8 +64,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-03-03',
-    'build_time'                    => 1772513008,
+    'version'                       => 'develop/2026-03-06',
+    'build_time'                    => 1772779816,
     'fake_data'                     => env('FAKE_DATA', false),
     'providers'                     => [
         'file'      => [

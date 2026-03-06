@@ -11,12 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionCamt053 extends AbstractTransaction
 {
-    public function __construct(
-        Message $levelA,
-        Statement $levelB,
-        Entry $levelC,
-        array $levelD
-    ) {
+    public function __construct(Message $levelA, Statement $levelB, Entry $levelC, array $levelD)
+    {
         $this->levelA = $levelA;
         $this->levelB = $levelB;
         $this->levelC = $levelC;
