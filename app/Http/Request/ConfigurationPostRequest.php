@@ -54,7 +54,7 @@ final class ConfigurationPostRequest extends Request
         foreach ($accounts as $identifier => $current) {
             // import from these accounts?
             // if it must be created, details MUST be in "newAccounts, or it will be skipped.
-            if (array_key_exists($identifier, $doImport) && 'create_new' === $accounts[$identifier] ?? false) {
+            if (array_key_exists($identifier, $doImport) && 'create_new' === $accounts[$identifier]) {
                 $toImportFrom[$identifier] = 0;
                 $toCreate[$identifier]     = $newAccounts[$identifier];
             }

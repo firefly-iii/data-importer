@@ -167,7 +167,7 @@ final class ConfigurationController extends Controller
         $generic = match ($flow) {
             'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
-            'lunchflow' => ImportServiceAccount::convertLunchflowArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
             'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
             'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
             'file'      => [],

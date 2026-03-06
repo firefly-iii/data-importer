@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
  *
  * @codeCoverageIgnore
  */
-final class Request extends FormRequest
+class Request extends FormRequest
 {
     public function convertBoolean(?string $value): bool
     {

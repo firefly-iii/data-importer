@@ -77,13 +77,13 @@ final class SelectionController extends Controller
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
             // FIXME
             throw new ImporterErrorException('Do not redirect as it stands now.');
-            session()->put(Constants::CONFIGURATION, $configuration->toArray());
-            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
-
-            // send to Nordigen for approval
-            Log::debug('Redirect to GoCardless from selection controller.');
-
-            return redirect(route('gocardless-connect.index', [$identifier]));
+//            session()->put(Constants::CONFIGURATION, $configuration->toArray());
+//            session()->put(Constants::SELECTED_BANK_COUNTRY, true);
+//
+//            // send to Nordigen for approval
+//            Log::debug('Redirect to GoCardless from selection controller.');
+//
+//            return redirect(route('gocardless-connect.index', [$identifier]));
         }
         // get banks and countries
         $accessToken   = TokenManager::getAccessToken();
@@ -94,7 +94,7 @@ final class SelectionController extends Controller
 
         try {
             $response = $request->get();
-        } catch (AgreementExpiredException|ImporterHttpException|RateLimitException $e) { // @phpstan-ignore-line
+        } catch (AgreementExpiredException|ImporterHttpException|RateLimitException $e) {
             throw new ImporterErrorException($e->getMessage(), 0, $e);
         }
 
