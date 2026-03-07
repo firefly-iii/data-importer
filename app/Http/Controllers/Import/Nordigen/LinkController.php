@@ -59,10 +59,10 @@ final class LinkController extends Controller
     public function build(string $identifier): Redirector|RedirectResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob = $this->repository->find($identifier);
+        $importJob         = $this->repository->find($identifier);
         // grab config of user:
         // create a new config thing
-        $configuration = $importJob->getConfiguration();
+        $configuration     = $importJob->getConfiguration();
         if ('XX' === $configuration->getNordigenBank()) {
             Log::debug('Return back to selection because bank is XX');
 
@@ -72,7 +72,7 @@ final class LinkController extends Controller
         TokenManager::validateAllTokens();
 
         // if already a requisition in config file, no need to make a new one unless its invalid.
-        $requisitions = $configuration->getNordigenRequisitions();
+        $requisitions      = $configuration->getNordigenRequisitions();
         if (1 === count($requisitions)) {
             // FIXME build me.
             throw new ImporterErrorException('Not yet.');
@@ -94,11 +94,11 @@ final class LinkController extends Controller
             //            return redirect(route('004-configure.index'));
         }
 
-        $uuid        = Uuid::uuid4()->toString();
-        $url         = config('nordigen.url');
-        $accessToken = TokenManager::getAccessToken();
+        $uuid              = Uuid::uuid4()->toString();
+        $url               = config('nordigen.url');
+        $accessToken       = TokenManager::getAccessToken();
 
-        $agreementRequest = new PostNewUserAgreement($url, $accessToken);
+        $agreementRequest  = new PostNewUserAgreement($url, $accessToken);
         $agreementRequest->setTimeOut(config('importer.connection.timeout'));
         $agreementRequest->setBank($configuration->getNordigenBank());
         $agreementRequest->setAccessValidForDays('90');
@@ -107,7 +107,7 @@ final class LinkController extends Controller
         /** @var NewUserAgreementResponse $agreementResponse */
         $agreementResponse = $agreementRequest->post();
 
-        $request = new PostNewRequisitionRequest($url, $accessToken, $identifier);
+        $request           = new PostNewRequisitionRequest($url, $accessToken, $identifier);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setBank($configuration->getNordigenBank());
         $request->setReference($uuid);
@@ -116,7 +116,7 @@ final class LinkController extends Controller
         Log::debug(sprintf('Reference is "%s"', $uuid));
 
         /** @var NewRequisitionResponse $response */
-        $response = $request->post();
+        $response          = $request->post();
         Log::debug(sprintf('Got a new requisition with id "%s"', $response->id));
         Log::debug(sprintf('Status: %s, returned reference: "%s"', $response->status, $response->reference));
         Log::debug(sprintf('Will now redirect the user to %s', $response->link));
@@ -134,7 +134,7 @@ final class LinkController extends Controller
      */
     public function callback(Request $request, string $identifier)
     {
-        $reference = trim((string)$request->get('ref'));
+        $reference     = trim((string) $request->get('ref'));
         Log::debug(sprintf('Now at %s', __METHOD__));
         Log::debug(sprintf('Reference is "%s"', $reference));
 
