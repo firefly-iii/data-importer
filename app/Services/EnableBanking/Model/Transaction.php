@@ -212,6 +212,15 @@ class Transaction
         return null;
     }
 
+    public function getSourceBban(): ?string
+    {
+        if ('' !== $this->debtorBban) {
+            return $this->debtorBban;
+        }
+
+        return null;
+    }
+
     public function getDestinationName(): ?string
     {
         if ('' !== $this->creditorName) {
@@ -225,6 +234,15 @@ class Transaction
     {
         if ('' !== $this->creditorIban) {
             return $this->creditorIban;
+        }
+
+        return null;
+    }
+
+    public function getDestinationBban(): ?string
+    {
+        if ('' !== $this->creditorBban) {
+            return $this->creditorBban;
         }
 
         return null;
@@ -251,8 +269,10 @@ class Transaction
             'value_date'             => $this->valueDate?->toW3cString(),
             'creditor_name'          => $this->creditorName,
             'creditor_iban'          => $this->creditorIban,
+            'creditor_bban'          => $this->creditorBban,
             'debtor_name'            => $this->debtorName,
             'debtor_iban'            => $this->debtorIban,
+            'debtor_bban'            => $this->debtorBban,
             'remittance_information' => $this->remittanceInformation,
             'additional_information' => $this->additionalInformation,
             'status'                 => $this->status,
