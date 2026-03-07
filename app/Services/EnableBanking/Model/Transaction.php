@@ -41,8 +41,10 @@ class Transaction
     public ?Carbon $valueDate             = null;
     public string  $creditorName          = '';
     public string  $creditorIban          = '';
+    public string  $creditorBban          = '';
     public string  $debtorName            = '';
     public string  $debtorIban            = '';
+    public string  $debtorBban            = '';
     public string  $remittanceInformation = '';
     public string  $additionalInformation = '';
     public string  $status                = '';
