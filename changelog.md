@@ -1052,6 +1052,8 @@ First release of the data importer.
 
 ## v0.0.0 - 2021-xx-xx
 
+<!-- summary: If you can read this I forgot to update the summary! -->
+
 ### Added
 - Initial release.
 
