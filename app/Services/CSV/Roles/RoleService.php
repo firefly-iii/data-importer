@@ -182,7 +182,7 @@ class RoleService
                 $combinedParts    = [];
 
                 foreach ($pseudoIdentifier['source_columns'] as $sourceIndex) {
-                    $value = isset($line[$sourceIndex]) ? trim((string) $line[$sourceIndex]) : '';
+                    $value = array_key_exists($sourceIndex, $line) && null !== $line[$sourceIndex] ? trim((string) $line[$sourceIndex]) : '';
                     if ('' !== $value) {
                         $combinedParts[] = $value;
                     }
