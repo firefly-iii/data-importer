@@ -1,6 +1,6 @@
 # Welcome to Mago!
 # For full documentation, see https://mago.carthage.software/tools/overview
-php-version = "8.4.0"
+php-version = "8.5.0"
 
 [source]
 workspace = "."
@@ -45,7 +45,7 @@ excessive-parameter-list = { enabled = false }
 no-redundant-math={ enabled = false }
 prefer-first-class-callable={ enabled = false }
 prefer-arrow-function = { enabled = false }
-
+no-isset = { enabled = false }
 
 
 [analyzer]
