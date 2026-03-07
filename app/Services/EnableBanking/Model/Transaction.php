@@ -54,21 +54,24 @@ class Transaction
     {
         Log::debug('Enable Banking transaction from array', $array);
 
-        $transaction                        = new self();
+        $transaction = new self();
         // API may return transaction_id or entry_reference as unique identifier
-        $transaction->transactionId         = $array['transaction_id'] ?? $array['entry_reference'] ?? '';
-        $transaction->accountUid            = $array['account_uid'] ?? '';
+        // 2026-03-07 prefer entry_reference or empty string because "transaction_id" is empty.
+        $transaction->transactionId = $array['entry_reference'] ?? '';
+
+        // 2026-03-07 account_uid does not exist according to the API documentation.
+        $transaction->accountUid = $array['account_uid'] ?? '';
 
         // Handle transaction amount - apply sign based on credit_debit_indicator
-        $amount                             = (string) ($array['transaction_amount']['amount'] ?? '0');
-        $creditDebitIndicator               = $array['credit_debit_indicator'] ?? '';
+        $amount               = (string)($array['transaction_amount']['amount'] ?? '0');
+        $creditDebitIndicator = $array['credit_debit_indicator'] ?? '';
 
         // DBIT = debit (money out, negative), CRDT = credit (money in, positive)
         if ('DBIT' === $creditDebitIndicator && bccomp($amount, '0') >= 0) {
             $amount = bcmul($amount, '-1');
         }
-        $transaction->transactionAmount     = $amount;
-        $transaction->currencyCode          = $array['transaction_amount']['currency'] ?? '';
+        $transaction->transactionAmount = $amount;
+        $transaction->currencyCode      = $array['transaction_amount']['currency'] ?? '';
 
         // Handle dates
         if (isset($array['booking_date'])) {
@@ -82,18 +85,40 @@ class Transaction
             $transaction->bookingDate = Carbon::parse($array['transaction_date']);
         }
 
-        // Creditor info - handle nested structure
-        $transaction->creditorName          = $array['creditor_name'] ?? $array['creditor']['name'] ?? '';
-        // API uses creditor_account.iban or creditor_account.identification
-        $transaction->creditorIban          = $array['creditor_account']['iban'] ?? $array['creditor_account']['identification'] ?? '';
+        // creditor name
+        $transaction->creditorName = '';
+        if (array_key_exists('creditor', $array) && is_array($array['creditor']) && array_key_exists('name', $array['creditor'])) {
+            $transaction->creditorName = $array['creditor']['name'] ?? '';
+        }
+        // creditor iban
+        $transaction->creditorIban = '';
+        if (array_key_exists('creditor_account', $array) && is_array($array['creditor_account']) && array_key_exists('iban', $array['creditor_account'])) {
+            $transaction->creditorIban = $array['creditor_account']['iban'] ?? '';
+        }
+        // creditor bban
+        $transaction->creditorBban = '';
+        if (array_key_exists('creditor_account', $array) && is_array($array['creditor_account']) && array_key_exists('other', $array['creditor_account']) && is_array($array['creditor_account']['other']) && 'BBAN' === $array['creditor_account']['other']['scheme_name']) {
+            $transaction->creditorBban = $array['creditor_account']['other']['identification'] ?? '';
+        }
 
-        // Debtor info - handle nested structure
-        $transaction->debtorName            = $array['debtor_name'] ?? $array['debtor']['name'] ?? '';
-        // API uses debtor_account.iban or debtor_account.identification
-        $transaction->debtorIban            = $array['debtor_account']['iban'] ?? $array['debtor_account']['identification'] ?? '';
+        // debtor name
+        $transaction->debtorName = '';
+        if (array_key_exists('debtor', $array) && is_array($array['debtor']) && array_key_exists('name', $array['debtor'])) {
+            $transaction->debtorName = $array['debtor']['name'] ?? '';
+        }
+        // debtor iban
+        $transaction->debtorIban = '';
+        if (array_key_exists('debtor_account', $array) && is_array($array['debtor_account']) && array_key_exists('iban', $array['debtor_account'])) {
+            $transaction->debtorIban = $array['debtor_account']['iban'] ?? '';
+        }
+        // debtor bban
+        $transaction->debtorBban = '';
+        if (array_key_exists('debtor_account', $array) && is_array($array['debtor_account']) && array_key_exists('other', $array['debtor_account']) && is_array($array['debtor_account']['other']) && 'BBAN' === $array['debtor_account']['other']['scheme_name']) {
+            $transaction->debtorBban = $array['debtor_account']['other']['identification'] ?? '';
+        }
 
         // Description - remittance_information is an array of strings per API spec
-        $remittanceInfo                     = $array['remittance_information'] ?? '';
+        $remittanceInfo = $array['remittance_information'] ?? '';
         if (is_array($remittanceInfo)) {
             $transaction->remittanceInformation = implode(' ', $remittanceInfo);
         }
@@ -102,7 +127,7 @@ class Transaction
         }
         $transaction->additionalInformation = $array['additional_information'] ?? $array['note'] ?? '';
 
-        $transaction->status                = $array['status'] ?? 'booked';
+        $transaction->status = $array['status'] ?? 'booked';
 
         // Add status as tag
         if ('' !== $transaction->status) {
@@ -111,8 +136,8 @@ class Transaction
 
         // Generate transaction ID if empty - use entry_reference or hash
         if ('' === $transaction->transactionId) {
-            $hash                       = hash('sha256', (string) microtime());
-            $encoded                    = json_encode($array);
+            $hash    = hash('sha256', (string)microtime()); // backup value.
+            $encoded = json_encode($array);
             if (json_validate($encoded)) {
                 $hash = hash('sha256', $encoded);
             }
@@ -163,8 +188,8 @@ class Transaction
 
     public function getTransactionId(): string
     {
-        $accountId     = substr(trim((string) preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
-        $transactionId = substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
+        $accountId     = substr(trim((string)preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
+        $transactionId = substr(trim((string)preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
 
         return trim(sprintf('%s-%s', $accountId, $transactionId));
     }
