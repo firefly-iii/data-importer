@@ -184,11 +184,20 @@ class GenerateTransactions
         // Set destination info
         $destName = $entry->getDestinationName();
         $destIban = $entry->getDestinationIban();
+        $destBban = $entry->getDestinationBban();
 
         if (null !== $destIban && '' !== $destIban) {
             $transaction['destination_iban'] = $destIban;
 
-            // Check if IBAN is a known asset account
+            // check if BBAN is a match
+            $bbanKey = sprintf('nr_%s', $destBban);
+            if (array_key_exists($bbanKey, $this->targetAccounts)) {
+                $transaction['destination_id'] = $this->targetAccounts[$bbanKey];
+                $transaction['type']      = 'transfer';
+                Log::debug(sprintf('Matched destination BBAN "nr_%s" to account #%d', $destBban, $this->targetAccounts[$bbanKey]));
+            }
+
+            // Check if IBAN is a match, will overrule BBAN.
             if (array_key_exists($destIban, $this->targetAccounts)) {
                 $transaction['destination_id'] = $this->targetAccounts[$destIban];
                 $transaction['type']           = 'transfer';
