@@ -69,9 +69,9 @@ final class SelectionController extends Controller
         $configuration = $importJob->getConfiguration();
 
         // if there is a requisition & country etc in the config file, go to next step.
-        $requisitions = $configuration->getNordigenRequisitions();
-        $country      = $configuration->getNordigenCountry();
-        $bank         = $configuration->getNordigenBank();
+        $requisitions  = $configuration->getNordigenRequisitions();
+        $country       = $configuration->getNordigenCountry();
+        $bank          = $configuration->getNordigenBank();
         if (1 === count($requisitions) && '' !== $country && '' !== $bank) {
             // FIXME
             throw new ImporterErrorException('Do not redirect as it stands now.');
@@ -85,10 +85,10 @@ final class SelectionController extends Controller
             //            return redirect(route('gocardless-connect.index', [$identifier]));
         }
         // get banks and countries
-        $accessToken = TokenManager::getAccessToken();
-        $url         = config('nordigen.url');
+        $accessToken   = TokenManager::getAccessToken();
+        $url           = config('nordigen.url');
 
-        $request = new ListBanksRequest($url, $accessToken);
+        $request       = new ListBanksRequest($url, $accessToken);
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
@@ -101,7 +101,7 @@ final class SelectionController extends Controller
             throw new ImporterErrorException($response->message);
         }
 
-        $flow = 'nordigen';
+        $flow          = 'nordigen';
 
         return view('import.009-selection.index', compact(
             'mainTitle',
