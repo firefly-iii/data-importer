@@ -7,10 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 <!-- summary: This release fixes the auto-import feature and expands Enable Banking support. -->
 
 ### Added
-- #11884
+- [Issue 11884](https://github.com/firefly-iii/firefly-iii/issues/11884) (Add BBAN to Enable Banking imports for better transfer matching) reported by @zorknemsis
 
 ### Fixed
-- #11906
+- [Issue 11906](https://github.com/firefly-iii/firefly-iii/issues/11906) (`AUTO_IMPORT_SECRET` is not validated correctly) reported by @ict
 - Fix various code quality issues.
 
 ## v2.2.0 - 2026-03-06

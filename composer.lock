@@ -7468,16 +7468,16 @@
         },
         {
             "name": "fruitcake/laravel-debugbar",
-            "version": "v4.0.10",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fruitcake/laravel-debugbar.git",
-                "reference": "96afd5efc93c2cb3140df356893381296259695b"
+                "reference": "5cbe5fc76054723ab9501917b7d252cdafb5ad5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/96afd5efc93c2cb3140df356893381296259695b",
-                "reference": "96afd5efc93c2cb3140df356893381296259695b",
+                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/5cbe5fc76054723ab9501917b7d252cdafb5ad5d",
+                "reference": "5cbe5fc76054723ab9501917b7d252cdafb5ad5d",
                 "shasum": ""
             },
             "require": {
@@ -7485,7 +7485,7 @@
                 "illuminate/session": "^11|^12|^13.0",
                 "illuminate/support": "^11|^12|^13.0",
                 "php": "^8.2",
-                "php-debugbar/php-debugbar": "^3.3.1",
+                "php-debugbar/php-debugbar": "^3.5",
                 "php-debugbar/symfony-bridge": "^1.1"
             },
             "replace": {
@@ -7499,7 +7499,7 @@
                 "laravel/telescope": "^5.16",
                 "livewire/livewire": "^3.7|^4",
                 "mockery/mockery": "^1.3.3",
-                "orchestra/testbench-dusk": "^9|^10",
+                "orchestra/testbench-dusk": "^9|^10|^11",
                 "php-debugbar/twig-bridge": "^2.0",
                 "phpstan/phpstan-phpunit": "^2",
                 "phpstan/phpstan-strict-rules": "^2.0",
@@ -7517,7 +7517,7 @@
                     ]
                 },
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -7554,7 +7554,7 @@
             ],
             "support": {
                 "issues": "https://github.com/fruitcake/laravel-debugbar/issues",
-                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.0.10"
+                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.1.0"
             },
             "funding": [
                 {
@@ -7566,7 +7566,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-26T11:45:48+00:00"
+            "time": "2026-03-07T19:01:10+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",
