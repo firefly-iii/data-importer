@@ -74,14 +74,14 @@ class Transaction
         $transaction->currencyCode          = $array['transaction_amount']['currency'] ?? '';
 
         // Handle dates
-        if (isset($array['booking_date'])) {
+        if (array_key_exists('booking_date', $array) && null !== $array['booking_date']) {
             $transaction->bookingDate = Carbon::parse($array['booking_date']);
         }
-        if (isset($array['value_date'])) {
+        if (array_key_exists('value_date', $array) && null !== $array['value_date']) {
             $transaction->valueDate = Carbon::parse($array['value_date']);
         }
         // Also check transaction_date as fallback
-        if (null === $transaction->bookingDate && isset($array['transaction_date'])) {
+        if (null === $transaction->bookingDate && array_key_exists('transaction_date', $array) && null !== $array['transaction_date']) {
             $transaction->bookingDate = Carbon::parse($array['transaction_date']);
         }
 

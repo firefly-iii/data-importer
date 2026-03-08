@@ -39,12 +39,12 @@ class GenerateTransactions
 {
     use CollectsAccounts;
 
-    private array $accounts;
+    private array         $accounts;
     private Configuration $configuration;
-    private ImportJob $importJob;
-    private array $targetAccounts;
-    private array $targetTypes;
-    private array $userAccounts;
+    private ImportJob     $importJob;
+    private array         $targetAccounts;
+    private array         $targetTypes;
+    private array         $userAccounts;
 
     public function __construct()
     {
@@ -96,15 +96,15 @@ class GenerateTransactions
     {
         Log::debug(sprintf('Enable Banking transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currencyCode, $entry->transactionAmount));
 
-        $return                   = [
+        $return = [
             'error_if_duplicate_hash' => $this->configuration->isIgnoreDuplicateTransactions(),
             'apply_rules'             => $this->configuration->isRules(),
             'fire_webhooks'           => $this->configuration->isWebhooks(),
             'transactions'            => [],
         ];
 
-        $valueDate                = $entry->getValueDate();
-        $transaction              = [
+        $valueDate   = $entry->getValueDate();
+        $transaction = [
             'type'               => 'withdrawal',
             'date'               => $entry->getDate()->toW3cString(),
             'datetime'           => $entry->getDate()->toW3cString(),
@@ -141,18 +141,18 @@ class GenerateTransactions
     {
         $transaction['type']           = 'deposit';
         $transaction['amount']         = $entry->transactionAmount;
-        $transaction['destination_id'] = (int) $this->accounts[$accountUid];
+        $transaction['destination_id'] = (int)$this->accounts[$accountUid];
 
         // Set source info
-        $sourceName                    = $entry->getSourceName();
-        $sourceIban                    = $entry->getSourceIban();
-        $sourceBban                    = $entry->getSourceBban();
+        $sourceName = $entry->getSourceName();
+        $sourceIban = $entry->getSourceIban();
+        $sourceBban = $entry->getSourceBban();
 
         if (null !== $sourceIban && '' !== $sourceIban) {
             $transaction['source_iban'] = $sourceIban;
 
             // check if BBAN is a match
-            $bbanKey                    = sprintf('nr_%s', $sourceBban);
+            $bbanKey = sprintf('nr_%s', $sourceBban);
             if (array_key_exists($bbanKey, $this->targetAccounts)) {
                 $transaction['source_id'] = $this->targetAccounts[$bbanKey];
                 $transaction['type']      = 'transfer';
@@ -169,7 +169,7 @@ class GenerateTransactions
         if (null !== $sourceName) {
             $transaction['source_name'] = $sourceName;
         }
-        if (null === $sourceName && !isset($transaction['source_id'])) {
+        if (null === $sourceName && (!array_key_exists('source_id', $transaction) || null === $transaction['source_id'])) {
             $transaction['source_name'] = '(unknown source)';
         }
 
@@ -179,18 +179,18 @@ class GenerateTransactions
     private function appendNegativeAmountInfo(string $accountUid, array $transaction, Transaction $entry): array
     {
         $transaction['amount']    = bcmul($entry->transactionAmount, '-1');
-        $transaction['source_id'] = (int) $this->accounts[$accountUid];
+        $transaction['source_id'] = (int)$this->accounts[$accountUid];
 
         // Set destination info
-        $destName                 = $entry->getDestinationName();
-        $destIban                 = $entry->getDestinationIban();
-        $destBban                 = $entry->getDestinationBban();
+        $destName = $entry->getDestinationName();
+        $destIban = $entry->getDestinationIban();
+        $destBban = $entry->getDestinationBban();
 
         if (null !== $destIban && '' !== $destIban) {
             $transaction['destination_iban'] = $destIban;
 
             // check if BBAN is a match
-            $bbanKey                         = sprintf('nr_%s', $destBban);
+            $bbanKey = sprintf('nr_%s', $destBban);
             if (array_key_exists($bbanKey, $this->targetAccounts)) {
                 $transaction['destination_id'] = $this->targetAccounts[$bbanKey];
                 $transaction['type']           = 'transfer';
@@ -207,7 +207,7 @@ class GenerateTransactions
         if (null !== $destName) {
             $transaction['destination_name'] = $destName;
         }
-        if (null === $destName && !isset($transaction['destination_id'])) {
+        if (null === $destName && (!array_key_exists('destination_id', $transaction) || null === $transaction['destination_id'])) {
             $transaction['destination_name'] = '(unknown destination)';
         }
 

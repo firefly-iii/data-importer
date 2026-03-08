@@ -332,11 +332,11 @@ abstract class Request
         }
 
         // days:
-        $days    = floor($reset / 86400);
+        $days    = floor($reset / 86_400);
         if ($days > 0) {
             $return .= sprintf('%dd', $days);
         }
-        $reset -= $days * 86400;
+        $reset -= $days * 86_400;
 
         $hours   = floor($reset / 3600);
         if ($hours > 0) {

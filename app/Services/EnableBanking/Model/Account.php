@@ -58,7 +58,7 @@ class Account
         $account->iban        = $accountId['iban'] ?? $array['iban'] ?? '';
 
         // Handle non-IBAN identification via "other" field
-        if (isset($accountId['other'])) {
+        if (array_key_exists('other', $accountId) && null !== $accountId['other']) {
             $account->otherIdentification = $accountId['other']['identification'] ?? '';
             $account->otherScheme         = $accountId['other']['scheme_name'] ?? '';
         }
