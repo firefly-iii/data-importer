@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.1 - 2026-03-10
+
+<!-- summary: This release fixes the auto-import feature and expands Enable Banking support. -->
+
+### Added
+- #11884
+
+### Fixed
+- #11906
+- Fix various code quality issues.
+
 ## v2.2.0 - 2026-03-06
 
 > [!IMPORTANT]  
