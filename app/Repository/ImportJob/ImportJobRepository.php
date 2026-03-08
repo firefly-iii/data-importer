@@ -72,7 +72,7 @@ class ImportJobRepository
 
     public function find(string $identifier): ImportJob
     {
-        if(!Uuid::isValid($identifier)) {
+        if (!Uuid::isValid($identifier)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
         $disk    = $this->getDisk();
