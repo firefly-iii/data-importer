@@ -60,7 +60,9 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
         $transactions         = $array['transactions'] ?? [];
 
         // Check if it's the nested format (has 'booked' or 'pending' keys)
-        if (isset($transactions['booked']) || isset($transactions['pending'])) {
+        if (
+            (array_key_exists('booked', $transactions) && is_array($transactions['booked'])) ||
+            array_key_exists('pending', $transactions) && is_array($transactions['pending'])) {
             $booked  = $transactions['booked'] ?? [];
             $pending = $transactions['pending'] ?? [];
 
@@ -78,7 +80,7 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
                 $response->transactions[] = Transaction::fromArray($tx);
             }
         }
-        if (!isset($transactions['booked']) && !isset($transactions['pending'])) {
+        if (!array_key_exists('booked', $transactions) && !array_key_exists('pending', $transactions)) {
             // Flat array format - each transaction has its own status field
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 

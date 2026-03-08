@@ -273,21 +273,21 @@ class Configuration
         $object->ignoreDuplicateTransactions = $data['ignore_duplicate_transactions'] ?? true;
         Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
 
-        if (isset($data['ignore_duplicates']) && true === $data['ignore_duplicates']) {
+        if (array_key_exists('ignore_duplicates', $data) && true === $data['ignore_duplicates']) {
             Log::debug('Will ignore duplicates.');
             $object->ignoreDuplicateTransactions = true;
             Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
             $object->duplicateDetectionMethod    = 'classic';
         }
 
-        if (isset($data['ignore_duplicates']) && false === $data['ignore_duplicates']) {
+        if (array_key_exists('ignore_duplicates', $data) && false === $data['ignore_duplicates']) {
             Log::debug('Will NOT ignore duplicates.');
             $object->ignoreDuplicateTransactions = false;
             $object->duplicateDetectionMethod    = 'none';
             Log::debug(sprintf('Configuration fromClassicFile: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
         }
 
-        if (isset($data['ignore_lines']) && true === $data['ignore_lines']) {
+        if (array_key_exists('ignore_lines', $data) && true === $data['ignore_lines']) {
             Log::debug('Will ignore duplicate lines.');
             $object->ignoreDuplicateLines = true;
         }
@@ -894,7 +894,7 @@ class Configuration
     public function getUniqueColumnIndexDisplay(): string
     {
         // If pseudo identifier exists, return comma-separated source columns
-        if ($this->hasPseudoIdentifier() && isset($this->pseudoIdentifier['source_columns'])) {
+        if ($this->hasPseudoIdentifier() && array_key_exists('source_columns', $this->pseudoIdentifier)) {
             return implode(',', $this->pseudoIdentifier['source_columns']);
         }
 
@@ -1162,7 +1162,7 @@ class Configuration
     private static function calcDateNotBefore(string $unit, int $number): ?string
     {
         $functions = ['d' => 'subDays', 'w' => 'subWeeks', 'm' => 'subMonths', 'y' => 'subYears'];
-        if (isset($functions[$unit])) {
+        if (array_key_exists($unit, $functions)) {
             $today    = Carbon::now();
             $function = $functions[$unit];
             $today->{$function}($number);

@@ -80,7 +80,7 @@ class PostRefreshConnectionRequest extends Request
         }
 
         // could be error response:
-        if (isset($response['error']) && !isset($response['data'])) {
+        if (array_key_exists('error', $response) && !array_key_exists('data', $response)) {
             return new ErrorResponse($response);
         }
 

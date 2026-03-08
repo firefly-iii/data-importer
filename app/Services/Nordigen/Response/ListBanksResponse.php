@@ -37,12 +37,12 @@ use Iterator;
 class ListBanksResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
-    private array $countries;
-    private int $position = 0;
+    private array               $countries;
+    private int                 $position = 0;
 
     public function __construct(array $data)
     {
-        $this->countries  = [];
+        $this->countries = [];
 
         foreach ($data as $bank) {
             // process countries:
@@ -61,7 +61,7 @@ class ListBanksResponse extends Response implements Iterator, Countable
     private function processCountries(array $bank): void
     {
         foreach ($bank['countries'] as $code) {
-            if (!isset($this->countries[$code])) {
+            if (!array_key_exists($code, $this->countries)) {
                 $this->countries[$code] = new Country($code, new Collection());
             }
         }

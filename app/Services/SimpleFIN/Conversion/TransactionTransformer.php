@@ -91,7 +91,7 @@ class TransactionTransformer
 
         // Use 'posted' date as the primary transaction date.
         // SimpleFIN 'posted' is a UNIX timestamp.
-        $transactionTimestamp  = isset($transactionData['posted']) ? (int) $transactionData['posted'] : Carbon::now()->timestamp;
+        $transactionTimestamp  = array_key_exists('posted', $transactionData) && null !== $transactionData['posted'] ? (int) $transactionData['posted'] : Carbon::now()->timestamp;
         $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
 
         return [
@@ -130,14 +130,14 @@ class TransactionTransformer
 
         // Check for user-provided account name first, then fall back to SimpleFIN account name
         $userProvidedName = null;
-        if ($accountKey && isset($newAccountConfig[$accountKey]['name'])) {
+        if (null !== $accountKey && array_key_exists($accountKey, $newAccountConfig) && array_key_exists('name', $newAccountConfig[$accountKey])) {
             $userProvidedName = $newAccountConfig[$accountKey]['name'];
         }
 
         $accountName      = $userProvidedName ?? $simpleFINAccountData->getName() ?? 'Unknown SimpleFIN Account';
 
         // Check if account is mapped and has a valid (non-zero) Firefly III account ID
-        if ($accountKey && isset($accountMapping[$accountKey]) && $accountMapping[$accountKey] > 0) {
+        if (null !== $accountKey && array_key_exists($accountKey, $accountMapping) && $accountMapping[$accountKey] > 0) {
             return [
                 'id'     => $accountMapping[$accountKey], // Configuration maps SimpleFIN account ID directly to Firefly account ID
                 'name'   => $accountName,
@@ -275,7 +275,7 @@ class TransactionTransformer
         $categoryFields = ['category', 'Category', 'CATEGORY', 'merchant_category', 'transaction_category'];
 
         foreach ($categoryFields as $field) {
-            if (isset($extra[$field]) && '' !== (string) $extra[$field]) {
+            if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
                 return (string) $extra[$field];
             }
         }
@@ -290,7 +290,7 @@ class TransactionTransformer
     {
         $tags  = [];
 
-        if (isset($transactionData['pending']) && true === $transactionData['pending']) {
+        if (array_key_exists('pending', $transactionData) && true === $transactionData['pending']) {
             $tags[] = 'pending';
         }
 
@@ -301,7 +301,7 @@ class TransactionTransformer
         }
 
         // Look for tags in extra data
-        if (isset($extra['tags']) && is_array($extra['tags'])) {
+        if (array_key_exists('tags', $extra) && is_array($extra['tags'])) {
             $tags = array_merge($tags, $extra['tags']);
         }
 
@@ -319,7 +319,7 @@ class TransactionTransformer
         $notes = [];
         $extra = $transactionData['extra'] ?? null;
 
-        if (isset($transactionData['pending']) && true === $transactionData['pending']) {
+        if (array_key_exists('pending', $transactionData) && true === $transactionData['pending']) {
             $notes[] = 'Transaction is pending';
         }
 
@@ -328,7 +328,7 @@ class TransactionTransformer
             $noteFields = ['memo', 'notes', 'reference', 'check_number'];
 
             foreach ($noteFields as $field) {
-                if (isset($extra[$field]) && '' !== (string) $extra[$field]) {
+                if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
                     $notes[] = sprintf('- %s: %s', ucfirst($field), $extra[$field]);
                 }
             }
@@ -350,7 +350,7 @@ class TransactionTransformer
      */
     private function getBookDate(array $transactionData): ?string
     {
-        if (isset($transactionData['posted']) && (int) $transactionData['posted'] > 0) {
+        if (array_key_exists('posted', $transactionData) && (int) $transactionData['posted'] > 0) {
             return Carbon::createFromTimestamp((int) $transactionData['posted'])->format('Y-m-d');
         }
 
@@ -364,7 +364,7 @@ class TransactionTransformer
      */
     private function getProcessDate(array $transactionData): ?string
     {
-        if (isset($transactionData['transacted_at']) && (int) $transactionData['transacted_at'] > 0) {
+        if (array_key_exists('transacted_at', $transactionData) && (int) $transactionData['transacted_at'] > 0) {
             return Carbon::createFromTimestamp((int) $transactionData['transacted_at'])->format('Y-m-d');
         }
 

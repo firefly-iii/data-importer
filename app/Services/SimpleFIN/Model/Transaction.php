@@ -187,12 +187,12 @@ class Transaction
         }
 
         // Validate transacted_at if present
-        if (isset($data['transacted_at']) && !is_numeric($data['transacted_at'])) {
+        if (array_key_exists('transacted_at', $data) && !is_numeric($data['transacted_at'])) {
             throw new InvalidArgumentException('Transacted at must be a numeric timestamp');
         }
 
         // Validate pending if present
-        if (isset($data['pending']) && !is_bool($data['pending'])) {
+        if (array_key_exists('pending', $data) && !is_bool($data['pending'])) {
             throw new InvalidArgumentException('Pending must be a boolean');
         }
     }

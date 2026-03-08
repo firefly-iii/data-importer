@@ -86,7 +86,7 @@ class TransactionExtra
         // "Time in HH:MM:SS format, representing time when the transaction appears in statement."
         $model->postingTime              = array_key_exists('posting_time', $data) ? $data['posting_time'] : null;
         $model->accountNumber            = $data['account_number'] ?? null;
-        $model->originalAmount           = isset($data['original_amount']) ? (string) $data['original_amount'] : null;
+        $model->originalAmount           = array_key_exists('original_amount', $data) && null !== $data['original_amount'] ? (string) $data['original_amount'] : null;
         $model->originalCurrencyCode     = $data['original_currency_code'] ?? null;
         $model->assetCode                = $data['asset_code'] ?? null;
         $model->assetAmount              = $data['asset_amount'] ?? null;

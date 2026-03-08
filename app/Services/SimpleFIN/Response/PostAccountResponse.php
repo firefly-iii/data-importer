@@ -41,7 +41,7 @@ class PostAccountResponse extends Response
     public function __construct(array $data)
     {
         $this->account = null;
-        if (isset($data['id'])) {
+        if (array_key_exists('id', $data)) {
             $this->account = Account::fromArray($data);
         }
         $this->rawData = $data;

@@ -449,12 +449,15 @@ class Transaction
         $info = [];
 
         // Add exchange rate if available and not zero
-        if (isset($this->currencyExchange['exchangeRate']) && 0.0 !== (float) $this->currencyExchange['exchangeRate']) {
+
+        if (array_key_exists('exchangeRate', $this->currencyExchange) && 0.0 !== (float) $this->currencyExchange['exchangeRate']) {
             $info[] = sprintf('- Exchange rate: %s', $this->currencyExchange['exchangeRate']);
         }
 
         // Add source and target currencies if available
-        if (isset($this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency'])) {
+        if (
+            array_key_exists('sourceCurrency', $this->currencyExchange) &&
+            array_key_exists('targetCurrency', $this->currencyExchange)) {
             $info[] = sprintf('- Currency exchange: %s → %s', $this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency']);
         }
 
