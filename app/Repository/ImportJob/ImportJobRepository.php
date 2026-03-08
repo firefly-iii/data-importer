@@ -44,6 +44,7 @@ use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
+use Ramsey\Uuid\Uuid;
 
 class ImportJobRepository
 {
@@ -71,6 +72,9 @@ class ImportJobRepository
 
     public function find(string $identifier): ImportJob
     {
+        if(!Uuid::isValid($identifier)) {
+            throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
+        }
         $disk    = $this->getDisk();
         $file    = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
