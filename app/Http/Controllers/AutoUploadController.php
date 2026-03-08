@@ -49,7 +49,7 @@ final class AutoUploadController extends Controller
         }
         $secret         = (string) ($request->get('secret') ?? '');
         $systemSecret   = (string) config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
+        if ('' === $secret || '' === $systemSecret || !hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 

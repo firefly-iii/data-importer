@@ -33,7 +33,6 @@ use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Nordigen\Request\ListBanksRequest;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\TokenManager;
-use App\Services\Session\Constants;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;

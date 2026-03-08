@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.1 - 2026-03-10
+
+<!-- summary: This release fixes the auto-import feature and expands Enable Banking support. -->
+
+### Added
+- [Issue 11884](https://github.com/firefly-iii/firefly-iii/issues/11884) (Add BBAN to Enable Banking imports for better transfer matching) reported by @zorknemsis
+
+### Fixed
+- [Issue 11906](https://github.com/firefly-iii/firefly-iii/issues/11906) (`AUTO_IMPORT_SECRET` is not validated correctly) reported by @ict
+- Fix various code quality issues.
+
 ## v2.2.0 - 2026-03-06
 
 > [!IMPORTANT]  
@@ -1051,6 +1062,8 @@ A special thanks to the excellent folks over at @nordigen for some quick debuggi
 First release of the data importer.
 
 ## v0.0.0 - 2021-xx-xx
+
+<!-- summary: If you can read this I forgot to update the summary! -->
 
 ### Added
 - Initial release.

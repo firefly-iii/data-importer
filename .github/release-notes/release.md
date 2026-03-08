@@ -1,4 +1,4 @@
-Welcome to release %version of the Firefly III DataImporter. It contains the latest fixes, translations and features. Docker users can find this release under the `latest` tag.
+Welcome to release %version of the Firefly III Data Importer. It contains the latest fixes, translations and features. Docker users can find this release under the `latest` tag.
 
 ## Changelog
 

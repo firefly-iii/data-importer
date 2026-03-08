@@ -146,11 +146,20 @@ class GenerateTransactions
         // Set source info
         $sourceName                    = $entry->getSourceName();
         $sourceIban                    = $entry->getSourceIban();
+        $sourceBban                    = $entry->getSourceBban();
 
         if (null !== $sourceIban && '' !== $sourceIban) {
             $transaction['source_iban'] = $sourceIban;
 
-            // Check if IBAN is a known asset account
+            // check if BBAN is a match
+            $bbanKey                    = sprintf('nr_%s', $sourceBban);
+            if (array_key_exists($bbanKey, $this->targetAccounts)) {
+                $transaction['source_id'] = $this->targetAccounts[$bbanKey];
+                $transaction['type']      = 'transfer';
+                Log::debug(sprintf('Matched source BBAN "nr_%s" to account #%d', $sourceBban, $this->targetAccounts[$bbanKey]));
+            }
+
+            // Check if IBAN is a match. Will overrule BBAN match.
             if (array_key_exists($sourceIban, $this->targetAccounts)) {
                 $transaction['source_id'] = $this->targetAccounts[$sourceIban];
                 $transaction['type']      = 'transfer';
@@ -160,7 +169,7 @@ class GenerateTransactions
         if (null !== $sourceName) {
             $transaction['source_name'] = $sourceName;
         }
-        if (null === $sourceName && !isset($transaction['source_id'])) {
+        if (null === $sourceName && (!array_key_exists('source_id', $transaction) || null === $transaction['source_id'])) {
             $transaction['source_name'] = '(unknown source)';
         }
 
@@ -175,11 +184,20 @@ class GenerateTransactions
         // Set destination info
         $destName                 = $entry->getDestinationName();
         $destIban                 = $entry->getDestinationIban();
+        $destBban                 = $entry->getDestinationBban();
 
         if (null !== $destIban && '' !== $destIban) {
             $transaction['destination_iban'] = $destIban;
 
-            // Check if IBAN is a known asset account
+            // check if BBAN is a match
+            $bbanKey                         = sprintf('nr_%s', $destBban);
+            if (array_key_exists($bbanKey, $this->targetAccounts)) {
+                $transaction['destination_id'] = $this->targetAccounts[$bbanKey];
+                $transaction['type']           = 'transfer';
+                Log::debug(sprintf('Matched destination BBAN "nr_%s" to account #%d', $destBban, $this->targetAccounts[$bbanKey]));
+            }
+
+            // Check if IBAN is a match, will overrule BBAN.
             if (array_key_exists($destIban, $this->targetAccounts)) {
                 $transaction['destination_id'] = $this->targetAccounts[$destIban];
                 $transaction['type']           = 'transfer';
@@ -189,7 +207,7 @@ class GenerateTransactions
         if (null !== $destName) {
             $transaction['destination_name'] = $destName;
         }
-        if (null === $destName && !isset($transaction['destination_id'])) {
+        if (null === $destName && (!array_key_exists('destination_id', $transaction) || null === $transaction['destination_id'])) {
             $transaction['destination_name'] = '(unknown destination)';
         }
 
