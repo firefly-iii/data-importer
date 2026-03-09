@@ -46,14 +46,14 @@ class GenerateTransactions
 
     public const string NUMBER_FORMAT = 'nr_%s';
 
-    private array     $accounts;
-    private array     $nordigenAccountInfo;
-    private array     $targetAccounts;
-    private array     $expenseAccounts;
-    private array     $revenueAccounts;
-    private array     $targetTypes;
-    private array     $expenseAccountNames;
-    private array     $revenueAccountNames;
+    private array $accounts;
+    private array $nordigenAccountInfo;
+    private array $targetAccounts;
+    private array $expenseAccounts;
+    private array $revenueAccounts;
+    private array $targetTypes;
+    private array $expenseAccountNames;
+    private array $revenueAccountNames;
     private ImportJob $importJob;
 
     private array $userAccounts; // contains ALL information on Firefly III asset accounts and liabilities.
@@ -115,7 +115,7 @@ class GenerateTransactions
         $return = [];
 
         /**
-         * @var int $accountId
+         * @var int   $accountId
          * @var array $entries
          */
         foreach ($transactions as $accountId => $entries) {
@@ -123,7 +123,7 @@ class GenerateTransactions
             Log::debug(sprintf('Going to parse account %s with %d transaction(s).', $accountId, $total));
 
             /**
-             * @var int $index
+             * @var int         $index
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
@@ -145,16 +145,16 @@ class GenerateTransactions
      */
     private function generateTransaction(int $accountId, Transaction $entry): array
     {
-        $configuration = $this->importJob->getConfiguration();
+        $configuration            = $this->importJob->getConfiguration();
         Log::debug(sprintf('Lunch Flow transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currency, $entry->amount));
 
-        $return      = [
+        $return                   = [
             'apply_rules'             => $configuration->isRules(),
             'fire_webhooks'           => $configuration->isWebhooks(),
             'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
-        $transaction = [
+        $transaction              = [
             'type'          => 'withdrawal',
             'date'          => $entry->getDate()->toW3cString(),
             'datetime'      => $entry->getDate()->toW3cString(),
@@ -192,21 +192,26 @@ class GenerateTransactions
     private function appendPositiveAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
         // amount is positive: deposit or transfer. Lunch Flow account could be the destination
-        $transaction['type']   = 'deposit';
-        $transaction['amount'] = $entry->amount;
+        $transaction['type']           = 'deposit';
+        $transaction['amount']         = $entry->amount;
 
         // destination is a Lunch Flow account (has to be!)
-        $transaction['destination_id'] = (int)$this->accounts[$accountId];
+        $transaction['destination_id'] = (int) $this->accounts[$accountId];
         Log::debug(sprintf('Destination ID is now #%d, which could be a Firefly III asset account.', $transaction['destination_id']));
 
         // before we begin, log the source and dest info
-        Log::debug(sprintf('At start. Source_name = "%s", source_iban = "%s", source_id = "%s"', $transaction['source_name'] ?? '', $transaction['source_iban'] ?? '', $transaction['source_id'] ?? ''));
+        Log::debug(sprintf(
+            'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
+            $transaction['source_name'] ?? '',
+            $transaction['source_iban'] ?? '',
+            $transaction['source_id'] ?? ''
+        ));
 
         // append source name, iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'source');
+        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
 
         // FIXME clean up mapping
-        $mappedId = null;
+        $mappedId                      = null;
 
         if (array_key_exists('source_name', $transaction) && null !== $transaction['source_name']) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
@@ -219,32 +224,34 @@ class GenerateTransactions
         // FIXME this part I don't think it can be reached.
         if (null !== $mappedId && 0 !== $mappedId) {
             Log::debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['source_name'], $mappedId));
+
             throw new ImporterErrorException('[a] Please open an issue on GitHub when you run into this error.');
-//            $mappedType               = $this->getMappedAccountType($mappedId);
-//            $originalSourceName       = $transaction['source_name'];
-//            $transaction['source_id'] = $mappedId;
-//
-//            // catch error here:
-//            try {
-//                $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
-//                Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
-//            } catch (ImporterErrorException $e) {
-//                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-//                Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
-//                unset($transaction['source_id']);
-//                $transaction['source_name'] = $originalSourceName;
-//            }
+
+            //            $mappedType               = $this->getMappedAccountType($mappedId);
+            //            $originalSourceName       = $transaction['source_name'];
+            //            $transaction['source_id'] = $mappedId;
+            //
+            //            // catch error here:
+            //            try {
+            //                $transaction['type'] = $this->getTransactionType($mappedType, 'asset');
+            //                Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
+            //            } catch (ImporterErrorException $e) {
+            //                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+            //                Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
+            //                unset($transaction['source_id']);
+            //                $transaction['source_name'] = $originalSourceName;
+            //            }
         }
 
-        $transaction = $this->positiveTransactionSafetyCatch($transaction, '', '');
+        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, '', '');
 
         Log::debug(sprintf(
-                       'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
-                       $transaction['destination_id'] ?? '',
-                       $transaction['source_name'] ?? '',
-                       $transaction['source_iban'] ?? '',
-                       $transaction['source_id'] ?? ''
-                   ));
+            'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
+            $transaction['destination_id'] ?? '',
+            $transaction['source_name'] ?? '',
+            $transaction['source_iban'] ?? '',
+            $transaction['source_id'] ?? ''
+        ));
 
         return $transaction;
     }
@@ -289,7 +296,7 @@ class GenerateTransactions
         }
 
         // The data importer determines the account type based on the IBAN.
-        $accountType = (string)($this->targetTypes[$iban] ?? 'unknown');
+        $accountType = (string) ($this->targetTypes[$iban] ?? 'unknown');
 
         // If the IBAN is a known target account, but it's not a liability OR revenue OR expense, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
@@ -322,7 +329,7 @@ class GenerateTransactions
 
         // If the account number is a known target account, but it's not a liability, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
-        $accountType = (string)($this->targetTypes[$number] ?? 'unknown');
+        $accountType = (string) ($this->targetTypes[$number] ?? 'unknown');
         if ($this->isAssetAccount($accountType, $number) && sprintf(self::NUMBER_FORMAT, '') !== $number) {
             Log::debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$number];
@@ -349,46 +356,46 @@ class GenerateTransactions
         $configuration = $this->importJob->getConfiguration();
         $mapping       = $configuration->getMapping();
         if (array_key_exists('accounts', $mapping) && array_key_exists($name, $mapping['accounts']) && null !== $mapping['accounts'][$name]) {
-            return (int)$configuration->getMapping()['accounts'][$name];
+            return (int) $configuration->getMapping()['accounts'][$name];
         }
 
         return null;
     }
 
-//    /**
-//     * FIXME Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
-//     *
-//     * @throws ImporterHttpException
-//     */
-//    private function getMappedAccountType(int $mappedId): string
-//    {
-//        throw new ImporterErrorException('Please open an issue when you run into this. Share many details. Thanks!');
-//        $configuration = $this->importJob->getConfiguration();
-//
-//        if (!isset($configuration->getAccountTypes()[$mappedId])) {
-//            Log::warning(sprintf('Cannot find account type for Firefly III account #%d.', $mappedId));
-//            $accountType             = $this->getAccountType($mappedId);
-//            $accountTypes            = $configuration->getAccountTypes();
-//            $accountTypes[$mappedId] = $accountType;
-//            $configuration->setAccountTypes($accountTypes);
-//
-//            Log::debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $accountType));
-//
-//            return $accountType;
-//        }
-//        $type = $configuration->getAccountTypes()[$mappedId] ?? 'expense';
-//        Log::debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $type));
-//
-//        return $type;
-//    }
+    //    /**
+    //     * FIXME Method "getAccountTypes" does not exist and I'm not sure what it is supposed to do.
+    //     *
+    //     * @throws ImporterHttpException
+    //     */
+    //    private function getMappedAccountType(int $mappedId): string
+    //    {
+    //        throw new ImporterErrorException('Please open an issue when you run into this. Share many details. Thanks!');
+    //        $configuration = $this->importJob->getConfiguration();
+    //
+    //        if (!isset($configuration->getAccountTypes()[$mappedId])) {
+    //            Log::warning(sprintf('Cannot find account type for Firefly III account #%d.', $mappedId));
+    //            $accountType             = $this->getAccountType($mappedId);
+    //            $accountTypes            = $configuration->getAccountTypes();
+    //            $accountTypes[$mappedId] = $accountType;
+    //            $configuration->setAccountTypes($accountTypes);
+    //
+    //            Log::debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $accountType));
+    //
+    //            return $accountType;
+    //        }
+    //        $type = $configuration->getAccountTypes()[$mappedId] ?? 'expense';
+    //        Log::debug(sprintf('Account type for Firefly III account #%d is "%s"', $mappedId, $type));
+    //
+    //        return $type;
+    //    }
 
     /**
      * @throws ImporterHttpException
      */
     private function getAccountType(int $accountId): string
     {
-        $token = SecretManager::getAccessToken();
-        $url   = SecretManager::getBaseUrl();
+        $token   = SecretManager::getAccessToken();
+        $url     = SecretManager::getBaseUrl();
         Log::debug(sprintf('Going to download account #%d', $accountId));
         $request = new GetAccountRequest($url, $token);
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -400,7 +407,7 @@ class GenerateTransactions
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
-        $type = $result->getAccount()->type;
+        $type    = $result->getAccount()->type;
 
         Log::debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
 
@@ -439,12 +446,12 @@ class GenerateTransactions
     private function appendNegativeAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
         $transaction['amount']    = bcmul($entry->amount, '-1');
-        $transaction['source_id'] = (int)$this->accounts[$accountId]; // FIXME entry may not exist, then what?
+        $transaction['source_id'] = (int) $this->accounts[$accountId]; // FIXME entry may not exist, then what?
 
         // append source iban and number (if present)
-        $transaction = $this->appendAccountFields($transaction, $entry, 'destination');
+        $transaction              = $this->appendAccountFields($transaction, $entry, 'destination');
 
-        $mappedId = null;
+        $mappedId                 = null;
         if (array_key_exists('destination_name', $transaction) && null !== $transaction['destination_name']) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['destination_name']));
             $mappedId = $this->getMappedAccountId($transaction['destination_name']);
@@ -456,33 +463,35 @@ class GenerateTransactions
         // FIXME this part I don't think it can be reached.
         if (null !== $mappedId && 0 !== $mappedId) {
             Log::debug(sprintf('Account name "%s" is mapped to Firefly III account ID "%d"', $transaction['destination_name'], $mappedId));
+
             throw new ImporterErrorException('[b] Please open an issue on GitHub when you run into this error.');
-//            $mappedType = $this->getMappedAccountType($mappedId);
-//
-//            $originalDestName              = $transaction['destination_name'];
-//            $transaction['destination_id'] = $mappedId;
-//
-//            // catch error here:
-//            try {
-//                $transaction['type'] = $this->getTransactionType('asset', $mappedType);
-//                Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
-//            } catch (ImporterErrorException $e) {
-//                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-//                Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
-//                unset($transaction['destination_id']);
-//                $transaction['destination_name'] = $originalDestName;
-//            }
+
+            //            $mappedType = $this->getMappedAccountType($mappedId);
+            //
+            //            $originalDestName              = $transaction['destination_name'];
+            //            $transaction['destination_id'] = $mappedId;
+            //
+            //            // catch error here:
+            //            try {
+            //                $transaction['type'] = $this->getTransactionType('asset', $mappedType);
+            //                Log::debug(sprintf('Transaction type seems to be %s', $transaction['type']));
+            //            } catch (ImporterErrorException $e) {
+            //                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
+            //                Log::info('Will not use mapped ID, Firefly III account is of the wrong type.');
+            //                unset($transaction['destination_id']);
+            //                $transaction['destination_name'] = $originalDestName;
+            //            }
         }
 
-        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), '');
+        $transaction              = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getDestinationName(), '');
 
         Log::debug(sprintf(
-                       'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
-                       $transaction['source_id'],
-                       $transaction['destination_id'] ?? '',
-                       $transaction['destination_name'] ?? '',
-                       $transaction['destination_iban'] ?? ''
-                   ));
+            'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
+            $transaction['source_id'],
+            $transaction['destination_id'] ?? '',
+            $transaction['destination_name'] ?? '',
+            $transaction['destination_iban'] ?? ''
+        ));
 
         return $transaction;
     }

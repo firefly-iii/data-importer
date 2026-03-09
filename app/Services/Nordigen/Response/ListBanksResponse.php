@@ -37,12 +37,12 @@ use Iterator;
 class ListBanksResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
-    private array               $countries;
-    private int                 $position = 0;
+    private array $countries;
+    private int $position = 0;
 
     public function __construct(array $data)
     {
-        $this->countries = [];
+        $this->countries  = [];
 
         foreach ($data as $bank) {
             // process countries:
