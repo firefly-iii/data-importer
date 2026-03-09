@@ -91,7 +91,9 @@ class TransactionTransformer
 
         // Use 'posted' date as the primary transaction date.
         // SimpleFIN 'posted' is a UNIX timestamp.
-        $transactionTimestamp  = array_key_exists('posted', $transactionData) && null !== $transactionData['posted'] ? (int) $transactionData['posted'] : Carbon::now()->timestamp;
+        $transactionTimestamp  = array_key_exists('posted', $transactionData) && null !== $transactionData['posted']
+            ? (int) $transactionData['posted']
+            : Carbon::now()->timestamp;
         $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
 
         return [

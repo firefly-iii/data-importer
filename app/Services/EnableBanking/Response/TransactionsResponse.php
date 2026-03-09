@@ -61,8 +61,9 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
 
         // Check if it's the nested format (has 'booked' or 'pending' keys)
         if (
-            (array_key_exists('booked', $transactions) && is_array($transactions['booked'])) ||
-            array_key_exists('pending', $transactions) && is_array($transactions['pending'])) {
+            array_key_exists('booked', $transactions) && is_array($transactions['booked'])
+            || array_key_exists('pending', $transactions) && is_array($transactions['pending'])
+        ) {
             $booked  = $transactions['booked'] ?? [];
             $pending = $transactions['pending'] ?? [];
 

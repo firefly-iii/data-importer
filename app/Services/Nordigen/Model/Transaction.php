@@ -455,9 +455,7 @@ class Transaction
         }
 
         // Add source and target currencies if available
-        if (
-            array_key_exists('sourceCurrency', $this->currencyExchange) &&
-            array_key_exists('targetCurrency', $this->currencyExchange)) {
+        if (array_key_exists('sourceCurrency', $this->currencyExchange) && array_key_exists('targetCurrency', $this->currencyExchange)) {
             $info[] = sprintf('- Currency exchange: %s → %s', $this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency']);
         }
 
