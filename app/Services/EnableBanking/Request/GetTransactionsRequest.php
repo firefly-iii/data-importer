@@ -34,19 +34,17 @@ use App\Services\Shared\Response\Response;
  */
 class GetTransactionsRequest extends Request
 {
-    private string $accountUid;
-    private ?string $dateFrom = null;
-    private ?string $dateTo   = null;
+    private string  $accountUid;
 
     public function __construct(string $url, string $accountUid, ?string $dateFrom = null, ?string $dateTo = null)
     {
         $this->setBase($url);
         $this->accountUid = $accountUid;
-        $this->dateFrom   = $dateFrom;
-        $this->dateTo     = $dateTo;
+        //$this->dateFrom   = $dateFrom;
+        //$this->dateTo     = $dateTo;
 
-        $urlPath          = sprintf('accounts/%s/transactions', $accountUid);
-        $params           = [];
+        $urlPath = sprintf('accounts/%s/transactions', $accountUid);
+        $params  = [];
         if (null !== $dateFrom) {
             $params['date_from'] = $dateFrom;
         }
@@ -54,7 +52,7 @@ class GetTransactionsRequest extends Request
             $params['date_to'] = $dateTo;
         }
         if (count($params) > 0) {
-            $urlPath .= '?'.http_build_query($params);
+            $urlPath .= '?' . http_build_query($params);
         }
 
         $this->setUrl($urlPath);
@@ -65,9 +63,36 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
-        $json = $this->authenticatedGet();
+        // create empty response
+        $response      = TransactionsResponse::fromArray([], $this->accountUid);
+        $haveMorePages = true;
+        $max           = 50;
+        $count         = 0;
+        $continuationKey = '';
+        while ($haveMorePages && $count < $max) {
+            // add continuation_key
+            if('' !== $continuationKey) {
+                $this->addParameter('continuation_key', $continuationKey);
+            }
+            // remove if empty:
+            if('' === $continuationKey) {
+                $this->removeParameter('continuation_key');
+            }
 
-        return TransactionsResponse::fromArray($json, $this->accountUid);
+            // do an authenticated get.
+            $json    = $this->authenticatedGet();
+
+            // retrieve new key
+            $continuationKey = (string)$json['continuation_key'];
+            if ('' === $continuationKey) {
+                $haveMorePages = false;
+            }
+            // add found transactions.
+            $response->appendResponse($json);
+
+            $count++;
+        }
+        return $response;
     }
 
     public function post(): Response

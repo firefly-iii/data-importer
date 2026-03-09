@@ -67,7 +67,7 @@ final class AutoImport extends Command
             return ExitCode::INVALID_PATH->value;
         }
         if (!$this->isAllowedPath($directory)) {
-            $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
+            $this->error(sprintf('[a] Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
 
             Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::NOT_ALLOWED_PATH->name));
 
