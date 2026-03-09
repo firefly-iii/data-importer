@@ -41,11 +41,11 @@ class GetTransactionsRequest extends Request
     {
         $this->setBase($url);
         $this->accountUid = $accountUid;
-        //$this->dateFrom   = $dateFrom;
-        //$this->dateTo     = $dateTo;
+        // $this->dateFrom   = $dateFrom;
+        // $this->dateTo     = $dateTo;
 
-        $urlPath = sprintf('accounts/%s/transactions', $accountUid);
-        $params  = [];
+        $urlPath          = sprintf('accounts/%s/transactions', $accountUid);
+        $params           = [];
         if (null !== $dateFrom) {
             $params['date_from'] = $dateFrom;
         }
@@ -53,7 +53,7 @@ class GetTransactionsRequest extends Request
             $params['date_to'] = $dateTo;
         }
         if (count($params) > 0) {
-            $urlPath .= '?' . http_build_query($params);
+            $urlPath .= '?'.http_build_query($params);
         }
 
         $this->setUrl($urlPath);
@@ -72,7 +72,7 @@ class GetTransactionsRequest extends Request
         $count           = 0;
         $continuationKey = '';
         while ($haveMorePages && $count < $max) {
-            Log::debug(sprintf('Now running attempt #%d', $count+1));
+            Log::debug(sprintf('Now running attempt #%d', $count + 1));
             // add continuation_key
             if ('' !== $continuationKey) {
                 $this->addParameter('continuation_key', $continuationKey);
@@ -85,10 +85,10 @@ class GetTransactionsRequest extends Request
             }
 
             // do an authenticated get.
-            $json = $this->authenticatedGet();
+            $json            = $this->authenticatedGet();
 
             // retrieve new key
-            $continuationKey = (string)$json['continuation_key'];
+            $continuationKey = (string) $json['continuation_key'];
             if ('' === $continuationKey) {
                 Log::debug('Response contains no continuation key, this was the last page.');
                 $haveMorePages = false;
@@ -99,9 +99,10 @@ class GetTransactionsRequest extends Request
             // add found transactions.
             $response->appendResponse($json);
 
-            $count++;
+            ++$count;
         }
         Log::debug('Done with Enable Banking GetTransactionsRequest');
+
         return $response;
     }
 

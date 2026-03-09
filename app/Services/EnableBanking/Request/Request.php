@@ -41,8 +41,8 @@ abstract class Request
 {
     private string $base;
     private string $url;
-    private array  $parameters = [];
-    private float  $timeOut    = 30.0;
+    private array $parameters = [];
+    private float $timeOut    = 30.0;
 
     abstract public function get(): Response;
 
@@ -92,7 +92,7 @@ abstract class Request
 
     protected function getClient(): Client
     {
-        return new Client(['connect_timeout' => $this->timeOut, 'timeout' => $this->timeOut]);
+        return new Client(['connect_timeout' => $this->timeOut, 'timeout'         => $this->timeOut]);
     }
 
     protected function getHeaders(): array
@@ -121,7 +121,7 @@ abstract class Request
 
         Log::debug(sprintf('Enable Banking authenticatedGet(%s)', $fullUrl));
 
-        $client = $this->getClient();
+        $client  = $this->getClient();
 
         try {
             $res = $client->request('GET', $fullUrl, ['headers' => $this->getHeaders()]);
@@ -129,14 +129,14 @@ abstract class Request
             Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
 
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
 
             throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
         }
 
-        $body = (string)$res->getBody();
+        $body    = (string) $res->getBody();
         Log::debug(sprintf('Enable Banking raw response: %s', $body));
 
         try {
@@ -159,22 +159,22 @@ abstract class Request
 
         Log::debug(sprintf('Enable Banking authenticatedPost(%s)', $fullUrl));
 
-        $client = $this->getClient();
+        $client  = $this->getClient();
 
         try {
-            $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json' => $data]);
+            $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json'    => $data]);
         } catch (ClientException|GuzzleException $e) {
             Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
 
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
 
             throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
         }
 
-        $body = (string)$res->getBody();
+        $body    = (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);

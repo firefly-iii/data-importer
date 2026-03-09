@@ -52,6 +52,7 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
         $response             = new self($array);
         $response->accountUid = $accountUid;
         $response->appendResponse($array);
+
         return $response;
     }
 
@@ -77,7 +78,6 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
 
     public function appendResponse(array $array): void
     {
-
         Log::debug(sprintf('TransactionsResponse::fromArray received keys: %s', implode(', ', array_keys($array))));
 
         // Enable Banking API returns transactions in one of two formats:
@@ -112,7 +112,7 @@ class TransactionsResponse extends Response implements Countable, IteratorAggreg
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 
             foreach ($transactions as $tx) {
-                $tx['account_uid'] = $this->accountUid;
+                $tx['account_uid']    = $this->accountUid;
                 // Map Enable Banking status values: BOOK -> booked, PDNG -> pending
                 $status               = $tx['status'] ?? 'BOOK';
                 $tx['status']         = 'BOOK' === $status ? 'booked' : 'pending';
