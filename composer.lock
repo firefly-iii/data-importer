@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5e2853777233cdabbe858d0ecb78fb7",
+    "content-hash": "fcf751e93e575a0b172cf9c0b9d11019",
     "packages": [
         {
             "name": "brick/math",
@@ -7468,16 +7468,16 @@
         },
         {
             "name": "fruitcake/laravel-debugbar",
-            "version": "v4.1.1",
+            "version": "v4.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fruitcake/laravel-debugbar.git",
-                "reference": "048876cf8ffdd8af2b82306289e2c0453fa0b059"
+                "reference": "370ce259b10936c2396b9a8b0282c9228682df3b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/048876cf8ffdd8af2b82306289e2c0453fa0b059",
-                "reference": "048876cf8ffdd8af2b82306289e2c0453fa0b059",
+                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/370ce259b10936c2396b9a8b0282c9228682df3b",
+                "reference": "370ce259b10936c2396b9a8b0282c9228682df3b",
                 "shasum": ""
             },
             "require": {
@@ -7554,7 +7554,7 @@
             ],
             "support": {
                 "issues": "https://github.com/fruitcake/laravel-debugbar/issues",
-                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.1.1"
+                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.1.2"
             },
             "funding": [
                 {
@@ -7566,7 +7566,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-08T08:20:19+00:00"
+            "time": "2026-03-09T12:49:05+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",
