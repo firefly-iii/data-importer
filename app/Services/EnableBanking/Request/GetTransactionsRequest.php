@@ -27,6 +27,7 @@ namespace App\Services\EnableBanking\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\TransactionsResponse;
 use App\Services\Shared\Response\Response;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GetTransactionsRequest
@@ -34,7 +35,7 @@ use App\Services\Shared\Response\Response;
  */
 class GetTransactionsRequest extends Request
 {
-    private string  $accountUid;
+    private string $accountUid;
 
     public function __construct(string $url, string $accountUid, ?string $dateFrom = null, ?string $dateTo = null)
     {
@@ -63,35 +64,44 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
+        Log::debug('Will now do Enable Banking GetTransactionsRequest');
         // create empty response
-        $response      = TransactionsResponse::fromArray([], $this->accountUid);
-        $haveMorePages = true;
-        $max           = 50;
-        $count         = 0;
+        $response        = TransactionsResponse::fromArray([], $this->accountUid);
+        $haveMorePages   = true;
+        $max             = 50;
+        $count           = 0;
         $continuationKey = '';
         while ($haveMorePages && $count < $max) {
+            Log::debug(sprintf('Now running attempt #%d', $count+1));
             // add continuation_key
-            if('' !== $continuationKey) {
+            if ('' !== $continuationKey) {
                 $this->addParameter('continuation_key', $continuationKey);
+                Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
             }
             // remove if empty:
-            if('' === $continuationKey) {
+            if ('' === $continuationKey) {
                 $this->removeParameter('continuation_key');
+                Log::debug('No continuation key set (yet), will not be added to request.');
             }
 
             // do an authenticated get.
-            $json    = $this->authenticatedGet();
+            $json = $this->authenticatedGet();
 
             // retrieve new key
             $continuationKey = (string)$json['continuation_key'];
             if ('' === $continuationKey) {
+                Log::debug('Response contains no continuation key, this was the last page.');
                 $haveMorePages = false;
+            }
+            if ('' !== $continuationKey) {
+                Log::debug(sprintf('Response contains continuation key "%s", will be added to the next request.', $continuationKey));
             }
             // add found transactions.
             $response->appendResponse($json);
 
             $count++;
         }
+        Log::debug('Done with Enable Banking GetTransactionsRequest');
         return $response;
     }
 
