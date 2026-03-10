@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.2 - 2026-03-16
+
+<!-- summary: This releases improves Enable Banking imports and fixes a CAMT import issue. -->
+
+### Removed
+- Removed all instances of `isset`
+
+### Fixed
+- #11917
+- #11923
+- #11924
+
 ## v2.2.1 - 2026-03-10
 
 <!-- summary: This release fixes the auto-import feature and expands Enable Banking support. -->
