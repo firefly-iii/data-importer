@@ -41,8 +41,6 @@ class GetTransactionsRequest extends Request
     {
         $this->setBase($url);
         $this->accountUid = $accountUid;
-        // $this->dateFrom   = $dateFrom;
-        // $this->dateTo     = $dateTo;
 
         $urlPath          = sprintf('accounts/%s/transactions', $accountUid);
         $params           = [];
@@ -52,10 +50,7 @@ class GetTransactionsRequest extends Request
         if (null !== $dateTo) {
             $params['date_to'] = $dateTo;
         }
-        if (count($params) > 0) {
-            $urlPath .= '?'.http_build_query($params);
-        }
-
+        $this->setParameters($params);
         $this->setUrl($urlPath);
     }
 
