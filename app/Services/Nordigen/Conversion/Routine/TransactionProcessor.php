@@ -154,7 +154,7 @@ class TransactionProcessor
                 $return[$account]           = [];
 
                 // save the rate limits:
-                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
                 ++$index;
 
                 continue;
@@ -164,12 +164,12 @@ class TransactionProcessor
                 $return[$account]           = [];
                 $this->importJob->conversionStatus->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
                 // save rate limits, even though they may not be there.
-                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
                 ++$index;
 
                 continue;
             }
-            $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+            $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
 
             $return[$account]           = $this->filterTransactions($transactions);
             Log::debug(sprintf(

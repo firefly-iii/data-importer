@@ -96,7 +96,7 @@ final class SubmitController extends Controller
         ProcessImportSubmissionJob::dispatch($importJob, $accessToken, $baseUrl, $vanityUrl);
 
         // Return immediate response indicating job was dispatched
-        return response()->json(['status'     => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
+        return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
     }
 
     public function status(Request $request, string $identifier): JsonResponse

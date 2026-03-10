@@ -57,7 +57,7 @@ final class ServiceController extends Controller
             'lunchflow' => $this->validateLunchFlow(),
             'eb'        => $this->validateEnableBanking(),
             'file'      => response()->json(['result' => 'OK']),
-            default     => response()->json(['result'  => 'NOK', 'message' => 'Unknown provider'])
+            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
     }
 

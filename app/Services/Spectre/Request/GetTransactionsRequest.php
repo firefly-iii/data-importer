@@ -57,7 +57,7 @@ class GetTransactionsRequest extends Request
         while ($hasNextPage) {
             Log::debug(sprintf('Now calling GetTransactionsRequest for next_id %d', $nextId));
 
-            $this->setParameters(['connection_id' => $this->connectionId, 'account_id'    => $this->accountId, 'from_id'       => $nextId]);
+            $this->setParameters(['connection_id' => $this->connectionId, 'account_id' => $this->accountId, 'from_id' => $nextId]);
             $response    = $this->authenticatedGet();
 
             // count entries:

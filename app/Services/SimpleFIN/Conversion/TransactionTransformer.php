@@ -150,7 +150,7 @@ class TransactionTransformer
         }
 
         // No mapping or mapped to 0 (deferred creation) - return null ID to trigger name-based account creation
-        return ['id'     => null, 'name'   => $accountName, 'iban'   => null, 'number' => $accountKey, 'bic'    => null];
+        return ['id' => null, 'name' => $accountName, 'iban' => null, 'number' => $accountKey, 'bic' => null];
     }
 
     /**
@@ -166,7 +166,7 @@ class TransactionTransformer
         // Try to find existing expense or revenue account first
         $existingAccount    = $this->findExistingAccount($description, $isDeposit);
         if (null !== $existingAccount && [] !== $existingAccount) {
-            return ['id'     => $existingAccount['id'], 'name'   => $existingAccount['name'], 'iban'   => null, 'number' => null, 'bic'    => null];
+            return ['id' => $existingAccount['id'], 'name' => $existingAccount['name'], 'iban' => null, 'number' => null, 'bic' => null];
         }
 
         // For clean instances: try clustering when no existing accounts found
@@ -178,7 +178,7 @@ class TransactionTransformer
             if (0 === count($accountsToCheck)) {
                 $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
                 if (null !== $clusteredAccountName && '' !== $clusteredAccountName && '0' !== $clusteredAccountName) {
-                    return ['id'     => null, 'name'   => $clusteredAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+                    return ['id' => null, 'name' => $clusteredAccountName, 'iban' => null, 'number' => null, 'bic' => null];
                 }
             }
         }
@@ -189,12 +189,12 @@ class TransactionTransformer
         if (!config('simplefin.auto_create_expense_accounts', true)) {
             Log::warning(sprintf('Auto-creation disabled. No %s account will be created for "%s"', $isDeposit ? 'revenue' : 'expense', $description));
 
-            return ['id'     => null, 'name'   => $counterAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+            return ['id' => null, 'name' => $counterAccountName, 'iban' => null, 'number' => null, 'bic' => null];
         }
 
         Log::info(sprintf('Creating new %s account "%s" for transaction "%s"', $isDeposit ? 'revenue' : 'expense', $counterAccountName, $description));
 
-        return ['id'     => null, 'name'   => $counterAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+        return ['id' => null, 'name' => $counterAccountName, 'iban' => null, 'number' => null, 'bic' => null];
     }
 
     /**
@@ -514,7 +514,7 @@ class TransactionTransformer
 
             if ($similarity > $bestSimilarity && $similarity >= $threshold) {
                 $bestSimilarity = $similarity;
-                $bestMatch      = ['account'    => $account, 'similarity' => $similarity];
+                $bestMatch      = ['account' => $account, 'similarity' => $similarity];
             }
         }
 

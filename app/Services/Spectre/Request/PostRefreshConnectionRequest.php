@@ -65,7 +65,7 @@ class PostRefreshConnectionRequest extends Request
             'return_connection_id' => false,
             'automatic_refresh'    => true,
             'show_widget'          => false,
-            'attempt'              => ['fetch_scopes' => ['accounts', 'transactions'], 'return_to'    => $this->getUrl()],
+            'attempt'              => ['fetch_scopes' => ['accounts', 'transactions'], 'return_to' => $this->getUrl()],
         ]];
 
         try {

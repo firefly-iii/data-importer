@@ -72,6 +72,6 @@ readonly class ValidationResult
 
     public function toArray(): array
     {
-        return ['valid'    => $this->isValid, 'errors'   => $this->errors, 'warnings' => $this->warnings];
+        return ['valid' => $this->isValid, 'errors' => $this->errors, 'warnings' => $this->warnings];
     }
 }

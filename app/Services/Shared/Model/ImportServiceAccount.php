@@ -100,7 +100,7 @@ class ImportServiceAccount
                 'iban'          => '',
                 'bban'          => '',
                 'status'        => $account->status,
-                'extra'         => ['Currency' => (string) $account->currency, 'IBAN'     => '', 'BBAN'     => ''],
+                'extra'         => ['Currency' => (string) $account->currency, 'IBAN' => '', 'BBAN' => ''],
             ]);
         }
         if ($account instanceof NordigenAccount) {
@@ -331,7 +331,7 @@ class ImportServiceAccount
                 'iban'          => $iban,
                 'bban'          => $account->accountNumber,
                 'status'        => $account->status,
-                'extra'         => ['Currency' => $account->currencyCode, 'IBAN'     => $iban, 'BBAN'     => $account->accountNumber],
+                'extra'         => ['Currency' => $account->currencyCode, 'IBAN' => $iban, 'BBAN' => $account->accountNumber],
             ]);
         }
 
@@ -351,7 +351,7 @@ class ImportServiceAccount
                 'iban'          => '',
                 'bban'          => '',
                 'status'        => $account->status,
-                'extra'         => ['Currency' => (string) $account->currency, 'IBAN'     => '', 'BBAN'     => ''],
+                'extra'         => ['Currency' => (string) $account->currency, 'IBAN' => '', 'BBAN' => ''],
             ]);
         }
 

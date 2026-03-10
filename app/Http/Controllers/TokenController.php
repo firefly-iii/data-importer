@@ -137,7 +137,7 @@ final class TokenController extends Controller
     public function doValidate(): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $response        = ['result'  => 'OK', 'message' => null];
+        $response        = ['result' => 'OK', 'message' => null];
 
         // Check if OAuth is configured but no session token exists
         $clientId        = (string) config('importer.client_id');
@@ -148,7 +148,7 @@ final class TokenController extends Controller
         if ('' !== $clientId && '' === $configToken && !$sessionHasToken) {
             Log::debug('OAuth configured but no session token - needs authentication');
 
-            return response()->json(['result'  => 'NEEDS_OAUTH', 'message' => 'OAuth authentication required']);
+            return response()->json(['result' => 'NEEDS_OAUTH', 'message' => 'OAuth authentication required']);
         }
 
         // get values from secret manager:
@@ -168,7 +168,7 @@ final class TokenController extends Controller
             Log::error(sprintf('Could not connect to Firefly III: %s', $e->getMessage()));
             Log::debug(sprintf('Using access token "%s" (limited to 25 chars if present)', substr($token, 0, 25)));
 
-            return response()->json(['result'  => 'NOK', 'message' => $e->getMessage()]);
+            return response()->json(['result' => 'NOK', 'message' => $e->getMessage()]);
         }
         // -1 = OK (minimum is smaller)
         // 0 = OK (same version)
@@ -209,7 +209,7 @@ final class TokenController extends Controller
         if (1 === $compare) {
             $errorMessage = sprintf('Your Firefly III version %s is below the minimum required version %s', $result->version, $minimum);
             Log::error(sprintf('Could not link to Firefly III: %s', $errorMessage));
-            $response     = ['result'  => 'NOK', 'message' => $errorMessage];
+            $response     = ['result' => 'NOK', 'message' => $errorMessage];
         }
         Log::debug('Result is', $response);
 
@@ -325,7 +325,7 @@ final class TokenController extends Controller
     public function submitClientId(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url'  => 'url']);
+        $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
         if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {

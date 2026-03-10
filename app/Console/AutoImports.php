@@ -218,7 +218,7 @@ trait AutoImports
         // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
         $jsonContent      = file_get_contents($jsonFile);
         $json             = json_decode($jsonContent, true);
-        $flow = $json['flow'] ?? 'file';
+        $flow             = $json['flow'] ?? 'file';
 
         // defaults to "file".
         Log::debug(sprintf('JSON says the flow is "%s"', $flow));
@@ -470,7 +470,7 @@ trait AutoImports
 
     private function reportImport(): void
     {
-        $list = ['info'  => $this->importMessages, 'warn'  => $this->importWarnings, 'error' => $this->importErrors];
+        $list = ['info' => $this->importMessages, 'warn' => $this->importWarnings, 'error' => $this->importErrors];
 
         // FIXME this reports to info() which ends up in the result.
         Log::info(sprintf('There are %d message(s)', count($this->importMessages)));
@@ -613,7 +613,7 @@ trait AutoImports
         // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
         $jsonContent           = file_get_contents($jsonFile);
         $json                  = json_decode($jsonContent, true);
-        $flow = $json['flow'] ?? 'file';
+        $flow                  = $json['flow'] ?? 'file';
         $importableFileContent = '';
         if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
             $importableFileContent = file_get_contents($importableFile);

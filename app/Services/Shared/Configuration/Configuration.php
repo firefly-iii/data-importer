@@ -575,7 +575,7 @@ class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
         $object->accessToken                 = $array['access_token'] ?? '';
 
-        // flow 
+        // flow
         $object->flow                        = $array['flow'] ?? 'file';
 
         // overrule a setting:
@@ -927,7 +927,7 @@ class Configuration
         // Create pseudo identifier from old single-column format
         Log::debug(sprintf('Migrating old identifier format to pseudo identifier: index=%d, type=%s', $this->uniqueColumnIndex, $this->uniqueColumnType));
 
-        $this->pseudoIdentifier = ['source_columns' => [$this->uniqueColumnIndex], 'separator'      => '|', 'role'           => $this->uniqueColumnType];
+        $this->pseudoIdentifier = ['source_columns' => [$this->uniqueColumnIndex], 'separator' => '|', 'role' => $this->uniqueColumnType];
     }
 
     public function getPendingTransactions(): bool
