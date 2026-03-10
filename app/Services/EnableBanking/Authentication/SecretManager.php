@@ -60,7 +60,7 @@ class SecretManager
         if ('' === $sessionId) {
             Log::debug('No Enable Banking App ID in session, will return config variable.');
             $sessionId = (string) config('eb.application_id');
-            if('' === $sessionId) {
+            if ('' === $sessionId) {
                 Log::error('The Enable Banking App ID in the configuration is empty! Did you set ENABLE_BANKING_APP_ID?');
             }
         }
