@@ -111,7 +111,7 @@ trait CreatesAccounts
                 $configuration['opening_balance']      = $newAccountData['opening_balance'];
                 $configuration['opening_balance_date'] = Carbon::now()->format('Y-m-d');
             }
-            Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration'       => $configuration]);
+            Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration' => $configuration]);
 
             // Create Account object and create Firefly III account
             $existingAccountObject       = ImportServiceAccount::convertSingleAccount($existingAccount);

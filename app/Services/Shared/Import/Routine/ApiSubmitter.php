@@ -578,7 +578,7 @@ class ApiSubmitter
 
         $groupId = (int) $groupInfo['group_id'];
         Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = ['fire_webhooks'    => false, 'batch_submission' => true, 'apply_rules'      => false, 'transactions'     => []];
+        $body    = ['fire_webhooks' => false, 'batch_submission' => true, 'apply_rules' => false, 'transactions' => []];
 
         /**
          * @var int   $journalId
@@ -586,7 +586,7 @@ class ApiSubmitter
          */
         foreach ($groupInfo['journals'] as $journalId => $currentTags) {
             $currentTags[]          = $this->tag;
-            $body['transactions'][] = ['transaction_journal_id' => $journalId, 'tags'                   => $currentTags];
+            $body['transactions'][] = ['transaction_journal_id' => $journalId, 'tags' => $currentTags];
         }
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
@@ -617,7 +617,7 @@ class ApiSubmitter
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        $body    = ['tag'  => $this->tag, 'date' => $this->tagDate];
+        $body    = ['tag' => $this->tag, 'date' => $this->tagDate];
         $request->setBody($body);
 
         try {

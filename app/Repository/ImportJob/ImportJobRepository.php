@@ -300,7 +300,7 @@ class ImportJobRepository
     private function getApplicationAccounts(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $accounts = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []];
+        $accounts = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
         $url      = null;
 
         try {
@@ -308,7 +308,7 @@ class ImportJobRepository
             $token         = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
-                Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty'   => '' === $url, 'token_empty' => '' === $token]);
+                Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
 
                 return $accounts; // Return empty accounts if auth details are missing
             }

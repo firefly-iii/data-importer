@@ -143,7 +143,7 @@ trait CollectsAccounts
             if (in_array($type, ['expense', 'revenue'], true)) {
                 $key          = sprintf('id_%d', $entry->id);
                 Log::debug(sprintf('Collected %s account "%s" under key "%s"', $type, $entry->name, $key));
-                $return[$key] = ['id'     => $entry->id, 'type'   => $entry->type, 'name'   => $entry->name, 'number' => $entry->number];
+                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
 
                 // #10546 drop the continue statement here.
             }
@@ -160,7 +160,7 @@ trait CollectsAccounts
                 $number       = $this->filterSpaces((string) $entry->number);
                 $key          = sprintf('nr_%s', $number);
                 Log::debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
-                $return[$key] = ['id'     => $entry->id, 'type'   => $entry->type, 'name'   => $entry->name, 'number' => $entry->number];
+                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
             // #10546 include expense and revenue accounts in the IBAN list, unless entry already exist.
             if (array_key_exists($iban, $return) && in_array($type, ['expense', 'revenue'], true)) {
@@ -171,12 +171,12 @@ trait CollectsAccounts
             // #10546 allow asset and liability accounts to be added under their IBAN, overruling expense accounts if necessary.
             if (array_key_exists($iban, $return) && !in_array($type, ['expense', 'revenue'], true)) {
                 Log::debug(sprintf('Allow %s account with IBAN "%s" to overrule existing IBAN entry.', $type, $iban));
-                $return[$iban] = ['id'     => $entry->id, 'type'   => $entry->type, 'name'   => $entry->name, 'number' => $entry->number];
+                $return[$iban] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
             // #10546 if the IBAN does not yet exist, add it of course.
             if (!array_key_exists($iban, $return)) {
                 Log::debug(sprintf('Collected account IBAN "%s" (%s) under ID #%d', $iban, $entry->type, $entry->id));
-                $return[$iban] = ['id'     => $entry->id, 'type'   => $entry->type, 'name'   => $entry->name, 'number' => $entry->number];
+                $return[$iban] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
         }
         Log::debug(sprintf('Collected %d accounts of type "%s"', count($result), $type));

@@ -89,7 +89,7 @@ class TransactionConverter
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
-                    $current[$role] ??= ['data'    => [], 'mapping' => []];
+                    $current[$role] ??= ['data' => [], 'mapping' => []];
                     if (array_key_exists($field, $mapping)) {
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }

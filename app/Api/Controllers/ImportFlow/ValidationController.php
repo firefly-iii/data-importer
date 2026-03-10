@@ -45,7 +45,7 @@ final class ValidationController extends Controller
             'sophtron'  => $this->validateSophtron(),
             'eb'        => $this->validateEnableBanking(),
             'file'      => response()->json(['result' => 'OK']),
-            default     => response()->json(['result'  => 'NOK', 'message' => 'Unknown provider'])
+            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
     }
 

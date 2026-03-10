@@ -63,16 +63,16 @@ final class DuplicateCheckController extends Controller
         if ('' === $name || '' === $type) {
             Log::debug('Duplicate check: Empty name or type, returning no duplicate');
 
-            return response()->json(['isDuplicate' => false, 'message'     => null]);
+            return response()->json(['isDuplicate' => false, 'message' => null]);
         }
         // Validate account type
         $validTypes          = ['asset', 'liabilities'];
         if (!in_array($type, $validTypes, true)) {
-            Log::warning('Duplicate check: Invalid account type provided', ['type'        => $type, 'valid_types' => $validTypes]);
+            Log::warning('Duplicate check: Invalid account type provided', ['type' => $type, 'valid_types' => $validTypes]);
 
-            return response()->json(['isDuplicate' => false, 'message'     => null]);
+            return response()->json(['isDuplicate' => false, 'message' => null]);
         }
-        $arrayToCheck        = ['asset'       => Constants::ASSET_ACCOUNTS, 'liabilities' => Constants::LIABILITIES];
+        $arrayToCheck        = ['asset' => Constants::ASSET_ACCOUNTS, 'liabilities' => Constants::LIABILITIES];
         $array               = $applicationAccounts[$arrayToCheck[$type]] ?? [];
         $isDuplicate         = false;
 
@@ -87,13 +87,8 @@ final class DuplicateCheckController extends Controller
             $message = sprintf('%s <em>%s</em> already exists!', ucfirst($type), $name);
         }
 
-        Log::debug('Duplicate check: Validation result', [
-            'name'        => $name,
-            'type'        => $type,
-            'isDuplicate' => $isDuplicate,
-            'message'     => $message,
-        ]);
+        Log::debug('Duplicate check: Validation result', ['name' => $name, 'type' => $type, 'isDuplicate' => $isDuplicate, 'message' => $message]);
 
-        return response()->json(['isDuplicate' => $isDuplicate, 'message'     => $message]);
+        return response()->json(['isDuplicate' => $isDuplicate, 'message' => $message]);
     }
 }

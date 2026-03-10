@@ -171,7 +171,7 @@ final class ConfigurationPostRequest extends Request
         // Build pseudo identifier definition (same for single or multiple columns)
         $type    = $this->convertToString('unique_column_type');
 
-        return ['source_columns' => $indices, 'separator'      => '|', 'role'           => $type];
+        return ['source_columns' => $indices, 'separator' => '|', 'role' => $type];
     }
 
     public function rules(): array

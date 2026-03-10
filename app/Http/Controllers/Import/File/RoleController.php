@@ -148,8 +148,8 @@ final class RoleController extends Controller
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
         $levels         = [];
-        $levels['A']    = ['title'       => trans('camt.level_A'), 'explanation' => trans('camt.explain_A'), 'fields'      => $this->getFieldsForLevel('A')];
-        $levels['B']    = ['title'       => trans('camt.level_B'), 'explanation' => trans('camt.explain_B'), 'fields'      => $this->getFieldsForLevel('B')];
+        $levels['A']    = ['title' => trans('camt.level_A'), 'explanation' => trans('camt.explain_A'), 'fields' => $this->getFieldsForLevel('A')];
+        $levels['B']    = ['title' => trans('camt.level_B'), 'explanation' => trans('camt.explain_B'), 'fields' => $this->getFieldsForLevel('B')];
         //        var_dump($levels['B']);
         //        var_dump($roles);
         //        exit;
@@ -161,12 +161,12 @@ final class RoleController extends Controller
                 'entryAccountServicerReference' => config('camt.fields.entryAccountServicerReference'),
                 'entryReference'                => config('camt.fields.entryReference'),
                 'entryAdditionalInfo'           => config('camt.fields.entryAdditionalInfo'),
-                'section_transaction'           => ['section' => true, 'title'   => 'transaction'],
+                'section_transaction'           => ['section' => true, 'title' => 'transaction'],
                 'entryAmount'                   => config('camt.fields.entryAmount'),
                 'entryAmountCurrency'           => config('camt.fields.entryAmountCurrency'),
                 'entryValueDate'                => config('camt.fields.entryValueDate'),
                 'entryBookingDate'              => config('camt.fields.entryBookingDate'),
-                'section_btc'                   => ['section' => true, 'title'   => 'Btc'],
+                'section_btc'                   => ['section' => true, 'title' => 'Btc'],
                 'entryBtcDomainCode'            => config('camt.fields.entryBtcDomainCode'),
                 'entryBtcFamilyCode'            => config('camt.fields.entryBtcFamilyCode'),
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
@@ -174,7 +174,7 @@ final class RoleController extends Controller
         ];
         $group_handling = $configuration->getGroupedTransactionHandling();
         if ('group' === $group_handling) {
-            $levels['D'] = ['title'       => trans('camt.level_D'), 'explanation' => trans('camt.explain_D_dropped')];
+            $levels['D'] = ['title' => trans('camt.level_D'), 'explanation' => trans('camt.explain_D_dropped')];
         }
         if ('group' !== $group_handling) {
             $levels['D'] = [
@@ -192,14 +192,14 @@ final class RoleController extends Controller
                     'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
                         'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
                     ),
-                    'section_tr'                                                                     => ['section' => true, 'title'   => 'transaction'],
+                    'section_tr'                                                                     => ['section' => true, 'title' => 'transaction'],
                     'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
                     'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
-                    'section_btc'                                                                    => ['section' => true, 'title'   => 'Btc'],
+                    'section_btc'                                                                    => ['section' => true, 'title' => 'Btc'],
                     'entryDetailBtcDomainCode'                                                       => config('camt.fields.entryDetailBtcDomainCode'),
                     'entryDetailBtcFamilyCode'                                                       => config('camt.fields.entryDetailBtcFamilyCode'),
                     'entryDetailBtcSubFamilyCode'                                                    => config('camt.fields.entryDetailBtcSubFamilyCode'),
-                    'section_opposing'                                                               => ['section' => true, 'title'   => 'opposingPart'],
+                    'section_opposing'                                                               => ['section' => true, 'title' => 'opposingPart'],
                     'entryDetailOpposingAccountIban'                                                 => config('camt.fields.entryDetailOpposingAccountIban'),
                     'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
                     'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),

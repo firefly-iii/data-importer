@@ -132,7 +132,7 @@ class ProcessImportSubmissionJob implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
-        Log::error('ProcessImportSubmissionJob marked as failed', ['identifier' => $this->importJob->identifier, 'exception'  => $exception->getMessage()]);
+        Log::error('ProcessImportSubmissionJob marked as failed', ['identifier' => $this->importJob->identifier, 'exception' => $exception->getMessage()]);
 
         // Ensure error status is set even if job fails catastrophically
         $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
