@@ -103,7 +103,7 @@ class CSVFileProcessor
 
     public function setDelimiter(string $delimiter): void
     {
-        $map             = ['tab'       => "\t", 'semicolon' => ';', 'comma'     => ','];
+        $map             = ['tab' => "\t", 'semicolon' => ';', 'comma' => ','];
 
         $this->delimiter = $map[$delimiter] ?? ',';
     }

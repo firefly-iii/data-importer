@@ -212,7 +212,7 @@ abstract class Request
 
         try {
             $client = $this->getClient();
-            $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body'    => $body]);
+            $res    = $client->request('POST', $fullUrl, ['headers' => $headers, 'body' => $body]);
         } catch (Exception|GuzzleException $e) {
             throw new ImporterHttpException(sprintf('Guzzle Exception: %s', $e->getMessage()));
         }

@@ -53,7 +53,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof ImporterErrorException || $e instanceof ImporterHttpException) {
             $isDebug = config('app.debug');
 
-            return response()->view('errors.exception', ['exception' => $e, 'debug'     => $isDebug], 500);
+            return response()->view('errors.exception', ['exception' => $e, 'debug' => $isDebug], 500);
         }
 
         return parent::render($request, $e);

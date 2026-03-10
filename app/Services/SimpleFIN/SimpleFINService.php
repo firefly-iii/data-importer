@@ -249,7 +249,7 @@ class SimpleFINService
         }
 
         try {
-            $client    = new Client(['timeout' => $this->getTimeout(), 'verify'  => config('importer.connection.verify')]);
+            $client    = new Client(['timeout' => $this->getTimeout(), 'verify' => config('importer.connection.verify')]);
 
             $parts     = parse_url($claimUrl);
             Log::debug(sprintf('Parsed $claimUrl parts: %s', json_encode($parts)));

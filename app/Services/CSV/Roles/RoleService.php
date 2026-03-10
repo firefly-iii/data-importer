@@ -197,10 +197,10 @@ class RoleService
                     $count         = count($pseudoIdentifier['source_columns']);
                     if ($count > 1) {
                         $combinedValue    = substr(hash('sha256', $combinedValue), 0, 8);
-                        $pseudoExamples[] = ['raw'    => $rawValue, 'hashed' => $combinedValue];
+                        $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => $combinedValue];
                     }
                     if ($count <= 1) {
-                        $pseudoExamples[] = ['raw'    => $rawValue, 'hashed' => null];
+                        $pseudoExamples[] = ['raw' => $rawValue, 'hashed' => null];
                     }
                 }
             }
@@ -224,7 +224,7 @@ class RoleService
             $examples[$line] = $entries;
         }
 
-        return ['columns'           => $examples, 'pseudo_identifier' => $pseudoExamples];
+        return ['columns' => $examples, 'pseudo_identifier' => $pseudoExamples];
     }
 
     public static function getExampleDataFromCamt(string $content, Configuration $configuration): array

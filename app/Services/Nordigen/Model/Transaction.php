@@ -572,9 +572,9 @@ class Transaction
             'value_date'                                => $this->valueDate->toW3cString(),
             'account_identifier'                        => $this->accountIdentifier,
             // array values:
-            'debtor_account'                            => ['iban'     => $this->debtorAccountIban, 'currency' => $this->debtorAccountCurrency],
-            'creditor_account'                          => ['iban'     => $this->creditorAccountIban, 'currency' => $this->creditorAccountCurrency],
-            'transaction_amount'                        => ['amount'   => $this->transactionAmount, 'currency' => $this->currencyCode],
+            'debtor_account'                            => ['iban' => $this->debtorAccountIban, 'currency' => $this->debtorAccountCurrency],
+            'creditor_account'                          => ['iban' => $this->creditorAccountIban, 'currency' => $this->creditorAccountCurrency],
+            'transaction_amount'                        => ['amount' => $this->transactionAmount, 'currency' => $this->currencyCode],
 
             // undocumented values:
             'end_to_end_id'                             => $this->endToEndId,

@@ -111,13 +111,7 @@ class AccountMapper
             $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
 
             // Build account creation payload
-            $payload  = [
-                'name'              => $accountName,
-                'type'              => $accountType,
-                'currency_code'     => $currencyCode,
-                'active'            => true,
-                'include_net_worth' => true,
-            ];
+            $payload  = ['name' => $accountName, 'type' => $accountType, 'currency_code' => $currencyCode, 'active' => true, 'include_net_worth' => true];
 
             // Add opening balance date if opening balance is provided
             if ('' !== (string) $openingBalance && is_numeric($openingBalance) && '0.00' !== $openingBalance) {

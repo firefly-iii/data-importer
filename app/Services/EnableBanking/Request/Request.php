@@ -92,7 +92,7 @@ abstract class Request
 
     protected function getClient(): Client
     {
-        return new Client(['connect_timeout' => $this->timeOut, 'timeout'         => $this->timeOut]);
+        return new Client(['connect_timeout' => $this->timeOut, 'timeout' => $this->timeOut]);
     }
 
     protected function getHeaders(): array
@@ -162,7 +162,7 @@ abstract class Request
         $client  = $this->getClient();
 
         try {
-            $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json'    => $data]);
+            $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json' => $data]);
         } catch (ClientException|GuzzleException $e) {
             Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
 

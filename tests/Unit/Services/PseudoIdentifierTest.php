@@ -112,7 +112,7 @@ final class PseudoIdentifierTest extends TestCase
             'duplicate_detection_method'    => 'cell',
             'unique_column_index'           => 0,
             'unique_column_type'            => 'external-id',
-            'pseudo_identifier'             => ['source_columns' => [0, 3, 5], 'separator'      => '|', 'role'           => 'external-id'],
+            'pseudo_identifier'             => ['source_columns' => [0, 3, 5], 'separator' => '|', 'role' => 'external-id'],
             'headers'                       => true,
             'delimiter'                     => 'comma',
             'date'                          => 'Y-m-d',
@@ -218,7 +218,7 @@ final class PseudoIdentifierTest extends TestCase
             'duplicate_detection_method' => 'cell',
             'unique_column_index'        => 1,
             'unique_column_type'         => 'internal_reference',
-            'pseudo_identifier'          => ['source_columns' => [1, 4], 'separator'      => '|', 'role'           => 'internal_reference'],
+            'pseudo_identifier'          => ['source_columns' => [1, 4], 'separator' => '|', 'role' => 'internal_reference'],
         ]);
 
         // Load configuration
