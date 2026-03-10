@@ -218,13 +218,15 @@ trait AutoImports
         // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
         $jsonContent      = file_get_contents($jsonFile);
         $json             = json_decode($jsonContent, true);
+        $flow = $json['flow'] ?? 'file';
 
-        Log::debug(sprintf('JSON says the flow is "%s"', $json['flow']));
+        // defaults to "file".
+        Log::debug(sprintf('JSON says the flow is "%s"', $flow));
 
         // create new import job:
         $this->repository = new ImportJobRepository();
         $importJob        = $this->repository->create();
-        $importJob        = $this->repository->setFlow($importJob, $json['flow']);
+        $importJob        = $this->repository->setFlow($importJob, $flow);
         $importJob        = $this->repository->setConfigurationString($importJob, $jsonContent);
         if ('' !== $importableFile) {
             $importJob = $this->repository->setImportableFileString($importJob, file_get_contents($importableFile));
@@ -611,13 +613,13 @@ trait AutoImports
         // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
         $jsonContent           = file_get_contents($jsonFile);
         $json                  = json_decode($jsonContent, true);
-
+        $flow = $json['flow'] ?? 'file';
         $importableFileContent = '';
         if ('' !== $importableFile && file_exists($importableFile) && is_readable($importableFile)) {
             $importableFileContent = file_get_contents($importableFile);
         }
 
-        $importJob             = $this->repository->setFlow($importJob, $json['flow']);
+        $importJob             = $this->repository->setFlow($importJob, $flow);
         $importJob             = $this->repository->setConfigurationString($importJob, $jsonContent);
         $importJob             = $this->repository->setImportableFileString($importJob, $importableFileContent);
         $importJob             = $this->repository->markAs($importJob, 'contains_content');
@@ -636,7 +638,7 @@ trait AutoImports
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);
 
-        Log::debug(sprintf('[b] Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $json['flow']));
+        Log::debug(sprintf('[b] Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $flow));
 
         // this is it!
         $this->startConversionFromImportJob($importJob);

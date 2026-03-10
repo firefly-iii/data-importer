@@ -575,7 +575,7 @@ class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
         $object->accessToken                 = $array['access_token'] ?? '';
 
-        // flow
+        // flow 
         $object->flow                        = $array['flow'] ?? 'file';
 
         // overrule a setting:
