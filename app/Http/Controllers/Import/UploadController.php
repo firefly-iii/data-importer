@@ -157,10 +157,10 @@ final class UploadController extends Controller
         if (null !== $importJob->getConfiguration()) {
             $configuration = $importJob->getConfiguration();
         }
+
         $configuration->setFlow($importJob->getFlow());
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);
-
         // FIXME: validation needs to be in a factory or something.
         // do validation for all configurations.
         switch ($flow) {

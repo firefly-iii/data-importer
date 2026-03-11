@@ -180,7 +180,10 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current = $configuration->getDuplicateDetectionMethod();
+                if('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -191,7 +194,10 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current = $configuration->getDuplicateDetectionMethod();
+                if('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -203,15 +209,20 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current = $configuration->getDuplicateDetectionMethod();
+                if('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
             case 'sophtron':
                 // get import job + configuration back:
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
-
+                $current = $configuration->getDuplicateDetectionMethod();
+                if('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
                 break;
 
             case 'eb':
@@ -220,7 +231,10 @@ class ImportJobRepository
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current = $configuration->getDuplicateDetectionMethod();
+                if('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 

@@ -61,7 +61,7 @@ final class ConfigurationController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle           = 'Configuration';
         $subTitle            = 'Configure your import';
-        $doParse             = 'true' === $request->get('parse');
+        $doParse             = 'true' === $request->input('parse');
         $importJob           = $this->repository->find($identifier);
         $flow                = $importJob->getFlow();
 
