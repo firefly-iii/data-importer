@@ -88,7 +88,7 @@ final class MapController extends Controller
             $data  = $this->getCamtMapInformation($importJob);
         }
 
-        // nordigen, spectre, simplefin and others:
+        // nordigen, simplefin and others:
         if ('file' !== $importJob->getFlow()) {
             Log::debug('Get mapping data for data importers.');
             $roles = [];
@@ -243,7 +243,7 @@ final class MapController extends Controller
     }
 
     /**
-     * Weird bunch of code to return info on Spectre and Nordigen.
+     * Weird bunch of code to return info on Nordigen.
      */
     private function getImporterMapInformation(ImportJob $importJob): array
     {
@@ -259,7 +259,6 @@ final class MapController extends Controller
         if (
             'nordigen' === $importJob->getFlow()
             || 'sophtron' === $importJob->getFlow()
-            || 'spectre' === $importJob->getFlow()
             || 'lunchflow' === $importJob->getFlow()
             || 'eb' === $importJob->getFlow()
         ) {

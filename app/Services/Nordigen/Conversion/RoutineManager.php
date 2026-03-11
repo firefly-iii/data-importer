@@ -52,6 +52,7 @@ class RoutineManager implements RoutineManagerInterface
     private TransactionProcessor $transactionProcessor;
     private ImportJobRepository $repository;
     private ImportJob $importJob;
+    private array $rateLimits = [];
 
     private array $downloaded;
 

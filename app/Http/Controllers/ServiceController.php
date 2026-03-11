@@ -29,9 +29,7 @@ use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
-use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -52,12 +50,11 @@ final class ServiceController extends Controller
     {
         return match ($provider) {
             'nordigen', 'gocardless' => $this->validateNordigen(),
-            'simplefin' => $this->validateSimpleFIN(),
-            'spectre'   => $this->validateSpectre(request()),
-            'lunchflow' => $this->validateLunchFlow(),
-            'eb'        => $this->validateEnableBanking(),
-            'file'      => response()->json(['result' => 'OK']),
-            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
+            'simplefin'              => $this->validateSimpleFIN(),
+            'lunchflow'              => $this->validateLunchFlow(),
+            'eb'                     => $this->validateEnableBanking(),
+            'file'                   => response()->json(['result' => 'OK']),
+            default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
     }
 
@@ -101,22 +98,6 @@ final class ServiceController extends Controller
         return response()->json(['result' => 'OK']);
     }
 
-    public function validateSpectre(Request $request): JsonResponse
-    {
-        $validator = new SpectreValidator();
-        $result    = $validator->validate();
-
-        if (AuthenticationStatus::ERROR === $result) {
-            // send user error:
-            return response()->json(['result' => 'NOK']);
-        }
-        if (AuthenticationStatus::NODATA === $result) {
-            // send user error:
-            return response()->json(['result' => 'NODATA']);
-        }
-
-        return response()->json(['result' => 'OK']);
-    }
 
     public function validateLunchFlow(): JsonResponse
     {

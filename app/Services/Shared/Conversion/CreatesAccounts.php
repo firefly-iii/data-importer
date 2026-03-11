@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Shared\Model\ImportServiceAccount;
@@ -34,6 +35,7 @@ use Illuminate\Support\Facades\Log;
 
 trait CreatesAccounts
 {
+    protected ImportJobRepository $repository;
     protected array $existingServiceAccounts = [];
 
     public function setExistingServiceAccounts(array $existingServiceAccounts): void

@@ -43,8 +43,6 @@ class Constants
     public const string NORDIGEN_REFRESH_TOKEN       = 'nordigen_refresh_token';
     public const string REQUISITION_REFERENCE        = 'requisition_reference';
 
-    // spectre specific steps:
-
     // nordigen specific steps
     public const string SELECTED_BANK_COUNTRY        = 'selected_bank_country';
 

@@ -148,16 +148,6 @@ abstract class Request
         return new Client(['connect_timeout' => $this->timeOut]);
     }
 
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    public function setToken(#[SensitiveParameter] string $token): void
-    {
-        $this->token = $token;
-    }
-
     /**
      * @throws GuzzleException
      * @throws ImporterHttpException

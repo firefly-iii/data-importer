@@ -47,12 +47,6 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
         Log::debug('Created new GetTransactionsResponse');
     }
 
-    public function setAccountId(string $accountId): void
-    {
-        $this->accountId = $accountId;
-        Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
-    }
-
     public function processData(): void
     {
         Log::debug('Processing data in GetTransactionsResponse');

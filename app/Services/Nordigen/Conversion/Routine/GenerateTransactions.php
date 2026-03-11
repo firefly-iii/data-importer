@@ -41,6 +41,7 @@ use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -106,8 +107,8 @@ class GenerateTransactions
             $request                   = new GetAccountInformationRequest($url, $accessToken, $nordigenIdentifier);
             $request->setTimeOut(config('importer.connection.timeout'));
 
-            /** @var ArrayResponse $response */
             try {
+                /** @var ArrayResponse $response */
                 $response = $request->get();
             } catch (ImporterHttpException|RateLimitException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);

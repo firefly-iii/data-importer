@@ -56,6 +56,7 @@ class TransactionProcessor
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
     private ImportJobRepository $repository;
+    private array $rateLimits = [];
 
     /**
      * @throws ImporterErrorException
@@ -190,11 +191,6 @@ class TransactionProcessor
     public function getAccounts(): array
     {
         return $this->accounts;
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     private function filterTransactions(GetTransactionsResponse $transactions): array

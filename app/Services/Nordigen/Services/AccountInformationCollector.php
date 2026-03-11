@@ -168,8 +168,8 @@ class AccountInformationCollector
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var ArrayResponse $response */
         try {
+            /** @var ArrayResponse $response */
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             throw new AgreementExpiredException($e->getMessage(), 0, $e);

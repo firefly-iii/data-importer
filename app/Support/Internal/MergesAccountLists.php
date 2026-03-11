@@ -135,14 +135,6 @@ trait MergesAccountLists
         return $result;
     }
 
-    protected function mergeSpectreAccountLists(array $spectre, array $applicationAccounts): array
-    {
-        Log::debug('Now merging Spectre account lists.');
-        $generic = ImportServiceAccount::convertSpectreArray($spectre);
-
-        return $this->mergeGenericAccountList($generic, $applicationAccounts);
-    }
-
     protected function mergeLunchFlowAccountLists(array $lunchFlow, array $applicationAccounts): array
     {
         Log::debug('Now merging Lunch Flow account lists.');

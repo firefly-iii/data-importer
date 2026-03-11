@@ -16,8 +16,6 @@ parameters:
       enabled: false
     privateInFinalClass:
       enabled: false
-    noIsset:
-      enabled: false
     finalInAbstractClass:
       enabled: false
     noConstructorParameterWithDefaultValue:
@@ -33,9 +31,6 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
-    - identifier: method.nameCase
-    - identifier: class.notFound
-    - identifier: property.notFound
     - identifier: method.childReturnType
     - identifier: varTag.variableNotFound
     - identifier: regexp.pattern
