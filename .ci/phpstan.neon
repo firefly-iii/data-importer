@@ -34,7 +34,6 @@ parameters:
     - identifier: method.childReturnType
     - identifier: varTag.variableNotFound
     - identifier: regexp.pattern
-    - identifier: property.uninitializedReadonly
     - identifier: staticMethod.dynamicName
     - identifier: booleanOr.leftNotBoolean
     - identifier: attribute.notFound
@@ -44,7 +43,6 @@ parameters:
     - identifier: staticMethod.notFound
     - identifier: instanceof.alwaysFalse
     - identifier: staticMethod.nameCase
-    - identifier: property.onlyRead
     - identifier: offsetAccess.notFound
     - identifier: constructor.unusedParameter
     - identifier: booleanAnd.leftNotBoolean

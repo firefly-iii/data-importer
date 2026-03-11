@@ -55,7 +55,7 @@ class TransactionProcessor
     private ?Carbon $notAfter             = null;
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
     private array $rateLimits = [];
 
     /**
