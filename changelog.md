@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.2.2 - 2026-03-16
 
+> [!WARNING]
+> Some changes in this release may lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
 <!-- summary: This releases improves Enable Banking imports and fixes a CAMT import issue. -->
 
 ### Removed
@@ -15,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [Issue 11923](https://github.com/firefly-iii/firefly-iii/issues/11923) (Positive transactions in CAMT files fail to import) reported by @rmu1987
 - [Issue 11924](https://github.com/firefly-iii/firefly-iii/issues/11924) ("Missing array offset", broken auto-import when using import configuration with no `flow` key) reported by @Unsantae
 - [Issue 11925](https://github.com/firefly-iii/firefly-iii/issues/11925) (Enable Banking does not find duplicate transactions when changing status) reported by @rigibe
-- [Issue 11932](https://github.com/firefly-iii/firefly-iii/issues/11932) (ignore_duplicate_transactions fiels is not updated in the import_config.json) reported by @Passific
+- [Issue 11932](https://github.com/firefly-iii/firefly-iii/issues/11932) (ignore_duplicate_transactions field is not updated in the import_config.json) reported by @Passific
 
 ## v2.2.1 - 2026-03-10
 
