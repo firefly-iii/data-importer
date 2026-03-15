@@ -8,12 +8,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 - Removed all instances of `isset`
+- Removed old Spectre code
 
 ### Fixed
 - #11917
 - #11923
 - #11924
 - #11925
+- #11932
 
 ## v2.2.1 - 2026-03-10
 
