@@ -33,7 +33,6 @@ use GuzzleHttp\Exception\GuzzleException;
 
 trait CollectsAccounts
 {
-
     /**
      * @throws GuzzleException
      * @throws ImporterHttpException

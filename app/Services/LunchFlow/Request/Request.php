@@ -26,7 +26,6 @@ namespace App\Services\LunchFlow\Request;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
@@ -58,7 +57,6 @@ abstract class Request
      * @throws ImporterHttpException
      */
     abstract public function put(): Response;
-
 
     public function setTimeOut(float $timeOut): void
     {

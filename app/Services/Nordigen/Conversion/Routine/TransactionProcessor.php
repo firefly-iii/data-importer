@@ -56,7 +56,7 @@ class TransactionProcessor
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
     protected ImportJobRepository $repository;
-    private array $rateLimits = [];
+    private array $rateLimits             = [];
 
     /**
      * @throws ImporterErrorException

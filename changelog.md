@@ -11,11 +11,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Removed old Spectre code
 
 ### Fixed
-- #11917
-- #11923
-- #11924
-- #11925
-- #11932
+- [Issue 11917](https://github.com/firefly-iii/firefly-iii/issues/11917) (Enable Banking continuation key not used) reported by @victor-amblard
+- [Issue 11923](https://github.com/firefly-iii/firefly-iii/issues/11923) (Positive transactions in CAMT files fail to import) reported by @rmu1987
+- [Issue 11924](https://github.com/firefly-iii/firefly-iii/issues/11924) ("Missing array offset", broken auto-import when using import configuration with no `flow` key) reported by @Unsantae
+- [Issue 11925](https://github.com/firefly-iii/firefly-iii/issues/11925) (Enable Banking does not find duplicate transactions when changing status) reported by @rigibe
+- [Issue 11932](https://github.com/firefly-iii/firefly-iii/issues/11932) (ignore_duplicate_transactions fiels is not updated in the import_config.json) reported by @Passific
 
 ## v2.2.1 - 2026-03-10
 
