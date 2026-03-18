@@ -39,7 +39,7 @@ return [
         ';'         => ';',
         "\t"        => "\t",
     ],
-    'fallback_locale'       => envNonEmpty('FALLBACK_LOCALE'),
+    'fallback_locale'       => env('FALLBACK_LOCALE'),
     'delimiters_reversed'   => [
         'comma'     => 'comma',
         'semicolon' => 'semicolon',

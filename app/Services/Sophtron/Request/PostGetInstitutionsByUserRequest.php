@@ -46,10 +46,7 @@ final class PostGetInstitutionsByUserRequest extends Request
     }
 
     /**
-     * @throws AgreementExpiredException
-     * @throws ImporterErrorException
      * @throws ImporterHttpException
-     * @throws RateLimitException
      */
     public function get(): Response
     {

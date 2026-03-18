@@ -46,10 +46,10 @@ final class Kernel extends ConsoleKernel
     #[Override]
     protected function commands(): void
     {
-        $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
-        $clientId    = (string) env('FIREFLY_III_CLIENT_ID', '');
-        $baseUrl     = (string) env('FIREFLY_III_URL', '');
-        $vanityUrl   = (string) env('VANITY_URL', '');
+        $accessToken = (string) config('importer.access_token');
+        $clientId    = (string) config('importer.client_id');
+        $baseUrl     = (string) config('importer.url');
+        $vanityUrl   = (string) config('importer.vanity_url');
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && '' !== $clientId) {
             echo PHP_EOL;

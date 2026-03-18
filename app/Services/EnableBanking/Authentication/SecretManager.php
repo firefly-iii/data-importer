@@ -69,14 +69,6 @@ final class SecretManager
     }
 
     /**
-     * Will verify if the user has an Enable Banking App ID (in a cookie)
-     */
-    private static function hasAppId(): bool
-    {
-        return '' !== self::getSessionAppId();
-    }
-
-    /**
      * Get the Private Key from session, returns empty string if not found or on exception
      */
     private static function getSessionPrivateKey(): string
@@ -137,14 +129,6 @@ final class SecretManager
         }
 
         return true;
-    }
-
-    /**
-     * Will verify if the user has an Enable Banking Private Key (in a cookie)
-     */
-    private static function hasPrivateKey(): bool
-    {
-        return '' !== self::getSessionPrivateKey();
     }
 
     /**

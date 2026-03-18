@@ -30,6 +30,7 @@ use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Services\Sophtron\Model\Transaction;
 use App\Services\Sophtron\Request\PostGetTransactionsByTransactionDateRequest;
+use App\Services\Sophtron\Response\PostGetTransactionsByTransactionDateResponse;
 use App\Services\Sophtron\Validation\NewJobDataCollector;
 use Illuminate\Support\Facades\Log;
 
@@ -38,7 +39,7 @@ final class TransactionDownloader
     use CreatesAccounts;
 
     private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
 
     public function __construct(ImportJob $importJob)
     {
@@ -103,6 +104,7 @@ final class TransactionDownloader
         $notAfter      = $configuration->getDateNotAfter();
 
         $request       = new PostGetTransactionsByTransactionDateRequest($userId, $accessKey, $accountId, $notBefore, $notAfter);
+        /** @var PostGetTransactionsByTransactionDateResponse $response */
         $response      = $request->post();
         $return        = [];
 

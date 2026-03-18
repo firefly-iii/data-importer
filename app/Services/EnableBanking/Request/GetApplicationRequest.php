@@ -30,8 +30,6 @@ use App\Services\Shared\Response\Response;
 
 final class GetApplicationRequest extends Request
 {
-    private string $sessionId;
-
     public function __construct(string $url)
     {
         $this->setBase($url);

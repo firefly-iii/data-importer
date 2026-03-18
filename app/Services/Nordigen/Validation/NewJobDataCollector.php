@@ -84,8 +84,8 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
 
-                /** @var ListAccountsResponse $response */
                 try {
+                    /** @var ListAccountsResponse $response */
                     $response = $request->get();
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);

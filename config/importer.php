@@ -168,7 +168,7 @@ return [
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),
     'tracker_url'                   => env('TRACKER_URL', ''),
-    'vanity_url'                    => envNonEmpty('VANITY_URL'),
+    'vanity_url'                    => env('VANITY_URL'),
     'connection'                    => [
         'verify'  => env('VERIFY_TLS_SECURITY', true),
         'timeout' => 0.0 === (float)env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float)env('CONNECTION_TIMEOUT', 31.415),

@@ -39,6 +39,7 @@ use Exception;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Support\Facades\Log;
@@ -288,7 +289,7 @@ final class ImportJobRepository
         return $importJob;
     }
 
-    public function setImportableFileString(ImportJob $importJob, string $importableFileContent)
+    public function setImportableFileString(ImportJob $importJob, string $importableFileContent): ImportJob
     {
         $importJob->setImportableFileString($importableFileContent);
         $this->saveToDisk($importJob);
@@ -334,6 +335,7 @@ final class ImportJobRepository
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
+            /** @var GetAccountsResponse $responseAsset */
             $responseAsset = $requestAsset->get();
 
             /** @var Account $account */
@@ -357,6 +359,7 @@ final class ImportJobRepository
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
+            /** @var GetAccountsResponse $responseLiability */
             $responseLiability = $requestLiability->get();
 
             /** @var Account $account */

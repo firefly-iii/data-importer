@@ -27,15 +27,6 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
-    - identifier: deadCode.unreachable
-    - identifier: missingType.parameter
-    - identifier: method.unused
-    - identifier: property.unused
-    - identifier: catch.neverThrown
-    - identifier: missingType.return
-    - identifier: method.dynamicName
-    - identifier: larastan.noEnvCallsOutsideOfConfig
-    - identifier: foreach.nonIterable
     - identifier: notIdentical.alwaysTrue
     - identifier: method.notFound
     - identifier: nullsafe.neverNull
@@ -80,7 +71,8 @@ parameters:
     - identifier: return.unusedType
     - identifier: return.phpDocType
     # all errors below I will never fix.
-    - identifier: throws.unusedType # often still thrown.
+    - identifier: method.dynamicName # dont care
+    - identifier: catch.neverThrown # always things that are not thrown.
     - identifier: staticMethod.dynamicName # dont care
     - identifier: method.childReturnType # no idea what this even means.
     - identifier: missingType.generics # not interesting enough to fix.

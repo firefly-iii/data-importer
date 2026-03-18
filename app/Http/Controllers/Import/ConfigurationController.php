@@ -56,7 +56,7 @@ final class ConfigurationController extends Controller
         $this->repository = new ImportJobRepository();
     }
 
-    public function index(Request $request, string $identifier)
+    public function index(Request $request, string $identifier): mixed
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle           = 'Configuration';

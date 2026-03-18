@@ -119,7 +119,7 @@ final class AuthenticateController extends Controller
         return null;
     }
 
-    public function postIndex(Request $request, string $flow)
+    public function postIndex(Request $request, string $flow): mixed
     {
         $mainTitle  = 'Authentication';
         $pageTitle  = 'Authentication';

@@ -28,21 +28,20 @@ use App\Exceptions\Handler;
 
 bcscale(12);
 
-if (!function_exists('envNonEmpty')) {
+if (!function_exists('envDefaultWhenEmpty')) {
     /**
-     * @param  string  $key
-     * @param  null  $default
      *
      * @return mixed|null
      */
-    function envNonEmpty(string $key, $default = null)
+    function envDefaultWhenEmpty(mixed $value, string | int | bool | null $default = null): mixed
     {
-        $result = env($key, $default);
-        if (is_string($result) && '' === $result) {
+        if(null === $value) {
             return $default;
         }
-
-        return $result;
+        if('' === $value) {
+            return $default;
+        }
+        return $value;
     }
 }
 

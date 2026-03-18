@@ -40,7 +40,6 @@ use Override;
  */
 final class RoutineManager implements RoutineManagerInterface
 {
-    private Configuration $configuration;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
     private ImportJobRepository $repository;

@@ -254,7 +254,7 @@ trait AutoImports
 
                 return ExitCode::NO_REQUISITIONS_PRESENT->value;
             }
-            foreach ($messages as $message) {
+            foreach ($messages->all() as $message) {
                 $this->error(sprintf('Error message: %s', $message));
             }
 

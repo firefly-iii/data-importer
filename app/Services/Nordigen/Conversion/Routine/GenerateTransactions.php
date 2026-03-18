@@ -460,54 +460,54 @@ final class GenerateTransactions
     //        return $type;
     //    }
 
-    /**
-     * @throws ImporterHttpException
-     */
-    private function getAccountType(int $accountId): string
-    {
-        $token   = SecretManager::getAccessToken();
-        $url     = SecretManager::getBaseUrl();
-        Log::debug(sprintf('Going to download account #%d', $accountId));
-        $request = new GetAccountRequest($url, $token);
-        $request->setTimeOut(config('importer.connection.timeout'));
-        $request->setId($accountId);
+//    /**
+//     * @throws ImporterHttpException
+//     */
+//    private function getAccountType(int $accountId): string
+//    {
+//        $token   = SecretManager::getAccessToken();
+//        $url     = SecretManager::getBaseUrl();
+//        Log::debug(sprintf('Going to download account #%d', $accountId));
+//        $request = new GetAccountRequest($url, $token);
+//        $request->setTimeOut(config('importer.connection.timeout'));
+//        $request->setId($accountId);
+//
+//        try {
+//            /** @var GetAccountResponse $result */
+//            $result = $request->get();
+//        } catch (ApiHttpException $e) {
+//            throw new ImporterHttpException($e->getMessage(), 0, $e);
+//        }
+//        $type    = $result->getAccount()->type;
+//
+//        Log::debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
+//
+//        return $type;
+//    }
 
-        try {
-            /** @var GetAccountResponse $result */
-            $result = $request->get();
-        } catch (ApiHttpException $e) {
-            throw new ImporterHttpException($e->getMessage(), 0, $e);
-        }
-        $type    = $result->getAccount()->type;
-
-        Log::debug(sprintf('Discovered that account #%d is of type "%s"', $accountId, $type));
-
-        return $type;
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function getTransactionType(string $source, string $destination): string
-    {
-        $combination = sprintf('%s-%s', $source, $destination);
-
-        switch ($combination) {
-            default:
-                throw new ImporterErrorException(sprintf('Unknown combination: %s and %s', $source, $destination));
-
-            case 'asset-liabilities':
-            case 'asset-expense':
-                return 'withdrawal';
-
-            case 'asset-asset':
-                return 'transfer';
-
-            case 'liabilities-asset':
-            case 'revenue-asset':
-                return 'deposit';
-        }
-    }
+//    /**
+//     * @throws ImporterErrorException
+//     */
+//    private function getTransactionType(string $source, string $destination): string
+//    {
+//        $combination = sprintf('%s-%s', $source, $destination);
+//
+//        switch ($combination) {
+//            default:
+//                throw new ImporterErrorException(sprintf('Unknown combination: %s and %s', $source, $destination));
+//
+//            case 'asset-liabilities':
+//            case 'asset-expense':
+//                return 'withdrawal';
+//
+//            case 'asset-asset':
+//                return 'transfer';
+//
+//            case 'liabilities-asset':
+//            case 'revenue-asset':
+//                return 'deposit';
+//        }
+//    }
 
     /**
      * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.

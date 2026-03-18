@@ -40,22 +40,11 @@ final class ApplicationResponse extends Response implements Countable, IteratorA
     /** @var Account[] */
     private array  $accounts  = [];
     private string $sessionId = '';
+    private array $data = [];
 
     public function __construct(array $data = [])
     {
-        throw new ImporterHttpException('This method is not in use.');
-        $accounts = $data['accounts'] ?? $data;
-
-        // Handle null or non-array accounts (restricted clients without pre-authorization)
-        if (!is_array($accounts)) {
-            $accounts = [];
-        }
-
-        foreach ($accounts as $account) {
-            if (is_array($account)) {
-                $this->accounts[] = Account::fromArray($account);
-            }
-        }
+        $this->data = $data;
     }
 
     public static function fromArray(array $array, string $sessionId = ''): self

@@ -53,7 +53,7 @@ final class SubmitController extends Controller
         $this->repository = new ImportJobRepository();
     }
 
-    public function index(string $identifier)
+    public function index(string $identifier): mixed
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle  = 'Submit the data';

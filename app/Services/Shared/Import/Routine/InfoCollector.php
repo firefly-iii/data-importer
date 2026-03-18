@@ -29,6 +29,7 @@ use App\Support\RequestCache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -60,6 +61,7 @@ final class InfoCollector
             $request->setType(GetAccountsRequest::ALL);
             $request->setVerify(config('importer.connection.verify'));
             $request->setTimeOut(config('importer.connection.timeout'));
+            /** @var GetAccountsResponse $response */
             $response = $request->get();
         }
         if ($inCache) {
