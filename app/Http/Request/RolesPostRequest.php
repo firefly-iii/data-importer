@@ -67,7 +67,7 @@ final class RolesPostRequest extends Request
         });
     }
 
-    protected function validateAmountRole(Validator $validator): void
+    private function validateAmountRole(Validator $validator): void
     {
         $data                 = $validator->getData();
         $roles                = $data['roles'] ?? [];
