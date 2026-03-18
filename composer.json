@@ -80,7 +80,7 @@
         "firefly-iii/api-support-classes": "@dev",
         "genkgo/camt": ">=2.10.1",
         "guzzlehttp/guzzle": "^7.9",
-        "laravel/framework": "^12",
+        "laravel/framework": "^13",
         "league/csv": "9.*",
         "ramsey/uuid": "^4.9",
         "spatie/enum": "^3.10",
