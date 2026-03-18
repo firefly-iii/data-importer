@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\EnableBanking\Response;
 
-use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Model\Account;
 use App\Services\Shared\Response\Response;
 use ArrayIterator;
@@ -40,7 +39,7 @@ final class ApplicationResponse extends Response implements Countable, IteratorA
     /** @var Account[] */
     private array  $accounts  = [];
     private string $sessionId = '';
-    private array $data = [];
+    private array  $data      = [];
 
     public function __construct(array $data = [])
     {

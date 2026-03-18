@@ -540,7 +540,7 @@ final class TransactionTransformer
         }
 
         $levenshtein           = levenshtein($str1, $str2);
-        $levenshteinSimilarity = 1 - ($levenshtein / $maxLen);
+        $levenshteinSimilarity = 1 - $levenshtein / $maxLen;
 
         // Use similar_text for additional comparison
         similar_text($str1, $str2, $percent);
@@ -553,7 +553,7 @@ final class TransactionTransformer
         }
 
         // Weighted average of different similarity measures
-        $finalSimilarity       = ($levenshteinSimilarity * 0.5) + ($similarTextSimilarity * 0.4) + $substringBonus;
+        $finalSimilarity       = $levenshteinSimilarity * 0.5 + $similarTextSimilarity * 0.4 + $substringBonus;
 
         return min(1.0, $finalSimilarity);
     }
