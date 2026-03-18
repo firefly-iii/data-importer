@@ -40,7 +40,7 @@ final class TransactionsResponse extends Response implements Countable, Iterator
     /** @var Transaction[] */
     private array  $transactions = [];
     private string $accountUid   = '';
-    private array $data = [];
+    private array  $data         = [];
 
     public function __construct(array $data = [])
     {

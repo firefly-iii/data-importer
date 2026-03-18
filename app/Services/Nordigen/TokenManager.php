@@ -118,7 +118,7 @@ final class TokenManager
             $tokenValidity = 0;
         }
         // Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
-        $result = Carbon::now()->getTimestamp() < $tokenValidity;
+        $result         = Carbon::now()->getTimestamp() < $tokenValidity;
         if (false === $result) {
             Log::debug('Nordigen token is no longer valid');
 
