@@ -141,7 +141,7 @@ final class Transaction
     public function getEffectiveDate(): Carbon
     {
         // Use transacted_at if available, otherwise fall back to posted date
-        if ($this->transactedAt && $this->transactedAt > 0) {
+        if (is_int($this->transactedAt) && $this->transactedAt > 0) {
             return Carbon::createFromTimestamp($this->transactedAt);
         }
 

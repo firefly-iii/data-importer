@@ -97,7 +97,7 @@ trait CreatesAccounts
             Log::error(sprintf('Existing account data not found for account "%s"', $importServiceId));
             $continue = false;
         }
-
+        $configuration = [];
         if (true === $continue) {
             // Prepare account creation configuration with defaults
             $configuration               = [
@@ -139,8 +139,8 @@ trait CreatesAccounts
             'account_id'         => $importServiceId,
             'firefly_account_id' => $createdAccount->id,
             'account_name'       => $createdAccount->name,
-            'account_type'       => $configuration['type'],
-            'currency'           => $configuration['currency'],
+            'account_type'       => $configuration['type'] ?? null,
+            'currency'           => $configuration['currency'] ?? null,
         ]);
 
         return $createdAccount;

@@ -97,7 +97,7 @@ final class ApiSubmitter
             $this->importJob->submissionStatus->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
         }
 
-        $this->vanityURL  = SecretManager::getVanityURL();
+        $this->vanityURL  = SecretManager::getVanityUrl();
 
         Log::debug(sprintf('Vanity URL: "%s"', $this->vanityURL));
 
@@ -621,7 +621,7 @@ final class ApiSubmitter
         $request->setBody($body);
 
         try {
-            /** @var PostTagResponse $response */
+            /** @var PostTagResponse|ValidationErrorResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
             $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());

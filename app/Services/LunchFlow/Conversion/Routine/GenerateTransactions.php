@@ -330,7 +330,7 @@ final class GenerateTransactions
         // If the account number is a known target account, but it's not a liability, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
         $accountType = (string) ($this->targetTypes[$number] ?? 'unknown');
-        if ($this->isAssetAccount($accountType, $number) && sprintf(self::NUMBER_FORMAT, '') !== $number) {
+        if ($this->isAssetAccount($accountType, $number)) {
             Log::debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$number];
             $transaction['type'] = 'transfer';

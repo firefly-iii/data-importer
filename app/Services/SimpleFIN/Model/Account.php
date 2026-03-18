@@ -193,15 +193,15 @@ final class Account
             throw new InvalidArgumentException('Organization must be an array');
         }
 
-        if (!array_key_exists('sfin-url', $data['org']) && null !== $data['org']['sfin-url']) {
+        if (!array_key_exists('sfin-url', $data['org']) || null === $data['org']['sfin-url']) {
             throw new InvalidArgumentException('Organization must have sfin-url');
         }
 
         if (
             !array_key_exists('domain', $data['org'])
-            && !array_key_exists('name', $data['org'])
-            && null !== $data['org']['domain']
-            && null !== $data['org']['name']
+            || !array_key_exists('name', $data['org'])
+            || null === $data['org']['domain']
+            || null === $data['org']['name']
         ) {
             throw new InvalidArgumentException('Organization must have either domain or name');
         }

@@ -27,18 +27,6 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
-    - identifier: nullCoalesce.expr
-    - identifier: trait.unused
-    - identifier: variable.undefined
-    - identifier: staticMethod.notFound
-    - identifier: instanceof.alwaysFalse
-    - identifier: staticMethod.nameCase
-    - identifier: offsetAccess.notFound
-    - identifier: constructor.unusedParameter
-    - identifier: booleanAnd.leftNotBoolean
-    - identifier: booleanAnd.rightNotBoolean
-    - identifier: notIdentical.alwaysFalse
-    - identifier: throws.unusedType
     - identifier: deadCode.unreachable
     - identifier: missingType.parameter
     - identifier: method.unused
@@ -59,7 +47,6 @@ parameters:
     - identifier: booleanNot.exprNotBoolean
     - identifier: ternary.condNotBoolean
     # - identifier: booleanNot.alwaysFalse
-    - identifier: booleanAnd.alwaysFalse
     # - identifier: greater.alwaysTrue
     - identifier: function.alreadyNarrowedType
     # - identifier: booleanNot.alwaysTrue
@@ -93,6 +80,7 @@ parameters:
     - identifier: return.unusedType
     - identifier: return.phpDocType
     # all errors below I will never fix.
+    - identifier: throws.unusedType # often still thrown.
     - identifier: staticMethod.dynamicName # dont care
     - identifier: method.childReturnType # no idea what this even means.
     - identifier: missingType.generics # not interesting enough to fix.

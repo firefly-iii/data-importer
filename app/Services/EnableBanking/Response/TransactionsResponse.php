@@ -40,11 +40,13 @@ final class TransactionsResponse extends Response implements Countable, Iterator
     /** @var Transaction[] */
     private array  $transactions = [];
     private string $accountUid   = '';
+    private array $data = [];
 
     public function __construct(array $data = [])
     {
         // Constructor is required by parent, but actual parsing is done in fromArray
         // to support the accountUid parameter
+        $this->data = $data;
     }
 
     public static function fromArray(array $array, string $accountUid = ''): self

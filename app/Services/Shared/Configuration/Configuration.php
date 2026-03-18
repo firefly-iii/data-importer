@@ -311,7 +311,7 @@ final class Configuration
                 $object->roles[$index] = $role;
             }
             if (null === $config) {
-                Log::warn(sprintf('There is no config for "%s"!', $role));
+                Log::warning(sprintf('There is no config for "%s"!', $role));
             }
         }
         ksort($object->roles);

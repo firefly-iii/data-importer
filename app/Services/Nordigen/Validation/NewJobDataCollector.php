@@ -66,7 +66,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         }
         Log::debug(sprintf('Have %d requisition(s) for import.', count($requisitions)));
         foreach ($requisitions as $requisition) {
-            $inCache = Cache::has($requisition) && config('importer.use_cache');
+            $inCache = Cache::has($requisition) && true === config('importer.use_cache');
             // if cached, return it.
             if ($inCache) {
                 Log::debug('Have accounts in cache.');
