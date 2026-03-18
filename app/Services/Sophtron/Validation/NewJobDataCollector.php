@@ -72,7 +72,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
     public function downloadInstitutions(): void
     {
         Log::debug('Now in downloadInstitutions()');
-        $count = count($this->importJob->getSophtronInstitutions());
+        $count     = count($this->importJob->getSophtronInstitutions());
         if (0 !== $count) {
             Log::debug(sprintf('There are %d institutions already, do not download.', $count));
 
@@ -81,10 +81,11 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $userId    = SecretManager::getSophtronUserId($this->importJob);
         $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
 
-        $request = new GetInstitutionsRequest($userId, $accessKey);
+        $request   = new GetInstitutionsRequest($userId, $accessKey);
+
         /** @var GetInstitutionsResponse $response */
-        $response = $request->get();
-        $array    = [];
+        $response  = $request->get();
+        $array     = [];
         foreach ($response as $country) {
             /** @var Institution $institution */
             foreach ($country['institutions'] as $institution) {
@@ -97,16 +98,16 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
     public function downloadInstitutionsByUser(): void
     {
         Log::debug('Now in downloadInstitutionsByUser()');
-        $count = count($this->importJob->getSophtronInstitutions());
+        $count       = count($this->importJob->getSophtronInstitutions());
         if (0 !== $count) {
             // always download.
             // Log::debug(sprintf('There are %d institutions already, do not download.', $count));
             // return;
         }
-        $userId    = SecretManager::getSophtronUserId($this->importJob);
-        $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
+        $userId      = SecretManager::getSophtronUserId($this->importJob);
+        $accessKey   = SecretManager::getSophtronAccessKey($this->importJob);
 
-        $request = new PostGetInstitutionsByUserRequest($userId, $accessKey);
+        $request     = new PostGetInstitutionsByUserRequest($userId, $accessKey);
 
         /** @var PostGetInstitutionsByUserResponse $response */
         $response    = $request->post();
@@ -116,21 +117,22 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         /** @var UserInstitution $institution */
         foreach ($response as $institution) {
             // request accounts from institution.
-            $accountRequest = new PostGetUserInstitutionAccountsRequest($userId, $accessKey, $institution->userInstitutionId);
+            $accountRequest        = new PostGetUserInstitutionAccountsRequest($userId, $accessKey, $institution->userInstitutionId);
+
             /** @var PostGetUserInstitutionAccountsResponse $accountResponse */
-            $accountResponse = $accountRequest->post();
-            $accounts        = [];
+            $accountResponse       = $accountRequest->post();
+            $accounts              = [];
 
             /** @var UserInstitutionAccount $account */
             foreach ($accountResponse as $account) {
-                $accounts[] = $account;
+                $accounts[]               = $account;
                 // then, set a reference to the institution, and save it again.
                 $account->userInstitution = $institution;
                 $allAccounts[]            = $account;
             }
             $institution->accounts = $accounts;
 
-            $array[] = $institution->toArray();
+            $array[]               = $institution->toArray();
         }
         $this->importJob->setServiceAccounts($allAccounts);
         $this->importJob->setSophtronInstitutions($array);

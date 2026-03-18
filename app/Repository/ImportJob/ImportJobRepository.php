@@ -335,6 +335,7 @@ final class ImportJobRepository
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
+
             /** @var GetAccountsResponse $responseAsset */
             $responseAsset = $requestAsset->get();
 
@@ -359,6 +360,7 @@ final class ImportJobRepository
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
+
             /** @var GetAccountsResponse $responseLiability */
             $responseLiability = $requestLiability->get();
 

@@ -61,6 +61,7 @@ final class InfoCollector
             $request->setType(GetAccountsRequest::ALL);
             $request->setVerify(config('importer.connection.verify'));
             $request->setTimeOut(config('importer.connection.timeout'));
+
             /** @var GetAccountsResponse $response */
             $response = $request->get();
         }

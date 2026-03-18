@@ -104,6 +104,7 @@ final class TransactionDownloader
         $notAfter      = $configuration->getDateNotAfter();
 
         $request       = new PostGetTransactionsByTransactionDateRequest($userId, $accessKey, $accountId, $notBefore, $notAfter);
+
         /** @var PostGetTransactionsByTransactionDateResponse $response */
         $response      = $request->post();
         $return        = [];
