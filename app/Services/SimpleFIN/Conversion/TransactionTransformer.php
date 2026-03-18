@@ -379,18 +379,6 @@ class TransactionTransformer
     }
 
     /**
-     * Get the transaction date from the transaction.
-     */
-    private function getTransactionDate(array $transactionData): ?string
-    {
-        if (array_key_exists('transacted_at', $transactionData) && (int)$transactionData['transacted_at'] > 0) {
-            return Carbon::createFromTimestamp((int)$transactionData['transacted_at'])->format('Y-m-d');
-        }
-
-        return null;
-    }
-
-    /**
      * Ensure expense and revenue accounts are collected from Firefly III
      */
     private function ensureAccountsCollected(): void
