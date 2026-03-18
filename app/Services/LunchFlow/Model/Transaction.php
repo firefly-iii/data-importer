@@ -29,7 +29,7 @@ use Carbon\Carbon;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     public string $id;
     public int $account;

@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class InfoCollector
  */
-class InfoCollector
+final class InfoCollector
 {
     /**
      * Collect various accounts from Firefly III and save the account type.

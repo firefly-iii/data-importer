@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class Account
  */
-class Account
+final class Account
 {
     private array $balances = [];
     private string $bban;

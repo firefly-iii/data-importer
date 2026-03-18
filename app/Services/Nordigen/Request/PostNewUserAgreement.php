@@ -34,7 +34,7 @@ use SensitiveParameter;
 /**
  * Class PostNewUserAgreement
  */
-class PostNewUserAgreement extends Request
+final class PostNewUserAgreement extends Request
 {
     private string $accessValidForDays;
     private string $bank;

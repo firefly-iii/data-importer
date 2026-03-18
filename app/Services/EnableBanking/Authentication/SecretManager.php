@@ -31,7 +31,7 @@ use Psr\Container\NotFoundExceptionInterface;
 /**
  * Class SecretManager
  */
-class SecretManager
+final class SecretManager
 {
     public const string EB_APP_ID      = 'enable_banking_app_id';
     public const string EB_PRIVATE_KEY = 'enable_banking_private_key';

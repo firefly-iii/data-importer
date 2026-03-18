@@ -41,7 +41,7 @@ use League\Csv\UnableToProcessCsv;
 /**
  * Class RoleService
  */
-class RoleService
+final class RoleService
 {
     public const int EXAMPLE_COUNT  = 7;
     public const int EXAMPLE_LENGTH = 26;

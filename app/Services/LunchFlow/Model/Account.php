@@ -27,7 +27,7 @@ namespace App\Services\LunchFlow\Model;
 /**
  * Class Account
  */
-class Account
+final class Account
 {
     public int $id;
     public string $institutionLogo;

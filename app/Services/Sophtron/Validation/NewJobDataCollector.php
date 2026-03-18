@@ -37,7 +37,7 @@ use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
 

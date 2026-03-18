@@ -29,7 +29,7 @@ use App\Services\Sophtron\Model\UserInstitution;
 use Countable;
 use Iterator;
 
-class PostGetInstitutionsByUserResponse extends Response implements Iterator, Countable
+final class PostGetInstitutionsByUserResponse extends Response implements Iterator, Countable
 {
     private array $institutions = [];
     private int   $position     = 0;

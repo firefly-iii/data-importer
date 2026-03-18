@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ImportedTransactions
  */
-class ImportedTransactions
+final class ImportedTransactions
 {
     use SerializesModels;
 

@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Collects meta information and more on the given Account
  */
-class AccountInformationCollector
+final class AccountInformationCollector
 {
     /**
      * @throws AgreementExpiredException
@@ -99,7 +99,7 @@ class AccountInformationCollector
     /**
      * @throws AgreementExpiredException|ImporterErrorException
      */
-    protected static function getAccountDetails(Account $account): Account
+    private static function getAccountDetails(Account $account): Account
     {
         Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 

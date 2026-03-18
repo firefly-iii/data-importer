@@ -29,7 +29,7 @@ use Exception;
 /**
  * Class ImporterErrorException
  */
-class ImporterErrorException extends Exception
+final class ImporterErrorException extends Exception
 {
     public array $json;
     public int $statusCode = 0;

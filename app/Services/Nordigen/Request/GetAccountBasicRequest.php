@@ -35,7 +35,7 @@ use SensitiveParameter;
 /**
  * Class GetAccountBasicRequest
  */
-class GetAccountBasicRequest extends Request
+final class GetAccountBasicRequest extends Request
 {
     private string $identifier;
 

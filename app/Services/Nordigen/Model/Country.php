@@ -29,7 +29,7 @@ use Illuminate\Support\Collection;
 /**
  * Class Country
  */
-class Country
+final class Country
 {
     public function __construct(
         public string $code,

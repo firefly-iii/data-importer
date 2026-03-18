@@ -26,7 +26,7 @@ namespace App\Services\Sophtron\Model;
 
 use Carbon\Carbon;
 
-class Transaction
+final class Transaction
 {
     public ?Carbon $createdDateUtc          = null;
     public string  $id                      = '';

@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class Bills
  */
-class Bills implements MapperInterface
+final class Bills implements MapperInterface
 {
     /**
      * Get map of objects.

@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class Currency
  */
-class Currency extends AbstractTask
+final class Currency extends AbstractTask
 {
     public function process(array $group): array
     {

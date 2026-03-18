@@ -34,7 +34,7 @@ use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
 /**
  * Class GetTransactionsRequest
  */
-class PostGetInstitutionsByUserRequest extends Request
+final class PostGetInstitutionsByUserRequest extends Request
 {
     public function __construct(string $userId, string $accessKey)
     {

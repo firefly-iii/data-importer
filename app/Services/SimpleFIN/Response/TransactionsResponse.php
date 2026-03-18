@@ -30,7 +30,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Class TransactionsResponse
  */
-class TransactionsResponse extends SimpleFINResponse
+final class TransactionsResponse extends SimpleFINResponse
 {
     private array $transactions = [];
 

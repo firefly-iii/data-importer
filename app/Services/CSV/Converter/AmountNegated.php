@@ -26,7 +26,7 @@ namespace App\Services\CSV\Converter;
 /**
  * Class AmountNegated
  */
-class AmountNegated implements ConverterInterface
+final class AmountNegated implements ConverterInterface
 {
     /**
      * Negate amount.

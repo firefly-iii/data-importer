@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class BankDebitCredit
  */
-class BankDebitCredit implements ConverterInterface
+final class BankDebitCredit implements ConverterInterface
 {
     /**
      * Convert a value.

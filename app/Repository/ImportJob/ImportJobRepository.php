@@ -46,7 +46,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Ramsey\Uuid\Uuid;
 
-class ImportJobRepository
+final class ImportJobRepository
 {
     public function create(): ImportJob
     {

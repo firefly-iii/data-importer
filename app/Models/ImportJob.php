@@ -52,7 +52,7 @@ use Ramsey\Uuid\Uuid;
  * - ready_for_submission: any import with converted data that can be submitted to Firefly III.
  */
 
-class ImportJob implements Arrayable
+final class ImportJob implements Arrayable
 {
     // job meta-data:
     public string $identifier;

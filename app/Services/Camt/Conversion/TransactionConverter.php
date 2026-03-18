@@ -29,7 +29,7 @@ use App\Services\Camt\AbstractTransaction;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Support\Facades\Log;
 
-class TransactionConverter
+final class TransactionConverter
 {
     public function __construct(
         private Configuration $configuration

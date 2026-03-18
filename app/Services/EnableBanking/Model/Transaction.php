@@ -31,7 +31,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     public string  $transactionId         = '';
     public string  $accountUid            = '';

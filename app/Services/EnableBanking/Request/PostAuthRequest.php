@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  * Class PostAuthRequest
  * Initiates the authorization process with a bank
  */
-class PostAuthRequest extends Request
+final class PostAuthRequest extends Request
 {
     private string $aspsp;
     private string $country    = '';

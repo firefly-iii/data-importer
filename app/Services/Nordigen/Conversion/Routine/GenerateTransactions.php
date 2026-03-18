@@ -47,7 +47,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class GenerateTransactions.
  */
-class GenerateTransactions
+final class GenerateTransactions
 {
     use CollectsAccounts;
     use DuplicateSafetyCatch;
@@ -472,8 +472,8 @@ class GenerateTransactions
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setId($accountId);
 
-        /** @var GetAccountResponse $result */
         try {
+            /** @var GetAccountResponse $result */
             $result = $request->get();
         } catch (ApiHttpException $e) {
             throw new ImporterHttpException($e->getMessage(), 0, $e);

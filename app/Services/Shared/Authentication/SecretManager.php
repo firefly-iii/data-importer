@@ -32,7 +32,7 @@ use SensitiveParameter;
 /**
  * Class SecretManager
  */
-class SecretManager
+final class SecretManager
 {
     public static function getSophtronAccessKey(?ImportJob $importJob = null): string
     {

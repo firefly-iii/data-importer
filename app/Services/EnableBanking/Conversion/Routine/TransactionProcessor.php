@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionProcessor
  */
-class TransactionProcessor
+final class TransactionProcessor
 {
     use CreatesAccounts;
 

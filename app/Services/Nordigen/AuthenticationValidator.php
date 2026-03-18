@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class AuthenticationValidator
  */
-class AuthenticationValidator implements AuthenticationValidatorInterface
+final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     public function validate(): AuthenticationStatus
     {

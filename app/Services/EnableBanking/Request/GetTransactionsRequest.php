@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Log;
  * Class GetTransactionsRequest
  * Gets transactions for an account
  */
-class GetTransactionsRequest extends Request
+final class GetTransactionsRequest extends Request
 {
     private string $accountUid;
 

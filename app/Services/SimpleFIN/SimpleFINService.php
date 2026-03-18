@@ -40,7 +40,7 @@ use SensitiveParameter;
 /**
  * Class SimpleFINService
  */
-class SimpleFINService
+final class SimpleFINService
 {
     private string $setupToken  = '';
     private Configuration $configuration;

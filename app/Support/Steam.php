@@ -30,7 +30,7 @@ use ValueError;
 /**
  * Class Steam
  */
-class Steam
+final class Steam
 {
     public function cleanStringAndNewlines($value): string
     {

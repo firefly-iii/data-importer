@@ -27,7 +27,7 @@ namespace App\Services\Session;
 /**
  * Class Constants
  */
-class Constants
+final class Constants
 {
     // constants to remember Nordigen access token, refresh token and validity:
     public const string ASSET_ACCOUNTS               = 'assets';

@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class RoutineManager
  */
-class RoutineManager
+final class RoutineManager
 {
     private ApiSubmitter $apiSubmitter;
     private InfoCollector $infoCollector;

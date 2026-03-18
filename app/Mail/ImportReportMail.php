@@ -32,7 +32,7 @@ use Illuminate\Queue\SerializesModels;
 /**
  * Class ImportReportMail
  */
-class ImportReportMail extends Mailable
+final class ImportReportMail extends Mailable
 {
     use Queueable;
     use SerializesModels;

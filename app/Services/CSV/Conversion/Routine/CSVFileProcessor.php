@@ -37,7 +37,7 @@ use League\Csv\Statement;
 /**
  * Class CSVFileProcessor
  */
-class CSVFileProcessor
+final class CSVFileProcessor
 {
     private string $delimiter;
     private bool $hasHeaders;

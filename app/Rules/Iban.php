@@ -30,7 +30,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 /**
  * IBAN rule class.
  */
-class Iban implements ValidationRule
+final class Iban implements ValidationRule
 {
     /**
      * Get the validation error message.

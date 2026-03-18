@@ -37,7 +37,7 @@ use UnexpectedValueException;
  * Converts rows of ColumnValue's to pseudo transactions.
  * Pseudo because they still require some lookups and cleaning up.
  */
-class ColumnValueConverter
+final class ColumnValueConverter
 {
     private array $roleToTransaction;
     private Configuration $configuration;

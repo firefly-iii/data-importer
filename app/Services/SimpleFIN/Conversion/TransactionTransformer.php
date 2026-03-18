@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionTransformer
  */
-class TransactionTransformer
+final class TransactionTransformer
 {
     use CollectsAccounts;
 

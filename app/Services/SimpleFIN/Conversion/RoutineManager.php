@@ -37,7 +37,7 @@ use Override;
 /**
  * Class RoutineManager
  */
-class RoutineManager implements RoutineManagerInterface
+final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 

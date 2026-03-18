@@ -30,7 +30,7 @@ use Illuminate\Notifications\Notifiable;
 /**
  * Class User
  */
-class User extends Authenticatable
+final class User extends Authenticatable
 {
     use Notifiable;
 

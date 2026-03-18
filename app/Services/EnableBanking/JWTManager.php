@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Log;
  * Class JWTManager
  * Generates RS256 JWT tokens for Enable Banking API authentication
  */
-class JWTManager
+final class JWTManager
 {
     private const int TOKEN_EXPIRY_SECONDS = 3600; // 1 hour
 

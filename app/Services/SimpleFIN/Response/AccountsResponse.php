@@ -31,7 +31,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Class AccountsResponse
  */
-class AccountsResponse extends SimpleFINResponse
+final class AccountsResponse extends SimpleFINResponse
 {
     private array $accounts = [];
 

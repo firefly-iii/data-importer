@@ -31,7 +31,7 @@ use ValueError;
 /**
  * Class Iban
  */
-class Iban implements ConverterInterface
+final class Iban implements ConverterInterface
 {
     /**
      * Convert a value.

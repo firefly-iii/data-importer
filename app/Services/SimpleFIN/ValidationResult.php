@@ -27,7 +27,7 @@ namespace App\Services\SimpleFIN;
 /**
  * Validation result container
  */
-readonly class ValidationResult
+readonly final class ValidationResult
 {
     public function __construct(
         private bool $isValid,

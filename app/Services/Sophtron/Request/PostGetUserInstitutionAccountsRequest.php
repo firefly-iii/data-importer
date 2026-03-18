@@ -28,7 +28,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Sophtron\Response\PostGetUserInstitutionAccountsResponse;
 
-class PostGetUserInstitutionAccountsRequest extends Request
+final class PostGetUserInstitutionAccountsRequest extends Request
 {
     private string $userInstitutionId = '';
 

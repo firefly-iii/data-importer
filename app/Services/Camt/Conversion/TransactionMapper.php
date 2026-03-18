@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionMapper
  */
-class TransactionMapper
+final class TransactionMapper
 {
     use GetAccounts;
 

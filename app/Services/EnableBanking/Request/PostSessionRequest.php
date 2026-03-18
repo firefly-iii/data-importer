@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Log;
  * Class PostSessionRequest
  * Creates a session after successful authorization
  */
-class PostSessionRequest extends Request
+final class PostSessionRequest extends Request
 {
     private string $code;
 

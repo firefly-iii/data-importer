@@ -41,7 +41,7 @@ use League\Csv\Statement;
 /**
  * Class MapperService
  */
-class MapperService
+final class MapperService
 {
     /**
      * Appends the given array with data from the CSV file in the config.

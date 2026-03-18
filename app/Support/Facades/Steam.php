@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * Class Steam
  */
-class Steam extends Facade
+final class Steam extends Facade
 {
     /**
      * Get the registered name of the component.

@@ -36,7 +36,7 @@ use SensitiveParameter;
 /**
  * Class GetTransactionsRequest
  */
-class GetTransactionsRequest extends Request
+final class GetTransactionsRequest extends Request
 {
     public function __construct(
         string $url,

@@ -34,7 +34,7 @@ use SensitiveParameter;
 /**
  * Class PostNewRequisitionRequest
  */
-class PostNewRequisitionRequest extends Request
+final class PostNewRequisitionRequest extends Request
 {
     private string $agreement;
     private string $bank;

@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class PostNewTokenRequest
  */
-class PostNewTokenRequest extends Request
+final class PostNewTokenRequest extends Request
 {
     public function __construct(
         private readonly string $identifier,

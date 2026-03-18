@@ -30,7 +30,7 @@ use InvalidArgumentException;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     private readonly string $id;
     private readonly int $posted;

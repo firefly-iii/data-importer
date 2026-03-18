@@ -31,7 +31,7 @@ use Override;
 /**
  * Class AppServiceProvider
  */
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.

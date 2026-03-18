@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
 use SensitiveParameter;
 use Throwable;
 
-class ProcessImportSubmissionJob implements ShouldQueue
+final class ProcessImportSubmissionJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;

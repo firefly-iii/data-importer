@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Log;
  * arrays with single "ColumnValue" that hold the value + the role of the column
  * + the mapped value (if any).
  */
-class LineProcessor
+final class LineProcessor
 {
     private Configuration $configuration;
     private string $dateFormat;

@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  *
  * @property array $data
  */
-class ArrayResponse extends Response
+final class ArrayResponse extends Response
 {
     public function __construct(
         public array $data

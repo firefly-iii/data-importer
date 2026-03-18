@@ -29,7 +29,7 @@ use App\Services\CSV\Converter\Amount as AmountConverter;
 /**
  * Class PositiveAmount
  */
-class PositiveAmount extends AbstractTask
+final class PositiveAmount extends AbstractTask
 {
     /**
      * Make sure amount is always positive when submitting.

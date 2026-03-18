@@ -41,7 +41,7 @@ use Illuminate\Support\MessageBag;
 /**
  * Class NewJobDataCollector
  */
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;

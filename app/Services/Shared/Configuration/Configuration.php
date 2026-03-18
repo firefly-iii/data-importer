@@ -34,7 +34,7 @@ use UnexpectedValueException;
 /**
  * Class Configuration
  */
-class Configuration
+final class Configuration
 {
     public const int VERSION              = 3;
 

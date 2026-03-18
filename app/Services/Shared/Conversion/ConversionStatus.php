@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ConversionStatus
  */
-class ConversionStatus
+final class ConversionStatus
 {
     public const string CONVERSION_DONE    = 'conv_done';
 

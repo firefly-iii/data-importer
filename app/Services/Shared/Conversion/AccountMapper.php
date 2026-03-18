@@ -42,7 +42,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\Response;
 use GrumpyDictator\FFIIIApiSupport\Response\ValidationErrorResponse;
 use Illuminate\Support\Facades\Log;
 
-class AccountMapper
+final class AccountMapper
 {
     private array $fireflyIIIAccounts = [];
     private array $accountMapping     = [];

@@ -39,7 +39,7 @@ use Psr\Container\NotFoundExceptionInterface;
 /**
  * Class TokenManager
  */
-class TokenManager
+final class TokenManager
 {
     /**
      * @throws ImporterErrorException

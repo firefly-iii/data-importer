@@ -29,7 +29,7 @@ use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Support\Facades\Log;
 
-class AuthenticationValidator implements AuthenticationValidatorInterface
+final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     public function validate(): AuthenticationStatus
     {

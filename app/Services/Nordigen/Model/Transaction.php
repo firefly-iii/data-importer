@@ -36,7 +36,7 @@ use Validator;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     public string $accountIdentifier;
     public string $additionalInformation;

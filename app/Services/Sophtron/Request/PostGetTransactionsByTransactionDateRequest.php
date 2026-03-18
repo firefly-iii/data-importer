@@ -28,7 +28,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Sophtron\Response\PostGetTransactionsByTransactionDateResponse;
 
-class PostGetTransactionsByTransactionDateRequest extends Request
+final class PostGetTransactionsByTransactionDateRequest extends Request
 {
     private string $start     = '';
     private string $end       = '';

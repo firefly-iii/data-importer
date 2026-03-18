@@ -33,7 +33,7 @@ use App\Services\Sophtron\Request\PostGetTransactionsByTransactionDateRequest;
 use App\Services\Sophtron\Validation\NewJobDataCollector;
 use Illuminate\Support\Facades\Log;
 
-class TransactionDownloader
+final class TransactionDownloader
 {
     use CreatesAccounts;
 

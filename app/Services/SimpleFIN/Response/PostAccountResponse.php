@@ -30,7 +30,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\Response;
 /**
  * Class PostAccountResponse.
  */
-class PostAccountResponse extends Response
+final class PostAccountResponse extends Response
 {
     private ?Account $account;
     private readonly array $rawData;

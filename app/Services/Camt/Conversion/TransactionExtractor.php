@@ -30,7 +30,7 @@ use Genkgo\Camt\Camt053\DTO\Statement as CamtStatement;
 use Genkgo\Camt\DTO\Message;
 use Illuminate\Support\Facades\Log;
 
-class TransactionExtractor
+final class TransactionExtractor
 {
     public function __construct(
         private Configuration $configuration

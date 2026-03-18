@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  * Class GetAccountsRequest
  * Gets accounts for a session
  */
-class GetAccountDetailsRequest extends Request
+final class GetAccountDetailsRequest extends Request
 {
     private string $accountId;
 

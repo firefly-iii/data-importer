@@ -27,7 +27,7 @@ namespace App\Services\CSV\Conversion\Task;
 /**
  * Class Tags
  */
-class Tags extends AbstractTask
+final class Tags extends AbstractTask
 {
     public function process(array $group): array
     {

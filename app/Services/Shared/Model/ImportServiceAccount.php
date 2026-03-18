@@ -35,7 +35,7 @@ use App\Services\Sophtron\Model\UserInstitutionAccount as SophtronAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-class ImportServiceAccount
+final class ImportServiceAccount
 {
     public string $bban;
     public string $currencyCode;

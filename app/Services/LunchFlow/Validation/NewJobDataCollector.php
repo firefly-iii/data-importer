@@ -33,7 +33,7 @@ use App\Services\LunchFlow\Response\GetAccountsResponse;
 use App\Services\Shared\Validation\NewJobDataCollectorInterface;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;

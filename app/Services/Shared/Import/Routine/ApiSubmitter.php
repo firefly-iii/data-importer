@@ -50,7 +50,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ApiSubmitter
  */
-class ApiSubmitter
+final class ApiSubmitter
 {
     private array $accountInfo;
     private bool $addTag;

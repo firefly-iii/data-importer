@@ -34,7 +34,7 @@ use Throwable;
 /**
  * Class Handler
  */
-class Handler extends ExceptionHandler
+final class Handler extends ExceptionHandler
 {
     protected $dontFlash  = ['password', 'password_confirmation'];
 

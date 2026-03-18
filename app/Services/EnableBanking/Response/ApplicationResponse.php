@@ -35,7 +35,7 @@ use Traversable;
 /**
  * Class AccountsResponse
  */
-class ApplicationResponse extends Response implements Countable, IteratorAggregate
+final class ApplicationResponse extends Response implements Countable, IteratorAggregate
 {
     /** @var Account[] */
     private array  $accounts  = [];

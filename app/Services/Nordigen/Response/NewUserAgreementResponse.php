@@ -29,7 +29,7 @@ use App\Services\Shared\Response\Response;
 /**
  * Class NewUserAgreementResponse
  */
-class NewUserAgreementResponse extends Response
+final class NewUserAgreementResponse extends Response
 {
     public string $created;
     public string $id;

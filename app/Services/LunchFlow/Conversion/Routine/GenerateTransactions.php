@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class GenerateTransactions.
  */
-class GenerateTransactions
+final class GenerateTransactions
 {
     use CollectsAccounts;
     use DuplicateSafetyCatch;

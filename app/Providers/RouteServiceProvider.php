@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 /**
  * Class RouteServiceProvider
  */
-class RouteServiceProvider extends ServiceProvider
+final class RouteServiceProvider extends ServiceProvider
 {
     /**
      * The path to the "home" route for your application.
@@ -58,7 +58,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * These routes are typically stateless.
      */
-    protected function mapApiRoutes(): void
+    private function mapApiRoutes(): void
     {
         Route::prefix('api')
             ->middleware('api')
@@ -72,7 +72,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * These routes all receive session state, CSRF protection, etc.
      */
-    protected function mapWebRoutes(): void
+    private function mapWebRoutes(): void
     {
         Route::middleware('web')->namespace($this->namespace)->group(base_path('routes/web.php'));
     }

@@ -29,7 +29,7 @@ use App\Services\Sophtron\Model\Transaction;
 use App\Support\Facades\Steam;
 use Illuminate\Support\Facades\Log;
 
-class TransactionConverter
+final class TransactionConverter
 {
     private ImportJob $importJob;
     private bool $isRules        = true;

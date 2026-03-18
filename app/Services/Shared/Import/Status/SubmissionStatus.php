@@ -26,7 +26,7 @@ namespace App\Services\Shared\Import\Status;
 
 use Illuminate\Support\Facades\Log;
 
-class SubmissionStatus
+final class SubmissionStatus
 {
     public const string SUBMISSION_DONE    = 'submission_done';
     public const string SUBMISSION_ERRORED = 'submission_errored';

@@ -50,7 +50,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 /**
  * Class Kernel
  */
-class Kernel extends HttpKernel
+final class Kernel extends HttpKernel
 {
     /**
      * The application's global HTTP middleware stack.

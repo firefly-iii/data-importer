@@ -30,7 +30,7 @@ use League\Csv\Reader;
 /**
  * Class FileReader
  */
-class FileReader
+final class FileReader
 {
     public static function getReaderFromContent(string $content, bool $convert = false): Reader
     {
