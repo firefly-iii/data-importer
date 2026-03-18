@@ -32,7 +32,6 @@ use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use JetBrains\PhpStorm\NoReturn;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -119,7 +118,7 @@ final class TokenManager
             $tokenValidity = 0;
         }
         // Log::debug(sprintf('Nordigen token is valid until %s', date('Y-m-d H:i:s', $tokenValidity)));
-        $result         = Carbon::now()->getTimestamp() < $tokenValidity;
+        $result = Carbon::now()->getTimestamp() < $tokenValidity;
         if (false === $result) {
             Log::debug('Nordigen token is no longer valid');
 
@@ -144,7 +143,6 @@ final class TokenManager
         throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
     }
 
-    #[NoReturn]
     public static function getFreshAccessToken(): void
     {
         throw new ImporterErrorException('getFreshAccessToken: Do not use this method, store token somewhere else.');

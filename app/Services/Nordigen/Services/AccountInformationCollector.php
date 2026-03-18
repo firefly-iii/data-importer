@@ -54,7 +54,7 @@ final class AccountInformationCollector
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
-        if (config('nordigen.get_account_details') || $overruleSettings) {
+        if (true === config('nordigen.get_account_details') || $overruleSettings) {
             try {
                 Log::debug('Get account details is ENABLED.');
                 $detailedAccount = self::getAccountDetails($detailedAccount);
@@ -66,7 +66,7 @@ final class AccountInformationCollector
             }
         }
 
-        if (config('nordigen.get_balance_details') || $overruleSettings) {
+        if (true === config('nordigen.get_balance_details') || $overruleSettings) {
             Log::debug('Get account balance is ENABLED.');
 
             try {

@@ -49,7 +49,7 @@ final class ImportServiceAccount
     {
         // probably simpleFIN.
         if (is_array($account)) {
-            $timestamp  = (int) $account['balance-date'] ?? 0;
+            $timestamp  = (int) ($account['balance-date'] ?? 0);
             $dateString = '';
             if ($timestamp > 100) {
                 $carbon     = Carbon::createFromTimestamp($timestamp);
@@ -235,7 +235,7 @@ final class ImportServiceAccount
                 'bban'          => '',
                 'status'        => 'active', // Expected by view for status checks
                 'extra'         => [
-                    'Balance'      => $account->getBalance() ?? null, // SimpleFIN balance (numeric string)
+                    'Balance'      => $account->getBalance(), // SimpleFIN balance (numeric string)
                     'Balance date' => $dateString, // SimpleFIN balance timestamp
                     'Organization' => $account->getOrganizationName(), // SimpleFIN organization data
                 ],

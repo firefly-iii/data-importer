@@ -93,7 +93,7 @@ final class SecretManager
 
         Log::debug('No access token in session, will return header or config variable.');
 
-        $token = request()?->header('Authorization', '') ?? '';
+        $token = request()?->header('Authorization', '');
         if (is_array($token)) {
             $token = (string) reset($token);
         }

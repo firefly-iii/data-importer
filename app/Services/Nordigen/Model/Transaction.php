@@ -337,7 +337,7 @@ final class Transaction
         if (str_contains("\n", $description)) {
             // return without newlines.
             $description = str_replace(["\n", "\t"], ' ', $description);
-            $description = preg_replace("\r", '', $description);
+            $description = str_replace("\r", '', $description);
         }
 
         return $description;

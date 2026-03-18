@@ -129,18 +129,18 @@ final class TransactionTransformer
      */
     private function getFireflyAccount(Account $simpleFINAccountData, array $accountMapping, array $newAccountConfig = []): array
     {
-        $accountKey = $simpleFINAccountData->getId() ?? null;
+        $accountKey = $simpleFINAccountData->getId();
 
         // Check for user-provided account name first, then fall back to SimpleFIN account name
         $userProvidedName = null;
-        if (null !== $accountKey && array_key_exists($accountKey, $newAccountConfig) && array_key_exists('name', $newAccountConfig[$accountKey])) {
+        if (array_key_exists($accountKey, $newAccountConfig) && array_key_exists('name', $newAccountConfig[$accountKey])) {
             $userProvidedName = $newAccountConfig[$accountKey]['name'];
         }
 
-        $accountName = $userProvidedName ?? $simpleFINAccountData->getName() ?? 'Unknown SimpleFIN Account';
+        $accountName = $userProvidedName ?? $simpleFINAccountData->getName();
 
         // Check if account is mapped and has a valid (non-zero) Firefly III account ID
-        if (null !== $accountKey && array_key_exists($accountKey, $accountMapping) && $accountMapping[$accountKey] > 0) {
+        if (array_key_exists($accountKey, $accountMapping) && $accountMapping[$accountKey] > 0) {
             return [
                 'id'     => $accountMapping[$accountKey], // Configuration maps SimpleFIN account ID directly to Firefly account ID
                 'name'   => $accountName,
@@ -345,7 +345,7 @@ final class TransactionTransformer
      */
     private function buildExternalId(array $transactionData, Account $simpleFINAccountData): string
     {
-        return sprintf('ff3-%s-%s', $simpleFINAccountData->getId() ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
+        return sprintf('ff3-%s-%s', $simpleFINAccountData->getId(), $transactionData['id'] ?? 'unknown_transaction');
     }
 
     /**

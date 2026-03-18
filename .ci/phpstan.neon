@@ -27,10 +27,6 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
-    - identifier: regexp.pattern
-    - identifier: staticMethod.dynamicName
-    - identifier: booleanOr.leftNotBoolean
-    - identifier: attribute.notFound
     - identifier: nullCoalesce.expr
     - identifier: trait.unused
     - identifier: variable.undefined
@@ -97,6 +93,7 @@ parameters:
     - identifier: return.unusedType
     - identifier: return.phpDocType
     # all errors below I will never fix.
+    - identifier: staticMethod.dynamicName # dont care
     - identifier: method.childReturnType # no idea what this even means.
     - identifier: missingType.generics # not interesting enough to fix.
     - identifier: missingType.iterableValue # not interesting enough to fix.
