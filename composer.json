@@ -91,7 +91,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
-        "driftingly/rector-laravel": "^2.1",
+        "driftingly/rector-laravel": "^2.2",
         "ergebnis/phpstan-rules": "^2",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.18",
