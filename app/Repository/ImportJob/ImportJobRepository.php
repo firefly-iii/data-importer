@@ -39,6 +39,7 @@ use Exception;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountsRequest;
+use GrumpyDictator\FFIIIApiSupport\Response\GetAccountsResponse;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Support\Facades\Log;
@@ -46,7 +47,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Ramsey\Uuid\Uuid;
 
-class ImportJobRepository
+final class ImportJobRepository
 {
     public function create(): ImportJob
     {
@@ -180,7 +181,10 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current       = $configuration->getDuplicateDetectionMethod();
+                if ('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -191,7 +195,10 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current       = $configuration->getDuplicateDetectionMethod();
+                if ('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -203,14 +210,20 @@ class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current       = $configuration->getDuplicateDetectionMethod();
+                if ('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
             case 'sophtron':
                 // get import job + configuration back:
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current       = $configuration->getDuplicateDetectionMethod();
+                if ('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -220,7 +233,10 @@ class ImportJobRepository
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
-                $configuration->setDuplicateDetectionMethod('cell');
+                $current       = $configuration->getDuplicateDetectionMethod();
+                if ('cell' !== $current && 'none' !== $current) {
+                    $configuration->setDuplicateDetectionMethod('cell');
+                }
 
                 break;
 
@@ -273,7 +289,7 @@ class ImportJobRepository
         return $importJob;
     }
 
-    public function setImportableFileString(ImportJob $importJob, string $importableFileContent)
+    public function setImportableFileString(ImportJob $importJob, string $importableFileContent): ImportJob
     {
         $importJob->setImportableFileString($importableFileContent);
         $this->saveToDisk($importJob);
@@ -300,7 +316,7 @@ class ImportJobRepository
     private function getApplicationAccounts(): array
     {
         Log::debug(sprintf('Now in %s', __METHOD__));
-        $accounts = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []];
+        $accounts = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
         $url      = null;
 
         try {
@@ -308,7 +324,7 @@ class ImportJobRepository
             $token         = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
-                Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty'   => '' === $url, 'token_empty' => '' === $token]);
+                Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
 
                 return $accounts; // Return empty accounts if auth details are missing
             }
@@ -319,6 +335,8 @@ class ImportJobRepository
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
+
+            /** @var GetAccountsResponse $responseAsset */
             $responseAsset = $requestAsset->get();
 
             /** @var Account $account */
@@ -342,6 +360,8 @@ class ImportJobRepository
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
+
+            /** @var GetAccountsResponse $responseLiability */
             $responseLiability = $requestLiability->get();
 
             /** @var Account $account */

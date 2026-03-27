@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class PostNewTokenRequest
  */
-class PostNewTokenRequest extends Request
+final class PostNewTokenRequest extends Request
 {
     public function __construct(
         private readonly string $identifier,
@@ -53,7 +53,7 @@ class PostNewTokenRequest extends Request
 
         try {
             $res = $client->post($url, [
-                'json'    => ['secret_id'  => $this->identifier, 'secret_key' => $this->key],
+                'json'    => ['secret_id' => $this->identifier, 'secret_key' => $this->key],
                 'headers' => [
                     'accept'       => 'application/json',
                     'content-type' => 'application/json',

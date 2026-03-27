@@ -34,7 +34,7 @@ use Log;
 /**
  * Class GetTransactionsResponse
  */
-class GetTransactionsResponse extends Response implements Iterator, Countable
+final class GetTransactionsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private int $position = 0;
@@ -45,12 +45,6 @@ class GetTransactionsResponse extends Response implements Iterator, Countable
     ) {
         $this->collection = new Collection();
         Log::debug('Created new GetTransactionsResponse');
-    }
-
-    public function setAccountId(string $accountId): void
-    {
-        $this->accountId = $accountId;
-        Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
     }
 
     public function processData(): void

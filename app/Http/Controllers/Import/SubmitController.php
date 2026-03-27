@@ -53,7 +53,7 @@ final class SubmitController extends Controller
         $this->repository = new ImportJobRepository();
     }
 
-    public function index(string $identifier)
+    public function index(string $identifier): mixed
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $mainTitle  = 'Submit the data';
@@ -96,7 +96,7 @@ final class SubmitController extends Controller
         ProcessImportSubmissionJob::dispatch($importJob, $accessToken, $baseUrl, $vanityUrl);
 
         // Return immediate response indicating job was dispatched
-        return response()->json(['status'     => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
+        return response()->json(['status' => SubmissionStatus::SUBMISSION_RUNNING, 'identifier' => $identifier]);
     }
 
     public function status(Request $request, string $identifier): JsonResponse

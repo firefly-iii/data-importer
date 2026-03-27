@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionProcessor
  */
-class TransactionProcessor
+final class TransactionProcessor
 {
     use CreatesAccounts;
 
@@ -49,7 +49,7 @@ class TransactionProcessor
     private ?Carbon $notAfter             = null;
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
 
     public function __construct()
     {

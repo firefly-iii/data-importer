@@ -33,11 +33,13 @@ use App\Services\Sophtron\Model\UserInstitutionAccount;
 use App\Services\Sophtron\Request\GetInstitutionsRequest;
 use App\Services\Sophtron\Request\PostGetInstitutionsByUserRequest;
 use App\Services\Sophtron\Request\PostGetUserInstitutionAccountsRequest;
+use App\Services\Sophtron\Response\GetInstitutionsResponse;
 use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
+use App\Services\Sophtron\Response\PostGetUserInstitutionAccountsResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
 
@@ -80,6 +82,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
 
         $request   = new GetInstitutionsRequest($userId, $accessKey);
+
+        /** @var GetInstitutionsResponse $response */
         $response  = $request->get();
         $array     = [];
         foreach ($response as $country) {
@@ -114,6 +118,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         foreach ($response as $institution) {
             // request accounts from institution.
             $accountRequest        = new PostGetUserInstitutionAccountsRequest($userId, $accessKey, $institution->userInstitutionId);
+
+            /** @var PostGetUserInstitutionAccountsResponse $accountResponse */
             $accountResponse       = $accountRequest->post();
             $accounts              = [];
 

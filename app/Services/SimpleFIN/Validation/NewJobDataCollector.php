@@ -32,7 +32,7 @@ use App\Services\SimpleFIN\SimpleFINService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     public bool   $useDemo    = false;
     public string $setupToken = '';

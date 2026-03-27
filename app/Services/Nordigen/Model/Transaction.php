@@ -36,7 +36,7 @@ use Validator;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     public string $accountIdentifier;
     public string $additionalInformation;
@@ -337,7 +337,7 @@ class Transaction
         if (str_contains("\n", $description)) {
             // return without newlines.
             $description = str_replace(["\n", "\t"], ' ', $description);
-            $description = preg_replace("\r", '', $description);
+            $description = str_replace("\r", '', $description);
         }
 
         return $description;
@@ -449,12 +449,13 @@ class Transaction
         $info = [];
 
         // Add exchange rate if available and not zero
-        if (isset($this->currencyExchange['exchangeRate']) && 0.0 !== (float) $this->currencyExchange['exchangeRate']) {
+
+        if (array_key_exists('exchangeRate', $this->currencyExchange) && 0.0 !== (float) $this->currencyExchange['exchangeRate']) {
             $info[] = sprintf('- Exchange rate: %s', $this->currencyExchange['exchangeRate']);
         }
 
         // Add source and target currencies if available
-        if (isset($this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency'])) {
+        if (array_key_exists('sourceCurrency', $this->currencyExchange) && array_key_exists('targetCurrency', $this->currencyExchange)) {
             $info[] = sprintf('- Currency exchange: %s → %s', $this->currencyExchange['sourceCurrency'], $this->currencyExchange['targetCurrency']);
         }
 
@@ -571,9 +572,9 @@ class Transaction
             'value_date'                                => $this->valueDate->toW3cString(),
             'account_identifier'                        => $this->accountIdentifier,
             // array values:
-            'debtor_account'                            => ['iban'     => $this->debtorAccountIban, 'currency' => $this->debtorAccountCurrency],
-            'creditor_account'                          => ['iban'     => $this->creditorAccountIban, 'currency' => $this->creditorAccountCurrency],
-            'transaction_amount'                        => ['amount'   => $this->transactionAmount, 'currency' => $this->currencyCode],
+            'debtor_account'                            => ['iban' => $this->debtorAccountIban, 'currency' => $this->debtorAccountCurrency],
+            'creditor_account'                          => ['iban' => $this->creditorAccountIban, 'currency' => $this->creditorAccountCurrency],
+            'transaction_amount'                        => ['amount' => $this->transactionAmount, 'currency' => $this->currencyCode],
 
             // undocumented values:
             'end_to_end_id'                             => $this->endToEndId,

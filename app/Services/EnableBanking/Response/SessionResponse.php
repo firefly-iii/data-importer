@@ -30,7 +30,7 @@ use App\Services\Shared\Response\Response;
  * Class SessionResponse
  * Response from POST /sessions endpoint
  */
-class SessionResponse extends Response
+final class SessionResponse extends Response
 {
     public string $sessionId = '';
     public array  $accounts  = [];

@@ -34,7 +34,7 @@ use App\Services\Sophtron\Response\GetInstitutionsResponse;
 /**
  * Class GetTransactionsRequest
  */
-class GetInstitutionsRequest extends Request
+final class GetInstitutionsRequest extends Request
 {
     public function __construct(string $userId, string $accessKey)
     {

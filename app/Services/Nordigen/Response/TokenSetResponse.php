@@ -30,7 +30,7 @@ use Carbon\Carbon;
 /**
  * Class TokenSetResponse
  */
-class TokenSetResponse extends Response
+final class TokenSetResponse extends Response
 {
     public int $accessExpires;
     public string $accessToken;

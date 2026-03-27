@@ -35,7 +35,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
-use SensitiveParameter;
 
 /**
  * Class Request
@@ -146,16 +145,6 @@ abstract class Request
         // config here
 
         return new Client(['connect_timeout' => $this->timeOut]);
-    }
-
-    public function getToken(): string
-    {
-        return $this->token;
-    }
-
-    public function setToken(#[SensitiveParameter] string $token): void
-    {
-        $this->token = $token;
     }
 
     /**
@@ -271,71 +260,71 @@ abstract class Request
         throw new ImporterErrorException('The body returned was not valid JSON');
     }
 
-    private function logRateLimitHeaders(ResponseInterface $res, bool $fromErrorSituation): void
-    {
-        throw new ImporterErrorException('Should not be necesary.');
-
-        //        $headers = $res->getHeaders();
-        //        $method  = $fromErrorSituation ? 'error' : 'debug';
-        //        if (array_key_exists('http_x_ratelimit_limit', $headers)) {
-        //            Log::{$method}(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
-        //        }
-        //        if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
-        //            Log::{$method}(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
-        //        }
-        //        if (array_key_exists('http_x_ratelimit_reset', $headers)) {
-        //            Log::{$method}(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
-        //        }
-        //
-        //        if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
-        //            Log::{$method}(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
-        //        }
-        //        if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
-        //            Log::{$method}(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
-        //        }
-        //        if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
-        //            Log::{$method}(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
-        //        }
-    }
-
-    /**
-     * @throws RateLimitException
-     */
-    private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
-    {
-        throw new ImporterErrorException('Should not be necesary.');
-
-        //        $method      = $fromErrorSituation ? 'error' : 'debug';
-        //        Log::{$method}(sprintf('[%s] Now in pauseForRateLimit', config('importer.version')));
-        //        $headers     = $res->getHeaders();
-        //
-        //        // raw header values for debugging:
-        //        //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
-        //        //        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
-        //        //        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
-        //        //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
-        //
-        //        // first the normal rate limit:
-        //        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
-        //        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
-        //        $this->reportAndPause('Rate limit', $remaining, $reset, $fromErrorSituation);
-        //
-        //        // then the account success rate limit:
-        //        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
-        //        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
-        //
-        //        // save the remaining info in the object.
-        //        $this->reset = $reset;
-        //        if ($remaining > -1) { // zero or more.
-        //            Log::{$method}('Save the account success limits? YES');
-        //            $this->remaining = $remaining;
-        //        }
-        //        if ($remaining < 0) {  // less than zero.
-        //            Log::{$method}('Save the account success limits? NO');
-        //        }
-        //
-        //        $this->reportAndPause('Account success limit', $remaining, $reset, $fromErrorSituation);
-    }
+    //    private function logRateLimitHeaders(ResponseInterface $res, bool $fromErrorSituation): void
+    //    {
+    //        throw new ImporterErrorException('Should not be necesary.');
+    //
+    //        //        $headers = $res->getHeaders();
+    //        //        $method  = $fromErrorSituation ? 'error' : 'debug';
+    //        //        if (array_key_exists('http_x_ratelimit_limit', $headers)) {
+    //        //            Log::{$method}(sprintf('Rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_limit']))));
+    //        //        }
+    //        //        if (array_key_exists('http_x_ratelimit_remaining', $headers)) {
+    //        //            Log::{$method}(sprintf('Rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_remaining']))));
+    //        //        }
+    //        //        if (array_key_exists('http_x_ratelimit_reset', $headers)) {
+    //        //            Log::{$method}(sprintf('Rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_reset']))));
+    //        //        }
+    //        //
+    //        //        if (array_key_exists('http_x_ratelimit_account_success_limit', $headers)) {
+    //        //            Log::{$method}(sprintf('Account success rate limit: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_limit']))));
+    //        //        }
+    //        //        if (array_key_exists('http_x_ratelimit_account_success_remaining', $headers)) {
+    //        //            Log::{$method}(sprintf('Account success rate limit remaining: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_remaining']))));
+    //        //        }
+    //        //        if (array_key_exists('http_x_ratelimit_account_success_reset', $headers)) {
+    //        //            Log::{$method}(sprintf('Account success rate limit reset: %s', trim(implode(' ', $headers['http_x_ratelimit_account_success_reset']))));
+    //        //        }
+    //    }
+    //
+    //    /**
+    //     * @throws RateLimitException
+    //     */
+    //    private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
+    //    {
+    //        throw new ImporterErrorException('Should not be necesary.');
+    //
+    //        //        $method      = $fromErrorSituation ? 'error' : 'debug';
+    //        //        Log::{$method}(sprintf('[%s] Now in pauseForRateLimit', config('importer.version')));
+    //        //        $headers     = $res->getHeaders();
+    //        //
+    //        //        // raw header values for debugging:
+    //        //        //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
+    //        //        //        Log::debug(sprintf('http_x_ratelimit_reset: %s', json_encode($headers['http_x_ratelimit_reset'] ?? false)));
+    //        //        //        Log::debug(sprintf('http_x_ratelimit_account_success_remaining: %s', json_encode($headers['http_x_ratelimit_account_success_remaining'] ?? false)));
+    //        //        //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
+    //        //
+    //        //        // first the normal rate limit:
+    //        //        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
+    //        //        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
+    //        //        $this->reportAndPause('Rate limit', $remaining, $reset, $fromErrorSituation);
+    //        //
+    //        //        // then the account success rate limit:
+    //        //        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
+    //        //        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
+    //        //
+    //        //        // save the remaining info in the object.
+    //        //        $this->reset = $reset;
+    //        //        if ($remaining > -1) { // zero or more.
+    //        //            Log::{$method}('Save the account success limits? YES');
+    //        //            $this->remaining = $remaining;
+    //        //        }
+    //        //        if ($remaining < 0) {  // less than zero.
+    //        //            Log::{$method}('Save the account success limits? NO');
+    //        //        }
+    //        //
+    //        //        $this->reportAndPause('Account success limit', $remaining, $reset, $fromErrorSituation);
+    //    }
 
     public static function formatTime(int $reset): string
     {
@@ -373,53 +362,53 @@ abstract class Request
         //        return $return;
     }
 
-    private function reportAndPause(string $type, int $remaining, int $reset, bool $fromErrorSituation): void
-    {
-        throw new ImporterErrorException('Should not be necessary.');
-
-        //        if ($remaining < 0) {
-        //            // no need to report:
-        //            return;
-        //        }
-        //        $resetString = self::formatTime($reset);
-        //        if ($remaining >= 5) {
-        //            Log::debug(sprintf('%s: %d requests left, and %s before the limit resets.', $type, $remaining, $resetString));
-        //
-        //            return;
-        //        }
-        //        if ($remaining >= 1) {
-        //            Log::warning(sprintf('%s: %d requests remaining, it will take %s for the limit to reset.', $type, $remaining, $resetString));
-        //
-        //            return;
-        //        }
-        //
-        //        // extra message if error.
-        //        if ($reset > 1) {
-        //            Log::error(sprintf('%s: Have zero requests left!', $type));
-        //        }
-        //
-        //        // do exit?
-        //        if (true === config('nordigen.exit_for_rate_limit') && $fromErrorSituation) {
-        //            throw new RateLimitException(sprintf('%s reached: there are %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
-        //        }
-        //
-        //        // no exit. Do sleep?
-        //        if ($reset < 300 && $reset > 0) {
-        //            Log::info(sprintf('%s reached, sleep %s for reset.', $type, $resetString));
-        //            sleep($reset + 1);
-        //
-        //            return;
-        //        }
-        //        if ($reset >= 300) {
-        //            Log::error(sprintf('%s: Refuse to sleep for %s, throw exception instead.', $type, $resetString));
-        //        }
-        //        if ($reset < 0) {
-        //            Log::error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
-        //        }
-        //        if ($fromErrorSituation) {
-        //            throw new RateLimitException(sprintf('%s reached: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
-        //        }
-    }
+    //    private function reportAndPause(string $type, int $remaining, int $reset, bool $fromErrorSituation): void
+    //    {
+    //        throw new ImporterErrorException('Should not be necessary.');
+    //
+    //        //        if ($remaining < 0) {
+    //        //            // no need to report:
+    //        //            return;
+    //        //        }
+    //        //        $resetString = self::formatTime($reset);
+    //        //        if ($remaining >= 5) {
+    //        //            Log::debug(sprintf('%s: %d requests left, and %s before the limit resets.', $type, $remaining, $resetString));
+    //        //
+    //        //            return;
+    //        //        }
+    //        //        if ($remaining >= 1) {
+    //        //            Log::warning(sprintf('%s: %d requests remaining, it will take %s for the limit to reset.', $type, $remaining, $resetString));
+    //        //
+    //        //            return;
+    //        //        }
+    //        //
+    //        //        // extra message if error.
+    //        //        if ($reset > 1) {
+    //        //            Log::error(sprintf('%s: Have zero requests left!', $type));
+    //        //        }
+    //        //
+    //        //        // do exit?
+    //        //        if (true === config('nordigen.exit_for_rate_limit') && $fromErrorSituation) {
+    //        //            throw new RateLimitException(sprintf('%s reached: there are %d requests left and %s before the limit resets.', $type, $remaining, $resetString));
+    //        //        }
+    //        //
+    //        //        // no exit. Do sleep?
+    //        //        if ($reset < 300 && $reset > 0) {
+    //        //            Log::info(sprintf('%s reached, sleep %s for reset.', $type, $resetString));
+    //        //            sleep($reset + 1);
+    //        //
+    //        //            return;
+    //        //        }
+    //        //        if ($reset >= 300) {
+    //        //            Log::error(sprintf('%s: Refuse to sleep for %s, throw exception instead.', $type, $resetString));
+    //        //        }
+    //        //        if ($reset < 0) {
+    //        //            Log::error(sprintf('%s: Reset time is a negative number (%d = %s), this is an issue.', $type, $reset, $resetString));
+    //        //        }
+    //        //        if ($fromErrorSituation) {
+    //        //            throw new RateLimitException(sprintf('%s reached: %d requests remaining, and %s before the limit resets.', $type, $remaining, $resetString));
+    //        //        }
+    //    }
 
     public function getRemaining(): int
     {

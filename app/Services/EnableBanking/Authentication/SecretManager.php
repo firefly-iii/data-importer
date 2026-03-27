@@ -31,7 +31,7 @@ use Psr\Container\NotFoundExceptionInterface;
 /**
  * Class SecretManager
  */
-class SecretManager
+final class SecretManager
 {
     public const string EB_APP_ID      = 'enable_banking_app_id';
     public const string EB_PRIVATE_KEY = 'enable_banking_private_key';
@@ -59,19 +59,13 @@ class SecretManager
 
         if ('' === $sessionId) {
             Log::debug('No Enable Banking App ID in session, will return config variable.');
-
-            return (string) config('eb.application_id');
+            $sessionId = (string) config('eb.application_id');
+            if ('' === $sessionId) {
+                Log::error('The Enable Banking App ID in the configuration is empty! Did you set ENABLE_BANKING_APP_ID?');
+            }
         }
 
         return $sessionId;
-    }
-
-    /**
-     * Will verify if the user has an Enable Banking App ID (in a cookie)
-     */
-    private static function hasAppId(): bool
-    {
-        return '' !== self::getSessionAppId();
     }
 
     /**
@@ -98,18 +92,43 @@ class SecretManager
         if ('' === $sessionKey) {
             Log::debug('No Enable Banking private key in session, will return config variable.');
 
-            return (string) config('eb.private_key');
+            $privateKey = (string) config('eb.private_key');
+            if (self::isBase64($privateKey)) {
+                Log::debug('The key is already base64, format it into PEM and return.');
+
+                return sprintf("-----BEGIN PRIVATE KEY-----\n%s\n-----END PRIVATE KEY-----", implode("\n", str_split($privateKey, 64)));
+            }
+            $false      = filter_var($privateKey, FILTER_VALIDATE_URL);
+            if (false !== $false) {
+                Log::error(sprintf('Private key is an URL (%s)', $privateKey));
+
+                return 'PLEASE DO NOT PROVIDE PATHS OR URLS.';
+            }
+            Log::debug('Private key is not a base64 file and not a file, assume its a PEM stringified.');
+
+            return $privateKey;
         }
 
         return $sessionKey;
     }
 
-    /**
-     * Will verify if the user has an Enable Banking Private Key (in a cookie)
-     */
-    private static function hasPrivateKey(): bool
+    private static function isBase64(string $string): bool
     {
-        return '' !== self::getSessionPrivateKey();
+        if (!preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $string)) {
+            return false;
+        }
+        // Decode the string in strict mode and check the results
+        $decoded = base64_decode($string, true);
+        if (false === $decoded) {
+            return false;
+        }
+
+        // Encode the string again
+        if (base64_encode($decoded) !== $string) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

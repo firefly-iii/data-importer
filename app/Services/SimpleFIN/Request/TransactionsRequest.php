@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionsRequest
  */
-class TransactionsRequest extends SimpleFINRequest
+final class TransactionsRequest extends SimpleFINRequest
 {
     /**
      * @throws ImporterHttpException

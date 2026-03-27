@@ -36,7 +36,7 @@ use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\Sophtron\Conversion\RoutineManager as SophtronRoutineManager;
 use Illuminate\Support\Facades\Log;
 
-class ConversionRoutineFactory
+final class ConversionRoutineFactory
 {
     private ImportJob $importJob;
 

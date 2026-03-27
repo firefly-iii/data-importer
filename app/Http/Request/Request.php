@@ -34,9 +34,9 @@ use Illuminate\Support\Facades\Log;
  *
  * @codeCoverageIgnore
  */
-class Request extends FormRequest
+abstract class Request extends FormRequest
 {
-    public function convertBoolean(?string $value): bool
+    final public function convertBoolean(?string $value): bool
     {
         if (null === $value) {
             return false;
@@ -51,7 +51,7 @@ class Request extends FormRequest
     /**
      * Return integer value.
      */
-    public function convertToInteger(string $field): int
+    final public function convertToInteger(string $field): int
     {
         return (int) $this->get($field);
     }

@@ -24,17 +24,14 @@ declare(strict_types=1);
 
 namespace App\Services\Sophtron\Request;
 
-use App\Exceptions\AgreementExpiredException;
-use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use App\Exceptions\RateLimitException;
 use App\Services\Shared\Response\Response;
 use App\Services\Sophtron\Response\PostGetInstitutionsByUserResponse;
 
 /**
  * Class GetTransactionsRequest
  */
-class PostGetInstitutionsByUserRequest extends Request
+final class PostGetInstitutionsByUserRequest extends Request
 {
     public function __construct(string $userId, string $accessKey)
     {
@@ -46,10 +43,7 @@ class PostGetInstitutionsByUserRequest extends Request
     }
 
     /**
-     * @throws AgreementExpiredException
-     * @throws ImporterErrorException
      * @throws ImporterHttpException
-     * @throws RateLimitException
      */
     public function get(): Response
     {

@@ -41,7 +41,7 @@ use Illuminate\Support\MessageBag;
 /**
  * Class NewJobDataCollector
  */
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;
@@ -83,7 +83,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
 
         foreach ($sessions as $sessionId) {
             $cacheKey = sprintf('eb_session_%s', $sessionId);
-            $inCache  = Cache::has($cacheKey) && config('importer.use_cache');
+            $inCache  = Cache::has($cacheKey) && true === config('importer.use_cache');
 
             if ($inCache) {
                 Log::debug('Have accounts in cache.');

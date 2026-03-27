@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class AuthenticationValidator
  */
-class AuthenticationValidator implements AuthenticationValidatorInterface
+final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     public function validate(): AuthenticationStatus
     {
@@ -54,7 +54,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
 
     public function getData(): array
     {
-        return ['app_id'      => SecretManager::getAppId(), 'private_key' => SecretManager::getPrivateKey()];
+        return ['app_id' => SecretManager::getAppId(), 'private_key' => SecretManager::getPrivateKey()];
     }
 
     public function setData(array $data): void

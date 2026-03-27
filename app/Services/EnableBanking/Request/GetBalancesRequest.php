@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  * Class GetBalancesRequest
  * Gets balances for an account
  */
-class GetBalancesRequest extends Request
+final class GetBalancesRequest extends Request
 {
     private string $accountUid;
 

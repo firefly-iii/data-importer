@@ -26,7 +26,7 @@ namespace App\Services\Sophtron\Model;
 
 use Carbon\Carbon;
 
-class UserInstitution
+final class UserInstitution
 {
     public string $userInstitutionId = '';
     public string $userId            = '';

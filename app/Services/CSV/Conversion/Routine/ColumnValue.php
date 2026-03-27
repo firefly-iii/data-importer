@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ColumnValue
  */
-class ColumnValue
+final class ColumnValue
 {
     private bool $appendValue;
     private ?string $configuration;

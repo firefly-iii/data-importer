@@ -2,6 +2,29 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.2 - 2026-03-28
+
+> [!WARNING]
+> Some changes in this release may lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+<!-- summary: This releases improves Enable Banking imports and fixes a CAMT import issue. -->
+
+### Removed
+- Removed all instances of `isset`
+- Removed old Spectre code
+
+### Changed
+- Can now add Enable Banking private key as raw PEM string.
+
+### Fixed
+- [Issue 11917](https://github.com/firefly-iii/firefly-iii/issues/11917) (Enable Banking continuation key not used) reported by @victor-amblard
+- [Issue 11923](https://github.com/firefly-iii/firefly-iii/issues/11923) (Positive transactions in CAMT files fail to import) reported by @rmu1987
+- [Issue 11924](https://github.com/firefly-iii/firefly-iii/issues/11924) ("Missing array offset", broken auto-import when using import configuration with no `flow` key) reported by @Unsantae
+- [Issue 11925](https://github.com/firefly-iii/firefly-iii/issues/11925) (Enable Banking does not find duplicate transactions when changing status) reported by @rigibe
+- [Issue 11932](https://github.com/firefly-iii/firefly-iii/issues/11932) (ignore_duplicate_transactions field is not updated in the import_config.json) reported by @Passific
+- [Discussion 11959](https://github.com/orgs/firefly-iii/discussions/11959) ([Importer] SimpleFIN uses “posted_at” instead of “transacted_at” field for Transaction Date) started by @Siddhant-k
+- Fix a missing JS variable
+
 ## v2.2.1 - 2026-03-10
 
 <!-- summary: This release fixes the auto-import feature and expands Enable Banking support. -->
@@ -1063,7 +1086,7 @@ First release of the data importer.
 
 ## v0.0.0 - 2021-xx-xx
 
-<!-- summary: If you can read this I forgot to update the summary! -->
+<!-- summary: In this release ... If you can read this I forgot to update the summary! -->
 
 ### Added
 - Initial release.

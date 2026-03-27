@@ -26,7 +26,6 @@ namespace App\Services\LunchFlow\Request;
 
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
@@ -58,12 +57,6 @@ abstract class Request
      * @throws ImporterHttpException
      */
     abstract public function put(): Response;
-
-    public function setParameters(array $parameters): void
-    {
-        Log::debug('setParameters', $parameters);
-        $this->parameters = $parameters;
-    }
 
     public function setTimeOut(float $timeOut): void
     {
@@ -155,21 +148,6 @@ abstract class Request
         // config here
 
         return new Client(['connect_timeout' => $this->timeOut]);
-    }
-
-    protected function getDefaultHeaders(): array
-    {
-        $this->expiresAt = Carbon::now()->getTimestamp() + 180;
-
-        return [
-            'App-id'        => $this->getAppId(),
-            'Secret'        => $this->getSecret(),
-            'Accept'        => 'application/json',
-            'Content-type'  => 'application/json',
-            'Cache-Control' => 'no-cache',
-            'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
-            'Expires-at'    => $this->expiresAt,
-        ];
     }
 
     public function setApiKey(#[SensitiveParameter] string $apiKey): void

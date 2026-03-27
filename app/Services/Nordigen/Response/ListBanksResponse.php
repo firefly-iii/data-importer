@@ -34,7 +34,7 @@ use Iterator;
 /**
  * Class ListBanksResponse
  */
-class ListBanksResponse extends Response implements Iterator, Countable
+final class ListBanksResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
     private array $countries;
@@ -61,7 +61,7 @@ class ListBanksResponse extends Response implements Iterator, Countable
     private function processCountries(array $bank): void
     {
         foreach ($bank['countries'] as $code) {
-            if (!isset($this->countries[$code])) {
+            if (!array_key_exists($code, $this->countries)) {
                 $this->countries[$code] = new Country($code, new Collection());
             }
         }

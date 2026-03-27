@@ -2,8 +2,6 @@ parameters:
   ergebnis:
     noExtends:
       enabled: false
-    final:
-      enabled: false
     noParameterWithNullDefaultValue:
       enabled: false
     noParameterWithNullableTypeDeclaration:
@@ -13,10 +11,6 @@ parameters:
     noSwitch:
       enabled: false
     noNullableReturnTypeDeclaration:
-      enabled: false
-    privateInFinalClass:
-      enabled: false
-    noIsset:
       enabled: false
     finalInAbstractClass:
       enabled: false
@@ -33,38 +27,6 @@ parameters:
   reportUnmatchedIgnoredErrors: true
   ignoreErrors:
     # these are actually interesting but not right now:
-    - identifier: method.nameCase
-    - identifier: class.notFound
-    - identifier: property.notFound
-    - identifier: method.childReturnType
-    - identifier: varTag.variableNotFound
-    - identifier: regexp.pattern
-    - identifier: property.uninitializedReadonly
-    - identifier: staticMethod.dynamicName
-    - identifier: booleanOr.leftNotBoolean
-    - identifier: attribute.notFound
-    - identifier: nullCoalesce.expr
-    - identifier: trait.unused
-    - identifier: variable.undefined
-    - identifier: staticMethod.notFound
-    - identifier: instanceof.alwaysFalse
-    - identifier: staticMethod.nameCase
-    - identifier: property.onlyRead
-    - identifier: offsetAccess.notFound
-    - identifier: constructor.unusedParameter
-    - identifier: booleanAnd.leftNotBoolean
-    - identifier: booleanAnd.rightNotBoolean
-    - identifier: notIdentical.alwaysFalse
-    - identifier: throws.unusedType
-    - identifier: deadCode.unreachable
-    - identifier: missingType.parameter
-    - identifier: method.unused
-    - identifier: property.unused
-    - identifier: catch.neverThrown
-    - identifier: missingType.return
-    - identifier: method.dynamicName
-    - identifier: larastan.noEnvCallsOutsideOfConfig
-    - identifier: foreach.nonIterable
     - identifier: notIdentical.alwaysTrue
     - identifier: method.notFound
     - identifier: nullsafe.neverNull
@@ -76,7 +38,6 @@ parameters:
     - identifier: booleanNot.exprNotBoolean
     - identifier: ternary.condNotBoolean
     # - identifier: booleanNot.alwaysFalse
-    - identifier: booleanAnd.alwaysFalse
     # - identifier: greater.alwaysTrue
     - identifier: function.alreadyNarrowedType
     # - identifier: booleanNot.alwaysTrue
@@ -110,18 +71,14 @@ parameters:
     - identifier: return.unusedType
     - identifier: return.phpDocType
     # all errors below I will never fix.
-    # - '#expects view-string\|null, string given#'
-    # - '#expects view-string, string given#'
-    # - "#Parameter \\#[1-2] \\$num[1-2] of function bc[a-z]+ expects numeric-string, [a-z\\-|&]+ given#"
+    - identifier: method.dynamicName # dont care
+    - identifier: catch.neverThrown # always things that are not thrown.
+    - identifier: staticMethod.dynamicName # dont care
+    - identifier: method.childReturnType # no idea what this even means.
     - identifier: missingType.generics # not interesting enough to fix.
     - identifier: missingType.iterableValue # not interesting enough to fix.
     - identifier: varTag.type # needs a custom extension for every repository, not gonna happen.
     - '#Dynamic call to static method Illuminate#'
-    # - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::before#' # is custom scope
-    # - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::after#' # is custom scope
-    # - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::withTrashed#' # is to allow soft delete
-    # - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::accountTypeIn#' # is a custom scope
-    # - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\BelongsTo::withTrashed#' # is to allow soft delete
 
   # The level 8 is the highest level. original was 5
   # 7 is more than enough, higher just leaves NULL things.

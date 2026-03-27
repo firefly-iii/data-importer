@@ -37,16 +37,14 @@ use Override;
 /**
  * Class RoutineManager
  */
-class RoutineManager implements RoutineManagerInterface
+final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 
-    private readonly AccountMapper $accountMapper;
-    private readonly string $identifier;
     private readonly SimpleFINService $simpleFINService;
     private readonly TransactionTransformer $transformer;
     private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
 
     /**
      * RoutineManager constructor.
@@ -60,11 +58,6 @@ class RoutineManager implements RoutineManagerInterface
         $this->importJob        = $importJob;
         $this->importJob->refreshInstanceIdentifier();
         $this->simpleFINService->setConfiguration($this->importJob->getConfiguration());
-    }
-
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
     }
 
     #[Override]

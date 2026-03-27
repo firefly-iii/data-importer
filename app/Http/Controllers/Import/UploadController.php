@@ -157,6 +157,7 @@ final class UploadController extends Controller
         if (null !== $importJob->getConfiguration()) {
             $configuration = $importJob->getConfiguration();
         }
+
         $configuration->setFlow($importJob->getFlow());
         $importJob->setConfiguration($configuration);
         $this->repository->saveToDisk($importJob);

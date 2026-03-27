@@ -139,7 +139,7 @@ final class DebugController extends Controller
     /**
      * Some common combinations.
      */
-    protected function errorReporting(int $value): string // get configuration
+    private function errorReporting(int $value): string // get configuration
     {
         $array = [
             -1                                                             => 'ALL errors',

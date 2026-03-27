@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionProcessor
  */
-class TransactionProcessor
+final class TransactionProcessor
 {
     use CreatesAccounts;
 
@@ -55,7 +55,8 @@ class TransactionProcessor
     private ?Carbon $notAfter             = null;
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
+    private array $rateLimits             = [];
 
     /**
      * @throws ImporterErrorException
@@ -154,7 +155,7 @@ class TransactionProcessor
                 $return[$account]           = [];
 
                 // save the rate limits:
-                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
                 ++$index;
 
                 continue;
@@ -164,12 +165,12 @@ class TransactionProcessor
                 $return[$account]           = [];
                 $this->importJob->conversionStatus->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
                 // save rate limits, even though they may not be there.
-                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+                $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
                 ++$index;
 
                 continue;
             }
-            $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset'     => $request->getReset()];
+            $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
 
             $return[$account]           = $this->filterTransactions($transactions);
             Log::debug(sprintf(
@@ -190,11 +191,6 @@ class TransactionProcessor
     public function getAccounts(): array
     {
         return $this->accounts;
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
     }
 
     private function filterTransactions(GetTransactionsResponse $transactions): array

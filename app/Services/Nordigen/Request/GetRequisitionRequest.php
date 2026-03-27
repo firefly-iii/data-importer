@@ -36,10 +36,8 @@ use SensitiveParameter;
 /**
  * Class GetRequisitionRequest
  */
-class GetRequisitionRequest extends Request
+final class GetRequisitionRequest extends Request
 {
-    private readonly string $requisitionId;
-
     public function __construct(string $url, #[SensitiveParameter] string $token, string $requisitionId)
     {
         $this->setParameters([]);

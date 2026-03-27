@@ -27,7 +27,7 @@ namespace App\Services\CSV\Converter;
 /**
  * Class CleanString
  */
-class CleanString implements ConverterInterface
+final class CleanString implements ConverterInterface
 {
     /**
      * Convert a value.

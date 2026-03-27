@@ -50,7 +50,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ApiSubmitter
  */
-class ApiSubmitter
+final class ApiSubmitter
 {
     private array $accountInfo;
     private bool $addTag;
@@ -97,7 +97,7 @@ class ApiSubmitter
             $this->importJob->submissionStatus->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
         }
 
-        $this->vanityURL  = SecretManager::getVanityURL();
+        $this->vanityURL  = SecretManager::getVanityUrl();
 
         Log::debug(sprintf('Vanity URL: "%s"', $this->vanityURL));
 
@@ -470,7 +470,7 @@ class ApiSubmitter
                         Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
                     }
                 }
-                if ('' === trim((string) $transaction['description'] ?? '')) {
+                if ('' === trim((string) ($transaction['description'] ?? ''))) {
                     $transaction['description'] = '(no description)';
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
@@ -578,7 +578,7 @@ class ApiSubmitter
 
         $groupId = (int) $groupInfo['group_id'];
         Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body    = ['fire_webhooks'    => false, 'batch_submission' => true, 'apply_rules'      => false, 'transactions'     => []];
+        $body    = ['fire_webhooks' => false, 'batch_submission' => true, 'apply_rules' => false, 'transactions' => []];
 
         /**
          * @var int   $journalId
@@ -586,7 +586,7 @@ class ApiSubmitter
          */
         foreach ($groupInfo['journals'] as $journalId => $currentTags) {
             $currentTags[]          = $this->tag;
-            $body['transactions'][] = ['transaction_journal_id' => $journalId, 'tags'                   => $currentTags];
+            $body['transactions'][] = ['transaction_journal_id' => $journalId, 'tags' => $currentTags];
         }
         $url     = SecretManager::getBaseUrl();
         $token   = SecretManager::getAccessToken();
@@ -617,11 +617,11 @@ class ApiSubmitter
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        $body    = ['tag'  => $this->tag, 'date' => $this->tagDate];
+        $body    = ['tag' => $this->tag, 'date' => $this->tagDate];
         $request->setBody($body);
 
         try {
-            /** @var PostTagResponse $response */
+            /** @var PostTagResponse|ValidationErrorResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
             $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());

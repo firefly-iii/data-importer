@@ -26,7 +26,7 @@ namespace App\Services\CSV\Converter;
 /**
  * Class AmountCredit
  */
-class AmountCredit implements ConverterInterface
+final class AmountCredit implements ConverterInterface
 {
     /**
      * Convert an amount, always return positive.

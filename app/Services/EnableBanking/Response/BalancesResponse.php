@@ -29,7 +29,7 @@ use App\Services\Shared\Response\Response;
 /**
  * Class BalancesResponse
  */
-class BalancesResponse extends Response
+final class BalancesResponse extends Response
 {
     private array  $balances   = [];
     private string $accountUid = '';

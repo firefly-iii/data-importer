@@ -214,12 +214,7 @@ final class ConfigurationContractValidatorTest extends TestCase
         $validFormData = [
             'do_import'   => ['acc1' => '1'],
             'accounts'    => ['acc1' => 0],
-            'new_account' => ['acc1' => [
-                'name'            => 'Test Account',
-                'type'            => 'asset',
-                'currency'        => 'USD',
-                'opening_balance' => '1000.00',
-            ]],
+            'new_account' => ['acc1' => ['name' => 'Test Account', 'type' => 'asset', 'currency' => 'USD', 'opening_balance' => '1000.00']],
         ];
 
         $result        = $this->validator->validateFormFieldStructure($validFormData);
@@ -249,8 +244,8 @@ final class ConfigurationContractValidatorTest extends TestCase
      */
     public function testValidationResultClass(): void
     {
-        $errors        = [['field'   => 'test', 'message' => 'Test error', 'value'   => null]];
-        $warnings      = [['field'   => 'test', 'message' => 'Test warning', 'value'   => null]];
+        $errors        = [['field' => 'test', 'message' => 'Test error', 'value' => null]];
+        $warnings      = [['field' => 'test', 'message' => 'Test warning', 'value' => null]];
 
         // Test invalid result
         $invalidResult = new ValidationResult(false, $errors, $warnings);

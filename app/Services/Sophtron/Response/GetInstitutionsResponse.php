@@ -30,7 +30,7 @@ use Countable;
 use Illuminate\Support\Facades\Log;
 use Iterator;
 
-class GetInstitutionsResponse extends Response implements Iterator, Countable
+final class GetInstitutionsResponse extends Response implements Iterator, Countable
 {
     private array $institutions;
     private int $position = 0;

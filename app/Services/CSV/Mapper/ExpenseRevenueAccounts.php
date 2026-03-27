@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class ExpenseRevenueAccounts
  */
-class ExpenseRevenueAccounts implements MapperInterface
+final class ExpenseRevenueAccounts implements MapperInterface
 {
     /**
      * Get map of expense and revenue accounts.
@@ -52,7 +52,7 @@ class ExpenseRevenueAccounts implements MapperInterface
     /**
      * Get expense and revenue accounts from Firefly III API.
      */
-    protected function getExpenseRevenueAccounts(): array
+    private function getExpenseRevenueAccounts(): array
     {
         Log::debug('getExpenseRevenueAccounts: Fetching expense and revenue accounts.');
 
@@ -90,7 +90,7 @@ class ExpenseRevenueAccounts implements MapperInterface
     /**
      * Convert response to array of Account objects.
      */
-    protected function toArray(GetAccountsResponse $response): array
+    private function toArray(GetAccountsResponse $response): array
     {
         $accounts = [];
 
@@ -105,7 +105,7 @@ class ExpenseRevenueAccounts implements MapperInterface
     /**
      * Merge expense and revenue accounts into select-ready list.
      */
-    protected function mergeExpenseRevenue(array $accounts): array
+    private function mergeExpenseRevenue(array $accounts): array
     {
         $result       = [];
         $invalidTypes = ['initial-balance', 'reconciliation'];

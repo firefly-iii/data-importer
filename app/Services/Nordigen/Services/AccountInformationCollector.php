@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Collects meta information and more on the given Account
  */
-class AccountInformationCollector
+final class AccountInformationCollector
 {
     /**
      * @throws AgreementExpiredException
@@ -54,7 +54,7 @@ class AccountInformationCollector
         // you know nothing, Jon Snow
         $detailedAccount = $account;
 
-        if (config('nordigen.get_account_details') || $overruleSettings) {
+        if (true === config('nordigen.get_account_details') || $overruleSettings) {
             try {
                 Log::debug('Get account details is ENABLED.');
                 $detailedAccount = self::getAccountDetails($detailedAccount);
@@ -66,7 +66,7 @@ class AccountInformationCollector
             }
         }
 
-        if (config('nordigen.get_balance_details') || $overruleSettings) {
+        if (true === config('nordigen.get_balance_details') || $overruleSettings) {
             Log::debug('Get account balance is ENABLED.');
 
             try {
@@ -99,7 +99,7 @@ class AccountInformationCollector
     /**
      * @throws AgreementExpiredException|ImporterErrorException
      */
-    protected static function getAccountDetails(Account $account): Account
+    private static function getAccountDetails(Account $account): Account
     {
         Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
@@ -168,8 +168,8 @@ class AccountInformationCollector
         $request     = new GetAccountBalanceRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
-        /** @var ArrayResponse $response */
         try {
+            /** @var ArrayResponse $response */
             $response = $request->get();
         } catch (AgreementExpiredException $e) {
             throw new AgreementExpiredException($e->getMessage(), 0, $e);

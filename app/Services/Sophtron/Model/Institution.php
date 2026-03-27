@@ -26,7 +26,7 @@ namespace App\Services\Sophtron\Model;
 
 use App\Exceptions\ImporterHttpException;
 
-class Institution
+final class Institution
 {
     public string $id;
     public string $name;

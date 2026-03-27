@@ -29,7 +29,7 @@ use App\Services\Shared\Response\Response;
 /**
  * Class GetRequisitionResponse
  */
-class GetRequisitionResponse extends Response
+final class GetRequisitionResponse extends Response
 {
     public array $accounts;
     public string $id;

@@ -29,7 +29,8 @@ use Exception;
 /**
  * Class ImporterHttpException
  */
-class ImporterHttpException extends Exception
+final class ImporterHttpException extends Exception
 {
-    public int $statusCode = 0;
+    public array $json       = [];
+    public int   $statusCode = 0;
 }

@@ -37,7 +37,7 @@ use League\Csv\Statement;
 /**
  * Class CSVFileProcessor
  */
-class CSVFileProcessor
+final class CSVFileProcessor
 {
     private string $delimiter;
     private bool $hasHeaders;
@@ -103,7 +103,7 @@ class CSVFileProcessor
 
     public function setDelimiter(string $delimiter): void
     {
-        $map             = ['tab'       => "\t", 'semicolon' => ';', 'comma'     => ','];
+        $map             = ['tab' => "\t", 'semicolon' => ';', 'comma' => ','];
 
         $this->delimiter = $map[$delimiter] ?? ',';
     }

@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Log;
  * A very simple task that makes sure that if the source of a deposit
  * or the destination of a withdrawal is empty, it will be set to "(no name)".
  */
-class EmptyAccounts extends AbstractTask
+final class EmptyAccounts extends AbstractTask
 {
     public function process(array $group): array
     {

@@ -31,4 +31,4 @@ use Exception;
  *
  * @deprecated
  */
-class ImportException extends Exception {}
+final class ImportException extends Exception {}

@@ -29,8 +29,10 @@ use App\Services\Shared\Response\Response;
 /**
  * Because I'm lazy, this response model gives you the original array.
  * Class ArrayResponse
+ *
+ * @property array $data
  */
-class ArrayResponse extends Response
+final class ArrayResponse extends Response
 {
     public function __construct(
         public array $data

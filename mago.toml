@@ -45,7 +45,6 @@ excessive-parameter-list = { enabled = false }
 no-redundant-math={ enabled = false }
 prefer-first-class-callable={ enabled = false }
 prefer-arrow-function = { enabled = false }
-no-isset = { enabled = false }
 
 [analyzer]
 find-unused-definitions = true

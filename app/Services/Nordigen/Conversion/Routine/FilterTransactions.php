@@ -27,7 +27,7 @@ namespace App\Services\Nordigen\Conversion\Routine;
 /**
  * Class FilterTransactions
  */
-class FilterTransactions
+final class FilterTransactions
 {
     /**
      * FilterTransactions constructor.

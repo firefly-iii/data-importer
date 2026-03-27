@@ -27,7 +27,7 @@ namespace App\Support;
 use Illuminate\Support\Facades\Log;
 use SensitiveParameter;
 
-class RequestCache
+final class RequestCache
 {
     public static function has(string $identifier, #[SensitiveParameter] string $token): bool
     {

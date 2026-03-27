@@ -29,7 +29,7 @@ use App\Exceptions\ImporterErrorException;
 /**
  * Class AssetAccounts
  */
-class AssetAccounts implements MapperInterface
+final class AssetAccounts implements MapperInterface
 {
     use GetAccounts;
 

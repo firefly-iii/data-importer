@@ -31,7 +31,7 @@ use SensitiveParameter;
 /**
  * Class SecretManager
  */
-class SecretManager
+final class SecretManager
 {
     public const string API_KEY = 'lunch_flow_api_key';
 

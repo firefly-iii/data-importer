@@ -41,7 +41,7 @@ final class RolesPostRequest extends Request
 
     public function getAllForFile(): array
     {
-        $data = ['roles'      => $this->get('roles') ?? [], 'do_mapping' => $this->get('do_mapping') ?? []];
+        $data = ['roles' => $this->get('roles') ?? [], 'do_mapping' => $this->get('do_mapping') ?? []];
         foreach (array_keys($data['roles']) as $index) {
             $data['do_mapping'][$index] = $this->convertBoolean($data['do_mapping'][$index] ?? 'false');
         }
@@ -53,7 +53,7 @@ final class RolesPostRequest extends Request
     {
         $keys = implode(',', array_keys(config('csv.import_roles')));
 
-        return ['roles.*'      => sprintf('required|in:%s', $keys), 'do_mapping.*' => 'numeric|between:0,1'];
+        return ['roles.*' => sprintf('required|in:%s', $keys), 'do_mapping.*' => 'numeric|between:0,1'];
     }
 
     /**
@@ -67,7 +67,7 @@ final class RolesPostRequest extends Request
         });
     }
 
-    protected function validateAmountRole(Validator $validator): void
+    private function validateAmountRole(Validator $validator): void
     {
         $data                 = $validator->getData();
         $roles                = $data['roles'] ?? [];

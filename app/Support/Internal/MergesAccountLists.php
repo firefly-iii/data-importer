@@ -46,7 +46,7 @@ trait MergesAccountLists
                 $account->bban
             ));
 
-            $entry    = ['import_account'       => $account, 'firefly_iii_accounts' => [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []]];
+            $entry    = ['import_account' => $account, 'firefly_iii_accounts' => [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []]];
 
             // Always show all accounts, but sort matches to the top
             $filtered = $this->filterByAccountInfo($fireflyIII, $account);
@@ -77,7 +77,7 @@ trait MergesAccountLists
             $importServiceAccount->bban,
             $importServiceAccount->name
         ));
-        $result = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []];
+        $result = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
 
         foreach ($applicationAccounts as $key => $set) {
             /** @var Account $applicationAccount */
@@ -120,9 +120,9 @@ trait MergesAccountLists
     protected function filterByCurrency(array $fireflyIII, string $currency): array
     {
         if ('' === $currency) {
-            return [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []];
+            return [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
         }
-        $result = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES    => []];
+        $result = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
 
         foreach ($fireflyIII as $key => $accounts) {
             foreach ($accounts as $account) {
@@ -133,14 +133,6 @@ trait MergesAccountLists
         }
 
         return $result;
-    }
-
-    protected function mergeSpectreAccountLists(array $spectre, array $applicationAccounts): array
-    {
-        Log::debug('Now merging Spectre account lists.');
-        $generic = ImportServiceAccount::convertSpectreArray($spectre);
-
-        return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
 
     protected function mergeLunchFlowAccountLists(array $lunchFlow, array $applicationAccounts): array

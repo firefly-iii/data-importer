@@ -42,7 +42,7 @@ use Override;
 /**
  * Class RoutineManager
  */
-class RoutineManager implements RoutineManagerInterface
+final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 
@@ -50,8 +50,9 @@ class RoutineManager implements RoutineManagerInterface
     private FilterTransactions $transactionFilter;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
-    private ImportJobRepository $repository;
+    protected ImportJobRepository $repository;
     private ImportJob $importJob;
+    private array $rateLimits = [];
 
     private array $downloaded;
 

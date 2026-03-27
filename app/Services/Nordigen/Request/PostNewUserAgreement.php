@@ -34,7 +34,7 @@ use SensitiveParameter;
 /**
  * Class PostNewUserAgreement
  */
-class PostNewUserAgreement extends Request
+final class PostNewUserAgreement extends Request
 {
     private string $accessValidForDays;
     private string $bank;
@@ -62,11 +62,7 @@ class PostNewUserAgreement extends Request
     public function post(): Response
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $array  = [
-            'institution_id'        => $this->bank,
-            'max_historical_days'   => $this->maxHistoricalDays,
-            'access_valid_for_days' => $this->accessValidForDays,
-        ];
+        $array  = ['institution_id' => $this->bank, 'max_historical_days' => $this->maxHistoricalDays, 'access_valid_for_days' => $this->accessValidForDays];
 
         $result = $this->authenticatedJsonPost($array);
         Log::debug('Returned from POST: ', $result);

@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class Accounts
  */
-class Accounts extends AbstractTask
+final class Accounts extends AbstractTask
 {
     use DeterminesTransactionType;
 

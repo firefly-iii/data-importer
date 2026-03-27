@@ -35,7 +35,7 @@ use SensitiveParameter;
 /**
  * Class ListAccountsRequest
  */
-class ListAccountsRequest extends Request
+final class ListAccountsRequest extends Request
 {
     public function __construct(string $url, string $identifier, #[SensitiveParameter] string $token)
     {

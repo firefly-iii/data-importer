@@ -35,7 +35,7 @@ use SensitiveParameter;
  * Class PostAccountRequest
  * POST an account to Firefly III.
  */
-class PostAccountRequest extends Request
+final class PostAccountRequest extends Request
 {
     /**
      * PostAccountRequest constructor.

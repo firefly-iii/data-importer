@@ -29,7 +29,7 @@ use App\Services\Sophtron\Model\Transaction;
 use Countable;
 use Iterator;
 
-class PostGetTransactionsByTransactionDateResponse extends Response implements Iterator, Countable
+final class PostGetTransactionsByTransactionDateResponse extends Response implements Iterator, Countable
 {
     private array $transactions = [];
     private int   $position     = 0;

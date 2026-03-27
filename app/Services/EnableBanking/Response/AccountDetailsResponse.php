@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class AccountsResponse
  */
-class AccountDetailsResponse extends Response
+final class AccountDetailsResponse extends Response
 {
     public Account $account;
 

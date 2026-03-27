@@ -34,7 +34,7 @@ use Traversable;
 /**
  * Class ASPSPsResponse
  */
-class ASPSPsResponse extends Response implements Countable, IteratorAggregate
+final class ASPSPsResponse extends Response implements Countable, IteratorAggregate
 {
     /** @var Bank[] */
     private array $banks = [];

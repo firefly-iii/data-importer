@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
+use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Shared\Model\ImportServiceAccount;
@@ -34,6 +35,7 @@ use Illuminate\Support\Facades\Log;
 
 trait CreatesAccounts
 {
+    protected ImportJobRepository $repository;
     protected array $existingServiceAccounts = [];
 
     public function setExistingServiceAccounts(array $existingServiceAccounts): void
@@ -95,7 +97,7 @@ trait CreatesAccounts
             Log::error(sprintf('Existing account data not found for account "%s"', $importServiceId));
             $continue = false;
         }
-
+        $configuration   = [];
         if (true === $continue) {
             // Prepare account creation configuration with defaults
             $configuration               = [
@@ -111,7 +113,7 @@ trait CreatesAccounts
                 $configuration['opening_balance']      = $newAccountData['opening_balance'];
                 $configuration['opening_balance_date'] = Carbon::now()->format('Y-m-d');
             }
-            Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration'       => $configuration]);
+            Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration' => $configuration]);
 
             // Create Account object and create Firefly III account
             $existingAccountObject       = ImportServiceAccount::convertSingleAccount($existingAccount);
@@ -137,8 +139,8 @@ trait CreatesAccounts
             'account_id'         => $importServiceId,
             'firefly_account_id' => $createdAccount->id,
             'account_name'       => $createdAccount->name,
-            'account_type'       => $configuration['type'],
-            'currency'           => $configuration['currency'],
+            'account_type'       => $configuration['type'] ?? null,
+            'currency'           => $configuration['currency'] ?? null,
         ]);
 
         return $createdAccount;

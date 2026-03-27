@@ -30,7 +30,7 @@ use App\Services\Shared\Response\Response;
  * Class AuthResponse
  * Response from POST /auth endpoint
  */
-class AuthResponse extends Response
+final class AuthResponse extends Response
 {
     public string $url       = '';
     public string $authId    = '';

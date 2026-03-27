@@ -27,7 +27,7 @@ namespace App\Services\CSV\Converter;
 /**
  * Class Description
  */
-class Description implements ConverterInterface
+final class Description implements ConverterInterface
 {
     /**
      * Convert a value.

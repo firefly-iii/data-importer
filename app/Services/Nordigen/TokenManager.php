@@ -32,14 +32,13 @@ use App\Services\Nordigen\Response\TokenSetResponse;
 use App\Services\Session\Constants;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use JetBrains\PhpStorm\NoReturn;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class TokenManager
  */
-class TokenManager
+final class TokenManager
 {
     /**
      * @throws ImporterErrorException
@@ -144,7 +143,6 @@ class TokenManager
         throw new ImporterErrorException('hasExpiredRefreshToken: Do not use this method, store token somewhere else.');
     }
 
-    #[NoReturn]
     public static function getFreshAccessToken(): void
     {
         throw new ImporterErrorException('getFreshAccessToken: Do not use this method, store token somewhere else.');

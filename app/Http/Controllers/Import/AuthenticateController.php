@@ -32,7 +32,6 @@ use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
-use App\Services\Spectre\AuthenticationValidator as SpectreValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -104,9 +103,6 @@ final class AuthenticateController extends Controller
     {
         // need a switch here to validate all possible flows.
         switch ($flow) {
-            case 'spectre':
-                return new SpectreValidator();
-
             case 'nordigen':
                 return new NordigenValidator();
 
@@ -123,7 +119,7 @@ final class AuthenticateController extends Controller
         return null;
     }
 
-    public function postIndex(Request $request, string $flow)
+    public function postIndex(Request $request, string $flow): mixed
     {
         $mainTitle  = 'Authentication';
         $pageTitle  = 'Authentication';

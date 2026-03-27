@@ -29,7 +29,7 @@ use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Shared\Authentication\SecretManager;
 use Illuminate\Support\Facades\Log;
 
-class AuthenticationValidator implements AuthenticationValidatorInterface
+final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
     public function validate(): AuthenticationStatus
     {
@@ -50,7 +50,7 @@ class AuthenticationValidator implements AuthenticationValidatorInterface
      */
     public function getData(): array
     {
-        return ['user_id'    => SecretManager::getSophtronUserId(null), 'access_key' => SecretManager::getSophtronAccessKey(null)];
+        return ['user_id' => SecretManager::getSophtronUserId(null), 'access_key' => SecretManager::getSophtronAccessKey(null)];
     }
 
     public function setData(array $data): void

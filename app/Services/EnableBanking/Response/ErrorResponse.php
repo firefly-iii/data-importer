@@ -29,7 +29,7 @@ use App\Services\Shared\Response\Response;
 /**
  * Class ErrorResponse
  */
-class ErrorResponse extends Response
+final class ErrorResponse extends Response
 {
     public string $message = '';
     public string $code    = '';

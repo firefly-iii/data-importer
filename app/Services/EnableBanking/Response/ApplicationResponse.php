@@ -24,7 +24,6 @@ declare(strict_types=1);
 
 namespace App\Services\EnableBanking\Response;
 
-use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Model\Account;
 use App\Services\Shared\Response\Response;
 use ArrayIterator;
@@ -35,27 +34,16 @@ use Traversable;
 /**
  * Class AccountsResponse
  */
-class ApplicationResponse extends Response implements Countable, IteratorAggregate
+final class ApplicationResponse extends Response implements Countable, IteratorAggregate
 {
     /** @var Account[] */
     private array  $accounts  = [];
     private string $sessionId = '';
+    private array  $data      = [];
 
     public function __construct(array $data = [])
     {
-        throw new ImporterHttpException('This method is not in use.');
-        $accounts = $data['accounts'] ?? $data;
-
-        // Handle null or non-array accounts (restricted clients without pre-authorization)
-        if (!is_array($accounts)) {
-            $accounts = [];
-        }
-
-        foreach ($accounts as $account) {
-            if (is_array($account)) {
-                $this->accounts[] = Account::fromArray($account);
-            }
-        }
+        $this->data = $data;
     }
 
     public static function fromArray(array $array, string $sessionId = ''): self

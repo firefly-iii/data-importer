@@ -32,7 +32,7 @@ use RecursiveRegexIterator;
 use RegexIterator;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
-class ValidateJsonFiles extends Command
+final class ValidateJsonFiles extends Command
 {
     use VerifyJSON;
 

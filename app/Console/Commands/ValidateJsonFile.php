@@ -28,7 +28,7 @@ use App\Console\VerifyJSON;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
-class ValidateJsonFile extends Command
+final class ValidateJsonFile extends Command
 {
     use VerifyJSON;
 

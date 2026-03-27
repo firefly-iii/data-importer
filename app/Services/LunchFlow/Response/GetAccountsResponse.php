@@ -33,7 +33,7 @@ use Iterator;
 /**
  * Class GetAccountsResponse
  */
-class GetAccountsResponse extends Response implements Iterator, Countable
+final class GetAccountsResponse extends Response implements Iterator, Countable
 {
     private readonly Collection $collection;
 

@@ -36,6 +36,6 @@ final class AutoUploadRequest extends Request
 
     public function rules(): array
     {
-        return ['importable' => 'file', 'json'       => 'required|file'];
+        return ['importable' => 'file', 'json' => 'required|file'];
     }
 }

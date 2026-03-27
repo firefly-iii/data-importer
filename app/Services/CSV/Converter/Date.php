@@ -33,7 +33,7 @@ use InvalidArgumentException;
 /**
  * Class Date
  */
-class Date implements ConverterInterface
+final class Date implements ConverterInterface
 {
     private string $dateFormat;
     private readonly string $dateFormatPattern;

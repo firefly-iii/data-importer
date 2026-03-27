@@ -27,7 +27,7 @@ namespace App\Services\Session;
 /**
  * Class Constants
  */
-class Constants
+final class Constants
 {
     // constants to remember Nordigen access token, refresh token and validity:
     public const string ASSET_ACCOUNTS               = 'assets';
@@ -42,8 +42,6 @@ class Constants
     public const string NORDIGEN_REFRESH_EXPIRY_TIME = 'nordigen_refresh_expiry_time';
     public const string NORDIGEN_REFRESH_TOKEN       = 'nordigen_refresh_token';
     public const string REQUISITION_REFERENCE        = 'requisition_reference';
-
-    // spectre specific steps:
 
     // nordigen specific steps
     public const string SELECTED_BANK_COUNTRY        = 'selected_bank_country';

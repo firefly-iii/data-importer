@@ -27,7 +27,7 @@ namespace App\Services\Nordigen\Model;
 /**
  * Class Bank
  */
-class Bank
+final class Bank
 {
     public string $id;
     public string $logo;

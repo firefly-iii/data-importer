@@ -26,7 +26,7 @@ namespace App\Services\CSV\Converter;
 
 use App\Support\Facades\Steam;
 
-class AccountNumber implements ConverterInterface
+final class AccountNumber implements ConverterInterface
 {
     public function convert(mixed $value): string
     {

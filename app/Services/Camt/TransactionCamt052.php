@@ -9,7 +9,7 @@ use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\Message;
 use Illuminate\Support\Facades\Log;
 
-class TransactionCamt052 extends AbstractTransaction
+final class TransactionCamt052 extends AbstractTransaction
 {
     public function __construct(Message $levelA, Report $levelB, Entry $levelC, array $levelD)
     {

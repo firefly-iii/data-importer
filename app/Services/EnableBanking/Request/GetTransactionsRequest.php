@@ -27,23 +27,20 @@ namespace App\Services\EnableBanking\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\TransactionsResponse;
 use App\Services\Shared\Response\Response;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class GetTransactionsRequest
  * Gets transactions for an account
  */
-class GetTransactionsRequest extends Request
+final class GetTransactionsRequest extends Request
 {
     private string $accountUid;
-    private ?string $dateFrom = null;
-    private ?string $dateTo   = null;
 
     public function __construct(string $url, string $accountUid, ?string $dateFrom = null, ?string $dateTo = null)
     {
         $this->setBase($url);
         $this->accountUid = $accountUid;
-        $this->dateFrom   = $dateFrom;
-        $this->dateTo     = $dateTo;
 
         $urlPath          = sprintf('accounts/%s/transactions', $accountUid);
         $params           = [];
@@ -53,10 +50,7 @@ class GetTransactionsRequest extends Request
         if (null !== $dateTo) {
             $params['date_to'] = $dateTo;
         }
-        if (count($params) > 0) {
-            $urlPath .= '?'.http_build_query($params);
-        }
-
+        $this->setParameters($params);
         $this->setUrl($urlPath);
     }
 
@@ -65,9 +59,46 @@ class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
-        $json = $this->authenticatedGet();
+        Log::debug('Will now do Enable Banking GetTransactionsRequest');
+        // create empty response
+        $response        = TransactionsResponse::fromArray([], $this->accountUid);
+        $haveMorePages   = true;
+        $max             = 50;
+        $count           = 0;
+        $continuationKey = '';
+        while ($haveMorePages && $count < $max) {
+            Log::debug(sprintf('Now running attempt #%d', $count + 1));
+            // add continuation_key
+            if ('' !== $continuationKey) {
+                $this->addParameter('continuation_key', $continuationKey);
+                Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
+            }
+            // remove if empty:
+            if ('' === $continuationKey) {
+                $this->removeParameter('continuation_key');
+                Log::debug('No continuation key set (yet), will not be added to request.');
+            }
 
-        return TransactionsResponse::fromArray($json, $this->accountUid);
+            // do an authenticated get.
+            $json            = $this->authenticatedGet();
+
+            // retrieve new key
+            $continuationKey = (string) $json['continuation_key'];
+            if ('' === $continuationKey) {
+                Log::debug('Response contains no continuation key, this was the last page.');
+                $haveMorePages = false;
+            }
+            if ('' !== $continuationKey) {
+                Log::debug(sprintf('Response contains continuation key "%s", will be added to the next request.', $continuationKey));
+            }
+            // add found transactions.
+            $response->appendResponse($json);
+
+            ++$count;
+        }
+        Log::debug('Done with Enable Banking GetTransactionsRequest');
+
+        return $response;
     }
 
     public function post(): Response

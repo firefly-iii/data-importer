@@ -32,7 +32,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use SensitiveParameter;
 
-class GetAccountsRequest extends Request
+final class GetAccountsRequest extends Request
 {
     public string $connection;
 

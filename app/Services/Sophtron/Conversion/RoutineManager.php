@@ -29,7 +29,7 @@ use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
 
-class RoutineManager implements RoutineManagerInterface
+final class RoutineManager implements RoutineManagerInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;

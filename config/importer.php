@@ -64,8 +64,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => '2.2.1',
-    'build_time'                    => 1772956525,
+    'version'                       => '2.2.2',
+    'build_time'                    => 1774594056,
     'fake_data'                     => env('FAKE_DATA', false),
     'providers'                     => [
         'file'      => [
@@ -168,7 +168,7 @@ return [
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),
     'tracker_url'                   => env('TRACKER_URL', ''),
-    'vanity_url'                    => envNonEmpty('VANITY_URL'),
+    'vanity_url'                    => env('VANITY_URL'),
     'connection'                    => [
         'verify'  => env('VERIFY_TLS_SECURITY', true),
         'timeout' => 0.0 === (float)env('CONNECTION_TIMEOUT', 31.415) ? 31.415 : (float)env('CONNECTION_TIMEOUT', 31.415),

@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  * Class PostAuthRequest
  * Initiates the authorization process with a bank
  */
-class PostAuthRequest extends Request
+final class PostAuthRequest extends Request
 {
     private string $aspsp;
     private string $country    = '';
@@ -90,7 +90,7 @@ class PostAuthRequest extends Request
         $validUntilTimestamp = $this->validUntil ?? strtotime('+90 days');
         $data                = [
             'access'       => ['valid_until'       => date('c', $validUntilTimestamp)],
-            'aspsp'        => ['name'    => $this->aspsp, 'country' => $this->country],
+            'aspsp'        => ['name' => $this->aspsp, 'country' => $this->country],
             'state'        => $this->state,
             'redirect_url' => $this->redirectUrl,
             'psu_type'     => $this->psuType,

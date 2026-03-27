@@ -37,7 +37,7 @@ use SensitiveParameter;
 /**
  * Class GetAccountBalanceRequest
  */
-class GetAccountBalanceRequest extends Request
+final class GetAccountBalanceRequest extends Request
 {
     private string $identifier;
 

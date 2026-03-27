@@ -28,7 +28,7 @@ namespace App\Services\EnableBanking\Model;
  * Class Bank
  * Represents an ASPSP (Account Servicing Payment Service Provider) from Enable Banking
  */
-class Bank
+final class Bank
 {
     public string $name                   = '';
     public string $country                = '';

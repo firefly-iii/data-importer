@@ -202,5 +202,8 @@
 
 @endsection
 @section('scripts')
+    <script type="text/javascript">
+        var tokenPageUrl = '{{ route('token.index') }}';
+    </script>
     @vite(['src/pages/index/index.js'])
 @endsection

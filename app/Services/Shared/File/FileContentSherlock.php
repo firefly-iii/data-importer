@@ -36,7 +36,7 @@ use function Safe\file_get_contents;
 /**
  * Class FileContentSherlock
  */
-class FileContentSherlock
+final class FileContentSherlock
 {
     public Reader $camtReader;
 

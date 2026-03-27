@@ -29,7 +29,7 @@ use App\Services\Camt\AbstractTransaction;
 use App\Services\Shared\Configuration\Configuration;
 use Illuminate\Support\Facades\Log;
 
-class TransactionConverter
+final class TransactionConverter
 {
     public function __construct(
         private Configuration $configuration
@@ -89,7 +89,7 @@ class TransactionConverter
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
-                    $current[$role] ??= ['data'    => [], 'mapping' => []];
+                    $current[$role] ??= ['data' => [], 'mapping' => []];
                     if (array_key_exists($field, $mapping)) {
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }

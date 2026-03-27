@@ -30,7 +30,7 @@ use InvalidArgumentException;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     private readonly string $id;
     private readonly int $posted;
@@ -141,7 +141,7 @@ class Transaction
     public function getEffectiveDate(): Carbon
     {
         // Use transacted_at if available, otherwise fall back to posted date
-        if ($this->transactedAt && $this->transactedAt > 0) {
+        if (is_int($this->transactedAt) && $this->transactedAt > 0) {
             return Carbon::createFromTimestamp($this->transactedAt);
         }
 
@@ -187,12 +187,12 @@ class Transaction
         }
 
         // Validate transacted_at if present
-        if (isset($data['transacted_at']) && !is_numeric($data['transacted_at'])) {
+        if (array_key_exists('transacted_at', $data) && !is_numeric($data['transacted_at'])) {
             throw new InvalidArgumentException('Transacted at must be a numeric timestamp');
         }
 
         // Validate pending if present
-        if (isset($data['pending']) && !is_bool($data['pending'])) {
+        if (array_key_exists('pending', $data) && !is_bool($data['pending'])) {
             throw new InvalidArgumentException('Pending must be a boolean');
         }
     }

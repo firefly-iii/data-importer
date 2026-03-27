@@ -1,23 +1,57 @@
 <!--
-Thank you for submitting new code to Firefly III, or any of the related projects. Please read the following rules carefully.
 
-- Please do not submit solutions for problems that are not already reported in an issue.
-- Unfortunately, Firefly III can't be your learning experience. If you're new to all of this, please open an issue first.
-- Please do not open PRs to "discuss" possible solutions or to "get feedback" on your code. I simply don't have time for that.
-- Pull requests for the MAIN branch will be closed.
-- DO NOT include translated strings in your PR.
-- PRs (or parts thereof) that only fix issues inside code comments will not be accepted.
+🙌 Thanks for contributing a pull request. Before you continue:
 
-If it feels necessary to open an issue first, please do so, before you open a PR.
+1. If you introduce new third party data providers, talk to me FIRST.
+2. If your PR is more than 25 lines, talk to me FIRST.
+3. If you fix spelling or code comments, talk to me FIRST.
 
-See also: https://docs.firefly-iii.org/explanation/support/#contributing-code
+This is to prevent AI bots, low-effort PRs and spam. Sorry about that.
+
+Wanna talk to me? Open a GitHub Issue, Discussion, or email me: james@firefly-iii.org
+
+👀 Please ensure you have taken a look at the contribution guidelines:
+https://docs.firefly-iii.org/explanation/support/#contributing-code
+
+Remember that your PR may be CLOSED:
+
+1. If you do not refer to an existing issue, your PR will be CLOSED.
+2. If you open a PR on the main branch, your PR will be CLOSED.
+3. If you only fix a spelling error or code comment, your PR will be CLOSED.
+
+Again, this is to prevent AI bots, low-effort PRs and spam. I apologize for the harsh tone.
+
+But if you made it this far thanks again for contributing, and happy developing!
 
 -->
-    
-This PR fixes issue # (if relevant).
 
-Changes in this pull request:
+#### Reference issues and PRs
+<!--
+Example: Fixes #1234. See also #3456.
+-->
 
--
--
--
+#### What does this implement/fix? Explain your changes.
+
+
+
+#### AI usage disclosure
+<!--
+If AI tools were involved in creating this PR, please check all boxes that apply
+below and make sure that you adhere to our Automated Contributions Policy:
+https://docs.firefly-iii.org/explanation/support/#automated-contributions-policy
+-->
+I used AI assistance for:
+- [ ] Code generation (e.g., when writing an implementation or fixing a bug)
+- [ ] Test/benchmark generation
+- [ ] Documentation (including examples)
+- [ ] Research and understanding
+
+
+#### Any other comments?
+
+<!--
+Thanks for contributing!
+-->
+
+@JC5
+

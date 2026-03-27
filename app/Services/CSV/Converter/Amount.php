@@ -29,7 +29,7 @@ use NumberFormatter;
 /**
  * Class Amount.
  */
-class Amount implements ConverterInterface
+final class Amount implements ConverterInterface
 {
     public static function negative(string $amount): string
     {

@@ -32,7 +32,7 @@ use App\Services\Shared\Response\Response;
  * Class GetASPSPsRequest
  * Gets list of available ASPSPs (banks) for a country
  */
-class GetASPSPsRequest extends Request
+final class GetASPSPsRequest extends Request
 {
     private string $country;
 

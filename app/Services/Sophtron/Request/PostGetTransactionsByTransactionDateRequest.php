@@ -28,7 +28,7 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\Response;
 use App\Services\Sophtron\Response\PostGetTransactionsByTransactionDateResponse;
 
-class PostGetTransactionsByTransactionDateRequest extends Request
+final class PostGetTransactionsByTransactionDateRequest extends Request
 {
     private string $start     = '';
     private string $end       = '';
@@ -53,7 +53,7 @@ class PostGetTransactionsByTransactionDateRequest extends Request
 
     public function post(): Response
     {
-        $body   = ['accountID' => $this->accountId, 'startDate' => '1970-01-01', 'endDate'   => date('Y-m-d')];
+        $body   = ['accountID' => $this->accountId, 'startDate' => '1970-01-01', 'endDate' => date('Y-m-d')];
         if ('' !== $this->start) {
             $body['startDate'] = $this->start;
         }

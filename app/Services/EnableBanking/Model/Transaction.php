@@ -31,7 +31,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class Transaction
  */
-class Transaction
+final class Transaction
 {
     public string  $transactionId         = '';
     public string  $accountUid            = '';
@@ -132,10 +132,10 @@ class Transaction
         // Description - remittance_information is an array of strings per API spec
         $remittanceInfo                     = $array['remittance_information'] ?? '';
         if (is_array($remittanceInfo)) {
-            $transaction->remittanceInformation = implode(' ', $remittanceInfo);
+            $transaction->remittanceInformation = trim(implode(' ', $remittanceInfo));
         }
         if (!is_array($remittanceInfo)) {
-            $transaction->remittanceInformation = $remittanceInfo;
+            $transaction->remittanceInformation = trim($remittanceInfo);
         }
         $transaction->additionalInformation = $array['additional_information'] ?? $array['note'] ?? '';
 
@@ -144,6 +144,15 @@ class Transaction
         // Add status as tag
         if ('' !== $transaction->status) {
             $transaction->tags[] = $transaction->status;
+        }
+
+        // add sub code as tag, #11925
+        if (
+            array_key_exists('bank_transaction_code', $array)
+            && is_array($array['bank_transaction_code'])
+            && array_key_exists('sub_code', $array['bank_transaction_code'])
+        ) {
+            $transaction->tags[] = (string) $array['bank_transaction_code']['sub_code'];
         }
 
         // Generate transaction ID if empty - use entry_reference or hash

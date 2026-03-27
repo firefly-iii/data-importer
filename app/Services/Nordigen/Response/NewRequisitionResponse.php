@@ -29,7 +29,7 @@ use App\Services\Shared\Response\Response;
 /**
  * Class NewRequisitionResponse
  */
-class NewRequisitionResponse extends Response
+final class NewRequisitionResponse extends Response
 {
     public string $id;
     public string $link;

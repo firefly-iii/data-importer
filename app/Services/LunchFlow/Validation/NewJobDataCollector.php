@@ -29,11 +29,11 @@ use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\LunchFlow\Authentication\SecretManager as LunchFlowSecretManager;
 use App\Services\LunchFlow\Request\GetAccountsRequest as LunchFlowGetAccountsRequest;
 use App\Services\LunchFlow\Response\ErrorResponse;
+use App\Services\LunchFlow\Response\GetAccountsResponse;
 use App\Services\Shared\Validation\NewJobDataCollectorInterface;
-use App\Services\Spectre\Response\GetAccountsResponse;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;

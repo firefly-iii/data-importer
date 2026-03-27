@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionMapper
  */
-class TransactionMapper
+final class TransactionMapper
 {
     use GetAccounts;
 
@@ -710,7 +710,7 @@ class TransactionMapper
                 if (!is_string($amount)) {
                     $amount = (string) $amount;
                 }
-                if (1 === bccomp($return, $amount, 12)) {
+                if ('' !== $amount && 0 !== bccomp($return, $amount, 12)) {
                     Log::debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $return));
                     $return = $amount;
                 }
@@ -731,7 +731,7 @@ class TransactionMapper
                 }
                 Log::debug(sprintf('Amount is %s.', var_export($amount, true)));
                 // check for null first, should prevent null pointers in abs()
-                if (1 === bccomp($return, $amount, 12)) {
+                if ('' !== $amount && 0 !== bccomp($return, $amount, 12)) {
                     Log::debug(sprintf('Amount is now "%s" instead of "%s"', $amount, $return));
                     $return = $amount;
                 }

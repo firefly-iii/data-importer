@@ -36,7 +36,7 @@ use SensitiveParameter;
 /**
  * Class ListBanksRequest
  */
-class ListBanksRequest extends Request
+final class ListBanksRequest extends Request
 {
     /**
      * ListCustomersRequest constructor.

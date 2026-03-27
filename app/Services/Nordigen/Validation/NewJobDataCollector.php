@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
-class NewJobDataCollector implements NewJobDataCollectorInterface
+final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
     private ImportJob $importJob;
     private ImportJobRepository $repository;
@@ -66,7 +66,7 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
         }
         Log::debug(sprintf('Have %d requisition(s) for import.', count($requisitions)));
         foreach ($requisitions as $requisition) {
-            $inCache = Cache::has($requisition) && config('importer.use_cache');
+            $inCache = Cache::has($requisition) && true === config('importer.use_cache');
             // if cached, return it.
             if ($inCache) {
                 Log::debug('Have accounts in cache.');
@@ -84,8 +84,8 @@ class NewJobDataCollector implements NewJobDataCollectorInterface
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
 
-                /** @var ListAccountsResponse $response */
                 try {
+                    /** @var ListAccountsResponse $response */
                     $response = $request->get();
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);

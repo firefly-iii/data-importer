@@ -30,7 +30,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Class TransactionsResponse
  */
-class TransactionsResponse extends SimpleFINResponse
+final class TransactionsResponse extends SimpleFINResponse
 {
     private array $transactions = [];
 
@@ -66,10 +66,10 @@ class TransactionsResponse extends SimpleFINResponse
         }
 
         // SimpleFIN API returns transactions in the 'transactions' array within accounts
-        if (isset($data['accounts']) && is_array($data['accounts'])) {
+        if (array_key_exists('accounts', $data) && is_array($data['accounts'])) {
             $transactions       = [];
             foreach ($data['accounts'] as $account) {
-                if (isset($account['transactions']) && is_array($account['transactions'])) {
+                if (array_key_exists('transactions', $data) && is_array($account['transactions'])) {
                     $transactions = array_merge($transactions, $account['transactions']);
                 }
             }

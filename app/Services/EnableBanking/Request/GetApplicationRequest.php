@@ -28,10 +28,8 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\ApplicationResponse;
 use App\Services\Shared\Response\Response;
 
-class GetApplicationRequest extends Request
+final class GetApplicationRequest extends Request
 {
-    private string $sessionId;
-
     public function __construct(string $url)
     {
         $this->setBase($url);

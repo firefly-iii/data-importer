@@ -37,7 +37,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionTransformer
  */
-class TransactionTransformer
+final class TransactionTransformer
 {
     use CollectsAccounts;
 
@@ -62,7 +62,7 @@ class TransactionTransformer
     public function transform(array $transactionData, Account $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {
         // Ensure amount is a float. SimpleFIN provides it as a string.
-        $amount                = $transactionData['amount'] ?? '0.0';
+        $amount         = $transactionData['amount'] ?? '0.0';
 
         // Skip zero-amount transactions as they're invalid for Firefly III
         if (0 === bccomp('0', $amount)) {
@@ -74,8 +74,8 @@ class TransactionTransformer
             return [];
         }
 
-        $isDeposit             = -1 === bccomp('0', $amount);
-        $absoluteAmount        = Amount::positive($amount);
+        $isDeposit      = -1 === bccomp('0', $amount);
+        $absoluteAmount = Amount::positive($amount);
 
         // Determine transaction type and accounts
         if ($isDeposit) {
@@ -89,16 +89,21 @@ class TransactionTransformer
             $destinationAccount = $this->getCounterAccount($transactionData, false);
         }
 
+        // 2026-03-18 switch to "transacted_at" as the primary transaction date.
         // Use 'posted' date as the primary transaction date.
         // SimpleFIN 'posted' is a UNIX timestamp.
-        $transactionTimestamp  = isset($transactionData['posted']) ? (int) $transactionData['posted'] : Carbon::now()->timestamp;
-        $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
+        //        $transactionTimestamp  = array_key_exists('posted', $transactionData) && null !== $transactionData['posted']
+        //            ? (int) $transactionData['posted']
+        //            : Carbon::now()->timestamp;
+        //        $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
+        //
+        $bookDate       = $this->getBookDate($transactionData);
 
         return [
             'type'               => $type,
-            'date'               => $transactionDateCarbon->format('Y-m-d'),
+            'date'               => $this->getTransactionDate($transactionData),
             'amount'             => $absoluteAmount,
-            'description'        => $this->sanitizeDescription($transactionData['description'] ?? 'N/A'),
+            'description'        => $this->sanitizeDescription($transactionData['description'] ?? '(empty description)'),
             'source_id'          => $sourceAccount['id'] ?? null,
             'source_name'        => $sourceAccount['name'] ?? null,
             'source_iban'        => $sourceAccount['iban'] ?? null,
@@ -116,8 +121,7 @@ class TransactionTransformer
             'tags'               => $this->extractTags($transactionData),
             'internal_reference' => $transactionData['id'] ?? null,
             'external_id'        => $this->buildExternalId($transactionData, $simpleFINAccountData),
-            'book_date'          => $this->getBookDate($transactionData),
-            'process_date'       => $this->getProcessDate($transactionData),
+            'book_date'          => '' === $bookDate ? null : $bookDate, // uses "posted"
         ];
     }
 
@@ -126,18 +130,18 @@ class TransactionTransformer
      */
     private function getFireflyAccount(Account $simpleFINAccountData, array $accountMapping, array $newAccountConfig = []): array
     {
-        $accountKey       = $simpleFINAccountData->getId() ?? null;
+        $accountKey       = $simpleFINAccountData->getId();
 
         // Check for user-provided account name first, then fall back to SimpleFIN account name
         $userProvidedName = null;
-        if ($accountKey && isset($newAccountConfig[$accountKey]['name'])) {
+        if (array_key_exists($accountKey, $newAccountConfig) && array_key_exists('name', $newAccountConfig[$accountKey])) {
             $userProvidedName = $newAccountConfig[$accountKey]['name'];
         }
 
-        $accountName      = $userProvidedName ?? $simpleFINAccountData->getName() ?? 'Unknown SimpleFIN Account';
+        $accountName      = $userProvidedName ?? $simpleFINAccountData->getName();
 
         // Check if account is mapped and has a valid (non-zero) Firefly III account ID
-        if ($accountKey && isset($accountMapping[$accountKey]) && $accountMapping[$accountKey] > 0) {
+        if (array_key_exists($accountKey, $accountMapping) && $accountMapping[$accountKey] > 0) {
             return [
                 'id'     => $accountMapping[$accountKey], // Configuration maps SimpleFIN account ID directly to Firefly account ID
                 'name'   => $accountName,
@@ -148,7 +152,7 @@ class TransactionTransformer
         }
 
         // No mapping or mapped to 0 (deferred creation) - return null ID to trigger name-based account creation
-        return ['id'     => null, 'name'   => $accountName, 'iban'   => null, 'number' => $accountKey, 'bic'    => null];
+        return ['id' => null, 'name' => $accountName, 'iban' => null, 'number' => $accountKey, 'bic' => null];
     }
 
     /**
@@ -164,7 +168,7 @@ class TransactionTransformer
         // Try to find existing expense or revenue account first
         $existingAccount    = $this->findExistingAccount($description, $isDeposit);
         if (null !== $existingAccount && [] !== $existingAccount) {
-            return ['id'     => $existingAccount['id'], 'name'   => $existingAccount['name'], 'iban'   => null, 'number' => null, 'bic'    => null];
+            return ['id' => $existingAccount['id'], 'name' => $existingAccount['name'], 'iban' => null, 'number' => null, 'bic' => null];
         }
 
         // For clean instances: try clustering when no existing accounts found
@@ -176,7 +180,7 @@ class TransactionTransformer
             if (0 === count($accountsToCheck)) {
                 $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
                 if (null !== $clusteredAccountName && '' !== $clusteredAccountName && '0' !== $clusteredAccountName) {
-                    return ['id'     => null, 'name'   => $clusteredAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+                    return ['id' => null, 'name' => $clusteredAccountName, 'iban' => null, 'number' => null, 'bic' => null];
                 }
             }
         }
@@ -187,12 +191,12 @@ class TransactionTransformer
         if (!config('simplefin.auto_create_expense_accounts', true)) {
             Log::warning(sprintf('Auto-creation disabled. No %s account will be created for "%s"', $isDeposit ? 'revenue' : 'expense', $description));
 
-            return ['id'     => null, 'name'   => $counterAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+            return ['id' => null, 'name' => $counterAccountName, 'iban' => null, 'number' => null, 'bic' => null];
         }
 
         Log::info(sprintf('Creating new %s account "%s" for transaction "%s"', $isDeposit ? 'revenue' : 'expense', $counterAccountName, $description));
 
-        return ['id'     => null, 'name'   => $counterAccountName, 'iban'   => null, 'number' => null, 'bic'    => null];
+        return ['id' => null, 'name' => $counterAccountName, 'iban' => null, 'number' => null, 'bic' => null];
     }
 
     /**
@@ -275,7 +279,7 @@ class TransactionTransformer
         $categoryFields = ['category', 'Category', 'CATEGORY', 'merchant_category', 'transaction_category'];
 
         foreach ($categoryFields as $field) {
-            if (isset($extra[$field]) && '' !== (string) $extra[$field]) {
+            if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
                 return (string) $extra[$field];
             }
         }
@@ -290,7 +294,7 @@ class TransactionTransformer
     {
         $tags  = [];
 
-        if (isset($transactionData['pending']) && true === $transactionData['pending']) {
+        if (array_key_exists('pending', $transactionData) && true === $transactionData['pending']) {
             $tags[] = 'pending';
         }
 
@@ -301,7 +305,7 @@ class TransactionTransformer
         }
 
         // Look for tags in extra data
-        if (isset($extra['tags']) && is_array($extra['tags'])) {
+        if (array_key_exists('tags', $extra) && is_array($extra['tags'])) {
             $tags = array_merge($tags, $extra['tags']);
         }
 
@@ -319,7 +323,7 @@ class TransactionTransformer
         $notes = [];
         $extra = $transactionData['extra'] ?? null;
 
-        if (isset($transactionData['pending']) && true === $transactionData['pending']) {
+        if (array_key_exists('pending', $transactionData) && true === $transactionData['pending']) {
             $notes[] = 'Transaction is pending';
         }
 
@@ -328,7 +332,7 @@ class TransactionTransformer
             $noteFields = ['memo', 'notes', 'reference', 'check_number'];
 
             foreach ($noteFields as $field) {
-                if (isset($extra[$field]) && '' !== (string) $extra[$field]) {
+                if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
                     $notes[] = sprintf('- %s: %s', ucfirst($field), $extra[$field]);
                 }
             }
@@ -342,33 +346,38 @@ class TransactionTransformer
      */
     private function buildExternalId(array $transactionData, Account $simpleFINAccountData): string
     {
-        return sprintf('ff3-%s-%s', $simpleFINAccountData->getId() ?? 'unknown_account', $transactionData['id'] ?? 'unknown_transaction');
+        return sprintf('ff3-%s-%s', $simpleFINAccountData->getId(), $transactionData['id'] ?? 'unknown_transaction');
     }
 
     /**
-     * Get book date from transaction data (using 'posted' timestamp)
+     * Get book date from transaction data (using 'posted' timestamp).
+     * If it is 0, return empty string
      */
-    private function getBookDate(array $transactionData): ?string
+    private function getBookDate(array $transactionData): string
     {
-        if (isset($transactionData['posted']) && (int) $transactionData['posted'] > 0) {
-            return Carbon::createFromTimestamp((int) $transactionData['posted'])->format('Y-m-d');
+        if (array_key_exists('posted', $transactionData) && (int) $transactionData['posted'] > 0) {
+            return Carbon::createFromTimestamp((int) $transactionData['posted'])->toW3cString();
         }
 
-        return null;
+        return '';
     }
 
     /**
-     * Get process date from transaction data
-     * SimpleFIN JSON does not typically include a separate 'transacted_at'.
-     * This method will return null unless 'transacted_at' is explicitly in $transactionData.
+     * Get transaction date, based on "transacted_at"
+     * If it is NULL, fall back to "posted".
+     * If it does not exist, give NOW()
      */
-    private function getProcessDate(array $transactionData): ?string
+    private function getTransactionDate(array $transactionData): ?string
     {
-        if (isset($transactionData['transacted_at']) && (int) $transactionData['transacted_at'] > 0) {
-            return Carbon::createFromTimestamp((int) $transactionData['transacted_at'])->format('Y-m-d');
+        if (array_key_exists('transacted_at', $transactionData) && (int) $transactionData['transacted_at'] > 0) {
+            return Carbon::createFromTimestamp((int) $transactionData['transacted_at'])->toW3cString();
+        }
+        $alt = $this->getBookDate($transactionData);
+        if ('' === $alt) {
+            return now()->toW3cString();
         }
 
-        return null;
+        return $alt;
     }
 
     /**
@@ -512,7 +521,7 @@ class TransactionTransformer
 
             if ($similarity > $bestSimilarity && $similarity >= $threshold) {
                 $bestSimilarity = $similarity;
-                $bestMatch      = ['account'    => $account, 'similarity' => $similarity];
+                $bestMatch      = ['account' => $account, 'similarity' => $similarity];
             }
         }
 

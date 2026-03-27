@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class PseudoTransactionProcessor
  */
-class PseudoTransactionProcessor
+final class PseudoTransactionProcessor
 {
     private Account $defaultAccount;
     private TransactionCurrency $primaryCurrency;

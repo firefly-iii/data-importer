@@ -27,7 +27,7 @@ namespace App\Services\SimpleFIN;
 /**
  * Validation result container
  */
-readonly class ValidationResult
+final readonly class ValidationResult
 {
     public function __construct(
         private bool $isValid,
@@ -72,6 +72,6 @@ readonly class ValidationResult
 
     public function toArray(): array
     {
-        return ['valid'    => $this->isValid, 'errors'   => $this->errors, 'warnings' => $this->warnings];
+        return ['valid' => $this->isValid, 'errors' => $this->errors, 'warnings' => $this->warnings];
     }
 }

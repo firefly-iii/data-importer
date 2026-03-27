@@ -71,7 +71,7 @@ final class Import extends Command
         if ('' !== $config) {
             $directory = dirname($config);
             if (!$this->isAllowedPath($directory)) {
-                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
+                $this->error(sprintf('[c] Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
                 Log::error(sprintf('Exit code is %s.', ExitCode::INVALID_PATH->name));
 
                 return ExitCode::INVALID_PATH->value;
@@ -82,7 +82,7 @@ final class Import extends Command
         if ('' !== $file) {
             $directory = dirname($file);
             if (!$this->isAllowedPath($directory)) {
-                $this->error(sprintf('Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
+                $this->error(sprintf('[b] Path "%s" is not in the list of allowed paths (IMPORT_DIR_ALLOWLIST).', $directory));
                 Log::error(sprintf('Exit code is %s.', ExitCode::NOT_ALLOWED_PATH->name));
 
                 return ExitCode::NOT_ALLOWED_PATH->value;

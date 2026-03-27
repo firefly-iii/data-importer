@@ -25,8 +25,8 @@ $useSandbox = env('SOPHTRON_SANDBOX', false);
 
 return [
     'url'                   => $useSandbox ? 'https://api.sophtron-prod.com' : 'https://api.sophtron.com',
-    'user_id'               => envNonEmpty('SOPHTRON_USER_ID', ''),
-    'access_key'            => envNonEmpty('SOPHTRON_ACCESS_KEY', ''),
+    'user_id'               => env('SOPHTRON_USER_ID', ''),
+    'access_key'            => env('SOPHTRON_ACCESS_KEY', ''),
     'unique_column_options' => [
         'external-id' => 'External identifier',
     ],

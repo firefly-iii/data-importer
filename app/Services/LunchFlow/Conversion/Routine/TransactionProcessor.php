@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Class TransactionProcessor
  */
-class TransactionProcessor
+final class TransactionProcessor
 {
     use CollectsAccounts;
     use CreatesAccounts;

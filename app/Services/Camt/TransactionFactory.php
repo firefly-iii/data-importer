@@ -10,7 +10,7 @@ use Genkgo\Camt\DTO\Entry;
 use Genkgo\Camt\DTO\Message;
 use InvalidArgumentException;
 
-class TransactionFactory
+final class TransactionFactory
 {
     public static function create(string $camtType, Message $msg, Report|Statement $levelB, Entry $entry, array $splits): AbstractTransaction
     {

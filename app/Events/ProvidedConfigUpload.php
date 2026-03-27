@@ -31,7 +31,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ProvidedConfigUpload
+final class ProvidedConfigUpload
 {
     use Dispatchable;
     use InteractsWithSockets;
