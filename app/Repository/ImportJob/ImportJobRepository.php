@@ -191,6 +191,7 @@ final class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
+
                 break;
 
             case 'nordigen':
@@ -201,11 +202,13 @@ final class ImportJobRepository
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
+
                 break;
 
             case 'sophtron':
                 // get import job + configuration back:
                 $configuration = $importJob->getConfiguration();
+
                 break;
 
             case 'eb':
@@ -214,6 +217,7 @@ final class ImportJobRepository
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
+
                 break;
 
             default:

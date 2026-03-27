@@ -426,11 +426,11 @@ final class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // duplicate transaction detection
-        if('file' === $object->flow) {
-        $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
+        if ('file' === $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
         }
-        if('file' !== $object->flow) {
-            $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'cell';
+        if ('file' !== $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
         }
 
         // config for "classic":
@@ -556,10 +556,10 @@ final class Configuration
         $object->dateNotAfter                = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
-        if('file' === $object->flow) {
+        if ('file' === $object->flow) {
             $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
         }
-        if('file' !== $object->flow) {
+        if ('file' !== $object->flow) {
             $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
         }
 
