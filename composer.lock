@@ -9035,12 +9035,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "b4cf097607afd6063b103f723d55cf481c04ee07"
+                "reference": "17761a96bb4625de6be133b5f5b61e48b4df33d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b4cf097607afd6063b103f723d55cf481c04ee07",
-                "reference": "b4cf097607afd6063b103f723d55cf481c04ee07",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/17761a96bb4625de6be133b5f5b61e48b4df33d7",
+                "reference": "17761a96bb4625de6be133b5f5b61e48b4df33d7",
                 "shasum": ""
             },
             "conflict": {
@@ -9541,6 +9541,7 @@
                 "mikehaertl/php-shellcommand": "<1.6.1",
                 "mineadmin/mineadmin": "<=3.0.9",
                 "miniorange/miniorange-saml": "<1.4.3",
+                "miraheze/ts-portal": "<=33",
                 "mittwald/typo3_forum": "<1.2.1",
                 "mobiledetect/mobiledetectlib": "<2.8.32",
                 "modx/revolution": "<=3.1",
@@ -10073,7 +10074,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-26T18:25:06+00:00"
+            "time": "2026-03-27T16:21:17+00:00"
         },
         {
             "name": "sebastian/cli-parser",
