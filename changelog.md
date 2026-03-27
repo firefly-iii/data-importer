@@ -22,7 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [Issue 11924](https://github.com/firefly-iii/firefly-iii/issues/11924) ("Missing array offset", broken auto-import when using import configuration with no `flow` key) reported by @Unsantae
 - [Issue 11925](https://github.com/firefly-iii/firefly-iii/issues/11925) (Enable Banking does not find duplicate transactions when changing status) reported by @rigibe
 - [Issue 11932](https://github.com/firefly-iii/firefly-iii/issues/11932) (ignore_duplicate_transactions field is not updated in the import_config.json) reported by @Passific
-- #11959
+- [Discussion 11959](https://github.com/orgs/firefly-iii/discussions/11959) ([Importer] SimpleFIN uses “posted_at” instead of “transacted_at” field for Transaction Date) started by @Siddhant-k
 - Fix a missing JS variable
 
 ## v2.2.1 - 2026-03-10
