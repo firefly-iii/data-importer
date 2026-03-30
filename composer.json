@@ -95,7 +95,7 @@
         "ergebnis/phpstan-rules": "^2",
         "fakerphp/faker": "^1.24",
         "filp/whoops": "^2.18",
-        "fruitcake/laravel-debugbar": "^4.1",
+        "fruitcake/laravel-debugbar": "^4.2",
         "larastan/larastan": "^3",
         "laravel/ui": "^4.5",
         "mockery/mockery": "^1.6",
