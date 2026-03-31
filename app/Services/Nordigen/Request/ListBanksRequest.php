@@ -61,7 +61,7 @@ final class ListBanksRequest extends Request
 
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
-            return new ErrorResponse($e->json ?? []);
+            return new ErrorResponse($e->json);
         }
 
         return new ListBanksResponse($response);

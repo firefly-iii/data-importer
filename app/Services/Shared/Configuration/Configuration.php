@@ -719,7 +719,7 @@ final class Configuration
 
     public function getDoMapping(): array
     {
-        return $this->doMapping ?? [];
+        return $this->doMapping;
     }
 
     public function setDoMapping(array $doMapping): void
@@ -759,7 +759,7 @@ final class Configuration
 
     public function getMapping(): array
     {
-        return $this->mapping ?? [];
+        return $this->mapping;
     }
 
     public function setMapping(array $mapping): void
@@ -859,7 +859,7 @@ final class Configuration
 
     public function getRoles(): array
     {
-        return $this->roles ?? [];
+        return $this->roles;
     }
 
     public function setRoles(array $roles): void
