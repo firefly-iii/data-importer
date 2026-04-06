@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.3 - 2026-04-07
+
+> [!WARNING]
+> Some changes in this release may lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Fixed
+- [Issue 12041](https://github.com/firefly-iii/firefly-iii/issues/12041) (ignore_duplicate_transactions is not taken into account) reported by @Passific
+- [Issue 12073](https://github.com/firefly-iii/firefly-iii/issues/12073) (Clarify `_FILE` is already supported for `MAIL_DESTINATION` in importer.env) reported by @elp3dr0
+- [Issue 12093](https://github.com/firefly-iii/firefly-iii/issues/12093) (EnableBanking: duplicate detection fails due to session-scoped accountUid in external_id) reported by @dominikheiss
+
 ## v2.2.2 - 2026-03-28
 
 > [!WARNING]

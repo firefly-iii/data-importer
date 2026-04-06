@@ -59,7 +59,7 @@ final class GetRequisitionRequest extends Request
 
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
-            return new ErrorResponse($e->json ?? []);
+            return new ErrorResponse($e->json);
         }
 
         return new GetRequisitionResponse($response);

@@ -426,7 +426,12 @@ final class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // duplicate transaction detection
-        $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
+        if ('file' === $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+        }
+        if ('file' !== $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
+        }
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
@@ -551,7 +556,12 @@ final class Configuration
         $object->dateNotAfter                = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
-        $object->duplicateDetectionMethod    = $array['duplicate_detection_method'] ?? 'classic';
+        if ('file' === $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
+        }
+        if ('file' !== $object->flow) {
+            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
+        }
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
@@ -709,7 +719,7 @@ final class Configuration
 
     public function getDoMapping(): array
     {
-        return $this->doMapping ?? [];
+        return $this->doMapping;
     }
 
     public function setDoMapping(array $doMapping): void
@@ -749,7 +759,7 @@ final class Configuration
 
     public function getMapping(): array
     {
-        return $this->mapping ?? [];
+        return $this->mapping;
     }
 
     public function setMapping(array $mapping): void
@@ -849,7 +859,7 @@ final class Configuration
 
     public function getRoles(): array
     {
-        return $this->roles ?? [];
+        return $this->roles;
     }
 
     public function setRoles(array $roles): void

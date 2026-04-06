@@ -143,7 +143,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                         config('importer.version'),
                         $index + 1,
                         $total,
-                        $account->getUid()
+                        $account->getIdentificationHash()
                     ));
 
                     $return[] = $account;

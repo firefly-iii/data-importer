@@ -106,7 +106,6 @@ final class ConversionStatus
     public function addRateLimit(int $index, string $message): void
     {
         Log::error(sprintf('[c] Add rate limit message to index #%d: %s', $index, $message));
-        $this->rateLimits         ??= [];
         $this->rateLimits[$index] ??= [];
         $this->rateLimits[$index][] = $message;
     }

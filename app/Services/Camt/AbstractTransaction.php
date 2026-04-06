@@ -43,11 +43,7 @@ abstract class AbstractTransaction
 
     public function getCurrencyCode(int $index): string
     {
-        return (string) $this->levelC
-            ->getAmount()
-            ->getCurrency()
-            ->getCode()
-        ;
+        return (string) $this->levelC->getAmount()->getCurrency()->getCode();
     }
 
     public function getAmount(int $index): string
@@ -144,11 +140,7 @@ abstract class AbstractTransaction
 
             case 'entryAmountCurrency':
                 // always the same, since its level C.
-                return (string) $this->levelC
-                    ->getAmount()
-                    ->getCurrency()
-                    ->getCode()
-                ;
+                return (string) $this->levelC->getAmount()->getCurrency()->getCode();
 
             case 'entryValueDate':
                 // always the same, since its level C.
@@ -161,11 +153,7 @@ abstract class AbstractTransaction
             case 'entryBtcDomainCode':
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    return (string) $this->levelC
-                        ->getBankTransactionCode()
-                        ->getDomain()
-                        ->getCode()
-                    ;
+                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return '';
@@ -174,12 +162,7 @@ abstract class AbstractTransaction
                 $return          = '';
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    $return = (string) $this->levelC
-                        ->getBankTransactionCode()
-                        ->getDomain()
-                        ->getFamily()
-                        ->getCode()
-                    ;
+                    $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return '';
@@ -188,12 +171,7 @@ abstract class AbstractTransaction
                 $return          = '';
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    return (string) $this->levelC
-                        ->getBankTransactionCode()
-                        ->getDomain()
-                        ->getFamily()
-                        ->getSubFamilyCode()
-                    ;
+                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
