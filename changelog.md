@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.2.3 - 2026-04-07
+
+> [!WARNING]
+> Some changes in this release may lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+### Fixed
+- #12041
+- #12073
+- #12093
+
 ## v2.2.2 - 2026-03-28
 
 > [!WARNING]
