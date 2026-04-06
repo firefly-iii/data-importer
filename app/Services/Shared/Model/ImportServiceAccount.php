@@ -127,6 +127,7 @@ final class ImportServiceAccount
                 $iban = '';
             }
             Log::debug(sprintf('Generate EB ImportServiceAccount with ID %s', $account->getIdentificationHash()));
+
             return self::fromArray([
                 'id'            => $account->getIdentificationHash(),
                 'name'          => $account->getFullName(),
