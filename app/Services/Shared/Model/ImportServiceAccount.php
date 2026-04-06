@@ -47,8 +47,10 @@ final class ImportServiceAccount
 
     public static function convertSingleAccount(array|object $account): self
     {
+        Log::debug('Called convertSingleAccount');
         // probably simpleFIN.
         if (is_array($account)) {
+            Log::debug('its an array!');
             $timestamp  = (int) ($account['balance-date'] ?? 0);
             $dateString = '';
             if ($timestamp > 100) {
@@ -124,9 +126,9 @@ final class ImportServiceAccount
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
-
+            Log::debug(sprintf('Generate EB ImportServiceAccount with ID %s', $account->getIdentificationHash()));
             return self::fromArray([
-                'id'            => $account->getUid(),
+                'id'            => $account->getIdentificationHash(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
@@ -346,7 +348,7 @@ final class ImportServiceAccount
             }
 
             $current  = self::fromArray([
-                'id'            => $account->getIdentifier(),
+                'id'            => $account->getIdentificationHash(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
