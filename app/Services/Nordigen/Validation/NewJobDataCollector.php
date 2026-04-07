@@ -83,7 +83,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $url         = config('nordigen.url');
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
-
+                $response = [];
                 try {
                     /** @var ListAccountsResponse $response */
                     $response = $request->get();
