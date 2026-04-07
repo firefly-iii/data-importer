@@ -329,22 +329,22 @@ trait AutoImports
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
         $this->startImportFromImportJob();
         $this->reportImport();
-        $this->reportBalanceDifferences($importJob);
+        $this->reportBalanceDifferences($this->importJob);
 
         $this->line('Done!');
 
         // merge things, then report about it.
-        $messages         = array_merge($importJob->conversionStatus->messages, $importJob->submissionStatus->messages);
-        $warnings         = array_merge($importJob->conversionStatus->warnings, $importJob->submissionStatus->warnings);
-        $errors           = array_merge($importJob->conversionStatus->errors, $importJob->submissionStatus->errors);
-        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $importJob->conversionStatus->rateLimits));
+        $messages         = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings         = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors           = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->importJob->conversionStatus->rateLimits));
 
         if (count($errors) > 0) {
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
 
             return ExitCode::GENERAL_ERROR->value;
         }
-        if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+        if (0 === count($messages) && 0 === count($warnings)) {
             Log::error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
 
             return ExitCode::NOTHING_WAS_IMPORTED->value;
