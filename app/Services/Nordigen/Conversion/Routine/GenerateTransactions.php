@@ -109,8 +109,9 @@ final class GenerateTransactions
                 $response = $request->get();
             } catch (ImporterHttpException|RateLimitException $e) {
                 throw new ImporterErrorException($e->getMessage(), 0, $e);
-            } catch(AgreementExpiredException $e) {
+            } catch (AgreementExpiredException $e) {
                 Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
+
                 throw new AgreementExpiredException($e->getMessage(), 0, $e);
             }
             $accountInfo               = $response->data['account'] ?? [];
