@@ -63,8 +63,9 @@ final class ListBanksRequest extends Request
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
             return new ErrorResponse($e->json);
-        } catch(AgreementExpiredException $e) {
+        } catch (AgreementExpiredException $e) {
             Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
+
             throw new AgreementExpiredException($e->getMessage(), 0, $e);
         }
 

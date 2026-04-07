@@ -83,13 +83,14 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $url         = config('nordigen.url');
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
-                $response = [];
+                $response    = [];
+
                 try {
                     /** @var ListAccountsResponse $response */
                     $response = $request->get();
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
-                } catch(AgreementExpiredException) {
+                } catch (AgreementExpiredException) {
                     Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
                     $messageBag->add('expired_agreement', 'true');
                 }
