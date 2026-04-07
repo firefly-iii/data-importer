@@ -111,13 +111,13 @@ final class Import extends Command
         $exitCode   = $this->importFileAsImportJob($config, $file);
 
         // merge things:
-        $messages   = array_merge($this->importMessages, $this->conversionMessages);
-        $warnings   = array_merge($this->importWarnings, $this->conversionWarnings);
-        $errors     = array_merge($this->importErrors, $this->conversionErrors);
+        $messages   = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings   = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors     = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
         // #11577 no need to report again
         // event(new ImportedTransactions(basename($config), $messages, $warnings, $errors, $this->conversionRateLimits));
-        if (0 !== count($this->importErrors)) {
+        if (0 !== count($errors)) {
             $exitCode = ExitCode::GENERAL_ERROR->value;
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
         }
