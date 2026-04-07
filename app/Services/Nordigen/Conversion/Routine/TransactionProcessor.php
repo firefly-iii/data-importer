@@ -109,6 +109,7 @@ final class TransactionProcessor
             try {
                 $fullInfo = AccountInformationCollector::collectInformation($object);
             } catch (AgreementExpiredException $e) {
+                Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
                 $this->importJob->conversionStatus->addError(
                     0,
                     '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'

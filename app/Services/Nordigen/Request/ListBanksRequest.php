@@ -31,6 +31,7 @@ use App\Exceptions\RateLimitException;
 use App\Services\Nordigen\Response\ErrorResponse;
 use App\Services\Nordigen\Response\ListBanksResponse;
 use App\Services\Shared\Response\Response;
+use Illuminate\Support\Facades\Log;
 use SensitiveParameter;
 
 /**
@@ -62,6 +63,9 @@ final class ListBanksRequest extends Request
             return new ErrorResponse($error);
         } catch (ImporterHttpException $e) {
             return new ErrorResponse($e->json);
+        } catch(AgreementExpiredException $e) {
+            Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
+            throw new AgreementExpiredException($e->getMessage(), 0, $e);
         }
 
         return new ListBanksResponse($response);

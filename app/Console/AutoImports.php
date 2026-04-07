@@ -684,7 +684,7 @@ trait AutoImports
             if (array_any($errors, static fn ($error) => str_contains((string) $error, 'EUA') && str_contains((string) $error, 'expired'))) {
                 return true;
             }
-            if (array_any($errors, static fn ($error) => str_contains((string) $error, 'a112') || str_contains((string) $error, 'a113'))) {
+            if (array_any($errors, static fn ($error) => str_contains((string) $error, 'a112') || str_contains((string) $error, 'a113') || str_contains((string) $error, 'a114'))) {
                 return true;
             }
         }

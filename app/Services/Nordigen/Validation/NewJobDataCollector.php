@@ -89,6 +89,9 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     $response = $request->get();
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
+                } catch(AgreementExpiredException) {
+                    Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
+                    $messageBag->add('expired_agreement', 'true');
                 }
                 $total       = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
@@ -111,6 +114,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                         $return[] = $account;
                         $cache[]  = $account->toLocalArray();
                     } catch (AgreementExpiredException) {
+                        Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
                         $messageBag->add('expired_agreement', 'true');
                     }
                 }
