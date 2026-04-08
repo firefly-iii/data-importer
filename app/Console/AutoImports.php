@@ -392,10 +392,7 @@ trait AutoImports
         $this->importJob                  = $manager->getImportJob();
         $this->importJob->setConvertedTransactions($transactions);
         $this->repository->saveToDisk($this->importJob);
-
-        if (count($transactions) > 0) {
-            $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
-        }
+        $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
         $this->importerAccounts     = $manager->getServiceAccounts();
     }
 

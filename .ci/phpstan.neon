@@ -46,7 +46,7 @@ parameters:
     - identifier: nullCoalesce.variable
     # - identifier: larastan.noUnnecessaryCollectionCall
     # - identifier: varTag.differentVariable
-    - identifier: identical.alwaysTrue
+    # - identifier: identical.alwaysTrue
     # - identifier: clone.nonObject
     # - identifier: assign.propertyReadOnly
     # - identifier: property.nonObject

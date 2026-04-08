@@ -96,7 +96,6 @@ final class TransactionTransformer
         //            ? (int) $transactionData['posted']
         //            : Carbon::now()->timestamp;
         //        $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
-        //
         $bookDate       = $this->getBookDate($transactionData);
 
         return [
