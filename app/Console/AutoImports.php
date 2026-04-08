@@ -236,12 +236,10 @@ trait AutoImports
         unset($importJob);
 
         if ($messages->count() > 0) {
-
             // merge things:
-            $jobMessages   = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
-            $warnings   = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
-            $errors     = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
-
+            $jobMessages = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+            $warnings    = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+            $errors      = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
             if ($messages->has('missing_requisitions') && 'true' === (string) $messages->get('missing_requisitions')[0]) {
                 $this->error('Your import is missing a necessary GoCardless requisitions.');
@@ -261,7 +259,7 @@ trait AutoImports
                 return ExitCode::NO_REQUISITIONS_PRESENT->value;
             }
 
-            //
+
             foreach ($messages->all() as $key => $message) {
                 $this->error(sprintf('Error message: %s: %s', $key, $message));
             }
@@ -366,8 +364,8 @@ trait AutoImports
 
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
-        $factory                    = new ConversionRoutineFactory($this->importJob);
-        $manager                    = $factory->createManager();
+        $factory                = new ConversionRoutineFactory($this->importJob);
+        $manager                = $factory->createManager();
         Log::debug(sprintf('Routine created: %s.', $manager::class));
         Log::debug('About to call start()');
         $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
@@ -378,6 +376,7 @@ trait AutoImports
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_ERRORED);
             Log::debug('Caught error in start()');
+
             return;
         }
 
@@ -386,14 +385,15 @@ trait AutoImports
         if (0 === count($transactions)) {
             Log::error('[a] Zero transactions!');
             $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
+
             return;
         }
         Log::debug('Grab import job back from manager.');
-        $this->importJob                  = $manager->getImportJob();
+        $this->importJob        = $manager->getImportJob();
         $this->importJob->setConvertedTransactions($transactions);
         $this->repository->saveToDisk($this->importJob);
         $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
-        $this->importerAccounts     = $manager->getServiceAccounts();
+        $this->importerAccounts = $manager->getServiceAccounts();
     }
 
     private function reportConversion(): void
@@ -428,7 +428,7 @@ trait AutoImports
     private function startImportFromImportJob(): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $routine              = new RoutineManager($this->importJob);
+        $routine = new RoutineManager($this->importJob);
 
         if (0 === count($this->importJob->getConvertedTransactions())) {
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
@@ -457,7 +457,11 @@ trait AutoImports
 
     private function reportImport(): void
     {
-        $list = ['info' => $this->importJob->submissionStatus->messages, 'warn' => $this->importJob->submissionStatus->warnings, 'error' => $this->importJob->submissionStatus->errors];
+        $list = [
+            'info'  => $this->importJob->submissionStatus->messages,
+            'warn'  => $this->importJob->submissionStatus->warnings,
+            'error' => $this->importJob->submissionStatus->errors,
+        ];
 
         // FIXME this reports to info() which ends up in the result.
         Log::info(sprintf('There are %d message(s)', count($this->importJob->submissionStatus->messages)));
@@ -646,19 +650,11 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things:
-        $messages   = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
-        $warnings   = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
-        $errors     = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        $messages              = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings              = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors                = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
-        event(
-            new ImportedTransactions(
-                basename($jsonFile),
-                $messages,
-                $warnings,
-                $errors,
-                $this->conversionRateLimits
-            )
-        );
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->conversionRateLimits));
     }
 
     protected function isNothingDownloaded(): bool

@@ -40,18 +40,18 @@ use Illuminate\Support\Facades\Log;
  */
 abstract class Request
 {
-    private string   $base;
-    protected string $method     = 'GET';
-    private string   $authString = '';
-    private array    $parameters;
-    private float    $timeOut    = 3.14;
+    private string $base;
+    protected string $method   = 'GET';
+    private string $authString = '';
+    private array $parameters;
+    private float $timeOut     = 3.14;
 
     protected string $userId;
     protected string $accessKey;
     protected string $url;
 
-    private int $remaining = -1;
-    private int $reset     = -1;
+    private int $remaining     = -1;
+    private int $reset         = -1;
 
     /**
      * @throws ImporterHttpException
@@ -76,16 +76,16 @@ abstract class Request
 
     protected function calculateAuthString(): void
     {
-        $url            = strtolower(substr($this->url, strpos($this->url, '/')));
-        $integrationKey = base64_decode($this->accessKey, true);
-        $plainKey       = strtoupper($this->method) . "\n" . $url;
+        $url              = strtolower(substr($this->url, strpos($this->url, '/')));
+        $integrationKey   = base64_decode($this->accessKey, true);
+        $plainKey         = strtoupper($this->method)."\n".$url;
 
         // Log::debug('calculateAuthString', [$url, $integrationKey, $plainKey]);
 
         // algo, data, key.
-        $signature  = hash_hmac('sha256', $plainKey, $integrationKey, true);
-        $base64sig  = base64_encode($signature);
-        $authString = 'FIApiAUTH:' . $this->userId . ':' . $base64sig . ':' . $url;
+        $signature        = hash_hmac('sha256', $plainKey, $integrationKey, true);
+        $base64sig        = base64_encode($signature);
+        $authString       = 'FIApiAUTH:'.$this->userId.':'.$base64sig.':'.$url;
 
         // Log::debug('calculateAuthString', ['base64_sig' => $base64sig, 'authString' => $authString]);
 
@@ -199,7 +199,7 @@ abstract class Request
     {
         $fullUrl = sprintf('%s/%s', config('sophtron.url'), $this->getUrl());
         Log::debug(sprintf('authenticatedMethod(%s, %s)', $method, $fullUrl), $body);
-        $client = $this->getClient();
+        $client  = $this->getClient();
 
         try {
             $opts = ['headers' => [
@@ -211,9 +211,9 @@ abstract class Request
             if (count($body) > 0) {
                 $opts['json'] = $body;
             }
-            $res = $client->request($method, $fullUrl, $opts);
+            $res  = $client->request($method, $fullUrl, $opts);
         } catch (ClientException|GuzzleException|TransferException $e) {
-            $statusCode = $e->getCode();
+            $statusCode      = $e->getCode();
             if (429 === $statusCode) {
                 Log::debug(sprintf('Ran into exception: %s', $e::class));
 
@@ -233,12 +233,12 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json = [];
+            $json            = [];
             if (method_exists($e, 'getResponse')) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
-            if (array_key_exists('summary', $json) && str_contains((string)$json['summary'], 'expired')) {
+            if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
 
@@ -251,7 +251,7 @@ abstract class Request
 
             throw $exception;
         }
-        $body = (string)$res->getBody();
+        $body    = (string) $res->getBody();
         if (json_validate($body)) {
             return json_decode($body, true) ?? [];
         }
