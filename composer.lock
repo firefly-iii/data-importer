@@ -7110,16 +7110,16 @@
         },
         {
             "name": "driftingly/rector-laravel",
-            "version": "2.2.0",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/driftingly/rector-laravel.git",
-                "reference": "807840ceb09de6764cbfcce0719108d044a459a9"
+                "reference": "3c1c13f335b3b4d1a1f944a8ea194020044871ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/807840ceb09de6764cbfcce0719108d044a459a9",
-                "reference": "807840ceb09de6764cbfcce0719108d044a459a9",
+                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/3c1c13f335b3b4d1a1f944a8ea194020044871ed",
+                "reference": "3c1c13f335b3b4d1a1f944a8ea194020044871ed",
                 "shasum": ""
             },
             "require": {
@@ -7140,9 +7140,9 @@
             "description": "Rector upgrades rules for Laravel Framework",
             "support": {
                 "issues": "https://github.com/driftingly/rector-laravel/issues",
-                "source": "https://github.com/driftingly/rector-laravel/tree/2.2.0"
+                "source": "https://github.com/driftingly/rector-laravel/tree/2.3.0"
             },
-            "time": "2026-03-19T17:24:38+00:00"
+            "time": "2026-04-08T10:52:44+00:00"
         },
         {
             "name": "ergebnis/phpstan-rules",
@@ -7353,16 +7353,16 @@
         },
         {
             "name": "fruitcake/laravel-debugbar",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fruitcake/laravel-debugbar.git",
-                "reference": "3c70910acfb35850b9304278b4af97fecb1128f4"
+                "reference": "4f62913c865023ccd2c34d8d2d13916d2c5720f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/3c70910acfb35850b9304278b4af97fecb1128f4",
-                "reference": "3c70910acfb35850b9304278b4af97fecb1128f4",
+                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/4f62913c865023ccd2c34d8d2d13916d2c5720f8",
+                "reference": "4f62913c865023ccd2c34d8d2d13916d2c5720f8",
                 "shasum": ""
             },
             "require": {
@@ -7370,7 +7370,7 @@
                 "illuminate/session": "^11|^12|^13.0",
                 "illuminate/support": "^11|^12|^13.0",
                 "php": "^8.2",
-                "php-debugbar/php-debugbar": "^3.7",
+                "php-debugbar/php-debugbar": "^3.7.2",
                 "php-debugbar/symfony-bridge": "^1.1"
             },
             "replace": {
@@ -7439,7 +7439,7 @@
             ],
             "support": {
                 "issues": "https://github.com/fruitcake/laravel-debugbar/issues",
-                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.2.4"
+                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v4.2.5"
             },
             "funding": [
                 {
@@ -7451,7 +7451,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-04T08:05:27+00:00"
+            "time": "2026-04-08T09:39:15+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",
@@ -8115,16 +8115,16 @@
         },
         {
             "name": "php-debugbar/php-debugbar",
-            "version": "v3.7.2",
+            "version": "v3.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-debugbar/php-debugbar.git",
-                "reference": "032dd5a385f528fcf0c8676af49559b2d1a0bea6"
+                "reference": "ea965a77f10b3824881b0ae7dba70d2038a9df84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/032dd5a385f528fcf0c8676af49559b2d1a0bea6",
-                "reference": "032dd5a385f528fcf0c8676af49559b2d1a0bea6",
+                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/ea965a77f10b3824881b0ae7dba70d2038a9df84",
+                "reference": "ea965a77f10b3824881b0ae7dba70d2038a9df84",
                 "shasum": ""
             },
             "require": {
@@ -8201,7 +8201,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-debugbar/php-debugbar/issues",
-                "source": "https://github.com/php-debugbar/php-debugbar/tree/v3.7.2"
+                "source": "https://github.com/php-debugbar/php-debugbar/tree/v3.7.3"
             },
             "funding": [
                 {
@@ -8213,7 +8213,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-07T10:37:03+00:00"
+            "time": "2026-04-08T07:22:30+00:00"
         },
         {
             "name": "php-debugbar/symfony-bridge",
@@ -8958,16 +8958,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "a51dfddbf6a29ed9fbf6e8410fc90c1608df1b5d"
+                "reference": "000b7050b9e4fe98db2192971e56eb0b302b3feb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/a51dfddbf6a29ed9fbf6e8410fc90c1608df1b5d",
-                "reference": "a51dfddbf6a29ed9fbf6e8410fc90c1608df1b5d",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/000b7050b9e4fe98db2192971e56eb0b302b3feb",
+                "reference": "000b7050b9e4fe98db2192971e56eb0b302b3feb",
                 "shasum": ""
             },
             "require": {
@@ -9006,7 +9006,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.4.0"
+                "source": "https://github.com/rectorphp/rector/tree/2.4.1"
             },
             "funding": [
                 {
@@ -9014,7 +9014,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-04T07:37:45+00:00"
+            "time": "2026-04-08T08:43:56+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -9022,12 +9022,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "7c570124dcf5c6834d78348d6817f32cd6b537d7"
+                "reference": "c5e319c36bb8e95f3662f05e46f16e89c44da480"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/7c570124dcf5c6834d78348d6817f32cd6b537d7",
-                "reference": "7c570124dcf5c6834d78348d6817f32cd6b537d7",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/c5e319c36bb8e95f3662f05e46f16e89c44da480",
+                "reference": "c5e319c36bb8e95f3662f05e46f16e89c44da480",
                 "shasum": ""
             },
             "conflict": {
@@ -9083,7 +9083,6 @@
                 "auth0/wordpress": "<=5.5",
                 "automad/automad": "<2.0.0.0-alpha5",
                 "automattic/jetpack": "<9.8",
-                "avideo/avideo": "<=26",
                 "awesome-support/awesome-support": "<=6.0.7",
                 "aws/aws-sdk-php": "<=3.371.3",
                 "ayacoo/redirect-tab": "<2.1.2|>=3,<3.1.7|>=4,<4.0.5",
@@ -9142,7 +9141,7 @@
                 "cesnet/simplesamlphp-module-proxystatistics": "<3.1",
                 "chriskacerguis/codeigniter-restserver": "<=2.7.1",
                 "chrome-php/chrome": "<1.14",
-                "ci4-cms-erp/ci4ms": "<=0.31.1",
+                "ci4-cms-erp/ci4ms": "<=0.31.3",
                 "civicrm/civicrm-core": ">=4.2,<4.2.9|>=4.3,<4.3.3",
                 "ckeditor/ckeditor": "<4.25",
                 "clickstorm/cs-seo": ">=6,<6.8|>=7,<7.5|>=8,<8.4|>=9,<9.3",
@@ -9460,6 +9459,7 @@
                 "laravel/fortify": "<1.11.1",
                 "laravel/framework": "<10.48.29|>=11,<11.44.1|>=12,<12.1.1",
                 "laravel/laravel": ">=5.4,<5.4.22",
+                "laravel/passport": "<13.7.1",
                 "laravel/pulse": "<1.3.1",
                 "laravel/reverb": "<1.7",
                 "laravel/socialite": ">=1,<2.0.10",
@@ -10063,7 +10063,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-06T23:13:58+00:00"
+            "time": "2026-04-08T23:16:29+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -10136,23 +10136,23 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "8.1.0",
+            "version": "8.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "e35cd9e8bbc43142bc7d6db53ceb2b01c6ad95a3"
+                "reference": "44b063d0a64da0e8ea74fb6464d8de2b1429ab7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/e35cd9e8bbc43142bc7d6db53ceb2b01c6ad95a3",
-                "reference": "e35cd9e8bbc43142bc7d6db53ceb2b01c6ad95a3",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/44b063d0a64da0e8ea74fb6464d8de2b1429ab7e",
+                "reference": "44b063d0a64da0e8ea74fb6464d8de2b1429ab7e",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-mbstring": "*",
                 "php": ">=8.4",
-                "sebastian/diff": "^8.0",
+                "sebastian/diff": "^8.1",
                 "sebastian/exporter": "^8.0"
             },
             "require-dev": {
@@ -10204,7 +10204,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/8.1.0"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/8.1.1"
             },
             "funding": [
                 {
@@ -10224,7 +10224,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-06T11:57:51+00:00"
+            "time": "2026-04-08T04:47:31+00:00"
         },
         {
             "name": "sebastian/complexity",
