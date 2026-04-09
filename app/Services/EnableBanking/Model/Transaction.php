@@ -211,10 +211,10 @@ final class Transaction
     {
         return substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
 
-//        $accountId     = substr(trim((string) preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
-//        $transactionId = substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
-//
-//        return trim(sprintf('%s-%s', $accountId, $transactionId));
+        //        $accountId     = substr(trim((string) preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
+        //        $transactionId = substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
+        //
+        //        return trim(sprintf('%s-%s', $accountId, $transactionId));
     }
 
     public function getSourceName(): ?string

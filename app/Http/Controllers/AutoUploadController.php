@@ -70,18 +70,21 @@ final class AutoUploadController extends Controller
 
             return response()->json(['error' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
         }
+
         return response()->json(['message' => 'Translate the import result to a JSON thing.']);
     }
 
     public function error($string, $verbosity = null): void
     {
         Log::error($string);
+
         // $this->line($string);
     }
 
     public function line(string $string): void
     {
         Log::info($string);
+
         // echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
     }
 
@@ -92,6 +95,7 @@ final class AutoUploadController extends Controller
     public function info($string, $verbosity = null): void
     {
         Log::info($string);
+
         // $this->line($string);
     }
 
@@ -102,6 +106,7 @@ final class AutoUploadController extends Controller
     public function warn($string, $verbosity = null): void
     {
         Log::warning($string);
+
         // $this->line($string);
     }
 }

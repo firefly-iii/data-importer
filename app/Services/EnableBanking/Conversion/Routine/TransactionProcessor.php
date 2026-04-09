@@ -83,7 +83,14 @@ final class TransactionProcessor
         $index           = 1;
 
         foreach ($accounts as $accountUid => $destinationId) {
-            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account "%s" (into #%d)', config('importer.version'), $index, $total, $accountUid, $destinationId));
+            Log::debug(sprintf(
+                '[%s] [%d/%d] Going to download transactions for account "%s" (into #%d)',
+                config('importer.version'),
+                $index,
+                $total,
+                $accountUid,
+                $destinationId
+            ));
 
             if (0 === $destinationId) {
                 Log::debug('No destination ID found, create account');
@@ -95,7 +102,13 @@ final class TransactionProcessor
             $dateFrom            = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
             $dateTo              = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
 
-            Log::debug(sprintf('GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s', $url, $accountUid, $dateFrom ?? 'null', $dateTo ?? 'null'));
+            Log::debug(sprintf(
+                'GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s',
+                $url,
+                $accountUid,
+                $dateFrom ?? 'null',
+                $dateTo ?? 'null'
+            ));
 
             $request             = new GetTransactionsRequest($url, $accountUid, $dateFrom, $dateTo);
             $request->setTimeOut(config('importer.connection.timeout'));
