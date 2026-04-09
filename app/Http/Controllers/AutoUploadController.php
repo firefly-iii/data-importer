@@ -30,6 +30,7 @@ use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
 use App\Http\Request\AutoUploadRequest;
 use Carbon\Carbon;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -47,7 +48,7 @@ final class AutoUploadController extends Controller
         if (false === config('importer.can_post_files')) {
             throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
         }
-        $secret         = (string) ($request->get('secret') ?? '');
+        $secret         = (string) ($request->input('secret') ?? '');
         $systemSecret   = (string) config('importer.auto_import_secret');
         if ('' === $secret || '' === $systemSecret || !hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
@@ -63,25 +64,25 @@ final class AutoUploadController extends Controller
 
         try {
             $this->importUpload((string) $json?->getPathname(), $importablePath);
-        } catch (ImporterErrorException $e) {
+        } catch (ApiHttpException|ImporterErrorException $e) {
             $message = sprintf('[%s]: %s', config('importer.version'), $e->getMessage());
             Log::error($message);
 
             return response()->json(['error' => sprintf('Translate the import result to a JSON thing. Also error: %s', $message)], 400);
         }
-
         return response()->json(['message' => 'Translate the import result to a JSON thing.']);
     }
 
     public function error($string, $verbosity = null): void
     {
         Log::error($string);
-        $this->line($string);
+        // $this->line($string);
     }
 
     public function line(string $string): void
     {
-        echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
+        Log::info($string);
+        // echo sprintf("%s: %s\n", Carbon::now()->format('Y-m-d H:i:s'), $string);
     }
 
     /**
@@ -90,7 +91,8 @@ final class AutoUploadController extends Controller
      */
     public function info($string, $verbosity = null): void
     {
-        $this->line($string);
+        Log::info($string);
+        // $this->line($string);
     }
 
     /**
@@ -99,6 +101,7 @@ final class AutoUploadController extends Controller
      */
     public function warn($string, $verbosity = null): void
     {
-        $this->line($string);
+        Log::warning($string);
+        // $this->line($string);
     }
 }
