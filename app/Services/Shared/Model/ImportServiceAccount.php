@@ -129,7 +129,7 @@ final class ImportServiceAccount
             Log::debug(sprintf('Generate EB ImportServiceAccount with ID %s', $account->getIdentificationHash()));
 
             return self::fromArray([
-                'id'            => $account->getIdentificationHash(),
+                'id'            => $account->getUid(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
@@ -349,7 +349,7 @@ final class ImportServiceAccount
             }
 
             $current  = self::fromArray([
-                'id'            => $account->getIdentificationHash(),
+                'id'            => $account->getUid(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
