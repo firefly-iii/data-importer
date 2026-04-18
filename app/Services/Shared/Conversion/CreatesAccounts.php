@@ -74,7 +74,7 @@ trait CreatesAccounts
                 return $entry->getIdentifier() === $importServiceId;
             }
             if ($entry instanceof EnableBankingAccount) {
-                return $entry->getIdentificationHash() === $importServiceId;
+                return $entry->getUid() === $importServiceId;
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
 

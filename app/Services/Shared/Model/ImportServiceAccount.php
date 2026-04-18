@@ -126,10 +126,10 @@ final class ImportServiceAccount
                 Log::debug(sprintf('IBAN "%s" is invalid so it will be ignored.', $iban));
                 $iban = '';
             }
-            Log::debug(sprintf('Generate EB ImportServiceAccount with ID %s', $account->getIdentificationHash()));
+            Log::debug(sprintf('Generate EB ImportServiceAccount with ID %s', $account->getUid()));
 
             return self::fromArray([
-                'id'            => $account->getIdentificationHash(),
+                'id'            => $account->getUid(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
@@ -349,7 +349,7 @@ final class ImportServiceAccount
             }
 
             $current  = self::fromArray([
-                'id'            => $account->getIdentificationHash(),
+                'id'            => $account->getUid(),
                 'name'          => $account->getFullName(),
                 'currency_code' => $account->getCurrency(),
                 'iban'          => $iban,
