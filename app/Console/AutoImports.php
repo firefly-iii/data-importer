@@ -50,14 +50,8 @@ use Illuminate\Support\Facades\Storage;
  */
 trait AutoImports
 {
-    protected array $conversionErrors     = [];
-    protected array $conversionMessages   = [];
-    protected array $conversionWarnings   = [];
     protected array $conversionRateLimits = []; // only conversion can have rate limits.
     protected string $identifier;
-    protected array $importErrors         = [];
-    protected array $importMessages       = [];
-    protected array $importWarnings       = [];
     protected array $importerAccounts     = [];
     protected ImportJobRepository $repository;
     private ImportJob $importJob;
@@ -191,14 +185,6 @@ trait AutoImports
                     Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                     $exitCodes[$importableFile] = 1;
                 }
-                // report has already been sent. Reset errors and continue.
-                $this->conversionErrors     = [];
-                $this->conversionMessages   = [];
-                $this->conversionWarnings   = [];
-                $this->conversionRateLimits = [];
-                $this->importErrors         = [];
-                $this->importMessages       = [];
-                $this->importWarnings       = [];
             }
         }
         Log::debug(sprintf('Collection of exit codes: %s', implode(', ', array_values($exitCodes))));
@@ -245,18 +231,39 @@ trait AutoImports
         }
         $importJob->setConfiguration($configuration);
         $this->importJob  = $importJob;
-        $this->repository->saveToDisk($importJob);
-        $messages         = $this->repository->parseImportJob($importJob);
+        $this->repository->saveToDisk($this->importJob);
+        $messages         = $this->repository->parseImportJob($this->importJob);
+        unset($importJob);
 
         if ($messages->count() > 0) {
+            // merge things:
+            $jobMessages = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+            $warnings    = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+            $errors      = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+
             if ($messages->has('missing_requisitions') && 'true' === (string) $messages->get('missing_requisitions')[0]) {
                 $this->error('Your import is missing a necessary GoCardless requisitions.');
 
+                // report it.
+                event(new ImportedTransactions(basename($jsonFile), $jobMessages, $warnings, $errors, []));
+
                 return ExitCode::NO_REQUISITIONS_PRESENT->value;
             }
-            foreach ($messages->all() as $message) {
-                $this->error(sprintf('Error message: %s', $message));
+
+            if ($messages->has('expired_agreement') && 'true' === (string) $messages->get('expired_agreement')[0]) {
+                $this->error('Your GoCardless requisition is expired.');
+
+                // report it.
+                event(new ImportedTransactions(basename($jsonFile), $jobMessages, $warnings, $errors, []));
+
+                return ExitCode::NO_REQUISITIONS_PRESENT->value;
             }
+
+            foreach ($messages->all() as $key => $message) {
+                $this->error(sprintf('Error message: %s: %s', $key, $message));
+            }
+            // report it.
+            event(new ImportedTransactions(basename($jsonFile), $jobMessages, $warnings, $errors, []));
 
             return ExitCode::GENERAL_ERROR->value;
         }
@@ -277,17 +284,15 @@ trait AutoImports
             $jsonFile,
             $configuration->getFlow()
         ));
-        $this->importJob  = $importJob;
-        $this->repository->saveToDisk($importJob);
+        $this->repository->saveToDisk($this->importJob);
         // this is it!
-        $importJob        = $this->startConversionFromImportJob($importJob);
+        $this->startConversionFromImportJob();
         $this->reportConversion();
-        $this->importJob  = $importJob;
-        $this->repository->saveToDisk($importJob);
+        $this->repository->saveToDisk($this->importJob);
 
         // crash here if the conversion failed.
-        if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+        if (0 !== count($this->importJob->conversionStatus->errors)) {
+            $this->error(sprintf('[a] Too many errors in the data conversion (%d), exit.', count($this->importJob->conversionStatus->errors)));
             Log::debug(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::TOO_MANY_ERRORS_PROCESSING->name));
             $exitCode = ExitCode::TOO_MANY_ERRORS_PROCESSING->value;
 
@@ -308,10 +313,10 @@ trait AutoImports
             event(
                 new ImportedTransactions(
                     basename($jsonFile),
-                    array_merge($importJob->conversionStatus->messages, $importJob->submissionStatus->messages),
-                    array_merge($importJob->conversionStatus->warnings, $importJob->submissionStatus->warnings),
-                    array_merge($importJob->conversionStatus->errors, $importJob->submissionStatus->errors),
-                    $importJob->conversionStatus->rateLimits
+                    array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages),
+                    array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings),
+                    array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors),
+                    $this->importJob->conversionStatus->rateLimits
                 )
             );
 
@@ -319,24 +324,24 @@ trait AutoImports
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        $this->startImportFromImportJob($importJob);
+        $this->startImportFromImportJob();
         $this->reportImport();
-        $this->reportBalanceDifferences($importJob);
+        $this->reportBalanceDifferences($this->importJob);
 
         $this->line('Done!');
 
         // merge things, then report about it.
-        $messages         = array_merge($importJob->conversionStatus->messages, $importJob->submissionStatus->messages);
-        $warnings         = array_merge($importJob->conversionStatus->warnings, $importJob->submissionStatus->warnings);
-        $errors           = array_merge($importJob->conversionStatus->errors, $importJob->submissionStatus->errors);
-        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $importJob->conversionStatus->rateLimits));
+        $messages         = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings         = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors           = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->importJob->conversionStatus->rateLimits));
 
         if (count($errors) > 0) {
             Log::error(sprintf('Exit code is %s.', ExitCode::GENERAL_ERROR->name));
 
             return ExitCode::GENERAL_ERROR->value;
         }
-        if (0 === count($messages) && 0 === count($warnings) && 0 === count($errors)) {
+        if (0 === count($messages) && 0 === count($warnings)) {
             Log::error(sprintf('Exit code is %s.', ExitCode::NOTHING_WAS_IMPORTED->name));
 
             return ExitCode::NOTHING_WAS_IMPORTED->value;
@@ -349,64 +354,54 @@ trait AutoImports
 
     /**
      * @throws ImporterErrorException
+     * @throws ApiHttpException
      */
-    private function startConversionFromImportJob(ImportJob $importJob): ImportJob
+    private function startConversionFromImportJob(): void
     {
-        $this->conversionMessages   = [];
-        $this->conversionWarnings   = [];
-        $this->conversionErrors     = [];
-        $this->conversionRateLimits = [];
-        $flow                       = $importJob->getFlow();
-        $configuration              = $importJob->getConfiguration();
-        $this->repository->parseImportJob($importJob);
-        $this->repository->saveToDisk($importJob);
+        $this->repository->parseImportJob($this->importJob);
+        $this->repository->saveToDisk($this->importJob);
 
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
-        $factory                    = new ConversionRoutineFactory($importJob);
-        $manager                    = $factory->createManager();
+        $factory                = new ConversionRoutineFactory($this->importJob);
+        $manager                = $factory->createManager();
         Log::debug(sprintf('Routine created: %s.', $manager::class));
         Log::debug('About to call start()');
-        $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
-
-        // then push stuff into the routine:
-        $transactions               = [];
+        $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
 
         try {
             $transactions = $manager->start();
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_ERRORED);
+            $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_ERRORED);
             Log::debug('Caught error in start()');
+
+            return;
         }
 
         Log::debug('Past error processing for routine manager');
 
         if (0 === count($transactions)) {
             Log::error('[a] Zero transactions!');
-            $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
+            $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
+
+            return;
         }
         Log::debug('Grab import job back from manager.');
-        $importJob                  = $manager->getImportJob();
-        $importJob->setConvertedTransactions($transactions);
-        $this->importJob            = $importJob;
-        $this->repository->saveToDisk($importJob);
-
-        if (count($transactions) > 0) {
-            $importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
-        }
-        $this->importerAccounts     = $manager->getServiceAccounts();
-
-        return $importJob;
+        $this->importJob        = $manager->getImportJob();
+        $this->importJob->setConvertedTransactions($transactions);
+        $this->repository->saveToDisk($this->importJob);
+        $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
+        $this->importerAccounts = $manager->getServiceAccounts();
     }
 
     private function reportConversion(): void
     {
         $list = [
-            [$this->conversionMessages, 'info'],
-            [$this->conversionWarnings, 'warn'],
-            [$this->conversionErrors, 'error'],
-            [$this->conversionRateLimits, 'warn'],
+            [$this->importJob->conversionStatus->messages, 'info'],
+            [$this->importJob->conversionStatus->warnings, 'warn'],
+            [$this->importJob->conversionStatus->warnings, 'error'],
+            [$this->importJob->conversionStatus->rateLimits, 'warn'],
         ];
         foreach ($list as $set) {
             /** @var string $func */
@@ -429,53 +424,48 @@ trait AutoImports
         }
     }
 
-    private function startImportFromImportJob(ImportJob $importJob): void
+    private function startImportFromImportJob(): void
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $routine              = new RoutineManager($importJob);
+        $routine = new RoutineManager($this->importJob);
 
-        if (0 === count($importJob->getConvertedTransactions())) {
-            $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
-            $this->repository->saveToDisk($importJob);
+        if (0 === count($this->importJob->getConvertedTransactions())) {
+            $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
+            $this->repository->saveToDisk($this->importJob);
             Log::error('No transactions in array, there is nothing to import.');
-            $this->importMessages = $importJob->submissionStatus->messages;
-            $this->importWarnings = $importJob->submissionStatus->warnings;
-            $this->importErrors   = $importJob->submissionStatus->errors;
 
             return;
         }
 
-        $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
+        $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
 
         try {
             $routine->start();
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
-            $importJob->submissionStatus->addError(0, $e->getMessage());
-            $this->repository->saveToDisk($importJob);
-            $this->importMessages = $importJob->submissionStatus->messages;
-            $this->importWarnings = $importJob->submissionStatus->warnings;
-            $this->importErrors   = $importJob->submissionStatus->errors;
+            $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
+            $this->importJob->submissionStatus->addError(0, $e->getMessage());
+            $this->repository->saveToDisk($this->importJob);
 
             return;
         }
 
         // set done:
-        $importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
-        $this->importMessages = $importJob->submissionStatus->messages;
-        $this->importWarnings = $importJob->submissionStatus->warnings;
-        $this->importErrors   = $importJob->submissionStatus->errors;
+        $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_DONE);
     }
 
     private function reportImport(): void
     {
-        $list = ['info' => $this->importMessages, 'warn' => $this->importWarnings, 'error' => $this->importErrors];
+        $list = [
+            'info'  => $this->importJob->submissionStatus->messages,
+            'warn'  => $this->importJob->submissionStatus->warnings,
+            'error' => $this->importJob->submissionStatus->errors,
+        ];
 
         // FIXME this reports to info() which ends up in the result.
-        Log::info(sprintf('There are %d message(s)', count($this->importMessages)));
-        Log::info(sprintf('There are %d warning(s)', count($this->importWarnings)));
-        Log::info(sprintf('There are %d error(s)', count($this->importErrors)));
+        Log::info(sprintf('There are %d message(s)', count($this->importJob->submissionStatus->messages)));
+        Log::info(sprintf('There are %d warning(s)', count($this->importJob->submissionStatus->warnings)));
+        Log::info(sprintf('There are %d error(s)', count($this->importJob->submissionStatus->errors)));
 
         foreach ($list as $func => $set) {
             /**
@@ -594,6 +584,7 @@ trait AutoImports
 
     /**
      * @throws ImporterErrorException
+     * @throws ApiHttpException
      */
     private function importUpload(string $jsonFile, string $importableFile): void
     {
@@ -641,35 +632,33 @@ trait AutoImports
         Log::debug(sprintf('[b] Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $flow));
 
         // this is it!
-        $this->startConversionFromImportJob($importJob);
+        $this->startConversionFromImportJob(); // dingflofbips
         $this->reportConversion();
 
         // crash here if the conversion failed.
-        if (0 !== count($this->conversionErrors)) {
-            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->conversionErrors)));
+        if (0 !== count($this->importJob->conversionStatus->errors)) {
+            $this->error(sprintf('[b] Too many errors in the data conversion (%d), exit.', count($this->importJob->conversionStatus->errors)));
 
             throw new ImporterErrorException('Too many errors in the data conversion.');
         }
 
         $this->line(sprintf('Done converting from file %s using configuration %s.', $importableFile, $jsonFile));
-        $this->startImportFromImportJob($importJob);
+        $this->startImportFromImportJob();
         $this->reportImport();
 
         $this->line('Done!');
-        event(
-            new ImportedTransactions(
-                basename($jsonFile),
-                array_merge($this->conversionMessages, $this->importMessages),
-                array_merge($this->conversionWarnings, $this->importWarnings),
-                array_merge($this->conversionErrors, $this->importErrors),
-                $this->conversionRateLimits
-            )
-        );
+
+        // merge things:
+        $messages              = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings              = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors                = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+
+        event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->conversionRateLimits));
     }
 
     protected function isNothingDownloaded(): bool
     {
-        foreach ($this->conversionErrors as $errors) {
+        foreach ($this->importJob->conversionStatus->errors as $errors) {
             if (array_any($errors, static fn ($error) => str_contains((string) $error, '[a111]'))) {
                 return true;
             }
@@ -680,11 +669,14 @@ trait AutoImports
 
     protected function isExpiredAgreement(): bool
     {
-        foreach ($this->conversionErrors as $errors) {
+        foreach ($this->importJob->conversionStatus->errors as $errors) {
             if (array_any($errors, static fn ($error) => str_contains((string) $error, 'EUA') && str_contains((string) $error, 'expired'))) {
                 return true;
             }
-            if (array_any($errors, static fn ($error) => str_contains((string) $error, 'a112') || str_contains((string) $error, 'a113'))) {
+            if (array_any(
+                $errors,
+                static fn ($error) => str_contains((string) $error, 'a112') || str_contains((string) $error, 'a113') || str_contains((string) $error, 'a114')
+            )) {
                 return true;
             }
         }

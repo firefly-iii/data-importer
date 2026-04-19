@@ -274,7 +274,7 @@ final class TokenController extends Controller
     /**
      * This method forwards the user to Firefly III. Some parameters are stored in the user's session.
      */
-    private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, int $clientId): RedirectResponse
+    private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, string $clientId): RedirectResponse
     {
         $baseURL               = rtrim($baseURL, '/');
         $vanityURL             = rtrim($vanityURL, '/');
@@ -325,7 +325,7 @@ final class TokenController extends Controller
     public function submitClientId(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $data              = $request->validate(['client_id' => 'required|numeric|min:1|max:65536', 'base_url' => 'url']);
+        $data      = $request->validate(['client_id' => 'required|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
         if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {
@@ -334,12 +334,10 @@ final class TokenController extends Controller
             return redirect(route('token.index'));
         }
 
-        $data['client_id'] = (int) $data['client_id'];
-
         // grab base URL from config first, otherwise from submitted data:
-        $baseURL           = config('importer.url');
+        $baseURL   = config('importer.url');
         Log::debug(sprintf('[a] Base URL is "%s" (based on "FIREFLY_III_URL")', $baseURL));
-        $vanityURL         = $baseURL;
+        $vanityURL = $baseURL;
 
         Log::debug(sprintf('[b] Vanity URL is now "%s" (based on "FIREFLY_III_URL")', $vanityURL));
 

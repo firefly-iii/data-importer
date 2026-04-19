@@ -34,7 +34,6 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Illuminate\Support\Facades\Log;
-use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class Request

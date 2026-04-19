@@ -64,8 +64,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => '2.2.3',
-    'build_time'                    => 1775487179,
+    'version'                       => '2.3.0',
+    'build_time'                    => 1776584873,
     'fake_data'                     => env('FAKE_DATA', false),
     'providers'                     => [
         'file'      => [
@@ -163,7 +163,7 @@ return [
     'ignore_not_found_transactions' => env('IGNORE_NOT_FOUND_TRANSACTIONS', false),
     'namespace'                     => 'c40dcba2-411d-11ec-973a-0242ac130003',
     'use_cache'                     => env('USE_CACHE', false),
-    'minimum_version'               => '6.5.4',
+    'minimum_version'               => '6.6.0',
     'cache_api_calls'               => false,
     'ignored_files'                 => ['.gitignore'],
     'tracker_site_id'               => env('TRACKER_SITE_ID', ''),

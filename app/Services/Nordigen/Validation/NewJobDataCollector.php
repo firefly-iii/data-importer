@@ -83,12 +83,20 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $url         = config('nordigen.url');
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
+                $response    = [];
 
                 try {
                     /** @var ListAccountsResponse $response */
                     $response = $request->get();
                 } catch (ImporterErrorException|ImporterHttpException $e) {
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
+                } catch (AgreementExpiredException) {
+                    Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
+                    $messageBag->add('expired_agreement', 'true');
+                    $this->importJob->conversionStatus->addError(
+                        0,
+                        '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
+                    );
                 }
                 $total       = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
@@ -111,7 +119,12 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                         $return[] = $account;
                         $cache[]  = $account->toLocalArray();
                     } catch (AgreementExpiredException) {
+                        Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
                         $messageBag->add('expired_agreement', 'true');
+                        $this->importJob->conversionStatus->addError(
+                            0,
+                            '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
+                        );
                     }
                 }
             }

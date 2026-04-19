@@ -40,12 +40,12 @@ final class ValidationController extends Controller
     {
         return match ($flow) {
             'nordigen', 'gocardless' => $this->validateGoCardless(),
-            'simplefin' => $this->validateSimpleFIN(),
-            'lunchflow' => $this->validateLunchFlow(),
-            'sophtron'  => $this->validateSophtron(),
-            'eb'        => $this->validateEnableBanking(),
-            'file'      => response()->json(['result' => 'OK']),
-            default     => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
+            'simplefin'              => $this->validateSimpleFIN(),
+            'lunchflow'              => $this->validateLunchFlow(),
+            'sophtron'               => $this->validateSophtron(),
+            'eb'                     => $this->validateEnableBanking(),
+            'file'                   => response()->json(['result' => 'OK']),
+            default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
     }
 

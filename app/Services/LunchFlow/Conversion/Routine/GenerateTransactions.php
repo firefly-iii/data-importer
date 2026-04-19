@@ -28,12 +28,9 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Services\LunchFlow\Model\Transaction;
-use App\Services\Shared\Authentication\SecretManager;
 use App\Support\Http\CollectsAccounts;
 use App\Support\Internal\DuplicateSafetyCatch;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
 use Illuminate\Support\Facades\Log;
 
 /**

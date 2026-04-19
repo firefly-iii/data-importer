@@ -295,6 +295,7 @@ final class RoutineManager implements RoutineManagerInterface
             Log::error('Could not collect info on all GoCardless accounts, but this info isn\'t used at the moment anyway.');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
         } catch (AgreementExpiredException $e) {
+            Log::error(sprintf('AgreementExpiredException in %s', __METHOD__));
             $this->importJob->conversionStatus->addError(0, '[a112]: The connection between your bank and GoCardless has expired.');
             $this->repository->saveToDisk($this->importJob);
 
