@@ -42,23 +42,21 @@ final class AccountsRequest extends SimpleFINRequest
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // chunk time diff
-        $chunks = [];
-        $params = $this->getParameters();
+        $chunks          = [];
+        $params          = $this->getParameters();
         if (array_key_exists('start-date', $params) || array_key_exists('end-date', $params)) {
             Log::debug('Start date or end date are present, may need to chunk.');
             $start = $params['start-date'];
             $end   = $params['end-date'] ?? time();
             $diff  = $end - $start;
             Log::debug(sprintf('Difference is %d seconds, or %s', $diff, $this->formatTime($diff)));
-            if ($diff > 90 * 24 * 60 * 60) {
+            if ($diff > (90 * 24 * 60 * 60)) {
                 Log::debug('More than 90 days, need to chunk this.');
                 $chunks = $this->chunkByTime($start, $end);
             }
-            if ($diff <= 90 * 24 * 60 * 60) {
+            if ($diff <= (90 * 24 * 60 * 60)) {
                 Log::debug('No more than 90 days, no need to chunk this.');
-                $chunk = [
-                    'start-date' => $start,
-                ];
+                $chunk    = ['start-date' => $start];
                 if (array_key_exists('end-date', $params)) {
                     $chunk['end-date'] = $params['end-date'];
                 }
@@ -91,40 +89,41 @@ final class AccountsRequest extends SimpleFINRequest
             }
             $this->setParameters($params);
             $response = $this->authenticatedGet('/accounts');
-            if(null !== $accountResponse) {
+            if (null !== $accountResponse) {
                 Log::debug('Append to new account response.');
                 // append to one.
                 $newResponse = new AccountsResponse($response);
                 $accountResponse->appendFromArray($newResponse->getAccounts());
             }
-            if(null === $accountResponse) {
+            if (null === $accountResponse) {
                 Log::debug('Create new account response.');
                 $accountResponse = new AccountsResponse($response);
             }
         }
+
         return $accountResponse;
     }
 
     private function formatTime(int $time): string
     {
-        $return = '';
+        $return  = '';
         // days:
-        $days = floor($time / 86400);
+        $days    = floor($time / 86400);
         if ($days > 0) {
             $return .= sprintf('%dd', $days);
         }
-        $time -= ($days * 86400);
+        $time -= $days * 86400;
 
-        $hours = floor($time / 3600);
+        $hours   = floor($time / 3600);
         if ($hours > 0) {
             $return .= sprintf('%dh', $hours);
         }
-        $time    -= ($hours * 3600);
+        $time    -= $hours * 3600;
         $minutes = floor($time / 60);
         if ($minutes > 0) {
             $return .= sprintf('%dm', $minutes);
         }
-        $time    -= ($minutes * 60);
+        $time    -= $minutes * 60;
         $seconds = $time % 60;
         if ($seconds > 0) {
             $return .= sprintf('%ds', $seconds);
@@ -146,17 +145,14 @@ final class AccountsRequest extends SimpleFINRequest
             if ($currentEnd > $end) {
                 $currentEnd = $end;
             }
-            $return[] = [
-                'start-date' => $currentStart,
-                'end-date'   => $currentEnd,
-            ];
+            $return[]   = ['start-date' => $currentStart, 'end-date' => $currentEnd];
             Log::debug(sprintf('Add chunk on index #%d', count($return) - 1));
             Log::debug(sprintf('Start of chunk is %d (%s)', $currentStart, Carbon::createFromTimestamp($currentStart, config('app.timezone'))->toW3cString()));
             Log::debug(sprintf('End of chunk is   %d (%s)', $currentEnd, Carbon::createFromTimestamp($currentEnd, config('app.timezone'))->toW3cString()));
 
-
-            $currentStart = $currentStart + $size;
+            $currentStart += $size;
         }
+
         return $return;
     }
 }
