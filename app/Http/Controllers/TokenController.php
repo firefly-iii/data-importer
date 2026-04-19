@@ -65,7 +65,7 @@ final class TokenController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $state        = (string) session()->pull('state');
         $codeVerifier = (string) $request->session()->pull('code_verifier');
-        $clientId     = (int) $request->session()->pull('form_client_id');
+        $clientId     = (string) $request->session()->pull('form_client_id');
         $baseURL      = (string) $request->session()->pull('form_base_url');
         $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
