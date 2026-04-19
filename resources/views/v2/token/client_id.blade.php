@@ -73,7 +73,7 @@
                             @endif
                             <div class="form-group mb-3">
                                 <label for="input_client_id">Client ID</label>
-                                <input type="number" step="1" min="1" class="form-control" id="input_client_id" autocomplete="off" name="client_id" value="{{ $clientId }}">
+                                <input type="text" class="form-control" id="input_client_id" autocomplete="off" name="client_id" value="{{ $clientId }}">
                                 @if($errors->has('client_id'))
                                     <span class="text-danger">{{ $errors->first('client_id') }}</span>
                                 @endif
