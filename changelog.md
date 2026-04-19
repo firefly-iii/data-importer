@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [Discussion 12100](https://github.com/orgs/firefly-iii/discussions/12100) (Enable Banking Importer - Issue when you specify dates to Import) started by @ZeluisFS
 - [Issue 12102](https://github.com/firefly-iii/firefly-iii/issues/12102) (Error "Cannot modify header information" in /autoupload endpoint) reported by @MagelanM
 - [Issue 12128](https://github.com/firefly-iii/firefly-iii/issues/12128) (SimpleFIN date range options exceed 90 days but backend makes a single unchunked API call) reported by @CodeBradley
-- #12158
+- [Discussion 12158](https://github.com/orgs/firefly-iii/discussions/12158) (Importer oAuth Issue) started by @danielpngr
 
 ## v2.3.0 - 2026-04-20
 
