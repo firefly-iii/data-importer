@@ -117,7 +117,7 @@ abstract class SimpleFINRequest
     private function handleClientException(ClientException $e): void
     {
         $statusCode = $e->getResponse()->getStatusCode();
-        $body       = (string) $e->getResponse()->getBody();
+        $body       = (string)$e->getResponse()->getBody();
 
         Log::error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 
