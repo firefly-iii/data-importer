@@ -154,7 +154,7 @@ return [
     'can_post_files'                => env('CAN_POST_FILES', false),
     'access_token'                  => env('FIREFLY_III_ACCESS_TOKEN'),
     'url'                           => env('FIREFLY_III_URL'),
-    'client_id'                     => env('FIREFLY_III_CLIENT_ID'),
+    'client_id'                     => (string) env('FIREFLY_III_CLIENT_ID'),
     'upload_path'                   => storage_path('uploads'),
     'log_return_json'               => env('LOG_RETURN_JSON', false),
     'expect_secure_url'             => env('EXPECT_SECURE_URL', false),

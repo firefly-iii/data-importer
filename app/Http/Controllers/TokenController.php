@@ -254,8 +254,8 @@ final class TokenController extends Controller
         }
 
         // Option 2: client ID + base URL.
-        if (0 !== $clientId && '' !== $baseUrl) {
-            Log::debug(sprintf('Found client ID "%d" + URL "%s" in config, redirect to Firefly III for permission.', $clientId, $baseUrl));
+        if ('' !== $clientId && '' !== $baseUrl) {
+            Log::debug(sprintf('Found client ID "%s" + URL "%s" in config, redirect to Firefly III for permission.', $clientId, $baseUrl));
 
             return $this->redirectForPermission($request, $baseUrl, $vanityUrl, $clientId);
         }
@@ -358,6 +358,6 @@ final class TokenController extends Controller
         }
 
         // return request for permission:
-        return $this->redirectForPermission($request, $baseURL, $vanityURL, $data['client_id']);
+        return $this->redirectForPermission($request, $baseURL, $vanityURL, (string) $data['client_id']);
     }
 }
