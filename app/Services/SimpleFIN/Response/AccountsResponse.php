@@ -44,11 +44,12 @@ final class AccountsResponse extends SimpleFINResponse
     public function appendFromArray(array $more): void
     {
         Log::debug('Will now append second set of transactions.');
+
         /** @var Account $original */
-        foreach($this->accounts as $index => $original) {
+        foreach ($this->accounts as $index => $original) {
             /** @var Account $extra */
-            foreach($more as $extra) {
-                if($original->id === $extra->id) {
+            foreach ($more as $extra) {
+                if ($original->id === $extra->id) {
                     Log::debug(sprintf('Will append transactions for account "%s"', $original->id));
                     $original->transactions = array_merge($original->transactions, $extra->transactions);
                 }
@@ -92,6 +93,7 @@ final class AccountsResponse extends SimpleFINResponse
             return $return;
         }
         Log::warning('SimpleFIN AccountsResponse: No accounts array found in response');
+
         return [];
     }
 }
