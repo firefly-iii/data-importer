@@ -139,15 +139,15 @@ final class SecretManager
     /**
      * Will return the client ID. From a cookie if its there, otherwise from configuration.
      */
-    public static function getClientId(): int
+    public static function getClientId(): string
     {
         if (!self::hasClientId()) {
             Log::debug('No client id in hasClientId() session, will return config variable.');
 
-            return (int) config('importer.client_id');
+            return (string) config('importer.client_id');
         }
 
-        return (int) session()->get(Constants::SESSION_CLIENT_ID);
+        return (string) session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     /**
@@ -155,7 +155,7 @@ final class SecretManager
      */
     private static function hasClientId(): bool
     {
-        return session()->has(Constants::SESSION_CLIENT_ID) && 0 !== session()->get(Constants::SESSION_CLIENT_ID);
+        return session()->has(Constants::SESSION_CLIENT_ID) && '' !== (string) session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getVanityUrl(): string
