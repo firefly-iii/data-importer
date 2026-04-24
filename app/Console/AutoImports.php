@@ -590,7 +590,7 @@ trait AutoImports
     {
         Log::debug('Start of importUpload');
         $this->repository      = new ImportJobRepository();
-        $importJob             = $this->repository->create();
+        $this->importJob             = $this->repository->create();
 
         // do JSON check
         $jsonResult            = $this->verifyJSON($jsonFile);
@@ -610,24 +610,24 @@ trait AutoImports
             $importableFileContent = file_get_contents($importableFile);
         }
 
-        $importJob             = $this->repository->setFlow($importJob, $flow);
-        $importJob             = $this->repository->setConfigurationString($importJob, $jsonContent);
-        $importJob             = $this->repository->setImportableFileString($importJob, $importableFileContent);
-        $importJob             = $this->repository->markAs($importJob, 'contains_content');
+        $this->importJob             = $this->repository->setFlow($this->importJob, $flow);
+        $this->importJob             = $this->repository->setConfigurationString($this->importJob, $jsonContent);
+        $this->importJob             = $this->repository->setImportableFileString($this->importJob, $importableFileContent);
+        $this->importJob             = $this->repository->markAs($this->importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated
         // at this point, also parse and process the uploaded configuration file string.
         $configuration         = Configuration::make();
-        if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
+        if ('' !== $jsonContent && null === $this->importJob->getConfiguration()) {
             $configuration = Configuration::fromArray(json_decode($jsonContent, true));
         }
-        if (null !== $importJob->getConfiguration()) {
-            $configuration = $importJob->getConfiguration();
+        if (null !== $this->importJob->getConfiguration()) {
+            $configuration = $this->importJob->getConfiguration();
         }
-        $configuration->setFlow($importJob->getFlow());
-        $importJob->setConfiguration($configuration);
-        $this->repository->saveToDisk($importJob);
+        $configuration->setFlow($this->importJob->getFlow());
+        $this->importJob->setConfiguration($configuration);
+        $this->repository->saveToDisk($this->importJob);
 
         Log::debug(sprintf('[b] Going to convert from file "%s" using configuration "%s" and flow "%s".', $importableFile, $jsonFile, $flow));
 
