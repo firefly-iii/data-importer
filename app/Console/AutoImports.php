@@ -590,7 +590,7 @@ trait AutoImports
     {
         Log::debug('Start of importUpload');
         $this->repository      = new ImportJobRepository();
-        $this->importJob             = $this->repository->create();
+        $this->importJob       = $this->repository->create();
 
         // do JSON check
         $jsonResult            = $this->verifyJSON($jsonFile);
@@ -610,10 +610,10 @@ trait AutoImports
             $importableFileContent = file_get_contents($importableFile);
         }
 
-        $this->importJob             = $this->repository->setFlow($this->importJob, $flow);
-        $this->importJob             = $this->repository->setConfigurationString($this->importJob, $jsonContent);
-        $this->importJob             = $this->repository->setImportableFileString($this->importJob, $importableFileContent);
-        $this->importJob             = $this->repository->markAs($this->importJob, 'contains_content');
+        $this->importJob       = $this->repository->setFlow($this->importJob, $flow);
+        $this->importJob       = $this->repository->setConfigurationString($this->importJob, $jsonContent);
+        $this->importJob       = $this->repository->setImportableFileString($this->importJob, $importableFileContent);
+        $this->importJob       = $this->repository->markAs($this->importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated

@@ -89,7 +89,7 @@ final class PostAuthRequest extends Request
     {
         $validUntilTimestamp = $this->validUntil ?? strtotime('+90 days');
         $data                = [
-            'access'       => ['valid_until'       => date('c', $validUntilTimestamp)],
+            'access'       => ['valid_until' => date('c', $validUntilTimestamp)],
             'aspsp'        => ['name' => $this->aspsp, 'country' => $this->country],
             'state'        => $this->state,
             'redirect_url' => $this->redirectUrl,

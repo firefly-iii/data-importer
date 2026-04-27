@@ -202,12 +202,14 @@ abstract class Request
         $client  = $this->getClient();
 
         try {
-            $opts = ['headers' => [
-                'Accept'        => 'application/json',
-                'Content-Type'  => 'application/json',
-                'Authorization' => sprintf('%s', $this->authString),
-                'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
-            ]];
+            $opts = [
+                'headers' => [
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => sprintf('%s', $this->authString),
+                    'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
+                ],
+            ];
             if (count($body) > 0) {
                 $opts['json'] = $body;
             }

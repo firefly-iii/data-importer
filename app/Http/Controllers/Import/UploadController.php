@@ -80,7 +80,7 @@ final class UploadController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
         $mainTitle = 'Upload your file(s)';
         $subTitle  = 'Start page and instructions';
-        $settings  = ['simplefin'  => $this->getSimpleFINSettings()];
+        $settings  = ['simplefin' => $this->getSimpleFINSettings()];
         $list      = $this->getConfigurations();
 
         return view('import.003-upload.index', compact('mainTitle', 'subTitle', 'list', 'flow', 'settings'));
