@@ -63,7 +63,7 @@ final class TransactionConverter
     private function convertSingle(AbstractTransaction $transaction): array
     {
         Log::debug('Convert single transaction into pseudo-transaction.');
-        $result           = ['transactions'          => []];
+        $result           = ['transactions' => []];
         $configuredRoles  = $this->getConfiguredRoles();
         $mapping          = $this->configuration->getMapping();
         $allRoles         = $this->configuration->getRoles();
