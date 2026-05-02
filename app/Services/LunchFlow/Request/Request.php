@@ -74,14 +74,12 @@ abstract class Request
         $body    = null;
 
         try {
-            $res = $client->request('GET', $fullUrl, [
-                'headers' => [
-                    'Accept'       => 'application/json',
-                    'Content-Type' => 'application/json',
-                    'x-api-key'    => $this->apiKey,
-                    'User-Agent'   => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c')),
-                ],
-            ]);
+            $res = $client->request('GET', $fullUrl, ['headers' => [
+                'Accept'       => 'application/json',
+                'Content-Type' => 'application/json',
+                'x-api-key'    => $this->apiKey,
+                'User-Agent'   => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c')),
+            ]]);
         } catch (TransferException $e) {
             Log::error(sprintf('TransferException: %s', $e->getMessage()));
             // if response, parse as error response.
