@@ -108,11 +108,11 @@ final class AccountsRequest extends SimpleFINRequest
     {
         $return  = '';
         // days:
-        $days    = floor($time / 86400);
+        $days    = floor($time / 86_400);
         if ($days > 0) {
             $return .= sprintf('%dd', $days);
         }
-        $time -= $days * 86400;
+        $time -= $days * 86_400;
 
         $hours   = floor($time / 3600);
         if ($hours > 0) {
