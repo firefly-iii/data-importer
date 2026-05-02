@@ -97,14 +97,12 @@ abstract class Request
         $body    = null;
 
         try {
-            $res = $client->request('GET', $fullUrl, [
-                'headers' => [
-                    'Accept'        => 'application/json',
-                    'Content-Type'  => 'application/json',
-                    'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                    'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
-                ],
-            ]);
+            $res = $client->request('GET', $fullUrl, ['headers' => [
+                'Accept'        => 'application/json',
+                'Content-Type'  => 'application/json',
+                'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
+            ]]);
         } catch (ClientException|GuzzleException|TransferException $e) {
             $statusCode      = $e->getCode();
             if (429 === $statusCode) {

@@ -274,9 +274,13 @@ final class ConfigurationContractValidatorTest extends TestCase
 
         $config = $this->createMockConfiguration();
         $config->setAccounts(['acc1' => 0]);
-        $config->setNewAccounts([
-            'acc1' => ['name' => 'Savings Account', 'type' => 'asset', 'currency' => 'USD', 'opening_balance' => '1000.00', 'account_role' => 'invalidRole'],
-        ]);
+        $config->setNewAccounts(['acc1' => [
+            'name'            => 'Savings Account',
+            'type'            => 'asset',
+            'currency'        => 'USD',
+            'opening_balance' => '1000.00',
+            'account_role'    => 'invalidRole',
+        ]]);
 
         $result = $this->validator->validateConfigurationContract($config);
 
@@ -309,9 +313,13 @@ final class ConfigurationContractValidatorTest extends TestCase
         return Configuration::fromArray([
             'flow'        => $flow,
             'accounts'    => ['acc1' => 1, 'acc2' => 0],
-            'new_account' => [
-                'acc2' => ['name' => 'New Account', 'type' => 'asset', 'currency' => 'USD', 'opening_balance' => '1000.00', 'account_role' => 'defaultAsset'],
-            ],
+            'new_account' => ['acc2' => [
+                'name'            => 'New Account',
+                'type'            => 'asset',
+                'currency'        => 'USD',
+                'opening_balance' => '1000.00',
+                'account_role'    => 'defaultAsset',
+            ]],
         ]);
     }
 
