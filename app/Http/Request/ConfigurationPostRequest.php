@@ -85,6 +85,8 @@ final class ConfigurationPostRequest extends Request
             'ignore_duplicate_lines'        => $this->convertBoolean($this->get('ignore_duplicate_lines')),
             'ignore_duplicate_transactions' => $this->convertBoolean($this->get('ignore_duplicate_transactions')),
             'skip_form'                     => $this->convertBoolean($this->get('skip_form')),
+            'skip_first_lines'              => $this->convertToInteger('skip_first_lines'),
+            'skip_last_lines'               => $this->convertToInteger('skip_last_lines'),
             'add_import_tag'                => $this->convertBoolean($this->get('add_import_tag')),
             'pending_transactions'          => $this->convertBoolean($this->get('pending_transactions')),
             'custom_tag'                    => $this->convertToString('custom_tag'),
@@ -194,6 +196,8 @@ final class ConfigurationPostRequest extends Request
             'ignore_duplicate_lines'        => 'numeric|between:0,1',
             'ignore_duplicate_transactions' => 'numeric|between:0,1',
             'skip_form'                     => 'numeric|between:0,1',
+            'skip_first_lines'              => 'nullable|integer|min:0',
+            'skip_last_lines'               => 'nullable|integer|min:0',
             'add_import_tag'                => 'numeric|between:0,1',
             'ignore_spectre_categories'     => 'numeric|between:0,1',
 

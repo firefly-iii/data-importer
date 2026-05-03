@@ -76,11 +76,14 @@ final class RoleService
         }
 
         $headers   = [];
+        $skipFirstLines = $configuration->getSkipFirstLines();
+        
         if (true === $configuration->isHeaders()) {
             try {
+                // Skip first N lines, then read the header line
                 $stmt    = new Statement()
                     ->limit(1)
-                    ->offset(0)
+                    ->offset($skipFirstLines)
                 ;
                 $records = $stmt->process($reader);
                 $headers = $records->first();
@@ -98,9 +101,10 @@ final class RoleService
             Log::debug('Role service: file has no headers');
 
             try {
+                // Skip first N lines, then read the first data line to count columns
                 $stmt    = new Statement()
                     ->limit(1)
-                    ->offset(0)
+                    ->offset($skipFirstLines)
                 ;
                 $records = $stmt->process($reader);
                 $count   = count($records->first());
@@ -148,14 +152,46 @@ final class RoleService
                 break;
         }
 
-        $offset         = $configuration->isHeaders() ? 1 : 0;
+        $skipFirstLines = $configuration->getSkipFirstLines();
+        $skipLastLines  = $configuration->getSkipLastLines();
+        
+        // Calculate offset: skip_first_lines + (1 if headers)
+        $offset         = $skipFirstLines + ($configuration->isHeaders() ? 1 : 0);
         $examples       = [];
         $pseudoExamples = [];
+
+        // Calculate example limit: min(EXAMPLE_COUNT, total_rows - skip_first - skip_last - headers)
+        $exampleLimit   = self::EXAMPLE_COUNT;
+        
+        try {
+            // Count total rows in file
+            $totalRows = $reader->count();
+            
+            // Calculate available data rows: total - skip_first - skip_last - (1 if headers)
+            $availableRows = $totalRows - $skipFirstLines - $skipLastLines - ($configuration->isHeaders() ? 1 : 0);
+            
+            if ($availableRows > 0) {
+                $exampleLimit = min(self::EXAMPLE_COUNT, $availableRows);
+                Log::debug(sprintf('Total rows: %d, skip first: %d, skip last: %d, headers: %s, available: %d, example limit: %d',
+                    $totalRows, $skipFirstLines, $skipLastLines, $configuration->isHeaders() ? 'yes' : 'no', $availableRows, $exampleLimit
+                ));
+            } else {
+                // No data rows available
+                $exampleLimit = 0;
+                Log::warning(sprintf('No data rows available for examples: total=%d, skip_first=%d, skip_last=%d, headers=%s',
+                    $totalRows, $skipFirstLines, $skipLastLines, $configuration->isHeaders() ? 'yes' : 'no'
+                ));
+            }
+        } catch (Exception $e) {
+            Log::error(sprintf('[%s]: Error counting rows: %s', config('importer.version'), $e->getMessage()));
+            // Fall back to default behavior if counting fails
+            $exampleLimit = self::EXAMPLE_COUNT;
+        }
 
         // make statement.
         try {
             $stmt = new Statement()
-                ->limit(self::EXAMPLE_COUNT)
+                ->limit($exampleLimit)
                 ->offset($offset)
             ;
 

@@ -95,6 +95,40 @@
                     </div>
                 </div>
 
+                <div class="form-group row mb-3">
+                    <label for="skip_first_lines" class="col-sm-3 col-form-label">Skip first lines</label>
+                    <div class="col-sm-9">
+                        <input type="number"
+                            name="skip_first_lines"
+                            id="skip_first_lines"
+                            class="form-control"
+                            min="0"
+                            value="{{ $configuration->getSkipFirstLines() ?? 0 }}"
+                            aria-describedby="skipFirstLinesHelp">
+                        <small id="skipFirstLinesHelp" class="form-text text-muted">
+                            Number of lines to skip at the beginning of the file (before processing headers or data).
+                            Useful for files with additional rows at the top.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-3">
+                    <label for="skip_last_lines" class="col-sm-3 col-form-label">Skip last lines</label>
+                    <div class="col-sm-9">
+                        <input type="number"
+                            name="skip_last_lines"
+                            id="skip_last_lines"
+                            class="form-control"
+                            min="0"
+                            value="{{ $configuration->getSkipLastLines() ?? 0 }}"
+                            aria-describedby="skipLastLinesHelp">
+                        <small id="skipLastLinesHelp" class="form-text text-muted">
+                            Number of lines to skip at the end of the file.
+                            Useful for files with additional rows at the bottom.
+                        </small>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

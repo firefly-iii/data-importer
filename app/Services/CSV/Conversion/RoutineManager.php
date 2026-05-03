@@ -79,6 +79,8 @@ final class RoutineManager implements RoutineManagerInterface
         // convert CSV file into raw lines (arrays)
         $this->csvFileProcessor->setHasHeaders($this->configuration->isHeaders());
         $this->csvFileProcessor->setDelimiter($this->configuration->getDelimiter());
+        $this->csvFileProcessor->setSkipFirstLines($this->configuration->getSkipFirstLines());
+        $this->csvFileProcessor->setSkipLastLines($this->configuration->getSkipLastLines());
 
         $this->csvFileProcessor->setReader(FileReader::getReaderFromContent($this->importJob->getImportableFileString($this->configuration->isConversion())));
 

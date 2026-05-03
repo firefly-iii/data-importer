@@ -41,6 +41,8 @@ final class CSVFileProcessor
 {
     private string $delimiter;
     private bool $hasHeaders;
+    private int $skipFirstLines = 0;
+    private int $skipLastLines = 0;
     private Reader $reader;
     private ImportJob $importJob;
     private Configuration $configuration;
@@ -61,7 +63,16 @@ final class CSVFileProcessor
     public function processCSVFile(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $offset = $this->hasHeaders ? 1 : 0;
+
+        // Calculate total offset: skip_first_lines + (1 if headers)
+        $offset = $this->skipFirstLines + ($this->hasHeaders ? 1 : 0);
+
+        Log::debug(sprintf(
+            'Skip first lines: %d, Has headers: %s, Total offset: %d',
+            $this->skipFirstLines,
+            $this->hasHeaders ? 'yes' : 'no',
+            $offset
+        ));
 
         try {
             $this->reader->setDelimiter($this->delimiter);
@@ -108,6 +119,16 @@ final class CSVFileProcessor
         $this->delimiter = $map[$delimiter] ?? ',';
     }
 
+    public function setSkipFirstLines(int $lines): void
+    {
+        $this->skipFirstLines = $lines;
+    }
+
+    public function setSkipLastLines(int $lines): void
+    {
+        $this->skipLastLines = $lines;
+    }
+
     /**
      * Loop all records from CSV file.
      *
@@ -118,15 +139,44 @@ final class CSVFileProcessor
         $updatedRecords = [];
         $count          = $records->count();
         Log::info(sprintf('Now in %s with %d records', __METHOD__, $count));
+
+        // Calculate how many lines to actually process
+        $linesToProcess = $this->skipLastLines > 0
+            ? $count - $this->skipLastLines
+            : $count;
+
+        Log::debug(sprintf(
+            'Total records: %d, Skip last lines: %d, Lines to process: %d',
+            $count,
+            $this->skipLastLines,
+            $linesToProcess
+        ));
+
         $currentIndex   = 1;
         foreach ($records as $line) {
+            // Stop processing if we've reached the lines to skip at the end
+            if ($currentIndex > $linesToProcess) {
+                Log::debug(sprintf(
+                    'Skipping line %d/%d (part of last %d lines)',
+                    $currentIndex,
+                    $count,
+                    $this->skipLastLines
+                ));
+                ++$currentIndex;
+                continue;
+            }
+
             $line             = $this->sanitize($line);
-            Log::debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
+            Log::debug(sprintf('Parsing line %d/%d', $currentIndex, $linesToProcess));
             $updatedRecords[] = $line;
 
             ++$currentIndex;
         }
-        Log::info(sprintf('Parsed all %d lines.', $count));
+        Log::info(sprintf(
+            'Parsed %d lines (skipped last %d lines).',
+            count($updatedRecords),
+            $this->skipLastLines
+        ));
 
         // exclude double lines.
         if ($this->configuration->isIgnoreDuplicateLines()) {

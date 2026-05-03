@@ -69,6 +69,8 @@ final class Configuration
 
     // csv config
     private string $groupedTransactionHandling;
+    private int $skipFirstLines = 0;
+    private int $skipLastLines = 0;
 
     // spectre + nordigen configuration
     private bool $headers                 = false;
@@ -361,6 +363,8 @@ final class Configuration
         $object->date                        = $array['date'] ?? 'Y-m-d';
         $object->defaultAccount              = $array['default_account'] ?? 0;
         $object->delimiter                   = $delimiters[$array['delimiter'] ?? ','] ?? 'comma';
+        $object->skipFirstLines              = $array['skip_first_lines'] ?? 0;
+        $object->skipLastLines               = $array['skip_last_lines'] ?? 0;
         $object->rules                       = $array['rules'] ?? true;
         $object->webhooks                    = $array['webhooks'] ?? true;
         $object->skipForm                    = $array['skip_form'] ?? false;
@@ -717,6 +721,16 @@ final class Configuration
         return $this->delimiter;
     }
 
+    public function getSkipFirstLines(): int
+    {
+        return $this->skipFirstLines;
+    }
+
+    public function getSkipLastLines(): int
+    {
+        return $this->skipLastLines;
+    }
+
     public function getDoMapping(): array
     {
         return $this->doMapping;
@@ -1022,6 +1036,8 @@ final class Configuration
             'date'                         => $this->date,
             'default_account'              => $this->defaultAccount,
             'delimiter'                    => $this->delimiter,
+            'skip_first_lines'             => $this->skipFirstLines,
+            'skip_last_lines'              => $this->skipLastLines,
             'headers'                      => $this->headers,
             'rules'                        => $this->rules,
             'webhooks'                     => $this->webhooks,
@@ -1252,6 +1268,8 @@ final class Configuration
         $this->dateNotBefore               = (string) $request['date_not_before'];
         $this->dateNotAfter                = (string) $request['date_not_after'];
         $this->conversion                  = $request['conversion'];
+        $this->skipFirstLines              = $request['skip_first_lines'];
+        $this->skipLastLines               = $request['skip_last_lines'];
         $this->groupedTransactionHandling  = $request['grouped_transaction_handling'];
         $this->useEntireOpposingAddress    = $request['use_entire_opposing_address'];
         $this->newAccounts                 = $request['to_create'];
