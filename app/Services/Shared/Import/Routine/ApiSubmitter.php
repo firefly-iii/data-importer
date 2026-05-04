@@ -658,6 +658,7 @@ final class ApiSubmitter
             /** @var PostFinishBatchResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
+            Log::error(sprintf('Could not finish batch: %s', $e->getMessage()));
             $this->importJob->submissionStatus->addWarning(0, 'Could not finish batch, but that\'s OK.');
 
             return;
