@@ -2323,16 +2323,16 @@
         },
         {
             "name": "moneyphp/money",
-            "version": "v4.8.0",
+            "version": "v4.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/moneyphp/money.git",
-                "reference": "b358727ea5a5cd2d7475e59c31dfc352440ae7ec"
+                "reference": "d49ee625c6ba79b9d7a228ce153b02fc1032152b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/moneyphp/money/zipball/b358727ea5a5cd2d7475e59c31dfc352440ae7ec",
-                "reference": "b358727ea5a5cd2d7475e59c31dfc352440ae7ec",
+                "url": "https://api.github.com/repos/moneyphp/money/zipball/d49ee625c6ba79b9d7a228ce153b02fc1032152b",
+                "reference": "d49ee625c6ba79b9d7a228ce153b02fc1032152b",
                 "shasum": ""
             },
             "require": {
@@ -2407,9 +2407,9 @@
             ],
             "support": {
                 "issues": "https://github.com/moneyphp/money/issues",
-                "source": "https://github.com/moneyphp/money/tree/v4.8.0"
+                "source": "https://github.com/moneyphp/money/tree/v4.9.0"
             },
-            "time": "2025-10-23T07:55:09+00:00"
+            "time": "2026-05-04T20:23:15+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -8567,16 +8567,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "14.1.6",
+            "version": "14.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "4991e47adce8e31e554aee8fdaabfc3b1d60707d"
+                "reference": "da6e6b64940901650abcea62430c8c24926b7a71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/4991e47adce8e31e554aee8fdaabfc3b1d60707d",
-                "reference": "4991e47adce8e31e554aee8fdaabfc3b1d60707d",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/da6e6b64940901650abcea62430c8c24926b7a71",
+                "reference": "da6e6b64940901650abcea62430c8c24926b7a71",
                 "shasum": ""
             },
             "require": {
@@ -8633,7 +8633,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.1.6"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.1.7"
             },
             "funding": [
                 {
@@ -8653,7 +8653,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-24T13:10:08+00:00"
+            "time": "2026-05-04T15:51:53+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -9105,12 +9105,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "2221f6ef09e87784e78e188aadd8f7e3a50e679a"
+                "reference": "f31a4bb999a8e810b02e0d004961b6152826c100"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/2221f6ef09e87784e78e188aadd8f7e3a50e679a",
-                "reference": "2221f6ef09e87784e78e188aadd8f7e3a50e679a",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f31a4bb999a8e810b02e0d004961b6152826c100",
+                "reference": "f31a4bb999a8e810b02e0d004961b6152826c100",
                 "shasum": ""
             },
             "conflict": {
@@ -9170,7 +9170,7 @@
                 "awesome-support/awesome-support": "<=6.0.7",
                 "aws/aws-sdk-php": "<=3.371.3",
                 "ayacoo/redirect-tab": "<2.1.2|>=3,<3.1.7|>=4,<4.0.5",
-                "azuracast/azuracast": "<=0.23.3",
+                "azuracast/azuracast": "<=0.23.5",
                 "b13/seo_basics": "<0.8.2",
                 "backdrop/backdrop": "<=1.32",
                 "backpack/crud": "<3.4.9",
@@ -9225,7 +9225,7 @@
                 "cesnet/simplesamlphp-module-proxystatistics": "<3.1",
                 "chriskacerguis/codeigniter-restserver": "<=2.7.1",
                 "chrome-php/chrome": "<1.14",
-                "ci4-cms-erp/ci4ms": "<=0.31.6",
+                "ci4-cms-erp/ci4ms": "<=0.31.7",
                 "civicrm/civicrm-core": ">=4.2,<4.2.9|>=4.3,<4.3.3",
                 "ckeditor/ckeditor": "<4.25",
                 "clickstorm/cs-seo": ">=6,<6.8|>=7,<7.5|>=8,<8.4|>=9,<9.3",
@@ -9596,6 +9596,7 @@
                 "mautic/core-lib": ">=1.0.0.0-beta,<4.4.13|>=5.0.0.0-alpha,<5.1.1",
                 "mautic/grapes-js-builder-bundle": ">=4,<4.4.18|>=5,<5.2.9|>=6,<6.0.7",
                 "maximebf/debugbar": "<1.19",
+                "mckenziearts/livewire-markdown-editor": "<1.3",
                 "mdanter/ecc": "<2",
                 "mediawiki/abuse-filter": "<1.39.9|>=1.40,<1.41.3|>=1.42,<1.42.2",
                 "mediawiki/cargo": "<3.8.3",
@@ -9639,6 +9640,7 @@
                 "munkireport/softwareupdate": "<1.6",
                 "mustache/mustache": ">=2,<2.14.1",
                 "mwdelaney/wp-enable-svg": "<=0.2",
+                "nabeel/phpvms": "<7.0.6",
                 "namshi/jose": "<2.2",
                 "nasirkhan/laravel-starter": "<11.11",
                 "nategood/httpful": "<1",
@@ -10035,7 +10037,7 @@
                 "webcoast/deferred-image-processing": "<1.0.2",
                 "webklex/laravel-imap": "<5.3",
                 "webklex/php-imap": "<5.3",
-                "webonyx/graphql-php": "<=15.31.4",
+                "webonyx/graphql-php": "<15.32.2",
                 "webpa/webpa": "<3.1.2",
                 "webreinvent/vaahcms": "<=2.3.1",
                 "wikibase/wikibase": "<=1.39.3",
@@ -10154,7 +10156,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-30T21:24:12+00:00"
+            "time": "2026-05-04T22:23:55+00:00"
         },
         {
             "name": "sebastian/cli-parser",
