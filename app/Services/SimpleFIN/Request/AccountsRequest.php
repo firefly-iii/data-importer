@@ -42,7 +42,7 @@ final class AccountsRequest extends SimpleFINRequest
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // chunk time diff
-        $chunkSize = config('simplefin.max_chunk_size');
+        $chunkSize       = config('simplefin.max_chunk_size');
         $chunks          = [];
         $params          = $this->getParameters();
         if (array_key_exists('start-date', $params) || array_key_exists('end-date', $params)) {
@@ -137,7 +137,7 @@ final class AccountsRequest extends SimpleFINRequest
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $return       = [];
-        $chunkSize = config('simplefin.max_chunk_size');
+        $chunkSize    = config('simplefin.max_chunk_size');
         $size         = $chunkSize * 24 * 60 * 60;
         $currentStart = $start;
         Log::debug(sprintf('Start is %d (%s)', $start, Carbon::createFromTimestamp($start, config('app.timezone'))->toW3cString()));

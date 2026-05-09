@@ -34,7 +34,7 @@ return [
     'token'                           => env('SIMPLEFIN_TOKEN', ''),
     'origin_url'                      => env('SIMPLEFIN_CORS_ORIGIN_URL', ''),
 
-    'max_chunk_size' => 44, // in days
+    'max_chunk_size'                  => 44, // in days
 
     /*
     |--------------------------------------------------------------------------
