@@ -42,6 +42,7 @@ final class AccountsRequest extends SimpleFINRequest
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // chunk time diff
+        $chunkSize = config('simplefin.max_chunk_size');
         $chunks          = [];
         $params          = $this->getParameters();
         if (array_key_exists('start-date', $params) || array_key_exists('end-date', $params)) {
@@ -50,12 +51,12 @@ final class AccountsRequest extends SimpleFINRequest
             $end   = $params['end-date'] ?? time();
             $diff  = $end - $start;
             Log::debug(sprintf('Difference is %d seconds, or %s', $diff, $this->formatTime($diff)));
-            if ($diff > (90 * 24 * 60 * 60)) {
-                Log::debug('More than 90 days, need to chunk this.');
+            if ($diff > ($chunkSize * 24 * 60 * 60)) {
+                Log::debug(sprintf('More than %d days, need to chunk this.', $chunkSize));
                 $chunks = $this->chunkByTime($start, $end);
             }
-            if ($diff <= (90 * 24 * 60 * 60)) {
-                Log::debug('No more than 90 days, no need to chunk this.');
+            if ($diff <= ($chunkSize * 24 * 60 * 60)) {
+                Log::debug(sprintf('No more than %d days, no need to chunk this.', $chunkSize));
                 $chunk    = ['start-date' => $start];
                 if (array_key_exists('end-date', $params)) {
                     $chunk['end-date'] = $params['end-date'];
@@ -136,7 +137,8 @@ final class AccountsRequest extends SimpleFINRequest
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
         $return       = [];
-        $size         = 90 * 24 * 60 * 60;
+        $chunkSize = config('simplefin.max_chunk_size');
+        $size         = $chunkSize * 24 * 60 * 60;
         $currentStart = $start;
         Log::debug(sprintf('Start is %d (%s)', $start, Carbon::createFromTimestamp($start, config('app.timezone'))->toW3cString()));
         Log::debug(sprintf('End is   %d (%s)', $end, Carbon::createFromTimestamp($end, config('app.timezone'))->toW3cString()));
