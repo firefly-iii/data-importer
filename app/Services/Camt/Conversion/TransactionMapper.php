@@ -359,7 +359,7 @@ final class TransactionMapper
             return null;
         }
         if (0 === bccomp('0', $current['amount'])) {
-            Log::error(sprintf('Array has "%s" as amount, cannot fix.', $current['amount']), $current);
+            Log::error(sprintf('Array has "%s" as amount, cannot fix.', e($current['amount'])), $current);
             $this->importJob->conversionStatus->addError(0, sprintf(
                 'Encountered transaction with amount "%s". This transaction cannot be imported. Please see the logs for more details.',
                 $current['amount']

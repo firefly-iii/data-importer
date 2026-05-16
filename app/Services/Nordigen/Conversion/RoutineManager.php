@@ -143,26 +143,26 @@ final class RoutineManager implements RoutineManagerInterface
 
             // add IBAN if present
             if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
-                $message .= sprintf(' (IBAN %s)', $account['iban']);
+                $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
             if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
-                $message .= sprintf(' (account number %s)', $account['number']);
+                $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= sprintf('. The limit resets in %s. ', Request::formatTime($rateLimit['reset']));
         }
         if ($rateLimit['remaining'] > 0) {
-            $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], $account['name']);
+            $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], e($account['name']));
 
             // add IBAN if present
             if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
-                $message .= sprintf(' (IBAN %s)', $account['iban']);
+                $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
             if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
-                $message .= sprintf(' (account number %s)', $account['number']);
+                $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= '. ';
         }
@@ -191,7 +191,7 @@ final class RoutineManager implements RoutineManagerInterface
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // add error to current error thing:
-            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw $e;
@@ -224,7 +224,7 @@ final class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
@@ -255,7 +255,7 @@ final class RoutineManager implements RoutineManagerInterface
 
                 continue;
             }
-            Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], $fireflyIIIAccount['name']));
+            Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], e($fireflyIIIAccount['name'])));
             $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->importJob->conversionStatus->addWarning(0, $message);

@@ -119,7 +119,7 @@ final class TransactionProcessor
                 Log::debug(sprintf('TransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException $e) {
                 Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
-                $this->importJob->conversionStatus->addWarning(0, $e->getMessage());
+                $this->importJob->conversionStatus->addWarning(0, e($e->getMessage()));
                 $return[$accountUid] = [];
                 ++$index;
 
@@ -192,7 +192,7 @@ final class TransactionProcessor
                 $this->importJob->conversionStatus->addWarning(0, sprintf(
                     'Transaction #%s ("%s") has an amount of zero and has been ignored.',
                     $transaction->transactionId,
-                    $transaction->getDescription()
+                    e($transaction->getDescription())
                 ));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
 

@@ -227,7 +227,7 @@ final class ApiSubmitter
             $exists       = $this->searchFieldUsingCount($field, $value);
             if ($exists) {
                 Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in a deleted transaction group. Return false', $field, $value));
-                $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', $field, $value);
+                $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', e($field), e($value));
                 if (false === config('importer.ignore_duplicate_errors')) {
                     $this->importJob->submissionStatus->addError($index, $message);
                 }
@@ -386,7 +386,7 @@ final class ApiSubmitter
             foreach ($response->errors->messages() as $key => $errors) {
                 Log::error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
-                    $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
+                    $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, e($this->getOriginalValue($key, $line)));
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
                         $this->importJob->submissionStatus->addError($index, $msg);
                     }
@@ -624,7 +624,7 @@ final class ApiSubmitter
             /** @var PostTagResponse|ValidationErrorResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
-            $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
+            $message = sprintf('[a121]: Could not create tag. %s', e($e->getMessage()));
             Log::error(sprintf('[%s] %s', config('importer.version'), $message));
             $this->importJob->submissionStatus->addError(0, $message);
 

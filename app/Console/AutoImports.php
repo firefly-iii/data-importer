@@ -444,7 +444,7 @@ trait AutoImports
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
-            $this->importJob->submissionStatus->addError(0, $e->getMessage());
+            $this->importJob->submissionStatus->addError(0, e($e->getMessage()));
             $this->repository->saveToDisk($this->importJob);
 
             return;
