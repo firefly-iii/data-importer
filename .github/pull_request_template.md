@@ -39,6 +39,8 @@ Example: Fixes #1234. See also #3456.
 If AI tools were involved in creating this PR, please check all boxes that apply
 below and make sure that you adhere to our Automated Contributions Policy:
 https://docs.firefly-iii.org/explanation/support/#automated-contributions-policy
+
+If you remove or skip this disclosure, your PR may be ignored.
 -->
 I used AI assistance for:
 - [ ] Code generation (e.g., when writing an implementation or fixing a bug)
