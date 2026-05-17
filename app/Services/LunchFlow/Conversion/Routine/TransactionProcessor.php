@@ -183,7 +183,7 @@ final class TransactionProcessor
                     $transaction->id,
                     $transaction->account,
                     e($transaction->getDestinationName()),
-                  e($transaction->getDescription())
+                    e($transaction->getDescription())
                 ));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->amount));
 
