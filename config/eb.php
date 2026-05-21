@@ -31,6 +31,6 @@ return [
     'unique_column_options' => [
         'external-id' => 'External identifier',
     ],
-    'add_import_ip_header' => env('ENABLE_BANKING_IMPORT_IP_HEADER', false),
-    'import_ip' => env('ENABLE_BANKING_IMPORT_IP','127.0.0.1'),
+    'add_import_ip_header'  => env('ENABLE_BANKING_IMPORT_IP_HEADER', false),
+    'import_ip'             => env('ENABLE_BANKING_IMPORT_IP', '127.0.0.1'),
 ];

@@ -34,7 +34,6 @@ use App\Services\Shared\Response\Response;
  */
 final class GetAccountDetailsRequest extends Request
 {
-
     public function __construct(string $url, string $accountId)
     {
         $this->setBase($url);
