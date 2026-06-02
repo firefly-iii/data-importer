@@ -30,7 +30,9 @@ use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+
 use function Safe\json_decode;
+
 /**
  * Class PostNewTokenRequest
  */

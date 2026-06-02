@@ -68,7 +68,7 @@ final class ApiSubmitter
     {
         $importJob->refreshInstanceIdentifier();
         $this->configuration = $importJob->getConfiguration();
-        $this->roles = $this->configuration->getRoles();
+        $this->roles         = $this->configuration->getRoles();
         $this->mapping       = $this->configuration->getMapping();
         $this->repository    = new ImportJobRepository();
 
