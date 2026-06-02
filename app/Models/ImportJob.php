@@ -304,7 +304,6 @@ final class ImportJob implements Arrayable
 
     /**
      * Returns the service accounts.
-     * @return array
      */
     public function getServiceAccounts(): array
     {
