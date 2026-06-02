@@ -302,6 +302,10 @@ final class ImportJob implements Arrayable
         $this->convertedTransactions = $convertedTransactions;
     }
 
+    /**
+     * Returns the service accounts.
+     * @return array
+     */
     public function getServiceAccounts(): array
     {
         // Log::debug(__METHOD__);

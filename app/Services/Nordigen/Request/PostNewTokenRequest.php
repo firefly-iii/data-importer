@@ -30,7 +30,7 @@ use App\Services\Shared\Response\Response;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
-
+use function Safe\json_decode;
 /**
  * Class PostNewTokenRequest
  */
@@ -66,7 +66,7 @@ final class PostNewTokenRequest extends Request
             throw new ImporterHttpException($e->getMessage(), 0, $e);
         }
         $body   = (string) $res->getBody();
-        $json   = json_decode($body, true, JSON_THROW_ON_ERROR);
+        $json   = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 
         return new TokenSetResponse($json);
     }
