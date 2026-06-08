@@ -125,7 +125,7 @@ jobs:
           npm update
           npm run build --workspace=v2
       - name: Setup Mago
-        uses: nhedger/setup-mago@v1
+        uses: nhedger/setup-mago@v2
       - name: Code cleanup
         id: code-cleanup
         uses: JC5/firefly-iii-dev@main
