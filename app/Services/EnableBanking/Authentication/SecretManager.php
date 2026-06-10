@@ -90,9 +90,16 @@ final class SecretManager
         $sessionKey = self::getSessionPrivateKey();
 
         if ('' === $sessionKey) {
-            Log::debug('No Enable Banking private key in session, will return config variable.');
-
+            Log::debug('No Enable Banking private key in session, will return config variable!');
             $privateKey = (string) config('eb.private_key');
+
+            // see if this is a file that exists and is readable.
+            if(false !== realpath($privateKey) &&
+               file_exists(realpath($privateKey)) && is_readable(realpath($privateKey))) {
+                Log::debug('Enable Banking private key is a file, will try to read it.');
+                $privateKey = file_get_contents(realpath($privateKey));
+            }
+
             if (self::isBase64($privateKey)) {
                 Log::debug('The key is already base64, format it into PEM and return.');
 
