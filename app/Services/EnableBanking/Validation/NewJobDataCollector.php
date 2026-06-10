@@ -128,16 +128,27 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $total    = count($accounts);
 
                 if (0 === $total) {
-                    Log::warning('No accounts returned from Enable Banking. For restricted clients, accounts must be pre-authorized in the Enable Banking dashboard.');
-                    $messageBag->add('no_accounts', 'No accounts were returned from Enable Banking. If you are using a restricted client, please ensure accounts are pre-authorized in your Enable Banking dashboard.');
+                    Log::warning(
+                        'No accounts returned from Enable Banking. For restricted clients, accounts must be pre-authorized in the Enable Banking dashboard.'
+                    );
+                    $messageBag->add(
+                        'no_accounts',
+                        'No accounts were returned from Enable Banking. If you are using a restricted client, please ensure accounts are pre-authorized in your Enable Banking dashboard.'
+                    );
                 }
 
                 /**
-                 * @var int $index
+                 * @var int     $index
                  * @var Account $account
                  */
                 foreach ($accounts as $index => $account) {
-                    Log::debug(sprintf('[%s] [%d/%d] Now collecting information for account %s', config('importer.version'), $index + 1, $total, $account->getUid()));
+                    Log::debug(sprintf(
+                        '[%s] [%d/%d] Now collecting information for account %s',
+                        config('importer.version'),
+                        $index + 1,
+                        $total,
+                        $account->getUid()
+                    ));
 
                     $return[] = $account;
                     $cache[]  = $account->toLocalArray();

@@ -313,9 +313,6 @@ final class ImportJob implements Arrayable
 
     /**
      * Represents the account from the importing service.
-     *
-     * @param array $serviceAccounts
-     * @return void
      */
     public function setServiceAccounts(array $serviceAccounts): void
     {

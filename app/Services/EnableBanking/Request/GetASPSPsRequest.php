@@ -34,7 +34,6 @@ use App\Services\Shared\Response\Response;
  */
 final class GetASPSPsRequest extends Request
 {
-
     public function __construct(string $url, string $country)
     {
         $this->setBase($url);
