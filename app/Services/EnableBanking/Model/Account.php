@@ -100,7 +100,6 @@ final class Account
             Log::debug(sprintf('Account identification hash is now: %s', $account->identificationHash));
         }
 
-
         return $account;
     }
 
