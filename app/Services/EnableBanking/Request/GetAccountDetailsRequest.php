@@ -34,11 +34,11 @@ use App\Services\Shared\Response\Response;
  */
 final class GetAccountDetailsRequest extends Request
 {
-    public function __construct(string $url, string $accountId)
+    public function __construct(string $url, string $accountUid)
     {
         $this->setBase($url);
         // GET /sessions/{session_id} returns session data including accounts
-        $this->setUrl(sprintf('accounts/%s/details', $accountId));
+        $this->setUrl(sprintf('accounts/%s/details', $accountUid));
     }
 
     /**

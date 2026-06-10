@@ -97,8 +97,9 @@ final class Account
         // this works because this method is always called from a fresh EB connection.
         if (!array_key_exists('class', $array)) {
             $account->identificationHash = hash('sha256', $account->identificationHash);
+            Log::debug(sprintf('Account identification hash is now: %s', $account->identificationHash));
         }
-        Log::debug(sprintf('Account identification hash is now: %s', $account->identificationHash));
+
 
         return $account;
     }

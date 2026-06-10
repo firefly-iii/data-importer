@@ -62,6 +62,7 @@ final class Configuration
     // nordigen configuration
     private string $delimiter             = 'comma';
     private array  $doMapping             = [];
+    private string $fileName = '(unknown)';
 
     // flow and file type
     private string $duplicateDetectionMethod;
@@ -128,6 +129,7 @@ final class Configuration
     private function __construct()
     {
         $this->customTag                   = '';
+        $this->fileName = '(unknown)';
 
         // date range settings
         $this->dateRange                   = 'all';
@@ -232,6 +234,7 @@ final class Configuration
         $object->contentType                 = $data['content_type'] ?? 'csv';
         $object->camtType                    = $data['camt_type'] ?? '';
         $object->customTag                   = $data['custom_tag'] ?? '';
+        $object->fileName = $data['file_name'] ?? '(unknown)';
 
         // camt settings
         $object->groupedTransactionHandling  = $data['grouped_transaction_handling'] ?? 'single';
@@ -373,6 +376,7 @@ final class Configuration
         $object->contentType                 = $array['content_type'] ?? 'csv';
         $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
+        $object->fileName = $array['file_name'] ?? '(unknown)';
 
         // Log::debug(sprintf('Configuration fromArray, default_account=%s', var_export($object->defaultAccount, true)));
 
@@ -509,6 +513,7 @@ final class Configuration
         $object->contentType                 = $array['content_type'] ?? 'csv';
         $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
+        $object->fileName = $array['file_name'] ?? '(unknown)';
 
         Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
 
@@ -1039,6 +1044,7 @@ final class Configuration
             'content_type'                 => $this->contentType,
             'camt_type'                    => $this->camtType,
             'custom_tag'                   => $this->customTag,
+            'file_name' => $this->fileName,
 
             // spectre
             'identifier'                   => $this->identifier,
@@ -1233,6 +1239,7 @@ final class Configuration
         $this->addImportTag                = $request['add_import_tag'];
         $this->pendingTransactions         = $request['pending_transactions'];
         $this->customTag                   = $request['custom_tag'];
+        $this->fileName = $request['file_name'] ?? '(unknown)';
         $this->duplicateDetectionMethod    = $request['duplicate_detection_method'];
         $this->ignoreSpectreCategories     = $request['ignore_spectre_categories'];
         $this->mapAllData                  = $request['map_all_data'];
@@ -1268,4 +1275,16 @@ final class Configuration
         $this->migrateSingleIdentifierToPseudoIdentifier();
         $this->updateDateRange();
     }
+
+    public function getFileName(): string
+    {
+        return $this->fileName;
+    }
+
+    public function setFileName(string $fileName): void
+    {
+        $this->fileName = $fileName;
+    }
+
+
 }
