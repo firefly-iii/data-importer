@@ -51,6 +51,9 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $this->repository = new ImportJobRepository();
     }
 
+    /**
+     * @throws ImporterErrorException
+     */
     public function collectAccounts(): MessageBag
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
@@ -121,8 +124,12 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     }
                     $getAccountDetailRequest = new GetAccountDetailsRequest($url, $account);
 
+                    try {
                     /** @var AccountDetailsResponse $res */
                     $res                     = $getAccountDetailRequest->get();
+                    } catch (ImporterHttpException $e) {
+                        throw new ImporterErrorException($e->getMessage(), 0, $e);
+                    }
                     $accounts[]              = $res->account;
                 }
                 $total    = count($accounts);
