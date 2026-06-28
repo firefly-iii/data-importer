@@ -10,12 +10,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 <!-- summary: This release fixes a variety of bugs and updates a lot of used packages. -->
 
 ### Fixed
-- #11891
-- #11928
-- #12168
-- #12250
-- #12279
-- #12374
+- [Discussion 11891](https://github.com/orgs/firefly-iii/discussions/11891) (Enable Banking use of environment variables) started by @Ilpredatore
+- [Discussion 11928](https://github.com/orgs/firefly-iii/discussions/11928) (Import transaction with destination account type "liability") started by @zearan
+- [Issue 12168](https://github.com/firefly-iii/firefly-iii/issues/12168) (Error in Data Importer: `$importJob` must not be accessed before initialization) reported by @Kaysera
+- [Issue 12250](https://github.com/firefly-iii/firefly-iii/issues/12250) (.env.example needs a fix for oauth access token generation location) reported by @cloudboundboris
+- [Discussion 12279](https://github.com/orgs/firefly-iii/discussions/12279) (Question / Tips wanted: Handling strict bank rate limits (PSU-IP-Address) during autoimport) started by @torsteinelv
+- [Issue 12374](https://github.com/firefly-iii/firefly-iii/issues/12374) (Fix OAuth creation link in Importer) reported by @RustyPotato
 - Fix "class visibility" which broke some imports.
 
 ## v2.3.2 - 2026-04-20
