@@ -125,8 +125,8 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     $getAccountDetailRequest = new GetAccountDetailsRequest($url, $account);
 
                     try {
-                    /** @var AccountDetailsResponse $res */
-                    $res                     = $getAccountDetailRequest->get();
+                        /** @var AccountDetailsResponse $res */
+                        $res = $getAccountDetailRequest->get();
                     } catch (ImporterHttpException $e) {
                         throw new ImporterErrorException($e->getMessage(), 0, $e);
                     }
