@@ -41,7 +41,7 @@ final class SelectionRequest extends Request
 
     public function rules(): array
     {
-        return ['country' => 'required|not_in:XX', 'bank_*' => 'required', 'days' => 'required|numeric|between:1,1000'];
+        return ['country' => ['required', 'not_in:XX'], 'bank_*' => 'required', 'days' => ['required', 'numeric', 'between:1,1000']];
     }
 
     /**

@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.3.3 - 2026-06-28
+
+> [!WARNING]
+> Some changes in this release may lead to duplicate transactions. This is caused by changes in the data handling routines. This is unfortunate, but a result of new insights, changed APIs and other minor fixes. My apologies for any inconvenience. I try to avoid these kinds of changes, but it can't always be helped.
+
+<!-- summary: This release fixes a variety of bugs and updates a lot of used packages. -->
+
+### Fixed
+- #11891
+- #11928
+- #12168
+- #12250
+- #12279
+- #12374
+- Fix "class visibility" which broke some imports.
+
 ## v2.3.2 - 2026-04-20
 
 > [!WARNING]
