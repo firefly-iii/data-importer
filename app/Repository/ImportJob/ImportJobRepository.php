@@ -127,7 +127,7 @@ final class ImportJobRepository
     /**
      * FIXME: this is starting to look like a "catch-all" function for all tiny details that need to be taken care of when a new import is started.
      *
-     * @throws ApiHttpException
+     * @throws ImporterErrorException
      */
     public function parseImportJob(ImportJob $importJob): MessageBag
     {

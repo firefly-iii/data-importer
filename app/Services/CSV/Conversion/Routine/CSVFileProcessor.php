@@ -68,7 +68,7 @@ final class CSVFileProcessor
         } catch (Exception $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             // Log::error($e->getTraceAsString());
-            $message = sprintf('[a106]: Could not set delimiter: %s', $e->getMessage());
+            $message = sprintf('[a106]: Could not set delimiter: %s', e($e->getMessage()));
             $this->importJob->conversionStatus->addError(0, $message);
 
             return [];
@@ -83,7 +83,7 @@ final class CSVFileProcessor
         } catch (Exception $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
-            $message = sprintf('[a107]: Could not read CSV: %s', $e->getMessage());
+            $message = sprintf('[a107]: Could not read CSV: %s', e($e->getMessage()));
             $this->importJob->conversionStatus->addError(0, $message);
 
             return [];
@@ -94,7 +94,7 @@ final class CSVFileProcessor
         } catch (ImporterErrorException $e) {
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             //            Log::error($e->getTraceAsString());
-            $message = sprintf('[a108]: Could not parse CSV: %s', $e->getMessage());
+            $message = sprintf('[a108]: Could not parse CSV: %s', e($e->getMessage()));
             $this->importJob->conversionStatus->addError(0, $message);
 
             return [];

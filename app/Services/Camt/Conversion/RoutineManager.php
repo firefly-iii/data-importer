@@ -119,7 +119,7 @@ final class RoutineManager implements RoutineManagerInterface
         } catch (InvalidMessageException $e) {
             Log::error('Conversion error in RoutineManager::getCamtMessage');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-            $this->importJob->conversionStatus->addError(0, sprintf('[a104]: Could not convert CAMT.x file: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a104]: Could not convert CAMT.x file: %s', e($e->getMessage())));
 
             return null;
         }

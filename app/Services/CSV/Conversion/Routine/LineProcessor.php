@@ -88,7 +88,7 @@ final class LineProcessor
             } catch (ImporterErrorException $e) {
                 Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
                 //                Log::error($e->getTraceAsString());
-                $this->importJob->conversionStatus->addError(0, $e->getMessage());
+                $this->importJob->conversionStatus->addError(0, e($e->getMessage()));
             }
         }
 

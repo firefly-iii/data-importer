@@ -97,14 +97,27 @@ abstract class Request
 
     protected function getHeaders(): array
     {
-        $token = JWTManager::generateToken();
+        $token   = JWTManager::generateToken();
 
-        return [
+        $headers = [
             'Accept'        => 'application/json',
             'Content-Type'  => 'application/json',
             'Authorization' => sprintf('Bearer %s', $token),
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
         ];
+        if (true === config('eb.add_import_ip_header')) {
+            $ip = (string) config('eb.import_ip');
+            if ('autodetect' === $ip) {
+                $client = $this->getClient();
+                $res    = $client->get('https://icanhazip.com/');
+                $ip     = (string) $res->getBody();
+            }
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                $headers['PSU-IP-Address'] = $ip;
+            }
+        }
+
+        return $headers;
     }
 
     /**

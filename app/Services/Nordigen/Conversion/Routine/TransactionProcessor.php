@@ -115,10 +115,10 @@ final class TransactionProcessor
                     '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
                 if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
-                    $this->importJob->conversionStatus->addError(0, $e->json['summary']);
+                    $this->importJob->conversionStatus->addError(0, e($e->json['summary']));
                 }
                 if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
-                    $this->importJob->conversionStatus->addError(0, $e->json['detail']);
+                    $this->importJob->conversionStatus->addError(0, e($e->json['detail']));
                 }
                 $return[$account] = [];
                 ++$index;
@@ -131,7 +131,7 @@ final class TransactionProcessor
             try {
                 $accessToken = TokenManager::getAccessToken();
             } catch (ImporterErrorException $e) {
-                $this->importJob->conversionStatus->addError(0, $e->getMessage());
+                $this->importJob->conversionStatus->addError(0, e($e->getMessage()));
                 $return[$account] = [];
 
                 continue;
@@ -152,7 +152,7 @@ final class TransactionProcessor
                 Log::debug(sprintf('GetTransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
-                $this->importJob->conversionStatus->addWarning(0, $e->getMessage());
+                $this->importJob->conversionStatus->addWarning(0, e($e->getMessage()));
                 $return[$account]           = [];
 
                 // save the rate limits:
@@ -164,7 +164,7 @@ final class TransactionProcessor
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
                 $return[$account]           = [];
-                $this->importJob->conversionStatus->addError(0, $e->json['detail'] ?? '[a114]: Your EUA has expired.');
+                $this->importJob->conversionStatus->addError(0, e($e->json['detail'] ?? '[a114]: Your EUA has expired.'));
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
                 ++$index;
@@ -243,9 +243,9 @@ final class TransactionProcessor
                 $this->importJob->conversionStatus->addWarning(0, sprintf(
                     'Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
                     $transaction->transactionId,
-                    $transaction->getSourceName(),
-                    $transaction->getDestinationName(),
-                    $transaction->getDescription()
+                    e($transaction->getSourceName()),
+                    e($transaction->getDestinationName()),
+                    e($transaction->getDescription())
                 ));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->transactionAmount));
 

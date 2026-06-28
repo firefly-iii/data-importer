@@ -119,7 +119,7 @@ final class RoutineManager implements RoutineManagerInterface
             Log::error('Could not download transactions from Enable Banking.');
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
-            $this->importJob->conversionStatus->addError(0, sprintf('[eb001]: Could not download from Enable Banking: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[eb001]: Could not download from Enable Banking: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw $e;
@@ -137,7 +137,7 @@ final class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->importJob->conversionStatus->addError(0, sprintf('[eb002]: Error while collecting target accounts: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[eb002]: Error while collecting target accounts: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);

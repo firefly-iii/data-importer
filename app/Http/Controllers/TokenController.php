@@ -78,7 +78,7 @@ final class TokenController extends Controller
         }
         // always POST to the base URL, never the vanity URL.
         $finalURL     = sprintf('%s/oauth/token', $baseURL);
-        $params       = ['form_params'   => [
+        $params       = ['form_params' => [
             'grant_type'    => 'authorization_code',
             'client_id'     => $clientId,
             'redirect_uri'  => route('token.callback'),
@@ -92,7 +92,7 @@ final class TokenController extends Controller
         $opts         = [
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
-            'headers'         => ['User-Agent'         => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c'))],
+            'headers'         => ['User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c'))],
         ];
 
         try {

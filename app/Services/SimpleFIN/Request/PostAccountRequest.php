@@ -64,7 +64,7 @@ final class PostAccountRequest extends Request
         // should be impossible to get here (see previous code) but still check.
         if (!array_key_exists('data', $data)) {
             // return with error array:
-            if (array_key_exists('errors', $data) && is_array($data['errors'])) {
+            if (is_array($data['errors'])) {
                 return new ValidationErrorResponse($data['errors']);
             }
             // no data array and no error info, that's weird!

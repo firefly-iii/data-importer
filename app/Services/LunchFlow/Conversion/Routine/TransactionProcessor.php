@@ -182,8 +182,8 @@ final class TransactionProcessor
                     'Transaction #%s ("%s", "%s", "%s") has an amount of zero and has been ignored..',
                     $transaction->id,
                     $transaction->account,
-                    $transaction->getDestinationName(),
-                    $transaction->getDescription()
+                    e($transaction->getDestinationName()),
+                    e($transaction->getDescription())
                 ));
                 Log::debug(sprintf('Skip transaction because amount is zero: "%s".', $transaction->amount));
 

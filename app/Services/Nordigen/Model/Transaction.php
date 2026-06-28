@@ -362,7 +362,7 @@ final class Transaction
         Log::debug(__METHOD__);
         if ('' !== $this->creditorAccountIban) {
             $data      = ['iban' => $this->creditorAccountIban];
-            $rules     = ['iban'     => ['required', new Iban()]];
+            $rules     = ['iban' => ['required', new Iban()]];
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
                 Log::warning(sprintf('Destination IBAN is "%s" (creditor), but it is invalid, so ignoring', $this->creditorAccountIban));
@@ -470,7 +470,7 @@ final class Transaction
         Log::debug(__METHOD__);
         if ('' !== $this->debtorAccountIban) {
             $data      = ['iban' => $this->debtorAccountIban];
-            $rules     = ['iban'     => ['required', new Iban()]];
+            $rules     = ['iban' => ['required', new Iban()]];
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
                 Log::warning(sprintf('Source IBAN is "%s" (debtor), but it is invalid, so ignoring', $this->debtorAccountIban));

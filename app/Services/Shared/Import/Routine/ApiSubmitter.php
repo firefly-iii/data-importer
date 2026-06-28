@@ -58,6 +58,7 @@ final class ApiSubmitter
     private bool $createdTag;
     private array $mapping;
     private string $tag;
+    private array $roles;
     private string $tagDate;
     private string $vanityURL;
     private ImportJob $importJob;
@@ -67,6 +68,7 @@ final class ApiSubmitter
     {
         $importJob->refreshInstanceIdentifier();
         $this->configuration = $importJob->getConfiguration();
+        $this->roles         = $this->configuration->getRoles();
         $this->mapping       = $this->configuration->getMapping();
         $this->repository    = new ImportJobRepository();
 
@@ -148,6 +150,7 @@ final class ApiSubmitter
             return sprintf('Data Import on %s', Carbon::now()->format('Y-m-d \@ H:i'));
         }
         $items     = [
+            // '%filename%' => $this->configuration->f
             '%year%'        => Carbon::now()->format('Y'),
             '%month%'       => Carbon::now()->format('m'),
             '%month_full%'  => Carbon::now()->format('F'),
@@ -227,7 +230,7 @@ final class ApiSubmitter
             $exists       = $this->searchFieldUsingCount($field, $value);
             if ($exists) {
                 Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in a deleted transaction group. Return false', $field, $value));
-                $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', $field, $value);
+                $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', e($field), e($value));
                 if (false === config('importer.ignore_duplicate_errors')) {
                     $this->importJob->submissionStatus->addError($index, $message);
                 }
@@ -386,7 +389,7 @@ final class ApiSubmitter
             foreach ($response->errors->messages() as $key => $errors) {
                 Log::error(sprintf('Submission error: %d', $key), $errors);
                 foreach ($errors as $error) {
-                    $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, $this->getOriginalValue($key, $line));
+                    $msg = sprintf('[a117]: %s: %s (original value: "%s")', $key, $error, e($this->getOriginalValue($key, $line)));
                     if (false === $this->isDuplicationError($key, $error) || false === config('importer.ignore_duplicate_errors')) {
                         $this->importJob->submissionStatus->addError($index, $msg);
                     }
@@ -442,6 +445,10 @@ final class ApiSubmitter
     private function cleanupLine(array $line): array
     {
         Log::debug('Going to map data for this line.');
+        // OK so array 0 does not have to be the mapping, this is a bad assumption.
+        // it looks like the CSV importer already DOES the mapping somewhere so this cleanup
+        // is for OTHER import types ONLY.
+
         if (array_key_exists(0, $this->mapping)) {
             Log::debug('Configuration has mapping for opposing account name!');
 
@@ -624,7 +631,7 @@ final class ApiSubmitter
             /** @var PostTagResponse|ValidationErrorResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
-            $message = sprintf('[a121]: Could not create tag. %s', $e->getMessage());
+            $message = sprintf('[a121]: Could not create tag. %s', e($e->getMessage()));
             Log::error(sprintf('[%s] %s', config('importer.version'), $message));
             $this->importJob->submissionStatus->addError(0, $message);
 
@@ -658,6 +665,7 @@ final class ApiSubmitter
             /** @var PostFinishBatchResponse $response */
             $response = $request->post();
         } catch (ApiHttpException $e) {
+            Log::error(sprintf('Could not finish batch: %s', $e->getMessage()));
             $this->importJob->submissionStatus->addWarning(0, 'Could not finish batch, but that\'s OK.');
 
             return;

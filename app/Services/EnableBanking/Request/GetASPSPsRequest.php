@@ -34,12 +34,9 @@ use App\Services\Shared\Response\Response;
  */
 final class GetASPSPsRequest extends Request
 {
-    private string $country;
-
     public function __construct(string $url, string $country)
     {
         $this->setBase($url);
-        $this->country = $country;
         $this->setUrl(sprintf('aspsps?country=%s', $country));
     }
 

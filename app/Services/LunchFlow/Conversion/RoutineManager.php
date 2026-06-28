@@ -121,7 +121,7 @@ final class RoutineManager implements RoutineManagerInterface
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
 
             // add error to current error thing:
-            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a109]: Could not download from GoCardless: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw $e;
@@ -135,7 +135,7 @@ final class RoutineManager implements RoutineManagerInterface
         try {
             $this->transactionGenerator->collectTargetAccounts();
         } catch (ApiHttpException $e) {
-            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', $e->getMessage()));
+            $this->importJob->conversionStatus->addError(0, sprintf('[a110]: Error while collecting target accounts: %s', e($e->getMessage())));
             $this->repository->saveToDisk($this->importJob);
 
             throw new ImporterErrorException($e->getMessage(), 0, $e);
