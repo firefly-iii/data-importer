@@ -25,7 +25,12 @@ jobs:
             exit 0
           fi
 
-          echo "Not dependabot!"
+          if [[ $AUTHOR == *"github-actions"* ]]; then
+            echo "Is github-actions, stop"
+            exit 0
+          fi
+
+          echo "Not dependabot: $AUTHOR"
 
           # $BODY must contain one of these four uses.
           if [[ $BODY != *"Code generation"* &&
