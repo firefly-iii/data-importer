@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.3.4 - 2026-06-30
+
+<!-- summary: This release fixes a crash in the Soptron import routine. -->
+
+### Fixed
+- [Issue 12413](https://github.com/firefly-iii/firefly-iii/issues/12413) (Sophtron import has the wrong class visibility for a property, crashing the data importer) reported by @Apadgett879
+
 ## v2.3.3 - 2026-06-28
 
 > [!WARNING]
