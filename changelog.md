@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.3.4 - 2026-06-30
 
+<!-- summary: This release fixes a crash in the Soptron import routine. -->
+
 ### Fixed
 - #12413
 
