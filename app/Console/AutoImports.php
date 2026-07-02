@@ -42,6 +42,7 @@ use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account as LocalAccount;
 use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
 use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -175,9 +176,15 @@ trait AutoImports
     private function importFiles(string $directory, array $files): array
     {
         $exitCodes = [];
+        $total     = array_sum(array_map('count', $files));
+        $current   = 0;
+        $this->saveAutoImportProgress('running', $current, $total, null, []);
 
         foreach ($files as $jsonFile => $importableFiles) {
             foreach ($importableFiles as $importableFile) {
+                ++$current;
+                $this->saveAutoImportProgress('running', $current, $total, basename($importableFile), $exitCodes);
+
                 try {
                     $exitCodes[$importableFile] = $this->importFileAsImportJob($jsonFile, $importableFile);
                 } catch (ImporterErrorException $e) {
@@ -187,9 +194,27 @@ trait AutoImports
                 }
             }
         }
+        $this->saveAutoImportProgress('done', $current, $total, null, $exitCodes);
         Log::debug(sprintf('Collection of exit codes: %s', implode(', ', array_values($exitCodes))));
 
         return $exitCodes;
+    }
+
+    private function saveAutoImportProgress(string $status, int $current, int $total, ?string $currentFile, array $exitCodes): void
+    {
+        // keep file paths out of the response, only expose base names.
+        $codes = [];
+        foreach ($exitCodes as $file => $code) {
+            $codes[basename((string) $file)] = $code;
+        }
+        Cache::put('autoimport-status', [
+            'status'       => $status,
+            'current'      => $current,
+            'total'        => $total,
+            'current_file' => $currentFile,
+            'exit_codes'   => $codes,
+            'updated_at'   => Carbon::now()->toIso8601String(),
+        ], 86400);
     }
 
     /**

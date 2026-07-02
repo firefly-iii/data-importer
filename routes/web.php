@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 // import by POST
 Route::post('/autoimport', 'AutoImportController@index')->name('autoimport');
+Route::get('/autoimport/status', 'AutoImportController@status')->name('autoimport.status');
 Route::post('/autoupload', 'AutoUploadController@index')->name('autoupload');
 
 // new routes that use less session data and redirects.
