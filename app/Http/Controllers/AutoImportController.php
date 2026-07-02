@@ -28,9 +28,9 @@ use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
 use App\Exceptions\ImporterErrorException;
+use App\Http\Request\AutoImportRequest;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -43,10 +43,8 @@ final class AutoImportController extends Controller
     /**
      * @throws ImporterErrorException
      */
-    public function index(Request $request): JsonResponse
+    public function index(AutoImportRequest $request): JsonResponse
     {
-        $this->validateRequest($request);
-
         $argument     = (string) ($request->input('directory') ?? './');
         $directory    = realpath($argument);
         if (false === $directory) {
@@ -82,35 +80,14 @@ final class AutoImportController extends Controller
         return response()->json(['message' => 'Seems to have worked!']);
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    public function status(Request $request): JsonResponse
+    public function status(AutoImportRequest $request): JsonResponse
     {
-        $this->validateRequest($request);
-
         $status = Cache::get('autoimport-status');
         if (!is_array($status)) {
             return response()->json(['status' => 'unknown']);
         }
 
         return response()->json($status);
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function validateRequest(Request $request): void
-    {
-        if (false === config('importer.can_post_autoimport')) {
-            throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
-        }
-
-        $secret       = (string) ($request->input('secret') ?? '');
-        $systemSecret = (string) config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || !hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
-            throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
-        }
     }
 
     public function info(mixed $string): void
