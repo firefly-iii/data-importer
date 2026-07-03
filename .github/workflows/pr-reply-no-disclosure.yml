@@ -38,6 +38,7 @@ jobs:
                 $BODY != *"Documentation"* &&
                 $BODY != *"Research and understanding"* &&
                 $BODY != *"I used AI assistance for"* ]]; then
+            echo 'PR contains no AI disclosure.'
             MESSAGE="Hi there!
 
           This is an automated reply. \`Share and enjoy\`
@@ -54,7 +55,8 @@ jobs:
           There cannot be interaction with your PR without this disclosure.
 
           If the disclosure is present but the bot did not pick up on it, please accept my apologies for the intrusion. Contrary to other bots, this one is just a simple \`bash\` script and it may be wrong."
-
+            
+            echo 'Will now leave comment.'
             gh pr comment "$NUMBER" --body "$MESSAGE"
             echo "Triggered on AI disclosure missing."
             exit 0
