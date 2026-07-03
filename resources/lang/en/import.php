@@ -37,6 +37,9 @@ return [
     'label_lunchflow_api_key'       => 'Lunch Flow API key',
     'placeholder_lunchflow_api_key' => 'Lunch Flow API key',
     'help_lunchflow_api_key'        => 'Enter your Lunch Flow API key',
+    'label_obio_credentials'        => 'open-banking.io credentials',
+    'placeholder_obio_credentials'  => 'Paste the contents of your credentials.json',
+    'help_obio_credentials'         => 'In the open-banking.io app, export your credentials bundle (credentials.json — API key + private key) and paste the entire file here. Your data is decrypted locally; the key never leaves this importer.',
 
     // sophtron auth
     'label_sophtron_user_id' => 'Sophtron User ID',

@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "amount": 0,
+      "currency": "DKK",
+      "creditDebitIndicator": "DBIT",
+      "status": "BOOK",
+      "bookingDate": "2026-06-08",
+      "valueDate": null,
+      "transactionDate": "2026-06-08",
+      "creditorName": null,
+      "creditorIban": null,
+      "debtorName": null,
+      "debtorIban": null,
+      "remittanceInformation": null,
+      "bankTransactionCode": null,
+      "balanceAfterTransaction": null,
+      "balanceAfterCurrency": null,
+      "merchantCategoryCode": null,
+      "creditorAgentBic": null,
+      "debtorAgentBic": null,
+      "referenceNumber": null,
+      "exchangeRate": null,
+      "note": null,
+      "enc": "AQR6mtO64yAUTCB5CgsgMqJp+ooIBjKTjbFdmQfPyMbQe/hNYFMUxkxt8OmFhzvKOvR9cGvXkaVyPstDogMfUEiK12wQvBkQoGDwmoTHQTbfz5TbyV0NcFKE2x0xvQWPRNvJalT+ld/IgKsUVY+ic7a7SGmXg9ox2cnDpkyVHkRoSpyKm64OkXqUsqgzA0jSvUeIHPcTkghJ+yUkX+S6ku6j48R+gPhkbZ81g/Iwei8h2K1NXmH0sz4FvMUXqLalyHJmfQPBIKfyczIXYZCv9GUiagQNv1gDlV5HlMWJ8jw8kUuLdgAsno1yGqraRkSokPepZ7emgXQ2EuVEiAkMOuZQkBbQsdVNZVvx8YnoGqf6A3IaQfxCQfsdLg/ZbWzKKt6P9zLRfnu7Eg/ga7dkvfmsUMcYL6eO/kBINhXfEjvCNYNkDssjUCDkJqwCKRNMia7GUAmILG6kkLxQN6jCCDDa1HnnMcNDY6lOCbtXA9jOf5k63hfPbeQ32eKCXnMIJpSSih6IugRxizMqsjS4WH+ETpjw3ZPIuW62Lo/eTxvLLMJ1XKEIfYawhXn2X4wzLBXsQnsFu9byMlH7jAiePx/zQ0M3mzfYsHMnwUut/GGISRgUlEhDvnlkr8/eCTnQVg=="
+    }
+  ],
+  "total": 1
+}

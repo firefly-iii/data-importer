@@ -28,6 +28,9 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\LunchFlow\Authentication\SecretManager as LunchFlowSecretManager;
 use App\Services\LunchFlow\Request\GetAccountsRequest as LunchFlowGetAccountsRequest;
 use App\Services\LunchFlow\Response\GetAccountsResponse;
+use App\Services\OpenBankingIo\Authentication\SecretManager as OpenBankingIoSecretManager;
+use App\Services\OpenBankingIo\Request\GetAccountsRequest as OpenBankingIoGetAccountsRequest;
+use App\Services\OpenBankingIo\Response\GetAccountsResponse as OpenBankingIoGetAccountsResponse;
 use App\Services\Shared\Configuration\Configuration;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -47,6 +50,26 @@ trait CollectsAccounts
         /** @var GetAccountsResponse $lunchFlowAccounts */
         $lunchFlowAccounts = $lunchFlowList->get();
         foreach ($lunchFlowAccounts as $account) {
+            $return[] = $account;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws ImporterHttpException
+     */
+    protected function getOpenBankingIoAccounts(Configuration $configuration): array
+    {
+        $return   = [];
+        $parsed   = OpenBankingIoSecretManager::parse(OpenBankingIoSecretManager::getCredentials($configuration));
+        $request  = new OpenBankingIoGetAccountsRequest($parsed['apiKey'], $parsed['privateKey'], $parsed['apiBaseUrl']);
+        $request->setTimeOut(config('importer.connection.timeout'));
+
+        /** @var OpenBankingIoGetAccountsResponse $accounts */
+        $accounts = $request->get();
+        foreach ($accounts as $account) {
             $return[] = $account;
         }
 

@@ -43,6 +43,13 @@
                             out the documentation for this page.</a>
                     </p>
                 @endif
+                @if('obio' === $flow)
+                    <p>
+                        Configure how your open-banking.io accounts will be mapped to Firefly III accounts.
+                        You can map existing accounts or create new ones during import.
+                        Accounts marked for import will have their transactions synchronized based on your date range settings.
+                    </p>
+                @endif
                 @if('simplefin' === $flow)
                     <p>
                         Configure how your SimpleFIN accounts will be mapped to Firefly III accounts.

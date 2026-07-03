@@ -142,4 +142,12 @@ trait MergesAccountLists
 
         return $this->mergeGenericAccountList($generic, $applicationAccounts);
     }
+
+    protected function mergeOpenBankingIoAccountLists(array $openBankingIo, array $applicationAccounts): array
+    {
+        Log::debug('Now merging open-banking.io account lists.');
+        $generic = ImportServiceAccount::convertOpenBankingIoArray($openBankingIo);
+
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
+    }
 }

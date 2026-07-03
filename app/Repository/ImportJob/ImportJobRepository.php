@@ -29,6 +29,7 @@ use App\Models\ImportJob;
 use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\EnableBanking\Validation\NewJobDataCollector as EnableBankingNewJobDataCollector;
 use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
+use App\Services\OpenBankingIo\Validation\NewJobDataCollector as OpenBankingIoNewJobDataCollector;
 use App\Services\Nordigen\Validation\NewJobDataCollector as NordigenNewJobDataCollector;
 use App\Services\Session\Constants;
 use App\Services\Shared\Authentication\SecretManager;
@@ -176,6 +177,16 @@ final class ImportJobRepository
 
             case 'lunchflow':
                 $validator     = new LunchFlowNewJobDataCollector();
+                $validator->setImportJob($importJob);
+                $messageBag    = $validator->collectAccounts();
+                // get import job + configuration back:
+                $importJob     = $validator->getImportJob();
+                $configuration = $importJob->getConfiguration();
+
+                break;
+
+            case 'obio':
+                $validator     = new OpenBankingIoNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:

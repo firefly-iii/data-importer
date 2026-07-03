@@ -204,6 +204,11 @@ final class UploadController extends Controller
 
                 break;
 
+            case 'obio':
+                Log::debug('No extra steps for open-banking.io.');
+
+                break;
+
             case 'eb':
                 Log::debug('No extra steps for Enable Banking.');
 

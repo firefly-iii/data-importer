@@ -168,6 +168,7 @@ final class ConfigurationController extends Controller
             'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
             'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
             'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
+            'obio'      => ImportServiceAccount::convertOpenBankingIoArray($serviceAccounts),
             'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
             'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
             'file'      => [],

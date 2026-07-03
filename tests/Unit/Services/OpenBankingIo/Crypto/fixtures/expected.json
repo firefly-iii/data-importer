@@ -1,0 +1,49 @@
+{
+  "account": {
+    "ownerName": "Tatic ApS",
+    "iban": "DK6466952001724927",
+    "bban": "66952001724927",
+    "accountName": "Erhverv",
+    "product": "Business"
+  },
+  "displayName": {
+    "displayName": "Drift"
+  },
+  "uid": {
+    "uid": "c5d93aa7-5e23-4da0-ba88-42b9a584492c"
+  },
+  "balances": {
+    "ITBD": {
+      "amount": "828.13",
+      "name": "Tatic"
+    },
+    "ITAV": {
+      "amount": "633.90",
+      "name": "Tatic"
+    },
+    "OTHR": {
+      "amount": "194.23",
+      "name": "Tatic"
+    }
+  },
+  "transaction": {
+    "amount": "194.23",
+    "creditorName": "One.com",
+    "creditorIban": null,
+    "creditorBban": null,
+    "creditorAgentBic": null,
+    "debtorName": null,
+    "debtorIban": null,
+    "debtorBban": null,
+    "debtorAgentBic": null,
+    "remittanceInformation": "One.com",
+    "note": null,
+    "referenceNumber": null,
+    "exchangeRate": null,
+    "merchantCategoryCode": "4816",
+    "balanceAfter": "633.90",
+    "balanceAfterCurrency": "DKK",
+    "rawJson": "{\"id\":\"txn-1\"}"
+  },
+  "accountId": "11111111-1111-4111-8111-111111111111"
+}

@@ -30,6 +30,7 @@ use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\EnableBanking\Conversion\RoutineManager as EnableBankingRoutineManager;
 use App\Services\LunchFlow\Conversion\RoutineManager as LunchFlowRoutineManager;
+use App\Services\OpenBankingIo\Conversion\RoutineManager as OpenBankingIoRoutineManager;
 use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
@@ -84,6 +85,9 @@ final class ConversionRoutineFactory
         }
         if ('eb' === $flow) {
             return new EnableBankingRoutineManager($this->importJob);
+        }
+        if ('obio' === $flow) {
+            return new OpenBankingIoRoutineManager($this->importJob);
         }
 
         throw new ImporterErrorException(sprintf('ConversionRoutineFactory cannot create a routine for import flow "%s"', $flow));

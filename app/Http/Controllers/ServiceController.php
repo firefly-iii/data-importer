@@ -28,6 +28,7 @@ use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
+use App\Services\OpenBankingIo\AuthenticationValidator as OpenBankingIoValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -52,6 +53,7 @@ final class ServiceController extends Controller
             'nordigen', 'gocardless' => $this->validateNordigen(),
             'simplefin'              => $this->validateSimpleFIN(),
             'lunchflow'              => $this->validateLunchFlow(),
+            'obio'                   => $this->validateOpenBankingIo(),
             'eb'                     => $this->validateEnableBanking(),
             'file'                   => response()->json(['result' => 'OK']),
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
@@ -109,6 +111,21 @@ final class ServiceController extends Controller
         }
         if (AuthenticationStatus::NODATA === $result) {
             // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    public function validateOpenBankingIo(): JsonResponse
+    {
+        $validator = new OpenBankingIoValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
             return response()->json(['result' => 'NODATA']);
         }
 

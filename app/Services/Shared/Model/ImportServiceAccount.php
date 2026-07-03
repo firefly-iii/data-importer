@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
+use App\Services\OpenBankingIo\Model\Account as OpenBankingIoAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\SimpleFIN\Model\Account as SimpleFinAccount;
@@ -102,6 +103,23 @@ final class ImportServiceAccount
                 'bban'          => '',
                 'status'        => $account->status,
                 'extra'         => ['Currency' => (string) $account->currency, 'IBAN' => '', 'BBAN' => ''],
+            ]);
+        }
+        if ($account instanceof OpenBankingIoAccount) {
+            $booked = $account->getBookedBalance();
+
+            return self::fromArray([
+                'id'            => $account->id,
+                'name'          => $account->getName(),
+                'currency_code' => $account->currency,
+                'iban'          => (string) $account->iban,
+                'bban'          => (string) $account->bban,
+                'status'        => $account->needsReconnect ? 'inactive' : 'active',
+                'extra'         => [
+                    'Bank'    => $account->aspspName,
+                    'IBAN'    => (string) $account->iban,
+                    'Balance' => null !== $booked ? sprintf('%s %s', $booked->amount, $booked->currency) : '',
+                ],
             ]);
         }
         if ($account instanceof NordigenAccount) {
@@ -329,6 +347,26 @@ final class ImportServiceAccount
                 'bban'          => '',
                 'status'        => $account->status,
                 'extra'         => ['Currency' => (string) $account->currency, 'IBAN' => '', 'BBAN' => ''],
+            ]);
+        }
+
+        return $return;
+    }
+
+    public static function convertOpenBankingIoArray(array $openBankingIo): array
+    {
+        $return = [];
+
+        /** @var OpenBankingIoAccount $account */
+        foreach ($openBankingIo as $account) {
+            $return[] = self::fromArray([
+                'id'            => $account->id,
+                'name'          => $account->getName(),
+                'currency_code' => $account->currency,
+                'iban'          => (string) $account->iban,
+                'bban'          => (string) $account->bban,
+                'status'        => $account->needsReconnect ? 'inactive' : 'active',
+                'extra'         => ['Bank' => $account->aspspName, 'IBAN' => (string) $account->iban],
             ]);
         }
 

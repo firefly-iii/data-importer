@@ -117,6 +117,13 @@ return [
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
+        'obio'      => [
+            'title'                     => 'open-banking.io',
+            'enabled'                   => true,
+            'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
+        ],
         'teller'    => [
             'title'                     => 'teller.io',
             'enabled'                   => false,

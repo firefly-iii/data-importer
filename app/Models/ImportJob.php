@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\OpenBankingIo\Model\Account as OpenBankingIoAccount;
 use App\Services\Session\Constants;
 use App\Services\Shared\Configuration\Configuration;
 use App\Services\Shared\Conversion\ConversionStatus;
@@ -165,7 +166,7 @@ final class ImportJob implements Arrayable
         $serviceAccounts     = [];
         $applicationAccounts = [];
 
-        /** @var LunchFlowAccount|NordigenAccount|SimpleFINAccount $serviceAccount */
+        /** @var LunchFlowAccount|NordigenAccount|OpenBankingIoAccount|SimpleFINAccount $serviceAccount */
         foreach ($this->serviceAccounts as $serviceAccount) {
             $serviceAccounts[] = $serviceAccount->toArray();
         }

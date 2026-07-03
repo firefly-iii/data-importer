@@ -95,6 +95,7 @@ final class Configuration
     private array $nordigenRequisitions;
 
     private string $lunchFlowApiKey       = '';
+    private string $obioCredentials       = '';
 
     // enable banking configuration
     private string $enableBankingCountry  = '';
@@ -154,6 +155,7 @@ final class Configuration
 
         // lunch flow configuration
         $this->lunchFlowApiKey             = '';
+        $this->obioCredentials             = '';
 
         // enable banking configuration
         $this->enableBankingCountry        = '';
@@ -265,6 +267,7 @@ final class Configuration
 
         // lunch flow configuration
         $object->lunchFlowApiKey             = $data['lunch_flow_api_key'] ?? '';
+        $object->obioCredentials             = $data['obio_credentials'] ?? '';
 
         // settings for spectre + nordigen (are not in v1 anyway)
         $object->mapAllData                  = $data['map_all_data'] ?? false;
@@ -419,6 +422,7 @@ final class Configuration
 
         // lunch flow configuration
         $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
+        $object->obioCredentials             = $array['obio_credentials'] ?? '';
 
         // enable banking configuration
         $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
@@ -533,6 +537,7 @@ final class Configuration
 
         // lunch flow configuration
         $object->lunchFlowApiKey             = $array['lunch_flow_api_key'] ?? '';
+        $object->obioCredentials             = $array['obio_credentials'] ?? '';
 
         // enable banking:
         $object->enableBankingCountry        = $array['enable_banking_country'] ?? '';
@@ -1081,6 +1086,7 @@ final class Configuration
             'nordigen_requisitions'        => $this->nordigenRequisitions,
             'nordigen_max_days'            => $this->nordigenMaxDays,
             'lunch_flow_api_key'           => $this->lunchFlowApiKey,
+            'obio_credentials'             => $this->obioCredentials,
 
             // enable banking information:
             'enable_banking_country'       => $this->enableBankingCountry,
@@ -1213,6 +1219,16 @@ final class Configuration
     public function getLunchFlowApiKey(): string
     {
         return $this->lunchFlowApiKey;
+    }
+
+    public function getObioCredentials(): string
+    {
+        return $this->obioCredentials;
+    }
+
+    public function setObioCredentials(string $obioCredentials): void
+    {
+        $this->obioCredentials = $obioCredentials;
     }
 
     public function setDuplicateDetectionMethod(string $duplicateDetectionMethod): void

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "iban": null,
+    "bban": null,
+    "ownerName": null,
+    "accountName": null,
+    "displayName": null,
+    "product": null,
+    "aspspName": "Lunar",
+    "aspspCountry": "DK",
+    "currency": "DKK",
+    "accountType": "CACC",
+    "bic": "LUNADK22",
+    "needsReconnect": false,
+    "balances": [
+      {
+        "type": "ITBD",
+        "name": null,
+        "amount": 0,
+        "currency": "DKK",
+        "referenceDate": null,
+        "enc": "AQSSM9PMSzAYBFkvTmklr2YFHzrcWU/oAkrheuk5afP5h98hy+gOpA/MKB9sp2tUS93ascybbVz+qFORvdG8GHZtzjhxp8BRwdQiZCca/o3nlIouyhHcOREefX9sAxyQBKVrt8Lty6fAAFJYqt5hiLqYKBILGtcY/xI5BLHwQBk="
+      },
+      {
+        "type": "ITAV",
+        "name": null,
+        "amount": 0,
+        "currency": "DKK",
+        "referenceDate": null,
+        "enc": "AQTbaOsszMlaW8XRzZG836RySeQ4Iot68tCGg7wwuVR5VIxmPLDDY90how2N6eOarjAYityvx1XQ9g3Py58jj9F2YJGmz7/CEeP/srWs6OjVYnxEH5p7nv/eCWVmTROO6IqaAbqtpYGtX3bZBmQnwBvuLodVzSMmLqCjNEKKk3E="
+      },
+      {
+        "type": "OTHR",
+        "name": null,
+        "amount": 0,
+        "currency": "DKK",
+        "referenceDate": null,
+        "enc": "AQRqkRlWOg+6230ETtdWkwYu6MtMq5vNWNna4YMulcTVNCzXdAKW0mnKLC4wxi9QSKewz2G42wytWUZUaQo8ERHmflPB4xi4IdBfFrDumNrCkl3oZF/fgP8gp7IFu2OJZXQgQHeMyFZuw1Lpv1vN8oH8EYdws/o7v8jqqxmj5MI="
+      }
+    ],
+    "enc": "AQRJPrDySNnPnt6dwvvbUDSZkhMKbosE7Jj+fZ6DbUwOvplEXgYQpm2iEGjxBMAM9ZHMn2ezCCTevhLiIU7a2y+4Xv/jIydggBRIQQ4/cYV2mLqeXVaUjvYStGEou89No6FiiKG45IoP5zrWMPYHB3BV/Z6eZP6DLQch3h/jSU+W2bDrzuK64hYzmUACDPRoLws0MQDH4eEIeWnisMQlePoWoMvxHSDtAXjs0JCFRkBiwsNWDa65oTOnUj/DCymCnaW/1LAnGPBXzmlUmjnUUUK0h1n3N1cY",
+    "displayNameEnc": "AQTaK/UIgIa0KqQmEEPLua1UJdCNI6ARMDL4rHOb8Gi9W9s53+kHIMnGE7P+ihs1QzgDKflFaWX6vDIzzjvlRObXbjaayWj603xCMJxpMwxasvlL2uvwga0kVzfGJbWpSnpic9LsDauSB1D1Nf/P2b2276QI",
+    "uidEnc": "AQQYeRxbxudpVuAdTjpbBL+YO0C4zmgakHIoDUwfIaNs07O/TbF5Dnonxz5hk2NQelnkbbUXAOxI1ra7R8lho0tNo2lqK15I7PPL77Jxqu3+En+7Es+nBmlk2LzcH7OuhS075Sro/WfLPZgUnmrNSbbuO/grt1TBAG9uYbDbLFEnNCToRyT2aHX+W00="
+  }
+]
