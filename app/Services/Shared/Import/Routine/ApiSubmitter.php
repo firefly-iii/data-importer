@@ -189,7 +189,7 @@ final class ApiSubmitter
         $field        = $this->configuration->getUniqueColumnType();
         $field        = 'external-id' === $field ? 'external_id' : $field;
         $field        = 'note' === $field ? 'notes' : $field;
-        if('' === $field) {
+        if ('' === $field) {
             $field = 'external_id';
         }
         $value        = '';
