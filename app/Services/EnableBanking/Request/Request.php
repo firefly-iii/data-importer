@@ -41,8 +41,8 @@ abstract class Request
 {
     private string $base;
     private string $url;
-    private array $parameters = [];
-    private float $timeOut    = 30.0;
+    private array  $parameters = [];
+    private float  $timeOut    = 30.0;
 
     abstract public function get(): Response;
 
@@ -97,7 +97,8 @@ abstract class Request
 
     protected function getHeaders(): array
     {
-        $token   = JWTManager::generateToken();
+        Log::debug('Now in getHeaders()');
+        $token = JWTManager::generateToken();
 
         $headers = [
             'Accept'        => 'application/json',
@@ -106,16 +107,26 @@ abstract class Request
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
         ];
         if (true === config('eb.add_import_ip_header')) {
-            $ip = (string) config('eb.import_ip');
+            Log::debug('eb.add_import_ip_header is true, adding PSU-IP-Address header');
+            $ip = (string)config('eb.import_ip');
             if ('autodetect' === $ip) {
                 $client = $this->getClient();
                 $res    = $client->get('https://icanhazip.com/');
-                $ip     = (string) $res->getBody();
+                $ip     = (string)$res->getBody();
+                Log::debug(sprintf('IP is set to "autodetect", so detected IP %s', $ip));
             }
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            $filter = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+            if ($filter) {
+                Log::debug(sprintf('IP "%s" is valid.', $ip));
                 $headers['PSU-IP-Address'] = $ip;
             }
+            if (false === $filter) {
+                Log::warning(sprintf('IP "%s" NOT is valid.', $ip));
+            }
         }
+        $filteredHeaders = $headers;
+        unset($filteredHeaders['Authorization']);
+        Log::debug('Call to getHeaders() with final headers (Authorization is removed): ', $filteredHeaders);
 
         return $headers;
     }
@@ -134,7 +145,7 @@ abstract class Request
 
         Log::debug(sprintf('Enable Banking authenticatedGet(%s)', $fullUrl));
 
-        $client  = $this->getClient();
+        $client = $this->getClient();
 
         try {
             $res = $client->request('GET', $fullUrl, ['headers' => $this->getHeaders()]);
@@ -142,14 +153,14 @@ abstract class Request
             Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
 
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $body = (string) $e->getResponse()->getBody();
+                $body = (string)$e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
 
             throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
         }
 
-        $body    = (string) $res->getBody();
+        $body = (string)$res->getBody();
         Log::debug(sprintf('Enable Banking raw response: %s', $body));
 
         try {
@@ -172,7 +183,7 @@ abstract class Request
 
         Log::debug(sprintf('Enable Banking authenticatedPost(%s)', $fullUrl));
 
-        $client  = $this->getClient();
+        $client = $this->getClient();
 
         try {
             $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json' => $data]);
@@ -180,14 +191,14 @@ abstract class Request
             Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
 
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $body = (string) $e->getResponse()->getBody();
+                $body = (string)$e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
 
             throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
         }
 
-        $body    = (string) $res->getBody();
+        $body = (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
