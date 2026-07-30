@@ -92,11 +92,33 @@ final class SecretManager
         if ('' === $sessionKey) {
             Log::debug('No Enable Banking private key in session, will return config variable!');
             $privateKey = (string) config('eb.private_key');
+            if ('' === $privateKey) {
+                Log::error('The Enable Banking private key in the configuration is empty! Did you set ENABLE_BANKING_PRIVATE_KEY?');
+
+                return '';
+            }
 
             // see if this is a file that exists and is readable.
-            if (false !== realpath($privateKey) && file_exists(realpath($privateKey)) && is_readable(realpath($privateKey))) {
+            $path       = realpath($privateKey);
+            if (false !== $path && file_exists($path)) {
+                // mind you: file_exists() and is_readable() are also true for directories. A broken
+                // volume mount can leave a directory where the key file should be, and reading that
+                // is a fatal error. So explicitly demand a readable *file* here.
+                if (!is_file($path) || !is_readable($path)) {
+                    Log::error(sprintf('The Enable Banking private key "%s" is not a readable file. Is it a directory, or are the permissions wrong?', $path));
+
+                    return '';
+                }
                 Log::debug('Enable Banking private key is a file, will try to read it.');
-                $privateKey = file_get_contents(realpath($privateKey));
+                $content = file_get_contents($path);
+                if (false === $content) {
+                    Log::error(sprintf('Could not read the Enable Banking private key from "%s".', $path));
+
+                    return '';
+                }
+                // trim it: a trailing newline (which most editors add) would keep the key from
+                // being recognised as base64, and it would be returned unwrapped and unusable.
+                $privateKey = trim($content);
             }
 
             if (self::isBase64($privateKey)) {
