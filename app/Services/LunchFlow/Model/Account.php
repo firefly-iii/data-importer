@@ -49,7 +49,7 @@ final class Account
     {
         $model                  = new self();
         $model->id              = $data['id'];
-        $model->institutionLogo = $data['institution_logo'];
+        $model->institutionLogo = (string) $data['institution_logo'];
         $model->institutionName = $data['institution_name'];
         $model->name            = $data['name'];
         $model->provider        = $data['provider'];
