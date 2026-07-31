@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.3.5 - 2026-08-01
+
+<!-- summary: This release fixes various Enable Banking and other issues. -->
+
+### Added
+- Better AI disclosure for new PRs. 
+
+### Fixed
+- #12303
+- #12419
+- #12493
+- #12523
+- #12532
+- #12538
+- #12541
+- #12549
+- #12553
+- Merged [PR 1314](https://github.com/firefly-iii/data-importer/pull/1314) by @RustyPotato
+
 ## v2.3.4 - 2026-06-30
 
 <!-- summary: This release fixes a crash in the Soptron import routine. -->
