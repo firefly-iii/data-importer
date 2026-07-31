@@ -75,7 +75,7 @@ final class SimpleFINService
     {
         $return     = [
             // 'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
-            'start-date' => 0,
+            'start-date' => time() - 157_784_760, // never go back more than 5 years unless the user manually requests a different range.
             'account'    => $accountId,
         ];
         if ($this->configuration->getPendingTransactions()) {
