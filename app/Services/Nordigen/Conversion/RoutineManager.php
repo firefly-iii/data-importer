@@ -46,13 +46,13 @@ final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 
-    private Configuration         $configuration;
-    private FilterTransactions    $transactionFilter;
-    private GenerateTransactions  $transactionGenerator;
-    private TransactionProcessor  $transactionProcessor;
+    private Configuration $configuration;
+    private FilterTransactions $transactionFilter;
+    private GenerateTransactions $transactionGenerator;
+    private TransactionProcessor $transactionProcessor;
     protected ImportJobRepository $repository;
-    private ImportJob             $importJob;
-    private array                 $rateLimits = [];
+    private ImportJob $importJob;
+    private array $rateLimits = [];
 
     private array $downloaded;
 
@@ -127,7 +127,7 @@ final class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // return everything.
@@ -142,12 +142,12 @@ final class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have no requests left for bank account "%s"', $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
                 $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
                 $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= sprintf('. The limit resets in %s. ', Request::formatTime($rateLimit['reset']));
@@ -156,12 +156,12 @@ final class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], e($account['name']));
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
                 $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
                 $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= '. ';
@@ -174,7 +174,7 @@ final class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        return array_find($accounts, static fn($account) => $account['id'] === $accountId);
+        return array_find($accounts, static fn ($account) => $account['id'] === $accountId);
     }
 
     /**
@@ -256,7 +256,7 @@ final class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], e($fireflyIIIAccount['name'])));
-            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->importJob->conversionStatus->addWarning(0, $message);
             }
@@ -275,7 +275,10 @@ final class RoutineManager implements RoutineManagerInterface
         if (0 === $total && $this->hasGoCardlessError()) {
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
-            $this->importJob->conversionStatus->addError(0, '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.');
+            $this->importJob->conversionStatus->addError(
+                0,
+                '[a111]: No transactions were downloaded from GoCardless. You may be rate limited or something else went wrong.'
+            );
             $this->repository->saveToDisk($this->importJob);
 
             return true;
@@ -326,11 +329,13 @@ final class RoutineManager implements RoutineManagerInterface
             foreach ($array as $error) {
                 if (str_contains($error, 'a109') || str_contains($error, 'a113')) {
                     Log::warning('GoCardless had download error (a109 or a113).');
+
                     return true;
                 }
             }
         }
         Log::debug('GoCardless had no download error for this account.');
+
         return false;
     }
 }

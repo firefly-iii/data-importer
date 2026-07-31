@@ -87,7 +87,15 @@ final class TransactionProcessor
          * @var int    $destinationId
          */
         foreach ($accounts as $account => $destinationId) {
-            Log::debug(sprintf('[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)', config('importer.version'), $index, $total, $index, $account, $destinationId));
+            Log::debug(sprintf(
+                '[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)',
+                config('importer.version'),
+                $index,
+                $total,
+                $index,
+                $account,
+                $destinationId
+            ));
             $object                     = new Account();
             $object->setIdentifier($account);
             $fullInfo                   = null;
@@ -166,7 +174,14 @@ final class TransactionProcessor
             $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
 
             $return[$account]           = $this->filterTransactions($transactions);
-            Log::debug(sprintf('[%s] [%d/%d] Done downloading transactions for account #%d "%s"', config('importer.version'), $index, $total, $index, $account));
+            Log::debug(sprintf(
+                '[%s] [%d/%d] Done downloading transactions for account #%d "%s"',
+                config('importer.version'),
+                $index,
+                $total,
+                $index,
+                $account
+            ));
             ++$index;
         }
         Log::debug('Done with download of transactions.');
