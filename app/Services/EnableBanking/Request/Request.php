@@ -50,6 +50,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
+        Log::debug('setParameters()', $parameters);
         $this->parameters = $parameters;
     }
 
