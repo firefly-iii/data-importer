@@ -94,10 +94,17 @@ final class SecretManager
             $privateKey = (string) config('eb.private_key');
 
             // see if this is a file that exists and is readable.
-            if (false !== realpath($privateKey) && file_exists(realpath($privateKey)) && is_readable(realpath($privateKey))) {
+            $path = realpath($privateKey);
+            if (false !== $path && is_file($path) && file_exists($path) && is_readable($path)) {
                 Log::debug('Enable Banking private key is a file, will try to read it.');
-                $privateKey = file_get_contents(realpath($privateKey));
+                $privateKey = file_get_contents($path);
             }
+            if (false === $privateKey) {
+                Log::error(sprintf('Could not read the Enable Banking private key from "%s".', $path));
+
+                return '';
+            }
+            $privateKey = trim($privateKey);
 
             if (self::isBase64($privateKey)) {
                 Log::debug('The key is already base64, format it into PEM and return.');
