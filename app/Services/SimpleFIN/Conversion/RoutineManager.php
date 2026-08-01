@@ -153,7 +153,7 @@ final class RoutineManager implements RoutineManagerInterface
         // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
 
         foreach ($allTransactions as $importServiceAccountId => $transactions) {
-            /** @var null|Account $currentSimpleFINAccountData */
+            /** @var null|Account $currentSimpleFINAccount */
             $currentSimpleFINAccount = array_find(
                 $this->existingServiceAccounts,
                 static fn(Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
@@ -190,79 +190,6 @@ final class RoutineManager implements RoutineManagerInterface
         }
         Log::debug(sprintf('Will return %d parsed and processed transactions.', count($return)));
         return $return;
-    }
-
-    private function processAccount(string $importServiceAccountId, int $applicationAccountId): array
-    {
-        // Handle account creation if requested (fireflyAccountId === 0 means "create_new")
-        if (0 === $applicationAccountId) {
-            $this->createNewAccount($importServiceAccountId);
-        }
-
-        /** @var null|Account $currentSimpleFINAccountData */
-        $currentSimpleFINAccountData = array_find(
-            $this->existingServiceAccounts,
-            static fn(Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
-        );
-
-        if (null === $currentSimpleFINAccountData) {
-            Log::warning('Failed to find SimpleFIN account raw data in session for current account ID during transformation. Will redownload.', [
-                'simplefin_account_id_sought' => $importServiceAccountId,
-            ]);
-
-            // If the account data for this ID isn't found, we can't process its transactions.
-            // This might indicate an inconsistency in session data or configuration.
-            return [];
-        }
-
-        return $this->getTransactions($importServiceAccountId, $currentSimpleFINAccountData);
-    }
-
-    private function getTransactions(string $importServiceAccountId, Account $simpleFINAccount): array
-    {
-        Log::debug(sprintf('Extracting transactions for account %s from stored data', $importServiceAccountId));
-        $accountMapping = $this->importJob->getConfiguration()->getAccounts();
-        // Fetch transactions for the current account using the new method signature,
-        // passing the complete SimpleFIN accounts data retrieved from the session.
-        // Pass the full dataset
-        $accountTransactions = $this->simpleFINService->fetchFreshTransactions($importServiceAccountId);
-        Log::debug(sprintf('Extracted %d transactions for account %s', count($accountTransactions), $importServiceAccountId));
-        $transactions = [];
-        // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
-        foreach ($accountTransactions as $transactionData) {
-            // Renamed $transactionObject to $transactionData for clarity
-            // Use current account mapping (accounts are created immediately, no deferred creation)
-
-            // The transformer now expects:
-            // 1. Raw transaction data (array)
-            // 2. Parent SimpleFIN account data (array)
-            // 3. Full Firefly III account mapping configuration (array)
-            // 4. New account configuration data (array) - contains user-provided names
-            $transformedTransaction = $this->transformer->transform(
-                $transactionData,
-                $simpleFINAccount, // The specific SimpleFIN account data for this transaction's parent
-                $accountMapping, // Current mapping with actual account IDs
-                $this->importJob->getConfiguration()->getNewAccounts() // User-provided account configuration data
-            );
-
-            // Skip zero-amount transactions that transformer filtered out
-            if (0 === count($transformedTransaction)) {
-                continue;
-            }
-
-            // Wrap transaction in group structure expected by Firefly III
-            $transactionGroup = [
-                'error_if_duplicate_hash' => $this->importJob->getConfiguration()->isIgnoreDuplicateTransactions(),
-                'apply_rules'             => $this->importJob->getConfiguration()->isRules(),
-                'fire_webhooks'           => $this->importJob->getConfiguration()->isWebhooks(),
-                'group_title'             => null,
-                'transactions'            => [$transformedTransaction],
-            ];
-
-            $transactions[] = $transactionGroup;
-        }
-
-        return $transactions;
     }
 
     public function getImportJob(): ImportJob

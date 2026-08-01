@@ -212,7 +212,7 @@ final class SimpleFINService
      * Downloads transactions for a specific account fresh from the SimpleFIN API.
      * Applies date filtering if specified.
      *
-     * @param string $accountId the ID of the account for which to extract transactions
+     * @param array $allAccountIds
      *
      * @return array list of transaction data (associative arrays from SimpleFIN JSON)
      *
@@ -456,10 +456,14 @@ final class SimpleFINService
         $return        = [];
         $removePending = !$this->configuration->getPendingTransactions();
 
-        /** @var array $item */
+        /**
+         * @var string $importServiceAccountId
+         * @var array $set
+         */
         foreach ($transactions as $importServiceAccountId => $set) {
             $return[$importServiceAccountId] = [];
             Log::debug(sprintf('Filter for account "%s" starts with %d transaction(s) ', $importServiceAccountId, count($set)));
+            /** @var array $item */
             foreach ($set as $item) {
                 $add = true;
                 // is pending and need to collect pending transactions? add it.
