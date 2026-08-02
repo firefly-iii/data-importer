@@ -30,6 +30,7 @@ use App\Services\SimpleFIN\Response\TransactionsResponse;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 
@@ -50,27 +51,30 @@ final class TransactionsRequest extends SimpleFINRequest
      */
     public function get(): SharedResponseInterface
     {
-        if ((bool)config('importer.fake_data') && file_exists($this->fakeDataPath)) {
+        if ((bool) config('importer.fake_data') && file_exists($this->fakeDataPath)) {
             Log::debug('Will collect fake data instead of real data.');
+
             try {
                 $content = file_get_contents($this->fakeDataPath);
             } catch (FilesystemException $e) {
                 Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
+
                 throw new ImporterHttpException(sprintf('Could not read fake data: %s', $e->getMessage()));
             }
+
             return new TransactionsResponse(new Response(200, [], $content));
         }
-
 
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         $response = $this->authenticatedGet('');
 
-        if (false === (bool)config('importer.fake_data') && true === (bool)config('importer.store_fake_data')) {
+        if (false === (bool) config('importer.fake_data') && true === (bool) config('importer.store_fake_data')) {
             Log::debug('Will store this run as fake data to use the next time.');
+
             // store this run.
             try {
-                file_put_contents($this->fakeDataPath, (string)$response->getBody());
+                file_put_contents($this->fakeDataPath, (string) $response->getBody());
             } catch (FilesystemException $e) {
                 Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
             }
