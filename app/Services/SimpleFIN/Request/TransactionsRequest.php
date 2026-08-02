@@ -50,7 +50,7 @@ final class TransactionsRequest extends SimpleFINRequest
      */
     public function get(): SharedResponseInterface
     {
-        if (!config('importer.collect_fake_data') && config('importer.fake_data')) {
+        if ((bool)config('importer.fake_data') && file_exists($this->fakeDataPath)) {
             Log::debug('Will collect fake data instead of real data.');
             try {
                 $content = file_get_contents($this->fakeDataPath);
@@ -66,7 +66,7 @@ final class TransactionsRequest extends SimpleFINRequest
 
         $response = $this->authenticatedGet('');
 
-        if (config('importer.collect_fake_data') && !config('importer.fake_data')) {
+        if (false === (bool)config('importer.fake_data') && true === (bool)config('importer.store_fake_data')) {
             Log::debug('Will store this run as fake data to use the next time.');
             // store this run.
             try {

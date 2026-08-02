@@ -30,8 +30,8 @@ use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
-use function Safe\file_put_contents;
 use function Safe\file_get_contents;
+use function Safe\file_put_contents;
 
 /**
  * Class AccountsRequest
@@ -44,6 +44,7 @@ final class AccountsRequest extends SimpleFINRequest
     {
         $this->fakeDataPath = storage_path('fake-data/simplefin-accounts-%s.json');
     }
+
     /**
      * @throws ImporterHttpException
      */
@@ -99,26 +100,30 @@ final class AccountsRequest extends SimpleFINRequest
                 Log::debug(sprintf('Chunk #%d has NO end-date.', $index + 1));
             }
             $this->setParameters($params);
-            $hash = $this->getParameterHash();
-            $grabFake = !config('importer.collect_fake_data') && config('importer.fake_data');
+            $hash       = $this->getParameterHash();
+            $grabFake   = (bool)config('importer.fake_data');
             $fakeExists = file_exists(sprintf($this->fakeDataPath, $hash));
             // grab fake data at this point if necessary.
+            $response = null;
             if ($grabFake && $fakeExists) {
                 Log::debug('Will collect fake data instead of real data.');
-                $content= null;
+                $content = null;
                 try {
                     $content = file_get_contents(sprintf($this->fakeDataPath, $hash));
                 } catch (FilesystemException $e) {
                     Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
                 }
-                if(null !== $content) {
+                if (null !== $content) {
                     $response = new Response(200, [], $content);
                 }
             }
             if (!$grabFake || !$fakeExists) {
                 $response = $this->authenticatedGet('/accounts');
             }
-            $body           = (string)$response->getBody();
+            $body = '';
+            if (null !== $response) {
+                $body = (string)$response->getBody();
+            }
             if (null !== $accountResponse) {
                 Log::debug('Append to new account response.');
                 // append to one.
@@ -131,7 +136,7 @@ final class AccountsRequest extends SimpleFINRequest
             }
 
             // store fake data in new thing:
-            if ($grabFake && !$fakeExists) {
+            if ($grabFake && !$fakeExists && true === (bool)config('importer.store_fake_data')) {
                 Log::debug('Will store this run as fake data to use the next time.');
                 try {
                     file_put_contents(sprintf($this->fakeDataPath, $hash), $body);

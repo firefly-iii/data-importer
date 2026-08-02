@@ -48,10 +48,6 @@ abstract class SimpleFINResponse implements SharedResponseInterface
         $this->parseResponse();
     }
 
-    public static function fromString(string $data) {
-
-    }
-
     /**
      * Check if the response has an error
      */

@@ -67,6 +67,7 @@ return [
     'version'                       => 'develop/2026-08-01',
     'build_time'                    => 1785607033,
     'fake_data'                     => env('FAKE_DATA', false),
+    'store_fake_data' => env('STORE_FAKE_DATA', false),
     'providers'                     => [
         'file'      => [
             'title'                     => 'File',
