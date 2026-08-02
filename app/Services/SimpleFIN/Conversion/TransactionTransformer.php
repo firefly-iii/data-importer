@@ -160,7 +160,7 @@ final class TransactionTransformer
     private function getCounterAccount(array $transactionData, bool $isDeposit): array
     {
         $description        = $transactionData['description'] ?? 'N/A';
-        $payee = $transactionData['payee'] ?? '(unknown payee account)';
+        $payee = $transactionData['payee'] ?? $transactionData['description'] ?? '(unknown payee account)';
         Log::debug('Now in getCounterAccount', $transactionData);
 
         // Ensure accounts are collected
