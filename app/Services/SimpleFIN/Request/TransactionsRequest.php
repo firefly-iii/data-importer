@@ -27,21 +27,54 @@ namespace App\Services\SimpleFIN\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\Shared\Response\ResponseInterface as SharedResponseInterface;
 use App\Services\SimpleFIN\Response\TransactionsResponse;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Log;
+use Safe\Exceptions\FilesystemException;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
 
 /**
  * Class TransactionsRequest
  */
 final class TransactionsRequest extends SimpleFINRequest
 {
+    private string $fakeDataPath = '';
+
+    public function __construct()
+    {
+        $this->fakeDataPath = storage_path('fake-data/simplefin-transactions.json');
+    }
+
     /**
      * @throws ImporterHttpException
      */
     public function get(): SharedResponseInterface
     {
+        if (!config('importer.collect_fake_data') && config('importer.fake_data')) {
+            Log::debug('Will collect fake data instead of real data.');
+            try {
+                $content = file_get_contents($this->fakeDataPath);
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
+                throw new ImporterHttpException(sprintf('Could not read fake data: %s', $e->getMessage()));
+            }
+            return new TransactionsResponse(new Response(200, [], $content));
+        }
+
+
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         $response = $this->authenticatedGet('');
+
+        if (config('importer.collect_fake_data') && !config('importer.fake_data')) {
+            Log::debug('Will store this run as fake data to use the next time.');
+            // store this run.
+            try {
+                file_put_contents($this->fakeDataPath, (string)$response->getBody());
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
+            }
+        }
 
         return new TransactionsResponse($response);
     }

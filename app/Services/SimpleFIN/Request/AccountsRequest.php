@@ -27,13 +27,23 @@ namespace App\Services\SimpleFIN\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\SimpleFIN\Response\AccountsResponse;
 use Carbon\Carbon;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Log;
+use Safe\Exceptions\FilesystemException;
+use function Safe\file_put_contents;
+use function Safe\file_get_contents;
 
 /**
  * Class AccountsRequest
  */
 final class AccountsRequest extends SimpleFINRequest
 {
+    private string $fakeDataPath = '';
+
+    public function __construct()
+    {
+        $this->fakeDataPath = storage_path('fake-data/simplefin-accounts-%s.json');
+    }
     /**
      * @throws ImporterHttpException
      */
@@ -42,9 +52,9 @@ final class AccountsRequest extends SimpleFINRequest
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // chunk time diff
-        $chunkSize       = config('simplefin.max_chunk_size');
-        $chunks          = [];
-        $params          = $this->getParameters();
+        $chunkSize = config('simplefin.max_chunk_size');
+        $chunks    = [];
+        $params    = $this->getParameters();
         if (array_key_exists('start-date', $params) || array_key_exists('end-date', $params)) {
             Log::debug('Start date or end date are present, may need to chunk.');
             $start = $params['start-date'];
@@ -57,7 +67,7 @@ final class AccountsRequest extends SimpleFINRequest
             }
             if ($diff <= ($chunkSize * 24 * 60 * 60)) {
                 Log::debug(sprintf('No more than %d days, no need to chunk this.', $chunkSize));
-                $chunk    = ['start-date' => $start];
+                $chunk = ['start-date' => $start];
                 if (array_key_exists('end-date', $params)) {
                     $chunk['end-date'] = $params['end-date'];
                 }
@@ -89,7 +99,26 @@ final class AccountsRequest extends SimpleFINRequest
                 Log::debug(sprintf('Chunk #%d has NO end-date.', $index + 1));
             }
             $this->setParameters($params);
-            $response = $this->authenticatedGet('/accounts');
+            $hash = $this->getParameterHash();
+            $grabFake = !config('importer.collect_fake_data') && config('importer.fake_data');
+            $fakeExists = file_exists(sprintf($this->fakeDataPath, $hash));
+            // grab fake data at this point if necessary.
+            if ($grabFake && $fakeExists) {
+                Log::debug('Will collect fake data instead of real data.');
+                $content= null;
+                try {
+                    $content = file_get_contents(sprintf($this->fakeDataPath, $hash));
+                } catch (FilesystemException $e) {
+                    Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
+                }
+                if(null !== $content) {
+                    $response = new Response(200, [], $content);
+                }
+            }
+            if (!$grabFake || !$fakeExists) {
+                $response = $this->authenticatedGet('/accounts');
+            }
+            $body           = (string)$response->getBody();
             if (null !== $accountResponse) {
                 Log::debug('Append to new account response.');
                 // append to one.
@@ -100,6 +129,16 @@ final class AccountsRequest extends SimpleFINRequest
                 Log::debug('Create new account response.');
                 $accountResponse = new AccountsResponse($response);
             }
+
+            // store fake data in new thing:
+            if ($grabFake && !$fakeExists) {
+                Log::debug('Will store this run as fake data to use the next time.');
+                try {
+                    file_put_contents(sprintf($this->fakeDataPath, $hash), $body);
+                } catch (FilesystemException $e) {
+                    Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
+                }
+            }
         }
 
         return $accountResponse;
@@ -107,15 +146,15 @@ final class AccountsRequest extends SimpleFINRequest
 
     private function formatTime(int $time): string
     {
-        $return  = '';
+        $return = '';
         // days:
-        $days    = floor($time / 86_400);
+        $days = floor($time / 86_400);
         if ($days > 0) {
             $return .= sprintf('%dd', $days);
         }
         $time -= $days * 86_400;
 
-        $hours   = floor($time / 3600);
+        $hours = floor($time / 3600);
         if ($hours > 0) {
             $return .= sprintf('%dh', $hours);
         }
@@ -147,7 +186,7 @@ final class AccountsRequest extends SimpleFINRequest
             if ($currentEnd > $end) {
                 $currentEnd = $end;
             }
-            $return[]   = ['start-date' => $currentStart, 'end-date' => $currentEnd];
+            $return[] = ['start-date' => $currentStart, 'end-date' => $currentEnd];
             Log::debug(sprintf('Add chunk on index #%d', count($return) - 1));
             Log::debug(sprintf('Start of chunk is %d (%s)', $currentStart, Carbon::createFromTimestamp($currentStart, config('app.timezone'))->toW3cString()));
             Log::debug(sprintf('End of chunk is   %d (%s)', $currentEnd, Carbon::createFromTimestamp($currentEnd, config('app.timezone'))->toW3cString()));

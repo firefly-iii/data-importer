@@ -160,12 +160,14 @@ final class TransactionTransformer
     private function getCounterAccount(array $transactionData, bool $isDeposit): array
     {
         $description        = $transactionData['description'] ?? 'N/A';
+        $payee = $transactionData['payee'] ?? '(unknown payee account)';
+        Log::debug('Now in getCounterAccount', $transactionData);
 
         // Ensure accounts are collected
         $this->ensureAccountsCollected();
 
         // Try to find existing expense or revenue account first
-        $existingAccount    = $this->findExistingAccount($description, $isDeposit);
+        $existingAccount    = $this->findExistingAccount($payee, $isDeposit);
         if (null !== $existingAccount && [] !== $existingAccount) {
             return ['id' => $existingAccount['id'], 'name' => $existingAccount['name'], 'iban' => null, 'number' => null, 'bic' => null];
         }
@@ -177,14 +179,14 @@ final class TransactionTransformer
             $accountsToCheck = $isDeposit ? $this->revenueAccounts : $this->expenseAccounts;
 
             if (0 === count($accountsToCheck)) {
-                $clusteredAccountName = $this->findClusteredAccountName($description, $isDeposit);
+                $clusteredAccountName = $this->findClusteredAccountName($payee, $isDeposit);
                 if (null !== $clusteredAccountName && '' !== $clusteredAccountName && '0' !== $clusteredAccountName) {
                     return ['id' => null, 'name' => $clusteredAccountName, 'iban' => null, 'number' => null, 'bic' => null];
                 }
             }
         }
         // Fallback: extract meaningful counter account name from description
-        $counterAccountName = $this->extractCounterAccountName($description);
+        $counterAccountName = $this->extractCounterAccountName($payee);
 
         // Check if automatic account creation is enabled
         if (!config('simplefin.auto_create_expense_accounts', true)) {

@@ -42,8 +42,8 @@ abstract class SimpleFINRequest
 {
     private string $apiUrl;
     private string $token;
-    private array $parameters   = [];
-    private float $timeOut;
+    private array  $parameters = [];
+    private float  $timeOut;
 
     private string $accessToken = '';
 
@@ -66,6 +66,15 @@ abstract class SimpleFINRequest
     {
         Log::debug('SimpleFIN request parameters set to: ', $parameters);
         $this->parameters = $parameters;
+    }
+
+    protected function getParameterHash(): string
+    {
+        $final = '';
+        foreach ($this->parameters as $name => $value) {
+            $final .= sprintf('%s=%s', $name, json_encode($value));
+        }
+        return hash('sha256', $final);
     }
 
     public function setTimeOut(float $timeOut): void
@@ -117,7 +126,7 @@ abstract class SimpleFINRequest
     private function handleClientException(ClientException $e): void
     {
         $statusCode = $e->getResponse()->getStatusCode();
-        $body       = (string) $e->getResponse()->getBody();
+        $body       = (string)$e->getResponse()->getBody();
 
         Log::error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 

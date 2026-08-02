@@ -184,7 +184,6 @@ final class SimpleFINService
         } catch (ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
         }
-
         if ($response->hasError()) {
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
@@ -244,7 +243,6 @@ final class SimpleFINService
         if ($response->hasError()) {
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
-
         /** @var array<Account> $accounts */
         $accounts = $response->getAccounts();
 
