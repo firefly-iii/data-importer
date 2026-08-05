@@ -42,9 +42,11 @@ final class Transaction
     public string  $creditorName          = '';
     public string  $creditorIban          = '';
     public string  $creditorBban          = '';
+    public array   $creditorAddressLine   = [];
     public string  $debtorName            = '';
     public string  $debtorIban            = '';
     public string  $debtorBban            = '';
+    public array   $debtorAddressLine     = [];
     public string  $remittanceInformation = '';
     public string  $additionalInformation = '';
     public string  $status                = '';
@@ -106,6 +108,11 @@ final class Transaction
         ) {
             $transaction->creditorBban = $array['creditor_account']['other']['identification'] ?? '';
         }
+        // creditor address line
+        $creditorAddressLine                = $array['creditor']['postal_address']['address_line'] ?? [];
+        if (is_array($creditorAddressLine)) {
+            $transaction->creditorAddressLine = array_values(array_filter($creditorAddressLine, is_string(...)));
+        }
 
         // debtor name
         $transaction->debtorName            = '';
@@ -127,6 +134,11 @@ final class Transaction
             && 'BBAN' === $array['debtor_account']['other']['scheme_name']
         ) {
             $transaction->debtorBban = $array['debtor_account']['other']['identification'] ?? '';
+        }
+        // debtor address line
+        $debtorAddressLine                  = $array['debtor']['postal_address']['address_line'] ?? [];
+        if (is_array($debtorAddressLine)) {
+            $transaction->debtorAddressLine = array_values(array_filter($debtorAddressLine, is_string(...)));
         }
 
         // Description - remittance_information is an array of strings per API spec
@@ -217,8 +229,11 @@ final class Transaction
         //        return trim(sprintf('%s-%s', $accountId, $transactionId));
     }
 
-    public function getSourceName(): ?string
+    public function getSourceName(bool $useEntireOpposingAddress = false): ?string
     {
+        if ($useEntireOpposingAddress) {
+            return $this->composeNameWithAddress($this->debtorName, $this->debtorAddressLine);
+        }
         if ('' !== $this->debtorName) {
             return $this->debtorName;
         }
@@ -244,8 +259,11 @@ final class Transaction
         return null;
     }
 
-    public function getDestinationName(): ?string
+    public function getDestinationName(bool $useEntireOpposingAddress = false): ?string
     {
+        if ($useEntireOpposingAddress) {
+            return $this->composeNameWithAddress($this->creditorName, $this->creditorAddressLine);
+        }
         if ('' !== $this->creditorName) {
             return $this->creditorName;
         }
@@ -271,6 +289,23 @@ final class Transaction
         return null;
     }
 
+    private function composeNameWithAddress(string $name, array $addressLine): ?string
+    {
+        $parts = [];
+        foreach ([$name, ...$addressLine] as $part) {
+            $part = trim($part);
+            if ('' !== $part) {
+                $parts[] = $part;
+            }
+        }
+        if ([] === $parts) {
+            return null;
+        }
+
+        // Firefly III rejects account names over 255 characters.
+        return mb_substr(implode(', ', $parts), 0, 255);
+    }
+
     public function getNotes(): string
     {
         $notes = '';
@@ -293,9 +328,11 @@ final class Transaction
             'creditor_name'          => $this->creditorName,
             'creditor_iban'          => $this->creditorIban,
             'creditor_bban'          => $this->creditorBban,
+            'creditor_address_line'  => $this->creditorAddressLine,
             'debtor_name'            => $this->debtorName,
             'debtor_iban'            => $this->debtorIban,
             'debtor_bban'            => $this->debtorBban,
+            'debtor_address_line'    => $this->debtorAddressLine,
             'remittance_information' => $this->remittanceInformation,
             'additional_information' => $this->additionalInformation,
             'status'                 => $this->status,
