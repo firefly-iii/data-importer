@@ -145,7 +145,7 @@ final class GenerateTransactions
         $transaction['destination_id'] = (int) $this->accounts[$accountUid];
 
         // Set source info
-        $sourceName                    = $entry->getSourceName();
+        $sourceName                    = $entry->getSourceName($this->configuration->isUseEntireOpposingAddress());
         $sourceIban                    = $entry->getSourceIban();
         $sourceBban                    = $entry->getSourceBban();
 
@@ -207,7 +207,7 @@ final class GenerateTransactions
         $transaction['source_id'] = (int) $this->accounts[$accountUid];
 
         // Set destination info
-        $destName                 = $entry->getDestinationName();
+        $destName                 = $entry->getDestinationName($this->configuration->isUseEntireOpposingAddress());
         $destIban                 = $entry->getDestinationIban();
         $destBban                 = $entry->getDestinationBban();
 
