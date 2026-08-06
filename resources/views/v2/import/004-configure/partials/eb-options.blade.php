@@ -6,7 +6,7 @@
             </div>
             <div class="card-body">
                 <div class="form-group row mb-3">
-                    <div class="col-sm-3">Use the entire address of the opposing part?</div>
+                    <div class="col-sm-3">Use the entire address of the opposing party?</div>
                     <div class="col-sm-9">
                         <div class="form-check">
                             <input class="form-check-input"
