@@ -229,16 +229,18 @@ final class Transaction
         //        return trim(sprintf('%s-%s', $accountId, $transactionId));
     }
 
-    public function getSourceName(bool $useEntireOpposingAddress = false): ?string
+    public function getSourceName(): ?string
     {
-        if ($useEntireOpposingAddress) {
-            return $this->composeNameWithAddress($this->debtorName, $this->debtorAddressLine);
-        }
         if ('' !== $this->debtorName) {
             return $this->debtorName;
         }
 
         return null;
+    }
+
+    public function getSourceNameWithAddress(): ?string
+    {
+        return $this->composeNameWithAddress($this->debtorName, $this->debtorAddressLine);
     }
 
     public function getSourceIban(): ?string
@@ -259,16 +261,18 @@ final class Transaction
         return null;
     }
 
-    public function getDestinationName(bool $useEntireOpposingAddress = false): ?string
+    public function getDestinationName(): ?string
     {
-        if ($useEntireOpposingAddress) {
-            return $this->composeNameWithAddress($this->creditorName, $this->creditorAddressLine);
-        }
         if ('' !== $this->creditorName) {
             return $this->creditorName;
         }
 
         return null;
+    }
+
+    public function getDestinationNameWithAddress(): ?string
+    {
+        return $this->composeNameWithAddress($this->creditorName, $this->creditorAddressLine);
     }
 
     public function getDestinationIban(): ?string
