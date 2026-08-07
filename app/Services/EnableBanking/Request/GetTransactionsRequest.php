@@ -76,7 +76,7 @@ final class GetTransactionsRequest extends Request
                 Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
                 // split continuation key in two parts:
                 $parts  = explode('.', $continuationKey);
-                $params = json_decode(base64_decode($parts[0]));
+                $params = json_decode(base64_decode($parts[0]), true);
                 if (2 === count($params)) {
                     if (array_key_exists('params', $params)) {
                         foreach ($params as $key => $value) {
