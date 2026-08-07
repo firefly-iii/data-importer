@@ -28,6 +28,8 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\TransactionsResponse;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
+use function Safe\json_decode;
+use function Safe\base64_decode;
 
 /**
  * Class GetTransactionsRequest
@@ -70,8 +72,19 @@ final class GetTransactionsRequest extends Request
             Log::debug(sprintf('Now running attempt #%d', $count + 1));
             // add continuation_key
             if ('' !== $continuationKey) {
-                $this->addParameter('continuation_key', $continuationKey);
                 Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
+                // split continuation key in two parts:
+                $parts = explode('.', $continuationKey);
+                $params = json_decode(base64_decode($parts[0]));
+                if(2 === count($params)){
+                    if(array_key_exists('params', $params)) {
+                        foreach($params as $key => $value) {
+                            Log::debug(sprintf('Overrule parameter from continuation_key: %s=%s', $key, $value));
+                            $this->addParameter($key, $value);
+                        }
+                    }
+                }
+                $this->addParameter('continuation_key', $continuationKey);
             }
             // remove if empty:
             if ('' === $continuationKey) {
