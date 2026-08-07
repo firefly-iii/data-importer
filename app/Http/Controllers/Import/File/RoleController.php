@@ -182,9 +182,7 @@ final class RoleController extends Controller
                 'explanation' => trans('camt.explain_D'),
                 'fields'      => [
                     // have to collect D by hand because of intermediate sections
-                    'entryDetailAccountServicerReference'                                            => config(
-                        'camt.fields.entryDetailAccountServicerReference'
-                    ),
+                    'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
                     'entryDetailEndToEndId'                                                          => config('camt.fields.entryDetailEndToEndId'),
                     'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
                         'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'

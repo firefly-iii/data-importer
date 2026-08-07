@@ -272,7 +272,7 @@ final class RoutineManager implements RoutineManagerInterface
         foreach ($this->downloaded as $transactions) {
             $total += count($transactions);
         }
-        if (0 === $total) {
+        if (0 === $total && $this->hasGoCardlessError()) {
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(
@@ -319,5 +319,23 @@ final class RoutineManager implements RoutineManagerInterface
     public function getImportJob(): ImportJob
     {
         return $this->importJob;
+    }
+
+    private function hasGoCardlessError(): bool
+    {
+        Log::debug('Check if GoCardless had an error before we complain about not having transactions.');
+        $errors = $this->importJob->conversionStatus->errors;
+        foreach ($errors as $array) {
+            foreach ($array as $error) {
+                if (str_contains($error, 'a109') || str_contains($error, 'a113')) {
+                    Log::warning('GoCardless had download error (a109 or a113).');
+
+                    return true;
+                }
+            }
+        }
+        Log::debug('GoCardless had no download error for this account.');
+
+        return false;
     }
 }

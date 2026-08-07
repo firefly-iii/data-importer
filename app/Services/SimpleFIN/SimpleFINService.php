@@ -75,7 +75,7 @@ final class SimpleFINService
     {
         $return     = [
             // 'pending'    => $this->configuration->getPendingTransactions() ? 1 : 0,
-            'start-date' => 0,
+            'start-date' => time() - 157_784_760, // never go back more than 5 years unless the user manually requests a different range.
             'account'    => $accountId,
         ];
         if ($this->configuration->getPendingTransactions()) {
@@ -184,7 +184,6 @@ final class SimpleFINService
         } catch (ImporterHttpException $e) {
             throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
         }
-
         if ($response->hasError()) {
             throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
         }
@@ -204,6 +203,65 @@ final class SimpleFINService
         $transactions = $this->filterForPending($transactions);
 
         Log::debug(sprintf('Found %d transactions.', $transactions));
+
+        return $transactions;
+    }
+
+    /**
+     * Downloads transactions for a specific account fresh from the SimpleFIN API.
+     * Applies date filtering if specified.
+     *
+     * @return array list of transaction data (associative arrays from SimpleFIN JSON)
+     *
+     * @throws ImporterErrorException
+     */
+    public function fetchAllFreshTransactions(array $allAccountIds): array
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        Log::debug('SimpleFIN download transactions for accounts listed from provided data structure.', $allAccountIds);
+
+        $request               = new AccountsRequest();
+        $request->setAccessToken($this->configuration->getAccessToken());
+        $request->setTimeOut($this->getTimeout());
+
+        // Set parameters to retrieve all transactions
+        // #10599 and #10602 add date information.
+        $parameters            = $this->getFetchParams('0');
+        $parameters['account'] = array_values($allAccountIds);
+        $request->setParameters($parameters);
+
+        Log::debug('SimpleFIN downloading all transactions with parameters', $parameters);
+
+        try {
+            $response = $request->get();
+        } catch (ImporterHttpException $e) {
+            throw new ImporterErrorException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        if ($response->hasError()) {
+            throw new ImporterErrorException(sprintf('SimpleFIN API error: HTTP %d', $response->getStatusCode()));
+        }
+
+        /** @var array<Account> $accounts */
+        $accounts              = $response->getAccounts();
+
+        if (0 === count($accounts)) {
+            Log::warning('SimpleFIN API returned no accounts');
+
+            return [];
+        }
+        Log::debug(sprintf('There are %d account(s) in the response.', count($accounts)));
+        $transactions          = [];
+        foreach ($accounts as $account) {
+            $set                             = $account->getTransactions();
+            Log::debug(sprintf('Add %d transaction(s) from account "%s" ("%s")', count($set), $account->getName(), $account->getId()));
+            $transactions[$account->getId()] = $set;
+        }
+
+        // add a little filter to remove transactions that are pending.
+        $transactions          = $this->filterAllForPending($transactions);
+
+        Log::debug(sprintf('Found %d sets of transactions.', count($transactions)));
 
         return $transactions;
     }
@@ -380,6 +438,44 @@ final class SimpleFINService
             }
         }
         Log::debug(sprintf('Done filtering pending transaction, return %d item(s)', count($return)));
+
+        return $return;
+    }
+
+    private function filterAllForPending(array $transactions): array
+    {
+        Log::debug(sprintf('Filter pending transactions. Start with %d set(s)', count(array_keys($transactions))));
+        if (0 === count($transactions)) {
+            Log::debug('Empty array, nothing to filter.');
+
+            return [];
+        }
+        $return        = [];
+        $removePending = !$this->configuration->getPendingTransactions();
+
+        /**
+         * @var string $importServiceAccountId
+         * @var array  $set
+         */
+        foreach ($transactions as $importServiceAccountId => $set) {
+            $return[$importServiceAccountId] = [];
+            Log::debug(sprintf('Filter for account "%s" starts with %d transaction(s) ', $importServiceAccountId, count($set)));
+
+            /** @var array $item */
+            foreach ($set as $item) {
+                $add = true;
+                // is pending and need to collect pending transactions? add it.
+                if (array_key_exists('pending', $item) && true === $item['pending'] && $removePending) {
+                    Log::debug('Transaction is pending and removePending is true, skipping.');
+                    $add = false;
+                }
+                if (true === $add) {
+                    Log::debug('Transaction is not pending or removePending = false, add it.');
+                    $return[$importServiceAccountId][] = $item;
+                }
+            }
+            Log::debug(sprintf('Account "%s" now has %d transaction(s)', $importServiceAccountId, count($return[$importServiceAccountId])));
+        }
 
         return $return;
     }

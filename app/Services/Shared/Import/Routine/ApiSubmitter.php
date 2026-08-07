@@ -58,6 +58,7 @@ final class ApiSubmitter
     private bool $createdTag;
     private array $mapping;
     private string $tag;
+    private array $roles;
     private string $tagDate;
     private string $vanityURL;
     private ImportJob $importJob;
@@ -67,6 +68,7 @@ final class ApiSubmitter
     {
         $importJob->refreshInstanceIdentifier();
         $this->configuration = $importJob->getConfiguration();
+        $this->roles         = $this->configuration->getRoles();
         $this->mapping       = $this->configuration->getMapping();
         $this->repository    = new ImportJobRepository();
 
@@ -148,6 +150,7 @@ final class ApiSubmitter
             return sprintf('Data Import on %s', Carbon::now()->format('Y-m-d \@ H:i'));
         }
         $items     = [
+            // '%filename%' => $this->configuration->f
             '%year%'        => Carbon::now()->format('Y'),
             '%month%'       => Carbon::now()->format('m'),
             '%month_full%'  => Carbon::now()->format('F'),
@@ -186,6 +189,9 @@ final class ApiSubmitter
         $field        = $this->configuration->getUniqueColumnType();
         $field        = 'external-id' === $field ? 'external_id' : $field;
         $field        = 'note' === $field ? 'notes' : $field;
+        if ('' === $field) {
+            $field = 'external_id';
+        }
         $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
             $value        = (string) ($transaction[$field] ?? '');
@@ -442,6 +448,10 @@ final class ApiSubmitter
     private function cleanupLine(array $line): array
     {
         Log::debug('Going to map data for this line.');
+        // OK so array 0 does not have to be the mapping, this is a bad assumption.
+        // it looks like the CSV importer already DOES the mapping somewhere so this cleanup
+        // is for OTHER import types ONLY.
+
         if (array_key_exists(0, $this->mapping)) {
             Log::debug('Configuration has mapping for opposing account name!');
 

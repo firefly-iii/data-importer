@@ -146,6 +146,9 @@ final class GenerateTransactions
 
         // Set source info
         $sourceName                    = $entry->getSourceName();
+        if ($this->configuration->isUseEntireOpposingAddress()) {
+            $sourceName = $entry->getSourceNameWithAddress();
+        }
         $sourceIban                    = $entry->getSourceIban();
         $sourceBban                    = $entry->getSourceBban();
 
@@ -208,6 +211,9 @@ final class GenerateTransactions
 
         // Set destination info
         $destName                 = $entry->getDestinationName();
+        if ($this->configuration->isUseEntireOpposingAddress()) {
+            $destName = $entry->getDestinationNameWithAddress();
+        }
         $destIban                 = $entry->getDestinationIban();
         $destBban                 = $entry->getDestinationBban();
 
@@ -238,7 +244,7 @@ final class GenerateTransactions
             }
 
             // Check if IBAN is a match, will overrule BBAN.
-            if (array_key_exists($destIban, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes)) {
+            if (array_key_exists($destIban, $this->targetAccounts) && array_key_exists($destIban, $this->targetTypes)) {
                 Log::debug(sprintf('Matched source IBAN "%s" to account #%d', $destIban, $this->targetAccounts[$destIban]));
                 if ('asset' === $this->targetTypes[$destIban]) {
                     Log::debug(sprintf(

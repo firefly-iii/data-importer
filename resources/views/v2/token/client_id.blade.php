@@ -41,14 +41,11 @@
                             @endif
                         </p>
                         <p>
+                            If you don't have one, you must create one in "Remote access and tokens" under options.
                             @if('' !== (string)$baseUrl)
-                                If you don't have one, you must create <a href="{{ $baseUrl }}/profile">in your
-                                profile</a> under "OAuth". Make sure you
-                                <em>remove</em> the checkbox under "Confidential".
-                            @else
-                                If you don't have one, you must create in your profile under "OAuth". Make sure you
-                                <em>remove</em> the checkbox under "Confidential".
+                                Here's a <a href="{{ $baseUrl }}/profile/oauth">link</a>.
                             @endif
+                            Make sure you <em>uncheck</em> the checkbox under "Keep a secret?".
                         </p>
                         <p>
                             The callback URL for this installation is<br> <code>{{ route('token.callback') }}</code>

@@ -51,6 +51,9 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $this->repository = new ImportJobRepository();
     }
 
+    /**
+     * @throws ImporterErrorException
+     */
     public function collectAccounts(): MessageBag
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
@@ -109,7 +112,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 }
 
                 $total    = count($response);
-                Log::debug(sprintf('Found %d Enable Banking accounts.', $total));
+                Log::debug(sprintf('Found %d Enable Banking account(s).', $total));
 
                 // loop the accounts, if they are string we must grab them once again.
                 $accounts = [];
@@ -121,8 +124,12 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     }
                     $getAccountDetailRequest = new GetAccountDetailsRequest($url, $account);
 
-                    /** @var AccountDetailsResponse $res */
-                    $res                     = $getAccountDetailRequest->get();
+                    try {
+                        /** @var AccountDetailsResponse $res */
+                        $res = $getAccountDetailRequest->get();
+                    } catch (ImporterHttpException $e) {
+                        throw new ImporterErrorException($e->getMessage(), 0, $e);
+                    }
                     $accounts[]              = $res->account;
                 }
                 $total    = count($accounts);
@@ -137,13 +144,17 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     );
                 }
 
+                /**
+                 * @var int     $index
+                 * @var Account $account
+                 */
                 foreach ($accounts as $index => $account) {
                     Log::debug(sprintf(
                         '[%s] [%d/%d] Now collecting information for account %s',
                         config('importer.version'),
                         $index + 1,
                         $total,
-                        $account->getIdentificationHash()
+                        $account->getUid()
                     ));
 
                     $return[] = $account;

@@ -185,45 +185,45 @@ final class ConfigurationPostRequest extends Request
         $defaultAccountRule = $this->getDefaultAccountRule($flow);
 
         return [
-            'headers'                       => 'numeric|between:0,1',
+            'headers'                       => ['numeric', 'between:0,1'],
             'delimiter'                     => 'in:comma,semicolon,tab',
             'date'                          => 'between:1,25',
             'default_account'               => $defaultAccountRule,
-            'rules'                         => 'numeric|between:0,1',
-            'webhooks'                      => 'numeric|between:0,1',
-            'ignore_duplicate_lines'        => 'numeric|between:0,1',
-            'ignore_duplicate_transactions' => 'numeric|between:0,1',
-            'skip_form'                     => 'numeric|between:0,1',
-            'add_import_tag'                => 'numeric|between:0,1',
-            'ignore_spectre_categories'     => 'numeric|between:0,1',
+            'rules'                         => ['numeric', 'between:0,1'],
+            'webhooks'                      => ['numeric', 'between:0,1'],
+            'ignore_duplicate_lines'        => ['numeric', 'between:0,1'],
+            'ignore_duplicate_transactions' => ['numeric', 'between:0,1'],
+            'skip_form'                     => ['numeric', 'between:0,1'],
+            'add_import_tag'                => ['numeric', 'between:0,1'],
+            'ignore_spectre_categories'     => ['numeric', 'between:0,1'],
 
             // simplefin data rules"
-            'do_import.*'                   => 'numeric|between:0,1',
-            'accounts.*'                    => 'required|min:0|max:100',
-            'new_accounts.*'                => 'required|array',
-            'new_accounts.*.create'         => 'required|numeric|between:0,1',
-            'new_accounts.*.name'           => 'required|min:0|max:100',
-            'new_accounts.*.type'           => 'required|in:asset,liabilities',
-            'new_accounts.*.currency'       => 'required|min:3|max:12',
+            'do_import.*'                   => ['numeric', 'between:0,1'],
+            'accounts.*'                    => ['required', 'min:0', 'max:100'],
+            'new_accounts.*'                => ['required', 'array'],
+            'new_accounts.*.create'         => ['required', 'numeric', 'between:0,1'],
+            'new_accounts.*.name'           => ['required', 'min:0', 'max:100'],
+            'new_accounts.*.type'           => ['required', 'in:asset,liabilities'],
+            'new_accounts.*.currency'       => ['required', 'min:3', 'max:12'],
 
             // duplicate detection:
             'duplicate_detection_method'    => 'in:cell,none,classic',
-            'unique_column_index'           => 'nullable|string', // Allow comma-separated indices
+            'unique_column_index'           => ['nullable', 'string'], // Allow comma-separated indices
             'unique_column_type'            => sprintf('in:%s', $columnOptions),
 
             // conversion
-            'conversion'                    => 'numeric|between:0,1',
+            'conversion'                    => ['numeric', 'between:0,1'],
 
             // new account creation - updated to handle underscore-encoded field names
-            'new_account.*.name'            => 'nullable|string|max:255',
-            'new_account.*.create'          => 'nullable|string|in:0,1',
-            'new_account.*.type'            => 'nullable|string|in:asset,liabilities,expense,revenue',
+            'new_account.*.name'            => ['nullable', 'string', 'max:255'],
+            'new_account.*.create'          => ['nullable', 'string', 'in:0,1'],
+            'new_account.*.type'            => ['nullable', 'string', 'in:asset,liabilities,expense,revenue'],
             'new_account.*.currency'        => 'nullable|string|size:3|regex:/^[A-Z]{7}$/',
-            'new_account.*.opening_balance' => 'nullable|numeric',
+            'new_account.*.opening_balance' => ['nullable', 'numeric'],
 
             // camt
             'grouped_transaction_handling'  => 'in:single,group,split',
-            'use_entire_opposing_address'   => 'numeric|between:0,1',
+            'use_entire_opposing_address'   => ['numeric', 'between:0,1'],
         ];
     }
 

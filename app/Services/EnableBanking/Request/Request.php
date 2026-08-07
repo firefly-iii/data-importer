@@ -50,6 +50,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
+        Log::debug('setParameters()', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -97,14 +98,38 @@ abstract class Request
 
     protected function getHeaders(): array
     {
-        $token = JWTManager::generateToken();
+        Log::debug('Now in getHeaders()');
+        $token           = JWTManager::generateToken();
 
-        return [
+        $headers         = [
             'Accept'        => 'application/json',
             'Content-Type'  => 'application/json',
             'Authorization' => sprintf('Bearer %s', $token),
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
         ];
+        if (true === config('eb.add_import_ip_header')) {
+            Log::debug('eb.add_import_ip_header is true, adding PSU-IP-Address header');
+            $ip     = (string) config('eb.import_ip');
+            if ('autodetect' === $ip) {
+                $client = $this->getClient();
+                $res    = $client->get('https://icanhazip.com/');
+                $ip     = trim((string) $res->getBody());
+                Log::debug(sprintf('IP is set to "autodetect", so detected IP %s', $ip));
+            }
+            $filter = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+            if ($filter) {
+                Log::debug(sprintf('IP "%s" is valid.', $ip));
+                $headers['PSU-IP-Address'] = $ip;
+            }
+            if (false === $filter) {
+                Log::warning(sprintf('IP "%s" NOT is valid.', $ip));
+            }
+        }
+        $filteredHeaders = $headers;
+        unset($filteredHeaders['Authorization']);
+        Log::debug('Call to getHeaders() with final headers (Authorization is removed): ', $filteredHeaders);
+
+        return $headers;
     }
 
     /**

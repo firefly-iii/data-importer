@@ -53,7 +53,7 @@ final class RolesPostRequest extends Request
     {
         $keys = implode(',', array_keys(config('csv.import_roles')));
 
-        return ['roles.*' => sprintf('required|in:%s', $keys), 'do_mapping.*' => 'numeric|between:0,1'];
+        return ['roles.*' => sprintf('required|in:%s', $keys), 'do_mapping.*' => ['numeric', 'between:0,1']];
     }
 
     /**

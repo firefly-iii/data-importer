@@ -109,6 +109,7 @@ final class GetTransactionsRequest extends Request
 
             ++$count;
         }
+        $this->removeParameter('continuation_key');
         Log::debug('Done with Enable Banking GetTransactionsRequest');
 
         return $response;
