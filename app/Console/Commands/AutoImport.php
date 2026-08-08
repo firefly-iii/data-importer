@@ -48,7 +48,7 @@ final class AutoImport extends Command
      */
     public function handle(): int
     {
-        $access    = $this->haveAccess(true);
+        $access = $this->haveAccess(true);
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::NO_CONNECTION->name));
@@ -56,8 +56,8 @@ final class AutoImport extends Command
             return ExitCode::NO_CONNECTION->value;
         }
 
-        $argument  = (string) $this->argument('directory');
-        $argument  = '' === $argument ? './' : $argument;
+        $argument = (string)$this->argument('directory');
+        $argument = '' === $argument ? './' : $argument;
 
         $directory = realpath($argument);
         if (false === $directory) {
@@ -75,7 +75,7 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
-        $files     = $this->getFiles($directory);
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
@@ -87,22 +87,37 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s.', count($files), $directory));
 
-        $result    = $this->importFiles($directory, $files);
-        $unique    = array_unique($result);
+        $result = $this->importFiles($directory, $files);
+        $unique = array_unique($result);
         if (1 === count($unique)) {
-            return (int) reset($result);
+            return (int)reset($result);
         }
         if (count($unique) > 0) {
-            $this->warn('Multiple return codes found. Some imports may have failed');
-            foreach ($result as $file => $code) {
-                $this->warn(sprintf('File %s returned code #%d', $file, $code));
-            }
-            Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::GENERAL_ERROR->name));
-
-            return ExitCode::GENERAL_ERROR->value;
+            return $this->filteredExitCode($result);
         }
         Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::SUCCESS->name));
 
         return ExitCode::SUCCESS->value;
+    }
+
+    private function filteredExitCode(array $exitCodes): int
+    {
+        // a mix of NOTHING_WAS_IMPORTED and SUCCESS will yield NOTHING_WAS_IMPORTED_AND_SUCCESS
+        $mixed = true;
+        $this->warn('Multiple return codes found. Some imports may have failed');
+        foreach ($exitCodes as $file => $code) {
+            $this->warn(sprintf('File %s returned code #%d', $file, $code));
+            if (ExitCode::SUCCESS->value !== $code && ExitCode::NOTHING_WAS_IMPORTED->value !== $code) {
+                $mixed = false;
+            }
+        }
+        $finalExit = ExitCode::GENERAL_ERROR;
+        if ($mixed) {
+            $finalExit = ExitCode::NOTHING_WAS_IMPORTED_AND_SUCCESS;
+        }
+
+        Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), $finalExit->name));
+
+        return $finalExit->value;
     }
 }

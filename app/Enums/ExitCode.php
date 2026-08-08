@@ -40,4 +40,8 @@ enum ExitCode: int
     case NOTHING_WAS_IMPORTED        = 73;
     case AGREEMENT_EXPIRED           = 74;
     case NO_REQUISITIONS_PRESENT     = 75;
+    // a mixed exit code, only used when multiple exit codes are returned, and it turns out
+    // it's a combination of SUCCESS and NOTHING_WAS_IMPORTED. For many users, this is a distinctive
+    // case that's not worth of a GENERAL_ERROR exit code.
+    case NOTHING_WAS_IMPORTED_AND_SUCCESS = 76;
 }
