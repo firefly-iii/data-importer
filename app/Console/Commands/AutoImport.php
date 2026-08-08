@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Console\AutoImportResult;
 use App\Console\AutoImports;
 use App\Console\HaveAccess;
 use App\Console\VerifyJSON;
@@ -48,7 +49,7 @@ final class AutoImport extends Command
      */
     public function handle(): int
     {
-        $access    = $this->haveAccess(true);
+        $access = $this->haveAccess(true);
         if (false === $access) {
             $this->error(sprintf('[a] No access, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::NO_CONNECTION->name));
@@ -56,8 +57,8 @@ final class AutoImport extends Command
             return ExitCode::NO_CONNECTION->value;
         }
 
-        $argument  = (string) $this->argument('directory');
-        $argument  = '' === $argument ? './' : $argument;
+        $argument = (string) $this->argument('directory');
+        $argument = '' === $argument ? './' : $argument;
 
         $directory = realpath($argument);
         if (false === $directory) {
@@ -75,7 +76,7 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
-        $files     = $this->getFiles($directory);
+        $files = $this->getFiles($directory);
         if (0 === count($files)) {
             $this->info(sprintf('There are no files in directory %s', $directory));
             $this->info('To learn more about this process, read the docs:');
@@ -87,22 +88,18 @@ final class AutoImport extends Command
         }
         $this->line(sprintf('Found %d (importable +) JSON file sets in %s.', count($files), $directory));
 
-        $result    = $this->importFiles($directory, $files);
-        $unique    = array_unique($result);
-        if (1 === count($unique)) {
-            return (int) reset($result);
-        }
-        if (count($unique) > 0) {
-            $this->warn('Multiple return codes found. Some imports may have failed');
-            foreach ($result as $file => $code) {
+        $result   = new AutoImportResult($this->importFiles($directory, $files));
+        $failures = $result->getFailures();
+        if (count($failures) > 0) {
+            $this->warn('Some imports failed');
+            foreach ($failures as $file => $code) {
                 $this->warn(sprintf('File %s returned code #%d', $file, $code));
             }
-            Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::GENERAL_ERROR->name));
-
-            return ExitCode::GENERAL_ERROR->value;
         }
-        Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::SUCCESS->name));
 
-        return ExitCode::SUCCESS->value;
+        $exitCode = $result->getExitCode();
+        Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), $exitCode->name));
+
+        return $exitCode->value;
     }
 }
