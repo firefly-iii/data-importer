@@ -162,7 +162,9 @@ abstract class Request
         }
 
         $body    = (string) $res->getBody();
-        Log::debug(sprintf('Enable Banking raw response: %s', $body));
+        if(true === config('importer.log_return_json')) {
+            Log::debug(sprintf('Enable Banking raw response: %s', $body));
+        }
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);

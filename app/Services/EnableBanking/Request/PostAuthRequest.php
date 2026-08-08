@@ -27,7 +27,6 @@ namespace App\Services\EnableBanking\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\AuthResponse;
 use App\Services\Shared\Response\Response;
-
 /**
  * Class PostAuthRequest
  * Initiates the authorization process with a bank

@@ -27,6 +27,10 @@ namespace App\Services\EnableBanking\Request;
 use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\BalancesResponse;
 use App\Services\Shared\Response\Response;
+use Illuminate\Support\Facades\Log;
+use Safe\Exceptions\FilesystemException;
+use function Safe\file_get_contents;
+use function Safe\file_put_contents;
 
 /**
  * Class GetBalancesRequest
@@ -35,12 +39,14 @@ use App\Services\Shared\Response\Response;
 final class GetBalancesRequest extends Request
 {
     private string $accountUid;
+    private string $fakeDataPath = '';
 
     public function __construct(string $url, string $accountUid)
     {
         $this->setBase($url);
         $this->accountUid = $accountUid;
         $this->setUrl(sprintf('accounts/%s/balances', $accountUid));
+        $this->fakeDataPath = storage_path(sprintf('fake-data/eb-balances-%s.json', $accountUid));
     }
 
     /**
@@ -48,7 +54,36 @@ final class GetBalancesRequest extends Request
      */
     public function get(): Response
     {
-        $json = $this->authenticatedGet();
+        // perhaps grab fake data instead?
+        $grabFake   = (bool) config('importer.fake_data');
+        $fakeExists = file_exists($this->fakeDataPath);
+        $json = [];
+        if ($grabFake && $fakeExists) {
+            Log::debug('Will collect fake data instead of real data.');
+            $content = null;
+
+            try {
+                $content = file_get_contents($this->fakeDataPath);
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
+            }
+            if (null !== $content) {
+                $json = json_decode($content, true);
+            }
+        }
+        if (!$grabFake || !$fakeExists) {
+            $json = $this->authenticatedGet();
+        }
+        // store fake data in new thing:
+        if ($grabFake && !$fakeExists && true === (bool) config('importer.store_fake_data')) {
+            Log::debug('Will store this run as fake data to use the next time.');
+
+            try {
+                file_put_contents($this->fakeDataPath, json_encode($json));
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
+            }
+        }
 
         return BalancesResponse::fromArray($json, $this->accountUid);
     }
