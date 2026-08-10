@@ -29,8 +29,10 @@ use App\Services\EnableBanking\Response\AccountDetailsResponse;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
+
 /**
  * Class GetAccountsRequest
  * Gets accounts for a session
@@ -55,7 +57,7 @@ final class GetAccountDetailsRequest extends Request
         // perhaps grab fake data instead?
         $grabFake   = (bool) config('importer.fake_data');
         $fakeExists = file_exists($this->fakeDataPath);
-        $json = [];
+        $json       = [];
         if ($grabFake && $fakeExists) {
             Log::debug('Will collect fake data instead of real data.');
             $content = null;

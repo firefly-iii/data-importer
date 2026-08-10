@@ -26,12 +26,13 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use PHPUnit\Runner\ErrorHandler;
+use Throwable;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
 
@@ -43,13 +44,14 @@ abstract class TestCase extends BaseTestCase
         // Siehe: https://github.com/laravel/framework/issues/49502
         $this->ensureHandlerStackClean();
     }
+
     private function ensureHandlerStackClean(): void
     {
         // Alle Exception-Handler entfernen (nach tearDown sollten 0 übrig sein)
         while (true) {
-            $previous = set_exception_handler(static fn (\Throwable $e) => null);
+            $previous = set_exception_handler(static fn (Throwable $e) => null);
             restore_exception_handler();
-            if ($previous === null) {
+            if (null === $previous) {
                 break;
             }
             restore_exception_handler();
@@ -60,7 +62,7 @@ abstract class TestCase extends BaseTestCase
         while (true) {
             $handler = set_error_handler(static fn () => false);
             restore_error_handler();
-            if ($handler === null) {
+            if (null === $handler) {
                 break;
             }
             restore_error_handler();
@@ -70,7 +72,7 @@ abstract class TestCase extends BaseTestCase
         }
 
         // PHPUnits Error-Handler wieder installieren
-        if ($phpunitHandler !== null) {
+        if (null !== $phpunitHandler) {
             set_error_handler($phpunitHandler);
         }
     }

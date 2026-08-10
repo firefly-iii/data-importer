@@ -29,6 +29,7 @@ use App\Services\EnableBanking\Response\BalancesResponse;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 
@@ -44,7 +45,7 @@ final class GetBalancesRequest extends Request
     public function __construct(string $url, string $accountUid)
     {
         $this->setBase($url);
-        $this->accountUid = $accountUid;
+        $this->accountUid   = $accountUid;
         $this->setUrl(sprintf('accounts/%s/balances', $accountUid));
         $this->fakeDataPath = storage_path(sprintf('fake-data/eb-balances-%s.json', $accountUid));
     }
@@ -57,7 +58,7 @@ final class GetBalancesRequest extends Request
         // perhaps grab fake data instead?
         $grabFake   = (bool) config('importer.fake_data');
         $fakeExists = file_exists($this->fakeDataPath);
-        $json = [];
+        $json       = [];
         if ($grabFake && $fakeExists) {
             Log::debug('Will collect fake data instead of real data.');
             $content = null;

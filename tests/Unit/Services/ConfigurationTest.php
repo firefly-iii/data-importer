@@ -39,7 +39,7 @@ final class ConfigurationTest extends TestCase
      */
     public function testFlowChangeAppliesOnlyDefaultDuplicateDetectionMethod(): void
     {
-        $defaultConfiguration = Configuration::make();
+        $defaultConfiguration  = Configuration::make();
         $defaultConfiguration->setFlow('eb');
 
         $this->assertSame('cell', $defaultConfiguration->getDuplicateDetectionMethod());
