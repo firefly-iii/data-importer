@@ -65,7 +65,7 @@ final class Configuration
     private string $fileName              = '(unknown)';
 
     // flow and file type
-    private string $duplicateDetectionMethod;
+    private null|string $duplicateDetectionMethod = null;
     private string $flow                  = 'file';
 
     // csv config
@@ -171,9 +171,6 @@ final class Configuration
         // simplefin configuration
         $this->pendingTransactions         = true;
         $this->accessToken                 = '';
-
-        // double transaction detection:
-        $this->duplicateDetectionMethod    = 'classic';
 
         // config for "classic":
         // Log::debug('Configuration __construct. ignoreDuplicateTransactions = true');
@@ -430,12 +427,7 @@ final class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
 
         // duplicate transaction detection
-        if ('file' === $object->flow) {
-            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
-        }
-        if ('file' !== $object->flow) {
-            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
-        }
+        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? null;
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'] ?? false;
@@ -450,7 +442,7 @@ final class Configuration
         }
 
         // overrule a setting:
-        if ('none' === $object->duplicateDetectionMethod) {
+        if ('none' === $object->getDuplicateDetectionMethod()) {
             $object->ignoreDuplicateTransactions = false;
             Log::debug(sprintf('Configuration fromClassicFile overruled: ignoreDuplicateTransactions = %s', var_export(
                 $object->ignoreDuplicateTransactions,
@@ -514,6 +506,7 @@ final class Configuration
         $object->camtType                    = $array['camt_type'] ?? '';
         $object->customTag                   = $array['custom_tag'] ?? '';
         $object->fileName                    = $array['file_name'] ?? '(unknown)';
+        $object->flow                        = $array['flow'] ?? 'file';
 
         Log::debug(sprintf('Configuration fromRequest, default_account=%s', var_export($object->defaultAccount, true)));
 
@@ -561,12 +554,7 @@ final class Configuration
         $object->dateNotAfter                = null === $array['date_not_after'] ? '' : $array['date_not_after']->format('Y-m-d');
 
         // duplicate transaction detection
-        if ('file' === $object->flow) {
-            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'classic';
-        }
-        if ('file' !== $object->flow) {
-            $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? 'cell';
-        }
+        $object->duplicateDetectionMethod = $array['duplicate_detection_method'] ?? null;
 
         // config for "classic":
         $object->ignoreDuplicateLines        = $array['ignore_duplicate_lines'];
@@ -590,11 +578,8 @@ final class Configuration
         $object->pendingTransactions         = $array['pending_transactions'] ?? true;
         $object->accessToken                 = $array['access_token'] ?? '';
 
-        // flow
-        $object->flow                        = $array['flow'] ?? 'file';
-
         // overrule a setting:
-        if ('none' === $object->duplicateDetectionMethod) {
+        if ('none' === $object->getDuplicateDetectionMethod()) {
             $object->ignoreDuplicateTransactions = false;
             Log::debug(sprintf('Configuration overruled from none: ignoreDuplicateTransactions = %s', var_export($object->ignoreDuplicateTransactions, true)));
         }
@@ -734,7 +719,7 @@ final class Configuration
 
     public function getDuplicateDetectionMethod(): string
     {
-        return $this->duplicateDetectionMethod;
+        return $this->duplicateDetectionMethod ?? ('file' === $this->flow ? 'classic' : 'cell');
     }
 
     public function getFlow(): string
@@ -927,7 +912,7 @@ final class Configuration
         // 1. Using identifier-based detection ('cell')
         // 2. No pseudo identifier exists yet (old format)
         // 3. Have a valid unique column type
-        if ('cell' !== $this->duplicateDetectionMethod) {
+        if ('cell' !== $this->getDuplicateDetectionMethod()) {
             return;
         }
 
@@ -1035,7 +1020,7 @@ final class Configuration
             'roles'                        => $this->roles,
             'do_mapping'                   => $this->doMapping,
             'mapping'                      => $this->mapping,
-            'duplicate_detection_method'   => $this->duplicateDetectionMethod,
+            'duplicate_detection_method'   => $this->getDuplicateDetectionMethod(),
             'ignore_duplicate_lines'       => $this->ignoreDuplicateLines,
             'unique_column_index'          => $this->uniqueColumnIndex,
             'unique_column_type'           => $this->uniqueColumnType,
@@ -1095,7 +1080,7 @@ final class Configuration
         // make sure that "ignore duplicate transactions" is turned off
         // to deliver a consistent file.
         $array['ignore_duplicate_transactions'] = false;
-        if ('classic' === $this->duplicateDetectionMethod) {
+        if ('classic' === $this->getDuplicateDetectionMethod()) {
             $array['ignore_duplicate_transactions'] = true;
         }
 
