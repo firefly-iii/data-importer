@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
+use App\Services\Akahu\Model\Account\Account as AkahuAccount;
 use App\Services\Shared\Model\ImportServiceAccount;
 use Carbon\Carbon;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -75,6 +76,9 @@ trait CreatesAccounts
             }
             if ($entry instanceof EnableBankingAccount) {
                 return $entry->getUid() === $importServiceId;
+            }
+            if ($entry instanceof AkahuAccount) {
+                return $entry->getAkahuId() === $importServiceId;
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
 

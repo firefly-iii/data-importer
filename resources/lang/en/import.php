@@ -61,6 +61,9 @@ return [
     'placeholder_eb_private_key'    => 'Enable Banking Private Key (PEM format)',
     'help_eb_private_key'           => 'Paste your Enable Banking private key in PEM format',
 
+    'label_akahu_app_id_token'      => 'App ID Token',
+    'label_akahu_user_access_token' => 'User Access Token',
+
     // column roles for CSV import:
     'column__ignore'                => '(ignore this column)',
     'column_account-iban'           => 'Asset account (IBAN)',

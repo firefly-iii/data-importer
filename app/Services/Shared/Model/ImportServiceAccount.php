@@ -32,6 +32,9 @@ use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\SimpleFIN\Model\Account as SimpleFinAccount;
 use App\Services\Sophtron\Model\UserInstitutionAccount as SophtronAccount;
+use App\Services\Akahu\Model\Account\Account as AkahuAccount;
+use App\Support\Facades\Steam;
+
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -167,6 +170,25 @@ final class ImportServiceAccount
                     'Currency'          => $account->balanceCurrency,
                     'IBAN'              => $iban,
                     'BBAN'              => $account->accountNumber,
+                ],
+            ]);
+        }
+        if ($account instanceof AkahuAccount) {
+            return self::fromArray([
+                'id'            => $account->getAkahuId(),
+                'name'          => $account->getName(),
+                'currency_code' => $account->getBalance()?->getCurrency(),
+                'status'        => $account->getFireflyStatus(),
+                'bban'          => $account->getFormattedAccount() ?? '',
+                'extra'         => [
+                    'Balance'           => (string) $account->getBalance()?->getCurrent(),
+                    'Organization Name' => $account->getConnection()?->getName(),
+                    'Balance date' => $account->getRefreshed()
+                        ?->getBalance()
+                        ?->copy()
+                        ->setTimezone(config('app.timezone'))
+                        ->format('Y-m-d H:i:s'),
+                    'Account Type' => $account->getType(),
                 ],
             ]);
         }
@@ -370,6 +392,43 @@ final class ImportServiceAccount
                 $key                  = sprintf('Balance (%s) (%s)', $balance['balance_type'] ?? 'unknown', $balance['currency'] ?? '');
                 $current->extra[$key] = $balance['amount'] ?? '';
             }
+            $return[] = $current;
+        }
+
+        return $return;
+    }
+
+    public static function convertAkahuArray(array $accounts): array
+    {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $return = [];
+
+        foreach ($accounts as $account) {
+            $current = self::fromArray([
+                'id'            => $account->getAkahuId(),
+                'name'          => $account->getName(),
+                'currency_code' => $account->getBalance()?->getCurrency(),
+                'status'        => $account->getFireflyStatus(),
+                'bban'          => $account->getFormattedAccount() ?? '',
+                'extra'         => [
+                    // FIXME: pull dp from api
+                    'Current Balance' => Steam::bcstringify(
+                        $account->getBalance()?->getCurrent(),
+                        2
+                    ),
+                    'Balance date' => $account->getRefreshed()
+                        ?->getBalance()
+                        ?->copy()
+                        ->setTimezone(config('app.timezone'))
+                        ->format('Y-m-d H:i:s'),
+                    'Account Type' => $account->getType(),
+                ],
+            ]);
+
+            $current->org = [
+                'name' => $account->getConnection()?->getName(),
+            ];
+
             $return[] = $current;
         }
 

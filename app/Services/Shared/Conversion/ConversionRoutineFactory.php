@@ -34,6 +34,7 @@ use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\Sophtron\Conversion\RoutineManager as SophtronRoutineManager;
+use App\Services\Akahu\Conversion\RoutineManager as AkahuRoutineManager;
 use Illuminate\Support\Facades\Log;
 
 final class ConversionRoutineFactory
@@ -84,6 +85,9 @@ final class ConversionRoutineFactory
         }
         if ('eb' === $flow) {
             return new EnableBankingRoutineManager($this->importJob);
+        }
+        if ('akahu' === $flow) {
+            return new AkahuRoutineManager($this->importJob);
         }
 
         throw new ImporterErrorException(sprintf('ConversionRoutineFactory cannot create a routine for import flow "%s"', $flow));

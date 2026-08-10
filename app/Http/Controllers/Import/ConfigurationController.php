@@ -117,6 +117,15 @@ final class ConfigurationController extends Controller
 
                     return redirect()->route('eb-select-bank.index', [$identifier])->withErrors($messages);
                 }
+                if ($messages->has('no_accounts') && 'akahu' === $flow) {
+                    $importJob->setServiceAccounts([]);
+                    $importJob->setState('needs_connection_details');
+                    $this->repository->saveToDisk($importJob);
+
+                    $flow = 'akahu';
+                    session()->put('error', $messages->get('no_accounts')[0]);
+                    return redirect()->route('authenticate-flow.index', compact('flow'));
+                }
 
                 // if the agreement has expired, show error and exit gracefully.
 
@@ -170,6 +179,7 @@ final class ConfigurationController extends Controller
             'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
             'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
             'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
+            'akahu'     => ImportServiceAccount::convertAkahuArray($serviceAccounts),
             'file'      => [],
             default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow))
         };
