@@ -43,7 +43,7 @@ final class PostSessionRequest extends Request
     {
         $this->setBase($url);
         $this->setUrl('sessions');
-        $this->code = $code;
+        $this->code         = $code;
         $this->fakeDataPath = storage_path(sprintf('fake-data/eb-post-session-request-%s.json', $code));
     }
 
@@ -60,7 +60,7 @@ final class PostSessionRequest extends Request
         // perhaps grab fake data instead?
         $grabFake   = (bool) config('importer.fake_data');
         $fakeExists = file_exists($this->fakeDataPath);
-        $json = [];
+        $json       = [];
         if ($grabFake && $fakeExists) {
             Log::debug('Will collect fake data instead of real data.');
             $content = null;
@@ -89,7 +89,6 @@ final class PostSessionRequest extends Request
                 Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
             }
         }
-
 
         Log::debug('Enable Banking POST /sessions response:', $json);
 
