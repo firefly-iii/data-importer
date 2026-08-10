@@ -139,6 +139,13 @@ return [
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
+        'akahu'        => [
+            'title'                     => 'Akahu',
+            'enabled'                   => true,
+            'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
+        ],
     ],
 
     // docker build info.

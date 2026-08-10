@@ -31,6 +31,7 @@ use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
 use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
+use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -44,6 +45,7 @@ final class ValidationController extends Controller
             'lunchflow'              => $this->validateLunchFlow(),
             'sophtron'               => $this->validateSophtron(),
             'eb'                     => $this->validateEnableBanking(),
+            'akahu'                  => $this->validateAkahu(),
             'file'                   => response()->json(['result' => 'OK']),
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
@@ -146,6 +148,28 @@ final class ValidationController extends Controller
             return response()->json(['result' => 'NODATA']);
         }
         Log::info(sprintf('[%s] All OK in validateEnableBanking.', config('importer.version')));
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    private function validateAkahu(): JsonResponse
+    {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $validator = new AkahuValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            Log::error('Error: Could not validate Akahu credentials.');
+
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            Log::error('No data: Could not validate Akahu credentials.');
+
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        Log::info(sprintf('[%s] All OK in %s.', config('importer.version'), __METHOD__));
 
         return response()->json(['result' => 'OK']);
     }

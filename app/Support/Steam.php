@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Illuminate\Support\Facades\Log;
+use BcMath\Number;
 use ValueError;
 
 /**
@@ -173,5 +174,49 @@ final class Steam
         }
 
         return $amount;
+    }
+
+    /**
+     * https://github.com/firefly-iii/firefly-iii/blob/15fef8bbb5a31993/app/Support/Steam.php#L173-L199
+     */
+    public function bcround(?string $number, int $precision = 0): string
+    {
+        if (null === $number) {
+            return '0';
+        }
+        if ('' === trim($number)) {
+            return '0';
+        }
+        // if the number contains "E", it's in scientific notation, so we need to convert it to a normal number first.
+        if (false !== stripos($number, 'e')) {
+            $number = sprintf('%.12f', $number);
+        }
+
+        // Log::debug(sprintf('Trying bcround("%s",%d)', $number, $precision));
+        if (str_contains($number, '.')) {
+            if ('-' !== $number[0]) {
+                return bcadd($number, '0.'.str_repeat('0', $precision).'5', $precision);
+            }
+
+            return bcsub($number, '0.'.str_repeat('0', $precision).'5', $precision);
+        }
+
+        return $number;
+    }
+
+    /**
+     * Store amounts with full `bcscale()` precision.
+     */
+    public function bcnumber(string $number): Number
+    {
+        return new Number(bcround($number, bcscale()));
+    }
+
+    /**
+     * When displaying amounts, use currency specific precision.
+     */
+    public function bcstringify(Number $number, int $currencyDecimalPlaces)
+    {
+        return bcround((string) $number, $currencyDecimalPlaces);
     }
 }
