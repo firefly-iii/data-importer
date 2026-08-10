@@ -40,6 +40,6 @@ final class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertFound();
+        $response->assertOk();
     }
 }

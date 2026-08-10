@@ -77,5 +77,9 @@ final class AmountTest extends TestCase
 
         // the original problem from issue #8404
         $this->assertSame('1000', $amount->convert('1.000'));
+
+        // if FALLBACK_LOCALE is set, this test will succeed.
+        // See https://github.com/orgs/firefly-iii/discussions/12593
+        $this->assertSame('123.45', $amount->convert('123.450'));
     }
 }
