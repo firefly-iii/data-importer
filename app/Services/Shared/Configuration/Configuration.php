@@ -66,7 +66,7 @@ final class Configuration
 
     // flow and file type
     private ?string $duplicateDetectionMethod = null;
-    private string      $flow                 = 'file';
+    private string  $flow                     = 'file';
 
     // csv config
     private string $groupedTransactionHandling;
