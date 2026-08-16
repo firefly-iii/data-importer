@@ -35,6 +35,7 @@ return [
     'origin_url'                      => env('SIMPLEFIN_CORS_ORIGIN_URL', ''),
 
     'max_chunk_size'                  => 89, // in days
+    'trip_after_empty_days'           => env('SIMPLEFIN_TRIP_AFTER_EMPTY_DAYS', 180),
 
     /*
     |--------------------------------------------------------------------------

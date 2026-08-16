@@ -80,7 +80,9 @@ final class AccountsRequest extends SimpleFINRequest
             // add empty array to chunks.
             $chunks[] = [];
         }
-        $accountResponse = null;
+        $accountResponse  = null;
+        $emptyChunkStreak = 0;
+        $tripAfterChunks  = max(1, (int) ceil(config('simplefin.trip_after_empty_days') / $chunkSize));
         Log::debug(sprintf('Collected %d chunks(s)', count($chunks)));
         foreach ($chunks as $index => $chunk) {
             Log::debug(sprintf('Chunk #%d', $index + 1), $chunk);
@@ -126,15 +128,20 @@ final class AccountsRequest extends SimpleFINRequest
             if (null !== $response) {
                 $body = (string) $response->getBody();
             }
+
+            $newResponse           = new AccountsResponse($response);
+            $chunkTransactionCount = 0;
+            foreach ($newResponse->getAccounts() as $chunkAccount) {
+                $chunkTransactionCount += count($chunkAccount->transactions);
+            }
+            Log::debug(sprintf('Chunk #%d returned %d transaction(s).', $index + 1, $chunkTransactionCount));
+
             if (null !== $accountResponse) {
                 Log::debug('Append to new account response.');
-                // append to one.
-                $newResponse = new AccountsResponse($response);
                 $accountResponse->appendFromArray($newResponse->getAccounts());
-            }
-            if (null === $accountResponse) {
+            } else {
                 Log::debug('Create new account response.');
-                $accountResponse = new AccountsResponse($response);
+                $accountResponse = $newResponse;
             }
 
             // store fake data in new thing:
@@ -146,6 +153,17 @@ final class AccountsRequest extends SimpleFINRequest
                 } catch (FilesystemException $e) {
                     Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
                 }
+            }
+
+            $emptyChunkStreak = 0 === $chunkTransactionCount ? $emptyChunkStreak + 1 : 0;
+            if (count($chunks) > 1 && $emptyChunkStreak >= $tripAfterChunks) {
+                Log::debug(sprintf(
+                    '%d consecutive empty chunk(s) (~%d days) with no transactions -- assuming no history further back, stopping early instead of requesting the remaining %d chunk(s).',
+                    $emptyChunkStreak,
+                    $emptyChunkStreak * $chunkSize,
+                    count($chunks) - $index - 1
+                ));
+                break;
             }
         }
 
@@ -183,23 +201,26 @@ final class AccountsRequest extends SimpleFINRequest
     private function chunkByTime(int $start, int $end): array
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $return       = [];
-        $chunkSize    = config('simplefin.max_chunk_size');
-        $size         = $chunkSize * 24 * 60 * 60;
-        $currentStart = $start;
+        $return     = [];
+        $chunkSize  = config('simplefin.max_chunk_size');
+        $size       = $chunkSize * 24 * 60 * 60;
+        $currentEnd = $end;
         Log::debug(sprintf('Start is %d (%s)', $start, Carbon::createFromTimestamp($start, config('app.timezone'))->toW3cString()));
         Log::debug(sprintf('End is   %d (%s)', $end, Carbon::createFromTimestamp($end, config('app.timezone'))->toW3cString()));
-        while ($currentStart <= $end) {
-            $currentEnd = $currentStart + $size;
-            if ($currentEnd > $end) {
-                $currentEnd = $end;
+        // Newest chunk first, so a consumer that stops on consecutive empty
+        // chunks bails out once it's walked past real history, instead of
+        // needing every chunk back to $start queued up before it can tell.
+        while ($currentEnd > $start) {
+            $currentStart = $currentEnd - $size;
+            if ($currentStart < $start) {
+                $currentStart = $start;
             }
             $return[]   = ['start-date' => $currentStart, 'end-date' => $currentEnd];
             Log::debug(sprintf('Add chunk on index #%d', count($return) - 1));
             Log::debug(sprintf('Start of chunk is %d (%s)', $currentStart, Carbon::createFromTimestamp($currentStart, config('app.timezone'))->toW3cString()));
             Log::debug(sprintf('End of chunk is   %d (%s)', $currentEnd, Carbon::createFromTimestamp($currentEnd, config('app.timezone'))->toW3cString()));
 
-            $currentStart += $size;
+            $currentEnd -= $size;
         }
 
         return $return;
