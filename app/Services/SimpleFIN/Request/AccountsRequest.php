@@ -158,10 +158,8 @@ final class AccountsRequest extends SimpleFINRequest
             $emptyChunkStreak = 0 === $chunkTransactionCount ? $emptyChunkStreak + 1 : 0;
             if (count($chunks) > 1 && $emptyChunkStreak >= $tripAfterChunks) {
                 Log::debug(sprintf(
-                    '%d consecutive empty chunk(s) (~%d days) with no transactions -- assuming no history further back, stopping early instead of requesting the remaining %d chunk(s).',
-                    $emptyChunkStreak,
-                    $emptyChunkStreak * $chunkSize,
-                    count($chunks) - $index - 1
+                    'Stopping early because more than %d days with no transactions to save SimpleFIN API requests.',
+                    $emptyChunkStreak * $chunkSize
                 ));
                 break;
             }
