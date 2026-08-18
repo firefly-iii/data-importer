@@ -38,12 +38,12 @@ abstract class Request
         }
     }
 
-    public final function setAppIdToken(string $token): void
+    public final function setAppIdToken(#[\SensitiveParameter] string $token): void
     {
         $this->appIdToken = $token;
     }
 
-    public final function setUserAccessToken(string $token): void
+    public final function setUserAccessToken(#[\SensitiveParameter] string $token): void
     {
         $this->userAccessToken = $token;
     }

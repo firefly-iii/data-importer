@@ -47,7 +47,7 @@ final class Transaction
     // type, falling back to "CREDIT" or "DEBIT" if nothing else is available.
     private ?string $type     = null;
 
-    //
+    
     // Akahu "Enriched transaction data"
     //
 

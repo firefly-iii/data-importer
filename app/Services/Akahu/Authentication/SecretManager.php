@@ -27,12 +27,12 @@ final class SecretManager
         return config(sprintf('akahu.%s', self::USER_ACCESS_TOKEN));
     }
 
-    public static function setAppIdToken(string $token): void
+    public static function setAppIdToken(#[\SensitiveParameter] string $token): void
     {
         session()->put(self::APP_ID_TOKEN, $token);
     }
 
-    public static function setUserAccessToken(string $token): void
+    public static function setUserAccessToken(#[\SensitiveParameter] string $token): void
     {
         session()->put(self::USER_ACCESS_TOKEN, $token);
     }

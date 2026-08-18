@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Tests\Unit\Services\Akahu\Request;
 
 use App\Services\Shared\Configuration\Configuration;
-use App\Services\Akahu\Model\Transaction\Meta;
-use App\Services\Akahu\Model\Transaction\Transaction;
-use App\Services\Akahu\Conversion\NoteBuilder;
+
+
+
 use App\Services\Akahu\Request\AkahuDateRange;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Session;
-use Override;
+
+
+
 use Tests\TestCase;
 
-//
+
 // Testing date range behaviour:
 // curl \
 //   -H "Authorization: Bearer user_token_aaaaaaaaaaaaaaaaaaaaaaaaa" \
 //   -H "X-Akahu-Id: app_token_aaaaaaaaaaaaaaaaaaaaaaaaa" \
 //   'https://api.akahu.io/v1/transactions?start=<start-iso>&end=<end-iso>' -v \
 //   | jq '.items.[] | {description:.description, date:.date, amount:.amount}'
-//
+
 
 final class AkahuDateRangeTest extends TestCase
 {

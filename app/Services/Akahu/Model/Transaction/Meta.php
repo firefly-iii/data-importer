@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Model\Transaction;
 
-use Carbon\Carbon;
+
 
 // https://developers.akahu.nz/docs/the-transaction-model#meta
 // Additional metadata we manage to retrieve for the transaction. Only present

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Model\Transaction;
 
-use Carbon\Carbon;
-use App\Services\Akahu\Model\Transaction\Meta;
+
+
 
 // The base NZFCC category that the transaction belongs to. Also included
 // is a map of less specific category groupings that this NZFCC category
@@ -20,9 +20,9 @@ final class Category
     // The NZFCC Category Name
     private ?string $name = null;
 
-    //
+    
     // Higher level groupings that a category belongs to.
-    //
+    
     private array $groups = [];
 
     private ?PersonalFinanceGroup $personalFinanceGroup = null;

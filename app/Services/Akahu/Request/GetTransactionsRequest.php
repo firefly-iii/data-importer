@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Request;
 
-use App\Exceptions\ImporterHttpException;
-use App\Services\Akahu\Response\GetAccountsResponse;
+
+
 use App\Services\Akahu\Request\AkahuDateRange;
-use App\Services\Akahu\Model\Account\Account;
-use App\Services\Shared\Response\Response;
-use GuzzleHttp\Exception\GuzzleException;
+
+
+
 use App\Services\Akahu\Response\GetTransactions\GetTransactionsResponseBuilder;
 use App\Services\Akahu\Response\GetTransactions\GetTransactionsResponse;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+
+
 
 final class GetTransactionsRequest extends Request
 {

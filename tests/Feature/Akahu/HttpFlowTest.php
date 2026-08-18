@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Akahu;
 
-use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Storage;
 use App\Models\ImportJob;
 use Tests\TestCase;

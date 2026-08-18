@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Model\Transaction;
 
-use Carbon\Carbon;
+
 
 // Akahu defines a merchant as the business who was party to this transaction.
 // For example, "The Warehouse" is a merchant.
