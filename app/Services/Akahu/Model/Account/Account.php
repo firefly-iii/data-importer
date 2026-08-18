@@ -90,7 +90,7 @@ final class Account
 
         $account->akahuId = $json['_id'] ?? null;
 
-        $account->connection = isset($json['connection'])
+        $account->connection = array_key_exists('connection', $json)
             ? Connection::fromJson($json['connection']) : null;
 
         $account->name = $json['name'] ?? null;
@@ -99,10 +99,10 @@ final class Account
 
         $account->meta = $json['meta'] ?? null;
 
-        $account->refreshed = isset($json['refreshed'])
+        $account->refreshed = array_key_exists('refreshed', $json)
             ? Refreshed::fromJson($json['refreshed']) : null;
 
-        $account->balance = isset($json['balance'])
+        $account->balance = array_key_exists('balance', $json)
             ? Balance::fromJson($json['balance']) : null;
 
         $account->type = $json['type'] ?? null;
@@ -140,7 +140,7 @@ final class Account
 
         $account->akahuId = $data['akahuId'] ?? null;
 
-        $account->connection = isset($data['connection'])
+        $account->connection = array_key_exists('connection', $data)
             ? Connection::fromArray($data['connection']) : null;
 
         $account->name = $data['name'] ?? null;
@@ -148,10 +148,10 @@ final class Account
         $account->formattedAccount = $data['formattedAccount'] ?? null;
         $account->meta = $data['meta'] ?? null;
 
-        $account->refreshed = isset($data['refreshed'])
+        $account->refreshed = array_key_exists('refreshed', $data)
             ? Refreshed::fromArray($data['refreshed']) : null;
 
-        $account->balance = isset($data['balance'])
+        $account->balance = array_key_exists('balance', $data)
             ? Balance::fromArray($data['balance']) : null;
 
         $account->type = $data['type'] ?? null;

@@ -17,8 +17,8 @@ final class TransactionFetcher
 {
     private string $akahuAccountId;
     private int $fireflyAccountId;
-    private ?Carbon $startDate;
-    private ?Carbon $endDate;
+    //private ?Carbon $startDate;
+    //private ?Carbon $endDate;
     private ImportJob $importJob;
     private AkahuDateRange $dateRange;
 

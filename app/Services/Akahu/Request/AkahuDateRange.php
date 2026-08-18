@@ -26,11 +26,11 @@ final class AkahuDateRange
         $dateNotBefore = null;
         $dateNotAfter = null;
 
-        if ('' !== $configuration->getDateNotBefore() ?? '') {
+        if ('' !== $configuration->getDateNotBefore()) {
             $dateNotBefore = Carbon::parse($configuration->getDateNotBefore(), $tz);
         }
 
-        if ('' !== $configuration->getDateNotAfter() ?? '') {
+        if ('' !== $configuration->getDateNotAfter()) {
             $dateNotAfter = Carbon::parse($configuration->getDateNotAfter(), $tz);
         }
 

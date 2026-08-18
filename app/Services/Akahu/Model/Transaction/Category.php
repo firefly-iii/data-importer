@@ -23,6 +23,7 @@ final class Category
     //
     // Higher level groupings that a category belongs to.
     //
+    private array $groups = [];
 
     private ?PersonalFinanceGroup $personalFinanceGroup = null;
 
@@ -36,10 +37,10 @@ final class Category
         $category->nzfccId = $json['_id'] ?? null;
         $category->name = $json['name'] ?? null;
 
-        if (isset($json['groups']) && is_array($json['groups'])) {
-            $category->groups = [];
+        if (array_key_exists('groups', $json) && is_array($json['groups'])) {
+            $category->groups = []; // TODO this field is not used.
 
-            if (isset($json['groups'][PersonalFinanceGroup::CLASSIFIER])) {
+            if (array_key_exists(PersonalFinanceGroup::CLASSIFIER, $json['groups'])) {
                 $groupJson = $json['groups'][PersonalFinanceGroup::CLASSIFIER];
                 $category->personalFinanceGroup = PersonalFinanceGroup::fromJson($groupJson);
             }

@@ -38,11 +38,11 @@ final class Balance
     {
         $balance = new self();
 
-        $balance->current = isset($json['current'])
+        $balance->current = array_key_exists('current', $json)
             ? Steam::bcnumber($json['current']) : null;
-        $balance->available = isset($json['available'])
+        $balance->available = array_key_exists('available', $json)
             ? Steam::bcnumber($json['available']) : null;
-        $balance->limit = isset($json['limit'])
+        $balance->limit = array_key_exists('limit', $json)
             ? Steam::bcnumber($json['limit']) : null;
 
         $balance->overdrawn = $json['overdrawn'] ?? null;
@@ -72,12 +72,9 @@ final class Balance
     {
         $balance = new self();
 
-        $balance->current = isset($data['current'])
-            ? unserialize($data['current']) : null;
-        $balance->available = isset($data['available'])
-            ? unserialize($data['available']) : null;
-        $balance->limit = isset($data['limit'])
-            ? unserialize($data['limit']) : null;
+        $balance->current = array_key_exists('current', $data) ? unserialize($data['current']) : null;
+        $balance->available = array_key_exists('available', $data) ? unserialize($data['available']) : null;
+        $balance->limit = array_key_exists('limit', $data)? unserialize($data['limit']) : null;
 
         $balance->overdrawn = $data['overdrawn'] ?? null;
         $balance->currency = $data['currency'] ?? null;

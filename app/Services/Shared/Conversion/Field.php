@@ -6,10 +6,10 @@ namespace App\Services\Shared\Conversion;
 
 final class Field
 {
-    private ?string $fieldName;
-    private $field;
+    private ?string $fieldName = null;
+    private ?string $field = null;
 
-    public function __construct(string $fieldName, $field)
+    public function __construct(string|null $fieldName, string|null $field)
     {
         $this->fieldName = $fieldName;
         $this->field = $field;

@@ -215,7 +215,7 @@ final class Steam
     /**
      * When displaying amounts, use currency specific precision.
      */
-    public function bcstringify(Number $number, int $currencyDecimalPlaces)
+    public function bcstringify(Number $number, int $currencyDecimalPlaces): string
     {
         return bcround((string) $number, $currencyDecimalPlaces);
     }

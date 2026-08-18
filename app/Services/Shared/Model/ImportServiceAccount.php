@@ -422,12 +422,13 @@ final class ImportServiceAccount
                         ->setTimezone(config('app.timezone'))
                         ->format('Y-m-d H:i:s'),
                     'Account Type' => $account->getType(),
+                    'Organization' =>  $account->getConnection()?->getName(),
                 ],
             ]);
 
-            $current->org = [
-                'name' => $account->getConnection()?->getName(),
-            ];
+//            $current->org = [
+//                'name' => $account->getConnection()?->getName(),
+//            ];
 
             $return[] = $current;
         }

@@ -23,7 +23,7 @@ final class TransactionConverter
 
     private TransactionFetcher $transactionFetcher;
     private array $targetAccounts;
-    private int $accountDecimalPlaces;
+    // private int $accountDecimalPlaces;
 
     public function __construct(TransactionFetcher $transactionFetcher)
     {

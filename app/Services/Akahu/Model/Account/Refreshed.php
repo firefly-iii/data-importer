@@ -33,13 +33,13 @@ final class Refreshed
     {
         $refreshed = new self();
 
-        $refreshed->balance = isset($json['balance'])
+        $refreshed->balance = array_key_exists('balance', $json)
             ? Carbon::parse($json['balance']) : null;
-        $refreshed->meta = isset($json['meta'])
+        $refreshed->meta = array_key_exists('meta', $json)
             ? Carbon::parse($json['meta']) : null;
-        $refreshed->transactions = isset($json['transactions'])
+        $refreshed->transactions = array_key_exists('transactions', $json)
             ? Carbon::parse($json['transactions']) : null;
-        $refreshed->party = isset($json['party'])
+        $refreshed->party = array_key_exists('party', $json)
             ? Carbon::parse($json['party']) : null;
 
         return $refreshed;
@@ -65,13 +65,13 @@ final class Refreshed
     {
         $refreshed = new self();
 
-        $refreshed->balance = isset($data['balance'])
+        $refreshed->balance = array_key_exists('balance', $data)
             ? Carbon::parse($data['balance']) : null;
-        $refreshed->meta = isset($data['meta'])
+        $refreshed->meta = array_key_exists('meta', $data)
             ? Carbon::parse($data['meta']) : null;
-        $refreshed->transactions = isset($data['transactions'])
+        $refreshed->transactions = array_key_exists('transactions', $data)
             ? Carbon::parse($data['transactions']) : null;
-        $refreshed->party = isset($data['party'])
+        $refreshed->party = array_key_exists('party', $data)
             ? Carbon::parse($data['party']) : null;
 
         return $refreshed;

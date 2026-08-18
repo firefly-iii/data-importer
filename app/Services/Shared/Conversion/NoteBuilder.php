@@ -15,7 +15,7 @@ abstract class NoteBuilder
         return $this->notes;
     }
 
-    protected final function renderSection(string $fieldTitle, array $fields)
+    protected final function renderSection(string $fieldTitle, array $fields): void
     {
         if (!array_any($fields, fn(Field $f) => $f->present())) {
             return;

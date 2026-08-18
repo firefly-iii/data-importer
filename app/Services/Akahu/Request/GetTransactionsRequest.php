@@ -18,8 +18,8 @@ use Carbon\Carbon;
 final class GetTransactionsRequest extends Request
 {
     private string $akahuId;
-    private ?Carbon $startDate;
-    private ?Carbon $endDate;
+//    private ?Carbon $startDate;
+//    private ?Carbon $endDate;
     private AkahuDateRange $dateRange;
 
     public function __construct(

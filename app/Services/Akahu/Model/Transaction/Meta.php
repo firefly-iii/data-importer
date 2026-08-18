@@ -48,8 +48,7 @@ final class Meta
 
         $meta->otherAccount = $json['other_account'] ?? null;
 
-        $meta->conversion = isset($json['conversion'])
-            ? Conversion::fromJson($json['conversion']) : null;
+        $meta->conversion = array_key_exists('conversion', $json) ? Conversion::fromJson($json['conversion']) : null;
 
         $meta->cardSuffix = $json['card_suffix'] ?? null;
 

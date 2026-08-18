@@ -51,7 +51,7 @@ final class GetTransactionsResponseBuilder
         throw new ImporterErrorException($msg);
     }
 
-    private function submitPage(array $transactionsJson)
+    private function submitPage(array $transactionsJson): void
     {
         $pageTransactions = array_map(Transaction::fromJson(...), $transactionsJson);
         array_push($this->transactions, ...$pageTransactions);

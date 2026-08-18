@@ -84,19 +84,19 @@ final class Transaction
 
         $transaction->description = $json['description']
             ?? throw new InvalidArgumentException('transaction contains no description');
-        $transaction->amount = isset($json['amount'])
+        $transaction->amount = array_key_exists('amount', $json)
             ? Steam::bcnumber($json['amount'])
                 : throw new InvalidArgumentException('transaction contains no amount');
 
-        $transaction->balance = isset($json['balance'])
+        $transaction->balance = array_key_exists('balance', $json)
             ? Steam::bcnumber($json['balance']) : null;
         $transaction->type = $json['type']
             ?? throw new InvalidArgumentException('transaction contains no type');
-        $transaction->category = isset($json['category'])
+        $transaction->category = array_key_exists('category', $json)
             ? Category::fromJson($json['category']) : null;
-        $transaction->merchant = isset($json['merchant'])
+        $transaction->merchant = array_key_exists('merchant', $json)
             ? Merchant::fromJson($json['merchant']) : null;
-        $transaction->meta = isset($json['meta'])
+        $transaction->meta = array_key_exists('meta', $json)
             ? Meta::fromJson($json['meta']) : null;
 
         return $transaction;

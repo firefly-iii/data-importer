@@ -105,11 +105,17 @@ abstract class Request
         $query = $this->queryParams;
         $debug = $this->debug;
 
+        $opts = [
+            'headers' => $headers,
+            'query' => $query,
+            'debug' => $debug,
+        ];
+
+
         $handlerStackName = [];
 
         if (config('app.debug')) {
-            $handler = $this->handlerStack;
-            $handlerStackName = ['handler'];
+            $opts['handler'] = $this->handlerStack;
         }
 
         $client = $this->getClient();
@@ -118,7 +124,7 @@ abstract class Request
             $response = $client->request(
                 'GET',
                 $apiUrl,
-                compact('headers', 'query', 'debug', $handlerStackName)
+                $opts
             );
         } catch (ConnectException|TooManyRedirectsException $e) {
             throw new ImporterErrorException(sprintf(

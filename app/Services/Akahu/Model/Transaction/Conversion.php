@@ -32,15 +32,10 @@ final class Conversion
     {
         $conversion = new self();
 
-        $conversion->amount = isset($json['amount'])
-            ? Steam::bcnumber($json['amount']) : null;
-
+        $conversion->amount = array_key_exists('amount', $json) ? Steam::bcnumber($json['amount']) : null;
         $conversion->currency = $json['currency'] ?? null;
-
-        $conversion->rate = isset($json['rate'])
-            ? Steam::bcnumber($json['rate']) : null;
-        $conversion->fee = isset($json['fee'])
-            ? Steam::bcnumber($json['fee']) : null;
+        $conversion->rate = array_key_exists('rate', $json) ? Steam::bcnumber($json['rate']) : null;
+        $conversion->fee = array_key_exists('fee', $json) ? Steam::bcnumber($json['fee']) : null;
 
         return $conversion;
     }
