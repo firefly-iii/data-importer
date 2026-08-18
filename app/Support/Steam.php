@@ -24,8 +24,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Log;
 use BcMath\Number;
+use Illuminate\Support\Facades\Log;
 use ValueError;
 
 /**

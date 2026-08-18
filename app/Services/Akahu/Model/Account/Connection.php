@@ -7,10 +7,10 @@ namespace App\Services\Akahu\Model\Account;
 final class Connection
 {
     // The name of the provider.
-    private ?string $name = null;
+    private ?string $name           = null;
 
     // A URL pointing to an image of the provider's logo.
-    private ?string $logo = null;
+    private ?string $logo           = null;
 
     // The type of integration used to connect to this institution.
     // This will be one of:
@@ -25,10 +25,10 @@ final class Connection
      */
     public static function fromJson(array $json): self
     {
-        $connection = new self();
+        $connection                 = new self();
 
-        $connection->name = $json['name'] ?? null;
-        $connection->logo = $json['logo'] ?? null;
+        $connection->name           = $json['name'] ?? null;
+        $connection->logo           = $json['logo'] ?? null;
         $connection->connectionType = $json['connection_type'] ?? null;
 
         return $connection;
@@ -39,11 +39,7 @@ final class Connection
      */
     public function toArray(): array
     {
-        return [
-            'name' => $this->name,
-            'logo' => $this->logo,
-            'connectionType' => $this->connectionType,
-        ];
+        return ['name' => $this->name, 'logo' => $this->logo, 'connectionType' => $this->connectionType];
     }
 
     /**
@@ -51,10 +47,10 @@ final class Connection
      */
     public static function fromArray(array $data): self
     {
-        $connection = new self();
+        $connection                 = new self();
 
-        $connection->name = $data['name'] ?? null;
-        $connection->logo = $data['logo'] ?? null;
+        $connection->name           = $data['name'] ?? null;
+        $connection->logo           = $data['logo'] ?? null;
         $connection->connectionType = $data['connectionType'] ?? null;
 
         return $connection;

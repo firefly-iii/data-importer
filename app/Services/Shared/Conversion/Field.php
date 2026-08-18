@@ -7,13 +7,13 @@ namespace App\Services\Shared\Conversion;
 final class Field
 {
     private ?string $fieldName = null;
-    private ?string $field = null;
+    private ?string $field     = null;
 
-    public function __construct(string|null $fieldName, string|null $field)
+    public function __construct(?string $fieldName, ?string $field)
     {
         $this->fieldName = $fieldName;
-        $this->field = $field;
-   }
+        $this->field     = $field;
+    }
 
     public function renderIfPresent(string $notes): string
     {
@@ -26,6 +26,6 @@ final class Field
 
     public function present(): bool
     {
-        return !is_null($this->field);
+        return null !== $this->field;
     }
 }

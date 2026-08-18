@@ -65,74 +65,74 @@ declare(strict_types=1);
 
 return [
     'version'                       => 'develop/2026-08-18',
-    'build_time'                    => 1787024383,
+    'build_time'                    => 1787046207,
     'fake_data'                     => env('FAKE_DATA', false),
     'store_fake_data'               => env('STORE_FAKE_DATA', false),
     'providers'                     => [
-        'file'      => [
+        'file'         => [
             'title'                     => 'File',
             'explanation'               => 'CSV or CAMT.* files',
             'enabled'                   => true,
             'conversion_before_mapping' => false,
             'supports_new_accounts'     => false,
         ],
-        'sophtron'  => [
+        'sophtron'     => [
             'title'                     => 'Sophtron',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'nordigen'  => [
+        'nordigen'     => [
             'title'                     => 'GoCardless',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'simplefin' => [
+        'simplefin'    => [
             'title'                     => 'SimpleFIN',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'lunchflow' => [
+        'lunchflow'    => [
             'title'                     => 'Lunch Flow',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'obg'       => [
+        'obg'          => [
             'title'                     => 'Open Banking Gateway',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'eb'        => [
+        'eb'           => [
             'title'                     => 'Enable Banking',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'teller'    => [
+        'teller'       => [
             'title'                     => 'teller.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'fints'     => [
+        'fints'        => [
             'title'                     => 'FinTS/HBCI',
             'enabled'                   => false,
             'conversion_before_mapping' => false,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'basiq'     => [
+        'basiq'        => [
             'title'                     => 'basiq.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,

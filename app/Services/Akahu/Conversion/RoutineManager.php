@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Akahu\Conversion;
 
 use App\Models\ImportJob;
-use App\Services\Shared\Conversion\RoutineManagerInterface;
-
-use App\Services\Akahu\Request\AkahuDateRange;
-
-use App\Services\Shared\Conversion\CreatesAccounts;
 use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\Akahu\Request\AkahuDateRange;
+use App\Services\Shared\Conversion\CreatesAccounts;
+use App\Services\Shared\Conversion\RoutineManagerInterface;
 use Illuminate\Support\Facades\Log;
-
 
 final class RoutineManager implements RoutineManagerInterface
 {
@@ -24,7 +21,7 @@ final class RoutineManager implements RoutineManagerInterface
 
     public function __construct(ImportJob $importJob)
     {
-        $this->importJob = $importJob;
+        $this->importJob  = $importJob;
         $this->repository = new ImportJobRepository();
         $this->setExistingServiceAccounts($importJob->getServiceAccounts());
     }
@@ -42,20 +39,15 @@ final class RoutineManager implements RoutineManagerInterface
     public function start(): array
     {
         $configuration = $this->importJob->getConfiguration();
-        $accounts = $configuration->getAccounts();
-        $transactions = [];
+        $accounts      = $configuration->getAccounts();
+        $transactions  = [];
 
-        foreach($accounts as $akahuAccountId => $maybeFireflyAccountId) {
-            $fireflyAccountId = $this->ensureFireflyAccountId($maybeFireflyAccountId, $akahuAccountId);
-            $dateRange = new AkahuDateRange($configuration);
+        foreach ($accounts as $akahuAccountId => $maybeFireflyAccountId) {
+            $fireflyAccountId    = $this->ensureFireflyAccountId($maybeFireflyAccountId, $akahuAccountId);
+            $dateRange           = new AkahuDateRange($configuration);
 
-            $fetcher = new TransactionFetcher(
-                $akahuAccountId,
-                $fireflyAccountId,
-                $dateRange,
-                $this->importJob
-            );
-            $converter = new TransactionConverter($fetcher);
+            $fetcher             = new TransactionFetcher($akahuAccountId, $fireflyAccountId, $dateRange, $this->importJob);
+            $converter           = new TransactionConverter($fetcher);
             $accountTransactions = $converter->convert();
 
             array_push($transactions, ...$accountTransactions);
@@ -68,6 +60,7 @@ final class RoutineManager implements RoutineManagerInterface
     {
         if (self::CREATE_ACCOUNT_SENTINEL_ID === $fireflyAccountId) {
             Log::debug(sprintf('Creating new account for account "%s".', $akahuAccountId));
+
             return $this->createNewAccount($akahuAccountId);
         }
 

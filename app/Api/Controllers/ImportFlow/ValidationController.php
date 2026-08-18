@@ -25,13 +25,13 @@ declare(strict_types=1);
 namespace App\Api\Controllers\ImportFlow;
 
 use App\Api\Controllers\Controller;
+use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\SimpleFIN\AuthenticationValidator as SimpleFINValidator;
 use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
-use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 

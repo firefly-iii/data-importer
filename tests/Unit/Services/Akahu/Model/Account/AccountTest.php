@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Account;
 
-
 use App\Services\Akahu\Model\Account\Account;
-
-
-
 use Carbon\Carbon;
-
-
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class AccountTest extends TestCase
 {
     public function testSerializeDeserializeFull(): void
     {
-        $json = '{
+        $json         = '{
           "_id": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_authorisation": "authorisation_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_credentials": "creds_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -57,17 +56,17 @@ final class AccountTest extends TestCase
           ]
         }';
 
-        $original = Account::fromJson(json_decode($json, true));
+        $original     = Account::fromJson(json_decode($json, true));
 
-        $serialized = json_encode($original->toArray(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $serialized   = json_encode($original->toArray(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         $deserialized = Account::fromArray(json_decode($serialized, true));
 
-        $this->assertEquals($original, $deserialized);
+        $this->assertSame($original, $deserialized);
     }
 
     public function testParseJsonFull(): void
     {
-        $json = '{
+        $json    = '{
           "_id": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_authorisation": "authorisation_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_credentials": "creds_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -117,25 +116,20 @@ final class AccountTest extends TestCase
         $this->assertSame($account->getName(), 'Business Account');
         $this->assertSame($account->getAkahuStatus(), 'ACTIVE');
         $this->assertSame($account->getFormattedAccount(), '99-9999-0000000-00');
-        $this->assertEquals($account->getMeta(), []);
+        $this->assertSame($account->getMeta(), []);
 
-        $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
-        $this->assertEquals($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-04T03:22:25.542Z'));
-        $this->assertEquals($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-03T03:22:29.023Z'));
-        $this->assertEquals($account->getRefreshed()?->getParty(), Carbon::parse('2026-08-02T10:22:29.023Z'));
+        $this->assertSame($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
+        $this->assertSame($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-04T03:22:25.542Z'));
+        $this->assertSame($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-03T03:22:29.023Z'));
+        $this->assertSame($account->getRefreshed()?->getParty(), Carbon::parse('2026-08-02T10:22:29.023Z'));
 
         $this->assertSame($account->getType(), 'CHECKING');
-        $this->assertEquals($account->getAttributes(), [
-            Account::ATTRIBUTE_PAYMENT_TO,
-            Account::ATTRIBUTE_PAYMENT_FROM,
-            Account::ATTRIBUTE_TRANSACTIONS,
-        ]);
+        $this->assertSame($account->getAttributes(), [Account::ATTRIBUTE_PAYMENT_TO, Account::ATTRIBUTE_PAYMENT_FROM, Account::ATTRIBUTE_TRANSACTIONS]);
     }
 
     public function testParseJson1(): void
     {
-
-        $json = '{
+        $json    = '{
           "_id": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_authorisation": "authorisation_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_credentials": "creds_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -178,22 +172,18 @@ final class AccountTest extends TestCase
         $this->assertSame($account->getFormattedAccount(), '99-9999-0000000-00');
         $this->assertNull($account->getMeta());
 
-        $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T10:15:45.863Z'));
-        $this->assertEquals($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T10:15:45.863Z'));
+        $this->assertSame($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T10:15:45.863Z'));
+        $this->assertSame($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T10:15:45.863Z'));
         $this->assertNull($account->getRefreshed()?->getTransactions());
         $this->assertNull($account->getRefreshed()?->getParty());
 
         $this->assertSame($account->getType(), 'CHECKING');
-        $this->assertEquals($account->getAttributes(), [
-            Account::ATTRIBUTE_PAYMENT_FROM,
-            Account::ATTRIBUTE_PAYMENT_TO,
-        ]);
+        $this->assertSame($account->getAttributes(), [Account::ATTRIBUTE_PAYMENT_FROM, Account::ATTRIBUTE_PAYMENT_TO]);
     }
 
     public function testParseJson2(): void
     {
-
-        $json = '{
+        $json    = '{
           "_id": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_authorisation": "authorisation_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_credentials": "creds_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -236,16 +226,12 @@ final class AccountTest extends TestCase
         $this->assertSame($account->getFormattedAccount(), '11-0000-1111111-00');
         $this->assertNull($account->getMeta());
 
-        $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
-        $this->assertEquals($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T03:22:25.542Z'));
-        $this->assertEquals($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-05T03:22:29.023Z'));
+        $this->assertSame($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
+        $this->assertSame($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T03:22:25.542Z'));
+        $this->assertSame($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-05T03:22:29.023Z'));
         $this->assertNull($account->getRefreshed()?->getParty());
 
         $this->assertSame($account->getType(), 'CHECKING');
-        $this->assertEquals($account->getAttributes(), [
-            Account::ATTRIBUTE_PAYMENT_TO,
-            Account::ATTRIBUTE_PAYMENT_FROM,
-            Account::ATTRIBUTE_TRANSACTIONS,
-        ]);
+        $this->assertSame($account->getAttributes(), [Account::ATTRIBUTE_PAYMENT_TO, Account::ATTRIBUTE_PAYMENT_FROM, Account::ATTRIBUTE_TRANSACTIONS]);
     }
 }

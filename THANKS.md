@@ -5,6 +5,7 @@ Please find below all the people who contributed to the Firefly III Data Importe
 
 ## 2026
 - Danilo Bürger
+- Jess
 - Jan Sitarski
 - Kyle Fawcett
 - Diego Barreiro Perez

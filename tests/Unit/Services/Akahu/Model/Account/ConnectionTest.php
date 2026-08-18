@@ -4,35 +4,36 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Account;
 
-
 use App\Services\Akahu\Model\Account\Connection;
-
-
-
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class ConnectionTest extends TestCase
 {
     public function testSerializeDeserializeFull(): void
     {
-        $json = '{
+        $json         = '{
             "_id": "conn_aaaaaaaaaaaaaaaaaaaaaaaaa",
             "name": "my bank",
             "logo": "https://my-bank.com/logos/logo1",
             "connection_type": "official"
         }';
 
-        $original = Connection::fromJson(json_decode($json, true));
+        $original     = Connection::fromJson(json_decode($json, true));
 
-        $serialized = json_encode($original->toArray(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $serialized   = json_encode($original->toArray(), JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
         $deserialized = Connection::fromArray(json_decode($serialized, true));
 
-        $this->assertEquals($original, $deserialized);
+        $this->assertSame($original, $deserialized);
     }
 
     public function testParseJsonFull(): void
     {
-        $json = '{
+        $json       = '{
             "_id": "conn_aaaaaaaaaaaaaaaaaaaaaaaaa",
             "name": "my bank",
             "logo": "https://my-bank.com/logos/logo1",
@@ -48,7 +49,7 @@ final class ConnectionTest extends TestCase
 
     public function testParseJson1(): void
     {
-        $json = '{
+        $json       = '{
           "_id": "conn_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "name": "Demo Bank",
           "logo": "https://cdn.akahu.nz/logos/connections/conn_aaaaaaaaaaaaaaaaaaaaaaaaa",

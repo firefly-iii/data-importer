@@ -9,11 +9,11 @@ use Carbon\Carbon;
 final class Refreshed
 {
     // When the balance was last updated.
-    private ?Carbon $balance = null;
+    private ?Carbon $balance      = null;
 
     // When other account metadata was last updated (any account property
     // apart from balance).
-    private ?Carbon $meta = null;
+    private ?Carbon $meta         = null;
 
     // When we last checked for and processed any new transactions. This
     // flag may be missing when an account has first connected, as it takes
@@ -24,23 +24,19 @@ final class Refreshed
     // authenticated with the financial institution when connecting this
     // account. This data is updated by Akahu on a fixed 30 day interval,
     // regardless of your app's data refresh configuration.
-    private ?Carbon $party = null;
+    private ?Carbon $party        = null;
 
     /**
      * Parse a refreshed structure from an Akahu api json response
      */
     public static function fromJson(array $json): self
     {
-        $refreshed = new self();
+        $refreshed               = new self();
 
-        $refreshed->balance = array_key_exists('balance', $json)
-            ? Carbon::parse($json['balance']) : null;
-        $refreshed->meta = array_key_exists('meta', $json)
-            ? Carbon::parse($json['meta']) : null;
-        $refreshed->transactions = array_key_exists('transactions', $json)
-            ? Carbon::parse($json['transactions']) : null;
-        $refreshed->party = array_key_exists('party', $json)
-            ? Carbon::parse($json['party']) : null;
+        $refreshed->balance      = array_key_exists('balance', $json) ? Carbon::parse($json['balance']) : null;
+        $refreshed->meta         = array_key_exists('meta', $json) ? Carbon::parse($json['meta']) : null;
+        $refreshed->transactions = array_key_exists('transactions', $json) ? Carbon::parse($json['transactions']) : null;
+        $refreshed->party        = array_key_exists('party', $json) ? Carbon::parse($json['party']) : null;
 
         return $refreshed;
     }
@@ -51,10 +47,10 @@ final class Refreshed
     public function toArray(): array
     {
         return [
-            'balance' => $this->balance?->toISOString(),
-            'meta' => $this->meta?->toISOString(),
+            'balance'      => $this->balance?->toISOString(),
+            'meta'         => $this->meta?->toISOString(),
             'transactions' => $this->transactions?->toISOString(),
-            'party' => $this->party?->toISOString(),
+            'party'        => $this->party?->toISOString(),
         ];
     }
 
@@ -63,16 +59,12 @@ final class Refreshed
      */
     public static function fromArray(array $data): self
     {
-        $refreshed = new self();
+        $refreshed               = new self();
 
-        $refreshed->balance = array_key_exists('balance', $data)
-            ? Carbon::parse($data['balance']) : null;
-        $refreshed->meta = array_key_exists('meta', $data)
-            ? Carbon::parse($data['meta']) : null;
-        $refreshed->transactions = array_key_exists('transactions', $data)
-            ? Carbon::parse($data['transactions']) : null;
-        $refreshed->party = array_key_exists('party', $data)
-            ? Carbon::parse($data['party']) : null;
+        $refreshed->balance      = array_key_exists('balance', $data) ? Carbon::parse($data['balance']) : null;
+        $refreshed->meta         = array_key_exists('meta', $data) ? Carbon::parse($data['meta']) : null;
+        $refreshed->transactions = array_key_exists('transactions', $data) ? Carbon::parse($data['transactions']) : null;
+        $refreshed->party        = array_key_exists('party', $data) ? Carbon::parse($data['party']) : null;
 
         return $refreshed;
     }

@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Request;
 
-use App\Services\Akahu\Authentication\SecretManager;
 use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
-use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Exception\ConnectException;
+use App\Services\Akahu\Authentication\SecretManager;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+use SensitiveParameter;
 
 abstract class Request
 {
@@ -21,10 +22,10 @@ abstract class Request
     private string $userAccessToken;
     private string $apiBaseUrl;
     private bool $debug;
-    private array $queryParams = [];
+    private array $queryParams      = [];
     private array $historicRequests = [];
     private HandlerStack $handlerStack;
-    private float $timeOut = 30.0;
+    private float $timeOut          = 30.0;
 
     public function __construct()
     {
@@ -38,32 +39,32 @@ abstract class Request
         }
     }
 
-    public final function setAppIdToken(#[\SensitiveParameter] string $token): void
+    final public function setAppIdToken(#[SensitiveParameter] string $token): void
     {
         $this->appIdToken = $token;
     }
 
-    public final function setUserAccessToken(#[\SensitiveParameter] string $token): void
+    final public function setUserAccessToken(#[SensitiveParameter] string $token): void
     {
         $this->userAccessToken = $token;
     }
 
-    public final function setApiBaseUrl(string $baseUrl): void
+    final public function setApiBaseUrl(string $baseUrl): void
     {
         $this->apiBaseUrl = $baseUrl;
     }
 
-    public final function setRequestTimeout(float $timeOut): void
+    final public function setRequestTimeout(float $timeOut): void
     {
         $this->timeOut = $timeOut;
     }
 
-    public final function setQueryParam(string $key, string $value): void
+    final public function setQueryParam(string $key, string $value): void
     {
         $this->queryParams[$key] = $value;
     }
 
-    public final function setDebug(bool $debug): void
+    final public function setDebug(bool $debug): void
     {
         $this->debug = $debug;
     }
@@ -74,43 +75,31 @@ abstract class Request
         $this->handlerStack->push(Middleware::history($this->historicRequests));
     }
 
-    public final function getHistoricRequests(): array
+    final public function getHistoricRequests(): array
     {
         return $this->historicRequests;
     }
 
-    protected final function getClient(): Client
+    final protected function getClient(): Client
     {
-        return new Client([
-            'connect_timeout' => $this->timeOut,
-            'timeout' => $this->timeOut
-        ]);
+        return new Client(['connect_timeout' => $this->timeOut, 'timeout' => $this->timeOut]);
     }
 
-    protected final function authenticatedGet(string $apiPath): array
+    final protected function authenticatedGet(string $apiPath): array
     {
-        $apiUrl = sprintf(
-            "%s/%s",
-            $this->apiBaseUrl,
-            $apiPath,
-        );
+        $apiUrl           = sprintf('%s/%s', $this->apiBaseUrl, $apiPath);
 
-        $headers = [
+        $headers          = [
             'Accept'        => 'application/json',
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
             'Authorization' => sprintf('Bearer %s', $this->userAccessToken),
-            'X-Akahu-Id' => $this->appIdToken,
+            'X-Akahu-Id'    => $this->appIdToken,
         ];
 
-        $query = $this->queryParams;
-        $debug = $this->debug;
+        $query            = $this->queryParams;
+        $debug            = $this->debug;
 
-        $opts = [
-            'headers' => $headers,
-            'query' => $query,
-            'debug' => $debug,
-        ];
-
+        $opts             = ['headers' => $headers, 'query' => $query, 'debug' => $debug];
 
         $handlerStackName = [];
 
@@ -118,26 +107,15 @@ abstract class Request
             $opts['handler'] = $this->handlerStack;
         }
 
-        $client = $this->getClient();
+        $client           = $this->getClient();
 
         try {
-            $response = $client->request(
-                'GET',
-                $apiUrl,
-                $opts
-            );
+            $response = $client->request('GET', $apiUrl, $opts);
         } catch (ConnectException|TooManyRedirectsException $e) {
-            throw new ImporterErrorException(sprintf(
-                'Failed to connect to the Akahu api (%s): %s',
-                $apiUrl,
-                $e->getMessage()
-            ));
+            throw new ImporterErrorException(sprintf('Failed to connect to the Akahu api (%s): %s', $apiUrl, $e->getMessage()));
         } catch (BadResponseException $e) {
-            throw new ImporterHttpException(sprintf(
-                    'Akahu api returned an error response (%s): %s',
-                    $apiUrl,
-                    $e->getMessage()
-                ),
+            throw new ImporterHttpException(
+                sprintf('Akahu api returned an error response (%s): %s', $apiUrl, $e->getMessage()),
                 $e->getResponse()->getStatusCode(),
                 $e
             );
@@ -145,19 +123,16 @@ abstract class Request
 
         if (config('app.debug')) {
             $historicRequests = $this->getHistoricRequests();
-            $lastRequest = end($historicRequests)['request'];
+            $lastRequest      = end($historicRequests)['request'];
             Log::debug(sprintf('Fetched from from endpoint "%s"', $lastRequest->getUri()));
         }
 
-        $json = json_decode((string) $response->getBody(), true);
+        $json             = json_decode((string) $response->getBody(), true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            $msg = sprintf(
-                'Akahu api returned invalid json (%s). See logs for more details.',
-                $apiUrl
-            );
+            $msg = sprintf('Akahu api returned invalid json (%s). See logs for more details.', $apiUrl);
 
-            Log::error($msg . ' json: "' . $response->getBody() . '"');
+            Log::error($msg.' json: "'.$response->getBody().'"');
 
             throw new ImporterErrorException($msg);
         }

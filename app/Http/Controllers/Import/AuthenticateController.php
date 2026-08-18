@@ -26,13 +26,13 @@ namespace App\Http\Controllers\Import;
 
 use App\Exceptions\ImporterErrorException;
 use App\Http\Controllers\Controller;
+use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
 use App\Services\Nordigen\AuthenticationValidator as NordigenValidator;
 use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
 use App\Services\Sophtron\AuthenticationValidator as SophtronValidator;
-use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;

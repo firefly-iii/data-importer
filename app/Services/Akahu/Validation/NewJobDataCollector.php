@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Validation;
 
-use App\Services\Shared\Validation\NewJobDataCollectorInterface;
-use App\Services\Akahu\Request\GetAccountsRequest;
-use App\Exceptions\ImporterHttpException;
 use App\Exceptions\ImporterErrorException;
+use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
-use Illuminate\Support\MessageBag;
-
+use App\Services\Akahu\Request\GetAccountsRequest;
+use App\Services\Shared\Validation\NewJobDataCollectorInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\MessageBag;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 final class NewJobDataCollector implements NewJobDataCollectorInterface
@@ -21,7 +20,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
     public function collectAccounts(): MessageBag
     {
         $messages = new MessageBag();
-        $request = new GetAccountsRequest();
+        $request  = new GetAccountsRequest();
 
         try {
             $response = $request->get();
@@ -33,7 +32,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu credentials could not be authenticated, either the access tokens provided are invalid or have been revoked. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg . ' | ' . $e->getMessage());
+                Log::error($msg.' | '.$e->getMessage());
 
                 return $messages;
             }
@@ -45,15 +44,12 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu returned Forbidden when using the provided credentials, make sure all necessary permissions are granted in the Akahu website. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg . ' | ' . $e->getMessage());
+                Log::error($msg.' | '.$e->getMessage());
 
                 return $messages;
             }
 
-            throw new ImporterErrorException(sprintf(
-                "Failed get account details from the Akahu api: %s",
-                $e->getMessage()
-            ));
+            throw new ImporterErrorException(sprintf('Failed get account details from the Akahu api: %s', $e->getMessage()));
         }
 
         $this->importJob->setServiceAccounts($response->getAccounts());
