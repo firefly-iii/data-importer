@@ -26,6 +26,7 @@ namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
+use App\Services\Akahu\Conversion\RoutineManager as AkahuRoutineManager;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\EnableBanking\Conversion\RoutineManager as EnableBankingRoutineManager;
@@ -34,7 +35,6 @@ use App\Services\Nordigen\Conversion\RoutineManager as NordigenRoutineManager;
 use App\Services\Shared\File\FileContentSherlock;
 use App\Services\SimpleFIN\Conversion\RoutineManager as SimpleFINRoutineManager;
 use App\Services\Sophtron\Conversion\RoutineManager as SophtronRoutineManager;
-use App\Services\Akahu\Conversion\RoutineManager as AkahuRoutineManager;
 use Illuminate\Support\Facades\Log;
 
 final class ConversionRoutineFactory

@@ -4,15 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Request;
 
-
 use App\Services\Shared\Configuration\Configuration;
-
-
-
-
-
-
-
 use Carbon\Carbon;
 
 final class AkahuDateRange
@@ -22,9 +14,9 @@ final class AkahuDateRange
 
     public function __construct(Configuration $configuration)
     {
-        $tz = config('app.timezone');
-        $dateNotBefore = null;
-        $dateNotAfter = null;
+        $tz                  = config('app.timezone');
+        $dateNotBefore       = null;
+        $dateNotAfter        = null;
 
         if ('' !== $configuration->getDateNotBefore()) {
             $dateNotBefore = Carbon::parse($configuration->getDateNotBefore(), $tz);
@@ -35,7 +27,7 @@ final class AkahuDateRange
         }
 
         $this->dateNotBefore = $dateNotBefore;
-        $this->dateNotAfter = $dateNotAfter;
+        $this->dateNotAfter  = $dateNotAfter;
     }
 
     public function startDate(): ?Carbon

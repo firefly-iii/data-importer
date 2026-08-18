@@ -124,6 +124,7 @@ final class ConfigurationController extends Controller
 
                     $flow = 'akahu';
                     session()->put('error', $messages->get('no_accounts')[0]);
+
                     return redirect()->route('authenticate-flow.index', compact('flow'));
                 }
 

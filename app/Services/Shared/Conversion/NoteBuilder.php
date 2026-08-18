@@ -8,16 +8,16 @@ abstract class NoteBuilder
 {
     private const string SECTION_HEADER_SIZE = '####';
 
-    private string $notes = '';
+    private string $notes                    = '';
 
     public function getNotes(): string
     {
         return $this->notes;
     }
 
-    protected final function renderSection(string $fieldTitle, array $fields): void
+    final protected function renderSection(string $fieldTitle, array $fields): void
     {
-        if (!array_any($fields, fn(Field $f) => $f->present())) {
+        if (!array_any($fields, fn (Field $f) => $f->present())) {
             return;
         }
 
@@ -28,11 +28,7 @@ abstract class NoteBuilder
         }
 
         if ('' !== $section) {
-            $this->notes .= sprintf("%s %s\n%s\n",
-                self::SECTION_HEADER_SIZE,
-                $fieldTitle,
-                $section
-            );
+            $this->notes .= sprintf("%s %s\n%s\n", self::SECTION_HEADER_SIZE, $fieldTitle, $section);
         }
     }
 

@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Transactions;
 
-
 use App\Services\Akahu\Model\Transaction\Category;
-
-
-
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class CategoryTest extends TestCase
 {
     public function testParseJsonFull(): void
     {
-        $json = '{
+        $json     = '{
           "_id": "nzfcc_ckouvvyxm004c08mlexbea79o",
           "name": "Taxi, rideshare, and on-demand transport services",
           "groups": {
@@ -34,4 +35,3 @@ final class CategoryTest extends TestCase
         $this->assertSame($category->getPersonalFinanceGroup()?->getName(), 'Transport');
     }
 }
-

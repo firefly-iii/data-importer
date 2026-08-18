@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace App\Services\Shared\Model;
 
 use App\Exceptions\ImporterErrorException;
+use App\Services\Akahu\Model\Account\Account as AkahuAccount;
 use App\Services\CSV\Converter\Iban as IbanConverter;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\LunchFlow\Model\Account as LunchFlowAccount;
@@ -32,9 +33,7 @@ use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Nordigen\Model\Balance;
 use App\Services\SimpleFIN\Model\Account as SimpleFinAccount;
 use App\Services\Sophtron\Model\UserInstitutionAccount as SophtronAccount;
-use App\Services\Akahu\Model\Account\Account as AkahuAccount;
 use App\Support\Facades\Steam;
-
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -183,12 +182,8 @@ final class ImportServiceAccount
                 'extra'         => [
                     'Balance'           => (string) $account->getBalance()?->getCurrent(),
                     'Organization Name' => $account->getConnection()?->getName(),
-                    'Balance date' => $account->getRefreshed()
-                        ?->getBalance()
-                        ?->copy()
-                        ->setTimezone(config('app.timezone'))
-                        ->format('Y-m-d H:i:s'),
-                    'Account Type' => $account->getType(),
+                    'Balance date'      => $account->getRefreshed()?->getBalance()?->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s'),
+                    'Account Type'      => $account->getType(),
                 ],
             ]);
         }
@@ -404,7 +399,7 @@ final class ImportServiceAccount
         $return = [];
 
         foreach ($accounts as $account) {
-            $current = self::fromArray([
+            $current  = self::fromArray([
                 'id'            => $account->getAkahuId(),
                 'name'          => $account->getName(),
                 'currency_code' => $account->getBalance()?->getCurrency(),
@@ -412,23 +407,16 @@ final class ImportServiceAccount
                 'bban'          => $account->getFormattedAccount() ?? '',
                 'extra'         => [
                     // FIXME: pull dp from api
-                    'Current Balance' => Steam::bcstringify(
-                        $account->getBalance()?->getCurrent(),
-                        2
-                    ),
-                    'Balance date' => $account->getRefreshed()
-                        ?->getBalance()
-                        ?->copy()
-                        ->setTimezone(config('app.timezone'))
-                        ->format('Y-m-d H:i:s'),
-                    'Account Type' => $account->getType(),
-                    'Organization' =>  $account->getConnection()?->getName(),
+                    'Current Balance' => Steam::bcstringify($account->getBalance()?->getCurrent(), 2),
+                    'Balance date'    => $account->getRefreshed()?->getBalance()?->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s'),
+                    'Account Type'    => $account->getType(),
+                    'Organization'    => $account->getConnection()?->getName(),
                 ],
             ]);
 
-//            $current->org = [
-//                'name' => $account->getConnection()?->getName(),
-//            ];
+            //            $current->org = [
+            //                'name' => $account->getConnection()?->getName(),
+            //            ];
 
             $return[] = $current;
         }

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Response\GetTransactions;
 
-
 use App\Services\Shared\Response\Response;
-
 
 final class GetTransactionsResponse extends Response
 {

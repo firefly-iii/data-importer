@@ -4,39 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Request;
 
-
-
-use App\Services\Akahu\Request\AkahuDateRange;
-
-
-
-use App\Services\Akahu\Response\GetTransactions\GetTransactionsResponseBuilder;
 use App\Services\Akahu\Response\GetTransactions\GetTransactionsResponse;
-
-
+use App\Services\Akahu\Response\GetTransactions\GetTransactionsResponseBuilder;
 
 final class GetTransactionsRequest extends Request
 {
     private string $akahuId;
-//    private ?Carbon $startDate;
-//    private ?Carbon $endDate;
+    //    private ?Carbon $startDate;
+    //    private ?Carbon $endDate;
     private AkahuDateRange $dateRange;
 
-    public function __construct(
-        string $akahuId,
-        AkahuDateRange $dateRange,
-    )
+    public function __construct(string $akahuId, AkahuDateRange $dateRange)
     {
         parent::__construct();
 
-        $this->akahuId = $akahuId;
+        $this->akahuId   = $akahuId;
         $this->dateRange = $dateRange;
     }
 
     public function get(): GetTransactionsResponse
     {
         $responseBuilder = new GetTransactionsResponseBuilder();
-        $cursor = null;
+        $cursor          = null;
 
         // Akahu's transaction endpoint implements pagination
         do {
@@ -53,12 +42,9 @@ final class GetTransactionsRequest extends Request
                 $this->setQueryParam('cursor', $cursor);
             }
 
-            $responseJson = $this->authenticatedGet(sprintf(
-                'accounts/%s/transactions',
-                $this->akahuId
-            ));
+            $responseJson = $this->authenticatedGet(sprintf('accounts/%s/transactions', $this->akahuId));
 
-            $cursor = $responseBuilder->submitPageAndGetNextCursor($responseJson);
+            $cursor       = $responseBuilder->submitPageAndGetNextCursor($responseJson);
         } while (null !== $cursor);
 
         return $responseBuilder->build();
