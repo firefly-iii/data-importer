@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Response;
 
+use App\Exceptions\ImporterErrorException;
 use App\Services\Akahu\Model\Account\Account;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\ImporterErrorException;
 
 final class GetAccountsResponse extends Response
 {
@@ -20,13 +20,14 @@ final class GetAccountsResponse extends Response
 
             if (array_key_exists('items', $json)) {
                 $this->accounts = array_map(Account::fromJson(...), $json['items']);
+
                 return;
             }
         }
 
         $msg = 'Akahu api returned badly structured json, expected response to contain';
         $msg .= ' a "success" attribute and an "items" attribute. See logs for more details.';
-        Log::error($msg . ' json: "' . json_encode($json) . '"');
+        Log::error($msg.' json: "'.json_encode($json).'"');
 
         throw new ImporterErrorException($msg);
     }

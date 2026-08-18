@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Response\GetTransactions;
 
-
-use App\Services\Akahu\Model\Transaction\Transaction;
-
-use Illuminate\Support\Facades\Log;
 use App\Exceptions\ImporterErrorException;
+use App\Services\Akahu\Model\Transaction\Transaction;
+use Illuminate\Support\Facades\Log;
 
 final class GetTransactionsResponseBuilder
 {
@@ -19,7 +17,7 @@ final class GetTransactionsResponseBuilder
         if (array_key_exists('success', $json)) {
             if (!$json['success']) {
                 $msg = 'Akahu api returned a success value of "false". See logs for more details';
-                Log::error($msg . ' json: "' . json_encode($json) . '"');
+                Log::error($msg.' json: "'.json_encode($json).'"');
 
                 throw new ImporterErrorException($msg);
             }
@@ -33,10 +31,7 @@ final class GetTransactionsResponseBuilder
             if (array_key_exists('cursor', $json) && array_key_exists('next', $json['cursor'])) {
                 $nextCursor = $json['cursor']['next'];
 
-                Log::debug(sprintf(
-                    'Akahu api returned a page with a next cursor: %s',
-                    $nextCursor
-                ));
+                Log::debug(sprintf('Akahu api returned a page with a next cursor: %s', $nextCursor));
 
                 return $nextCursor;
             }
@@ -46,7 +41,7 @@ final class GetTransactionsResponseBuilder
 
         $msg = 'Akahu api returned badly structured json, expected response to contain';
         $msg .= ' a "success" attribute and an "items" attribute. See logs for more details.';
-        Log::error($msg . ' json: "' . json_encode($json) . '"');
+        Log::error($msg.' json: "'.json_encode($json).'"');
 
         throw new ImporterErrorException($msg);
     }

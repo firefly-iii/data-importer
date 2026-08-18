@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Authentication;
 
+use SensitiveParameter;
+
 final class SecretManager
 {
-    public const string APP_ID_TOKEN = 'app_id_token';
+    public const string APP_ID_TOKEN      = 'app_id_token';
     public const string USER_ACCESS_TOKEN = 'user_access_token';
 
     public static function getAppIdToken(): string
@@ -27,12 +29,12 @@ final class SecretManager
         return config(sprintf('akahu.%s', self::USER_ACCESS_TOKEN));
     }
 
-    public static function setAppIdToken(#[\SensitiveParameter] string $token): void
+    public static function setAppIdToken(#[SensitiveParameter] string $token): void
     {
         session()->put(self::APP_ID_TOKEN, $token);
     }
 
-    public static function setUserAccessToken(#[\SensitiveParameter] string $token): void
+    public static function setUserAccessToken(#[SensitiveParameter] string $token): void
     {
         session()->put(self::USER_ACCESS_TOKEN, $token);
     }
@@ -49,15 +51,12 @@ final class SecretManager
 
     public static function getSecrets(): array
     {
-        return [
-            self::APP_ID_TOKEN => SecretManager::getAppIdToken(),
-            self::USER_ACCESS_TOKEN => SecretManager::getUserAccessToken(),
-        ];
+        return [self::APP_ID_TOKEN => self::getAppIdToken(), self::USER_ACCESS_TOKEN => self::getUserAccessToken()];
     }
 
     public static function setSecrets(array $data): void
     {
-        SecretManager::setAppIdToken($data[self::APP_ID_TOKEN]);
-        SecretManager::setUserAccessToken($data[self::USER_ACCESS_TOKEN]);
+        self::setAppIdToken($data[self::APP_ID_TOKEN]);
+        self::setUserAccessToken($data[self::USER_ACCESS_TOKEN]);
     }
 }

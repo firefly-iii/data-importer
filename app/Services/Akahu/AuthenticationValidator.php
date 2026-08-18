@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu;
 
-use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
-use App\Services\Enums\AuthenticationStatus;
-use Illuminate\Support\Facades\Log;
 use App\Services\Akahu\Authentication\SecretManager;
+use App\Services\Enums\AuthenticationStatus;
+use App\Services\Shared\Authentication\AuthenticationValidatorInterface;
+use Illuminate\Support\Facades\Log;
 
 final class AuthenticationValidator implements AuthenticationValidatorInterface
 {

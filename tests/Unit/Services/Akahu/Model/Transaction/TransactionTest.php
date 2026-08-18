@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Transactions;
 
-
 use App\Services\Akahu\Model\Transaction\Transaction;
-use Carbon\Carbon;
-
-
-use Tests\TestCase;
 use BcMath\Number;
+use Carbon\Carbon;
+use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class TransactionTest extends TestCase
 {
     public function testParseJsonFull(): void
     {
-        $json = '{
+        $json        = '{
           "_id": "trans_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_account": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_user": "user_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -65,11 +67,11 @@ final class TransactionTest extends TestCase
 
         $this->assertSame($transaction->getAkahuId(), 'trans_aaaaaaaaaaaaaaaaaaaaaaaaa');
         $this->assertSame($transaction->getAkahuAccountId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($transaction->getCreatedAt(), Carbon::parse('2026-07-25T03:38:50.300Z'));
-        $this->assertEquals($transaction->getDate(), Carbon::parse('2026-06-29T11:39:52.000Z'));
+        $this->assertSame($transaction->getCreatedAt(), Carbon::parse('2026-07-25T03:38:50.300Z'));
+        $this->assertSame($transaction->getDate(), Carbon::parse('2026-06-29T11:39:52.000Z'));
         $this->assertSame($transaction->getDescription(), 'blah blah blah');
-        $this->assertEquals($transaction->getAmount(), new Number('-100'));
-        $this->assertEquals($transaction->getBalance(), new Number('1234567'));
+        $this->assertSame($transaction->getAmount(), new Number('-100'));
+        $this->assertSame($transaction->getBalance(), new Number('1234567'));
         $this->assertSame($transaction->getType(), 'EFTPOS');
 
         $this->assertSame($transaction->getCategory()?->getNzfccId(), 'nzfcc_aaaaaaaaaaaaaaaaaaaaaaaaa');
@@ -87,13 +89,12 @@ final class TransactionTest extends TestCase
         $this->assertSame($transaction->getMeta()?->getReference(), '12345678');
         $this->assertSame($transaction->getMeta()?->getOtherAccount(), '11-2222-3333333-44');
 
-        $this->assertEquals($transaction->getMeta()?->getConversion()?->getAmount(), new Number('0.33'));
+        $this->assertSame($transaction->getMeta()?->getConversion()?->getAmount(), new Number('0.33'));
         $this->assertSame($transaction->getMeta()?->getConversion()?->getCurrency(), 'USD');
-        $this->assertEquals($transaction->getMeta()?->getConversion()?->getRate(), new Number('0.22'));
-        $this->assertEquals($transaction->getMeta()?->getConversion()?->getFee(), new Number('0.11'));
+        $this->assertSame($transaction->getMeta()?->getConversion()?->getRate(), new Number('0.22'));
+        $this->assertSame($transaction->getMeta()?->getConversion()?->getFee(), new Number('0.11'));
 
         $this->assertSame($transaction->getMeta()?->getCardSuffix(), '1234');
         $this->assertSame($transaction->getMeta()?->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
     }
 }
-

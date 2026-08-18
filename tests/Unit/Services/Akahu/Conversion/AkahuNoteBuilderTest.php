@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Conversion;
 
-
-
-use App\Services\Akahu\Model\Transaction\Transaction;
 use App\Services\Akahu\Conversion\AkahuNoteBuilder;
-
-
-
+use App\Services\Akahu\Model\Transaction\Transaction;
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class AkahuNoteBuilderTest extends TestCase
 {
     public function testBuildNoteFull(): void
     {
-        $json = '{
+        $json        = '{
           "_id": "trans_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_account": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_user": "user_aaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -90,7 +90,7 @@ final class AkahuNoteBuilderTest extends TestCase
 
     public function testBuildNotePartial(): void
     {
-        $json = '{
+        $json        = '{
           "_id": "trans_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "_account": "acc_aaaaaaaaaaaaaaaaaaaaaaaaa",
           "date": "2010-12-07T10:02:08+00:00",

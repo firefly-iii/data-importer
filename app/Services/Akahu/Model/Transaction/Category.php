@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Akahu\Model\Transaction;
 
-
-
-
 // The base NZFCC category that the transaction belongs to. Also included
 // is a map of less specific category groupings that this NZFCC category
 // is part of (by default Akahu will include personal_finance). Custom
@@ -15,15 +12,14 @@ namespace App\Services\Akahu\Model\Transaction;
 final class Category
 {
     // The NZFCC Category ID
-    private ?string $nzfccId = null;
+    private ?string $nzfccId                            = null;
 
     // The NZFCC Category Name
-    private ?string $name = null;
+    private ?string $name                               = null;
 
-    
     // Higher level groupings that a category belongs to.
-    
-    private array $groups = [];
+
+    private array $groups                               = [];
 
     private ?PersonalFinanceGroup $personalFinanceGroup = null;
 
@@ -32,16 +28,16 @@ final class Category
      */
     public static function fromJson(array $json): self
     {
-        $category = new self();
+        $category          = new self();
 
         $category->nzfccId = $json['_id'] ?? null;
-        $category->name = $json['name'] ?? null;
+        $category->name    = $json['name'] ?? null;
 
         if (array_key_exists('groups', $json) && is_array($json['groups'])) {
             $category->groups = []; // TODO this field is not used.
 
             if (array_key_exists(PersonalFinanceGroup::CLASSIFIER, $json['groups'])) {
-                $groupJson = $json['groups'][PersonalFinanceGroup::CLASSIFIER];
+                $groupJson                      = $json['groups'][PersonalFinanceGroup::CLASSIFIER];
                 $category->personalFinanceGroup = PersonalFinanceGroup::fromJson($groupJson);
             }
         }

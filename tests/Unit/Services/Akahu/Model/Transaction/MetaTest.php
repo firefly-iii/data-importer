@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Transactions;
 
-
 use App\Services\Akahu\Model\Transaction\Meta;
-
-
-
-use Tests\TestCase;
 use BcMath\Number;
+use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class MetaTest extends TestCase
 {
     public function testParseJsonFull(): void
@@ -39,14 +40,11 @@ final class MetaTest extends TestCase
         $this->assertSame($meta->getCode(), 'my code');
         $this->assertSame($meta->getReference(), 'my ref');
         $this->assertSame($meta->getOtherAccount(), '00-0000-0000000-00');
-        $this->assertEquals($meta->getConversion()?->getAmount(), new Number('2.15'));
+        $this->assertSame($meta->getConversion()?->getAmount(), new Number('2.15'));
         $this->assertSame($meta->getConversion()?->getCurrency(), 'GBP');
-        $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.49'));
+        $this->assertSame($meta->getConversion()?->getRate(), new Number('0.49'));
         $this->assertSame($meta->getCardSuffix(), '1234');
-        $this->assertSame(
-            $meta->getLogo(),
-            'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
-        );
+        $this->assertSame($meta->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
     }
 
     public function testParseJson1(): void
@@ -67,10 +65,7 @@ final class MetaTest extends TestCase
         $this->assertNull($meta->getConversion()?->getRate());
         $this->assertNull($meta->getConversion()?->getFee());
         $this->assertSame($meta->getCardSuffix(), '1234');
-        $this->assertSame(
-            $meta->getLogo(),
-            'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
-        );
+        $this->assertSame($meta->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
     }
 
     public function testParseJson2(): void
@@ -92,15 +87,12 @@ final class MetaTest extends TestCase
         $this->assertNull($meta->getCode());
         $this->assertNull($meta->getReference());
         $this->assertNull($meta->getOtherAccount());
-        $this->assertEquals($meta->getConversion()?->getAmount(), new Number('12.34'));
+        $this->assertSame($meta->getConversion()?->getAmount(), new Number('12.34'));
         $this->assertSame($meta->getConversion()?->getCurrency(), 'AUD');
-        $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.44'));
-        $this->assertEquals($meta->getConversion()?->getFee(), new Number('0.22'));
+        $this->assertSame($meta->getConversion()?->getRate(), new Number('0.44'));
+        $this->assertSame($meta->getConversion()?->getFee(), new Number('0.22'));
         $this->assertSame($meta->getCardSuffix(), '1234');
-        $this->assertSame(
-            $meta->getLogo(),
-            'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
-        );
+        $this->assertSame($meta->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
     }
 
     public function testParseJson3(): void
@@ -121,10 +113,10 @@ final class MetaTest extends TestCase
         $this->assertNull($meta->getCode());
         $this->assertNull($meta->getReference());
         $this->assertNull($meta->getOtherAccount());
-        $this->assertEquals($meta->getConversion()?->getAmount(), new Number('1.11'));
+        $this->assertSame($meta->getConversion()?->getAmount(), new Number('1.11'));
         $this->assertSame($meta->getConversion()?->getCurrency(), 'NZD');
-        $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.99'));
-        $this->assertEquals($meta->getConversion()?->getFee(), new Number('0.11'));
+        $this->assertSame($meta->getConversion()?->getRate(), new Number('0.99'));
+        $this->assertSame($meta->getConversion()?->getFee(), new Number('0.11'));
         $this->assertSame($meta->getCardSuffix(), '1234');
         $this->assertNull($meta->getLogo());
     }

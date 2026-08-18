@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Akahu\Model\Transactions;
 
-
 use App\Services\Akahu\Model\Transaction\PersonalFinanceGroup;
-
-
-
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 final class PersonalFinanceGroupTest extends TestCase
 {
     public function testParseJsonFull(): void
@@ -20,10 +21,9 @@ final class PersonalFinanceGroupTest extends TestCase
           "name": "Lifestyle"
         }';
 
-        $pfg = PersonalFinanceGroup::fromJson(json_decode($json, true));
+        $pfg  = PersonalFinanceGroup::fromJson(json_decode($json, true));
 
         $this->assertSame($pfg->getAkahuId(), 'group_clasr0ysw0011hk4m6hlk9fq0');
         $this->assertSame($pfg->getName(), 'Lifestyle');
     }
 }
-
