@@ -116,7 +116,7 @@ final class Account
      */
     public function toArray(): array
     {
-        return array(
+        return [
             'class'            => self::class,
             'akahuId'          => $this->akahuId,
             'connection'       => $this->connection?->toArray(),
@@ -128,7 +128,7 @@ final class Account
             'balance'          => $this->balance?->toArray(),
             'type'             => $this->type,
             'attributes'       => $this->attributes,
-        );
+        ];
     }
 
     /**
@@ -211,9 +211,9 @@ final class Account
         return $this->attributes;
     }
 
-    
+
     // Helpers
-    
+
 
     public function getFireflyStatus(): string
     {

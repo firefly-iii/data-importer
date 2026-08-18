@@ -50,12 +50,12 @@ final class Refreshed
      */
     public function toArray(): array
     {
-        return array(
+        return [
             'balance' => $this->balance?->toISOString(),
             'meta' => $this->meta?->toISOString(),
             'transactions' => $this->transactions?->toISOString(),
             'party' => $this->party?->toISOString(),
-        );
+        ];
     }
 
     /**

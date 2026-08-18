@@ -39,11 +39,11 @@ final class Connection
      */
     public function toArray(): array
     {
-        return array(
+        return [
             'name' => $this->name,
             'logo' => $this->logo,
             'connectionType' => $this->connectionType,
-        );
+        ];
     }
 
     /**

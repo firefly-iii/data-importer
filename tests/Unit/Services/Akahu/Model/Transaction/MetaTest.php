@@ -35,15 +35,15 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), 'my particulars');
-        $this->assertEquals($meta->getCode(), 'my code');
-        $this->assertEquals($meta->getReference(), 'my ref');
-        $this->assertEquals($meta->getOtherAccount(), '00-0000-0000000-00');
+        $this->assertSame($meta->getParticulars(), 'my particulars');
+        $this->assertSame($meta->getCode(), 'my code');
+        $this->assertSame($meta->getReference(), 'my ref');
+        $this->assertSame($meta->getOtherAccount(), '00-0000-0000000-00');
         $this->assertEquals($meta->getConversion()?->getAmount(), new Number('2.15'));
-        $this->assertEquals($meta->getConversion()?->getCurrency(), 'GBP');
+        $this->assertSame($meta->getConversion()?->getCurrency(), 'GBP');
         $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.49'));
-        $this->assertEquals($meta->getCardSuffix(), '1234');
-        $this->assertEquals(
+        $this->assertSame($meta->getCardSuffix(), '1234');
+        $this->assertSame(
             $meta->getLogo(),
             'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
         );
@@ -58,16 +58,16 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), null);
-        $this->assertEquals($meta->getCode(), null);
-        $this->assertEquals($meta->getReference(), null);
-        $this->assertEquals($meta->getOtherAccount(), null);
-        $this->assertEquals($meta->getConversion()?->getAmount(), null);
-        $this->assertEquals($meta->getConversion()?->getCurrency(), null);
-        $this->assertEquals($meta->getConversion()?->getRate(), null);
-        $this->assertEquals($meta->getConversion()?->getFee(), null);
-        $this->assertEquals($meta->getCardSuffix(), '1234');
-        $this->assertEquals(
+        $this->assertNull($meta->getParticulars());
+        $this->assertNull($meta->getCode());
+        $this->assertNull($meta->getReference());
+        $this->assertNull($meta->getOtherAccount());
+        $this->assertNull($meta->getConversion()?->getAmount());
+        $this->assertNull($meta->getConversion()?->getCurrency());
+        $this->assertNull($meta->getConversion()?->getRate());
+        $this->assertNull($meta->getConversion()?->getFee());
+        $this->assertSame($meta->getCardSuffix(), '1234');
+        $this->assertSame(
             $meta->getLogo(),
             'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
         );
@@ -88,16 +88,16 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), null);
-        $this->assertEquals($meta->getCode(), null);
-        $this->assertEquals($meta->getReference(), null);
-        $this->assertEquals($meta->getOtherAccount(), null);
+        $this->assertNull($meta->getParticulars());
+        $this->assertNull($meta->getCode());
+        $this->assertNull($meta->getReference());
+        $this->assertNull($meta->getOtherAccount());
         $this->assertEquals($meta->getConversion()?->getAmount(), new Number('12.34'));
-        $this->assertEquals($meta->getConversion()?->getCurrency(), 'AUD');
+        $this->assertSame($meta->getConversion()?->getCurrency(), 'AUD');
         $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.44'));
         $this->assertEquals($meta->getConversion()?->getFee(), new Number('0.22'));
-        $this->assertEquals($meta->getCardSuffix(), '1234');
-        $this->assertEquals(
+        $this->assertSame($meta->getCardSuffix(), '1234');
+        $this->assertSame(
             $meta->getLogo(),
             'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa'
         );
@@ -117,16 +117,16 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), null);
-        $this->assertEquals($meta->getCode(), null);
-        $this->assertEquals($meta->getReference(), null);
-        $this->assertEquals($meta->getOtherAccount(), null);
+        $this->assertNull($meta->getParticulars());
+        $this->assertNull($meta->getCode());
+        $this->assertNull($meta->getReference());
+        $this->assertNull($meta->getOtherAccount());
         $this->assertEquals($meta->getConversion()?->getAmount(), new Number('1.11'));
-        $this->assertEquals($meta->getConversion()?->getCurrency(), 'NZD');
+        $this->assertSame($meta->getConversion()?->getCurrency(), 'NZD');
         $this->assertEquals($meta->getConversion()?->getRate(), new Number('0.99'));
         $this->assertEquals($meta->getConversion()?->getFee(), new Number('0.11'));
-        $this->assertEquals($meta->getCardSuffix(), '1234');
-        $this->assertEquals($meta->getLogo(), null);
+        $this->assertSame($meta->getCardSuffix(), '1234');
+        $this->assertNull($meta->getLogo());
     }
 
     public function testParseJson4(): void
@@ -140,16 +140,16 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), 'Meow');
-        $this->assertEquals($meta->getCode(), 'woeM');
-        $this->assertEquals($meta->getReference(), 'MEOW');
-        $this->assertEquals($meta->getOtherAccount(), '00-1111-2222222-33');
-        $this->assertEquals($meta->getConversion()?->getAmount(), null);
-        $this->assertEquals($meta->getConversion()?->getCurrency(), null);
-        $this->assertEquals($meta->getConversion()?->getRate(), null);
-        $this->assertEquals($meta->getConversion()?->getFee(), null);
-        $this->assertEquals($meta->getCardSuffix(), null);
-        $this->assertEquals($meta->getLogo(), null);
+        $this->assertSame($meta->getParticulars(), 'Meow');
+        $this->assertSame($meta->getCode(), 'woeM');
+        $this->assertSame($meta->getReference(), 'MEOW');
+        $this->assertSame($meta->getOtherAccount(), '00-1111-2222222-33');
+        $this->assertNull($meta->getConversion()?->getAmount());
+        $this->assertNull($meta->getConversion()?->getCurrency());
+        $this->assertNull($meta->getConversion()?->getRate());
+        $this->assertNull($meta->getConversion()?->getFee());
+        $this->assertNull($meta->getCardSuffix());
+        $this->assertNull($meta->getLogo());
     }
 
     // This can happen on transactions with type INTEREST
@@ -159,16 +159,16 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), null);
-        $this->assertEquals($meta->getCode(), null);
-        $this->assertEquals($meta->getReference(), null);
-        $this->assertEquals($meta->getOtherAccount(), null);
-        $this->assertEquals($meta->getConversion()?->getAmount(), null);
-        $this->assertEquals($meta->getConversion()?->getCurrency(), null);
-        $this->assertEquals($meta->getConversion()?->getRate(), null);
-        $this->assertEquals($meta->getConversion()?->getFee(), null);
-        $this->assertEquals($meta->getCardSuffix(), null);
-        $this->assertEquals($meta->getLogo(), null);
+        $this->assertNull($meta->getParticulars());
+        $this->assertNull($meta->getCode());
+        $this->assertNull($meta->getReference());
+        $this->assertNull($meta->getOtherAccount());
+        $this->assertNull($meta->getConversion()?->getAmount());
+        $this->assertNull($meta->getConversion()?->getCurrency());
+        $this->assertNull($meta->getConversion()?->getRate());
+        $this->assertNull($meta->getConversion()?->getFee());
+        $this->assertNull($meta->getCardSuffix());
+        $this->assertNull($meta->getLogo());
     }
 
     public function testParseJson6(): void
@@ -179,15 +179,15 @@ final class MetaTest extends TestCase
 
         $meta = Meta::fromJson(json_decode($json, true));
 
-        $this->assertEquals($meta->getParticulars(), null);
-        $this->assertEquals($meta->getCode(), null);
-        $this->assertEquals($meta->getReference(), null);
-        $this->assertEquals($meta->getOtherAccount(), '11-22-3333333-44');
-        $this->assertEquals($meta->getConversion()?->getAmount(), null);
-        $this->assertEquals($meta->getConversion()?->getCurrency(), null);
-        $this->assertEquals($meta->getConversion()?->getRate(), null);
-        $this->assertEquals($meta->getConversion()?->getFee(), null);
-        $this->assertEquals($meta->getCardSuffix(), null);
-        $this->assertEquals($meta->getLogo(), null);
+        $this->assertNull($meta->getParticulars());
+        $this->assertNull($meta->getCode());
+        $this->assertNull($meta->getReference());
+        $this->assertSame($meta->getOtherAccount(), '11-22-3333333-44');
+        $this->assertNull($meta->getConversion()?->getAmount());
+        $this->assertNull($meta->getConversion()?->getCurrency());
+        $this->assertNull($meta->getConversion()?->getRate());
+        $this->assertNull($meta->getConversion()?->getFee());
+        $this->assertNull($meta->getCardSuffix());
+        $this->assertNull($meta->getLogo());
     }
 }

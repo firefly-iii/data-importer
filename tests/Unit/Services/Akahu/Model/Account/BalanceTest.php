@@ -48,8 +48,8 @@ final class BalanceTest extends TestCase
         $this->assertEquals($balance->getCurrent(), new Number("100000"));
         $this->assertEquals($balance->getAvailable(), new Number("100000"));
         $this->assertEquals($balance->getLimit(), new Number("10000"));
-        $this->assertEquals($balance->getOverdrawn(), false);
-        $this->assertEquals($balance->getCurrency(), 'NZD');
+        $this->assertFalse($balance->getOverdrawn());
+        $this->assertSame($balance->getCurrency(), 'NZD');
     }
 
     public function testParseJson1(): void
@@ -66,8 +66,8 @@ final class BalanceTest extends TestCase
         $this->assertEquals($balance->getCurrent(), new Number("100000"));
         $this->assertEquals($balance->getAvailable(), new Number("100000"));
         $this->assertEquals($balance->getLimit(), new Number("10000"));
-        $this->assertEquals($balance->getOverdrawn(), null);
-        $this->assertEquals($balance->getCurrency(), 'NZD');
+        $this->assertNull($balance->getOverdrawn());
+        $this->assertSame($balance->getCurrency(), 'NZD');
     }
 
     public function testParseJson2(): void
@@ -84,7 +84,7 @@ final class BalanceTest extends TestCase
         $this->assertEquals($balance->getCurrent(), new Number("-5500"));
         $this->assertEquals($balance->getAvailable(), new Number("4500"));
         $this->assertEquals($balance->getLimit(), new Number("10000"));
-        $this->assertEquals($balance->getOverdrawn(), null);
-        $this->assertEquals($balance->getCurrency(), 'NZD');
+        $this->assertNull($balance->getOverdrawn());
+        $this->assertSame($balance->getCurrency(), 'NZD');
     }
 }

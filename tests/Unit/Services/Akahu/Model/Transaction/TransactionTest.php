@@ -63,37 +63,37 @@ final class TransactionTest extends TestCase
 
         $transaction = Transaction::fromJson(json_decode($json, true));
 
-        $this->assertEquals($transaction->getAkahuId(), 'trans_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($transaction->getAkahuAccountId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getAkahuId(), 'trans_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getAkahuAccountId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
         $this->assertEquals($transaction->getCreatedAt(), Carbon::parse('2026-07-25T03:38:50.300Z'));
         $this->assertEquals($transaction->getDate(), Carbon::parse('2026-06-29T11:39:52.000Z'));
-        $this->assertEquals($transaction->getDescription(), 'blah blah blah');
+        $this->assertSame($transaction->getDescription(), 'blah blah blah');
         $this->assertEquals($transaction->getAmount(), new Number('-100'));
         $this->assertEquals($transaction->getBalance(), new Number('1234567'));
-        $this->assertEquals($transaction->getType(), 'EFTPOS');
+        $this->assertSame($transaction->getType(), 'EFTPOS');
 
-        $this->assertEquals($transaction->getCategory()?->getNzfccId(), 'nzfcc_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($transaction->getCategory()?->getName(), 'NZFCC Category name');
-        $this->assertEquals($transaction->getCategory()?->getPersonalFinanceGroup()?->getAkahuId(), 'group_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($transaction->getCategory()?->getPersonalFinanceGroup()?->getName(), 'Professional Services');
+        $this->assertSame($transaction->getCategory()?->getNzfccId(), 'nzfcc_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getCategory()?->getName(), 'NZFCC Category name');
+        $this->assertSame($transaction->getCategory()?->getPersonalFinanceGroup()?->getAkahuId(), 'group_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getCategory()?->getPersonalFinanceGroup()?->getName(), 'Professional Services');
 
-        $this->assertEquals($transaction->getMerchant()?->getAkahuId(), 'merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($transaction->getMerchant()?->getName(), 'Business');
-        $this->assertEquals($transaction->getMerchant()?->getWebsite(), 'https://business.com');
-        $this->assertEquals($transaction->getMerchant()?->getNZBN(), '1111111111111');
+        $this->assertSame($transaction->getMerchant()?->getAkahuId(), 'merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getMerchant()?->getName(), 'Business');
+        $this->assertSame($transaction->getMerchant()?->getWebsite(), 'https://business.com');
+        $this->assertSame($transaction->getMerchant()?->getNZBN(), '1111111111111');
 
-        $this->assertEquals($transaction->getMeta()?->getParticulars(), 'Payment');
-        $this->assertEquals($transaction->getMeta()?->getCode(), 'ref:1234');
-        $this->assertEquals($transaction->getMeta()?->getReference(), '12345678');
-        $this->assertEquals($transaction->getMeta()?->getOtherAccount(), '11-2222-3333333-44');
+        $this->assertSame($transaction->getMeta()?->getParticulars(), 'Payment');
+        $this->assertSame($transaction->getMeta()?->getCode(), 'ref:1234');
+        $this->assertSame($transaction->getMeta()?->getReference(), '12345678');
+        $this->assertSame($transaction->getMeta()?->getOtherAccount(), '11-2222-3333333-44');
 
         $this->assertEquals($transaction->getMeta()?->getConversion()?->getAmount(), new Number('0.33'));
-        $this->assertEquals($transaction->getMeta()?->getConversion()?->getCurrency(), 'USD');
+        $this->assertSame($transaction->getMeta()?->getConversion()?->getCurrency(), 'USD');
         $this->assertEquals($transaction->getMeta()?->getConversion()?->getRate(), new Number('0.22'));
         $this->assertEquals($transaction->getMeta()?->getConversion()?->getFee(), new Number('0.11'));
 
-        $this->assertEquals($transaction->getMeta()?->getCardSuffix(), '1234');
-        $this->assertEquals($transaction->getMeta()?->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($transaction->getMeta()?->getCardSuffix(), '1234');
+        $this->assertSame($transaction->getMeta()?->getLogo(), 'https://cdn.akahu.nz/logos/merchants/merchant_aaaaaaaaaaaaaaaaaaaaaaaaa');
     }
 }
 

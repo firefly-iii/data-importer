@@ -30,7 +30,7 @@ final class ReauthTest extends TestCase
         $importJob = ImportJob::createFromJson($disk->get($disk->files()[0]));
 
         $response = $this->get(sprintf('/configure-import/%s?parse=true', $importJob->identifier));
-        $this->assertEquals(session('akahu_reauthenticate'), 'true');
+        $this->assertSame(session('akahu_reauthenticate'), 'true');
         $this->assertStringContainsString('Akahu credentials could not be authenticated', session('error'));
 
         $response->assertRedirectToRoute('authenticate-flow.index', [

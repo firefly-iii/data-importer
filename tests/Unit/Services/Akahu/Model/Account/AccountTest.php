@@ -108,15 +108,15 @@ final class AccountTest extends TestCase
 
         $account = Account::fromJson(json_decode($json, true));
 
-        $this->assertEquals($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
 
-        $this->assertEquals($account->getConnection()?->getName(), 'my bank');
-        $this->assertEquals($account->getConnection()?->getLogo(), 'https://my-bank.com/logos/logo1');
-        $this->assertEquals($account->getConnection()?->getConnectionType(), 'official');
+        $this->assertSame($account->getConnection()?->getName(), 'my bank');
+        $this->assertSame($account->getConnection()?->getLogo(), 'https://my-bank.com/logos/logo1');
+        $this->assertSame($account->getConnection()?->getConnectionType(), 'official');
 
-        $this->assertEquals($account->getName(), 'Business Account');
-        $this->assertEquals($account->getAkahuStatus(), 'ACTIVE');
-        $this->assertEquals($account->getFormattedAccount(), '99-9999-0000000-00');
+        $this->assertSame($account->getName(), 'Business Account');
+        $this->assertSame($account->getAkahuStatus(), 'ACTIVE');
+        $this->assertSame($account->getFormattedAccount(), '99-9999-0000000-00');
         $this->assertEquals($account->getMeta(), []);
 
         $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
@@ -124,7 +124,7 @@ final class AccountTest extends TestCase
         $this->assertEquals($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-03T03:22:29.023Z'));
         $this->assertEquals($account->getRefreshed()?->getParty(), Carbon::parse('2026-08-02T10:22:29.023Z'));
 
-        $this->assertEquals($account->getType(), 'CHECKING');
+        $this->assertSame($account->getType(), 'CHECKING');
         $this->assertEquals($account->getAttributes(), [
             Account::ATTRIBUTE_PAYMENT_TO,
             Account::ATTRIBUTE_PAYMENT_FROM,
@@ -167,23 +167,23 @@ final class AccountTest extends TestCase
 
         $account = Account::fromJson(json_decode($json, true));
 
-        $this->assertEquals($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
 
-        $this->assertEquals($account->getConnection()?->getName(), 'Demo Bank');
-        $this->assertEquals($account->getConnection()?->getLogo(), 'https://cdn.akahu.nz/logos/connections/conn_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($account->getConnection()?->getConnectionType(), 'official');
+        $this->assertSame($account->getConnection()?->getName(), 'Demo Bank');
+        $this->assertSame($account->getConnection()?->getLogo(), 'https://cdn.akahu.nz/logos/connections/conn_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($account->getConnection()?->getConnectionType(), 'official');
 
-        $this->assertEquals($account->getName(), 'Business Account');
-        $this->assertEquals($account->getAkahuStatus(), 'ACTIVE');
-        $this->assertEquals($account->getFormattedAccount(), '99-9999-0000000-00');
-        $this->assertEquals($account->getMeta(), null);
+        $this->assertSame($account->getName(), 'Business Account');
+        $this->assertSame($account->getAkahuStatus(), 'ACTIVE');
+        $this->assertSame($account->getFormattedAccount(), '99-9999-0000000-00');
+        $this->assertNull($account->getMeta());
 
         $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T10:15:45.863Z'));
         $this->assertEquals($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T10:15:45.863Z'));
-        $this->assertEquals($account->getRefreshed()?->getTransactions(), null);
-        $this->assertEquals($account->getRefreshed()?->getParty(), null);
+        $this->assertNull($account->getRefreshed()?->getTransactions());
+        $this->assertNull($account->getRefreshed()?->getParty());
 
-        $this->assertEquals($account->getType(), 'CHECKING');
+        $this->assertSame($account->getType(), 'CHECKING');
         $this->assertEquals($account->getAttributes(), [
             Account::ATTRIBUTE_PAYMENT_FROM,
             Account::ATTRIBUTE_PAYMENT_TO,
@@ -225,23 +225,23 @@ final class AccountTest extends TestCase
 
         $account = Account::fromJson(json_decode($json, true));
 
-        $this->assertEquals($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($account->getAkahuId(), 'acc_aaaaaaaaaaaaaaaaaaaaaaaaa');
 
-        $this->assertEquals($account->getConnection()?->getName(), 'ANZ');
-        $this->assertEquals($account->getConnection()?->getLogo(), 'https://cdn.akahu.nz/logos/connections/conn_aaaaaaaaaaaaaaaaaaaaaaaaa');
-        $this->assertEquals($account->getConnection()?->getConnectionType(), 'official');
+        $this->assertSame($account->getConnection()?->getName(), 'ANZ');
+        $this->assertSame($account->getConnection()?->getLogo(), 'https://cdn.akahu.nz/logos/connections/conn_aaaaaaaaaaaaaaaaaaaaaaaaa');
+        $this->assertSame($account->getConnection()?->getConnectionType(), 'official');
 
-        $this->assertEquals($account->getName(), 'my account');
-        $this->assertEquals($account->getAkahuStatus(), 'ACTIVE');
-        $this->assertEquals($account->getFormattedAccount(), '11-0000-1111111-00');
-        $this->assertEquals($account->getMeta(), null);
+        $this->assertSame($account->getName(), 'my account');
+        $this->assertSame($account->getAkahuStatus(), 'ACTIVE');
+        $this->assertSame($account->getFormattedAccount(), '11-0000-1111111-00');
+        $this->assertNull($account->getMeta());
 
         $this->assertEquals($account->getRefreshed()?->getBalance(), Carbon::parse('2026-08-05T03:22:25.542Z'));
         $this->assertEquals($account->getRefreshed()?->getMeta(), Carbon::parse('2026-08-05T03:22:25.542Z'));
         $this->assertEquals($account->getRefreshed()?->getTransactions(), Carbon::parse('2026-08-05T03:22:29.023Z'));
-        $this->assertEquals($account->getRefreshed()?->getParty(), null);
+        $this->assertNull($account->getRefreshed()?->getParty());
 
-        $this->assertEquals($account->getType(), 'CHECKING');
+        $this->assertSame($account->getType(), 'CHECKING');
         $this->assertEquals($account->getAttributes(), [
             Account::ATTRIBUTE_PAYMENT_TO,
             Account::ATTRIBUTE_PAYMENT_FROM,

@@ -37,16 +37,16 @@ final class HttpFlowTest extends TestCase
         $disk = Storage::disk('import-jobs');
         $files = $disk->files();
 
-        $this->assertEquals(count($files), 1);
+        $this->assertSame(count($files), 1);
         $importJobFilename = $files[0];
 
         $importJobJson = $disk->get($importJobFilename);
-        $this->assertNotEquals($importJobJson, null);
-        $this->assertNotEquals($importJobJson, '');
+        $this->assertNotNull($importJobJson);
+        $this->assertNotSame($importJobJson, '');
         $importJob = ImportJob::createFromJson($importJobJson);
 
-        $this->assertEquals($importJob->getFlow(), 'akahu');
-        $this->assertEquals($importJob->getState(), 'contains_content');
+        $this->assertSame($importJob->getFlow(), 'akahu');
+        $this->assertSame($importJob->getState(), 'contains_content');
 
         $response->assertRedirectToRoute('configure-import.index', [
             $importJob->identifier

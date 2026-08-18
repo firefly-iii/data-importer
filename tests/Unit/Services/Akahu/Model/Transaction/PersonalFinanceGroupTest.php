@@ -22,8 +22,8 @@ final class PersonalFinanceGroupTest extends TestCase
 
         $pfg = PersonalFinanceGroup::fromJson(json_decode($json, true));
 
-        $this->assertEquals($pfg->getAkahuId(), 'group_clasr0ysw0011hk4m6hlk9fq0');
-        $this->assertEquals($pfg->getName(), 'Lifestyle');
+        $this->assertSame($pfg->getAkahuId(), 'group_clasr0ysw0011hk4m6hlk9fq0');
+        $this->assertSame($pfg->getName(), 'Lifestyle');
     }
 }
 

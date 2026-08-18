@@ -37,8 +37,8 @@ final class AkahuDateRangeTest extends TestCase
 
         $dateRange = new AkahuDateRange($config);
 
-        $this->assertEquals($dateRange->startDate()->toIsoString(), '2026-08-12T11:59:59.999000Z');
-        $this->assertEquals($dateRange->endDate()->toIsoString(), '2026-08-13T12:00:00.000000Z');
+        $this->assertSame($dateRange->startDate()->toIsoString(), '2026-08-12T11:59:59.999000Z');
+        $this->assertSame($dateRange->endDate()->toIsoString(), '2026-08-13T12:00:00.000000Z');
     }
 
     public function testMultipleDays(): void
@@ -52,8 +52,8 @@ final class AkahuDateRangeTest extends TestCase
 
         $dateRange = new AkahuDateRange($config);
 
-        $this->assertEquals($dateRange->startDate()->toIsoString(), '2026-08-09T11:59:59.999000Z');
-        $this->assertEquals($dateRange->endDate()->toIsoString(), '2026-08-14T12:00:00.000000Z');
+        $this->assertSame($dateRange->startDate()->toIsoString(), '2026-08-09T11:59:59.999000Z');
+        $this->assertSame($dateRange->endDate()->toIsoString(), '2026-08-14T12:00:00.000000Z');
     }
 
     public function testOneSided(): void
@@ -67,7 +67,7 @@ final class AkahuDateRangeTest extends TestCase
 
         $dateRange = new AkahuDateRange($config);
 
-        $this->assertEquals($dateRange->startDate()->toIsoString(), '2026-08-12T11:59:59.999000Z');
-        $this->assertEquals($dateRange->endDate()?->toIsoString(), null);
+        $this->assertSame($dateRange->startDate()->toIsoString(), '2026-08-12T11:59:59.999000Z');
+        $this->assertNull($dateRange->endDate()?->toIsoString());
     }
 }

@@ -56,13 +56,13 @@ final class Balance
      */
     public function toArray(): array
     {
-        return array(
+        return [
             'current' => serialize($this->current),
             'available' => serialize($this->available),
             'limit' => serialize($this->limit),
             'overdrawn' => $this->overdrawn,
             'currency' => $this->currency,
-        );
+        ];
     }
 
     /**
