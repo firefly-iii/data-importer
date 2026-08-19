@@ -31,52 +31,49 @@ use RectorLaravel\Set\LaravelLevelSetList;
 
 
 return RectorConfig::configure()
-    ->withSkip([
-        ChangeOrIfContinueToMultiContinueRector::class,
-        AddParamBasedOnParentClassMethodRector::class,
-        StringToClassConstantRector::class => [
-            __DIR__ . '/../app/Http/Controllers/Auth/LoginController.php',
-        ],
-        __DIR__.'/../bootstrap/cache/*'
-    ])
-    ->withPaths([
-        __DIR__ . '/../app',
-        __DIR__ . '/../bootstrap',
-        __DIR__ . '/../config',
-        __DIR__ . '/../public',
-        __DIR__ . '/../resources/lang/en',
-        __DIR__ . '/../routes',
-        __DIR__ . '/../tests',
-    ])
-    ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_120,
-    ])
+                   ->withSkip([
+                                  ChangeOrIfContinueToMultiContinueRector::class,
+                                  AddParamBasedOnParentClassMethodRector::class,
+                                  __DIR__.'/../bootstrap/cache/*'
+                              ])
+                   ->withPaths([
+                                   __DIR__ . '/../app',
+                                   __DIR__ . '/../bootstrap',
+                                   __DIR__ . '/../config',
+                                   __DIR__ . '/../public',
+                                   __DIR__ . '/../resources/lang/en',
+                                   __DIR__ . '/../routes',
+                                   __DIR__ . '/../tests',
+                               ])
+                   ->withSets([
+                                  LaravelLevelSetList::UP_TO_LARAVEL_120,
+                              ])
 //    ->withConfiguredRule(ReplaceServiceContainerCallArgRector::class, [
 //        new ReplaceServiceContainerCallArg('log', new ClassConstFetch(new Name('Illuminate\Support\Facades\Log'), 'class')),
 //    ])
     // uncomment to reach your current PHP version
-    ->withPhpSets()
-    ->withPreparedSets(
-        codingStyle: false, // leave false
-        privatization: false, // leave false.
-        naming: false, // leave false
-        instanceOf: true,
-        earlyReturn: true,
-        strictBooleans: true,
-        carbon: true,
-        rectorPreset: true,
-        phpunitCodeQuality: true,
-        doctrineCodeQuality: true,
-        symfonyCodeQuality: true,
-        symfonyConfigs: true
-
-    )
-    ->withComposerBased(
-        twig: true,
-        doctrine: true,
-        phpunit: true,
-        symfony: true)
-    ->withTypeCoverageLevel(0)
-    ->withDeadCodeLevel(0)
-    ->withCodeQualityLevel(0)
-    ->withImportNames(removeUnusedImports: true);// import statements instead of full classes.
+                   ->withPhpSets()
+                   ->withPreparedSets(
+                       deadCode: true,
+                       codeQuality: true,
+                       codingStyle: false, // leave false
+                       typeDeclarations: true,
+                       typeDeclarationDocblocks: false,
+                       privatization: false, // leave false.
+                       naming: false, // leave false
+                       instanceOf: true,
+                       earlyReturn: true,
+                       // strictBooleans: true, // has a new thingie.
+                       carbon: true,
+                       rectorPreset: true,
+                       phpunitCodeQuality: true,
+                       doctrineCodeQuality: true,
+                       symfonyCodeQuality: true,
+                       symfonyConfigs: true,
+                   )
+                   ->withComposerBased(
+                       twig: true,
+                       doctrine: true,
+                       phpunit: true,
+                       symfony: true)
+                   ->withImportNames(removeUnusedImports: true);// import statements instead of full classes.
