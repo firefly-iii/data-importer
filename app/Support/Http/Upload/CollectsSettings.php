@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+
+
+
 
 /*
  * CollectsSettings.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -21,6 +23,10 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
+
+
 
 namespace App\Support\Http\Upload;
 

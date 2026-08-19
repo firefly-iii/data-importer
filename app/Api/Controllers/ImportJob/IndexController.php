@@ -1,16 +1,12 @@
 <?php
 
-declare(strict_types=1);
 
-namespace App\Api\Controllers\ImportJob;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Storage;
+
 
 /*
  * IndexController.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -27,6 +23,16 @@ use Illuminate\Support\Facades\Storage;
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+declare(strict_types=1);
+
+namespace App\Api\Controllers\ImportJob;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Storage;
+
+
 
 final class IndexController extends BaseController
 {
