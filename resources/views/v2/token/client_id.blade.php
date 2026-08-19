@@ -35,9 +35,9 @@
                                 @if('' !== (string)$vanityUrl)
                                     (<a href="{{ $vanityUrl }}">{{ $vanityUrl }}</a>)
                                 @endif
-                                , you will need to submit a valid Client ID. This is a number.
+                                , you will need to submit a valid Client ID.
                             @else
-                                In order to get access to your Firefly III installation, you will need to submit a valid Client ID. This is a number.
+                                In order to get access to your Firefly III installation, you will need to submit a valid Client ID.
                             @endif
                         </p>
                         <p>
