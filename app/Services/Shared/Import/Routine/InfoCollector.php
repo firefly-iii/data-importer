@@ -54,7 +54,7 @@ final class InfoCollector
         $return   = [];
         $count    = 0;
 
-        $inCache  = RequestCache::has($cacheKey, $token);
+        $inCache  = RequestCache::hasKeyInCache($cacheKey, $token);
         if (!$inCache) {
             Log::debug('Get response fresh!');
             $request  = new GetAccountsRequest($url, $token);

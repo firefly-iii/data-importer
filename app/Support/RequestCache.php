@@ -29,7 +29,7 @@ use SensitiveParameter;
 
 final class RequestCache
 {
-    public static function has(string $identifier, #[SensitiveParameter] string $token): bool
+    public static function hasKeyInCache(string $identifier, #[SensitiveParameter] string $token): bool
     {
         Log::debug('has key in cache?');
         $key    = self::generateKey($identifier, $token);

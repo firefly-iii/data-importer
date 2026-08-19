@@ -83,7 +83,7 @@ final class PseudoTransactionProcessor
 
         if (null !== $accountId) {
             // in cache perhaps?
-            $inCache              = RequestCache::has($cacheKey, $token);
+            $inCache              = RequestCache::hasKeyInCache($cacheKey, $token);
             if ($inCache) {
                 $this->defaultAccount = RequestCache::get($cacheKey, $token);
 
