@@ -36,16 +36,25 @@
                                     (<a href="{{ $vanityUrl }}">{{ $vanityUrl }}</a>)
                                 @endif
                                 , you will need to submit a valid Client ID.
+                                @if('' === (string)$vanityUrl)
+                                    If this link does not work, perhaps you must set the <code>VANITY_URL</code> environment variable.
+                                @endif
                             @else
                                 In order to get access to your Firefly III installation, you will need to submit a valid Client ID.
                             @endif
                         </p>
                         <p>
                             If you don't have one, you must create one in "Remote access and tokens" under options.
-                            @if('' !== (string)$baseUrl)
+                            @if('' !== (string)$baseUrl && '' === (string)$vanityUrl)
                                 Here's a <a href="{{ $baseUrl }}/profile/oauth">link</a>.
                             @endif
+                            @if('' !== (string)$vanityUrl)
+                                Here's a <a href="{{ $vanityUrl }}/profile/oauth">link</a>
+                            @endif
                             Make sure you <em>uncheck</em> the checkbox under "Keep a secret?".
+                            @if('' === (string)$vanityUrl)
+                                If this link does not work, perhaps you must set the <code>VANITY_URL</code> environment variable.
+                            @endif
                         </p>
                         <p>
                             The callback URL for this installation is<br> <code>{{ route('token.callback') }}</code>
