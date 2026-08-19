@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Log;
 
 trait CreatesAccounts
 {
-    protected ImportJobRepository $repository;
+    private ImportJobRepository $repository;
     protected array $existingServiceAccounts = [];
 
     public function setExistingServiceAccounts(array $existingServiceAccounts): void

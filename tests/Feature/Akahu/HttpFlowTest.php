@@ -17,12 +17,12 @@ final class HttpFlowTest extends TestCase
 {
     public function testValidate(): void
     {
-        $this->get('/api/import-flows/validate/akahu')->assertStatus(200)->assertJson(['result' => 'OK']);
+        $this->get('/api/import-flows/validate/akahu')->assertOk()->assertJson(['result' => 'OK']);
     }
 
     public function testGetNewImport(): void
     {
-        $this->get('/new-import/akahu')->assertStatus(200);
+        $this->get('/new-import/akahu')->assertOk();
     }
 
     public function testPostNewImport(): void

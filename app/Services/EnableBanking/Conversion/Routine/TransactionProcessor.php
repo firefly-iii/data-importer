@@ -49,7 +49,6 @@ final class TransactionProcessor
     private ?Carbon $notAfter             = null;
     private ?Carbon $notBefore            = null;
     private ImportJob $importJob;
-    protected ImportJobRepository $repository;
 
     public function __construct()
     {

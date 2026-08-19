@@ -50,7 +50,6 @@ final class RoutineManager implements RoutineManagerInterface
     private FilterTransactions $transactionFilter;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
-    protected ImportJobRepository $repository;
     private ImportJob $importJob;
     private array $rateLimits = [];
 

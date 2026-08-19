@@ -44,7 +44,6 @@ final class RoutineManager implements RoutineManagerInterface
     private readonly SimpleFINService $simpleFINService;
     private readonly TransactionTransformer $transformer;
     private ImportJob $importJob;
-    protected ImportJobRepository $repository;
 
     /**
      * RoutineManager constructor.

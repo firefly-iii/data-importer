@@ -39,7 +39,6 @@ final class TransactionDownloader
     use CreatesAccounts;
 
     private ImportJob $importJob;
-    protected ImportJobRepository $repository;
 
     public function __construct(ImportJob $importJob)
     {
