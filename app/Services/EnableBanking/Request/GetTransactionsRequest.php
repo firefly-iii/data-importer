@@ -30,7 +30,6 @@ use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
 
-use function Safe\base64_decode;
 use function Safe\json_decode;
 
 /**

@@ -1,9 +1,5 @@
 <?php
 
-
-
-
-
 /*
  * IndexController.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -31,8 +27,6 @@ namespace App\Api\Controllers\ImportJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Storage;
-
-
 
 final class IndexController extends BaseController
 {
