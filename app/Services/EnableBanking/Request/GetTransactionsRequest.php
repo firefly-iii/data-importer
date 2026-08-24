@@ -104,22 +104,6 @@ final class GetTransactionsRequest extends Request
             // add continuation_key
             if ('' !== $continuationKey) {
                 Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
-                // split continuation key in two parts:
-                $parts  = explode('.', $continuationKey);
-                $params = json_decode(base64_decode($parts[0]), true);
-                if (2 === count($params)) {
-                    if (array_key_exists('params', $params)) {
-                        foreach ($params['params'] as $key => $value) {
-                            if (null === $value) {
-                                Log::debug(sprintf('Ignore NULL parameter from continuation_key: %s', $key));
-                            }
-                            if (null !== $value) {
-                                Log::debug(sprintf('Overrule parameter from continuation_key: %s=%s', $key, json_encode($value)));
-                                $this->addParameter($key, $value);
-                            }
-                        }
-                    }
-                }
                 $this->addParameter('continuation_key', $continuationKey);
             }
             // remove if empty:
