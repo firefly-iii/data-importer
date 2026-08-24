@@ -1,9 +1,5 @@
 <?php
 
-
-
-
-
 /*
  * IndexController.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -30,8 +26,6 @@ namespace App\Api\Controllers\ImportFlow;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
-
-
 
 final class IndexController extends BaseController
 {
