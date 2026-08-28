@@ -151,13 +151,31 @@ final class RoutineManager implements RoutineManagerInterface
             $total += count($transactions);
         }
 
-        if (0 === $total) {
+        if (0 === $total && $this->hasEnableBankingError()) {
             Log::warning('Downloaded nothing, will return nothing.');
             $this->importJob->conversionStatus->addError(0, '[eb003]: No transactions were downloaded from Enable Banking.');
             $this->repository->saveToDisk($this->importJob);
 
             return true;
         }
+
+        return false;
+    }
+
+    private function hasEnableBankingError(): bool
+    {
+        Log::debug('Check if Enable Banking had an error before we complain about not having transactions.');
+        $errors = $this->importJob->conversionStatus->errors;
+        foreach ($errors as $array) {
+            foreach ($array as $error) {
+                if (str_contains($error, 'eb001')) {
+                    Log::warning('Enable Banking had download error (eb001).');
+
+                    return true;
+                }
+            }
+        }
+        Log::debug('Enable Banking had no download error for this account.');
 
         return false;
     }

@@ -148,7 +148,7 @@ final class RoutineManager implements RoutineManagerInterface
         foreach ($this->downloaded as $transactions) {
             $total += count($transactions);
         }
-        if (0 === $total) {
+        if (0 === $total && $this->hasLunchFlowError()) {
             Log::warning('Downloaded nothing, will return nothing.');
             // add error to current error thing:
             $this->importJob->conversionStatus->addError(
@@ -159,6 +159,24 @@ final class RoutineManager implements RoutineManagerInterface
 
             return true;
         }
+
+        return false;
+    }
+
+    private function hasLunchFlowError(): bool
+    {
+        Log::debug('Check if Lunch Flow had an error before we complain about not having transactions.');
+        $errors = $this->importJob->conversionStatus->errors;
+        foreach ($errors as $array) {
+            foreach ($array as $error) {
+                if (str_contains($error, 'a109')) {
+                    Log::warning('Lunch Flow had download error (a109).');
+
+                    return true;
+                }
+            }
+        }
+        Log::debug('Lunch Flow had no download error for this account.');
 
         return false;
     }
