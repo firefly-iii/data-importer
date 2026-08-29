@@ -238,7 +238,7 @@ final class GenerateTransactions
             }
 
             // Check if IBAN is a match, will overrule BBAN.
-            if (array_key_exists($destIban, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes)) {
+            if (array_key_exists($destIban, $this->targetAccounts) && array_key_exists($destIban, $this->targetTypes)) {
                 Log::debug(sprintf('Matched source IBAN "%s" to account #%d', $destIban, $this->targetAccounts[$destIban]));
                 if ('asset' === $this->targetTypes[$destIban]) {
                     Log::debug(sprintf(
