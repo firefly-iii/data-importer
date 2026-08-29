@@ -87,7 +87,7 @@ final class PostAuthRequest extends Request
      */
     public function post(): Response
     {
-        $validUntilTimestamp = $this->validUntil ?? strtotime('+90 days');
+        $validUntilTimestamp = $this->validUntil ?? time() + 7689600; // 89 days, DST-proof and within 7776000s limit
         $data                = [
             'access'       => ['valid_until' => date('c', $validUntilTimestamp)],
             'aspsp'        => ['name' => $this->aspsp, 'country' => $this->country],
