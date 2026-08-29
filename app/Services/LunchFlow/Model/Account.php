@@ -30,7 +30,7 @@ namespace App\Services\LunchFlow\Model;
 final class Account
 {
     public int $id;
-    public string $institutionLogo;
+    public ?string $institutionLogo = null;
     public string $institutionName;
     public string $name;
     public string $provider;
@@ -49,7 +49,7 @@ final class Account
     {
         $model                  = new self();
         $model->id              = $data['id'];
-        $model->institutionLogo = $data['institution_logo'];
+        $model->institutionLogo = $data['institution_logo'] ?? null;
         $model->institutionName = $data['institution_name'];
         $model->name            = $data['name'];
         $model->provider        = $data['provider'];
