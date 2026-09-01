@@ -217,6 +217,16 @@ abstract class AbstractTransaction
 
                 return (string) $info?->getReference()?->getEndToEndId();
 
+            case 'entryDetailUuidEndToEndReference':
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return '';
+                }
+
+                /** @var EntryTransactionDetail $info */
+                $info            = $this->levelD[$index];
+
+                return (string) $info?->getReference()?->getUuidEndToEndReference();
+
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
                 $result          = '';
 
