@@ -6,7 +6,7 @@ body:
       label: Support guidelines and the use of AI.
       description: Please read the support guidelines before proceeding. AI agents like Claude and CoPilot are not reliable tools. Do not use them.
       options:
-        - label: I've read the [support guidelines](https://github.com/firefly-iii/firefly-iii/blob/main/.github/support.md)
+        - label: I've read <!-- MZ2udTpin6FL --> the [support guidelines](https://github.com/firefly-iii/firefly-iii/blob/main/.github/support.md)
           required: true
         - label: I'm a real person and wrote this bug without assistance from AI.
           required: true
