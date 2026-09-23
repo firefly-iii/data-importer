@@ -68,6 +68,16 @@ abstract class SimpleFINRequest
         $this->parameters = $parameters;
     }
 
+    protected function getParameterHash(): string
+    {
+        $final = '';
+        foreach ($this->parameters as $name => $value) {
+            $final .= sprintf('%s=%s', $name, json_encode($value));
+        }
+
+        return hash('sha256', $final);
+    }
+
     public function setTimeOut(float $timeOut): void
     {
         $this->timeOut = $timeOut;

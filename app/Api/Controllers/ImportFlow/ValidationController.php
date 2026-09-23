@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * ValidationController.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -22,9 +20,12 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Api\Controllers\ImportFlow;
 
 use App\Api\Controllers\Controller;
+use App\Services\Akahu\AuthenticationValidator as AkahuValidator;
 use App\Services\EnableBanking\AuthenticationValidator as EnableBankingValidator;
 use App\Services\Enums\AuthenticationStatus;
 use App\Services\LunchFlow\AuthenticationValidator as LunchFlowValidator;
@@ -44,6 +45,7 @@ final class ValidationController extends Controller
             'lunchflow'              => $this->validateLunchFlow(),
             'sophtron'               => $this->validateSophtron(),
             'eb'                     => $this->validateEnableBanking(),
+            'akahu'                  => $this->validateAkahu(),
             'file'                   => response()->json(['result' => 'OK']),
             default                  => response()->json(['result' => 'NOK', 'message' => 'Unknown provider'])
         };
@@ -146,6 +148,28 @@ final class ValidationController extends Controller
             return response()->json(['result' => 'NODATA']);
         }
         Log::info(sprintf('[%s] All OK in validateEnableBanking.', config('importer.version')));
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    private function validateAkahu(): JsonResponse
+    {
+        Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
+        $validator = new AkahuValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            Log::error('Error: Could not validate Akahu credentials.');
+
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            Log::error('No data: Could not validate Akahu credentials.');
+
+            return response()->json(['result' => 'NODATA']);
+        }
+
+        Log::info(sprintf('[%s] All OK in %s.', config('importer.version'), __METHOD__));
 
         return response()->json(['result' => 'OK']);
     }

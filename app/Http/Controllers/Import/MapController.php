@@ -261,6 +261,7 @@ final class MapController extends Controller
             || 'sophtron' === $importJob->getFlow()
             || 'lunchflow' === $importJob->getFlow()
             || 'eb' === $importJob->getFlow()
+            || 'akahu' === $importJob->getFlow()
         ) {
             // FIXME should be in a helper or something generic.
             // index 0, opposing account name:

@@ -19,7 +19,7 @@
  */
 
 import '../../boot/bootstrap.js';
-
+import Alpine from "alpinejs";
 
 let index = function () {
     return {
@@ -112,7 +112,7 @@ let index = function () {
                 new_account_data: newAccountData
             };
 
-            window.axios.post(jobStartUrl, postData).then((response) => {
+            window.axios.post(jobStartUrl, postData).then(() => {
                 console.log('POST was OK');
                 this.getJobStatus();
                 this.post.running = false;

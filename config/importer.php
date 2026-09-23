@@ -64,9 +64,11 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => '2.3.4',
-    'build_time'                    => 1782797383,
+    'version'                       => '2.3.5',
+    'build_time'                    => 1790141955,
     'fake_data'                     => env('FAKE_DATA', false),
+    'store_fake_data'               => env('STORE_FAKE_DATA', false),
+    'stackable_fields'              => ['description', 'notes'],
     'providers'                     => [
         'file'      => [
             'title'                     => 'File',
@@ -138,6 +140,13 @@ return [
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
+        'akahu'     => [
+            'title'                     => 'Akahu',
+            'enabled'                   => true,
+            'conversion_before_mapping' => true,
+            'explanation'               => '',
+            'supports_new_accounts'     => true,
+        ],
     ],
 
     // docker build info.
@@ -154,7 +163,7 @@ return [
     'can_post_files'                => env('CAN_POST_FILES', false),
     'access_token'                  => env('FIREFLY_III_ACCESS_TOKEN'),
     'url'                           => env('FIREFLY_III_URL'),
-    'client_id'                     => (string) env('FIREFLY_III_CLIENT_ID'),
+    'client_id'                     => (string)env('FIREFLY_III_CLIENT_ID'),
     'upload_path'                   => storage_path('uploads'),
     'log_return_json'               => env('LOG_RETURN_JSON', false),
     'expect_secure_url'             => env('EXPECT_SECURE_URL', false),

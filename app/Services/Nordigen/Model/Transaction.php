@@ -29,9 +29,9 @@ use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use JsonException;
 use Ramsey\Uuid\Uuid;
-use Validator;
 
 /**
  * Class Transaction

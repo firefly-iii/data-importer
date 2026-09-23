@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * TransactionDownloader.php
  * Copyright (c) 2026 james@firefly-iii.org
@@ -22,6 +20,8 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Sophtron\Conversion;
 
 use App\Models\ImportJob;
@@ -39,7 +39,6 @@ final class TransactionDownloader
     use CreatesAccounts;
 
     private ImportJob $importJob;
-    protected ImportJobRepository $repository;
 
     public function __construct(ImportJob $importJob)
     {

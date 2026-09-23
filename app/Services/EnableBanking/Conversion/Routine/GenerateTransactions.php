@@ -146,15 +146,17 @@ final class GenerateTransactions
 
         // Set source info
         $sourceName                    = $entry->getSourceName();
+        if ($this->configuration->isUseEntireOpposingAddress()) {
+            $sourceName = $entry->getSourceNameWithAddress();
+        }
         $sourceIban                    = $entry->getSourceIban();
         $sourceBban                    = $entry->getSourceBban();
+        $bbanKey                       = sprintf('nr_%s', $sourceBban);
 
-        if (null !== $sourceIban && '' !== $sourceIban) {
-            $transaction['source_iban'] = $sourceIban;
-
+        if ('' !== (string) $sourceBban) {
             // check if BBAN is a match AND if the type is "asset".
-            $bbanKey                    = sprintf('nr_%s', $sourceBban);
-            if (array_key_exists($bbanKey, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes)) {
+            $match = array_key_exists($bbanKey, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes);
+            if ($match) {
                 Log::debug(sprintf('Matched source BBAN "nr_%s" to account #%d', $sourceBban, $this->targetAccounts[$bbanKey]));
                 if ('asset' === $this->targetTypes[$bbanKey]) {
                     $transaction['source_id'] = $this->targetAccounts[$bbanKey];
@@ -170,9 +172,17 @@ final class GenerateTransactions
                     ));
                 }
             }
+            if (!$match) {
+                Log::debug(sprintf('No match for source BBAN "nr_%s".', $sourceBban));
+            }
+        }
+
+        if ('' !== (string) $sourceIban) {
+            $transaction['source_iban'] = $sourceIban;
 
             // Check if IBAN is a match. Will overrule BBAN match.
-            if (array_key_exists($sourceIban, $this->targetAccounts) && array_key_exists($sourceIban, $this->targetTypes)) {
+            $match                      = array_key_exists($sourceIban, $this->targetAccounts) && array_key_exists($sourceIban, $this->targetTypes);
+            if ($match) {
                 Log::debug(sprintf('Matched source IBAN "%s" to account #%d', $sourceIban, $this->targetAccounts[$sourceIban]));
                 if ('asset' === $this->targetTypes[$sourceIban]) {
                     Log::debug(sprintf('Matched source IBAN "%s" to account #%d AND it is an asset account.', $sourceIban, $this->targetAccounts[$sourceIban]));
@@ -187,6 +197,9 @@ final class GenerateTransactions
                         $this->targetTypes[$sourceIban]
                     ));
                 }
+            }
+            if (!$match) {
+                Log::debug(sprintf('No match for source IBAN "%s".', $sourceIban));
             }
         }
 
@@ -208,16 +221,18 @@ final class GenerateTransactions
 
         // Set destination info
         $destName                 = $entry->getDestinationName();
+        if ($this->configuration->isUseEntireOpposingAddress()) {
+            $destName = $entry->getDestinationNameWithAddress();
+        }
         $destIban                 = $entry->getDestinationIban();
         $destBban                 = $entry->getDestinationBban();
+        $bbanKey                  = sprintf('nr_%s', $destBban);
 
-        if (null !== $destIban && '' !== $destIban) {
-            $transaction['destination_iban'] = $destIban;
-
-            // check if BBAN is a match
-            $bbanKey                         = sprintf('nr_%s', $destBban);
-            if (array_key_exists($bbanKey, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes)) {
-                Log::debug(sprintf('Matched source BBAN "nr_%s" to account #%d', $destBban, $this->targetAccounts[$bbanKey]));
+        if ('' !== (string) $destBban) {
+            // check if BBAN is a match (in case there is an IBAN in the BBAN field).
+            $match = array_key_exists($bbanKey, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes);
+            if ($match) {
+                Log::debug(sprintf('Matched destination BBAN "nr_%s" to account #%d', $destBban, $this->targetAccounts[$bbanKey]));
                 if ('asset' === $this->targetTypes[$bbanKey]) {
                     Log::debug(sprintf(
                         'Matched destination BBAN "nr_%s" to account #%d AND its an asset account.',
@@ -236,9 +251,16 @@ final class GenerateTransactions
                     ));
                 }
             }
+            if (!$match) {
+                Log::debug(sprintf('No match for destination BBAN "nr_%s".', $destBban));
+            }
+        }
 
-            // Check if IBAN is a match, will overrule BBAN.
-            if (array_key_exists($destIban, $this->targetAccounts) && array_key_exists($bbanKey, $this->targetTypes)) {
+        // Check if IBAN is a match, will overrule BBAN.
+        if ('' !== (string) $destIban) {
+            $transaction['destination_iban'] = $destIban;
+            $match                           = array_key_exists($destIban, $this->targetAccounts) && array_key_exists($destIban, $this->targetTypes);
+            if ($match) {
                 Log::debug(sprintf('Matched source IBAN "%s" to account #%d', $destIban, $this->targetAccounts[$destIban]));
                 if ('asset' === $this->targetTypes[$destIban]) {
                     Log::debug(sprintf(
@@ -258,6 +280,9 @@ final class GenerateTransactions
                         $this->targetTypes[$destIban]
                     ));
                 }
+            }
+            if (!$match) {
+                Log::debug(sprintf('No match for destination IBAN "%s".', $destIban));
             }
         }
 

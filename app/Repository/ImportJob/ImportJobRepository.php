@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * ImportJobRepository.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -22,10 +20,13 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Repository\ImportJob;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
+use App\Services\Akahu\Validation\NewJobDataCollector as AkahuNewJobDataCollector;
 use App\Services\CSV\Mapper\TransactionCurrencies;
 use App\Services\EnableBanking\Validation\NewJobDataCollector as EnableBankingNewJobDataCollector;
 use App\Services\LunchFlow\Validation\NewJobDataCollector as LunchFlowNewJobDataCollector;
@@ -213,6 +214,15 @@ final class ImportJobRepository
 
             case 'eb':
                 $validator     = new EnableBankingNewJobDataCollector();
+                $validator->setImportJob($importJob);
+                $messageBag    = $validator->collectAccounts();
+                $importJob     = $validator->getImportJob();
+                $configuration = $importJob->getConfiguration();
+
+                break;
+
+            case 'akahu':
+                $validator     = new AkahuNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();

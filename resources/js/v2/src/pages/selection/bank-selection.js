@@ -19,7 +19,7 @@
  */
 
 import '../../boot/bootstrap.js';
-
+import Alpine from "alpinejs";
 
 let bankSelection = function () {
     return {

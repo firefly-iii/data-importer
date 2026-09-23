@@ -20,10 +20,7 @@
 
 import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
-import manifestSRI from 'vite-plugin-manifest-sri';
-import * as fs from "fs";
 
-const host = '127.0.0.1';
 
 function manualChunks(id) {
     if (id.includes('node_modules')) {

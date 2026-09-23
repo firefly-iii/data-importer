@@ -28,8 +28,8 @@ use App\Services\Nordigen\Model\Transaction;
 use App\Services\Shared\Response\Response;
 use Countable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Iterator;
-use Log;
 
 /**
  * Class GetTransactionsResponse

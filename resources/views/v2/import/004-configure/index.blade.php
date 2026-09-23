@@ -87,6 +87,12 @@
                 @endif
                 <!-- end of Nordigen / GoCardless options -->
 
+                <!-- Enable Banking specific options -->
+                @if('eb' === $flow)
+                    @include('import.004-configure.partials.eb-options')
+                @endif
+                <!-- end of Enable Banking options -->
+
                 <!-- camt.053 options -->
                 @if('file' === $flow && 'camt'  === $configuration->getContentType())
                     @include('import.004-configure.partials.camt-053-options')

@@ -208,6 +208,11 @@ final class UploadController extends Controller
                 Log::debug('No extra steps for Enable Banking.');
 
                 break;
+
+            case 'akahu':
+                Log::debug('No extra steps for Akahu.');
+
+                break;
         }
 
         // stop again if any errors:

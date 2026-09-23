@@ -28,6 +28,9 @@ use App\Exceptions\ImporterHttpException;
 use App\Services\EnableBanking\Response\TransactionsResponse;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
+use Safe\Exceptions\FilesystemException;
+
+use function Safe\json_decode;
 
 /**
  * Class GetTransactionsRequest
@@ -36,19 +39,23 @@ use Illuminate\Support\Facades\Log;
 final class GetTransactionsRequest extends Request
 {
     private string $accountUid;
+    private string $fakeDataPath = '';
 
     public function __construct(string $url, string $accountUid, ?string $dateFrom = null, ?string $dateTo = null)
     {
         $this->setBase($url);
-        $this->accountUid = $accountUid;
+        $this->accountUid   = $accountUid;
+        $this->fakeDataPath = storage_path(sprintf('fake-data/eb-transactions-%s.json', $accountUid));
 
-        $urlPath          = sprintf('accounts/%s/transactions', $accountUid);
-        $params           = [];
+        $urlPath            = sprintf('accounts/%s/transactions', $accountUid);
+        $params             = [];
         if (null !== $dateFrom) {
             $params['date_from'] = $dateFrom;
+            $this->fakeDataPath  = storage_path(sprintf('fake-data/eb-transactions-%s-%s.json', $accountUid, $dateFrom));
         }
         if (null !== $dateTo) {
-            $params['date_to'] = $dateTo;
+            $params['date_to']  = $dateTo;
+            $this->fakeDataPath = storage_path(sprintf('fake-data/eb-transactions-%s-%s-%s.json', $accountUid, $dateFrom, $dateTo));
         }
         $this->setParameters($params);
         $this->setUrl($urlPath);
@@ -62,6 +69,31 @@ final class GetTransactionsRequest extends Request
         Log::debug('Will now do Enable Banking GetTransactionsRequest');
         // create empty response
         $response        = TransactionsResponse::fromArray([], $this->accountUid);
+
+        // fake data is appended here:
+        // perhaps grab fake data instead?
+        $grabFake        = (bool) config('importer.fake_data');
+        $fakeExists      = file_exists($this->fakeDataPath);
+        if ($grabFake && $fakeExists) {
+            Log::debug('Will collect fake data instead of real data.');
+            $content = null;
+
+            try {
+                $content = file_get_contents($this->fakeDataPath);
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not read fake data: %s', $e->getMessage()));
+            }
+            if (null !== $content) {
+                $allJson = json_decode($content, true);
+                foreach ($allJson as $json) {
+                    $response->appendResponse($json);
+                }
+
+                return $response;
+            }
+        }
+
+        $allJson         = [];
         $haveMorePages   = true;
         $max             = 50;
         $count           = 0;
@@ -70,8 +102,8 @@ final class GetTransactionsRequest extends Request
             Log::debug(sprintf('Now running attempt #%d', $count + 1));
             // add continuation_key
             if ('' !== $continuationKey) {
-                $this->addParameter('continuation_key', $continuationKey);
                 Log::debug(sprintf('Have continuation key, add to request: "%s"', $continuationKey));
+                $this->addParameter('continuation_key', $continuationKey);
             }
             // remove if empty:
             if ('' === $continuationKey) {
@@ -81,6 +113,7 @@ final class GetTransactionsRequest extends Request
 
             // do an authenticated get.
             $json            = $this->authenticatedGet();
+            $allJson[]       = $json;
 
             // retrieve new key
             $continuationKey = (string) $json['continuation_key'];
@@ -96,7 +129,19 @@ final class GetTransactionsRequest extends Request
 
             ++$count;
         }
+        $this->removeParameter('continuation_key');
         Log::debug('Done with Enable Banking GetTransactionsRequest');
+
+        // store fake data in new thing:
+        if ($grabFake && !$fakeExists && true === (bool) config('importer.store_fake_data')) {
+            Log::debug('Will store this run as fake data to use the next time.');
+
+            try {
+                file_put_contents($this->fakeDataPath, json_encode($allJson));
+            } catch (FilesystemException $e) {
+                Log::error(sprintf('Could not store fake data: %s', $e->getMessage()));
+            }
+        }
 
         return $response;
     }

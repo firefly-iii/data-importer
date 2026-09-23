@@ -19,6 +19,7 @@
  */
 
 import '../../boot/bootstrap.js';
+import Alpine from "alpinejs";
 
 
 let index = function () {
@@ -112,7 +113,7 @@ let index = function () {
             this.triedToStart = true;
             this.post.running = true;
             const jobStartUrl = './submit-data/' + this.identifier + '/start';
-            window.axios.post(jobStartUrl, null).then((response) => {
+            window.axios.post(jobStartUrl, null).then(() => {
                 console.log('POST was OK');
                 this.getJobStatus();
                 this.post.running = false;

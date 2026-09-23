@@ -108,6 +108,15 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                     /** @var AccountsResponse $response */
                     $response = $request->get();
                 } catch (ImporterHttpException $e) {
+                    // for some reason this request fails. We log the error and continue.
+                    $message = $e->getMessage();
+                    if (422 === $e->statusCode) {
+                        Log::error($message);
+                        $messageBag->add('missing_sessions', 'true');
+
+                        return $messageBag;
+                    }
+
                     throw new ImporterErrorException($e->getMessage(), 0, $e);
                 }
 

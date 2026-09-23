@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * CreatesAccounts.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -22,10 +20,13 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
 use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\Akahu\Model\Account\Account as AkahuAccount;
 use App\Services\EnableBanking\Model\Account as EnableBankingAccount;
 use App\Services\Nordigen\Model\Account as NordigenAccount;
 use App\Services\Shared\Model\ImportServiceAccount;
@@ -35,7 +36,7 @@ use Illuminate\Support\Facades\Log;
 
 trait CreatesAccounts
 {
-    protected ImportJobRepository $repository;
+    private ImportJobRepository $repository;
     protected array $existingServiceAccounts = [];
 
     public function setExistingServiceAccounts(array $existingServiceAccounts): void
@@ -75,6 +76,9 @@ trait CreatesAccounts
             }
             if ($entry instanceof EnableBankingAccount) {
                 return $entry->getUid() === $importServiceId;
+            }
+            if ($entry instanceof AkahuAccount) {
+                return $entry->getAkahuId() === $importServiceId;
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
 

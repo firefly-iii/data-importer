@@ -93,16 +93,31 @@ final class AutoImport extends Command
             return (int) reset($result);
         }
         if (count($unique) > 0) {
-            $this->warn('Multiple return codes found. Some imports may have failed');
-            foreach ($result as $file => $code) {
-                $this->warn(sprintf('File %s returned code #%d', $file, $code));
-            }
-            Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::GENERAL_ERROR->name));
-
-            return ExitCode::GENERAL_ERROR->value;
+            return $this->filteredExitCode($result);
         }
         Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), ExitCode::SUCCESS->name));
 
         return ExitCode::SUCCESS->value;
+    }
+
+    private function filteredExitCode(array $exitCodes): int
+    {
+        // a mix of NOTHING_WAS_IMPORTED and SUCCESS will yield NOTHING_WAS_IMPORTED_AND_SUCCESS
+        $mixed     = true;
+        $this->warn('Multiple return codes found. Some imports may have failed');
+        foreach ($exitCodes as $file => $code) {
+            $this->warn(sprintf('File %s returned code #%d', $file, $code));
+            if (ExitCode::SUCCESS->value !== $code && ExitCode::NOTHING_WAS_IMPORTED->value !== $code) {
+                $mixed = false;
+            }
+        }
+        $finalExit = ExitCode::GENERAL_ERROR;
+        if ($mixed) {
+            $finalExit = ExitCode::NOTHING_WAS_IMPORTED_AND_SUCCESS;
+        }
+
+        Log::error(sprintf('[%s] Exit code is %s.', config('importer.version'), $finalExit->name));
+
+        return $finalExit->value;
     }
 }

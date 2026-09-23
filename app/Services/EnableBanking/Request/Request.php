@@ -50,6 +50,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
+        Log::debug('setParameters()', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -97,25 +98,36 @@ abstract class Request
 
     protected function getHeaders(): array
     {
-        $token   = JWTManager::generateToken();
+        Log::debug('Now in getHeaders()');
+        $token           = JWTManager::generateToken();
 
-        $headers = [
+        $headers         = [
             'Accept'        => 'application/json',
             'Content-Type'  => 'application/json',
             'Authorization' => sprintf('Bearer %s', $token),
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
         ];
         if (true === config('eb.add_import_ip_header')) {
-            $ip = (string) config('eb.import_ip');
+            Log::debug('eb.add_import_ip_header is true, adding PSU-IP-Address header');
+            $ip     = (string) config('eb.import_ip');
             if ('autodetect' === $ip) {
                 $client = $this->getClient();
                 $res    = $client->get('https://icanhazip.com/');
-                $ip     = (string) $res->getBody();
+                $ip     = trim((string) $res->getBody());
+                Log::debug(sprintf('IP is set to "autodetect", so detected IP %s', $ip));
             }
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            $filter = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+            if ($filter) {
+                Log::debug(sprintf('IP "%s" is valid.', $ip));
                 $headers['PSU-IP-Address'] = $ip;
             }
+            if (false === $filter) {
+                Log::warning(sprintf('IP "%s" NOT is valid.', $ip));
+            }
         }
+        $filteredHeaders = $headers;
+        unset($filteredHeaders['Authorization']);
+        Log::debug('Call to getHeaders() with final headers (Authorization is removed): ', $filteredHeaders);
 
         return $headers;
     }
@@ -145,12 +157,16 @@ abstract class Request
                 $body = (string) $e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
+            $httpException             = new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
+            $httpException->statusCode = $e->getResponse()->getStatusCode();
 
-            throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
+            throw $httpException;
         }
 
         $body    = (string) $res->getBody();
-        Log::debug(sprintf('Enable Banking raw response: %s', $body));
+        if (true === config('importer.log_return_json')) {
+            Log::debug(sprintf('Enable Banking raw response: %s', $body));
+        }
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);

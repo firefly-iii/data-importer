@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.3.5 - 2026-09-23
+
+<!-- summary: This release fixes various Enable Banking and other issues. -->
+
+### Added
+- Better AI disclosure for new PRs. 
+
+### Fixed
+- [Issue 12303](https://github.com/firefly-iii/firefly-iii/issues/12303) (Use vanity URL for profile link on importer landing page) reported by @KentaKariya
+- [Issue 12419](https://github.com/firefly-iii/firefly-iii/issues/12419) (When no transactions are downloaded from GoCardless, we get an error) reported by @pvieira84
+- #12447
+- [Issue 12493](https://github.com/firefly-iii/firefly-iii/issues/12493) (Data Importer with Enable  Banking.  Fatal error: file_get_contents(): errno=21 Is a directory in SecretManager.php due to missing is_file check) reported by @oleksiips
+- [Issue 12523](https://github.com/firefly-iii/firefly-iii/issues/12523) (ENABLE_BANKING_IMPORT_IP_HEADER not applied during NewJobDataCollector::collectAccounts(). PSU-IP-Address still missing on GetAccountDetailsRequest) reported by @AndreasSkarmarkJakobsen
+- [Issue 12532](https://github.com/firefly-iii/firefly-iii/issues/12532) (Pagination continuation_key request sends mismatched dateFrom, causing 422 and silently dropping all transactions for large-history accounts) reported by @AndreasSkarmarkJakobsen
+- [Issue 12538](https://github.com/firefly-iii/firefly-iii/issues/12538) (Firefly III data importer exhausts SimpleFIN quota) reported by @csoghoian
+- [Issue 12541](https://github.com/firefly-iii/firefly-iii/issues/12541) (TypeError: Cannot assign null to institutionLogo property when LunchFlow account has no logo) reported by @anshul-rao
+- [Issue 12549](https://github.com/firefly-iii/firefly-iii/issues/12549) (Data importer `GenerateTransactions->appendNegativeAmountInfo` checks `destIban` against `bbanKey`) reported by @fitzchivalrik
+- [Issue 12553](https://github.com/firefly-iii/firefly-iii/issues/12553) (Enable Banking /auth fails with 422 (consent validity > 7776000s) when the 90-day window crosses a DST transition) reported by @Fziraji
+- #12620
+- #12720
+- #12804
+- #12840
+- Merged [PR 1314](https://github.com/firefly-iii/data-importer/pull/1314) by @RustyPotato
+
 ## v2.3.4 - 2026-06-30
 
 <!-- summary: This release fixes a crash in the Soptron import routine. -->

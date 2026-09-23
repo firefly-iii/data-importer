@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * ConversionRoutineFactory.php
- * Copyright (c) 2025 james@firefly-iii.org
+ * Copyright (c) 2026 james@firefly-iii.org
  *
  * This file is part of Firefly III (https://github.com/firefly-iii).
  *
@@ -22,10 +20,13 @@ declare(strict_types=1);
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Shared\Conversion;
 
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
+use App\Services\Akahu\Conversion\RoutineManager as AkahuRoutineManager;
 use App\Services\Camt\Conversion\RoutineManager as CamtRoutineManager;
 use App\Services\CSV\Conversion\RoutineManager as CSVRoutineManager;
 use App\Services\EnableBanking\Conversion\RoutineManager as EnableBankingRoutineManager;
@@ -84,6 +85,9 @@ final class ConversionRoutineFactory
         }
         if ('eb' === $flow) {
             return new EnableBankingRoutineManager($this->importJob);
+        }
+        if ('akahu' === $flow) {
+            return new AkahuRoutineManager($this->importJob);
         }
 
         throw new ImporterErrorException(sprintf('ConversionRoutineFactory cannot create a routine for import flow "%s"', $flow));
