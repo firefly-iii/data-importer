@@ -92,6 +92,9 @@ final class SecretManager
         if ('' === $sessionKey) {
             Log::debug('No Enable Banking private key in session, will return config variable!');
             $privateKey = (string) config('eb.private_key');
+            if('' === $privateKey) {
+                return '';
+            }
 
             // see if this is a file that exists and is readable.
             $path       = realpath($privateKey);
