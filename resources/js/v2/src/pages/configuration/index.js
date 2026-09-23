@@ -19,7 +19,7 @@
  */
 
 import '../../boot/bootstrap.js';
-
+import Alpine from "alpinejs";
 
 let index = function () {
     return {
@@ -35,6 +35,7 @@ let index = function () {
                 this.parsedDateFormat = response.data.result;
                 this.loadingParsedDate = false;
             }).catch((error) => {
+                console.log(error);
                 this.parsedDateFormat = ':(';
                 this.loadingParsedDate = false;
             });

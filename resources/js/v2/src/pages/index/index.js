@@ -19,7 +19,9 @@
  */
 
 import '../../boot/bootstrap.js';
+import Alpine from "alpinejs";
 
+let tokenPageUrl  = tokenPageUrl ?? '';
 
 let index = function () {
     return {
@@ -36,7 +38,7 @@ let index = function () {
             window.axios.get(importFlowUrl).then((response) => {
                 let flows = response.data;
                 for (let i = 0; i < flows.length; i++) {
-                    if (flows.hasOwnProperty(i)) {
+                    if (Object.hasOwn(flows, i)) {
                         let flow                   = flows[i];
                         flow.loading               = true;
                         flow.errorMessage          = '';
@@ -52,7 +54,7 @@ let index = function () {
         },
         validateAuthentications() {
             for (let flow in this.importFlows) {
-                if (this.importFlows.hasOwnProperty(flow)) {
+                if (Object.hasOwn(this.importFlows, flow)) {
                     console.log('Validate ' + flow);
                     if (!this.importFlows[flow].enabled) {
                         console.log('Skip ' + flow);
@@ -79,7 +81,7 @@ let index = function () {
                             this.importFlows[flow].authenticated = true;
                         }
                     }).catch((error) => {
-                        console.warn(flow + ' is broken');
+                        console.warn(flow + ' is broken', error);
                         this.importFlows[flow].loading      = false;
                         this.importFlows[flow].error        = true;
                         this.importFlows[flow].errorMessage = 'Could not load import provider';

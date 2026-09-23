@@ -27,7 +27,7 @@
 // import things
 import axios from 'axios';
 import Alpine from "alpinejs";
-import * as bootstrap from 'bootstrap';
+// import from 'bootstrap';
 // import even more
 
 
