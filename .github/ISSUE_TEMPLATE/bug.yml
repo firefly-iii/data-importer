@@ -1,15 +1,20 @@
 name: Bug report
-description: Report a bug in the Firefly III data importer
+description: Report a bug in Firefly III (or associated tools)
 body:
   - type: checkboxes
     attributes:
-      label: Support guidelines and the use of AI.
-      description: Please read the support guidelines before proceeding. AI agents like Claude and CoPilot are not reliable tools. Do not use them.
+      label: Support guidelines
+      description: Thank you for reading the support guidelines before proceeding.
       options:
-        - label: I've read <!-- MZ2udTpin6FL --> the [support guidelines](https://github.com/firefly-iii/firefly-iii/blob/main/.github/support.md)
+        - label: I'm smart and I read the <!-- MZ2udTpin6FL --> [support guidelines](https://github.com/firefly-iii/firefly-iii/blob/main/.github/support.md)
           required: true
+  - type: checkboxes
+    attributes:
+      label: Use of AI
+      description: AI agents like Claude and CoPilot are not reliable tools. Do not use them.
+      options:
         - label: I'm a real person and wrote this bug without assistance from AI.
-          required: true
+          required: false
 
   - type: checkboxes
     attributes:
@@ -32,7 +37,7 @@ body:
     attributes:
       label: Debug information
       description: Please provide the table from the /debug page. Do not add backticks or quotes.
-      placeholder: The output from the /debug page
+      placeholder: The output from the /debug page or "N/A"
     validations:
       required: true
 

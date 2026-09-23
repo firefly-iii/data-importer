@@ -64,83 +64,83 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-09-22',
-    'build_time'                    => 1790064687,
-    'fake_data'                     => env('FAKE_DATA', false),
-    'store_fake_data'               => env('STORE_FAKE_DATA', false),
-    'stackable_fields' => ['description','notes'],
-    'providers'                     => [
-        'file'         => [
+    'version'          => 'develop/2026-09-22',
+    'build_time'       => 1790064687,
+    'fake_data'        => env('FAKE_DATA', false),
+    'store_fake_data'  => env('STORE_FAKE_DATA', false),
+    'stackable_fields' => ['description', 'notes'],
+    'providers'        => [
+        'file'      => [
             'title'                     => 'File',
             'explanation'               => 'CSV or CAMT.* files',
             'enabled'                   => true,
             'conversion_before_mapping' => false,
             'supports_new_accounts'     => false,
         ],
-        'sophtron'     => [
+        'sophtron'  => [
             'title'                     => 'Sophtron',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'nordigen'     => [
+        'nordigen'  => [
             'title'                     => 'GoCardless',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'simplefin'    => [
+        'simplefin' => [
             'title'                     => 'SimpleFIN',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'lunchflow'    => [
+        'lunchflow' => [
             'title'                     => 'Lunch Flow',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'obg'          => [
+        'obg'       => [
             'title'                     => 'Open Banking Gateway',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'eb'           => [
+        'eb'        => [
             'title'                     => 'Enable Banking',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'teller'       => [
+        'teller'    => [
             'title'                     => 'teller.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'fints'        => [
+        'fints'     => [
             'title'                     => 'FinTS/HBCI',
             'enabled'                   => false,
             'conversion_before_mapping' => false,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'basiq'        => [
+        'basiq'     => [
             'title'                     => 'basiq.io',
             'enabled'                   => false,
             'conversion_before_mapping' => true,
             'explanation'               => '',
             'supports_new_accounts'     => true,
         ],
-        'akahu'        => [
+        'akahu'     => [
             'title'                     => 'Akahu',
             'enabled'                   => true,
             'conversion_before_mapping' => true,
@@ -150,7 +150,7 @@ return [
     ],
 
     // docker build info.
-    'docker'                        => [
+    'docker'           => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -163,7 +163,7 @@ return [
     'can_post_files'                => env('CAN_POST_FILES', false),
     'access_token'                  => env('FIREFLY_III_ACCESS_TOKEN'),
     'url'                           => env('FIREFLY_III_URL'),
-    'client_id'                     => (string) env('FIREFLY_III_CLIENT_ID'),
+    'client_id'                     => (string)env('FIREFLY_III_CLIENT_ID'),
     'upload_path'                   => storage_path('uploads'),
     'log_return_json'               => env('LOG_RETURN_JSON', false),
     'expect_secure_url'             => env('EXPECT_SECURE_URL', false),
@@ -228,7 +228,7 @@ return [
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
 
-    'http_codes'                    => [
+    'http_codes' => [
         0   => 'Unknown Error',
         100 => 'Continue',
         101 => 'Switching Protocols',
