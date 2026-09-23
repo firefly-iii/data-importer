@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.3.5 - 2026-08-01
 
+
+https://github.com/firefly-iii/firefly-iii/issues/12804
+
 <!-- summary: This release fixes various Enable Banking and other issues. -->
 
 ### Added

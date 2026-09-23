@@ -157,8 +157,9 @@ abstract class Request
                 $body = (string) $e->getResponse()->getBody();
                 Log::error(sprintf('Response body: %s', $body));
             }
-
-            throw new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
+            $httpException = new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
+            $httpException->statusCode = $e->getResponse()->getStatusCode();
+            throw $httpException;
         }
 
         $body    = (string) $res->getBody();

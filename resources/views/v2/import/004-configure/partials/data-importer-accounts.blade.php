@@ -26,7 +26,7 @@
                     </div>
                 @else
                     <div class="alert alert-warning">
-                        <strong>No {{ config('importer.providers.' . $flow . '.title') }} accounts found.</strong> Please ensure your settings are valid and try again.
+                        <strong>No {{ config('importer.providers.' . $flow . '.title') }} accounts found.</strong> Please ensure your settings are valid and try again. If your current session has expired, you may have reauthenticate again.
                     </div>
                 @endif
             </div>
