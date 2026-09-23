@@ -64,12 +64,12 @@ declare(strict_types=1);
  */
 
 return [
-    'version'          => 'develop/2026-09-22',
-    'build_time'       => 1790064687,
-    'fake_data'        => env('FAKE_DATA', false),
-    'store_fake_data'  => env('STORE_FAKE_DATA', false),
-    'stackable_fields' => ['description', 'notes'],
-    'providers'        => [
+    'version'                       => 'develop/2026-09-23',
+    'build_time'                    => 1790140435,
+    'fake_data'                     => env('FAKE_DATA', false),
+    'store_fake_data'               => env('STORE_FAKE_DATA', false),
+    'stackable_fields'              => ['description', 'notes'],
+    'providers'                     => [
         'file'      => [
             'title'                     => 'File',
             'explanation'               => 'CSV or CAMT.* files',
@@ -150,7 +150,7 @@ return [
     ],
 
     // docker build info.
-    'docker'           => [
+    'docker'                        => [
         'is_docker'  => env('IS_DOCKER', false),
         'base_build' => env('BASE_IMAGE_BUILD', '(unknown)'),
     ],
@@ -228,7 +228,7 @@ return [
     'line_d'                        => 'Don’t feel so sorry for yourself. Make do.',
     'line_e'                        => 'All the decisive blows are struck left-handed.',
 
-    'http_codes' => [
+    'http_codes'                    => [
         0   => 'Unknown Error',
         100 => 'Continue',
         101 => 'Switching Protocols',
