@@ -68,6 +68,7 @@ return [
     'build_time'                    => 1790064687,
     'fake_data'                     => env('FAKE_DATA', false),
     'store_fake_data'               => env('STORE_FAKE_DATA', false),
+    'stackable_fields' => ['description','notes'],
     'providers'                     => [
         'file'         => [
             'title'                     => 'File',

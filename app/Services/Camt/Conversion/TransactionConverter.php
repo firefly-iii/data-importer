@@ -79,6 +79,7 @@ final class TransactionConverter
             $current                  = [];
             foreach ($fieldNames as $field) {
                 $field = (string) $field;
+                /** @var string $role */
                 $role  = $allRoles[$field] ?? '_ignore';
                 if ('_ignore' !== $role) {
                     Log::debug(sprintf('Field "%s" was given role "%s".', $field, $role));
@@ -89,11 +90,24 @@ final class TransactionConverter
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
-                    $current[$role] ??= ['data' => [], 'mapping' => []];
+                    $current[$role] ??= [
+                        'data' => [],
+                        'mapping' => []
+                    ];
                     if (array_key_exists($field, $mapping)) {
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }
-                    $current[$role]['data'][$field] = $value;
+                    // some fields can be appended if they exist already.
+                    if(in_array($role, config('importer.stackable_fields'), true)) {
+                        if(array_key_exists($field, $current[$role]['data'])) {
+                            $current[$role]['data'][$field] .= $value;
+                        }
+                    }
+                    if(!in_array($role, config('importer.stackable_fields'), true)) {
+                        $current[$role]['data'][$field] = $value;
+                    }
+
+
                     $current[$role]['data']         = array_unique($current[$role]['data']);
                 }
             }
