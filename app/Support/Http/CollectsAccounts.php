@@ -136,8 +136,8 @@ trait CollectsAccounts
         /** @var Account $entry */
         foreach ($result as $entry) {
             Log::debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
-            $type   = $entry->type;
-            $iban   = (string) $entry->iban;
+            $type          = $entry->type;
+            $iban          = (string) $entry->iban;
             $accountNumber = sprintf('%s.', (string) $entry->accountNumber);
 
             // For expense and revenue accounts, use account ID as key since they don't usually have IBANs
@@ -150,18 +150,19 @@ trait CollectsAccounts
             }
 
             // For asset/liability accounts, continue with IBAN-based logic
-            $iban   = $this->filterSpaces($iban);
+            $iban          = $this->filterSpaces($iban);
             if ('.' !== $accountNumber) {
                 // account has an account number.
-                $accountNumber = $this->filterSpaces((string)$entry->number);
-                $key    = sprintf('nr_%s', $accountNumber);
+                $accountNumber = $this->filterSpaces((string) $entry->number);
+                $key           = sprintf('nr_%s', $accountNumber);
                 Log::debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
-                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
+                $return[$key]  = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
 
             // #10546 include expense and revenue accounts in the IBAN list, unless entry already exist.
             if (array_key_exists($iban, $return) && in_array($type, ['expense', 'revenue'], true)) {
                 Log::debug(sprintf('Refuse to let expense/revenue account IBAN "%s" overrule existing IBAN entry.', $iban));
+
                 continue; // skip this account, it is already in the list.
             }
             // #10546 allow asset and liability accounts to be added under their IBAN, overruling expense accounts if necessary.
