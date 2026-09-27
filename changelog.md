@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## v2.3.6 - 2026-09-28
+
+<!-- summary: In this release some tiny but important bugs were fixed for Enable Banking and Akahu -->
+
+### Fixed
+- #12896
+- #12840
+
 ## v2.3.5 - 2026-09-23
 
 <!-- summary: This release fixes various Enable Banking and other issues. -->
