@@ -32,12 +32,17 @@ final class GetTransactionsResponseBuilder
 {
     public array $transactions = [];
 
+    public function build(): GetTransactionsResponse
+    {
+        return new GetTransactionsResponse($this->transactions);
+    }
+
     public function submitPageAndGetNextCursor(array $json): ?string
     {
         if (array_key_exists('success', $json)) {
             if (!$json['success']) {
                 $msg = 'Akahu api returned a success value of "false". See logs for more details';
-                Log::error($msg.' json: "'.json_encode($json).'"');
+                Log::error($msg . ' json: "' . json_encode($json) . '"');
 
                 throw new ImporterErrorException($msg);
             }
@@ -61,7 +66,7 @@ final class GetTransactionsResponseBuilder
 
         $msg = 'Akahu api returned badly structured json, expected response to contain';
         $msg .= ' a "success" attribute and an "items" attribute. See logs for more details.';
-        Log::error($msg.' json: "'.json_encode($json).'"');
+        Log::error($msg . ' json: "' . json_encode($json) . '"');
 
         throw new ImporterErrorException($msg);
     }
@@ -70,10 +75,5 @@ final class GetTransactionsResponseBuilder
     {
         $pageTransactions = array_map(Transaction::fromJson(...), $transactionsJson);
         array_push($this->transactions, ...$pageTransactions);
-    }
-
-    public function build(): GetTransactionsResponse
-    {
-        return new GetTransactionsResponse($this->transactions);
     }
 }

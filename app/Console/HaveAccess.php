@@ -35,45 +35,15 @@ use Illuminate\Support\Facades\Log;
  */
 trait HaveAccess
 {
-    private function sendMessage(bool $console, string $line): void
-    {
-        if ($console) {
-            $this->line($line);
-
-            return;
-        }
-        Log::debug($line);
-    }
-
-    private function sendError(bool $console, string $line): void
-    {
-        if ($console) {
-            $this->error($line);
-
-            return;
-        }
-        Log::error($line);
-    }
-
-    private function sendWarning(bool $console, string $line): void
-    {
-        if ($console) {
-            $this->warn($line);
-
-            return;
-        }
-        Log::warning($line);
-    }
-
     protected function haveAccess(bool $console): bool
     {
-        $url             = (string) config('importer.url');
-        $token           = SecretManager::getAccessToken();
+        $url   = (string)config('importer.url');
+        $token = SecretManager::getAccessToken();
 
         $this->sendMessage($console, sprintf('Trying to connect to %s...', $url));
         $this->sendMessage($console, sprintf('The last 25 chars of the access token are: %s', substr($token, -25)));
 
-        $request         = new SystemInformationRequest($url, $token);
+        $request = new SystemInformationRequest($url, $token);
 
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
@@ -104,7 +74,7 @@ trait HaveAccess
             $this->sendWarning($console, 'You are connected to a branch version of Firefly III.');
         }
 
-        $compare         = version_compare($reportedVersion, config('importer.minimum_version'));
+        $compare = version_compare($reportedVersion, config('importer.minimum_version'));
         if (-1 === $compare && !str_starts_with($reportedVersion, 'develop') && !str_starts_with($reportedVersion, 'branch')) {
             $this->sendError($console, sprintf(
                 'The data importer cannot communicate with Firefly III v%s. Please upgrade to Firefly III v%s or higher.',
@@ -118,11 +88,41 @@ trait HaveAccess
         return true;
     }
 
+    private function sendMessage(bool $console, string $line): void
+    {
+        if ($console) {
+            $this->line($line);
+
+            return;
+        }
+        Log::debug($line);
+    }
+
+    private function sendError(bool $console, string $line): void
+    {
+        if ($console) {
+            $this->error($line);
+
+            return;
+        }
+        Log::error($line);
+    }
+
     /**
-     * @param null  $verbosity
+     * @param null $verbosity
      * @param mixed $string
      */
     abstract public function error($string, $verbosity = null);
+
+    private function sendWarning(bool $console, string $line): void
+    {
+        if ($console) {
+            $this->warn($line);
+
+            return;
+        }
+        Log::warning($line);
+    }
 
     private function isAllowedPath(string $path): bool
     {
@@ -147,7 +147,7 @@ trait HaveAccess
             if ($current === $path) {
                 return true;
             }
-            if (str_starts_with($path, (string) $current)) {
+            if (str_starts_with($path, (string)$current)) {
                 Log::debug(sprintf('SOFT match on isAllowedPath, "%s" is a subdirectory of "%s"', $path, $current));
 
                 return true;

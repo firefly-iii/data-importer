@@ -54,7 +54,7 @@ final class Import extends Command
      */
     public function handle(): int
     {
-        $access     = $this->haveAccess(true);
+        $access = $this->haveAccess(true);
         if (false === $access) {
             $this->error(sprintf('No access granted, or no connection is possible to your local Firefly III instance at %s.', config('importer.url')));
             Log::error(sprintf('Exit code is %s.', ExitCode::NO_CONNECTION->name));
@@ -64,8 +64,8 @@ final class Import extends Command
 
         $this->info(sprintf('Welcome to the Firefly III data importer, v%s', config('importer.version')));
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $file       = (string) $this->argument('file');
-        $config     = (string) $this->argument('config');
+        $file   = (string)$this->argument('file');
+        $config = (string)$this->argument('config');
 
         // validate config path:
         if ('' !== $config) {
@@ -108,12 +108,12 @@ final class Import extends Command
         }
 
         // 2025-12-20. Create new import job and use that instead.
-        $exitCode   = $this->importFileAsImportJob($config, $file);
+        $exitCode = $this->importFileAsImportJob($config, $file);
 
         // merge things:
-        $messages   = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
-        $warnings   = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
-        $errors     = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        $messages = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors   = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
         // #11577 no need to report again
         // event(new ImportedTransactions(basename($config), $messages, $warnings, $errors, $this->conversionRateLimits));

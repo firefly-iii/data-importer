@@ -41,7 +41,7 @@ use Illuminate\Support\MessageBag;
 
 final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
-    private ImportJob $importJob;
+    private ImportJob           $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -83,7 +83,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $url         = config('nordigen.url');
                 $request     = new ListAccountsRequest($url, $requisition, $accessToken);
                 $request->setTimeOut(config('importer.connection.timeout'));
-                $response    = [];
+                $response = [];
 
                 try {
                     /** @var ListAccountsResponse $response */
@@ -98,7 +98,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                         '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                     );
                 }
-                $total       = count($response);
+                $total = count($response);
                 Log::debug(sprintf('Found %d GoCardless accounts.', $total));
 
                 /** @var NordigenAccount $account */
@@ -141,11 +141,6 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         return 'nordigen';
     }
 
-    public function validate(): MessageBag
-    {
-        return new MessageBag();
-    }
-
     public function getImportJob(): ImportJob
     {
         return $this->importJob;
@@ -154,5 +149,10 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
     public function setImportJob(ImportJob $importJob): void
     {
         $this->importJob = $importJob;
+    }
+
+    public function validate(): MessageBag
+    {
+        return new MessageBag();
     }
 }

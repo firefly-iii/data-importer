@@ -46,7 +46,7 @@ trait DuplicateSafetyCatch
         // The data importer will try to correct this.
         if ('transfer' === $transaction['type'] && 0 !== $transaction['destination_id'] && $transaction['destination_id'] === $transaction['source_id']) {
             Log::warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
-            $transaction['type']             = 'withdrawal';
+            $transaction['type'] = 'withdrawal';
 
             // add error message to transaction:
             $transaction['notes'] ??= '';
@@ -54,7 +54,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= sprintf("- Original destination account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original destination account IBAN: '%s'\n", $originalIban);
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";
-            $transaction['notes']            = trim($transaction['notes']);
+            $transaction['notes'] = trim($transaction['notes']);
 
             unset($transaction['destination_id'], $transaction['destination_iban'], $transaction['destination_number'], $transaction['destination_name']);
             $transaction['destination_name'] = '(unknown destination account)';
@@ -80,7 +80,7 @@ trait DuplicateSafetyCatch
 
         if ('transfer' === $transaction['type'] && 0 !== $transaction['destination_id'] && $transaction['destination_id'] === $transaction['source_id']) {
             Log::warning('Transaction is a "transfer", but source and destination are the same. Correcting.');
-            $transaction['type']        = 'deposit';
+            $transaction['type'] = 'deposit';
 
             // add error message to transaction:
             $transaction['notes'] ??= '';
@@ -88,7 +88,7 @@ trait DuplicateSafetyCatch
             $transaction['notes'] .= sprintf("- Original source account name: '%s'\n", $originalName);
             $transaction['notes'] .= sprintf("- Original source account IBAN: '%s'\n", $originalIban);
             $transaction['notes'] .= "\nTo learn more, please visit: https://bit.ly/FF3-importer-ignored-values";
-            $transaction['notes']       = trim($transaction['notes']);
+            $transaction['notes'] = trim($transaction['notes']);
 
             unset($transaction['source_id'], $transaction['source_iban'], $transaction['source_number'], $transaction['source_name']);
             $transaction['source_name'] = '(unknown source account)';

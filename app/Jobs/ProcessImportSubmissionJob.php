@@ -46,15 +46,14 @@ final class ProcessImportSubmissionJob implements ShouldQueue
     use SerializesModels;
 
     /**
-     * The number of times the job may be attempted.
-     */
-    public int $tries   = 1;
-    private ImportJobRepository $repository;
-
-    /**
      * The maximum number of seconds the job can run for.
      */
     public int $timeout = 1800;
+    /**
+     * The number of times the job may be attempted.
+     */
+    public int                  $tries = 1;
+    private ImportJobRepository $repository;
 
     /**
      * Create a new job instance.
@@ -62,13 +61,25 @@ final class ProcessImportSubmissionJob implements ShouldQueue
     public function __construct(
         private ImportJob $importJob,
         #[SensitiveParameter]
-        private string $accessToken,
-        private string $baseUrl,
-        private ?string $vanityUrl
-    ) {
+        private string    $accessToken,
+        private string    $baseUrl,
+        private ?string   $vanityUrl
+    )
+    {
         $this->importJob->refreshInstanceIdentifier();
         $this->repository = new ImportJobRepository();
         $this->repository->saveToDisk($this->importJob);
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('ProcessImportSubmissionJob marked as failed', ['identifier' => $this->importJob->identifier, 'exception' => $exception->getMessage()]);
+
+        // Ensure error status is set even if job fails catastrophically
+        $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
     }
 
     /**
@@ -95,7 +106,7 @@ final class ProcessImportSubmissionJob implements ShouldQueue
             $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_RUNNING);
             $this->repository->saveToDisk($this->importJob);
             // Initialize routine manager and execute import
-            $routine         = new RoutineManager($this->importJob);
+            $routine = new RoutineManager($this->importJob);
 
             Log::debug(sprintf('Starting submission routine execution for import job "%s"', $this->importJob->identifier));
 
@@ -125,16 +136,5 @@ final class ProcessImportSubmissionJob implements ShouldQueue
             // Re-throw to mark job as failed
             throw $e;
         }
-    }
-
-    /**
-     * Handle a job failure.
-     */
-    public function failed(Throwable $exception): void
-    {
-        Log::error('ProcessImportSubmissionJob marked as failed', ['identifier' => $this->importJob->identifier, 'exception' => $exception->getMessage()]);
-
-        // Ensure error status is set even if job fails catastrophically
-        $this->importJob->submissionStatus->setStatus(SubmissionStatus::SUBMISSION_ERRORED);
     }
 }

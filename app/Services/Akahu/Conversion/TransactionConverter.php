@@ -39,8 +39,8 @@ final class TransactionConverter
     use CollectsAccounts;
     use DuplicateSafetyCatch;
 
+    private array              $targetAccounts;
     private TransactionFetcher $transactionFetcher;
-    private array $targetAccounts;
 
     // private int $accountDecimalPlaces;
 
@@ -48,7 +48,7 @@ final class TransactionConverter
     {
         $this->transactionFetcher = $transactionFetcher;
 
-        $fireflyAccountId         = $transactionFetcher->getFireflyAccountId();
+        $fireflyAccountId = $transactionFetcher->getFireflyAccountId();
 
         // $this->accountDecimalPlaces = $this->getAccountDecimalPlaces($fireflyAccountId);
     }
@@ -59,8 +59,8 @@ final class TransactionConverter
         $fireflyAccountId     = $this->transactionFetcher->getFireflyAccountId();
         $akahuTransactions    = $this->transactionFetcher->fetch();
 
-        $result               = [];
-        $total                = count($akahuTransactions);
+        $result = [];
+        $total  = count($akahuTransactions);
 
         foreach ($akahuTransactions as $index => $akahuTransaction) {
             Log::debug(sprintf('[%d/%d] Converting transaction', $index + 1, $total));
@@ -69,6 +69,97 @@ final class TransactionConverter
         }
 
         return $result;
+    }
+
+    private function convertTransaction(Transaction $akahuTransaction): array
+    {
+        $configuration = $this->transactionFetcher->getImportJob()->getConfiguration();
+        $noteBuilder   = new AkahuNoteBuilder($akahuTransaction);
+
+        $fireflyRequest = [
+            'apply_rules'             => $configuration->isRules(),
+            'fire_webhooks'           => $configuration->isWebhooks(),
+            'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
+            'transactions'            => [],
+        ];
+
+        $fireflyTransaction = [
+            'date'        => $akahuTransaction->getDate()->toRfc3339String(),
+            'amount'      => (string)$akahuTransaction->getAmount(),
+            'description' => $akahuTransaction->getDescription(),
+            'order'       => 0,
+            'notes'       => $noteBuilder->build(),
+        ];
+
+        $conversion = $akahuTransaction->getMeta()?->getConversion();
+        if (null !== $conversion) {
+            $amount   = $conversion?->getAmount();
+            $currency = $conversion?->getCurrency();
+
+            if (null !== $amount && null !== $currency) {
+                $fireflyTransaction['foreign_amount']        = Steam::bcstringify($amount, 2);
+                $fireflyTransaction['foreign_currency_code'] = $currency;
+            }
+        }
+
+        $akahuId = $akahuTransaction->getAkahuId();
+        if (null !== $akahuId) {
+            $fireflyTransaction['external_id'] = $akahuId;
+        }
+
+        $zero = new Number('0');
+        if ($akahuTransaction->getAmount()->compare($zero) >= 0) {
+            Log::debug('Amount is positive or zero: assume transfer or deposit');
+            $fireflyTransaction = $this->appendDepositInfo($fireflyTransaction, $akahuTransaction);
+        }
+        if ($akahuTransaction->getAmount()->compare($zero) < 0) {
+            Log::debug('Amount is negative: assume transfer or withdrawal');
+            $fireflyTransaction = $this->appendWithdrawalInfo($fireflyTransaction, $akahuTransaction);
+        }
+
+        $fireflyRequest['transactions'][] = $fireflyTransaction;
+
+        return $fireflyRequest;
+    }
+
+    private function appendDepositInfo(array $fireflyTransaction, Transaction $akahuTransaction): array
+    {
+        $fireflyTransaction['type'] = 'deposit';
+        // FIXME: pull dp from api
+        $fireflyTransaction['amount']         = Steam::bcstringify($akahuTransaction->getAmount(), 2);
+        $fireflyTransaction['destination_id'] = $this->transactionFetcher->getFireflyAccountId();
+        $fireflyTransaction['source_name']    = '(unknown source)';
+
+        $sourceBban = $akahuTransaction->getMeta()?->getOtherAccount();
+
+        if (null !== $sourceBban) {
+            $fireflyTransaction['source_name'] = $sourceBban;
+        }
+
+        return $fireflyTransaction;
+    }
+
+    private function appendWithdrawalInfo(array $fireflyTransaction, Transaction $akahuTransaction): array
+    {
+        $fireflyTransaction['type'] = 'withdrawal';
+        $amount                     = $akahuTransaction->getAmount() * new Number('-1');
+        // FIXME: pull dp from api
+        $fireflyTransaction['amount']           = Steam::bcstringify($amount, 2);
+        $fireflyTransaction['source_id']        = $this->transactionFetcher->getFireflyAccountId();
+        $fireflyTransaction['destination_name'] = '(unknown source)';
+
+        $destinationBban         = $akahuTransaction->getMeta()?->getOtherAccount();
+        $destinationMerchantName = $akahuTransaction->getMerchant()?->getName();
+
+        if (null !== $destinationMerchantName) {
+            $fireflyTransaction['destination_name'] = $destinationMerchantName;
+        }
+
+        if (null !== $destinationBban) {
+            $fireflyTransaction['destination_name'] = $destinationBban;
+        }
+
+        return $fireflyTransaction;
     }
 
     public function getAccountDecimalPlaces(int $fireflyAccountId): ?int
@@ -91,96 +182,5 @@ final class TransactionConverter
         }
 
         return $result->getAccount()->currencyDecimalPlaces;
-    }
-
-    private function convertTransaction(Transaction $akahuTransaction): array
-    {
-        $configuration                    = $this->transactionFetcher->getImportJob()->getConfiguration();
-        $noteBuilder                      = new AkahuNoteBuilder($akahuTransaction);
-
-        $fireflyRequest                   = [
-            'apply_rules'             => $configuration->isRules(),
-            'fire_webhooks'           => $configuration->isWebhooks(),
-            'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
-            'transactions'            => [],
-        ];
-
-        $fireflyTransaction               = [
-            'date'        => $akahuTransaction->getDate()->toRfc3339String(),
-            'amount'      => (string) $akahuTransaction->getAmount(),
-            'description' => $akahuTransaction->getDescription(),
-            'order'       => 0,
-            'notes'       => $noteBuilder->build(),
-        ];
-
-        $conversion                       = $akahuTransaction->getMeta()?->getConversion();
-        if (null !== $conversion) {
-            $amount   = $conversion?->getAmount();
-            $currency = $conversion?->getCurrency();
-
-            if (null !== $amount && null !== $currency) {
-                $fireflyTransaction['foreign_amount']        = Steam::bcstringify($amount, 2);
-                $fireflyTransaction['foreign_currency_code'] = $currency;
-            }
-        }
-
-        $akahuId                          = $akahuTransaction->getAkahuId();
-        if (null !== $akahuId) {
-            $fireflyTransaction['external_id'] = $akahuId;
-        }
-
-        $zero                             = new Number('0');
-        if ($akahuTransaction->getAmount()->compare($zero) >= 0) {
-            Log::debug('Amount is positive or zero: assume transfer or deposit');
-            $fireflyTransaction = $this->appendDepositInfo($fireflyTransaction, $akahuTransaction);
-        }
-        if ($akahuTransaction->getAmount()->compare($zero) < 0) {
-            Log::debug('Amount is negative: assume transfer or withdrawal');
-            $fireflyTransaction = $this->appendWithdrawalInfo($fireflyTransaction, $akahuTransaction);
-        }
-
-        $fireflyRequest['transactions'][] = $fireflyTransaction;
-
-        return $fireflyRequest;
-    }
-
-    private function appendDepositInfo(array $fireflyTransaction, Transaction $akahuTransaction): array
-    {
-        $fireflyTransaction['type']           = 'deposit';
-        // FIXME: pull dp from api
-        $fireflyTransaction['amount']         = Steam::bcstringify($akahuTransaction->getAmount(), 2);
-        $fireflyTransaction['destination_id'] = $this->transactionFetcher->getFireflyAccountId();
-        $fireflyTransaction['source_name']    = '(unknown source)';
-
-        $sourceBban                           = $akahuTransaction->getMeta()?->getOtherAccount();
-
-        if (null !== $sourceBban) {
-            $fireflyTransaction['source_name'] = $sourceBban;
-        }
-
-        return $fireflyTransaction;
-    }
-
-    private function appendWithdrawalInfo(array $fireflyTransaction, Transaction $akahuTransaction): array
-    {
-        $fireflyTransaction['type']             = 'withdrawal';
-        $amount                                 = $akahuTransaction->getAmount() * new Number('-1');
-        // FIXME: pull dp from api
-        $fireflyTransaction['amount']           = Steam::bcstringify($amount, 2);
-        $fireflyTransaction['source_id']        = $this->transactionFetcher->getFireflyAccountId();
-        $fireflyTransaction['destination_name'] = '(unknown source)';
-
-        $destinationBban                        = $akahuTransaction->getMeta()?->getOtherAccount();
-        $destinationMerchantName                = $akahuTransaction->getMerchant()?->getName();
-
-        if (null !== $destinationMerchantName) {
-            $fireflyTransaction['destination_name'] = $destinationMerchantName;
-        }
-
-        if (null !== $destinationBban) {
-            $fireflyTransaction['destination_name'] = $destinationBban;
-        }
-
-        return $fireflyTransaction;
     }
 }

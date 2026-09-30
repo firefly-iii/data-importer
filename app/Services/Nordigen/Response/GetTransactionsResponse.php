@@ -36,33 +36,16 @@ use Iterator;
  */
 final class GetTransactionsResponse extends Response implements Iterator, Countable
 {
+    private string              $accountId = '';
     private readonly Collection $collection;
-    private int    $position  = 0;
-    private string $accountId = '';
+    private int                 $position  = 0;
 
     public function __construct(
         private readonly array $data
-    ) {
+    )
+    {
         $this->collection = new Collection();
         Log::debug('Created new GetTransactionsResponse');
-    }
-
-    public function setAccountId(string $accountId): void
-    {
-        $this->accountId = $accountId;
-        Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
-    }
-
-    public function processData(): void
-    {
-        Log::debug('Processing data in GetTransactionsResponse');
-
-        /** @var array $array */
-        foreach ($this->data as $array) {
-            $array['account_id'] = $this->accountId;
-            $this->collection->push(Transaction::fromArray($array));
-        }
-        Log::debug('Done processing data in GetTransactionsResponse');
     }
 
     /**
@@ -139,5 +122,23 @@ final class GetTransactionsResponse extends Response implements Iterator, Counta
     public function valid(): bool
     {
         return $this->collection->has($this->position);
+    }
+
+    public function processData(): void
+    {
+        Log::debug('Processing data in GetTransactionsResponse');
+
+        /** @var array $array */
+        foreach ($this->data as $array) {
+            $array['account_id'] = $this->accountId;
+            $this->collection->push(Transaction::fromArray($array));
+        }
+        Log::debug('Done processing data in GetTransactionsResponse');
+    }
+
+    public function setAccountId(string $accountId): void
+    {
+        $this->accountId = $accountId;
+        Log::debug(sprintf('Set account ID to "%s" in GetTransactionsResponse', $accountId));
     }
 }

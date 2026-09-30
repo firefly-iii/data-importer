@@ -33,14 +33,14 @@ use Psr\Http\Message\ResponseInterface;
  */
 abstract class SimpleFINResponse implements SharedResponseInterface
 {
-    private array $data = [];
-    private readonly int $statusCode;
+    private array           $data = [];
     private readonly string $rawBody;
+    private readonly int    $statusCode;
 
     public function __construct(ResponseInterface $response)
     {
         $this->statusCode = $response->getStatusCode();
-        $this->rawBody    = (string) $response->getBody();
+        $this->rawBody    = (string)$response->getBody();
 
         //        Log::debug(sprintf('SimpleFIN Response: HTTP %d', $this->statusCode));
         //        Log::debug(sprintf('SimpleFIN Response body: %s', $this->rawBody));
@@ -49,34 +49,11 @@ abstract class SimpleFINResponse implements SharedResponseInterface
     }
 
     /**
-     * Check if the response has an error
-     */
-    public function hasError(): bool
-    {
-        return $this->statusCode >= 400;
-    }
-
-    /**
      * Get the HTTP status code
      */
     public function getStatusCode(): int
     {
         return $this->statusCode;
-    }
-
-    public function getRawBody(): string
-    {
-        return $this->rawBody;
-    }
-
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    protected function setData(array $data): void
-    {
-        $this->data = $data;
     }
 
     private function parseResponse(): void
@@ -88,7 +65,7 @@ abstract class SimpleFINResponse implements SharedResponseInterface
             return;
         }
 
-        $decoded    = json_decode($this->rawBody, true);
+        $decoded = json_decode($this->rawBody, true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
             Log::error(sprintf('SimpleFIN JSON decode error: %s', json_last_error_msg()));
@@ -106,5 +83,28 @@ abstract class SimpleFINResponse implements SharedResponseInterface
 
         $this->data = $decoded;
         Log::debug('SimpleFIN Response parsed successfully');
+    }
+
+    /**
+     * Check if the response has an error
+     */
+    public function hasError(): bool
+    {
+        return $this->statusCode >= 400;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    protected function setData(array $data): void
+    {
+        $this->data = $data;
+    }
+
+    public function getRawBody(): string
+    {
+        return $this->rawBody;
     }
 }

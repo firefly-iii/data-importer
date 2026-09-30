@@ -50,6 +50,22 @@ use Ramsey\Uuid\Uuid;
 
 final class ImportJobRepository
 {
+    public static function convertString(string $content): string
+    {
+        $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
+        if (false === $encoding) {
+            Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
+
+            return $content;
+        }
+        if ('ASCII' === $encoding || 'UTF-8' === $encoding) {
+            return $content;
+        }
+        Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
+
+        return mb_convert_encoding($content, 'UTF-8', $encoding);
+    }
+
     public function create(): ImportJob
     {
         $importJob = ImportJob::createNew();
@@ -59,6 +75,37 @@ final class ImportJobRepository
         Log::debug(sprintf('Created new import job with key "%s"', $importJob->identifier));
 
         return $importJob;
+    }
+
+    public function saveToDisk(ImportJob $importJob): void
+    {
+        $disk = $this->getDisk();
+        $path = sprintf('%s.json', $importJob->identifier);
+        if ($disk->exists($path)) {
+            $content = trim((string)$disk->get($path));
+            if ('' !== $content) {
+                $valid = json_validate($content);
+                if ($valid) {
+                    $json               = json_decode($content, true);
+                    $oldInstanceCounter = $json['instance_counter'];
+                    $newInstanceCounter = $importJob->getInstanceCounter();
+                    if ($oldInstanceCounter > $newInstanceCounter) {
+                        throw new ImporterErrorException(sprintf(
+                                                             'Cowardly refuse to overwrite current (#%d) import job file with given (#%d).',
+                                                             $oldInstanceCounter,
+                                                             $newInstanceCounter
+                                                         ));
+                    }
+                }
+            }
+        }
+        Log::debug(sprintf('Saved import job with key "%s" to disk.', $importJob->identifier));
+        $disk->put($path, $importJob->toString());
+    }
+
+    private function getDisk(): Filesystem|LocalFilesystemAdapter
+    {
+        return Storage::disk('import-jobs');
     }
 
     public function deleteImportJob(ImportJob $importJob): void
@@ -77,8 +124,8 @@ final class ImportJobRepository
         if (!Uuid::isValid($identifier)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
-        $disk    = $this->getDisk();
-        $file    = sprintf('%s.json', $identifier);
+        $disk = $this->getDisk();
+        $file = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
@@ -89,32 +136,6 @@ final class ImportJobRepository
         // Log::debug(sprintf('Found import job with identifier "%s"', $identifier));
 
         return ImportJob::createFromJson($content);
-    }
-
-    public function saveToDisk(ImportJob $importJob): void
-    {
-        $disk = $this->getDisk();
-        $path = sprintf('%s.json', $importJob->identifier);
-        if ($disk->exists($path)) {
-            $content = trim((string) $disk->get($path));
-            if ('' !== $content) {
-                $valid = json_validate($content);
-                if ($valid) {
-                    $json               = json_decode($content, true);
-                    $oldInstanceCounter = $json['instance_counter'];
-                    $newInstanceCounter = $importJob->getInstanceCounter();
-                    if ($oldInstanceCounter > $newInstanceCounter) {
-                        throw new ImporterErrorException(sprintf(
-                            'Cowardly refuse to overwrite current (#%d) import job file with given (#%d).',
-                            $oldInstanceCounter,
-                            $newInstanceCounter
-                        ));
-                    }
-                }
-            }
-        }
-        Log::debug(sprintf('Saved import job with key "%s" to disk.', $importJob->identifier));
-        $disk->put($path, $importJob->toString());
     }
 
     public function markAs(ImportJob $importJob, string $state): ImportJob
@@ -144,8 +165,8 @@ final class ImportJobRepository
         // collect Firefly III accounts, if not already in place for this job.
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
 
-        $allAccounts   = $importJob->getApplicationAccounts();
-        $count         = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
+        $allAccounts = $importJob->getApplicationAccounts();
+        $count       = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
         if (0 === $count) {
             Log::debug('No asset accounts or liabilities found, will collect them now.');
             $applicationAccounts = $this->getApplicationAccounts();
@@ -164,9 +185,9 @@ final class ImportJobRepository
         switch ($importJob->getFlow()) {
             case 'file':
                 // do file content sherlock things.
-                $detector      = new FileContentSherlock();
-                $content       = $importJob->getImportableFileString($configuration->isConversion());
-                $fileType      = $detector->detectContentTypeFromContent($content);
+                $detector = new FileContentSherlock();
+                $content  = $importJob->getImportableFileString($configuration->isConversion());
+                $fileType = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
                     $camtType = $detector->getCamtType();
@@ -176,9 +197,9 @@ final class ImportJobRepository
                 break;
 
             case 'lunchflow':
-                $validator     = new LunchFlowNewJobDataCollector();
+                $validator = new LunchFlowNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag    = $validator->collectAccounts();
+                $messageBag = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -186,9 +207,9 @@ final class ImportJobRepository
                 break;
 
             case 'simplefin':
-                $validator     = new SimpleFINNewJobDataCollector();
+                $validator = new SimpleFINNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag    = $validator->collectAccounts();
+                $messageBag = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -197,9 +218,9 @@ final class ImportJobRepository
 
             case 'nordigen':
                 // nordigen, download list of accounts.
-                $validator     = new NordigenNewJobDataCollector();
+                $validator = new NordigenNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag    = $validator->collectAccounts();
+                $messageBag = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -213,7 +234,7 @@ final class ImportJobRepository
                 break;
 
             case 'eb':
-                $validator     = new EnableBankingNewJobDataCollector();
+                $validator = new EnableBankingNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
@@ -222,7 +243,7 @@ final class ImportJobRepository
                 break;
 
             case 'akahu':
-                $validator     = new AkahuNewJobDataCollector();
+                $validator = new AkahuNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
@@ -240,64 +261,11 @@ final class ImportJobRepository
             $importJob->setState('is_parsed');
             $importJob->setInitialized(true);
         }
-        $importJob     = $this->setConfiguration($importJob, $configuration);
+        $importJob = $this->setConfiguration($importJob, $configuration);
         $this->saveToDisk($importJob);
 
         // if parse errors, display to user with a redirect to upload?
         return $messageBag;
-    }
-
-    public static function convertString(string $content): string
-    {
-        $encoding = mb_detect_encoding($content, config('importer.encoding'), true);
-        if (false === $encoding) {
-            Log::warning('Tried to detect encoding but could not find valid encoding. Assume UTF-8.');
-
-            return $content;
-        }
-        if ('ASCII' === $encoding || 'UTF-8' === $encoding) {
-            return $content;
-        }
-        Log::warning(sprintf('Content is detected as "%s" and will be converted to UTF-8. Your milage may vary.', $encoding));
-
-        return mb_convert_encoding($content, 'UTF-8', $encoding);
-    }
-
-    public function setConfigurationString(ImportJob $importJob, string $configFileContent): ImportJob
-    {
-        $importJob->setConfigurationString($configFileContent);
-        $this->saveToDisk($importJob);
-
-        return $importJob;
-    }
-
-    public function setFlow(ImportJob $importJob, string $flow): ImportJob
-    {
-        $importJob->setFlow($flow);
-        $this->saveToDisk($importJob);
-
-        return $importJob;
-    }
-
-    public function setImportableFileString(ImportJob $importJob, string $importableFileContent): ImportJob
-    {
-        $importJob->setImportableFileString($importableFileContent);
-        $this->saveToDisk($importJob);
-
-        return $importJob;
-    }
-
-    private function getDisk(): Filesystem|LocalFilesystemAdapter
-    {
-        return Storage::disk('import-jobs');
-    }
-
-    private function setConfiguration(ImportJob $importJob, Configuration $configuration): ImportJob
-    {
-        $importJob->setConfiguration($configuration);
-        $this->saveToDisk($importJob);
-
-        return $importJob;
     }
 
     /**
@@ -310,8 +278,8 @@ final class ImportJobRepository
         $url      = null;
 
         try {
-            $url           = SecretManager::getBaseUrl();
-            $token         = SecretManager::getAccessToken();
+            $url   = SecretManager::getBaseUrl();
+            $token = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
                 Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
@@ -321,7 +289,7 @@ final class ImportJobRepository
 
             // Fetch ASSET accounts
             Log::debug('Fetching asset accounts from Firefly III.', ['url' => $url]);
-            $requestAsset  = new GetAccountsRequest($url, $token);
+            $requestAsset = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
@@ -346,7 +314,7 @@ final class ImportJobRepository
 
         try {
             Log::debug('Fetching liability accounts from Firefly III.', ['url' => $url]);
-            $requestLiability  = new GetAccountsRequest($url, $token);
+            $requestLiability = new GetAccountsRequest($url, $token);
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);
@@ -384,5 +352,37 @@ final class ImportJobRepository
 
             return [];
         }
+    }
+
+    private function setConfiguration(ImportJob $importJob, Configuration $configuration): ImportJob
+    {
+        $importJob->setConfiguration($configuration);
+        $this->saveToDisk($importJob);
+
+        return $importJob;
+    }
+
+    public function setConfigurationString(ImportJob $importJob, string $configFileContent): ImportJob
+    {
+        $importJob->setConfigurationString($configFileContent);
+        $this->saveToDisk($importJob);
+
+        return $importJob;
+    }
+
+    public function setFlow(ImportJob $importJob, string $flow): ImportJob
+    {
+        $importJob->setFlow($flow);
+        $this->saveToDisk($importJob);
+
+        return $importJob;
+    }
+
+    public function setImportableFileString(ImportJob $importJob, string $importableFileContent): ImportJob
+    {
+        $importJob->setImportableFileString($importableFileContent);
+        $this->saveToDisk($importJob);
+
+        return $importJob;
     }
 }

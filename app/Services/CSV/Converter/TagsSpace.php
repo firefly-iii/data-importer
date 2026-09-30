@@ -35,7 +35,7 @@ final class TagsSpace implements ConverterInterface
     public function convert(mixed $value): array
     {
         $string = app('steam')->cleanStringAndNewlines($value);
-        $tags   = explode(' ', (string) $string);
+        $tags   = explode(' ', (string)$string);
 
         return array_map(trim(...), $tags);
     }
@@ -43,5 +43,7 @@ final class TagsSpace implements ConverterInterface
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void {}
+    public function setConfiguration(string $configuration): void
+    {
+    }
 }

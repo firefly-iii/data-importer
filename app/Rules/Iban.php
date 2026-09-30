@@ -33,21 +33,21 @@ use Illuminate\Contracts\Validation\ValidationRule;
 final class Iban implements ValidationRule
 {
     /**
+     * Determine if the given value is a valid IBAN.
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        $result = IbanConverter::isValidIban((string)$value);
+        if (!$result) {
+            $fail($this->message());
+        }
+    }
+
+    /**
      * Get the validation error message.
      */
     public function message(): string
     {
         return 'The :attribute is not a valid IBAN.';
-    }
-
-    /**
-     * Determine if the given value is a valid IBAN.
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        $result = IbanConverter::isValidIban((string) $value);
-        if (!$result) {
-            $fail($this->message());
-        }
     }
 }

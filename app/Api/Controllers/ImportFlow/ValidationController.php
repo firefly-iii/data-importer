@@ -68,23 +68,6 @@ final class ValidationController extends Controller
         return response()->json(['result' => 'OK']);
     }
 
-    public function validateLunchFlow(): JsonResponse
-    {
-        $validator = new LunchFlowValidator();
-        $result    = $validator->validate();
-
-        if (AuthenticationStatus::ERROR === $result) {
-            // send user error:
-            return response()->json(['result' => 'NOK']);
-        }
-        if (AuthenticationStatus::NODATA === $result) {
-            // send user error:
-            return response()->json(['result' => 'NODATA']);
-        }
-
-        return response()->json(['result' => 'OK']);
-    }
-
     public function validateSimpleFIN(): JsonResponse
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
@@ -104,6 +87,23 @@ final class ValidationController extends Controller
             return response()->json(['result' => 'NODATA']);
         }
         Log::info(sprintf('[%s] All OK in validateSimpleFIN.', config('importer.version')));
+
+        return response()->json(['result' => 'OK']);
+    }
+
+    public function validateLunchFlow(): JsonResponse
+    {
+        $validator = new LunchFlowValidator();
+        $result    = $validator->validate();
+
+        if (AuthenticationStatus::ERROR === $result) {
+            // send user error:
+            return response()->json(['result' => 'NOK']);
+        }
+        if (AuthenticationStatus::NODATA === $result) {
+            // send user error:
+            return response()->json(['result' => 'NODATA']);
+        }
 
         return response()->json(['result' => 'OK']);
     }

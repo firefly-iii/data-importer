@@ -55,7 +55,7 @@ final class BankDebitCredit implements ConverterInterface
         ];
 
         // Lowercase the value and trim it for comparison.
-        if (in_array(strtolower(trim((string) $value)), $negative, true)) {
+        if (in_array(strtolower(trim((string)$value)), $negative, true)) {
             return -1;
         }
 
@@ -65,5 +65,7 @@ final class BankDebitCredit implements ConverterInterface
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void {}
+    public function setConfiguration(string $configuration): void
+    {
+    }
 }

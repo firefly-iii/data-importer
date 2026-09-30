@@ -31,22 +31,24 @@ use Illuminate\Support\Facades\Log;
  */
 final class Account
 {
-    private string $uid                 = '';
-    private string $iban                = '';
-    private string $bban                = '';
-    private string $otherIdentification = '';
-    private string $otherScheme         = '';
-    private string $currency            = '';
-    private string $ownerName           = '';
-    private string $displayName         = '';
-    private string $product             = '';
-    private string $accountType         = ''; // API: cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
-    private string $usage               = '';
-    private string $details             = '';
+private string $accountType         = '';
     private array  $balances            = [];
+    private string $bban                = '';
+    private string $currency            = '';
+    private string $details             = '';
+    private string $displayName         = '';
+    private string $iban                = '';
     private string $identificationHash  = '';
+    private string $otherIdentification = '';
+        private string $otherScheme         = ''; // API: cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
+    private string $ownerName           = '';
+    private string $product             = '';
+    private string $uid                 = '';
+    private string $usage               = '';
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public static function fromArray(array $array): self
     {
@@ -57,8 +59,8 @@ final class Account
 
         // Handle account_id structure per API spec
         // account_id can have: iban, other (with identification and scheme_name)
-        $accountId                   = $array['account_id'] ?? [];
-        $account->iban               = $accountId['iban'] ?? $array['iban'] ?? '';
+        $accountId     = $array['account_id'] ?? [];
+        $account->iban = $accountId['iban'] ?? $array['iban'] ?? '';
 
         // Handle non-IBAN identification via "other" field
         if (array_key_exists('other', $accountId) && null !== $accountId['other']) {
@@ -67,7 +69,7 @@ final class Account
         }
 
         // Parse all_account_ids array for BBAN and other identifications
-        $allAccountIds               = $array['all_account_ids'] ?? [];
+        $allAccountIds = $array['all_account_ids'] ?? [];
         foreach ($allAccountIds as $accountIdEntry) {
             $schemeName     = $accountIdEntry['scheme_name'] ?? '';
             $identification = $accountIdEntry['identification'] ?? '';
@@ -80,14 +82,14 @@ final class Account
             }
         }
 
-        $account->currency           = $array['currency'] ?? '';
-        $account->ownerName          = $array['owner_name'] ?? $array['account_holder_name'] ?? '';
-        $account->displayName        = $array['display_name'] ?? $array['name'] ?? '';
-        $account->product            = $array['product'] ?? '';
+        $account->currency    = $array['currency'] ?? '';
+        $account->ownerName   = $array['owner_name'] ?? $array['account_holder_name'] ?? '';
+        $account->displayName = $array['display_name'] ?? $array['name'] ?? '';
+        $account->product     = $array['product'] ?? '';
         // API uses cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
-        $account->accountType        = $array['cash_account_type'] ?? $array['account_type'] ?? '';
-        $account->usage              = $array['usage'] ?? '';
-        $account->details            = $array['details'] ?? '';
+        $account->accountType = $array['cash_account_type'] ?? $array['account_type'] ?? '';
+        $account->usage       = $array['usage'] ?? '';
+        $account->details     = $array['details'] ?? '';
 
         if ('' === $account->identificationHash) {
             Log::warning('Identification hash is empty, generate one.');
@@ -101,6 +103,32 @@ final class Account
         }
 
         return $account;
+    }
+
+    public function toArray(): array
+    {
+        return $this->toLocalArray();
+    }
+
+    public function toLocalArray(): array
+    {
+        return [
+            'class'                => self::class,
+            'identification_hash'  => $this->identificationHash,
+            'uid'                  => $this->uid,
+            'iban'                 => $this->iban,
+            'bban'                 => $this->bban,
+            'other_identification' => $this->otherIdentification,
+            'other_scheme'         => $this->otherScheme,
+            'currency'             => $this->currency,
+            'owner_name'           => $this->ownerName,
+            'display_name'         => $this->displayName,
+            'product'              => $this->product,
+            'account_type'         => $this->accountType,
+            'usage'                => $this->usage,
+            'details'              => $this->details,
+            'balances'             => $this->balances,
+        ];
     }
 
     public static function fromLocalArray(array $array): self
@@ -124,29 +152,24 @@ final class Account
         return $account;
     }
 
-    public function getUid(): string
+    public function getAccountType(): string
     {
-        return $this->uid;
+        return $this->accountType;
     }
 
-    public function getIdentificationHash(): string
+    public function setAccountType(string $accountType): void
     {
-        return $this->identificationHash;
+        $this->accountType = $accountType;
     }
 
-    public function setUid(string $uid): void
+    public function getBalances(): array
     {
-        $this->uid = $uid;
+        return $this->balances;
     }
 
-    public function getIban(): string
+    public function setBalances(array $balances): void
     {
-        return $this->iban;
-    }
-
-    public function setIban(string $iban): void
-    {
-        $this->iban = $iban;
+        $this->balances = $balances;
     }
 
     public function getBban(): string
@@ -169,14 +192,14 @@ final class Account
         $this->currency = $currency;
     }
 
-    public function getOwnerName(): string
+    public function getDetails(): string
     {
-        return $this->ownerName;
+        return $this->details;
     }
 
-    public function setOwnerName(string $ownerName): void
+    public function setDetails(string $details): void
     {
-        $this->ownerName = $ownerName;
+        $this->details = $details;
     }
 
     public function getDisplayName(): string
@@ -187,76 +210,6 @@ final class Account
     public function setDisplayName(string $displayName): void
     {
         $this->displayName = $displayName;
-    }
-
-    public function getProduct(): string
-    {
-        return $this->product;
-    }
-
-    public function setProduct(string $product): void
-    {
-        $this->product = $product;
-    }
-
-    public function getAccountType(): string
-    {
-        return $this->accountType;
-    }
-
-    public function setAccountType(string $accountType): void
-    {
-        $this->accountType = $accountType;
-    }
-
-    public function getBalances(): array
-    {
-        return $this->balances;
-    }
-
-    public function setBalances(array $balances): void
-    {
-        $this->balances = $balances;
-    }
-
-    public function getOtherIdentification(): string
-    {
-        return $this->otherIdentification;
-    }
-
-    public function setOtherIdentification(string $otherIdentification): void
-    {
-        $this->otherIdentification = $otherIdentification;
-    }
-
-    public function getOtherScheme(): string
-    {
-        return $this->otherScheme;
-    }
-
-    public function setOtherScheme(string $otherScheme): void
-    {
-        $this->otherScheme = $otherScheme;
-    }
-
-    public function getUsage(): string
-    {
-        return $this->usage;
-    }
-
-    public function setUsage(string $usage): void
-    {
-        $this->usage = $usage;
-    }
-
-    public function getDetails(): string
-    {
-        return $this->details;
-    }
-
-    public function setDetails(string $details): void
-    {
-        $this->details = $details;
     }
 
     public function getFullName(): string
@@ -281,34 +234,83 @@ final class Account
         return '(no name)';
     }
 
+    public function getIban(): string
+    {
+        return $this->iban;
+    }
+
+    public function setIban(string $iban): void
+    {
+        $this->iban = $iban;
+    }
+
+    public function getIdentificationHash(): string
+    {
+        return $this->identificationHash;
+    }
+
     public function getIdentifier(): string
     {
         return $this->uid;
     }
 
-    public function toLocalArray(): array
+    public function getOtherIdentification(): string
     {
-        return [
-            'class'                => self::class,
-            'identification_hash'  => $this->identificationHash,
-            'uid'                  => $this->uid,
-            'iban'                 => $this->iban,
-            'bban'                 => $this->bban,
-            'other_identification' => $this->otherIdentification,
-            'other_scheme'         => $this->otherScheme,
-            'currency'             => $this->currency,
-            'owner_name'           => $this->ownerName,
-            'display_name'         => $this->displayName,
-            'product'              => $this->product,
-            'account_type'         => $this->accountType,
-            'usage'                => $this->usage,
-            'details'              => $this->details,
-            'balances'             => $this->balances,
-        ];
+        return $this->otherIdentification;
     }
 
-    public function toArray(): array
+    public function setOtherIdentification(string $otherIdentification): void
     {
-        return $this->toLocalArray();
+        $this->otherIdentification = $otherIdentification;
+    }
+
+    public function getOtherScheme(): string
+    {
+        return $this->otherScheme;
+    }
+
+    public function setOtherScheme(string $otherScheme): void
+    {
+        $this->otherScheme = $otherScheme;
+    }
+
+    public function getOwnerName(): string
+    {
+        return $this->ownerName;
+    }
+
+    public function setOwnerName(string $ownerName): void
+    {
+        $this->ownerName = $ownerName;
+    }
+
+    public function getProduct(): string
+    {
+        return $this->product;
+    }
+
+    public function setProduct(string $product): void
+    {
+        $this->product = $product;
+    }
+
+    public function getUid(): string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(string $uid): void
+    {
+        $this->uid = $uid;
+    }
+
+    public function getUsage(): string
+    {
+        return $this->usage;
+    }
+
+    public function setUsage(string $usage): void
+    {
+        $this->usage = $usage;
     }
 }

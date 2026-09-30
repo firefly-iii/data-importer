@@ -47,6 +47,6 @@ Route::group(
         Route::get('firefly-iii/validate', 'Connection\IndexController@validateConnection')->name('firefly-iii.validate');
 
         // import jobs
-        Route::get('import-jobs', 'ImportJob\IndexController@index')->name('import-jobs.index');
+        // Route::get('import-jobs', 'ImportJob\IndexController@index')->name('import-jobs.index');
     }
 );

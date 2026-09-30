@@ -38,27 +38,6 @@ final class JWTManager
     private const int TOKEN_EXPIRY_SECONDS = 3600; // 1 hour
 
     /**
-     * Generate a JWT token for Enable Banking API authentication
-     */
-    public static function generateToken(): string
-    {
-        Log::debug('Generating Enable Banking JWT token');
-
-        $appId      = SecretManager::getAppId();
-        $privateKey = SecretManager::getPrivateKey();
-
-        $now        = time();
-        $payload    = ['iss' => 'enablebanking.com', 'aud' => 'api.enablebanking.com', 'iat' => $now, 'exp' => $now + self::TOKEN_EXPIRY_SECONDS];
-
-        // The 4th parameter is the key ID (kid) which must be included in the JWT header
-        // Enable Banking requires kid to be the Application ID
-        $token      = JWT::encode($payload, $privateKey, 'RS256', $appId);
-        Log::debug('Enable Banking JWT token generated successfully');
-
-        return $token;
-    }
-
-    /**
      * Check if we have valid credentials to generate a token
      */
     public static function hasValidCredentials(): bool
@@ -73,5 +52,26 @@ final class JWTManager
         }
 
         return SecretManager::hasAppIdAvailable() && SecretManager::hasPrivateKeyAvailable() && $res;
+    }
+
+    /**
+     * Generate a JWT token for Enable Banking API authentication
+     */
+    public static function generateToken(): string
+    {
+        Log::debug('Generating Enable Banking JWT token');
+
+        $appId      = SecretManager::getAppId();
+        $privateKey = SecretManager::getPrivateKey();
+
+        $now     = time();
+        $payload = ['iss' => 'enablebanking.com', 'aud' => 'api.enablebanking.com', 'iat' => $now, 'exp' => $now + self::TOKEN_EXPIRY_SECONDS];
+
+        // The 4th parameter is the key ID (kid) which must be included in the JWT header
+        // Enable Banking requires kid to be the Application ID
+        $token = JWT::encode($payload, $privateKey, 'RS256', $appId);
+        Log::debug('Enable Banking JWT token generated successfully');
+
+        return $token;
     }
 }

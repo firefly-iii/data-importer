@@ -31,9 +31,9 @@ use App\Models\ImportJob;
  */
 interface RoutineManagerInterface
 {
-    public function getServiceAccounts(): array;
-
     public function getImportJob(): ImportJob;
+
+    public function getServiceAccounts(): array;
 
     public function start(): array;
 }

@@ -39,9 +39,9 @@ trait CollectsAccounts
      */
     protected function getLunchFlowAccounts(Configuration $configuration): array
     {
-        $return            = [];
-        $apiKey            = LunchFlowSecretManager::getApiKey($configuration);
-        $lunchFlowList     = new LunchFlowGetAccountsRequest($apiKey);
+        $return        = [];
+        $apiKey        = LunchFlowSecretManager::getApiKey($configuration);
+        $lunchFlowList = new LunchFlowGetAccountsRequest($apiKey);
         $lunchFlowList->setTimeOut(config('importer.connection.timeout'));
 
         /** @var GetAccountsResponse $lunchFlowAccounts */

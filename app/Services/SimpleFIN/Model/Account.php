@@ -32,15 +32,15 @@ use InvalidArgumentException;
  */
 final class Account
 {
-    public array $org;
-    public string $id;
-    public string $name;
-    public string $currency;
-    public string $balance;
     public ?string $availableBalance;
-    public int $balanceDate;
-    public array $transactions;
-    public array $extra;
+    public string  $balance;
+    public int     $balanceDate;
+    public string  $currency;
+    public array   $extra;
+    public string  $id;
+    public string  $name;
+    public array   $org;
+    public array   $transactions;
 
     public function __construct(array $data)
     {
@@ -55,127 +55,6 @@ final class Account
         $this->balanceDate      = $data['balance-date'];
         $this->transactions     = $data['transactions'] ?? [];
         $this->extra            = $data['extra'] ?? [];
-    }
-
-    public static function fromArray(array $data): self
-    {
-        return new self($data);
-    }
-
-    public function getOrganization(): array
-    {
-        return $this->org;
-    }
-
-    public function getOrganizationDomain(): ?string
-    {
-        return $this->org['domain'] ?? null;
-    }
-
-    public function getOrganizationName(): ?string
-    {
-        return $this->org['name'] ?? null;
-    }
-
-    public function getOrganizationSfinUrl(): string
-    {
-        return $this->org['sfin-url'];
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getCurrency(): string
-    {
-        return $this->currency;
-    }
-
-    public function isCustomCurrency(): bool
-    {
-        return str_starts_with($this->currency, 'http://') || str_starts_with($this->currency, 'https://');
-    }
-
-    public function getBalance(): string
-    {
-        return $this->balance;
-    }
-
-    public function getBalanceAsFloat(): float
-    {
-        return (float) $this->balance;
-    }
-
-    public function getAvailableBalance(): ?string
-    {
-        return $this->availableBalance;
-    }
-
-    public function getAvailableBalanceAsFloat(): ?float
-    {
-        return null !== $this->availableBalance ? (float) $this->availableBalance : null;
-    }
-
-    public function getBalanceDate(): int
-    {
-        return $this->balanceDate;
-    }
-
-    public function getBalanceDateAsCarbon(): Carbon
-    {
-        return Carbon::createFromTimestamp($this->balanceDate);
-    }
-
-    public function getTransactions(): array
-    {
-        return $this->transactions;
-    }
-
-    public function getTransactionCount(): int
-    {
-        return count($this->transactions);
-    }
-
-    public function hasTransactions(): bool
-    {
-        return count($this->transactions) > 0;
-    }
-
-    public function getExtra(): array
-    {
-        return $this->extra;
-    }
-
-    public function getExtraValue(string $key): mixed
-    {
-        return $this->extra[$key] ?? null;
-    }
-
-    public function hasExtra(string $key): bool
-    {
-        return array_key_exists($key, $this->extra);
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'class'             => self::class,
-            'org'               => $this->org,
-            'id'                => $this->id,
-            'name'              => $this->name,
-            'currency'          => $this->currency,
-            'balance'           => $this->balance,
-            'available-balance' => $this->availableBalance,
-            'balance-date'      => $this->balanceDate,
-            'transactions'      => $this->transactions,
-            'extra'             => $this->extra,
-        ];
     }
 
     private function validateRequiredFields(array $data): void
@@ -210,5 +89,126 @@ final class Account
         if (!is_numeric($data['balance-date'])) {
             throw new InvalidArgumentException('Balance date must be a numeric timestamp');
         }
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self($data);
+    }
+
+    public function getAvailableBalance(): ?string
+    {
+        return $this->availableBalance;
+    }
+
+    public function getAvailableBalanceAsFloat(): ?float
+    {
+        return null !== $this->availableBalance ? (float)$this->availableBalance : null;
+    }
+
+    public function getBalance(): string
+    {
+        return $this->balance;
+    }
+
+    public function getBalanceAsFloat(): float
+    {
+        return (float)$this->balance;
+    }
+
+    public function getBalanceDate(): int
+    {
+        return $this->balanceDate;
+    }
+
+    public function getBalanceDateAsCarbon(): Carbon
+    {
+        return Carbon::createFromTimestamp($this->balanceDate);
+    }
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    public function getExtra(): array
+    {
+        return $this->extra;
+    }
+
+    public function getExtraValue(string $key): mixed
+    {
+        return $this->extra[$key] ?? null;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getOrganization(): array
+    {
+        return $this->org;
+    }
+
+    public function getOrganizationDomain(): ?string
+    {
+        return $this->org['domain'] ?? null;
+    }
+
+    public function getOrganizationName(): ?string
+    {
+        return $this->org['name'] ?? null;
+    }
+
+    public function getOrganizationSfinUrl(): string
+    {
+        return $this->org['sfin-url'];
+    }
+
+    public function getTransactionCount(): int
+    {
+        return count($this->transactions);
+    }
+
+    public function getTransactions(): array
+    {
+        return $this->transactions;
+    }
+
+    public function hasExtra(string $key): bool
+    {
+        return array_key_exists($key, $this->extra);
+    }
+
+    public function hasTransactions(): bool
+    {
+        return count($this->transactions) > 0;
+    }
+
+    public function isCustomCurrency(): bool
+    {
+        return str_starts_with($this->currency, 'http://') || str_starts_with($this->currency, 'https://');
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'class'             => self::class,
+            'org'               => $this->org,
+            'id'                => $this->id,
+            'name'              => $this->name,
+            'currency'          => $this->currency,
+            'balance'           => $this->balance,
+            'available-balance' => $this->availableBalance,
+            'balance-date'      => $this->balanceDate,
+            'transactions'      => $this->transactions,
+            'extra'             => $this->extra,
+        ];
     }
 }

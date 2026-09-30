@@ -29,6 +29,14 @@ use SensitiveParameter;
 
 final class RequestCache
 {
+    public static function get(string $identifier, #[SensitiveParameter] string $token): mixed
+    {
+        Log::debug('get!');
+        $key = self::generateKey($identifier, $token);
+
+        return cache()->get($key);
+    }
+
     public static function hasKeyInCache(string $identifier, #[SensitiveParameter] string $token): bool
     {
         Log::debug('has key in cache?');
@@ -39,12 +47,12 @@ final class RequestCache
         return $result;
     }
 
-    public static function get(string $identifier, #[SensitiveParameter] string $token): mixed
+    private static function generateKey(string $identifier, #[SensitiveParameter] string $token): string
     {
-        Log::debug('get!');
-        $key = self::generateKey($identifier, $token);
+        $hash = hash('sha256', sprintf('%s-%s', $identifier, $token));
+        Log::debug(sprintf('generateKey("%s", "%s...") results in "%s..."', $identifier, substr($token, 0, 10), substr($hash, 0, 10)));
 
-        return cache()->get($key);
+        return $hash;
     }
 
     public static function set(string $identifier, #[SensitiveParameter] string $token, mixed $data): void
@@ -52,13 +60,5 @@ final class RequestCache
         Log::debug('set key forever!');
         $key = self::generateKey($identifier, $token);
         cache()->forever($key, $data);
-    }
-
-    private static function generateKey(string $identifier, #[SensitiveParameter] string $token): string
-    {
-        $hash = hash('sha256', sprintf('%s-%s', $identifier, $token));
-        Log::debug(sprintf('generateKey("%s", "%s...") results in "%s..."', $identifier, substr($token, 0, 10), substr($hash, 0, 10)));
-
-        return $hash;
     }
 }

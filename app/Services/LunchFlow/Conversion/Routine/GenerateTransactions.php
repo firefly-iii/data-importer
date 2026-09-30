@@ -43,17 +43,16 @@ final class GenerateTransactions
 
     public const string NUMBER_FORMAT = 'nr_%s';
 
-    private array $accounts;
-    private array $nordigenAccountInfo;
-    private array $targetAccounts;
-    private array $expenseAccounts;
-    private array $revenueAccounts;
-    private array $targetTypes;
-    private array $expenseAccountNames;
-    private array $revenueAccountNames;
+    private array     $accounts;
+    private array     $expenseAccountNames;
+    private array     $expenseAccounts;
     private ImportJob $importJob;
-
-    private array $userAccounts; // contains ALL information on Firefly III asset accounts and liabilities.
+    private array     $nordigenAccountInfo;
+    private array     $revenueAccountNames;
+    private array     $revenueAccounts;
+    private array     $targetAccounts;
+    private array     $targetTypes;
+private array $userAccounts; // contains ALL information on Firefly III asset accounts and liabilities.
 
     /**
      * GenerateTransactions constructor.
@@ -106,13 +105,18 @@ final class GenerateTransactions
         Log::debug(sprintf('Lunch Flow: Collected %d revenue accounts.', count($this->revenueAccounts)));
     }
 
+    public function getTargetAccounts(): array
+    {
+        return $this->targetAccounts;
+    }
+
     public function getTransactions(array $transactions): array
     {
         Log::debug('Now generate transactions.');
         $return = [];
 
         /**
-         * @var int   $accountId
+         * @var int $accountId
          * @var array $entries
          */
         foreach ($transactions as $accountId => $entries) {
@@ -120,7 +124,7 @@ final class GenerateTransactions
             Log::debug(sprintf('Going to parse account %s with %d transaction(s).', $accountId, $total));
 
             /**
-             * @var int         $index
+             * @var int $index
              * @var Transaction $entry
              */
             foreach ($entries as $index => $entry) {
@@ -142,16 +146,16 @@ final class GenerateTransactions
      */
     private function generateTransaction(int $accountId, Transaction $entry): array
     {
-        $configuration            = $this->importJob->getConfiguration();
+        $configuration = $this->importJob->getConfiguration();
         Log::debug(sprintf('Lunch Flow transaction: "%s" with amount %s %s', $entry->getDescription(), $entry->currency, $entry->amount));
 
-        $return                   = [
+        $return      = [
             'apply_rules'             => $configuration->isRules(),
             'fire_webhooks'           => $configuration->isWebhooks(),
             'error_if_duplicate_hash' => $configuration->isIgnoreDuplicateTransactions(),
             'transactions'            => [],
         ];
-        $transaction              = [
+        $transaction = [
             'type'          => 'withdrawal',
             'date'          => $entry->getDate()->toW3cString(),
             'datetime'      => $entry->getDate()->toW3cString(),
@@ -189,26 +193,26 @@ final class GenerateTransactions
     private function appendPositiveAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
         // amount is positive: deposit or transfer. Lunch Flow account could be the destination
-        $transaction['type']           = 'deposit';
-        $transaction['amount']         = $entry->amount;
+        $transaction['type']   = 'deposit';
+        $transaction['amount'] = $entry->amount;
 
         // destination is a Lunch Flow account (has to be!)
-        $transaction['destination_id'] = (int) $this->accounts[$accountId];
+        $transaction['destination_id'] = (int)$this->accounts[$accountId];
         Log::debug(sprintf('Destination ID is now #%d, which could be a Firefly III asset account.', $transaction['destination_id']));
 
         // before we begin, log the source and dest info
         Log::debug(sprintf(
-            'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
-            $transaction['source_name'] ?? '',
-            $transaction['source_iban'] ?? '',
-            $transaction['source_id'] ?? ''
-        ));
+                       'At start. Source_name = "%s", source_iban = "%s", source_id = "%s"',
+                       $transaction['source_name'] ?? '',
+                       $transaction['source_iban'] ?? '',
+                       $transaction['source_id'] ?? ''
+                   ));
 
         // append source name, iban and number (if present)
-        $transaction                   = $this->appendAccountFields($transaction, $entry, 'source');
+        $transaction = $this->appendAccountFields($transaction, $entry, 'source');
 
         // FIXME clean up mapping
-        $mappedId                      = null;
+        $mappedId = null;
 
         if (array_key_exists('source_name', $transaction) && null !== $transaction['source_name']) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['source_name']));
@@ -240,15 +244,15 @@ final class GenerateTransactions
             //            }
         }
 
-        $transaction                   = $this->positiveTransactionSafetyCatch($transaction, '', '');
+        $transaction = $this->positiveTransactionSafetyCatch($transaction, '', '');
 
         Log::debug(sprintf(
-            'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
-            $transaction['destination_id'] ?? '',
-            $transaction['source_name'] ?? '',
-            $transaction['source_iban'] ?? '',
-            $transaction['source_id'] ?? ''
-        ));
+                       'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
+                       $transaction['destination_id'] ?? '',
+                       $transaction['source_name'] ?? '',
+                       $transaction['source_iban'] ?? '',
+                       $transaction['source_id'] ?? ''
+                   ));
 
         return $transaction;
     }
@@ -293,7 +297,7 @@ final class GenerateTransactions
         }
 
         // The data importer determines the account type based on the IBAN.
-        $accountType = (string) ($this->targetTypes[$iban] ?? 'unknown');
+        $accountType = (string)($this->targetTypes[$iban] ?? 'unknown');
 
         // If the IBAN is a known target account, but it's not a liability OR revenue OR expense, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
@@ -326,7 +330,7 @@ final class GenerateTransactions
 
         // If the account number is a known target account, but it's not a liability, the data importer knows for sure this is a transfer.
         // it will save the ID and nothing else.
-        $accountType = (string) ($this->targetTypes[$number] ?? 'unknown');
+        $accountType = (string)($this->targetTypes[$number] ?? 'unknown');
         if ($this->isAssetAccount($accountType, $number)) {
             Log::debug(sprintf('Recognized "%s" (number) as a Firefly III asset account so this is a transfer.', $number));
             $transaction[$idKey] = $this->targetAccounts[$number];
@@ -346,17 +350,6 @@ final class GenerateTransactions
         Log::debug(sprintf('End of %s', __METHOD__));
 
         return $transaction;
-    }
-
-    private function getMappedAccountId(string $name): ?int
-    {
-        $configuration = $this->importJob->getConfiguration();
-        $mapping       = $configuration->getMapping();
-        if (array_key_exists('accounts', $mapping) && array_key_exists($name, $mapping['accounts']) && null !== $mapping['accounts'][$name]) {
-            return (int) $configuration->getMapping()['accounts'][$name];
-        }
-
-        return null;
     }
 
     //    /**
@@ -435,6 +428,47 @@ final class GenerateTransactions
     //        }
     //    }
 
+    private function isAssetAccount(string $accountType, string $iban): bool
+    {
+        return 'asset' === $accountType && '' !== $iban && array_key_exists($iban, $this->targetAccounts);
+    }
+
+    private function isExpenseOrRevenue(string $accountType, string $iban): bool
+    {
+        return
+            ('revenue' === $accountType || 'expense' === $accountType)
+            && '' !== $iban
+            && (array_key_exists($iban, $this->expenseAccounts) || array_key_exists($iban, $this->revenueAccounts));
+    }
+
+    private function getRevenueOrExpenseName(string $iban, string $accountType): string
+    {
+        if ('revenue' === $accountType) {
+            return $this->revenueAccountNames[$iban];
+        }
+        if ('expense' === $accountType) {
+            return $this->expenseAccountNames[$iban];
+        }
+
+        return sprintf('(unknown %s account)', $accountType);
+    }
+
+    private function ibanIsEmpty(string $iban): bool
+    {
+        return '' === $iban;
+    }
+
+    private function getMappedAccountId(string $name): ?int
+    {
+        $configuration = $this->importJob->getConfiguration();
+        $mapping       = $configuration->getMapping();
+        if (array_key_exists('accounts', $mapping) && array_key_exists($name, $mapping['accounts']) && null !== $mapping['accounts'][$name]) {
+            return (int)$configuration->getMapping()['accounts'][$name];
+        }
+
+        return null;
+    }
+
     /**
      * Handle transaction information when the amount is negative, and this is probably a withdrawal or a transfer.
      *
@@ -443,12 +477,12 @@ final class GenerateTransactions
     private function appendNegativeAmountInfo(int $accountId, array $transaction, Transaction $entry): array
     {
         $transaction['amount']    = bcmul($entry->amount, '-1');
-        $transaction['source_id'] = (int) $this->accounts[$accountId]; // FIXME entry may not exist, then what?
+        $transaction['source_id'] = (int)$this->accounts[$accountId]; // FIXME entry may not exist, then what?
 
         // append source iban and number (if present)
-        $transaction              = $this->appendAccountFields($transaction, $entry, 'destination');
+        $transaction = $this->appendAccountFields($transaction, $entry, 'destination');
 
-        $mappedId                 = null;
+        $mappedId = null;
         if (array_key_exists('destination_name', $transaction) && null !== $transaction['destination_name']) {
             Log::debug(sprintf('Check if "%s" is mapped to an account by the user.', $transaction['destination_name']));
             $mappedId = $this->getMappedAccountId($transaction['destination_name']);
@@ -480,17 +514,29 @@ final class GenerateTransactions
             //            }
         }
 
-        $transaction              = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getDestinationName(), '');
+        $transaction = $this->negativeTransactionSafetyCatch($transaction, (string)$entry->getDestinationName(), '');
 
         Log::debug(sprintf(
-            'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
-            $transaction['source_id'],
-            $transaction['destination_id'] ?? '',
-            $transaction['destination_name'] ?? '',
-            $transaction['destination_iban'] ?? ''
-        ));
+                       'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
+                       $transaction['source_id'],
+                       $transaction['destination_id'] ?? '',
+                       $transaction['destination_name'] ?? '',
+                       $transaction['destination_iban'] ?? ''
+                   ));
 
         return $transaction;
+    }
+
+    public function getUserAccounts(): array
+    {
+        return $this->userAccounts;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
+        $this->accounts  = $importJob->getConfiguration()->getAccounts();
+        $this->importJob->refreshInstanceIdentifier();
     }
 
     private function filterSpaces(string $iban): string
@@ -545,52 +591,5 @@ final class GenerateTransactions
         ];
 
         return str_replace($search, '', $iban);
-    }
-
-    public function getTargetAccounts(): array
-    {
-        return $this->targetAccounts;
-    }
-
-    public function getUserAccounts(): array
-    {
-        return $this->userAccounts;
-    }
-
-    private function isAssetAccount(string $accountType, string $iban): bool
-    {
-        return 'asset' === $accountType && '' !== $iban && array_key_exists($iban, $this->targetAccounts);
-    }
-
-    private function ibanIsEmpty(string $iban): bool
-    {
-        return '' === $iban;
-    }
-
-    private function isExpenseOrRevenue(string $accountType, string $iban): bool
-    {
-        return
-            ('revenue' === $accountType || 'expense' === $accountType)
-            && '' !== $iban
-            && (array_key_exists($iban, $this->expenseAccounts) || array_key_exists($iban, $this->revenueAccounts));
-    }
-
-    private function getRevenueOrExpenseName(string $iban, string $accountType): string
-    {
-        if ('revenue' === $accountType) {
-            return $this->revenueAccountNames[$iban];
-        }
-        if ('expense' === $accountType) {
-            return $this->expenseAccountNames[$iban];
-        }
-
-        return sprintf('(unknown %s account)', $accountType);
-    }
-
-    public function setImportJob(ImportJob $importJob): void
-    {
-        $this->importJob = $importJob;
-        $this->accounts  = $importJob->getConfiguration()->getAccounts();
-        $this->importJob->refreshInstanceIdentifier();
     }
 }

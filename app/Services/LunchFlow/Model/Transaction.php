@@ -31,12 +31,12 @@ use Carbon\Carbon;
  */
 final class Transaction
 {
-    public string $id;
-    public int $account;
+    public int    $account;
     public string $amount;
     public string $currency;
     public Carbon $date;
     public string $description;
+    public string $id;
     public string $merchant;
 
     /**
@@ -46,11 +46,11 @@ final class Transaction
      */
     public static function fromArray($array): self
     {
-        $object              = new self();
+        $object = new self();
         // mandatory fields:
         $object->id          = $array['id'];
         $object->account     = $array['accountId'];
-        $object->amount      = (string) $array['amount'];
+        $object->amount      = (string)$array['amount'];
         $object->currency    = $array['currency'];
         $object->date        = Carbon::parse($array['date'], config('app.timezone'));
         $object->description = trim($array['description'] ?? '');
@@ -64,7 +64,7 @@ final class Transaction
      */
     public static function fromLocalArray(array $array): self
     {
-        $object              = new self();
+        $object = new self();
 
         // mandatory fields:
         $object->id          = $array['id'];
@@ -95,11 +95,6 @@ final class Transaction
         return $this->description;
     }
 
-    public function getTransactionId(): string
-    {
-        return $this->id;
-    }
-
     /**
      * Return name of the destination account
      */
@@ -123,6 +118,11 @@ final class Transaction
         }
 
         return $this->merchant;
+    }
+
+    public function getTransactionId(): string
+    {
+        return $this->id;
     }
 
     /**

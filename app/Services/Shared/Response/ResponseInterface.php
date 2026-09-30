@@ -30,12 +30,12 @@ namespace App\Services\Shared\Response;
 interface ResponseInterface
 {
     /**
-     * Check if the response has an error
-     */
-    public function hasError(): bool;
-
-    /**
      * Get the HTTP status code
      */
     public function getStatusCode(): int;
+
+    /**
+     * Check if the response has an error
+     */
+    public function hasError(): bool;
 }

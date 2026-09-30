@@ -54,9 +54,9 @@ use Illuminate\Support\MessageBag;
 
 final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
-    public bool   $useDemo    = false;
-    public string $setupToken = '';
-    private ImportJob $importJob;
+    public string               $setupToken = '';
+    public bool                 $useDemo    = false;
+    private ImportJob           $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -64,17 +64,60 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $this->repository = new ImportJobRepository();
     }
 
+    public function collectAccounts(): MessageBag
+    {
+        $configuration = $this->importJob->getConfiguration();
+        $errors        = new MessageBag();
+        $accessToken   = $configuration->getAccessToken();
+        Log::debug(sprintf('collectAccounts("%s")', $this->importJob->identifier));
+
+        // create service:
+        /** @var SimpleFINService $simpleFINService */
+        $simpleFINService = app(SimpleFINService::class);
+        $simpleFINService->setConfiguration($configuration);
+        $simpleFINService->setAccessToken($accessToken);
+        $accounts = [];
+
+        try {
+            $accounts = $simpleFINService->fetchAccounts();
+        } catch (ImporterErrorException $e) {
+            Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
+            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
+
+            return $errors;
+        }
+        $this->importJob->setServiceAccounts($accounts);
+        $this->repository->saveToDisk($this->importJob);
+
+        return new MessageBag();
+    }
+
+    public function getFlowName(): string
+    {
+        return 'simplefin';
+    }
+
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
+    public function setImportJob(ImportJob $importJob): void
+    {
+        $this->importJob = $importJob;
+    }
+
     public function validate(): MessageBag
     {
         $this->importJob->refreshInstanceIdentifier(); // to make sure the information stays fresh.
-        $configuration    = $this->importJob->getConfiguration();
-        $errors           = new MessageBag();
-        $accessToken      = $configuration->getAccessToken();
+        $configuration = $this->importJob->getConfiguration();
+        $errors        = new MessageBag();
+        $accessToken   = $configuration->getAccessToken();
         Log::debug(sprintf('validate("%s") for SimpleFIN', $this->importJob->identifier));
 
         if ($this->useDemo) {
             Log::debug('Overrule info with demo info.');
-            $this->setupToken = (string) config('simplefin.demo_token');
+            $this->setupToken = (string)config('simplefin.demo_token');
         }
 
         if ('' === $this->setupToken && '' === $accessToken) {
@@ -109,48 +152,5 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $this->repository->saveToDisk($this->importJob);
 
         return new MessageBag();
-    }
-
-    public function collectAccounts(): MessageBag
-    {
-        $configuration    = $this->importJob->getConfiguration();
-        $errors           = new MessageBag();
-        $accessToken      = $configuration->getAccessToken();
-        Log::debug(sprintf('collectAccounts("%s")', $this->importJob->identifier));
-
-        // create service:
-        /** @var SimpleFINService $simpleFINService */
-        $simpleFINService = app(SimpleFINService::class);
-        $simpleFINService->setConfiguration($configuration);
-        $simpleFINService->setAccessToken($accessToken);
-        $accounts         = [];
-
-        try {
-            $accounts = $simpleFINService->fetchAccounts();
-        } catch (ImporterErrorException $e) {
-            Log::error('SimpleFIN connection failed', ['error' => $e->getMessage()]);
-            $errors->add('connection', sprintf('Failed to connect to SimpleFIN: %s', $e->getMessage()));
-
-            return $errors;
-        }
-        $this->importJob->setServiceAccounts($accounts);
-        $this->repository->saveToDisk($this->importJob);
-
-        return new MessageBag();
-    }
-
-    public function getFlowName(): string
-    {
-        return 'simplefin';
-    }
-
-    public function getImportJob(): ImportJob
-    {
-        return $this->importJob;
-    }
-
-    public function setImportJob(ImportJob $importJob): void
-    {
-        $this->importJob = $importJob;
     }
 }

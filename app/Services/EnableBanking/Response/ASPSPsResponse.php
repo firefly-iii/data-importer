@@ -52,17 +52,17 @@ final class ASPSPsResponse extends Response implements Countable, IteratorAggreg
         return new self($array);
     }
 
-    public function getBanks(): array
-    {
-        $banks = $this->banks;
-        usort($banks, fn ($a, $b) => strcasecmp($a->name, $b->name));
-
-        return $banks;
-    }
-
     public function count(): int
     {
         return count($this->banks);
+    }
+
+    public function getBanks(): array
+    {
+        $banks = $this->banks;
+        usort($banks, fn($a, $b) => strcasecmp($a->name, $b->name));
+
+        return $banks;
     }
 
     public function getIterator(): Traversable

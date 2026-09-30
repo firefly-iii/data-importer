@@ -47,7 +47,7 @@ final class GetAccountsResponse extends Response
 
         $msg = 'Akahu api returned badly structured json, expected response to contain';
         $msg .= ' a "success" attribute and an "items" attribute. See logs for more details.';
-        Log::error($msg.' json: "'.json_encode($json).'"');
+        Log::error($msg . ' json: "' . json_encode($json) . '"');
 
         throw new ImporterErrorException($msg);
     }

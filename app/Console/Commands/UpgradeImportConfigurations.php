@@ -41,7 +41,7 @@ final class UpgradeImportConfigurations extends Command
      */
     public function handle(): int
     {
-        $directory = (string) $this->argument('directory');
+        $directory = (string)$this->argument('directory');
 
         if (!file_exists($directory)) {
             $this->error(sprintf('"%s" does not exist.', $directory));
@@ -65,7 +65,7 @@ final class UpgradeImportConfigurations extends Command
         $files = new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::SELF_FIRST);
 
         /**
-         * @var string      $name
+         * @var string $name
          * @var SplFileInfo $object
          */
         foreach ($files as $name => $object) {
@@ -79,7 +79,7 @@ final class UpgradeImportConfigurations extends Command
             return;
         }
         $this->line(sprintf('Now processing "%s" ...', $name));
-        $content                    = (string) file_get_contents($name);
+        $content = (string)file_get_contents($name);
         if (!$this->isValidJson($content)) {
             $this->error('File does not contain valid JSON. Skipped.');
 

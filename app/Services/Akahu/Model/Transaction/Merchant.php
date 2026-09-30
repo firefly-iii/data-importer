@@ -32,21 +32,21 @@ final class Merchant
     private ?string $akahuId = null;
 
     // The Akahu Merchant name
-    private ?string $name    = null;
+    private ?string $name = null;
 
     // The Akahu Merchant website
-    private ?string $website = null;
+    private ?string $nzbn = null;
 
     // Undocumented
     // https://www.nzbn.govt.nz/
-    private ?string $nzbn    = null;
+    private ?string $website = null;
 
     /**
      * Parse a merchant structure from an Akahu api json response
      */
     public static function fromJson(array $json): self
     {
-        $merchant          = new self();
+        $merchant = new self();
 
         $merchant->akahuId = $json['_id'] ?? null;
         $merchant->name    = $json['name'] ?? null;
@@ -61,6 +61,11 @@ final class Merchant
         return $this->akahuId;
     }
 
+    public function getNZBN(): ?string
+    {
+        return $this->nzbn;
+    }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -69,10 +74,5 @@ final class Merchant
     public function getWebsite(): ?string
     {
         return $this->website;
-    }
-
-    public function getNZBN(): ?string
-    {
-        return $this->nzbn;
     }
 }

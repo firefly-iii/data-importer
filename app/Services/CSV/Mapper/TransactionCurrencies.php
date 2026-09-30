@@ -44,9 +44,9 @@ final class TransactionCurrencies implements MapperInterface
      */
     public function getMap(): array
     {
-        $result  = [];
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
+        $result = [];
+        $url    = SecretManager::getBaseUrl();
+        $token  = SecretManager::getAccessToken();
 
         $request = new GetCurrenciesRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));

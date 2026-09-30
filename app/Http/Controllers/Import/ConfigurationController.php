@@ -59,11 +59,11 @@ final class ConfigurationController extends Controller
     public function index(Request $request, string $identifier): mixed
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $mainTitle           = 'Configuration';
-        $subTitle            = 'Configure your import';
-        $doParse             = 'true' === $request->input('parse');
-        $importJob           = $this->repository->find($identifier);
-        $flow                = $importJob->getFlow();
+        $mainTitle = 'Configuration';
+        $subTitle  = 'Configure your import';
+        $doParse   = 'true' === $request->input('parse');
+        $importJob = $this->repository->find($identifier);
+        $flow      = $importJob->getFlow();
 
         Log::debug(sprintf('Import job state is "%s", doParse is %s', $importJob->getState(), var_export($doParse, true)));
 
@@ -84,26 +84,26 @@ final class ConfigurationController extends Controller
             if ($messages->count() > 0) {
                 // missing_requisitions
                 // if the job has no requisitions (Nordigen!) need to redirect to get some?
-                if ($messages->has('missing_requisitions') && 'true' === (string) $messages->get('missing_requisitions')[0]) {
+                if ($messages->has('missing_requisitions') && 'true' === (string)$messages->get('missing_requisitions')[0]) {
                     $importJob->setState('needs_connection_details');
                     $this->repository->saveToDisk($importJob);
 
                     return redirect()->route('select-bank.index', [$identifier]);
                 }
-                if ($messages->has('missing_sessions') && 'true' === (string) $messages->get('missing_sessions')[0]) {
+                if ($messages->has('missing_sessions') && 'true' === (string)$messages->get('missing_sessions')[0]) {
                     $importJob->setState('needs_connection_details');
                     $this->repository->saveToDisk($importJob);
 
                     return redirect()->route('eb-select-bank.index', [$identifier]);
                 }
-                if ($messages->has('expired_agreement') && 'true' === (string) $messages->get('expired_agreement')[0]) {
+                if ($messages->has('expired_agreement') && 'true' === (string)$messages->get('expired_agreement')[0]) {
                     $importJob->setServiceAccounts([]);
                     $configuration = $importJob->getConfiguration();
                     $configuration->clearRequisitions();
                     $importJob->setConfiguration($configuration);
                     $importJob->setState('needs_connection_details');
                     $this->repository->saveToDisk($importJob);
-                    $redirect      = route('select-bank.index', [$identifier]);
+                    $redirect = route('select-bank.index', [$identifier]);
 
                     return view('import.004-configure.gocardless-expired')->with(compact('mainTitle', 'subTitle', 'redirect'));
                 }
@@ -140,8 +140,8 @@ final class ConfigurationController extends Controller
         $this->repository->saveToDisk($importJob);
 
         // if configuration says to skip this configuration step, skip it:
-        $configuration       = $importJob->getConfiguration();
-        $doNotSkip           = 'true' === $request->input('do_not_skip');
+        $configuration = $importJob->getConfiguration();
+        $doNotSkip     = 'true' === $request->input('do_not_skip');
         if (true === $configuration->isSkipForm() && false === $doNotSkip) {
             // FIXME must also skip roles and mapping.
             $redirect = $this->redirectToNextstep($importJob);
@@ -171,53 +171,6 @@ final class ConfigurationController extends Controller
         ));
     }
 
-    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
-    {
-        Log::debug(sprintf('Now running %s', __METHOD__));
-        $generic = match ($flow) {
-            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
-            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
-            'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
-            'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
-            'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
-            'akahu'     => ImportServiceAccount::convertAkahuArray($serviceAccounts),
-            'file'      => [],
-            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow))
-        };
-
-        return $this->mergeGenericAccountList($generic, $applicationAccounts);
-    }
-
-    public function phpDate(Request $request): JsonResponse
-    {
-        Log::debug(sprintf('Method %s', __METHOD__));
-
-        $dateObj           = new Date();
-        [$locale, $format] = $dateObj->splitLocaleFormat((string) $request->get('format'));
-
-        /** @var Carbon $date */
-        $date              = today()->locale($locale);
-
-        return response()->json(['result' => $date->translatedFormat($format)]);
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
-    {
-        Log::debug(sprintf('Now running %s', __METHOD__));
-
-        // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
-        $importJob     = $this->repository->find($identifier);
-        $configuration = $importJob->getConfiguration();
-        $configuration->updateFromRequest($request->getAll());
-        $configuration->updateDateRange();
-        $importJob->setConfiguration($configuration);
-
-        return redirect($this->redirectToNextstep($importJob));
-    }
-
     private function redirectToNextstep(ImportJob $importJob): string
     {
         $importJob->setState('is_configured');
@@ -239,5 +192,52 @@ final class ConfigurationController extends Controller
         Log::debug('Redirect to conversion because flow is not file.');
 
         return route('data-conversion.index', [$importJob->identifier]);
+    }
+
+    private function mergeAccountLists(string $flow, array $applicationAccounts, array $serviceAccounts): array
+    {
+        Log::debug(sprintf('Now running %s', __METHOD__));
+        $generic = match ($flow) {
+            'nordigen'  => ImportServiceAccount::convertNordigenArray($serviceAccounts),
+            'simplefin' => ImportServiceAccount::convertSimpleFINArray($serviceAccounts),
+            'lunchflow' => ImportServiceAccount::convertLunchFlowArray($serviceAccounts),
+            'sophtron'  => ImportServiceAccount::convertSophtronArray($serviceAccounts),
+            'eb'        => ImportServiceAccount::convertEnableBankingArray($serviceAccounts),
+            'akahu'     => ImportServiceAccount::convertAkahuArray($serviceAccounts),
+            'file'      => [],
+            default     => throw new ImporterErrorException(sprintf('Cannot mergeAccountLists("%s")', $flow))
+        };
+
+        return $this->mergeGenericAccountList($generic, $applicationAccounts);
+    }
+
+    public function phpDate(Request $request): JsonResponse
+    {
+        Log::debug(sprintf('Method %s', __METHOD__));
+
+        $dateObj = new Date();
+        [$locale, $format] = $dateObj->splitLocaleFormat((string)$request->get('format'));
+
+        /** @var Carbon $date */
+        $date = today()->locale($locale);
+
+        return response()->json(['result' => $date->translatedFormat($format)]);
+    }
+
+    /**
+     * @throws ImporterErrorException
+     */
+    public function postIndex(ConfigurationPostRequest $request, string $identifier): RedirectResponse
+    {
+        Log::debug(sprintf('Now running %s', __METHOD__));
+
+        // this creates a whole new configuration object. Not OK. Only need to update the necessary fields in the CURRENT request.
+        $importJob     = $this->repository->find($identifier);
+        $configuration = $importJob->getConfiguration();
+        $configuration->updateFromRequest($request->getAll());
+        $configuration->updateDateRange();
+        $importJob->setConfiguration($configuration);
+
+        return redirect($this->redirectToNextstep($importJob));
     }
 }

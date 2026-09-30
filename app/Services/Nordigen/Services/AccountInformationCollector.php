@@ -103,9 +103,9 @@ final class AccountInformationCollector
     {
         Log::debug(sprintf('Now in %s(%s)', __METHOD__, $account->getIdentifier()));
 
-        $url          = config('nordigen.url');
-        $accessToken  = TokenManager::getAccessToken();
-        $request      = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
+        $url         = config('nordigen.url');
+        $accessToken = TokenManager::getAccessToken();
+        $request     = new GetAccountInformationRequest($url, $accessToken, $account->getIdentifier());
         $request->setTimeOut(config('importer.connection.timeout'));
 
         try {
@@ -124,7 +124,7 @@ final class AccountInformationCollector
             throw new ImporterErrorException('No account array received, perhaps rate limited.');
         }
 
-        $information  = $response->data['account'];
+        $information = $response->data['account'];
 
         Log::debug('getAccountDetails: Collected information for account', $information);
 
@@ -198,8 +198,8 @@ final class AccountInformationCollector
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var ArrayResponse $response */
-        $response    = $request->get();
-        $array       = $response->data;
+        $response = $request->get();
+        $array    = $response->data;
         Log::debug('Response for basic information request:', $array);
 
         // save IBAN if not already present

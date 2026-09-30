@@ -46,10 +46,10 @@ final class Kernel extends ConsoleKernel
     #[Override]
     protected function commands(): void
     {
-        $accessToken = (string) config('importer.access_token');
-        $clientId    = (string) config('importer.client_id');
-        $baseUrl     = (string) config('importer.url');
-        $vanityUrl   = (string) config('importer.vanity_url');
+        $accessToken = (string)config('importer.access_token');
+        $clientId    = (string)config('importer.client_id');
+        $baseUrl     = (string)config('importer.url');
+        $vanityUrl   = (string)config('importer.vanity_url');
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && '' !== $clientId) {
             echo PHP_EOL;
@@ -67,7 +67,7 @@ final class Kernel extends ConsoleKernel
             exit;
         }
 
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
@@ -76,5 +76,7 @@ final class Kernel extends ConsoleKernel
      * Define the application's command schedule.
      */
     #[Override]
-    protected function schedule(Schedule $schedule): void {}
+    protected function schedule(Schedule $schedule): void
+    {
+    }
 }

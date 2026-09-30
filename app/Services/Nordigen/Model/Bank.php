@@ -32,7 +32,7 @@ final class Bank
     public string $id;
     public string $logo;
     public string $name;
-    public int $transactionTotalDays;
+    public int    $transactionTotalDays;
 
     /**
      * @return static
@@ -42,7 +42,7 @@ final class Bank
         $bank                       = new self();
         $bank->id                   = $array['id'];
         $bank->name                 = $array['name'];
-        $bank->transactionTotalDays = (int) $array['transaction_total_days'];
+        $bank->transactionTotalDays = (int)$array['transaction_total_days'];
         $bank->logo                 = $array['logo'];
 
         return $bank;

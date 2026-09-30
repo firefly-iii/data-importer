@@ -37,10 +37,10 @@ use Traversable;
  */
 final class TransactionsResponse extends Response implements Countable, IteratorAggregate
 {
-    /** @var Transaction[] */
-    private array  $transactions = [];
     private string $accountUid   = '';
     private array  $data         = [];
+    /** @var Transaction[] */
+    private array  $transactions = [];
 
     public function __construct(array $data = [])
     {
@@ -56,26 +56,6 @@ final class TransactionsResponse extends Response implements Countable, Iterator
         $response->appendResponse($array);
 
         return $response;
-    }
-
-    public function getTransactions(): array
-    {
-        return $this->transactions;
-    }
-
-    public function getAccountUid(): string
-    {
-        return $this->accountUid;
-    }
-
-    public function count(): int
-    {
-        return count($this->transactions);
-    }
-
-    public function getIterator(): Traversable
-    {
-        return new ArrayIterator($this->transactions);
     }
 
     public function appendResponse(array $array): void
@@ -114,12 +94,32 @@ final class TransactionsResponse extends Response implements Countable, Iterator
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 
             foreach ($transactions as $tx) {
-                $tx['account_uid']    = $this->accountUid;
+                $tx['account_uid'] = $this->accountUid;
                 // Map Enable Banking status values: BOOK -> booked, PDNG -> pending
                 $status               = $tx['status'] ?? 'BOOK';
                 $tx['status']         = 'BOOK' === $status ? 'booked' : 'pending';
                 $this->transactions[] = Transaction::fromArray($tx);
             }
         }
+    }
+
+    public function count(): int
+    {
+        return count($this->transactions);
+    }
+
+    public function getAccountUid(): string
+    {
+        return $this->accountUid;
+    }
+
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->transactions);
+    }
+
+    public function getTransactions(): array
+    {
+        return $this->transactions;
     }
 }

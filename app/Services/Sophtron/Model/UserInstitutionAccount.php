@@ -28,22 +28,22 @@ use Carbon\Carbon;
 
 final class UserInstitutionAccount
 {
-    public string $userInstitutionId         = '';
-    public string $memberId                  = '';
-    public string $accountId                 = '';
-    public string $accountName               = '';
-    public string $accountNumber             = '';
-    public string $accountType               = '';
-    public string $balance                   = '0';
-    public string $availableBalance          = '0';
-    public string $balanceCurrency           = '';
-    public Carbon $lastUpdated;
-    public string $status                    = '';
-    public string $subType                   = '';
-    public string $userId                    = '';
-    public string $id                        = '';
-    public Carbon $lastModifiedUtc;
-    public ?UserInstitution $userInstitution = null;
+    public string           $accountId         = '';
+    public string           $accountName       = '';
+    public string           $accountNumber     = '';
+    public string           $accountType       = '';
+    public string           $availableBalance  = '0';
+    public string           $balance           = '0';
+    public string           $balanceCurrency   = '';
+    public string           $id                = '';
+    public Carbon           $lastModifiedUtc;
+    public Carbon           $lastUpdated;
+    public string           $memberId          = '';
+    public string           $status            = '';
+    public string           $subType           = '';
+    public string           $userId            = '';
+    public ?UserInstitution $userInstitution   = null;
+    public string           $userInstitutionId = '';
 
     public static function fromArray(array $array): self
     {
@@ -54,8 +54,8 @@ final class UserInstitutionAccount
         $object->accountName       = $array['AccountName'];
         $object->accountNumber     = $array['AccountNumber'];
         $object->accountType       = $array['AccountType'];
-        $object->balance           = (string) $array['Balance'];
-        $object->availableBalance  = (string) ($array['AvailableBalance'] ?? '');
+        $object->balance           = (string)$array['Balance'];
+        $object->availableBalance  = (string)($array['AvailableBalance'] ?? '');
         $object->balanceCurrency   = $array['BalanceCurrency'];
         $object->lastUpdated       = Carbon::parse($array['LastUpdated']);
         $object->status            = $array['Status'];

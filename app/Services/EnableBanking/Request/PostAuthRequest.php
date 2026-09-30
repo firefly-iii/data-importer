@@ -36,45 +36,15 @@ final class PostAuthRequest extends Request
 {
     private string $aspsp;
     private string $country    = '';
-    private string $state      = '';
-    private string $redirectUrl;
     private string $psuType    = 'personal';
+    private string $redirectUrl;
+    private string $state      = '';
     private ?int   $validUntil = null;
 
     public function __construct(string $url)
     {
         $this->setBase($url);
         $this->setUrl('auth');
-    }
-
-    public function setAspsp(string $aspsp): void
-    {
-        $this->aspsp = $aspsp;
-    }
-
-    public function setCountry(string $country): void
-    {
-        $this->country = $country;
-    }
-
-    public function setState(string $state): void
-    {
-        $this->state = $state;
-    }
-
-    public function setRedirectUrl(string $redirectUrl): void
-    {
-        $this->redirectUrl = $redirectUrl;
-    }
-
-    public function setPsuType(string $psuType): void
-    {
-        $this->psuType = $psuType;
-    }
-
-    public function setValidUntil(?int $validUntil): void
-    {
-        $this->validUntil = $validUntil;
     }
 
     public function get(): Response
@@ -96,8 +66,38 @@ final class PostAuthRequest extends Request
             'psu_type'     => $this->psuType,
         ]; // RFC3339 format
 
-        $json                = $this->authenticatedPost($data);
+        $json = $this->authenticatedPost($data);
 
         return AuthResponse::fromArray($json);
+    }
+
+    public function setAspsp(string $aspsp): void
+    {
+        $this->aspsp = $aspsp;
+    }
+
+    public function setCountry(string $country): void
+    {
+        $this->country = $country;
+    }
+
+    public function setPsuType(string $psuType): void
+    {
+        $this->psuType = $psuType;
+    }
+
+    public function setRedirectUrl(string $redirectUrl): void
+    {
+        $this->redirectUrl = $redirectUrl;
+    }
+
+    public function setState(string $state): void
+    {
+        $this->state = $state;
+    }
+
+    public function setValidUntil(?int $validUntil): void
+    {
+        $this->validUntil = $validUntil;
     }
 }

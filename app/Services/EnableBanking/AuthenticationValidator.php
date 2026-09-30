@@ -34,6 +34,17 @@ use Illuminate\Support\Facades\Log;
  */
 final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
+    public function getData(): array
+    {
+        return ['app_id' => SecretManager::getAppId(), 'private_key' => SecretManager::getPrivateKey()];
+    }
+
+    public function setData(array $data): void
+    {
+        SecretManager::saveAppId($data['app_id'] ?? '');
+        SecretManager::savePrivateKey($data['private_key'] ?? '');
+    }
+
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
@@ -50,16 +61,5 @@ final class AuthenticationValidator implements AuthenticationValidatorInterface
         }
 
         return AuthenticationStatus::ERROR;
-    }
-
-    public function getData(): array
-    {
-        return ['app_id' => SecretManager::getAppId(), 'private_key' => SecretManager::getPrivateKey()];
-    }
-
-    public function setData(array $data): void
-    {
-        SecretManager::saveAppId($data['app_id'] ?? '');
-        SecretManager::savePrivateKey($data['private_key'] ?? '');
     }
 }

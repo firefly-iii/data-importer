@@ -38,8 +38,8 @@ final class ApplicationResponse extends Response implements Countable, IteratorA
 {
     /** @var Account[] */
     private array  $accounts  = [];
-    private string $sessionId = '';
     private array  $data      = [];
+    private string $sessionId = '';
 
     public function __construct(array $data = [])
     {
@@ -54,23 +54,23 @@ final class ApplicationResponse extends Response implements Countable, IteratorA
         return $response;
     }
 
-    public function getAccounts(): array
-    {
-        return $this->accounts;
-    }
-
-    public function getSessionId(): string
-    {
-        return $this->sessionId;
-    }
-
     public function count(): int
     {
         return count($this->accounts);
     }
 
+    public function getAccounts(): array
+    {
+        return $this->accounts;
+    }
+
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->accounts);
+    }
+
+    public function getSessionId(): string
+    {
+        return $this->sessionId;
     }
 }

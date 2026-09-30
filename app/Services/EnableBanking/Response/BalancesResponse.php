@@ -31,8 +31,8 @@ use App\Services\Shared\Response\Response;
  */
 final class BalancesResponse extends Response
 {
-    private array  $balances   = [];
     private string $accountUid = '';
+    private array  $balances   = [];
 
     public function __construct(array $data = [])
     {
@@ -47,13 +47,13 @@ final class BalancesResponse extends Response
         return $response;
     }
 
-    public function getBalances(): array
-    {
-        return $this->balances;
-    }
-
     public function getAccountUid(): string
     {
         return $this->accountUid;
+    }
+
+    public function getBalances(): array
+    {
+        return $this->balances;
     }
 }

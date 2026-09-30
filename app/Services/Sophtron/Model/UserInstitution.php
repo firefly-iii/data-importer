@@ -28,17 +28,17 @@ use Carbon\Carbon;
 
 final class UserInstitution
 {
-    public string $userInstitutionId = '';
-    public string $userId            = '';
-    public string $institutionId     = '';
-    public string $userName          = '';
-    public string $companyName       = '';
-    public string $ownerName         = '';
-    public string $address           = '';
-    public string $phone             = '';
-    public string $email             = '';
     public array  $accounts          = [];
+    public string $address           = '';
+    public string $companyName       = '';
+    public string $email             = '';
+    public string $institutionId     = '';
     public Carbon $lastModified;
+    public string $ownerName         = '';
+    public string $phone             = '';
+    public string $userId            = '';
+    public string $userInstitutionId = '';
+    public string $userName          = '';
 
     public static function fromArray(array $data): self
     {
@@ -59,7 +59,7 @@ final class UserInstitution
             }
         }
 
-        $object->lastModified      = Carbon::parse($data['LastModified']);
+        $object->lastModified = Carbon::parse($data['LastModified']);
 
         return $object;
     }

@@ -57,8 +57,8 @@ final class DuplicateCheckController extends Controller
     {
         $importJob           = $this->repository->find($identifier);
         $applicationAccounts = $importJob->getApplicationAccounts();
-        $name                = trim((string) $request->input('name', ''));
-        $type                = trim((string) $request->input('type', ''));
+        $name                = trim((string)$request->input('name', ''));
+        $type                = trim((string)$request->input('type', ''));
 
         if ('' === $name || '' === $type) {
             Log::debug('Duplicate check: Empty name or type, returning no duplicate');
@@ -66,15 +66,15 @@ final class DuplicateCheckController extends Controller
             return response()->json(['isDuplicate' => false, 'message' => null]);
         }
         // Validate account type
-        $validTypes          = ['asset', 'liabilities'];
+        $validTypes = ['asset', 'liabilities'];
         if (!in_array($type, $validTypes, true)) {
             Log::warning('Duplicate check: Invalid account type provided', ['type' => $type, 'valid_types' => $validTypes]);
 
             return response()->json(['isDuplicate' => false, 'message' => null]);
         }
-        $arrayToCheck        = ['asset' => Constants::ASSET_ACCOUNTS, 'liabilities' => Constants::LIABILITIES];
-        $array               = $applicationAccounts[$arrayToCheck[$type]] ?? [];
-        $isDuplicate         = false;
+        $arrayToCheck = ['asset' => Constants::ASSET_ACCOUNTS, 'liabilities' => Constants::LIABILITIES];
+        $array        = $applicationAccounts[$arrayToCheck[$type]] ?? [];
+        $isDuplicate  = false;
 
         /** @var Account $account */
         foreach ($array as $account) {
@@ -82,7 +82,7 @@ final class DuplicateCheckController extends Controller
                 $isDuplicate = true;
             }
         }
-        $message             = null;
+        $message = null;
         if ($isDuplicate) {
             $message = sprintf('%s <em>%s</em> already exists!', ucfirst($type), $name);
         }

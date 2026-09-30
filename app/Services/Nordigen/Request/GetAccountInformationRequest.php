@@ -60,16 +60,6 @@ final class GetAccountInformationRequest extends Request
         return new ArrayResponse($array);
     }
 
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-
-    public function setIdentifier(string $identifier): void
-    {
-        $this->identifier = $identifier;
-    }
-
     public function post(): Response
     {
         throw new ImporterHttpException('Method not implemented');
@@ -78,5 +68,15 @@ final class GetAccountInformationRequest extends Request
     public function put(): Response
     {
         throw new ImporterHttpException('Method not implemented');
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    public function setIdentifier(string $identifier): void
+    {
+        $this->identifier = $identifier;
     }
 }

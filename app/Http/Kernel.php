@@ -57,7 +57,7 @@ final class Kernel extends HttpKernel
      *
      * These middleware are run during every request to your application.
      */
-    protected $middleware        = [
+    protected $middleware = [
         TrustProxies::class,
         HandleCors::class,
         CheckForMaintenanceMode::class,
@@ -66,29 +66,6 @@ final class Kernel extends HttpKernel
         ConvertEmptyStringsToNull::class,
         StartSession::class,
     ];
-
-    /**
-     * The application's route middleware groups.
-     */
-    protected $middlewareGroups  = [
-        'web' => [
-            EncryptCookies::class,
-            AddQueuedCookiesToResponse::class,
-            // StartSession::class,
-            // \Illuminate\Session\Middleware\AuthenticateSession::class,
-            ShareErrorsFromSession::class,
-            VerifyCsrfToken::class,
-            SubstituteBindings::class,
-        ],
-
-        'api' => [
-            // VerifyCsrfToken::class,
-            //  StartSession::class,
-            'throttle:60,1',
-            SubstituteBindings::class,
-        ],
-    ];
-
     /**
      * The application's route middleware.
      *
@@ -105,5 +82,26 @@ final class Kernel extends HttpKernel
         'signed'           => ValidateSignature::class,
         'throttle'         => ThrottleRequests::class,
         'verified'         => EnsureEmailIsVerified::class,
+    ];
+    /**
+     * The application's route middleware groups.
+     */
+    protected $middlewareGroups = [
+        'web' => [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            // StartSession::class,
+            // \Illuminate\Session\Middleware\AuthenticateSession::class,
+            ShareErrorsFromSession::class,
+            VerifyCsrfToken::class,
+            SubstituteBindings::class,
+        ],
+
+        'api' => [
+            // VerifyCsrfToken::class,
+            //  StartSession::class,
+            'throttle:60,1',
+            SubstituteBindings::class,
+        ],
     ];
 }

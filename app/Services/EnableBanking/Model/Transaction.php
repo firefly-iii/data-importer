@@ -33,47 +33,47 @@ use Ramsey\Uuid\Uuid;
  */
 final class Transaction
 {
-    public string  $transactionId         = '';
     public string  $accountUid            = '';
-    public string  $transactionAmount     = '';
-    public string  $currencyCode          = '';
-    public ?Carbon $bookingDate           = null;
-    public ?Carbon $valueDate             = null;
-    public string  $creditorName          = '';
-    public string  $creditorIban          = '';
-    public string  $creditorBban          = '';
-    public array   $creditorAddressLine   = [];
-    public string  $debtorName            = '';
-    public string  $debtorIban            = '';
-    public string  $debtorBban            = '';
-    public array   $debtorAddressLine     = [];
-    public string  $remittanceInformation = '';
     public string  $additionalInformation = '';
+    public ?Carbon $bookingDate           = null;
+    public array   $creditorAddressLine   = [];
+    public string  $creditorBban          = '';
+    public string  $creditorIban          = '';
+    public string  $creditorName          = '';
+    public string  $currencyCode          = '';
+    public array   $debtorAddressLine     = [];
+    public string  $debtorBban            = '';
+    public string  $debtorIban            = '';
+    public string  $debtorName            = '';
+    public string  $remittanceInformation = '';
     public string  $status                = '';
     public array   $tags                  = [];
+    public string  $transactionAmount     = '';
+    public string  $transactionId         = '';
+    public ?Carbon $valueDate             = null;
 
     public static function fromArray(array $array): self
     {
         Log::debug('Enable Banking transaction from array', $array);
 
-        $transaction                        = new self();
+        $transaction = new self();
         // API may return transaction_id or entry_reference as unique identifier
         // 2026-03-07 prefer entry_reference or empty string because "transaction_id" is empty.
-        $transaction->transactionId         = $array['entry_reference'] ?? '';
+        $transaction->transactionId = $array['entry_reference'] ?? '';
 
         // 2026-03-07 account_uid does not exist according to the API documentation.
-        $transaction->accountUid            = $array['account_uid'] ?? '';
+        $transaction->accountUid = $array['account_uid'] ?? '';
 
         // Handle transaction amount - apply sign based on credit_debit_indicator
-        $amount                             = (string) ($array['transaction_amount']['amount'] ?? '0');
-        $creditDebitIndicator               = $array['credit_debit_indicator'] ?? '';
+        $amount               = (string)($array['transaction_amount']['amount'] ?? '0');
+        $creditDebitIndicator = $array['credit_debit_indicator'] ?? '';
 
         // DBIT = debit (money out, negative), CRDT = credit (money in, positive)
         if ('DBIT' === $creditDebitIndicator && bccomp($amount, '0') >= 0) {
             $amount = bcmul($amount, '-1');
         }
-        $transaction->transactionAmount     = $amount;
-        $transaction->currencyCode          = $array['transaction_amount']['currency'] ?? '';
+        $transaction->transactionAmount = $amount;
+        $transaction->currencyCode      = $array['transaction_amount']['currency'] ?? '';
 
         // Handle dates
         if (array_key_exists('booking_date', $array) && null !== $array['booking_date']) {
@@ -88,17 +88,17 @@ final class Transaction
         }
 
         // creditor name
-        $transaction->creditorName          = '';
+        $transaction->creditorName = '';
         if (array_key_exists('creditor', $array) && is_array($array['creditor']) && array_key_exists('name', $array['creditor'])) {
             $transaction->creditorName = $array['creditor']['name'] ?? '';
         }
         // creditor iban
-        $transaction->creditorIban          = '';
+        $transaction->creditorIban = '';
         if (array_key_exists('creditor_account', $array) && is_array($array['creditor_account']) && array_key_exists('iban', $array['creditor_account'])) {
             $transaction->creditorIban = $array['creditor_account']['iban'] ?? '';
         }
         // creditor bban
-        $transaction->creditorBban          = '';
+        $transaction->creditorBban = '';
         if (
             array_key_exists('creditor_account', $array)
             && is_array($array['creditor_account'])
@@ -109,23 +109,23 @@ final class Transaction
             $transaction->creditorBban = $array['creditor_account']['other']['identification'] ?? '';
         }
         // creditor address line
-        $creditorAddressLine                = $array['creditor']['postal_address']['address_line'] ?? [];
+        $creditorAddressLine = $array['creditor']['postal_address']['address_line'] ?? [];
         if (is_array($creditorAddressLine)) {
             $transaction->creditorAddressLine = array_values(array_filter($creditorAddressLine, is_string(...)));
         }
 
         // debtor name
-        $transaction->debtorName            = '';
+        $transaction->debtorName = '';
         if (array_key_exists('debtor', $array) && is_array($array['debtor']) && array_key_exists('name', $array['debtor'])) {
             $transaction->debtorName = $array['debtor']['name'] ?? '';
         }
         // debtor iban
-        $transaction->debtorIban            = '';
+        $transaction->debtorIban = '';
         if (array_key_exists('debtor_account', $array) && is_array($array['debtor_account']) && array_key_exists('iban', $array['debtor_account'])) {
             $transaction->debtorIban = $array['debtor_account']['iban'] ?? '';
         }
         // debtor bban
-        $transaction->debtorBban            = '';
+        $transaction->debtorBban = '';
         if (
             array_key_exists('debtor_account', $array)
             && is_array($array['debtor_account'])
@@ -136,13 +136,13 @@ final class Transaction
             $transaction->debtorBban = $array['debtor_account']['other']['identification'] ?? '';
         }
         // debtor address line
-        $debtorAddressLine                  = $array['debtor']['postal_address']['address_line'] ?? [];
+        $debtorAddressLine = $array['debtor']['postal_address']['address_line'] ?? [];
         if (is_array($debtorAddressLine)) {
             $transaction->debtorAddressLine = array_values(array_filter($debtorAddressLine, is_string(...)));
         }
 
         // Description - remittance_information is an array of strings per API spec
-        $remittanceInfo                     = $array['remittance_information'] ?? '';
+        $remittanceInfo = $array['remittance_information'] ?? '';
         if (is_array($remittanceInfo)) {
             $transaction->remittanceInformation = trim(implode(' ', $remittanceInfo));
         }
@@ -151,7 +151,7 @@ final class Transaction
         }
         $transaction->additionalInformation = $array['additional_information'] ?? $array['note'] ?? '';
 
-        $transaction->status                = $array['status'] ?? 'booked';
+        $transaction->status = $array['status'] ?? 'booked';
 
         // Add status as tag
         if ('' !== $transaction->status) {
@@ -164,13 +164,13 @@ final class Transaction
             && is_array($array['bank_transaction_code'])
             && array_key_exists('sub_code', $array['bank_transaction_code'])
         ) {
-            $transaction->tags[] = (string) $array['bank_transaction_code']['sub_code'];
+            $transaction->tags[] = (string)$array['bank_transaction_code']['sub_code'];
         }
 
         // Generate transaction ID if empty - use entry_reference or hash
         if ('' === $transaction->transactionId) {
-            $hash                       = hash('sha256', (string) microtime()); // backup value.
-            $encoded                    = json_encode($array);
+            $hash    = hash('sha256', (string)microtime()); // backup value.
+            $encoded = json_encode($array);
             if (json_validate($encoded)) {
                 $hash = hash('sha256', $encoded);
             }
@@ -183,22 +183,9 @@ final class Transaction
         return $transaction;
     }
 
-    public function getDate(): Carbon
+    public function getCleanDescription(): string
     {
-        if ($this->bookingDate instanceof Carbon) {
-            return $this->bookingDate;
-        }
-        if ($this->valueDate instanceof Carbon) {
-            return $this->valueDate;
-        }
-        Log::warning('Transaction has no date, return NOW.');
-
-        return Carbon::now(config('app.timezone'));
-    }
-
-    public function getValueDate(): ?Carbon
-    {
-        return $this->valueDate;
+        return app('steam')->cleanStringAndNewlines($this->getDescription());
     }
 
     public function getDescription(): string
@@ -214,48 +201,32 @@ final class Transaction
         return '(no description)';
     }
 
-    public function getCleanDescription(): string
+    public function getDate(): Carbon
     {
-        return app('steam')->cleanStringAndNewlines($this->getDescription());
+        if ($this->bookingDate instanceof Carbon) {
+            return $this->bookingDate;
+        }
+        if ($this->valueDate instanceof Carbon) {
+            return $this->valueDate;
+        }
+        Log::warning('Transaction has no date, return NOW.');
+
+        return Carbon::now(config('app.timezone'));
     }
 
-    public function getTransactionId(): string
+    public function getDestinationBban(): ?string
     {
-        return substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
-
-        //        $accountId     = substr(trim((string) preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
-        //        $transactionId = substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
-        //
-        //        return trim(sprintf('%s-%s', $accountId, $transactionId));
-    }
-
-    public function getSourceName(): ?string
-    {
-        if ('' !== $this->debtorName) {
-            return $this->debtorName;
+        if ('' !== $this->creditorBban) {
+            return $this->creditorBban;
         }
 
         return null;
     }
 
-    public function getSourceNameWithAddress(): ?string
+    public function getDestinationIban(): ?string
     {
-        return $this->composeNameWithAddress($this->debtorName, $this->debtorAddressLine);
-    }
-
-    public function getSourceIban(): ?string
-    {
-        if ('' !== $this->debtorIban) {
-            return $this->debtorIban;
-        }
-
-        return null;
-    }
-
-    public function getSourceBban(): ?string
-    {
-        if ('' !== $this->debtorBban) {
-            return $this->debtorBban;
+        if ('' !== $this->creditorIban) {
+            return $this->creditorIban;
         }
 
         return null;
@@ -275,22 +246,46 @@ final class Transaction
         return $this->composeNameWithAddress($this->creditorName, $this->creditorAddressLine);
     }
 
-    public function getDestinationIban(): ?string
+    public function getNotes(): string
     {
-        if ('' !== $this->creditorIban) {
-            return $this->creditorIban;
+        $notes = '';
+        if ('' !== $this->additionalInformation && $this->additionalInformation !== $this->remittanceInformation) {
+            $notes = $this->additionalInformation;
+        }
+
+        return trim($notes);
+    }
+
+    public function getSourceBban(): ?string
+    {
+        if ('' !== $this->debtorBban) {
+            return $this->debtorBban;
         }
 
         return null;
     }
 
-    public function getDestinationBban(): ?string
+    public function getSourceIban(): ?string
     {
-        if ('' !== $this->creditorBban) {
-            return $this->creditorBban;
+        if ('' !== $this->debtorIban) {
+            return $this->debtorIban;
         }
 
         return null;
+    }
+
+    public function getSourceName(): ?string
+    {
+        if ('' !== $this->debtorName) {
+            return $this->debtorName;
+        }
+
+        return null;
+    }
+
+    public function getSourceNameWithAddress(): ?string
+    {
+        return $this->composeNameWithAddress($this->debtorName, $this->debtorAddressLine);
     }
 
     private function composeNameWithAddress(string $name, array $addressLine): ?string
@@ -310,14 +305,19 @@ final class Transaction
         return mb_substr(implode(', ', $parts), 0, 255);
     }
 
-    public function getNotes(): string
+    public function getTransactionId(): string
     {
-        $notes = '';
-        if ('' !== $this->additionalInformation && $this->additionalInformation !== $this->remittanceInformation) {
-            $notes = $this->additionalInformation;
-        }
+        return substr(trim((string)preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
 
-        return trim($notes);
+        //        $accountId     = substr(trim((string) preg_replace('/\s+/', ' ', $this->accountUid)), 0, 125);
+        //        $transactionId = substr(trim((string) preg_replace('/\s+/', ' ', $this->transactionId)), 0, 125);
+        //
+        //        return trim(sprintf('%s-%s', $accountId, $transactionId));
+    }
+
+    public function getValueDate(): ?Carbon
+    {
+        return $this->valueDate;
     }
 
     public function toLocalArray(): array

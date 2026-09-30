@@ -30,9 +30,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Logger;
-
 use const PHP_SAPI;
 
 final class DebugController extends Controller
@@ -44,33 +41,8 @@ final class DebugController extends Controller
      */
     public function index(Request $request)
     {
-        $now        = Carbon::now()->format('Y-m-d H:i:s e');
-        $table      = $this->getTable();
-
-        /** @var Logger $logger */
-        $logger     = Log::driver();
-        $handlers   = $logger->getHandlers();
-        $logContent = '';
-        foreach ($handlers as $handler) {
-            if ($handler instanceof RotatingFileHandler) {
-                $logFile = $handler->getUrl();
-                if (null !== $logFile) {
-                    try {
-                        $logContent = (string) file_get_contents($logFile);
-                    } catch (Exception) {
-                        // @ignoreException
-                        Log::debug(sprintf('Could not get content of %s, but that is OK', $logFile));
-                    }
-                }
-            }
-        }
-        if ('' !== $logContent) {
-            // last few lines
-            $logContent = sprintf('Truncated from this point <----|%s', substr($logContent, -32 * 1024));
-        }
-        if (true === config('importer.is_external')) {
-            $logContent = 'No logs, external installation.';
-        }
+        $now   = Carbon::now()->format('Y-m-d H:i:s e');
+        $table = $this->getTable();
 
         Log::emergency(sprintf('[%s] I am a EMERGENCY message.', config('importer.version')));
         Log::alert(sprintf('[%s] I am a ALERT message.', config('importer.version')));
@@ -81,7 +53,7 @@ final class DebugController extends Controller
         Log::info(sprintf('[%s] I am a INFO message.', config('importer.version')));
         Log::debug('I am a DEBUG message.');
 
-        return view('debug', compact('now', 'table', 'logContent'));
+        return view('debug', compact('now', 'table'));
     }
 
     private function getTable(): string
@@ -103,18 +75,18 @@ final class DebugController extends Controller
         if (true === $isDocker) {
             try {
                 if (file_exists('/var/www/counter-main.txt')) {
-                    $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
+                    $build = trim((string)file_get_contents('/var/www/counter-main.txt'));
                 }
             } catch (Exception $e) {
                 Log::debug('Could not check build counter, but that\'s ok.');
                 Log::warning($e->getMessage());
             }
-            if ('' !== (string) config('importer.docker.base_build')) {
-                $baseBuild = (string) config('importer.docker.base_build');
+            if ('' !== (string)config('importer.docker.base_build')) {
+                $baseBuild = (string)config('importer.docker.base_build');
             }
         }
-        $search    = ['~', '#'];
-        $replace   = ['\~', '# '];
+        $search  = ['~', '#'];
+        $replace = ['\~', '# '];
 
         return [
             'is_docker'   => $isDocker,
@@ -131,7 +103,7 @@ final class DebugController extends Controller
         return [
             'debug'          => var_export(config('app.debug'), true),
             'display_errors' => ini_get('display_errors'),
-            'reporting'      => $this->errorReporting((int) ini_get('error_reporting')),
+            'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
             'bcscale'        => bcscale(),
         ];
     }

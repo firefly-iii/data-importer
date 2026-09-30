@@ -68,9 +68,9 @@ final class DownloadController extends Controller
             $array['nordigen_requisitions'] = new stdClass();
         }
 
-        $result        = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
-        $response      = response($result);
-        $name          = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
+        $result   = json_encode($array, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $response = response($result);
+        $name     = sprintf('import_config_%s.json', Carbon::now()->format('Y-m-d'));
         $response
             ->header('Content-disposition', sprintf('attachment; filename=%s', $name))
             ->header('Content-Type', 'application/json')
@@ -79,8 +79,7 @@ final class DownloadController extends Controller
             ->header('Expires', '0')
             ->header('Cache-Control', 'must-revalidate, post-check=0, pre-check=0')
             ->header('Pragma', 'public')
-            ->header('Content-Length', (string) strlen($result))
-        ;
+            ->header('Content-Length', (string)strlen($result));
 
         return $response;
     }

@@ -32,7 +32,7 @@ use GrumpyDictator\FFIIIApiSupport\Response\Response;
  */
 final class PostAccountResponse extends Response
 {
-    private ?Account $account;
+    private ?Account       $account;
     private readonly array $rawData;
 
     /**
@@ -47,13 +47,13 @@ final class PostAccountResponse extends Response
         $this->rawData = $data;
     }
 
-    public function getRawData(): array
-    {
-        return $this->rawData;
-    }
-
     public function getAccount(): ?Account
     {
         return $this->account;
+    }
+
+    public function getRawData(): array
+    {
+        return $this->rawData;
     }
 }

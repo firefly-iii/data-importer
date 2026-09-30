@@ -44,54 +44,14 @@ use Illuminate\Support\Facades\Log;
 
 final class AccountMapper
 {
-    private array $fireflyIIIAccounts = [];
     private array $accountMapping     = [];
     private array $createdAccounts    = [];
+    private array $fireflyIIIAccounts = [];
 
     public function __construct()
     {
         // Defer account loading until actually needed to avoid authentication errors
         // during constructor when authentication context may not be available
-    }
-
-    /**
-     * Find a matching Firefly III account for a SimpleFIN account
-     */
-    public function findMatchingFireflyIIIAccount(ImportServiceAccount $account): ?Account
-    {
-        $this->loadFireflyIIIAccounts();
-
-        // Try to find by name first
-        $matchingAccounts = array_filter(
-            $this->fireflyIIIAccounts,
-            static fn (Account $current) => strtolower((string) $current->name) === strtolower($account->name)
-        );
-
-        if (0 === count($matchingAccounts)) {
-            return null;
-        }
-
-        Log::debug(sprintf('Search for Firefly III account with name "%s"', $account->name));
-
-        // Try to search via API
-        try {
-            $request  = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
-            $request->setField('name');
-            $request->setQuery($account->name);
-            $response = $request->get();
-
-            if ($response instanceof GetAccountsResponse && count($response) > 0) {
-                foreach ($response as $current) {
-                    if (strtolower($current->name) === strtolower($account->name)) {
-                        return $current;
-                    }
-                }
-            }
-        } catch (ApiHttpException $e) {
-            Log::warning(sprintf('Could not search for account "%s": %s', $account->name, $e->getMessage()));
-        }
-
-        return null;
     }
 
     /**
@@ -108,13 +68,13 @@ final class AccountMapper
         Log::info(sprintf('Creating Firefly III account "%s" via API', $accountName));
 
         try {
-            $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
 
             // Build account creation payload
-            $payload  = ['name' => $accountName, 'type' => $accountType, 'currency_code' => $currencyCode, 'active' => true, 'include_net_worth' => true];
+            $payload = ['name' => $accountName, 'type' => $accountType, 'currency_code' => $currencyCode, 'active' => true, 'include_net_worth' => true];
 
             // Add opening balance date if opening balance is provided
-            if ('' !== (string) $openingBalance && is_numeric($openingBalance) && '0.00' !== $openingBalance) {
+            if ('' !== (string)$openingBalance && is_numeric($openingBalance) && '0.00' !== $openingBalance) {
                 $payload['opening_balance']      = $openingBalance;
                 $payload['opening_balance_date'] = $config['opening_balance_date'] ?? Carbon::now()->format('Y-m-d');
             }
@@ -127,7 +87,7 @@ final class AccountMapper
             // Add liability-specific fields for liability accounts
             if (in_array($accountType, [AccountType::DEBT, AccountType::LOAN, AccountType::MORTGAGE, AccountType::LIABILITIES, 'liability'], true)) {
                 // Map account type to liability type
-                $liabilityTypeMap               = [
+                $liabilityTypeMap = [
                     AccountType::DEBT        => 'debt',
                     AccountType::LOAN        => 'loan',
                     AccountType::MORTGAGE    => 'mortgage',
@@ -140,12 +100,12 @@ final class AccountMapper
             }
 
             // Add IBAN if provided
-            if (array_key_exists('iban', $config) && '' !== (string) $config['iban'] && IbanConverter::isValidIban((string) $config['iban'])) {
+            if (array_key_exists('iban', $config) && '' !== (string)$config['iban'] && IbanConverter::isValidIban((string)$config['iban'])) {
                 $payload['iban'] = $config['iban'];
             }
 
             // Add account number if provided
-            if (array_key_exists('account_number', $config) && '' !== (string) $config['account_number']) {
+            if (array_key_exists('account_number', $config) && '' !== (string)$config['account_number']) {
                 $payload['account_number'] = $config['account_number'];
             }
 
@@ -200,8 +160,8 @@ final class AccountMapper
     private function getCurrencyCode(ImportServiceAccount $account, array $config): string
     {
         // 1. Use user-configured currency first
-        if (array_key_exists('currency', $config) && '' !== (string) $config['currency']) {
-            return (string) $config['currency'];
+        if (array_key_exists('currency', $config) && '' !== (string)$config['currency']) {
+            return (string)$config['currency'];
         }
 
         // 2. Fall back to account currency
@@ -209,57 +169,6 @@ final class AccountMapper
 
         // 3. Final fallback
         return '' !== $currency && '0' !== $currency ? $currency : 'EUR';
-    }
-
-    /**
-     * Load all Firefly III accounts
-     */
-    private function loadFireflyIIIAccounts(): void
-    {
-        // Only load once
-        if (count($this->fireflyIIIAccounts) > 0) {
-            Log::debug('Already loaded Firefly III accounts, skipping reload');
-
-            return;
-        }
-
-        try {
-            // Verify authentication context before making API calls
-            $baseUrl                  = SecretManager::getBaseUrl();
-            $accessToken              = SecretManager::getAccessToken();
-
-            if ('' === $baseUrl || '' === $accessToken) {
-                Log::warning('Missing authentication context for Firefly III account loading');
-
-                throw new ImporterErrorException('Authentication context not available for account loading');
-            }
-            $this->fireflyIIIAccounts = [];
-
-            // double request to also get the liabilities
-            $request                  = new GetAccountsRequest($baseUrl, $accessToken);
-            $request->setType(AccountType::ASSET);
-            $response                 = $request->get();
-
-            if ($response instanceof GetAccountsResponse) {
-                $this->fireflyIIIAccounts = iterator_to_array($response);
-                Log::debug(sprintf('Loaded %d Firefly III asset accounts', count($this->fireflyIIIAccounts)));
-            }
-
-            // double request to also get the liabilities
-            $request                  = new GetAccountsRequest($baseUrl, $accessToken);
-            $request->setType(AccountType::LIABILITIES);
-            $response                 = $request->get();
-
-            if ($response instanceof GetAccountsResponse) {
-                $array                    = array_values(iterator_to_array($response));
-                $this->fireflyIIIAccounts = array_merge(array_values($this->fireflyIIIAccounts), $array);
-                Log::debug(sprintf('Loaded %d Firefly III liabilities', count($array)));
-            }
-        } catch (ApiHttpException $e) {
-            Log::error(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
-
-            throw new ImporterErrorException(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
-        }
     }
 
     /**
@@ -285,7 +194,7 @@ final class AccountMapper
                 $errorMessage  = $e->getMessage();
 
                 // Check if this is a DNS/connection timeout error that we should retry
-                $shouldRetry   = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
+                $shouldRetry = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
 
                 if (!$shouldRetry) {
                     Log::error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
@@ -330,6 +239,97 @@ final class AccountMapper
             'Temporary failure in name resolution',
         ];
 
-        return array_any($retryableErrors, static fn ($retryableError) => false !== stripos($errorMessage, $retryableError));
+        return array_any($retryableErrors, static fn($retryableError) => false !== stripos($errorMessage, $retryableError));
+    }
+
+    /**
+     * Find a matching Firefly III account for a SimpleFIN account
+     */
+    public function findMatchingFireflyIIIAccount(ImportServiceAccount $account): ?Account
+    {
+        $this->loadFireflyIIIAccounts();
+
+        // Try to find by name first
+        $matchingAccounts = array_filter(
+            $this->fireflyIIIAccounts,
+            static fn(Account $current) => strtolower((string)$current->name) === strtolower($account->name)
+        );
+
+        if (0 === count($matchingAccounts)) {
+            return null;
+        }
+
+        Log::debug(sprintf('Search for Firefly III account with name "%s"', $account->name));
+
+        // Try to search via API
+        try {
+            $request = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request->setField('name');
+            $request->setQuery($account->name);
+            $response = $request->get();
+
+            if ($response instanceof GetAccountsResponse && count($response) > 0) {
+                foreach ($response as $current) {
+                    if (strtolower($current->name) === strtolower($account->name)) {
+                        return $current;
+                    }
+                }
+            }
+        } catch (ApiHttpException $e) {
+            Log::warning(sprintf('Could not search for account "%s": %s', $account->name, $e->getMessage()));
+        }
+
+        return null;
+    }
+
+    /**
+     * Load all Firefly III accounts
+     */
+    private function loadFireflyIIIAccounts(): void
+    {
+        // Only load once
+        if (count($this->fireflyIIIAccounts) > 0) {
+            Log::debug('Already loaded Firefly III accounts, skipping reload');
+
+            return;
+        }
+
+        try {
+            // Verify authentication context before making API calls
+            $baseUrl     = SecretManager::getBaseUrl();
+            $accessToken = SecretManager::getAccessToken();
+
+            if ('' === $baseUrl || '' === $accessToken) {
+                Log::warning('Missing authentication context for Firefly III account loading');
+
+                throw new ImporterErrorException('Authentication context not available for account loading');
+            }
+            $this->fireflyIIIAccounts = [];
+
+            // double request to also get the liabilities
+            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request->setType(AccountType::ASSET);
+            $response = $request->get();
+
+            if ($response instanceof GetAccountsResponse) {
+                $this->fireflyIIIAccounts = iterator_to_array($response);
+                Log::debug(sprintf('Loaded %d Firefly III asset accounts', count($this->fireflyIIIAccounts)));
+            }
+
+            // double request to also get the liabilities
+            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request->setType(AccountType::LIABILITIES);
+            $response = $request->get();
+
+            if ($response instanceof GetAccountsResponse) {
+                $array                    = array_values(iterator_to_array($response));
+                $this->fireflyIIIAccounts = array_merge(array_values($this->fireflyIIIAccounts), $array);
+                Log::debug(sprintf('Loaded %d Firefly III liabilities', count($array)));
+            }
+        } catch (ApiHttpException $e) {
+            Log::error(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
+
+            throw new ImporterErrorException(sprintf('Could not load Firefly III accounts: %s', $e->getMessage()));
+        }
     }
 }

@@ -31,9 +31,9 @@ use App\Services\Shared\Response\Response;
  */
 final class ErrorResponse extends Response
 {
-    public string $message = '';
     public string $code    = '';
     public array  $details = [];
+    public string $message = '';
 
     public function __construct(array $data = [])
     {

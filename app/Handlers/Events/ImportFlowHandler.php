@@ -28,5 +28,7 @@ use App\Events\DownloadedSimpleFINAccounts;
 
 final class ImportFlowHandler
 {
-    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void {}
+    public function handleDownloadedSimpleFINAccounts(DownloadedSimpleFINAccounts $event): void
+    {
+    }
 }

@@ -29,14 +29,14 @@ use Carbon\Carbon;
 
 final class AkahuDateRange
 {
-    private ?Carbon $dateNotBefore;
     private ?Carbon $dateNotAfter;
+    private ?Carbon $dateNotBefore;
 
     public function __construct(Configuration $configuration)
     {
-        $tz                  = config('app.timezone');
-        $dateNotBefore       = null;
-        $dateNotAfter        = null;
+        $tz            = config('app.timezone');
+        $dateNotBefore = null;
+        $dateNotAfter  = null;
 
         if ('' !== $configuration->getDateNotBefore()) {
             $dateNotBefore = Carbon::parse($configuration->getDateNotBefore(), $tz);
@@ -50,17 +50,17 @@ final class AkahuDateRange
         $this->dateNotAfter  = $dateNotAfter;
     }
 
+    public function endDate(): ?Carbon
+    {
+        // The `end` query parameter is inclusive.
+        return $this->dateNotAfter?->copy()?->addDay();
+    }
+
     public function startDate(): ?Carbon
     {
         // https://developers.akahu.nz/docs/accessing-transactional-data#getting-a-date-range
         // We want to include transactions that fall *on* the `dateNotBefore`
         // date as well.
         return $this->dateNotBefore?->copy()?->subMillisecond();
-    }
-
-    public function endDate(): ?Carbon
-    {
-        // The `end` query parameter is inclusive.
-        return $this->dateNotAfter?->copy()?->addDay();
     }
 }

@@ -28,16 +28,6 @@ Debug information generated at {{ $now }} for Firefly III Data Importer version 
 </p>
 
 <p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:600px;color:#a00;">
-    Extra info. Do not share this lightly!
-</p>
-
-<textarea rows="30" cols="100" name="log_info" style="font-family:Menlo, Monaco, Consolas, monospace;font-size:7pt;">
-```
-{{ $logContent }}
-```
-</textarea>
-
-<p style="font-family:Arial, Arial, Helvetica, sans-serif;font-size:12pt;width:600px;color:#a00;">
     <a href="{{ route('index') }}">Back to index</a>
 </p>
 

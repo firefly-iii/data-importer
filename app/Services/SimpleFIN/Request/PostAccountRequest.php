@@ -47,6 +47,11 @@ final class PostAccountRequest extends Request
         $this->setUri('accounts');
     }
 
+    public function delete(): Response
+    {
+        throw new ImporterHttpException('Method not implemented');
+    }
+
     public function get(): Response
     {
         throw new ImporterHttpException('Method not implemented');
@@ -77,11 +82,6 @@ final class PostAccountRequest extends Request
     }
 
     public function put(): Response
-    {
-        throw new ImporterHttpException('Method not implemented');
-    }
-
-    public function delete(): Response
     {
         throw new ImporterHttpException('Method not implemented');
     }

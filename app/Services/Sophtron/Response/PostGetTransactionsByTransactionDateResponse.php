@@ -31,8 +31,8 @@ use Iterator;
 
 final class PostGetTransactionsByTransactionDateResponse extends Response implements Iterator, Countable
 {
-    private array $transactions = [];
     private int   $position     = 0;
+    private array $transactions = [];
 
     public function __construct(array $data)
     {
@@ -41,14 +41,14 @@ final class PostGetTransactionsByTransactionDateResponse extends Response implem
         }
     }
 
+    public function count(): int
+    {
+        return count($this->transactions);
+    }
+
     public function current(): mixed
     {
         return $this->transactions[$this->position];
-    }
-
-    public function next(): void
-    {
-        ++$this->position;
     }
 
     public function key(): mixed
@@ -56,9 +56,9 @@ final class PostGetTransactionsByTransactionDateResponse extends Response implem
         return $this->position;
     }
 
-    public function valid(): bool
+    public function next(): void
     {
-        return array_key_exists($this->position, $this->transactions);
+        ++$this->position;
     }
 
     public function rewind(): void
@@ -66,8 +66,8 @@ final class PostGetTransactionsByTransactionDateResponse extends Response implem
         $this->position = 0;
     }
 
-    public function count(): int
+    public function valid(): bool
     {
-        return count($this->transactions);
+        return array_key_exists($this->position, $this->transactions);
     }
 }

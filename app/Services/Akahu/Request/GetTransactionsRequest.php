@@ -64,7 +64,7 @@ final class GetTransactionsRequest extends Request
 
             $responseJson = $this->authenticatedGet(sprintf('accounts/%s/transactions', $this->akahuId));
 
-            $cursor       = $responseBuilder->submitPageAndGetNextCursor($responseJson);
+            $cursor = $responseBuilder->submitPageAndGetNextCursor($responseJson);
         } while (null !== $cursor);
 
         return $responseBuilder->build();

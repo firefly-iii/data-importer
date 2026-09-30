@@ -32,13 +32,13 @@ use InvalidArgumentException;
  */
 final class Transaction
 {
-    private readonly string $id;
-    private readonly int $posted;
     private readonly string $amount;
     private readonly string $description;
-    private readonly ?int $transactedAt;
-    private readonly bool $pending;
-    private array $extra;
+    private array           $extra;
+    private readonly string $id;
+    private readonly bool   $pending;
+    private readonly int    $posted;
+    private readonly ?int   $transactedAt;
 
     public function __construct(array $data)
     {
@@ -51,119 +51,6 @@ final class Transaction
         $this->transactedAt = $data['transacted_at'] ?? null;
         $this->pending      = $data['pending'] ?? false;
         $this->extra        = $data['extra'] ?? [];
-    }
-
-    public static function fromArray(array $data): self
-    {
-        return new self($data);
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getPosted(): int
-    {
-        return $this->posted;
-    }
-
-    public function getPostedAsCarbon(): ?Carbon
-    {
-        return 0 === $this->posted ? null : Carbon::createFromTimestamp($this->posted);
-    }
-
-    public function getAmount(): string
-    {
-        return $this->amount;
-    }
-
-    public function getAmountAsFloat(): float
-    {
-        return (float) $this->amount;
-    }
-
-    public function isDeposit(): bool
-    {
-        return $this->getAmountAsFloat() >= 0;
-    }
-
-    public function isWithdrawal(): bool
-    {
-        return $this->getAmountAsFloat() < 0;
-    }
-
-    public function getAbsoluteAmount(): float
-    {
-        return abs($this->getAmountAsFloat());
-    }
-
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    public function getTransactedAt(): ?int
-    {
-        return $this->transactedAt;
-    }
-
-    public function getTransactedAtAsCarbon(): ?Carbon
-    {
-        return null !== $this->transactedAt && 0 !== $this->transactedAt ? Carbon::createFromTimestamp($this->transactedAt) : null;
-    }
-
-    public function isPending(): bool
-    {
-        return $this->pending;
-    }
-
-    public function isPosted(): bool
-    {
-        return !$this->pending && $this->posted > 0;
-    }
-
-    public function getExtra(): array
-    {
-        return $this->extra;
-    }
-
-    public function getExtraValue(string $key): mixed
-    {
-        return $this->extra[$key] ?? null;
-    }
-
-    public function hasExtra(string $key): bool
-    {
-        return array_key_exists($key, $this->extra);
-    }
-
-    public function getEffectiveDate(): Carbon
-    {
-        // Use transacted_at if available, otherwise fall back to posted date
-        if (is_int($this->transactedAt) && $this->transactedAt > 0) {
-            return Carbon::createFromTimestamp($this->transactedAt);
-        }
-
-        if ($this->posted > 0) {
-            return Carbon::createFromTimestamp($this->posted);
-        }
-
-        // If both are 0 or invalid, return current time
-        return Carbon::now();
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id'            => $this->id,
-            'posted'        => $this->posted,
-            'amount'        => $this->amount,
-            'description'   => $this->description,
-            'transacted_at' => $this->transactedAt,
-            'pending'       => $this->pending,
-            'extra'         => $this->extra,
-        ];
     }
 
     private function validateRequiredFields(array $data): void
@@ -195,5 +82,118 @@ final class Transaction
         if (array_key_exists('pending', $data) && !is_bool($data['pending'])) {
             throw new InvalidArgumentException('Pending must be a boolean');
         }
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self($data);
+    }
+
+    public function getAbsoluteAmount(): float
+    {
+        return abs($this->getAmountAsFloat());
+    }
+
+    public function getAmount(): string
+    {
+        return $this->amount;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getEffectiveDate(): Carbon
+    {
+        // Use transacted_at if available, otherwise fall back to posted date
+        if (is_int($this->transactedAt) && $this->transactedAt > 0) {
+            return Carbon::createFromTimestamp($this->transactedAt);
+        }
+
+        if ($this->posted > 0) {
+            return Carbon::createFromTimestamp($this->posted);
+        }
+
+        // If both are 0 or invalid, return current time
+        return Carbon::now();
+    }
+
+    public function getExtra(): array
+    {
+        return $this->extra;
+    }
+
+    public function getExtraValue(string $key): mixed
+    {
+        return $this->extra[$key] ?? null;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getPosted(): int
+    {
+        return $this->posted;
+    }
+
+    public function getPostedAsCarbon(): ?Carbon
+    {
+        return 0 === $this->posted ? null : Carbon::createFromTimestamp($this->posted);
+    }
+
+    public function getTransactedAt(): ?int
+    {
+        return $this->transactedAt;
+    }
+
+    public function getTransactedAtAsCarbon(): ?Carbon
+    {
+        return null !== $this->transactedAt && 0 !== $this->transactedAt ? Carbon::createFromTimestamp($this->transactedAt) : null;
+    }
+
+    public function hasExtra(string $key): bool
+    {
+        return array_key_exists($key, $this->extra);
+    }
+
+    public function isDeposit(): bool
+    {
+        return $this->getAmountAsFloat() >= 0;
+    }
+
+    public function getAmountAsFloat(): float
+    {
+        return (float)$this->amount;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->pending;
+    }
+
+    public function isPosted(): bool
+    {
+        return !$this->pending && $this->posted > 0;
+    }
+
+    public function isWithdrawal(): bool
+    {
+        return $this->getAmountAsFloat() < 0;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id'            => $this->id,
+            'posted'        => $this->posted,
+            'amount'        => $this->amount,
+            'description'   => $this->description,
+            'transacted_at' => $this->transactedAt,
+            'pending'       => $this->pending,
+            'extra'         => $this->extra,
+        ];
     }
 }

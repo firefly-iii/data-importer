@@ -53,10 +53,10 @@ final class UploadController extends Controller
     use CollectsSettings;
     use VerifyJSON;
 
-    private string $configFileContent     = '';
-    private string $configFileName;
-    private string $contentType;
-    private string $importableFileContent = '';
+    private string              $configFileContent     = '';
+    private string              $configFileName;
+    private string              $contentType;
+    private string              $importableFileContent = '';
     private ImportJobRepository $repository;
 
     /**
@@ -89,9 +89,9 @@ final class UploadController extends Controller
     private function getConfigurations(): array
     {
         // get existing configurations.
-        $disk    = Storage::disk('configurations');
+        $disk = Storage::disk('configurations');
         Log::debug(sprintf('Going to check directory for config files: %s', config('filesystems.disks.configurations.root')));
-        $all     = $disk->files();
+        $all = $disk->files();
 
         // remove files from list
         $list    = [];
@@ -118,12 +118,12 @@ final class UploadController extends Controller
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         // need to process two possible file uploads:
-        $importedFile  = $request->file('importable_file');
-        $configFile    = $request->file('config_file');
-        $errors        = new MessageBag();
+        $importedFile = $request->file('importable_file');
+        $configFile   = $request->file('config_file');
+        $errors       = new MessageBag();
 
         // process uploaded file (if present)
-        $errors        = $this->processUploadedFile($flow, $errors, $importedFile);
+        $errors = $this->processUploadedFile($flow, $errors, $importedFile);
         // content of importable file is now in $this->importableFileContent
 
         // process config file (if present)
@@ -133,7 +133,7 @@ final class UploadController extends Controller
         // at this point the config (unprocessed) is in $this->configFileContent
 
         // process pre-selected file (if present):
-        $errors        = $this->processSelection($errors, (string) $request->get('existing_config'), $configFile);
+        $errors = $this->processSelection($errors, (string)$request->get('existing_config'), $configFile);
         // the config in $this->configFileContent may now be overruled.
 
         // stop here if any errors:
@@ -141,11 +141,11 @@ final class UploadController extends Controller
             return redirect(route('new-import.index', [$flow]))->withErrors($errors)->withInput();
         }
         // at this point, create a new import job. With raw content of the config + importable file.
-        $importJob     = $this->repository->create();
-        $importJob     = $this->repository->setFlow($importJob, $flow);
-        $importJob     = $this->repository->setConfigurationString($importJob, $this->configFileContent);
-        $importJob     = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
-        $importJob     = $this->repository->markAs($importJob, 'contains_content');
+        $importJob = $this->repository->create();
+        $importJob = $this->repository->setFlow($importJob, $flow);
+        $importJob = $this->repository->setConfigurationString($importJob, $this->configFileContent);
+        $importJob = $this->repository->setImportableFileString($importJob, $this->importableFileContent);
+        $importJob = $this->repository->markAs($importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated
@@ -174,10 +174,10 @@ final class UploadController extends Controller
                 break;
 
             case 'simplefin':
-                $collector             = new SimpleFINNewJobDataCollector();
+                $collector = new SimpleFINNewJobDataCollector();
                 $collector->setImportJob($importJob);
                 $collector->useDemo    = $request->boolean('use_demo');
-                $collector->setupToken = (string) $request->get('simplefin_token');
+                $collector->setupToken = (string)$request->get('simplefin_token');
                 $errors                = $collector->validate();
                 $importJob             = $collector->getImportJob();
                 $this->repository->saveToDisk($importJob);
@@ -186,10 +186,10 @@ final class UploadController extends Controller
 
             case 'sophtron':
                 // download institutions for user.
-                $collector             = new SophtronNewJobDataCollector();
+                $collector = new SophtronNewJobDataCollector();
                 $collector->setImportJob($importJob);
                 $collector->downloadInstitutionsByUser();
-                $importJob             = $collector->getImportJob();
+                $importJob = $collector->getImportJob();
                 $this->repository->saveToDisk($importJob);
 
                 break;
@@ -240,7 +240,7 @@ final class UploadController extends Controller
             return $errors;
         }
 
-        $errorNumber       = $file->getError();
+        $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
             $errors->add('importable_file', $this->getError($errorNumber));
 
@@ -254,12 +254,12 @@ final class UploadController extends Controller
 
         switch ($this->contentType) {
             case 'csv':
-                $content = (string) file_get_contents($file->getPathname());
+                $content = (string)file_get_contents($file->getPathname());
 
                 // https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
                 // because apparently there are banks that use "\r" as newline. Looking at the morons of KBC Bank, Belgium.
                 // This one is for you: 🤦‍♀️
-                $eol     = $this->detectEOL($content);
+                $eol = $this->detectEOL($content);
                 if ("\r" === $eol) {
                     Log::error('Your bank is dumb. Tell them to fix their CSV files.');
                     $content = str_replace("\r", "\n", $content);
@@ -268,7 +268,7 @@ final class UploadController extends Controller
                 break;
 
             case 'camt':
-                $content = (string) file_get_contents($file->getPathname());
+                $content = (string)file_get_contents($file->getPathname());
 
                 break;
 
@@ -331,24 +331,24 @@ final class UploadController extends Controller
     private function processConfigFile(MessageBag $errors, UploadedFile $file): MessageBag
     {
         Log::debug('Config file is present.');
-        $errorNumber             = $file->getError();
+        $errorNumber = $file->getError();
         if (0 !== $errorNumber) {
-            $errors->add('config_file', (string) $errorNumber);
+            $errors->add('config_file', (string)$errorNumber);
 
             return $errors;
         }
 
         // upload the file to a temp directory and use it from there.
         Log::debug('Config file uploaded.');
-        $path                    = $file->getPathname();
-        $validation              = $this->verifyJSON($path);
+        $path       = $file->getPathname();
+        $validation = $this->verifyJSON($path);
         if (false === $validation) {
             $errors->add('config_file', $this->errorMessage);
 
             return $errors;
         }
 
-        $this->configFileContent = (string) file_get_contents($path);
+        $this->configFileContent = (string)file_get_contents($path);
 
         return $errors;
     }
@@ -361,7 +361,7 @@ final class UploadController extends Controller
         if (!$file instanceof UploadedFile && '' !== $selection) {
             Log::debug('User selected a config file from the store.');
             $disk                    = Storage::disk('configurations');
-            $content                 = (string) $disk->get($selection);
+            $content                 = (string)$disk->get($selection);
             $this->configFileContent = $content;
         }
 

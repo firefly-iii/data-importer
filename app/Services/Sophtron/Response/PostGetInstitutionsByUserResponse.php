@@ -61,14 +61,14 @@ final class PostGetInstitutionsByUserResponse extends Response implements Iterat
         }
     }
 
+    public function count(): int
+    {
+        return count($this->institutions);
+    }
+
     public function current(): mixed
     {
         return $this->institutions[$this->position];
-    }
-
-    public function next(): void
-    {
-        ++$this->position;
     }
 
     public function key(): mixed
@@ -76,9 +76,9 @@ final class PostGetInstitutionsByUserResponse extends Response implements Iterat
         return $this->position;
     }
 
-    public function valid(): bool
+    public function next(): void
     {
-        return array_key_exists($this->position, $this->institutions);
+        ++$this->position;
     }
 
     public function rewind(): void
@@ -86,8 +86,8 @@ final class PostGetInstitutionsByUserResponse extends Response implements Iterat
         $this->position = 0;
     }
 
-    public function count(): int
+    public function valid(): bool
     {
-        return count($this->institutions);
+        return array_key_exists($this->position, $this->institutions);
     }
 }

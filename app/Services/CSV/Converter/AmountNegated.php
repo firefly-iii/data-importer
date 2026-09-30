@@ -37,11 +37,13 @@ final class AmountNegated implements ConverterInterface
         $converter = app(Amount::class);
         $result    = $converter->convert($value);
 
-        return bcmul((string) $result, '-1');
+        return bcmul((string)$result, '-1');
     }
 
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void {}
+    public function setConfiguration(string $configuration): void
+    {
+    }
 }

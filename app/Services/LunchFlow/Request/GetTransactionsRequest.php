@@ -42,9 +42,10 @@ final class GetTransactionsRequest extends Request
 
     public function __construct(
         #[SensitiveParameter]
-        string $apiToken,
+        string               $apiToken,
         private readonly int $account
-    ) {
+    )
+    {
         $this->setApiKey($apiToken);
         $this->setUrl(sprintf('accounts/%d/transactions', $this->account));
     }
@@ -57,7 +58,7 @@ final class GetTransactionsRequest extends Request
      */
     public function get(): Response
     {
-        $response     = [];
+        $response = [];
         if (false === config('importer.fake_data')) {
             $response = $this->authenticatedGet();
         }
@@ -171,9 +172,9 @@ final class GetTransactionsRequest extends Request
         if (!array_key_exists('transactions', $response)) {
             Log::error('No transactions found in response');
         }
-        $total        = count($transactions);
+        $total = count($transactions);
         Log::debug(sprintf('Downloaded %d transactions from bank account #%d.', $total, $this->account));
-        $response     = new GetTransactionsResponse($transactions);
+        $response = new GetTransactionsResponse($transactions);
         $response->processData();
 
         return $response;

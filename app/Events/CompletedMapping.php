@@ -42,7 +42,9 @@ final class CompletedMapping
      */
     public function __construct(
         public Configuration $configuration
-    ) {}
+    )
+    {
+    }
 
     /**
      * Get the channels the event should broadcast on.

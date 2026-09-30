@@ -52,7 +52,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu credentials could not be authenticated, either the access tokens provided are invalid or have been revoked. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg.' | '.$e->getMessage());
+                Log::error($msg . ' | ' . $e->getMessage());
 
                 return $messages;
             }
@@ -64,7 +64,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu returned Forbidden when using the provided credentials, make sure all necessary permissions are granted in the Akahu website. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg.' | '.$e->getMessage());
+                Log::error($msg . ' | ' . $e->getMessage());
 
                 return $messages;
             }
@@ -77,9 +77,9 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         return $messages;
     }
 
-    public function validate(): MessageBag
+    public function getFlowName(): string
     {
-        return new MessageBag();
+        return 'akahu';
     }
 
     public function getImportJob(): ImportJob
@@ -92,8 +92,8 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
         $this->importJob = $importJob;
     }
 
-    public function getFlowName(): string
+    public function validate(): MessageBag
     {
-        return 'akahu';
+        return new MessageBag();
     }
 }

@@ -31,6 +31,19 @@ use Illuminate\Support\Facades\Log;
 
 final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
+    public function getData(): array
+    {
+        return SecretManager::getSecrets();
+    }
+
+    public function setData(array $data): void
+    {
+        // Clear the reauthentication flow flag whenever we set new data
+        session()->forget('akahu_reauthenticate');
+
+        SecretManager::setSecrets($data);
+    }
+
     public function validate(): AuthenticationStatus
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
@@ -48,18 +61,5 @@ final class AuthenticationValidator implements AuthenticationValidatorInterface
         }
 
         return AuthenticationStatus::AUTHENTICATED;
-    }
-
-    public function getData(): array
-    {
-        return SecretManager::getSecrets();
-    }
-
-    public function setData(array $data): void
-    {
-        // Clear the reauthentication flow flag whenever we set new data
-        session()->forget('akahu_reauthenticate');
-
-        SecretManager::setSecrets($data);
     }
 }

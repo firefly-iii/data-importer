@@ -35,9 +35,9 @@ use InvalidArgumentException;
  */
 final class Date implements ConverterInterface
 {
-    private string $dateFormat;
+    private string          $dateFormat;
     private readonly string $dateFormatPattern;
-    private string $dateLocale;
+    private string          $dateLocale;
 
     /**
      * Date constructor.

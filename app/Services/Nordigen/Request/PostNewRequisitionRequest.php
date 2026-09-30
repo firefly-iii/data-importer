@@ -38,8 +38,8 @@ final class PostNewRequisitionRequest extends Request
 {
     private string $agreement;
     private string $bank;
-    private string $reference;
     private string $identifier;
+    private string $reference;
 
     public function __construct(string $url, #[SensitiveParameter] string $token, string $identifier)
     {
@@ -48,8 +48,8 @@ final class PostNewRequisitionRequest extends Request
         $this->setToken($token);
         $this->identifier = $identifier;
         $this->setUrl('api/v2/requisitions/');
-        $this->reference  = '';
-        $this->agreement  = '';
+        $this->reference = '';
+        $this->agreement = '';
     }
 
     public function get(): Response
@@ -63,7 +63,7 @@ final class PostNewRequisitionRequest extends Request
     public function post(): Response
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $array  = [
+        $array = [
             'redirect'       => route('gocardless-connect.callback', [$this->identifier]),
             'institution_id' => $this->bank,
             'reference'      => $this->reference,

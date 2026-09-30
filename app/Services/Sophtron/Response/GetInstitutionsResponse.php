@@ -33,7 +33,7 @@ use Iterator;
 final class GetInstitutionsResponse extends Response implements Iterator, Countable
 {
     private array $institutions;
-    private int $position = 0;
+    private int   $position = 0;
 
     public function __construct(array $data)
     {
@@ -43,7 +43,7 @@ final class GetInstitutionsResponse extends Response implements Iterator, Counta
 
         /** @var array $array */
         foreach ($data as $array) {
-            $institution                                                     = Institution::fromArray($array);
+            $institution = Institution::fromArray($array);
             if (!array_key_exists($institution->countryCode, $this->institutions)) {
                 ++$countCountries;
                 $this->institutions[$institution->countryCode] = ['country_code' => $institution->countryCode, 'institutions' => []];
@@ -55,14 +55,14 @@ final class GetInstitutionsResponse extends Response implements Iterator, Counta
         $this->institutions = array_values($this->institutions);
     }
 
+    public function count(): int
+    {
+        return count($this->institutions);
+    }
+
     public function current(): mixed
     {
         return $this->institutions[$this->position];
-    }
-
-    public function next(): void
-    {
-        ++$this->position;
     }
 
     public function key(): mixed
@@ -70,9 +70,9 @@ final class GetInstitutionsResponse extends Response implements Iterator, Counta
         return $this->position;
     }
 
-    public function valid(): bool
+    public function next(): void
     {
-        return array_key_exists($this->position, $this->institutions);
+        ++$this->position;
     }
 
     public function rewind(): void
@@ -80,8 +80,8 @@ final class GetInstitutionsResponse extends Response implements Iterator, Counta
         $this->position = 0;
     }
 
-    public function count(): int
+    public function valid(): bool
     {
-        return count($this->institutions);
+        return array_key_exists($this->position, $this->institutions);
     }
 }

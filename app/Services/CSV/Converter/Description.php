@@ -34,11 +34,13 @@ final class Description implements ConverterInterface
      */
     public function convert(mixed $value): string
     {
-        return trim((string) $value);
+        return trim((string)$value);
     }
 
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void {}
+    public function setConfiguration(string $configuration): void
+    {
+    }
 }

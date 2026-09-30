@@ -28,7 +28,12 @@ abstract class NoteBuilder
 {
     private const string SECTION_HEADER_SIZE = '####';
 
-    private string $notes                    = '';
+    private string $notes = '';
+
+    /**
+     * Builds notes on this transaction to give to Firefly III
+     */
+    abstract public function build(): string;
 
     public function getNotes(): string
     {
@@ -37,7 +42,7 @@ abstract class NoteBuilder
 
     final protected function renderSection(string $fieldTitle, array $fields): void
     {
-        if (!array_any($fields, fn (Field $f) => $f->present())) {
+        if (!array_any($fields, fn(Field $f) => $f->present())) {
             return;
         }
 
@@ -51,9 +56,4 @@ abstract class NoteBuilder
             $this->notes .= sprintf("%s %s\n%s\n", self::SECTION_HEADER_SIZE, $fieldTitle, $section);
         }
     }
-
-    /**
-     * Builds notes on this transaction to give to Firefly III
-     */
-    abstract public function build(): string;
 }

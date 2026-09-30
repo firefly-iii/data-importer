@@ -40,52 +40,21 @@ use SensitiveParameter;
  */
 abstract class SimpleFINRequest
 {
-    private string $apiUrl;
-    private string $token;
-    private array $parameters   = [];
-    private float $timeOut;
-
     private string $accessToken = '';
+    private string $apiUrl;
+    private array  $parameters = [];
+    private float  $timeOut;
+    private string $token;
 
-    /**
-     * @throws ImporterHttpException
-     */
-    abstract public function get(): SharedResponseInterface;
-
-    public function setApiUrl(string $apiUrl): void
+    public function setAccessToken(#[SensitiveParameter] string $accessToken): void
     {
-        $this->apiUrl = rtrim($apiUrl, '/');
-    }
-
-    public function setToken(#[SensitiveParameter] string $token): void
-    {
-        $this->token = $token;
-    }
-
-    public function setParameters(array $parameters): void
-    {
-        Log::debug('SimpleFIN request parameters set to: ', $parameters);
-        $this->parameters = $parameters;
-    }
-
-    protected function getParameterHash(): string
-    {
-        $final = '';
-        foreach ($this->parameters as $name => $value) {
-            $final .= sprintf('%s=%s', $name, json_encode($value));
-        }
-
-        return hash('sha256', $final);
-    }
-
-    public function setTimeOut(float $timeOut): void
-    {
-        $this->timeOut = $timeOut;
+        // Log::debug(sprintf('Access token is now: %s', $accessToken));
+        $this->accessToken = $accessToken;
     }
 
     protected function authenticatedGet(string $endpoint): ResponseInterface
     {
-        Log::debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->accessToken, $endpoint));
+        // Log::debug(sprintf('SimpleFIN authenticated GET to %s%s', $this->accessToken, $endpoint));
 
         $client  = new Client();
         $fullUrl = sprintf('%s%s', $this->accessToken, $endpoint);
@@ -102,7 +71,7 @@ abstract class SimpleFINRequest
         if (count($this->parameters) > 0) {
             $options['query'] = $this->parameters;
         }
-        Log::debug('Options', $options);
+        // Log::debug('Options', $options);
 
         try {
             $response = $client->get($fullUrl, $options);
@@ -124,10 +93,15 @@ abstract class SimpleFINRequest
         return $response;
     }
 
+    /**
+     * @throws ImporterHttpException
+     */
+    abstract public function get(): SharedResponseInterface;
+
     private function handleClientException(ClientException $e): void
     {
         $statusCode = $e->getResponse()->getStatusCode();
-        $body       = (string) $e->getResponse()->getBody();
+        $body       = (string)$e->getResponse()->getBody();
 
         Log::error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 
@@ -154,9 +128,19 @@ abstract class SimpleFINRequest
         return $this->apiUrl;
     }
 
-    protected function getToken(): string
+    public function setApiUrl(string $apiUrl): void
     {
-        return $this->token;
+        $this->apiUrl = rtrim($apiUrl, '/');
+    }
+
+    protected function getParameterHash(): string
+    {
+        $final = '';
+        foreach ($this->parameters as $name => $value) {
+            $final .= sprintf('%s=%s', $name, json_encode($value));
+        }
+
+        return hash('sha256', $final);
     }
 
     protected function getParameters(): array
@@ -164,14 +148,29 @@ abstract class SimpleFINRequest
         return $this->parameters;
     }
 
+    public function setParameters(array $parameters): void
+    {
+        // Log::debug('SimpleFIN request parameters set to: ', $parameters);
+        $this->parameters = $parameters;
+    }
+
     protected function getTimeOut(): float
     {
         return $this->timeOut;
     }
 
-    public function setAccessToken(#[SensitiveParameter] string $accessToken): void
+    public function setTimeOut(float $timeOut): void
     {
-        Log::debug(sprintf('Access token is now: %s', $accessToken));
-        $this->accessToken = $accessToken;
+        $this->timeOut = $timeOut;
+    }
+
+    protected function getToken(): string
+    {
+        return $this->token;
+    }
+
+    public function setToken(#[SensitiveParameter] string $token): void
+    {
+        $this->token = $token;
     }
 }

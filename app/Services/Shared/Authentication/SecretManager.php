@@ -34,98 +34,15 @@ use SensitiveParameter;
  */
 final class SecretManager
 {
-    public static function getSophtronAccessKey(?ImportJob $importJob = null): string
-    {
-        // FIXME needs to use constants.
-        return self::getField('access_key', 'sophtron.access_key', 'sophtron_access_key', $importJob);
-    }
-
-    public static function getSophtronUserId(?ImportJob $importJob = null): string
-    {
-        // FIXME needs to use constants.
-        return self::getField('user_id', 'sophtron.user_id', 'sophtron_user_id', $importJob);
-    }
-
-    private static function getField(string $fieldName, string $configName, string $sessionField, ?ImportJob $importJob = null): string
-    {
-        $identifier = $importJob ? $importJob->identifier : 'NULL';
-        Log::debug(sprintf('Now in getField("%s","%s","%s", "%s")', $fieldName, $configName, $sessionField, $identifier));
-        $result     = '';
-        // check: session
-        if (session()->has($sessionField)) {
-            Log::debug(sprintf('There is a "%s" in the session.', $sessionField));
-            $result = (string) session()->get($sessionField);
-        }
-        // check: import job.
-        if ('' === $result && null !== $importJob) {
-            Log::debug(sprintf('Check if "%s" is in the import job.', $fieldName));
-            $details = $importJob->getAuthenticationDetails();
-            if (array_key_exists($fieldName, $details)) {
-                $result = (string) $details[$fieldName];
-            }
-        }
-        // check: config
-        if ('' === $result) {
-            Log::debug(sprintf('Check if "%s" is in the config.', $fieldName));
-            $result = (string) config($configName);
-        }
-        Log::debug(sprintf('Return result. strlen=%d', strlen($result)));
-
-        return $result;
-    }
-
-    /**
-     * Will return the access token. From a cookie or header if it's there, otherwise from configuration.
-     */
-    public static function getAccessToken(): string
-    {
-        Log::debug(__METHOD__);
-        if (session()->has(Constants::SESSION_ACCESS_TOKEN)) {
-            Log::debug('There is a token in the session.');
-            $token = session()->get(Constants::SESSION_ACCESS_TOKEN);
-            if ('' !== $token) {
-                Log::debug('Token is not empty, return it.');
-
-                return $token;
-            }
-            Log::debug('Token is empty or invalid.');
-        }
-
-        Log::debug('No access token in session, will return header or config variable.');
-
-        $token = request()?->header('Authorization', '');
-        if (is_array($token)) {
-            $token = (string) reset($token);
-        }
-        if ('' === $token) {
-            Log::debug('Access token in header is empty, will be ignored.');
-            $token = null;
-        }
-        if (is_string($token) && '' !== $token && !str_contains($token, 'Bearer ')) {
-            Log::debug('Access token in header is not a Bearer token, will be ignored.');
-            $token = null;
-        }
-        if (is_string($token) && '' !== $token && str_contains($token, 'Bearer ')) {
-            Log::debug('Access token in header is a Bearer token, will be used.');
-            $token = str_replace('Bearer ', '', $token);
-        }
-        if (null === $token) {
-            Log::debug('Access token is null, use config instead.');
-            $token = (string) config('importer.access_token');
-        }
-
-        return (string) $token;
-    }
-
     public static function getBaseUrl(): string
     {
         if (!self::hasBaseUrl()) {
             Log::debug('No base url in getBaseUrl() session, will return config variable.');
 
-            return (string) config('importer.url');
+            return (string)config('importer.url');
         }
 
-        return (string) session()->get(Constants::SESSION_BASE_URL);
+        return (string)session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -144,10 +61,10 @@ final class SecretManager
         if (!self::hasClientId()) {
             Log::debug('No client id in hasClientId() session, will return config variable.');
 
-            return (string) config('importer.client_id');
+            return (string)config('importer.client_id');
         }
 
-        return (string) session()->get(Constants::SESSION_CLIENT_ID);
+        return (string)session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     /**
@@ -155,21 +72,61 @@ final class SecretManager
      */
     private static function hasClientId(): bool
     {
-        return session()->has(Constants::SESSION_CLIENT_ID) && '' !== (string) session()->get(Constants::SESSION_CLIENT_ID);
+        return session()->has(Constants::SESSION_CLIENT_ID) && '' !== (string)session()->get(Constants::SESSION_CLIENT_ID);
+    }
+
+    public static function getSophtronAccessKey(?ImportJob $importJob = null): string
+    {
+        // FIXME needs to use constants.
+        return self::getField('access_key', 'sophtron.access_key', 'sophtron_access_key', $importJob);
+    }
+
+    private static function getField(string $fieldName, string $configName, string $sessionField, ?ImportJob $importJob = null): string
+    {
+        $identifier = $importJob ? $importJob->identifier : 'NULL';
+        Log::debug(sprintf('Now in getField("%s","%s","%s", "%s")', $fieldName, $configName, $sessionField, $identifier));
+        $result = '';
+        // check: session
+        if (session()->has($sessionField)) {
+            Log::debug(sprintf('There is a "%s" in the session.', $sessionField));
+            $result = (string)session()->get($sessionField);
+        }
+        // check: import job.
+        if ('' === $result && null !== $importJob) {
+            Log::debug(sprintf('Check if "%s" is in the import job.', $fieldName));
+            $details = $importJob->getAuthenticationDetails();
+            if (array_key_exists($fieldName, $details)) {
+                $result = (string)$details[$fieldName];
+            }
+        }
+        // check: config
+        if ('' === $result) {
+            Log::debug(sprintf('Check if "%s" is in the config.', $fieldName));
+            $result = (string)config($configName);
+        }
+        Log::debug(sprintf('Return result. strlen=%d', strlen($result)));
+
+        return $result;
+    }
+
+    public static function getSophtronUserId(?ImportJob $importJob = null): string
+    {
+        // FIXME needs to use constants.
+        return self::getField('user_id', 'sophtron.user_id', 'sophtron_user_id', $importJob);
     }
 
     public static function getVanityUrl(): string
     {
         if (!self::hasVanityUrl()) {
             Log::debug('No vanity url in getVanityUrl() session, will return config variable.');
-            if ('' === (string) config('importer.vanity_url')) {
-                return (string) config('importer.url');
+            if ('' === (string)config('importer.vanity_url')) {
+                return (string)config('importer.url');
             }
 
-            return (string) config('importer.vanity_url');
+            return (string)config('importer.vanity_url');
         }
 
-        return (string) session()->get(Constants::SESSION_VANITY_URL);
+        return (string)session()->get(Constants::SESSION_VANITY_URL);
     }
 
     /**
@@ -195,6 +152,49 @@ final class SecretManager
         Log::debug('Have valid secrets!');
 
         return true;
+    }
+
+    /**
+     * Will return the access token. From a cookie or header if it's there, otherwise from configuration.
+     */
+    public static function getAccessToken(): string
+    {
+        Log::debug(__METHOD__);
+        if (session()->has(Constants::SESSION_ACCESS_TOKEN)) {
+            Log::debug('There is a token in the session.');
+            $token = session()->get(Constants::SESSION_ACCESS_TOKEN);
+            if ('' !== $token) {
+                Log::debug('Token is not empty, return it.');
+
+                return $token;
+            }
+            Log::debug('Token is empty or invalid.');
+        }
+
+        Log::debug('No access token in session, will return header or config variable.');
+
+        $token = request()?->header('Authorization', '');
+        if (is_array($token)) {
+            $token = (string)reset($token);
+        }
+        if ('' === $token) {
+            Log::debug('Access token in header is empty, will be ignored.');
+            $token = null;
+        }
+        if (is_string($token) && '' !== $token && !str_contains($token, 'Bearer ')) {
+            Log::debug('Access token in header is not a Bearer token, will be ignored.');
+            $token = null;
+        }
+        if (is_string($token) && '' !== $token && str_contains($token, 'Bearer ')) {
+            Log::debug('Access token in header is a Bearer token, will be used.');
+            $token = str_replace('Bearer ', '', $token);
+        }
+        if (null === $token) {
+            Log::debug('Access token is null, use config instead.');
+            $token = (string)config('importer.access_token');
+        }
+
+        return (string)$token;
     }
 
     /**

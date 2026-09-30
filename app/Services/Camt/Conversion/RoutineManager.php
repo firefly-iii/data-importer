@@ -41,11 +41,11 @@ use Override;
  */
 final class RoutineManager implements RoutineManagerInterface
 {
+    private ImportJob            $importJob;
+    private ImportJobRepository  $repository;
     private TransactionConverter $transactionConverter;
     private TransactionExtractor $transactionExtractor;
-    private TransactionMapper $transactionMapper;
-    private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    private TransactionMapper    $transactionMapper;
 
     public function __construct(ImportJob $importJob)
     {
@@ -54,12 +54,6 @@ final class RoutineManager implements RoutineManagerInterface
         $this->repository = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
         $this->setConfiguration($this->importJob->getConfiguration());
-    }
-
-    #[Override]
-    public function getServiceAccounts(): array
-    {
-        return [];
     }
 
     /**
@@ -71,14 +65,20 @@ final class RoutineManager implements RoutineManagerInterface
         $this->transactionExtractor = new TransactionExtractor($configuration);
         $this->transactionConverter = new TransactionConverter($configuration);
         $this->transactionMapper    = new TransactionMapper($configuration);
+    }    #[Override]
+    public function getServiceAccounts(): array
+    {
+        return [];
     }
+
+
 
     public function start(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // get XML file
-        $camtMessage        = $this->getCamtMessage();
+        $camtMessage = $this->getCamtMessage();
         if (!$camtMessage instanceof Message) {
             Log::error('The CAMT object is NULL, probably due to a previous error');
             $this->importJob->conversionStatus->addError(0, '[a102]: The CAMT object is NULL, probably due to a previous error');
@@ -87,15 +87,15 @@ final class RoutineManager implements RoutineManagerInterface
             return [];
         }
         // get raw messages
-        $rawTransactions    = $this->transactionExtractor->extractTransactions($camtMessage);
+        $rawTransactions = $this->transactionExtractor->extractTransactions($camtMessage);
 
         // get intermediate result (still needs processing like mapping etc)
         $pseudoTransactions = $this->transactionConverter->convert($rawTransactions);
 
         // put the result into firefly iii compatible arrays (and replace mapping when necessary)
         $this->transactionMapper->setImportJob($this->importJob);
-        $transactions       = $this->transactionMapper->map($pseudoTransactions);
-        $this->importJob    = $this->transactionMapper->getImportJob();
+        $transactions    = $this->transactionMapper->map($pseudoTransactions);
+        $this->importJob = $this->transactionMapper->getImportJob();
 
         if (0 === count($transactions)) {
             Log::error('No transactions found in CAMT file');

@@ -40,15 +40,15 @@ final class SecretManager
         if (!self::hasApiKey()) {
             Log::debug('LunchFlow: No API key in hasApiKey() session, will return config OR Configuration variable.');
 
-            $apiKey = (string) config('lunchflow.api_key');
+            $apiKey = (string)config('lunchflow.api_key');
             if ('' !== $apiKey) {
                 return $apiKey;
             }
 
-            return (string) $configuration?->getLunchFlowApiKey();
+            return (string)$configuration?->getLunchFlowApiKey();
         }
 
-        return (string) session()->get(self::API_KEY);
+        return (string)session()->get(self::API_KEY);
     }
 
     /**
@@ -56,7 +56,7 @@ final class SecretManager
      */
     private static function hasApiKey(): bool
     {
-        return '' !== (string) session()->get(self::API_KEY);
+        return '' !== (string)session()->get(self::API_KEY);
     }
 
     public static function saveApiKey(#[SensitiveParameter] string $apiKey): void

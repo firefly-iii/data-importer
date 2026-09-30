@@ -69,6 +69,11 @@ final class AccountsResponse extends Response implements Countable, IteratorAggr
         return $response;
     }
 
+    public function count(): int
+    {
+        return count($this->accounts);
+    }
+
     public function getAccounts(): array
     {
         return $this->accounts;
@@ -79,18 +84,13 @@ final class AccountsResponse extends Response implements Countable, IteratorAggr
         $this->accounts = $accounts;
     }
 
-    public function getSessionId(): string
-    {
-        return $this->sessionId;
-    }
-
-    public function count(): int
-    {
-        return count($this->accounts);
-    }
-
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->accounts);
+    }
+
+    public function getSessionId(): string
+    {
+        return $this->sessionId;
     }
 }

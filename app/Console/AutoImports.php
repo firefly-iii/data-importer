@@ -50,23 +50,23 @@ use Illuminate\Support\Facades\Storage;
  */
 trait AutoImports
 {
-    protected array $conversionRateLimits = []; // only conversion can have rate limits.
-    protected string $identifier;
-    protected array $importerAccounts     = [];
+    protected array               $conversionRateLimits = []; // only conversion can have rate limits.
+    protected string              $identifier;
+    protected array               $importerAccounts     = [];
     protected ImportJobRepository $repository;
-    private ImportJob $importJob;
+    private ImportJob             $importJob;
 
     private function getFiles(string $directory): array
     {
         Log::debug(sprintf('Now in getFiles("%s")', $directory));
-        $ignore          = ['.', '..'];
+        $ignore = ['.', '..'];
 
         if ('' === $directory) {
             $this->error(sprintf('Directory "%s" is empty or invalid.', $directory));
 
             return [];
         }
-        $array           = scandir($directory);
+        $array = scandir($directory);
         if (!is_array($array)) {
             $this->error(sprintf('Directory "%s" is empty or invalid.', $directory));
 
@@ -89,12 +89,12 @@ trait AutoImports
                 Log::debug(sprintf('Added "%s" to the list of JSON files.', $file));
             }
         }
-        $return          = [];
+        $return = [];
         foreach ($importableFiles as $importableFile) {
             Log::debug(sprintf('Find JSON for importable file "%s".', $importableFile));
             $jsonFile = $this->getJsonConfiguration($directory, $importableFile);
             if (null !== $jsonFile) {
-                $return[$jsonFile] ??= [];
+                $return[$jsonFile]   ??= [];
                 $return[$jsonFile][] = sprintf('%s/%s', $directory, $importableFile);
                 Log::debug(sprintf('Found JSON: "%s".', $jsonFile));
 
@@ -105,7 +105,7 @@ trait AutoImports
         foreach ($jsonFiles as $jsonFile) {
             $fullJson = sprintf('%s/%s', $directory, $jsonFile);
             if (!array_key_exists($fullJson, $return)) {
-                $return[$fullJson] ??= [];
+                $return[$fullJson]   ??= [];
                 $return[$fullJson][] = $fullJson;
                 Log::debug(sprintf('Add JSON file to the list of things to import: %s', $fullJson));
             }
@@ -125,16 +125,6 @@ trait AutoImports
         return strtolower($parts[count($parts) - 1]);
     }
 
-    private function getExtensionLength(string $file): int
-    {
-        $parts = explode('.', $file);
-        if (1 === count($parts)) {
-            return 0;
-        }
-
-        return strlen($parts[count($parts) - 1]) + 1;
-    }
-
     private function getJsonConfiguration(string $directory, string $file): ?string
     {
         $extensionLength = $this->getExtensionLength($file);
@@ -148,7 +138,7 @@ trait AutoImports
         if (Storage::disk('configurations')->exists($jsonFile)) {
             return Storage::disk('configurations')->path($jsonFile);
         }
-        $fallbackConfig  = $this->getFallbackConfig($directory);
+        $fallbackConfig = $this->getFallbackConfig($directory);
         if (null !== $fallbackConfig) {
             $this->line('Found fallback configuration file, which will be used for this file.');
 
@@ -157,6 +147,16 @@ trait AutoImports
         $this->warn(sprintf('Cannot find JSON file "%s" nor fallback file expected to go with file "%s". This file will be ignored.', $jsonFile, $file));
 
         return null;
+    }
+
+    private function getExtensionLength(string $file): int
+    {
+        $parts = explode('.', $file);
+        if (1 === count($parts)) {
+            return 0;
+        }
+
+        return strlen($parts[count($parts) - 1]) + 1;
     }
 
     private function getFallbackConfig(string $directory): ?string
@@ -202,9 +202,9 @@ trait AutoImports
 
         // FIXME this is a hack. Normally, the data importer would know what import flow to use from the user's selection.
         // FIXME but now we parse the config (which we know is valid), take the flow, and give it to the import job.
-        $jsonContent      = file_get_contents($jsonFile);
-        $json             = json_decode($jsonContent, true);
-        $flow             = $json['flow'] ?? 'file';
+        $jsonContent = file_get_contents($jsonFile);
+        $json        = json_decode($jsonContent, true);
+        $flow        = $json['flow'] ?? 'file';
 
         // defaults to "file".
         Log::debug(sprintf('JSON says the flow is "%s"', $flow));
@@ -217,12 +217,12 @@ trait AutoImports
         if ('' !== $importableFile) {
             $importJob = $this->repository->setImportableFileString($importJob, file_get_contents($importableFile));
         }
-        $importJob        = $this->repository->markAs($importJob, 'contains_content');
+        $importJob = $this->repository->markAs($importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated
         // at this point, also parse and process the uploaded configuration file string.
-        $configuration    = Configuration::make();
+        $configuration = Configuration::make();
         if ('' !== $jsonContent && null === $importJob->getConfiguration()) {
             $configuration = Configuration::fromArray($json);
         }
@@ -230,9 +230,9 @@ trait AutoImports
             $configuration = $importJob->getConfiguration();
         }
         $importJob->setConfiguration($configuration);
-        $this->importJob  = $importJob;
+        $this->importJob = $importJob;
         $this->repository->saveToDisk($this->importJob);
-        $messages         = $this->repository->parseImportJob($this->importJob);
+        $messages = $this->repository->parseImportJob($this->importJob);
         unset($importJob);
 
         if ($messages->count() > 0) {
@@ -241,7 +241,7 @@ trait AutoImports
             $warnings    = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
             $errors      = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
-            if ($messages->has('missing_requisitions') && 'true' === (string) $messages->get('missing_requisitions')[0]) {
+            if ($messages->has('missing_requisitions') && 'true' === (string)$messages->get('missing_requisitions')[0]) {
                 $this->error('Your import is missing a necessary GoCardless requisitions.');
 
                 // report it.
@@ -250,7 +250,7 @@ trait AutoImports
                 return ExitCode::NO_REQUISITIONS_PRESENT->value;
             }
 
-            if ($messages->has('expired_agreement') && 'true' === (string) $messages->get('expired_agreement')[0]) {
+            if ($messages->has('expired_agreement') && 'true' === (string)$messages->get('expired_agreement')[0]) {
                 $this->error('Your GoCardless requisition is expired.');
 
                 // report it.
@@ -279,11 +279,11 @@ trait AutoImports
         }
 
         $this->line(sprintf(
-            '[a] Going to convert from file "%s" using configuration %s and flow "%s".',
-            $importableFile,
-            $jsonFile,
-            $configuration->getFlow()
-        ));
+                        '[a] Going to convert from file "%s" using configuration %s and flow "%s".',
+                        $importableFile,
+                        $jsonFile,
+                        $configuration->getFlow()
+                    ));
         $this->repository->saveToDisk($this->importJob);
         // this is it!
         $this->startConversionFromImportJob();
@@ -331,9 +331,9 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things, then report about it.
-        $messages         = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
-        $warnings         = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
-        $errors           = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        $messages = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors   = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
         event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->importJob->conversionStatus->rateLimits));
 
         if (count($errors) > 0) {
@@ -363,8 +363,8 @@ trait AutoImports
 
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
-        $factory                = new ConversionRoutineFactory($this->importJob);
-        $manager                = $factory->createManager();
+        $factory = new ConversionRoutineFactory($this->importJob);
+        $manager = $factory->createManager();
         Log::debug(sprintf('Routine created: %s.', $manager::class));
         Log::debug('About to call start()');
         $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_RUNNING);
@@ -388,7 +388,7 @@ trait AutoImports
             return;
         }
         Log::debug('Grab import job back from manager.');
-        $this->importJob        = $manager->getImportJob();
+        $this->importJob = $manager->getImportJob();
         $this->importJob->setConvertedTransactions($transactions);
         $this->repository->saveToDisk($this->importJob);
         $this->importJob->conversionStatus->setStatus(ConversionStatus::CONVERSION_DONE);
@@ -408,10 +408,10 @@ trait AutoImports
             $func = $set[1];
 
             /** @var array $all */
-            $all  = $set[0];
+            $all = $set[0];
 
             /**
-             * @var int   $index
+             * @var int $index
              * @var array $messages
              */
             foreach ($all as $index => $messages) {
@@ -422,6 +422,34 @@ trait AutoImports
                 }
             }
         }
+    }
+
+    protected function isNothingDownloaded(): bool
+    {
+        foreach ($this->importJob->conversionStatus->errors as $errors) {
+            if (array_any($errors, static fn($error) => str_contains((string)$error, '[a111]'))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isExpiredAgreement(): bool
+    {
+        foreach ($this->importJob->conversionStatus->errors as $errors) {
+            if (array_any($errors, static fn($error) => str_contains((string)$error, 'EUA') && str_contains((string)$error, 'expired'))) {
+                return true;
+            }
+            if (array_any(
+                $errors,
+                static fn($error) => str_contains((string)$error, 'a112') || str_contains((string)$error, 'a113') || str_contains((string)$error, 'a114')
+            )) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function startImportFromImportJob(): void
@@ -469,7 +497,7 @@ trait AutoImports
 
         foreach ($list as $func => $set) {
             /**
-             * @var int   $index
+             * @var int $index
              * @var array $messages
              */
             foreach ($set as $index => $messages) {
@@ -519,7 +547,7 @@ trait AutoImports
                 continue;
             }
 
-            $localAccount   = $result->getAccount();
+            $localAccount = $result->getAccount();
 
             $this->reportBalanceDifference($account, $localAccount);
         }
@@ -528,10 +556,10 @@ trait AutoImports
     private function reportBalanceDifference(Account $account, LocalAccount $localAccount): void
     {
         Log::debug(sprintf(
-            'Report balance difference between GoCardless account "%s" and Firefly III account #%d.',
-            $account->getIdentifier(),
-            $localAccount->id
-        ));
+                       'Report balance difference between GoCardless account "%s" and Firefly III account #%d.',
+                       $account->getIdentifier(),
+                       $localAccount->id
+                   ));
         Log::debug(sprintf('GoCardless account has %d balance entry (entries)', count($account->getBalances())));
 
         /** @var Balance $balance */
@@ -546,12 +574,12 @@ trait AutoImports
         // compare currencies, and warn if necessary.
         if ($balance->currency !== $localAccount->currencyCode) {
             Log::warning(sprintf(
-                'GoCardless account "%s" has currency %s, Firefly III account #%d uses %s.',
-                $account->getIdentifier(),
-                $localAccount->id,
-                $balance->currency,
-                $localAccount->currencyCode
-            ));
+                             'GoCardless account "%s" has currency %s, Firefly III account #%d uses %s.',
+                             $account->getIdentifier(),
+                             $localAccount->id,
+                             $balance->currency,
+                             $localAccount->currencyCode
+                         ));
             $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Currency mismatch', $balance->type, $localAccount->id));
         }
 
@@ -565,19 +593,19 @@ trait AutoImports
 
         // compare balance, warn (also a message)
         Log::debug(sprintf('Comparing %s and %s', $balance->amount, $localAccount->currentBalance));
-        if (0 !== bccomp($balance->amount, (string) $localAccount->currentBalance)) {
+        if (0 !== bccomp($balance->amount, (string)$localAccount->currentBalance)) {
             Log::warning(sprintf('GoCardless balance is %s, Firefly III balance is %s.', $balance->amount, $localAccount->currentBalance));
             $this->line(sprintf(
-                'Balance comparison (%s): Firefly III account #%d: GoCardless reports %s %s, Firefly III reports %s %d',
-                $balance->type,
-                $localAccount->id,
-                $balance->currency,
-                $balance->amount,
-                $localAccount->currencyCode,
-                $localAccount->currentBalance
-            ));
+                            'Balance comparison (%s): Firefly III account #%d: GoCardless reports %s %s, Firefly III reports %s %d',
+                            $balance->type,
+                            $localAccount->id,
+                            $balance->currency,
+                            $balance->amount,
+                            $localAccount->currencyCode,
+                            $localAccount->currentBalance
+                        ));
         }
-        if (0 === bccomp($balance->amount, (string) $localAccount->currentBalance)) {
+        if (0 === bccomp($balance->amount, (string)$localAccount->currentBalance)) {
             $this->line(sprintf('Balance comparison (%s): Firefly III account #%d: Balance OK', $balance->type, $localAccount->id));
         }
     }
@@ -589,11 +617,11 @@ trait AutoImports
     private function importUpload(string $jsonFile, string $importableFile): void
     {
         Log::debug('Start of importUpload');
-        $this->repository      = new ImportJobRepository();
-        $this->importJob       = $this->repository->create();
+        $this->repository = new ImportJobRepository();
+        $this->importJob  = $this->repository->create();
 
         // do JSON check
-        $jsonResult            = $this->verifyJSON($jsonFile);
+        $jsonResult = $this->verifyJSON($jsonFile);
         if (false === $jsonResult) {
             $message = sprintf('The importer can\'t import %s: could not decode the JSON in config file %s.', $importableFile, $jsonFile);
             Log::error($message);
@@ -610,15 +638,15 @@ trait AutoImports
             $importableFileContent = file_get_contents($importableFile);
         }
 
-        $this->importJob       = $this->repository->setFlow($this->importJob, $flow);
-        $this->importJob       = $this->repository->setConfigurationString($this->importJob, $jsonContent);
-        $this->importJob       = $this->repository->setImportableFileString($this->importJob, $importableFileContent);
-        $this->importJob       = $this->repository->markAs($this->importJob, 'contains_content');
+        $this->importJob = $this->repository->setFlow($this->importJob, $flow);
+        $this->importJob = $this->repository->setConfigurationString($this->importJob, $jsonContent);
+        $this->importJob = $this->repository->setImportableFileString($this->importJob, $importableFileContent);
+        $this->importJob = $this->repository->markAs($this->importJob, 'contains_content');
 
         // FIXME: this little routine belongs in a function or a helper.
         // FIXME: it is duplicated
         // at this point, also parse and process the uploaded configuration file string.
-        $configuration         = Configuration::make();
+        $configuration = Configuration::make();
         if ('' !== $jsonContent && null === $this->importJob->getConfiguration()) {
             $configuration = Configuration::fromArray(json_decode($jsonContent, true));
         }
@@ -649,38 +677,10 @@ trait AutoImports
         $this->line('Done!');
 
         // merge things:
-        $messages              = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
-        $warnings              = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
-        $errors                = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
+        $messages = array_merge($this->importJob->conversionStatus->messages, $this->importJob->submissionStatus->messages);
+        $warnings = array_merge($this->importJob->conversionStatus->warnings, $this->importJob->submissionStatus->warnings);
+        $errors   = array_merge($this->importJob->conversionStatus->errors, $this->importJob->submissionStatus->errors);
 
         event(new ImportedTransactions(basename($jsonFile), $messages, $warnings, $errors, $this->conversionRateLimits));
-    }
-
-    protected function isNothingDownloaded(): bool
-    {
-        foreach ($this->importJob->conversionStatus->errors as $errors) {
-            if (array_any($errors, static fn ($error) => str_contains((string) $error, '[a111]'))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    protected function isExpiredAgreement(): bool
-    {
-        foreach ($this->importJob->conversionStatus->errors as $errors) {
-            if (array_any($errors, static fn ($error) => str_contains((string) $error, 'EUA') && str_contains((string) $error, 'expired'))) {
-                return true;
-            }
-            if (array_any(
-                $errors,
-                static fn ($error) => str_contains((string) $error, 'a112') || str_contains((string) $error, 'a113') || str_contains((string) $error, 'a114')
-            )) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

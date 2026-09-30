@@ -30,15 +30,15 @@ namespace App\Services\EnableBanking\Model;
  */
 final class Bank
 {
-    public string $name                   = '';
-    public string $country                = '';
-    public string $logo                   = '';
+public array  $authMethods            = [];
+public bool   $beta                   = false;
     public string $bic                    = '';
-    public int    $maximumConsentValidity = 7_776_000; // API: maximum_consent_validity in seconds
-    public bool $beta                     = false; // API: beta flag
-    public array $psuTypes                = []; // API: psu_types (personal, business)
-    public array $authMethods             = []; // API: auth_methods
-    public array $requiredPsuHeaders      = []; // API: required_psu_headers
+    public string $country                = '';
+        public string $logo                   = ''; // API: maximum_consent_validity in seconds
+    public int    $maximumConsentValidity = 7_776_000; // API: beta flag
+        public string $name                   = ''; // API: psu_types (personal, business)
+    public array  $psuTypes               = []; // API: auth_methods
+    public array  $requiredPsuHeaders     = []; // API: required_psu_headers
 
     public static function fromArray(array $array): self
     {
@@ -47,8 +47,8 @@ final class Bank
         $bank->country                = $array['country'] ?? '';
         $bank->logo                   = $array['logo'] ?? '';
         $bank->bic                    = $array['bic'] ?? '';
-        $bank->maximumConsentValidity = (int) ($array['maximum_consent_validity'] ?? 7_776_000); // default 90 days in seconds
-        $bank->beta                   = (bool) ($array['beta'] ?? false);
+        $bank->maximumConsentValidity = (int)($array['maximum_consent_validity'] ?? 7_776_000); // default 90 days in seconds
+        $bank->beta                   = (bool)($array['beta'] ?? false);
         $bank->psuTypes               = $array['psu_types'] ?? [];
         $bank->authMethods            = $array['auth_methods'] ?? [];
         $bank->requiredPsuHeaders     = $array['required_psu_headers'] ?? [];

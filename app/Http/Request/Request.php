@@ -53,7 +53,7 @@ abstract class Request extends FormRequest
      */
     final public function convertToInteger(string $field): int
     {
-        return (int) $this->get($field);
+        return (int)$this->get($field);
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class Request extends FormRequest
      */
     public function convertToString(string $field): string
     {
-        return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
+        return app('steam')->cleanStringAndNewlines((string)($this->get($field) ?? ''));
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class Request extends FormRequest
             return null;
         }
 
-        return (int) $string;
+        return (int)$string;
     }
 
     /**
@@ -88,12 +88,12 @@ abstract class Request extends FormRequest
             return null;
         }
 
-        $value = (string) $this->get($field);
+        $value = (string)$this->get($field);
         if ('' === $value) {
             return null;
         }
 
-        return (int) $value;
+        return (int)$value;
     }
 
     /**
@@ -105,7 +105,7 @@ abstract class Request extends FormRequest
             return null;
         }
 
-        return app('steam')->cleanStringAndNewlines((string) ($this->get($field) ?? ''));
+        return app('steam')->cleanStringAndNewlines((string)($this->get($field) ?? ''));
     }
 
     /**

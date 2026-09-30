@@ -31,20 +31,6 @@ use Illuminate\Support\Facades\Log;
 
 final class AuthenticationValidator implements AuthenticationValidatorInterface
 {
-    public function validate(): AuthenticationStatus
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-
-        $userId    = SecretManager::getSophtronUserId(null);
-        $accessKey = SecretManager::getSophtronAccessKey(null);
-
-        if ('' === $userId || '' === $accessKey) {
-            return AuthenticationStatus::NODATA;
-        }
-
-        return AuthenticationStatus::AUTHENTICATED;
-    }
-
     /**
      * FIXME needs to point to a generic method that is somewhere inside a generic AuthenticationValidator.
      */
@@ -58,5 +44,19 @@ final class AuthenticationValidator implements AuthenticationValidatorInterface
         // FIXME needs to use constants.
         SecretManager::saveValueInSession('user_id', $data['user_id']);
         SecretManager::saveValueInSession('access_key', $data['access_key']);
+    }
+
+    public function validate(): AuthenticationStatus
+    {
+        Log::debug(sprintf('Now at %s', __METHOD__));
+
+        $userId    = SecretManager::getSophtronUserId(null);
+        $accessKey = SecretManager::getSophtronAccessKey(null);
+
+        if ('' === $userId || '' === $accessKey) {
+            return AuthenticationStatus::NODATA;
+        }
+
+        return AuthenticationStatus::AUTHENTICATED;
     }
 }

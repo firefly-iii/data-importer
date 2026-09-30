@@ -41,14 +41,14 @@ final class PostGetUserInstitutionAccountsResponse extends Response implements I
         }
     }
 
+    public function count(): int
+    {
+        return count($this->accounts);
+    }
+
     public function current(): mixed
     {
         return $this->accounts[$this->position];
-    }
-
-    public function next(): void
-    {
-        ++$this->position;
     }
 
     public function key(): mixed
@@ -56,9 +56,9 @@ final class PostGetUserInstitutionAccountsResponse extends Response implements I
         return $this->position;
     }
 
-    public function valid(): bool
+    public function next(): void
     {
-        return array_key_exists($this->position, $this->accounts);
+        ++$this->position;
     }
 
     public function rewind(): void
@@ -66,8 +66,8 @@ final class PostGetUserInstitutionAccountsResponse extends Response implements I
         $this->position = 0;
     }
 
-    public function count(): int
+    public function valid(): bool
     {
-        return count($this->accounts);
+        return array_key_exists($this->position, $this->accounts);
     }
 }

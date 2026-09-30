@@ -45,14 +45,12 @@ final class TransactionProcessor
     use CollectsAccounts;
     use CreatesAccounts;
 
-    private ImportJob $importJob;
-
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-
-    private array $accounts;
-    private ?Carbon $notAfter             = null;
-    private ?Carbon $notBefore            = null;
+    private array   $accounts;
+    private ImportJob $importJob;
+    private ?Carbon $notAfter  = null;
+    private ?Carbon $notBefore = null;
 
     /**
      * @throws ImporterErrorException
@@ -60,10 +58,10 @@ final class TransactionProcessor
     public function download(): array
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $this->notBefore               = null;
-        $this->notAfter                = null;
-        $this->accounts                = [];
-        $configuration                 = $this->importJob->getConfiguration();
+        $this->notBefore = null;
+        $this->notAfter  = null;
+        $this->accounts  = [];
+        $configuration   = $this->importJob->getConfiguration();
         if ('' !== $configuration->getDateNotBefore()) {
             $this->notBefore = new Carbon($configuration->getDateNotBefore());
         }
@@ -71,9 +69,9 @@ final class TransactionProcessor
         if ('' !== $configuration->getDateNotAfter()) {
             $this->notAfter = new Carbon($configuration->getDateNotAfter());
         }
-        $accounts                      = $configuration->getAccounts();
+        $accounts = $configuration->getAccounts();
         Log::debug(sprintf('Found the following accounts in config: %s', json_encode($accounts)));
-        $return                        = [];
+        $return = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
         $this->existingServiceAccounts = $this->getLunchFlowAccounts($configuration);
 
@@ -87,16 +85,16 @@ final class TransactionProcessor
             // first create the account if it does not exist.
             if (0 === $fireflyIIIAccountId) {
                 Log::debug('Firefly III account is zero, create it.');
-                $createdAccount                           = $this->createOrFindExistingAccount((string) $importServiceAccountId);
+                $createdAccount                           = $this->createOrFindExistingAccount((string)$importServiceAccountId);
                 $updatedAccounts                          = $configuration->getAccounts();
                 $updatedAccounts[$importServiceAccountId] = $createdAccount->id;
                 $configuration->setAccounts($updatedAccounts);
                 Log::debug(sprintf('Created Firefly III account #%d', $createdAccount->id));
             }
 
-            $apiToken                        = SecretManager::getApiKey($configuration);
+            $apiToken = SecretManager::getApiKey($configuration);
 
-            $request                         = new GetTransactionsRequest($apiToken, $importServiceAccountId);
+            $request = new GetTransactionsRequest($apiToken, $importServiceAccountId);
             $request->setBase(config('lunchflow.api_url'));
             $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -121,11 +119,11 @@ final class TransactionProcessor
 
             $return[$importServiceAccountId] = $this->filterTransactions($transactions);
             Log::debug(sprintf(
-                '[%s] Done downloading %d Lunch Flow transactions for account #%d',
-                config('importer.version'),
-                count($return[$importServiceAccountId]),
-                $importServiceAccountId
-            ));
+                           '[%s] Done downloading %d Lunch Flow transactions for account #%d',
+                           config('importer.version'),
+                           count($return[$importServiceAccountId]),
+                           $importServiceAccountId
+                       ));
         }
         Log::debug('Done with download of transactions.');
 
@@ -147,8 +145,8 @@ final class TransactionProcessor
         if ($this->notAfter instanceof Carbon) {
             Log::info(sprintf('Will not grab transactions after "%s"', $this->notAfter->format('Y-m-d H:i:s')));
         }
-        $return        = [];
-        $getPending    = $configuration->getPendingTransactions();
+        $return     = [];
+        $getPending = $configuration->getPendingTransactions();
         if ($getPending) {
             Log::info('Will include pending transactions.');
         }
@@ -156,23 +154,23 @@ final class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn   = $transaction->getDate();
+            $madeOn = $transaction->getDate();
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(sprintf(
-                    'Skip transaction because "%s" is before "%s".',
-                    $madeOn->format(self::DATE_TIME_FORMAT),
-                    $this->notBefore->format(self::DATE_TIME_FORMAT)
-                ));
+                               'Skip transaction because "%s" is before "%s".',
+                               $madeOn->format(self::DATE_TIME_FORMAT),
+                               $this->notBefore->format(self::DATE_TIME_FORMAT)
+                           ));
 
                 continue;
             }
             if ($this->notAfter instanceof Carbon && $madeOn->gt($this->notAfter)) {
                 Log::debug(sprintf(
-                    'Skip transaction because "%s" is after "%s".',
-                    $madeOn->format(self::DATE_TIME_FORMAT),
-                    $this->notAfter->format(self::DATE_TIME_FORMAT)
-                ));
+                               'Skip transaction because "%s" is after "%s".',
+                               $madeOn->format(self::DATE_TIME_FORMAT),
+                               $this->notAfter->format(self::DATE_TIME_FORMAT)
+                           ));
 
                 continue;
             }
@@ -199,14 +197,14 @@ final class TransactionProcessor
         return $return;
     }
 
+    public function getImportJob(): ImportJob
+    {
+        return $this->importJob;
+    }
+
     public function setImportJob(ImportJob $importJob): void
     {
         $this->importJob = $importJob;
         $this->importJob->refreshInstanceIdentifier();
-    }
-
-    public function getImportJob(): ImportJob
-    {
-        return $this->importJob;
     }
 }

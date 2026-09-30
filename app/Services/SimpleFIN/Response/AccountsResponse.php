@@ -41,38 +41,6 @@ final class AccountsResponse extends SimpleFINResponse
         $this->accounts = $this->parseAccounts($this->getData());
     }
 
-    public function appendFromArray(array $more): void
-    {
-        Log::debug('Will now append second set of transactions.');
-
-        /** @var Account $original */
-        foreach ($this->accounts as $index => $original) {
-            /** @var Account $extra */
-            foreach ($more as $extra) {
-                if ($original->id === $extra->id) {
-                    Log::debug(sprintf('Will append transactions for account "%s"', $original->id));
-                    $original->transactions = array_merge($original->transactions, $extra->transactions);
-                }
-            }
-            $this->accounts[$index] = $original;
-        }
-    }
-
-    public function getAccounts(): array
-    {
-        return $this->accounts;
-    }
-
-    public function getAccountCount(): int
-    {
-        return count($this->accounts);
-    }
-
-    public function hasAccounts(): bool
-    {
-        return count($this->accounts) > 0;
-    }
-
     private function parseAccounts(array $data): array
     {
         if (0 === count($data)) {
@@ -95,5 +63,37 @@ final class AccountsResponse extends SimpleFINResponse
         Log::warning('SimpleFIN AccountsResponse: No accounts array found in response');
 
         return [];
+    }
+
+    public function appendFromArray(array $more): void
+    {
+        Log::debug('Will now append second set of transactions.');
+
+        /** @var Account $original */
+        foreach ($this->accounts as $index => $original) {
+            /** @var Account $extra */
+            foreach ($more as $extra) {
+                if ($original->id === $extra->id) {
+                    Log::debug(sprintf('Will append transactions for account "%s"', $original->id));
+                    $original->transactions = array_merge($original->transactions, $extra->transactions);
+                }
+            }
+            $this->accounts[$index] = $original;
+        }
+    }
+
+    public function getAccountCount(): int
+    {
+        return count($this->accounts);
+    }
+
+    public function getAccounts(): array
+    {
+        return $this->accounts;
+    }
+
+    public function hasAccounts(): bool
+    {
+        return count($this->accounts) > 0;
     }
 }

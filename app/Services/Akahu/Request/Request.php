@@ -38,14 +38,14 @@ use SensitiveParameter;
 
 abstract class Request
 {
-    private string $appIdToken;
-    private string $userAccessToken;
-    private string $apiBaseUrl;
-    private bool $debug;
-    private array $queryParams      = [];
-    private array $historicRequests = [];
+    private string       $apiBaseUrl;
+    private string       $appIdToken;
+    private bool         $debug;
     private HandlerStack $handlerStack;
-    private float $timeOut          = 30.0;
+    private array        $historicRequests = [];
+    private array        $queryParams      = [];
+    private float        $timeOut          = 30.0;
+    private string       $userAccessToken;
 
     public function __construct()
     {
@@ -57,6 +57,11 @@ abstract class Request
         if (config('app.debug')) {
             $this->createHandlerStack();
         }
+    }
+
+    final public function setDebug(bool $debug): void
+    {
+        $this->debug = $debug;
     }
 
     final public function setAppIdToken(#[SensitiveParameter] string $token): void
@@ -74,9 +79,10 @@ abstract class Request
         $this->apiBaseUrl = $baseUrl;
     }
 
-    final public function setRequestTimeout(float $timeOut): void
+    private function createHandlerStack(): void
     {
-        $this->timeOut = $timeOut;
+        $this->handlerStack = HandlerStack::create();
+        $this->handlerStack->push(Middleware::history($this->historicRequests));
     }
 
     final public function setQueryParam(string $key, string $value): void
@@ -84,42 +90,26 @@ abstract class Request
         $this->queryParams[$key] = $value;
     }
 
-    final public function setDebug(bool $debug): void
+    final public function setRequestTimeout(float $timeOut): void
     {
-        $this->debug = $debug;
-    }
-
-    private function createHandlerStack(): void
-    {
-        $this->handlerStack = HandlerStack::create();
-        $this->handlerStack->push(Middleware::history($this->historicRequests));
-    }
-
-    final public function getHistoricRequests(): array
-    {
-        return $this->historicRequests;
-    }
-
-    final protected function getClient(): Client
-    {
-        return new Client(['connect_timeout' => $this->timeOut, 'timeout' => $this->timeOut]);
+        $this->timeOut = $timeOut;
     }
 
     final protected function authenticatedGet(string $apiPath): array
     {
-        $apiUrl           = sprintf('%s/%s', $this->apiBaseUrl, $apiPath);
+        $apiUrl = sprintf('%s/%s', $this->apiBaseUrl, $apiPath);
 
-        $headers          = [
+        $headers = [
             'Accept'        => 'application/json',
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
             'Authorization' => sprintf('Bearer %s', $this->userAccessToken),
             'X-Akahu-Id'    => $this->appIdToken,
         ];
 
-        $query            = $this->queryParams;
-        $debug            = $this->debug;
+        $query = $this->queryParams;
+        $debug = $this->debug;
 
-        $opts             = ['headers' => $headers, 'query' => $query, 'debug' => $debug];
+        $opts = ['headers' => $headers, 'query' => $query, 'debug' => $debug];
 
         $handlerStackName = [];
 
@@ -127,7 +117,7 @@ abstract class Request
             $opts['handler'] = $this->handlerStack;
         }
 
-        $client           = $this->getClient();
+        $client = $this->getClient();
 
         try {
             $response = $client->request('GET', $apiUrl, $opts);
@@ -147,16 +137,26 @@ abstract class Request
             Log::debug(sprintf('Fetched from from endpoint "%s"', $lastRequest->getUri()));
         }
 
-        $json             = json_decode((string) $response->getBody(), true);
+        $json = json_decode((string)$response->getBody(), true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
             $msg = sprintf('Akahu api returned invalid json (%s). See logs for more details.', $apiUrl);
 
-            Log::error($msg.' json: "'.$response->getBody().'"');
+            Log::error($msg . ' json: "' . $response->getBody() . '"');
 
             throw new ImporterErrorException($msg);
         }
 
         return $json;
+    }
+
+    final protected function getClient(): Client
+    {
+        return new Client(['connect_timeout' => $this->timeOut, 'timeout' => $this->timeOut]);
+    }
+
+    final public function getHistoricRequests(): array
+    {
+        return $this->historicRequests;
     }
 }

@@ -29,6 +29,8 @@ use Illuminate\Support\MessageBag;
 
 interface NewJobDataCollectorInterface
 {
+    public function collectAccounts(): MessageBag;
+
     public function getFlowName(): string;
 
     public function getImportJob(): ImportJob;
@@ -36,6 +38,4 @@ interface NewJobDataCollectorInterface
     public function setImportJob(ImportJob $importJob): void;
 
     public function validate(): MessageBag;
-
-    public function collectAccounts(): MessageBag;
 }

@@ -35,12 +35,39 @@ use Illuminate\Support\MessageBag;
 
 final class NewJobDataCollector implements NewJobDataCollectorInterface
 {
-    private ImportJob $importJob;
+    private ImportJob           $importJob;
     private ImportJobRepository $repository;
 
     public function __construct()
     {
         $this->repository = new ImportJobRepository();
+    }
+
+    public function collectAccounts(): MessageBag
+    {
+        $return     = [];
+        $url        = config('lunchflow.api_url');
+        $apiKey     = LunchFlowSecretManager::getApiKey($this->importJob->getConfiguration());
+        $messageBag = new MessageBag();
+        $req        = new LunchFlowGetAccountsRequest($apiKey);
+        $req->setTimeOut(config('importer.connection.timeout'));
+
+        /** @var ErrorResponse|GetAccountsResponse $accounts */
+        $accounts = $req->get();
+
+        if ($accounts instanceof ErrorResponse) {
+            $message = (string)config(sprintf('importer.http_codes.%d', $accounts->statusCode));
+            $messageBag->add('config_file', sprintf('LunchFlow API error with HTTP code %d: %s', $accounts->statusCode, $message));
+
+            return $messageBag;
+        }
+
+        foreach ($accounts as $account) {
+            $return[] = $account;
+        }
+        $this->importJob->setServiceAccounts($return);
+
+        return new MessageBag();
     }
 
     public function getFlowName(): string
@@ -61,33 +88,6 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
 
     public function validate(): MessageBag
     {
-        return new MessageBag();
-    }
-
-    public function collectAccounts(): MessageBag
-    {
-        $return     = [];
-        $url        = config('lunchflow.api_url');
-        $apiKey     = LunchFlowSecretManager::getApiKey($this->importJob->getConfiguration());
-        $messageBag = new MessageBag();
-        $req        = new LunchFlowGetAccountsRequest($apiKey);
-        $req->setTimeOut(config('importer.connection.timeout'));
-
-        /** @var ErrorResponse|GetAccountsResponse $accounts */
-        $accounts   = $req->get();
-
-        if ($accounts instanceof ErrorResponse) {
-            $message = (string) config(sprintf('importer.http_codes.%d', $accounts->statusCode));
-            $messageBag->add('config_file', sprintf('LunchFlow API error with HTTP code %d: %s', $accounts->statusCode, $message));
-
-            return $messageBag;
-        }
-
-        foreach ($accounts as $account) {
-            $return[] = $account;
-        }
-        $this->importJob->setServiceAccounts($return);
-
         return new MessageBag();
     }
 }

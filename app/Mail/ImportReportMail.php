@@ -37,25 +37,25 @@ final class ImportReportMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public array $errors;
-    public array $messages;
+    public string $configFile = '';
+    public array  $errors;
+    public array  $messages;
+    public array  $rateLimits;
     public string $time;
     public string $url;
     public string $version;
-    public array $warnings;
-    public string $configFile = '';
-    public array $rateLimits;
+    public array  $warnings;
 
     /**
      * Create a new message instance.
      */
     public function __construct(array $log)
     {
-        $this->time       = Carbon::now()->format('Y-m-d \@ H:i:s');
-        $this->url        = (string) config('importer.url');
-        $this->version    = config('importer.version');
-        if ('' !== (string) config('importer.vanity_url')) {
-            $this->url = (string) config('importer.vanity_url');
+        $this->time    = Carbon::now()->format('Y-m-d \@ H:i:s');
+        $this->url     = (string)config('importer.url');
+        $this->version = config('importer.version');
+        if ('' !== (string)config('importer.vanity_url')) {
+            $this->url = (string)config('importer.vanity_url');
         }
         $this->errors     = $log['errors'] ?? [];
         $this->warnings   = $log['warnings'] ?? [];
@@ -71,8 +71,8 @@ final class ImportReportMail extends Mailable
      */
     public function build()
     {
-        $address = (string) config('mail.from.address');
-        $name    = (string) config('mail.from.name');
+        $address = (string)config('mail.from.address');
+        $name    = (string)config('mail.from.name');
 
         return $this->from($address, $name)->markdown('emails.import.report');
     }

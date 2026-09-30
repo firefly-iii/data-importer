@@ -44,19 +44,27 @@ use SensitiveParameter;
 abstract class Request
 {
     private string $base;
-    private array $parameters;
-    private float $timeOut = 3.14;
-
-    private string $token;
-    private string $url;
-
+    private array  $parameters;
     private int $remaining = -1;
     private int $reset     = -1;
+    private float  $timeOut = 3.14;
+    private string $token;
+    private string $url;
 
     /**
      * @throws ImporterHttpException
      */
     abstract public function get(): Response;
+
+    public function getRemaining(): int
+    {
+        return $this->remaining;
+    }
+
+    public function getReset(): int
+    {
+        return $this->reset;
+    }
 
     /**
      * @throws ImporterHttpException
@@ -70,7 +78,7 @@ abstract class Request
 
     public function setParameters(array $parameters): void
     {
-        Log::debug('Request parameters will be set to: ', $parameters);
+        // Log::debug('Request parameters will be set to: ', $parameters);
         $this->parameters = $parameters;
     }
 
@@ -93,8 +101,8 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         Log::debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client  = $this->getClient();
-        $body    = null;
+        $client = $this->getClient();
+        $body   = null;
 
         try {
             $res = $client->request('GET', $fullUrl, ['headers' => [
@@ -104,7 +112,7 @@ abstract class Request
                 'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
             ]]);
         } catch (ClientException|GuzzleException|TransferException $e) {
-            $statusCode      = $e->getCode();
+            $statusCode = $e->getCode();
             if (429 === $statusCode) {
                 Log::debug(sprintf('Ran into exception: %s', $e::class));
                 $this->logRateLimitHeaders($e->getResponse(), true);
@@ -127,12 +135,12 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json            = [];
+            $json = [];
             if (method_exists($e, 'getResponse')) {
-                $body = (string) $e->getResponse()->getBody();
+                $body = (string)$e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
-            if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
+            if (array_key_exists('summary', $json) && str_contains((string)$json['summary'], 'expired')) {
                 Log::error('Detected EUA expired.');
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
@@ -154,20 +162,20 @@ abstract class Request
             // return body, class must handle this
             Log::error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
-            $body = (string) $res->getBody();
+            $body = (string)$res->getBody();
         }
-        $body ??= (string) $res->getBody();
+        $body ??= (string)$res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw new ImporterHttpException(sprintf(
-                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
-                $fullUrl,
-                $res->getStatusCode(),
-                $e->getMessage(),
-                $body
-            ));
+                                                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
+                                                $fullUrl,
+                                                $res->getStatusCode(),
+                                                $e->getMessage(),
+                                                $body
+                                            ));
         }
 
         if (null === $json) {
@@ -217,49 +225,6 @@ abstract class Request
         $this->token = $token;
     }
 
-    /**
-     * @throws GuzzleException
-     * @throws ImporterHttpException
-     */
-    protected function authenticatedJsonPost(array $json): array
-    {
-        Log::debug(sprintf('Now at %s', __METHOD__));
-        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
-
-        if (0 !== count($this->parameters)) {
-            $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
-        }
-
-        $client  = $this->getClient();
-
-        try {
-            $res = $client->request('POST', $fullUrl, [
-                'json'    => $json,
-                'headers' => [
-                    'Accept'        => 'application/json',
-                    'Content-Type'  => 'application/json',
-                    'Authorization' => sprintf('Bearer %s', $this->getToken()),
-                    'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_e')),
-                ],
-            ]);
-        } catch (ClientException $e) {
-            // FIXME error response, not an exception.
-            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
-        }
-        $body    = (string) $res->getBody();
-        $this->logRateLimitHeaders($res, false);
-        $this->pauseForRateLimit($res, false);
-
-        try {
-            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            // FIXME error response, not an exception.
-            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
-        }
-
-        return $json;
-    }
-
     private function logRateLimitHeaders(ResponseInterface $res, bool $fromErrorSituation): void
     {
         $headers = $res->getHeaders();
@@ -290,9 +255,9 @@ abstract class Request
      */
     private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
     {
-        $method      = $fromErrorSituation ? 'error' : 'debug';
+        $method = $fromErrorSituation ? 'error' : 'debug';
         Log::{$method}(sprintf('[%s] Now in pauseForRateLimit', config('importer.version')));
-        $headers     = $res->getHeaders();
+        $headers = $res->getHeaders();
 
         // raw header values for debugging:
         //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
@@ -301,13 +266,13 @@ abstract class Request
         //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
 
         // first the normal rate limit:
-        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
-        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
+        $remaining = (int)($headers['http_x_ratelimit_remaining'][0] ?? -2);
+        $reset     = (int)($headers['http_x_ratelimit_reset'][0] ?? -2);
         $this->reportAndPause('Rate limit', $remaining, $reset, $fromErrorSituation);
 
         // then the account success rate limit:
-        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
-        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
+        $remaining = (int)($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
+        $reset     = (int)($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
 
         // save the remaining info in the object.
         $this->reset = $reset;
@@ -320,40 +285,6 @@ abstract class Request
         }
 
         $this->reportAndPause('Account success limit', $remaining, $reset, $fromErrorSituation);
-    }
-
-    public static function formatTime(int $reset): string
-    {
-        $return  = '';
-        if ($reset < 0) {
-            Log::warning('The reset time is negative!');
-            $return = '-';
-            $reset  = abs($reset);
-        }
-
-        // days:
-        $days    = floor($reset / 86_400);
-        if ($days > 0) {
-            $return .= sprintf('%dd', $days);
-        }
-        $reset -= $days * 86_400;
-
-        $hours   = floor($reset / 3600);
-        if ($hours > 0) {
-            $return .= sprintf('%dh', $hours);
-        }
-        $reset   -= $hours * 3600;
-        $minutes = floor($reset / 60);
-        if ($minutes > 0) {
-            $return .= sprintf('%dm', $minutes);
-        }
-        $reset   -= $minutes * 60;
-        $seconds = $reset % 60;
-        if ($seconds > 0) {
-            $return .= sprintf('%ds', $seconds);
-        }
-
-        return $return;
     }
 
     private function reportAndPause(string $type, int $remaining, int $reset, bool $fromErrorSituation): void
@@ -402,13 +333,80 @@ abstract class Request
         }
     }
 
-    public function getRemaining(): int
+    public static function formatTime(int $reset): string
     {
-        return $this->remaining;
+        $return = '';
+        if ($reset < 0) {
+            Log::warning('The reset time is negative!');
+            $return = '-';
+            $reset  = abs($reset);
+        }
+
+        // days:
+        $days = floor($reset / 86_400);
+        if ($days > 0) {
+            $return .= sprintf('%dd', $days);
+        }
+        $reset -= $days * 86_400;
+
+        $hours = floor($reset / 3600);
+        if ($hours > 0) {
+            $return .= sprintf('%dh', $hours);
+        }
+        $reset   -= $hours * 3600;
+        $minutes = floor($reset / 60);
+        if ($minutes > 0) {
+            $return .= sprintf('%dm', $minutes);
+        }
+        $reset   -= $minutes * 60;
+        $seconds = $reset % 60;
+        if ($seconds > 0) {
+            $return .= sprintf('%ds', $seconds);
+        }
+
+        return $return;
     }
 
-    public function getReset(): int
+    /**
+     * @throws GuzzleException
+     * @throws ImporterHttpException
+     */
+    protected function authenticatedJsonPost(array $json): array
     {
-        return $this->reset;
+        Log::debug(sprintf('Now at %s', __METHOD__));
+        $fullUrl = sprintf('%s/%s', $this->getBase(), $this->getUrl());
+
+        if (0 !== count($this->parameters)) {
+            $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
+        }
+
+        $client = $this->getClient();
+
+        try {
+            $res = $client->request('POST', $fullUrl, [
+                'json'    => $json,
+                'headers' => [
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => sprintf('Bearer %s', $this->getToken()),
+                    'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_e')),
+                ],
+            ]);
+        } catch (ClientException $e) {
+            // FIXME error response, not an exception.
+            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
+        }
+        $body = (string)$res->getBody();
+        $this->logRateLimitHeaders($res, false);
+        $this->pauseForRateLimit($res, false);
+
+        try {
+            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            // FIXME error response, not an exception.
+            throw new ImporterHttpException(sprintf('AuthenticatedJsonPost JSON: %s', $e->getMessage()), 0, $e);
+        }
+
+        return $json;
     }
 }

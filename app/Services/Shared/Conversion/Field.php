@@ -26,8 +26,8 @@ namespace App\Services\Shared\Conversion;
 
 final class Field
 {
-    private ?string $fieldName = null;
     private ?string $field     = null;
+    private ?string $fieldName = null;
 
     public function __construct(?string $fieldName, ?string $field)
     {
