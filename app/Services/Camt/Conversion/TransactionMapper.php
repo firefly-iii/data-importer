@@ -119,6 +119,7 @@ final class TransactionMapper
 
     private function mapTransactionJournal(string $groupHandling, array $split): array
     {
+        Log::debug('mapTransactionJournal', $split);
         $current = ['type' => 'withdrawal']; // perhaps to be overruled later.
 
         /**
@@ -215,13 +216,14 @@ final class TransactionMapper
                 case 'account-iban':
                     // could be multiple, could be mapped.
                     $current = $this->mapAccount($current, 'iban', 'source', $data);
+                    Log::debug('account-iban', $current);
 
                     break;
 
                 case 'opposing-iban':
                     // could be multiple, could be mapped.
                     $current = $this->mapAccount($current, 'iban', 'destination', $data);
-
+                    Log::debug('opposing-iban', $current);
                     break;
 
                 case 'opposing-name':
@@ -277,6 +279,7 @@ final class TransactionMapper
                     break;
             }
         }
+        Log::debug('End of mapTransactionJournal', $current);
 
         return $current;
     }
@@ -297,7 +300,12 @@ final class TransactionMapper
     private function mapAccount(array $current, string $fieldName, string $direction, array $data): array
     {
         // bravely assume there's just one value in the array:
-        $fieldValue = implode('', $data['data']);
+        if(count($data['data']) > 1) {
+            Log::warning(sprintf('Multiple values found for %s %s: %s', $direction, $fieldName, implode(', ', $data['data'])));
+        }
+        $item = $data['data'];
+
+        $fieldValue = trim((string) array_first($item));
 
         // replace with mapping, if mapping exists.
         if (array_key_exists($fieldValue, $data['mapping'])) {
@@ -394,7 +402,7 @@ final class TransactionMapper
      */
     private function sanityCheck(array $current): ?array
     {
-        Log::debug('Start of sanityCheck');
+        Log::debug('Start of sanityCheck', $current);
         // no amount?
         if (!array_key_exists('amount', $current)) {
             Log::error('Array has no amount information, cannot fix.', $current);
@@ -533,7 +541,7 @@ final class TransactionMapper
 
     private function swapAccounts(array $currentTransaction): array
     {
-        Log::debug('swapAccounts');
+        Log::debug('swapAccounts', $currentTransaction);
         $return = $currentTransaction;
 
         foreach ($this->accountIdentificationSuffixes as $suffix) {
