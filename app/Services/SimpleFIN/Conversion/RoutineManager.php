@@ -90,10 +90,11 @@ final class RoutineManager implements RoutineManagerInterface
         $allAccountIds = [];
 
         /**
-         * @var string $importServiceAccountId
+         * @var string|int $importServiceAccountId
          * @var int $applicationAccountId
          */
         foreach ($accounts as $importServiceAccountId => $applicationAccountId) {
+            $importServiceAccountId = (string)$importServiceAccountId;
             Log::debug(sprintf('Now testing account "%s": #%d', $importServiceAccountId, $applicationAccountId));
             $res = $this->isValidAccount($importServiceAccountId, $applicationAccountId);
             if ($res) {
@@ -156,6 +157,7 @@ final class RoutineManager implements RoutineManagerInterface
         // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
 
         foreach ($allTransactions as $importServiceAccountId => $transactions) {
+            $importServiceAccountId = (string)$importServiceAccountId;
             /** @var null|Account $currentSimpleFINAccount */
             $currentSimpleFINAccount = array_find(
                 $this->existingServiceAccounts,
