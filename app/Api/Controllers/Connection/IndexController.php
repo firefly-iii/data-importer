@@ -38,11 +38,11 @@ final class IndexController extends Controller
     public function validateConnection(): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $response = ['result' => 'OK', 'message' => null, 'status_code' => 0];
+        $response        = ['result' => 'OK', 'message' => null, 'status_code' => 0];
 
         // Check if OAuth is configured but no session token exists
-        $clientId    = (string)config('importer.client_id');
-        $configToken = (string)config('importer.access_token');
+        $clientId        = (string) config('importer.client_id');
+        $configToken     = (string) config('importer.access_token');
 
         // Corrected: Use the constant value directly with session helper
         Log::debug(sprintf('Has valid secrets according to API call: %s', var_export(SecretManager::hasValidSecrets(), true)));
@@ -55,9 +55,9 @@ final class IndexController extends Controller
         }
 
         // get values from secret manager:
-        $url         = SecretManager::getBaseUrl();
-        $token       = SecretManager::getAccessToken();
-        $infoRequest = new SystemInformationRequest($url, $token);
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
+        $infoRequest     = new SystemInformationRequest($url, $token);
 
         $infoRequest->setVerify(config('importer.connection.verify'));
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
@@ -78,42 +78,42 @@ final class IndexController extends Controller
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum = (string)config('importer.minimum_version');
-        $compare = version_compare($minimum, $result->version);
+        $minimum         = (string) config('importer.minimum_version');
+        $compare         = version_compare($minimum, $result->version);
 
         if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a branch version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
 
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a develop version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
 
         if (1 === $compare) {
             $errorMessage = sprintf('Your Firefly III version %s is below the minimum required version %s', $result->version, $minimum);
             Log::error(sprintf('Could not link to Firefly III: %s', $errorMessage));
-            $response = ['result' => 'NOK', 'message' => $errorMessage];
+            $response     = ['result' => 'NOK', 'message' => $errorMessage];
         }
         Log::debug('Result is', $response);
 

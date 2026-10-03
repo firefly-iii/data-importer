@@ -26,20 +26,20 @@ namespace App\Enums;
 
 enum ExitCode: int
 {
-    case SUCCESS                     = 0;
-    case GENERAL_ERROR               = 1;
-    case NO_CONNECTION               = 64;
-    case INVALID_PATH                = 65;
-    case NOT_ALLOWED_PATH            = 66;
-    case NO_FILES_FOUND              = 67;
-    case CANNOT_READ_CONFIG          = 68;
-    case CANNOT_PARSE_CONFIG         = 69;
-    case IMPORTABLE_FILE_NOT_FOUND   = 70;
-    case CANNOT_READ_IMPORTABLE_FILE = 71;
-    case TOO_MANY_ERRORS_PROCESSING  = 72;
-    case NOTHING_WAS_IMPORTED        = 73;
-    case AGREEMENT_EXPIRED           = 74;
-    case NO_REQUISITIONS_PRESENT     = 75;
+    case SUCCESS                          = 0;
+    case GENERAL_ERROR                    = 1;
+    case NO_CONNECTION                    = 64;
+    case INVALID_PATH                     = 65;
+    case NOT_ALLOWED_PATH                 = 66;
+    case NO_FILES_FOUND                   = 67;
+    case CANNOT_READ_CONFIG               = 68;
+    case CANNOT_PARSE_CONFIG              = 69;
+    case IMPORTABLE_FILE_NOT_FOUND        = 70;
+    case CANNOT_READ_IMPORTABLE_FILE      = 71;
+    case TOO_MANY_ERRORS_PROCESSING       = 72;
+    case NOTHING_WAS_IMPORTED             = 73;
+    case AGREEMENT_EXPIRED                = 74;
+    case NO_REQUISITIONS_PRESENT          = 75;
     // a mixed exit code, only used when multiple exit codes are returned, and it turns out
     // it's a combination of SUCCESS and NOTHING_WAS_IMPORTED. For many users, this is a distinctive
     // case that's not worth of a GENERAL_ERROR exit code.

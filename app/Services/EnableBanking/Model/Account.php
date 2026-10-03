@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class Account
 {
-private string $accountType         = '';
+    private string $accountType         = '';
     private array  $balances            = [];
     private string $bban                = '';
     private string $currency            = '';
@@ -40,15 +40,13 @@ private string $accountType         = '';
     private string $iban                = '';
     private string $identificationHash  = '';
     private string $otherIdentification = '';
-        private string $otherScheme         = ''; // API: cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
+    private string $otherScheme         = ''; // API: cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
     private string $ownerName           = '';
     private string $product             = '';
     private string $uid                 = '';
     private string $usage               = '';
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public static function fromArray(array $array): self
     {
@@ -59,8 +57,8 @@ private string $accountType         = '';
 
         // Handle account_id structure per API spec
         // account_id can have: iban, other (with identification and scheme_name)
-        $accountId     = $array['account_id'] ?? [];
-        $account->iban = $accountId['iban'] ?? $array['iban'] ?? '';
+        $accountId                   = $array['account_id'] ?? [];
+        $account->iban               = $accountId['iban'] ?? $array['iban'] ?? '';
 
         // Handle non-IBAN identification via "other" field
         if (array_key_exists('other', $accountId) && null !== $accountId['other']) {
@@ -69,7 +67,7 @@ private string $accountType         = '';
         }
 
         // Parse all_account_ids array for BBAN and other identifications
-        $allAccountIds = $array['all_account_ids'] ?? [];
+        $allAccountIds               = $array['all_account_ids'] ?? [];
         foreach ($allAccountIds as $accountIdEntry) {
             $schemeName     = $accountIdEntry['scheme_name'] ?? '';
             $identification = $accountIdEntry['identification'] ?? '';
@@ -82,14 +80,14 @@ private string $accountType         = '';
             }
         }
 
-        $account->currency    = $array['currency'] ?? '';
-        $account->ownerName   = $array['owner_name'] ?? $array['account_holder_name'] ?? '';
-        $account->displayName = $array['display_name'] ?? $array['name'] ?? '';
-        $account->product     = $array['product'] ?? '';
+        $account->currency           = $array['currency'] ?? '';
+        $account->ownerName          = $array['owner_name'] ?? $array['account_holder_name'] ?? '';
+        $account->displayName        = $array['display_name'] ?? $array['name'] ?? '';
+        $account->product            = $array['product'] ?? '';
         // API uses cash_account_type (CACC, CARD, CASH, LOAN, OTHR, SVGS)
-        $account->accountType = $array['cash_account_type'] ?? $array['account_type'] ?? '';
-        $account->usage       = $array['usage'] ?? '';
-        $account->details     = $array['details'] ?? '';
+        $account->accountType        = $array['cash_account_type'] ?? $array['account_type'] ?? '';
+        $account->usage              = $array['usage'] ?? '';
+        $account->details            = $array['details'] ?? '';
 
         if ('' === $account->identificationHash) {
             Log::warning('Identification hash is empty, generate one.');

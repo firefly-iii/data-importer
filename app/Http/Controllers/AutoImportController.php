@@ -48,14 +48,14 @@ final class AutoImportController extends Controller
             throw new ImporterErrorException('Please set CAN_POST_AUTOIMPORT=true for this function to work.');
         }
 
-        $secret       = (string)($request->input('secret') ?? '');
-        $systemSecret = (string)config('importer.auto_import_secret');
-        if ('' === $secret || '' === $systemSecret || !hash_equals($secret, (string)config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
+        $secret       = (string) ($request->input('secret') ?? '');
+        $systemSecret = (string) config('importer.auto_import_secret');
+        if ('' === $secret || '' === $systemSecret || !hash_equals($secret, (string) config('importer.auto_import_secret')) || strlen($systemSecret) < 16) {
             throw new ImporterErrorException('Please make sure your secret value matches whatever is in AUTO_IMPORT_SECRET.');
         }
 
-        $argument  = (string)($request->input('directory') ?? './');
-        $directory = realpath($argument);
+        $argument     = (string) ($request->input('directory') ?? './');
+        $directory    = realpath($argument);
         if (false === $directory) {
             throw new ImporterErrorException(sprintf('"%s" does not resolve to an existing real directory.', $argument));
         }
@@ -64,7 +64,7 @@ final class AutoImportController extends Controller
             throw new ImporterErrorException('Not allowed to import from this path.');
         }
 
-        $access = $this->haveAccess(false);
+        $access       = $this->haveAccess(false);
         if (false === $access) {
             throw new ImporterErrorException(sprintf('Cannot connect, or denied access to your local Firefly III instance at %s.', config('importer.url')));
         }
@@ -72,7 +72,7 @@ final class AutoImportController extends Controller
         // take code from auto importer.
         Log::info(sprintf('[%s] Going to automatically import everything found in %s (%s)', config('importer.version'), $directory, $argument));
 
-        $files = $this->getFiles($directory);
+        $files        = $this->getFiles($directory);
         if (0 === count($files)) {
             return response()->json(['error' => 'No files found.']);
         }

@@ -33,7 +33,7 @@ final class ErrorResponse extends Response
 {
     public string $class;
     public string $message;
-    public int    $statusCode = 0;
+    public int $statusCode = 0;
 
     public function __construct(array $data)
     {

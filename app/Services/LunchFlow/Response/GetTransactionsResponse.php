@@ -36,14 +36,13 @@ use Iterator;
  */
 final class GetTransactionsResponse extends Response implements Iterator, Countable
 {
-    private int                 $account  = 0;
+    private int $account  = 0;
     private readonly Collection $collection;
-    private int                 $position = 0;
+    private int $position = 0;
 
     public function __construct(
         private readonly array $data
-    )
-    {
+    ) {
         $this->collection = new Collection();
         Log::debug('Created new GetTransactionsResponse');
     }

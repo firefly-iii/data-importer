@@ -37,7 +37,7 @@ final class Iban implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $result = IbanConverter::isValidIban((string)$value);
+        $result = IbanConverter::isValidIban((string) $value);
         if (!$result) {
             $fail($this->message());
         }

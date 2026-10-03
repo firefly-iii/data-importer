@@ -30,6 +30,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
 use const PHP_SAPI;
 
 final class DebugController extends Controller
@@ -75,18 +76,18 @@ final class DebugController extends Controller
         if (true === $isDocker) {
             try {
                 if (file_exists('/var/www/counter-main.txt')) {
-                    $build = trim((string)file_get_contents('/var/www/counter-main.txt'));
+                    $build = trim((string) file_get_contents('/var/www/counter-main.txt'));
                 }
             } catch (Exception $e) {
                 Log::debug('Could not check build counter, but that\'s ok.');
                 Log::warning($e->getMessage());
             }
-            if ('' !== (string)config('importer.docker.base_build')) {
-                $baseBuild = (string)config('importer.docker.base_build');
+            if ('' !== (string) config('importer.docker.base_build')) {
+                $baseBuild = (string) config('importer.docker.base_build');
             }
         }
-        $search  = ['~', '#'];
-        $replace = ['\~', '# '];
+        $search    = ['~', '#'];
+        $replace   = ['\~', '# '];
 
         return [
             'is_docker'   => $isDocker,
@@ -103,7 +104,7 @@ final class DebugController extends Controller
         return [
             'debug'          => var_export(config('app.debug'), true),
             'display_errors' => ini_get('display_errors'),
-            'reporting'      => $this->errorReporting((int)ini_get('error_reporting')),
+            'reporting'      => $this->errorReporting((int) ini_get('error_reporting')),
             'bcscale'        => bcscale(),
         ];
     }

@@ -36,7 +36,5 @@ final class ArrayResponse extends Response
 {
     public function __construct(
         public array $data
-    )
-    {
-    }
+    ) {}
 }

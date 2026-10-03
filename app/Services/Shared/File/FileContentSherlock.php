@@ -30,6 +30,7 @@ use Genkgo\Camt\MessageFormatInterface;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 
 /**
@@ -86,7 +87,7 @@ final class FileContentSherlock
             Log::debug('CAMT.05x Check of content: positive');
 
             return 'camt';
-        } catch (Exception $e)  {
+        } catch (Exception $e) {
             Log::debug(sprintf('CAMT.05x Check of content: negative: %s', $e->getMessage()));
         }
 

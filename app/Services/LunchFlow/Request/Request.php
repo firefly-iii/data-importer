@@ -40,7 +40,7 @@ abstract class Request
 {
     private string $apiKey;
     private string $base;
-    private float  $timeOut = 3.14;
+    private float $timeOut = 3.14;
     private string $url;
 
     /**
@@ -92,7 +92,7 @@ abstract class Request
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
-            $body                  = method_exists($e, 'getResponse') ? (string)$e->getResponse()->getBody() : '';
+            $body                  = method_exists($e, 'getResponse') ? (string) $e->getResponse()->getBody() : '';
             $exception             = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
             $exception->statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
 
@@ -102,20 +102,20 @@ abstract class Request
             // return body, class must handle this
             Log::error(sprintf('[3] Status code is %d', $res->getStatusCode()));
 
-            $body = (string)$res->getBody();
+            $body = (string) $res->getBody();
         }
-        $body ??= (string)$res->getBody();
+        $body ??= (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw new ImporterHttpException(sprintf(
-                                                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
-                                                $fullUrl,
-                                                $res->getStatusCode(),
-                                                $e->getMessage(),
-                                                $body
-                                            ));
+                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
+                $fullUrl,
+                $res->getStatusCode(),
+                $e->getMessage(),
+                $body
+            ));
         }
 
         if (null === $json) {

@@ -43,10 +43,10 @@ use Illuminate\Support\Facades\Log;
  */
 final class PseudoTransactionProcessor
 {
-    private Account             $defaultAccount;
-    private ImportJob           $importJob;
+    private Account $defaultAccount;
+    private ImportJob $importJob;
     private TransactionCurrency $primaryCurrency;
-    private array               $tasks;
+    private array $tasks;
 
     /**
      * PseudoTransactionProcessor constructor.
@@ -73,14 +73,14 @@ final class PseudoTransactionProcessor
 
         if (null !== $accountId) {
             // in cache perhaps?
-            $inCache = RequestCache::hasKeyInCache($cacheKey, $token);
+            $inCache              = RequestCache::hasKeyInCache($cacheKey, $token);
             if ($inCache) {
                 $this->defaultAccount = RequestCache::get($cacheKey, $token);
 
                 return;
             }
 
-            $accountRequest = new GetAccountRequest($url, $token);
+            $accountRequest       = new GetAccountRequest($url, $token);
             $accountRequest->setVerify(config('importer.connection.verify'));
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);
@@ -103,8 +103,8 @@ final class PseudoTransactionProcessor
      */
     private function getPrimaryCurrency(): void
     {
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
 
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));
@@ -166,7 +166,7 @@ final class PseudoTransactionProcessor
                 $object->setTransactionCurrency($this->primaryCurrency);
             }
 
-            $line = $object->process($line);
+            $line   = $object->process($line);
         }
         Log::debug('Final transaction: ', $line);
 

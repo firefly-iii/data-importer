@@ -34,13 +34,13 @@ final class ImportedTransactions
 {
     use SerializesModels;
 
-    public const int TEST = 3;
+    public const int TEST            = 3;
 
     public string $configurationFile = '';
     public array  $errors            = [];
     public array  $messages          = [];
-    public array  $rateLimits;
-    public array  $warnings          = [];
+    public array $rateLimits;
+    public array $warnings           = [];
 
     public function __construct(string $configurationFile, array $messages, array $warnings, array $errors, array $rateLimits)
     {
@@ -64,7 +64,7 @@ final class ImportedTransactions
         foreach ($collection as $index => $set) {
             $newSet = [];
             foreach ($set as $line) {
-                $line = (string)$line;
+                $line = (string) $line;
                 if ('' !== $line) {
                     $newSet[] = $line;
                     ++$count;

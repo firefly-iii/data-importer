@@ -32,24 +32,24 @@ use BcMath\Number;
 final class Conversion
 {
     // The amount transacted in the foreign currency
-    private ?Number $amount = null;
+    private ?Number $amount   = null;
 
     // The (3 letter ISO 4217 currency code)[https://www.xe.com/iso4217.php]
     // that was used for this transaction.
     private ?string $currency = null;
 
     // The foreign currency conversion rate applied to this transaction.
-    private ?Number $fee = null;
+    private ?Number $fee      = null;
 
     // Undocumented
-    private ?Number $rate = null;
+    private ?Number $rate     = null;
 
     /**
      * Parse a conversion structure from an Akahu api json response
      */
     public static function fromJson(array $json): self
     {
-        $conversion = new self();
+        $conversion           = new self();
 
         $conversion->amount   = array_key_exists('amount', $json) ? Steam::bcnumber($json['amount']) : null;
         $conversion->currency = $json['currency'] ?? null;

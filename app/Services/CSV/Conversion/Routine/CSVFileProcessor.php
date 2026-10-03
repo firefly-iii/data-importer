@@ -40,10 +40,10 @@ use League\Csv\Statement;
 final class CSVFileProcessor
 {
     private Configuration $configuration;
-    private string        $delimiter;
-    private bool          $hasHeaders;
-    private ImportJob     $importJob;
-    private Reader        $reader;
+    private string $delimiter;
+    private bool $hasHeaders;
+    private ImportJob $importJob;
+    private Reader $reader;
 
     /**
      * CSVFileProcessor constructor.
@@ -81,7 +81,7 @@ final class CSVFileProcessor
         Log::debug(sprintf('Offset is %d', $offset));
 
         try {
-            $stmt = new Statement()->offset($offset);
+            $stmt    = new Statement()->offset($offset);
 
             /** @var ResultSet $records */
             $records = $stmt->process($this->reader);
@@ -108,7 +108,7 @@ final class CSVFileProcessor
 
     public function setDelimiter(string $delimiter): void
     {
-        $map = ['tab' => "\t", 'semicolon' => ';', 'comma' => ','];
+        $map             = ['tab' => "\t", 'semicolon' => ';', 'comma' => ','];
 
         $this->delimiter = $map[$delimiter] ?? ',';
     }
@@ -123,9 +123,9 @@ final class CSVFileProcessor
         $updatedRecords = [];
         $count          = $records->count();
         Log::info(sprintf('Now in %s with %d records', __METHOD__, $count));
-        $currentIndex = 1;
+        $currentIndex   = 1;
         foreach ($records as $line) {
-            $line = $this->sanitize($line);
+            $line             = $this->sanitize($line);
             Log::debug(sprintf('Parsing line %d/%d', $currentIndex, $count));
             $updatedRecords[] = $line;
 
@@ -148,7 +148,7 @@ final class CSVFileProcessor
     private function sanitize(array $line): array
     {
         $lineValues = array_values($line);
-        array_walk($lineValues, static fn($element) => trim(str_replace('&nbsp;', ' ', (string)$element)));
+        array_walk($lineValues, static fn ($element) => trim(str_replace('&nbsp;', ' ', (string) $element)));
 
         return $lineValues;
     }

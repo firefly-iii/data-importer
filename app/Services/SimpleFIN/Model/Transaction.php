@@ -34,11 +34,11 @@ final class Transaction
 {
     private readonly string $amount;
     private readonly string $description;
-    private array           $extra;
+    private array $extra;
     private readonly string $id;
-    private readonly bool   $pending;
-    private readonly int    $posted;
-    private readonly ?int   $transactedAt;
+    private readonly bool $pending;
+    private readonly int $posted;
+    private readonly ?int $transactedAt;
 
     public function __construct(array $data)
     {
@@ -166,7 +166,7 @@ final class Transaction
 
     public function getAmountAsFloat(): float
     {
-        return (float)$this->amount;
+        return (float) $this->amount;
     }
 
     public function isPending(): bool

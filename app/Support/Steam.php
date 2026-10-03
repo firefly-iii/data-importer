@@ -60,10 +60,10 @@ final class Steam
         // Log::debug(sprintf('Trying bcround("%s",%d)', $number, $precision));
         if (str_contains($number, '.')) {
             if ('-' !== $number[0]) {
-                return bcadd($number, '0.' . str_repeat('0', $precision) . '5', $precision);
+                return bcadd($number, '0.'.str_repeat('0', $precision).'5', $precision);
             }
 
-            return bcsub($number, '0.' . str_repeat('0', $precision) . '5', $precision);
+            return bcsub($number, '0.'.str_repeat('0', $precision).'5', $precision);
         }
 
         return $number;
@@ -74,7 +74,7 @@ final class Steam
      */
     public function bcstringify(Number $number, int $currencyDecimalPlaces): string
     {
-        return bcround((string)$number, $currencyDecimalPlaces);
+        return bcround((string) $number, $currencyDecimalPlaces);
     }
 
     public function cleanStringAndNewlines(mixed $value): string
@@ -92,7 +92,7 @@ final class Steam
         if (is_array($value)) {
             $value = implode('', $value);
         }
-        $value  = (string)$value;
+        $value  = (string) $value;
         $search = [
             "\u{0001}", // start of heading
             "\u{0002}", // start of text

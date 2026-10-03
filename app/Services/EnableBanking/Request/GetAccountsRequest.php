@@ -29,6 +29,7 @@ use App\Services\EnableBanking\Response\AccountsResponse;
 use App\Services\Shared\Response\Response;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
+
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 
@@ -44,7 +45,7 @@ final class GetAccountsRequest extends Request
     public function __construct(string $url, string $sessionId)
     {
         $this->setBase($url);
-        $this->sessionId = $sessionId;
+        $this->sessionId    = $sessionId;
         // GET /sessions/{session_id} returns session data including accounts
         $this->setUrl(sprintf('sessions/%s', $sessionId));
         $this->fakeDataPath = storage_path(sprintf('fake-data/eb-accounts-request-%s.json', $sessionId));
@@ -56,7 +57,7 @@ final class GetAccountsRequest extends Request
     public function get(): Response
     {
         // perhaps grab fake data instead?
-        $grabFake   = (bool)config('importer.fake_data');
+        $grabFake   = (bool) config('importer.fake_data');
         $fakeExists = file_exists($this->fakeDataPath);
         $json       = [];
         if ($grabFake && $fakeExists) {
@@ -76,7 +77,7 @@ final class GetAccountsRequest extends Request
             $json = $this->authenticatedGet();
         }
         // store fake data in new thing:
-        if ($grabFake && !$fakeExists && true === (bool)config('importer.store_fake_data')) {
+        if ($grabFake && !$fakeExists && true === (bool) config('importer.store_fake_data')) {
             Log::debug('Will store this run as fake data to use the next time.');
 
             try {

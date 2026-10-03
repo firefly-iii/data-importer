@@ -36,9 +36,7 @@ final class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 
     /**
      * Register any application services.
@@ -46,6 +44,6 @@ final class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        $this->app->bind('steam', static fn() => new Steam());
+        $this->app->bind('steam', static fn () => new Steam());
     }
 }

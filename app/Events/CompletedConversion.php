@@ -39,9 +39,7 @@ final class CompletedConversion
     /**
      * Create a new event instance.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Get the channels the event should broadcast on.

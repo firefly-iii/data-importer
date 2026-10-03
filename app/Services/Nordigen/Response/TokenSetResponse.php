@@ -32,15 +32,15 @@ use Carbon\Carbon;
  */
 final class TokenSetResponse extends Response
 {
-    public int    $accessExpires;
+    public int $accessExpires;
     public string $accessToken;
-    public int    $refreshExpires;
+    public int $refreshExpires;
     public string $refreshToken;
 
     public function __construct(array $data)
     {
-        $this->accessToken  = $data['access'];
-        $this->refreshToken = $data['refresh'];
+        $this->accessToken    = $data['access'];
+        $this->refreshToken   = $data['refresh'];
 
         $this->accessExpires  = Carbon::now()->getTimestamp() + $data['access_expires'];
         $this->refreshExpires = Carbon::now()->getTimestamp() + $data['refresh_expires'];

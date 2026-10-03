@@ -66,7 +66,7 @@ final class PostAuthRequest extends Request
             'psu_type'     => $this->psuType,
         ]; // RFC3339 format
 
-        $json = $this->authenticatedPost($data);
+        $json                = $this->authenticatedPost($data);
 
         return AuthResponse::fromArray($json);
     }

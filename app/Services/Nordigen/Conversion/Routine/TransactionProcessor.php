@@ -50,12 +50,12 @@ final class TransactionProcessor
     /** @var string */
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
 
-    private array         $accounts   = [];
+    private array $accounts               = [];
     private Configuration $configuration;
-    private ImportJob     $importJob;
-    private ?Carbon       $notAfter   = null;
-    private ?Carbon       $notBefore  = null;
-    private array         $rateLimits = [];
+    private ImportJob $importJob;
+    private ?Carbon $notAfter             = null;
+    private ?Carbon $notBefore            = null;
+    private array   $rateLimits           = [];
 
     /**
      * @throws ImporterErrorException
@@ -74,30 +74,30 @@ final class TransactionProcessor
             $this->notAfter = new Carbon($this->configuration->getDateNotAfter());
         }
 
-        $accounts = $this->configuration->getAccounts();
+        $accounts        = $this->configuration->getAccounts();
 
-        $return = [];
+        $return          = [];
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total = count($accounts);
-        $index = 1;
+        $total           = count($accounts);
+        $index           = 1;
 
         /**
          * @var string $account
-         * @var int $destinationId
+         * @var int    $destinationId
          */
         foreach ($accounts as $account => $destinationId) {
             Log::debug(sprintf(
-                           '[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)',
-                           config('importer.version'),
-                           $index,
-                           $total,
-                           $index,
-                           $account,
-                           $destinationId
-                       ));
-            $object = new Account();
+                '[%s] [%d/%d] Going to download transactions for account #%d "%s" (into #%d)',
+                config('importer.version'),
+                $index,
+                $total,
+                $index,
+                $account,
+                $destinationId
+            ));
+            $object                     = new Account();
             $object->setIdentifier($account);
-            $fullInfo = null;
+            $fullInfo                   = null;
 
             if (0 === $destinationId) {
                 Log::debug('No destination ID found, create account');
@@ -113,10 +113,10 @@ final class TransactionProcessor
                     0,
                     '[a113]: Your GoCardless End User Agreement has expired. You must refresh it by generating a new one through the Firefly III Data Importer user interface. See the other error messages for more information.'
                 );
-                if (array_key_exists('summary', $e->json) && '' !== (string)$e->json['summary']) {
+                if (array_key_exists('summary', $e->json) && '' !== (string) $e->json['summary']) {
                     $this->importJob->conversionStatus->addError(0, e($e->json['summary']));
                 }
-                if (array_key_exists('detail', $e->json) && '' !== (string)$e->json['detail']) {
+                if (array_key_exists('detail', $e->json) && '' !== (string) $e->json['detail']) {
                     $this->importJob->conversionStatus->addError(0, e($e->json['detail']));
                 }
                 $return[$account] = [];
@@ -125,7 +125,7 @@ final class TransactionProcessor
                 continue;
             }
             Log::debug('Done downloading information for debug purposes.');
-            $this->accounts[] = $fullInfo;
+            $this->accounts[]           = $fullInfo;
 
             try {
                 $accessToken = TokenManager::getAccessToken();
@@ -135,8 +135,8 @@ final class TransactionProcessor
 
                 continue;
             }
-            $url     = config('nordigen.url');
-            $request = new GetTransactionsRequest(
+            $url                        = config('nordigen.url');
+            $request                    = new GetTransactionsRequest(
                 $url,
                 $accessToken,
                 $account,
@@ -152,7 +152,7 @@ final class TransactionProcessor
             } catch (ImporterHttpException|RateLimitException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 $this->importJob->conversionStatus->addWarning(0, e($e->getMessage()));
-                $return[$account] = [];
+                $return[$account]           = [];
 
                 // save the rate limits:
                 $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
@@ -162,7 +162,7 @@ final class TransactionProcessor
             } catch (AgreementExpiredException $e) {
                 Log::debug(sprintf('Ran into %s instead of GetTransactionsResponse', $e::class));
                 // agreement expired, whoops.
-                $return[$account] = [];
+                $return[$account]           = [];
                 $this->importJob->conversionStatus->addError(0, e($e->json['detail'] ?? '[a114]: Your EUA has expired.'));
                 // save rate limits, even though they may not be there.
                 $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
@@ -172,15 +172,15 @@ final class TransactionProcessor
             }
             $this->rateLimits[$account] = ['remaining' => $request->getRemaining(), 'reset' => $request->getReset()];
 
-            $return[$account] = $this->filterTransactions($transactions);
+            $return[$account]           = $this->filterTransactions($transactions);
             Log::debug(sprintf(
-                           '[%s] [%d/%d] Done downloading transactions for account #%d "%s"',
-                           config('importer.version'),
-                           $index,
-                           $total,
-                           $index,
-                           $account
-                       ));
+                '[%s] [%d/%d] Done downloading transactions for account #%d "%s"',
+                config('importer.version'),
+                $index,
+                $total,
+                $index,
+                $account
+            ));
             ++$index;
         }
         Log::debug('Done with download of transactions.');
@@ -211,7 +211,7 @@ final class TransactionProcessor
             Log::info('Will NOT include pending transactions.');
         }
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if (!$getPending && 'pending' === $transaction->key) {
                 Log::debug(sprintf('Skip pending transaction made on "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
@@ -221,19 +221,19 @@ final class TransactionProcessor
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(sprintf(
-                               'Skip transaction because "%s" is before "%s".',
-                               $madeOn->format(self::DATE_TIME_FORMAT),
-                               $this->notBefore->format(self::DATE_TIME_FORMAT)
-                           ));
+                    'Skip transaction because "%s" is before "%s".',
+                    $madeOn->format(self::DATE_TIME_FORMAT),
+                    $this->notBefore->format(self::DATE_TIME_FORMAT)
+                ));
 
                 continue;
             }
             if ($this->notAfter instanceof Carbon && $madeOn->gt($this->notAfter)) {
                 Log::debug(sprintf(
-                               'Skip transaction because "%s" is after "%s".',
-                               $madeOn->format(self::DATE_TIME_FORMAT),
-                               $this->notAfter->format(self::DATE_TIME_FORMAT)
-                           ));
+                    'Skip transaction because "%s" is after "%s".',
+                    $madeOn->format(self::DATE_TIME_FORMAT),
+                    $this->notAfter->format(self::DATE_TIME_FORMAT)
+                ));
 
                 continue;
             }

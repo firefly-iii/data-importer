@@ -52,7 +52,7 @@ final class EmptyAccounts extends AbstractTask
 
         if ('withdrawal' === $transaction['type']) {
             $destName   = $transaction['destination_name'] ?? '';
-            $destId     = (int)($transaction['destination_id'] ?? 0);
+            $destId     = (int) ($transaction['destination_id'] ?? 0);
             $destIban   = $transaction['destination_iban'] ?? '';
             $destNumber = $transaction['destination_number'] ?? '';
             if ('' === $destName && 0 === $destId && '' === $destIban && '' === $destNumber) {
@@ -62,7 +62,7 @@ final class EmptyAccounts extends AbstractTask
         }
         if ('deposit' === $transaction['type']) {
             $sourceName   = $transaction['source_name'] ?? '';
-            $sourceId     = (int)($transaction['source_id'] ?? 0);
+            $sourceId     = (int) ($transaction['source_id'] ?? 0);
             $sourceIban   = $transaction['source_iban'] ?? '';
             $sourceNumber = $transaction['source_number'] ?? '';
             if ('' === $sourceName && 0 === $sourceId && '' === $sourceIban && '' === $sourceNumber) {

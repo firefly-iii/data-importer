@@ -56,25 +56,25 @@ final class ImportJob implements Arrayable
 {
     // job meta-data:
     public ConversionStatus $conversionStatus;
-    public string           $identifier;
+    public string $identifier;
     public SubmissionStatus $submissionStatus;
-    private array $applicationAccounts   = [];
-    private array $authenticationDetails = [];
-    private ?Configuration  $configuration         = null;
-    private string          $configurationString   = '';
-    private array           $convertedTransactions = [];
-    private Carbon          $createdAt;
-    private array $currencies            = [];
-    private string          $flow                  = '';
-    private string          $importableFileString  = '';
-    private bool            $initialized           = false;
-    private int             $instanceCounter       = 0;
+    private array          $applicationAccounts   = [];
+    private array          $authenticationDetails = [];
+    private ?Configuration $configuration         = null;
+    private string         $configurationString   = '';
+    private array          $convertedTransactions = [];
+    private Carbon $createdAt;
+    private array  $currencies                    = [];
+    private string $flow                          = '';
+    private string $importableFileString          = '';
+    private bool   $initialized                   = false;
+    private int    $instanceCounter               = 0;
 
     // collected Firefly III data.
-    private string          $instanceIdentifier    = '';
-    private array $serviceAccounts       = [];
-    private array $sophtronInstitutions = [];
-    private string          $state;
+    private string $instanceIdentifier            = '';
+    private array  $serviceAccounts               = [];
+    private array  $sophtronInstitutions          = [];
+    private string $state;
 
     private function __construct()
     {
@@ -115,7 +115,7 @@ final class ImportJob implements Arrayable
         $importJob->sophtronInstitutions  = $array['sophtron_institutions'];
 
         // only create configuration object when there is configuration to be parsed.
-        $importJob->configuration = null;
+        $importJob->configuration         = null;
         if (0 !== count($array['configuration'])) {
             $importJob->configuration = Configuration::fromArray($array['configuration']);
         }
@@ -123,8 +123,8 @@ final class ImportJob implements Arrayable
         $importJob->submissionStatus      = SubmissionStatus::fromArray($array['submission_status']);
         $importJob->convertedTransactions = $array['converted_transactions'];
 
-        $importJob->applicationAccounts = [];
-        $importJob->serviceAccounts     = [];
+        $importJob->applicationAccounts   = [];
+        $importJob->serviceAccounts       = [];
 
         // Log::debug('Restoring service accounts');
         /** @var array $item */
@@ -132,7 +132,7 @@ final class ImportJob implements Arrayable
             $class                        = $item['class'];
             $importJob->serviceAccounts[] = $class::fromArray($item);
         }
-        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        $keys                             = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
         foreach ($keys as $key) {
             $importJob->applicationAccounts[$key] = [];
             if (array_key_exists($key, $array['application_accounts'])) {
@@ -143,14 +143,14 @@ final class ImportJob implements Arrayable
             }
         }
         // Log::debug('Restored application accounts');
-        $importJob->currencies = $array['currencies'];
+        $importJob->currencies            = $array['currencies'];
 
         return $importJob;
     }
 
     public static function createNew(): self
     {
-        $job = new self();
+        $job                   = new self();
         $job->refreshInstanceIdentifier();
         $job->conversionStatus = new ConversionStatus();
         $job->submissionStatus = new SubmissionStatus();
@@ -180,7 +180,7 @@ final class ImportJob implements Arrayable
         foreach ($this->serviceAccounts as $serviceAccount) {
             $serviceAccounts[] = $serviceAccount->toArray();
         }
-        $keys = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
+        $keys                = [Constants::ASSET_ACCOUNTS, Constants::LIABILITIES];
         foreach ($keys as $key) {
             $applicationAccounts[$key] ??= [];
             foreach ($this->applicationAccounts[$key] ?? [] as $current) {

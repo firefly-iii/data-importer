@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\Log;
 
 trait CreatesAccounts
 {
-    protected array             $existingServiceAccounts = [];
+    protected array $existingServiceAccounts = [];
     private ImportJobRepository $repository;
 
     public function setExistingServiceAccounts(array $existingServiceAccounts): void
@@ -63,13 +63,13 @@ trait CreatesAccounts
     {
         Log::debug(sprintf('Starting account creation process for account "%s".', $importServiceId));
         Log::debug(sprintf('Count of existing service accounts: %d', count($this->existingServiceAccounts)));
-        $newAccountData = $this->importJob->getConfiguration()->getNewAccounts()[$importServiceId] ?? null;
-        $createdAccount = null;
+        $newAccountData  = $this->importJob->getConfiguration()->getNewAccounts()[$importServiceId] ?? null;
+        $createdAccount  = null;
         // here is a check to see if account to be created is part of the import process.
         // so, existing service accounts contains all the accounts present at the import service with all of their meta-data.
         $existingAccount = array_find($this->existingServiceAccounts, static function (array|object $entry) use ($importServiceId) {
             if (is_array($entry)) {
-                return (string)$entry['id'] === $importServiceId;
+                return (string) $entry['id'] === $importServiceId;
             }
             if ($entry instanceof NordigenAccount) {
                 return $entry->getIdentifier() === $importServiceId;
@@ -82,17 +82,17 @@ trait CreatesAccounts
             }
             Log::debug(sprintf('Class of existing entry is %s', $entry::class));
 
-            return (string)$entry->id === $importServiceId;
+            return (string) $entry->id === $importServiceId;
         });
 
-        $continue = true;
+        $continue        = true;
         if (null === $newAccountData) {
             Log::error(sprintf('No new account data found for account "%s"', $importServiceId));
             $continue = false;
         }
 
         // Validate required fields for account creation
-        if (true === $continue && '' === (string)$newAccountData['name']) {
+        if (true === $continue && '' === (string) $newAccountData['name']) {
             Log::error(sprintf('Account name is required for creating account "%s"', $importServiceId));
             $continue = false;
         }
@@ -101,10 +101,10 @@ trait CreatesAccounts
             Log::error(sprintf('Existing account data not found for account "%s"', $importServiceId));
             $continue = false;
         }
-        $configuration = [];
+        $configuration   = [];
         if (true === $continue) {
             // Prepare account creation configuration with defaults
-            $configuration = [
+            $configuration               = [
                 'name'                => $newAccountData['name'],
                 'type'                => $newAccountData['type'] ?? 'asset',
                 'currency'            => $newAccountData['currency'] ?? 'EUR',
@@ -113,16 +113,16 @@ trait CreatesAccounts
             ];
 
             // Add opening balance if provided
-            if ('' !== (string)$newAccountData['opening_balance'] && is_numeric($newAccountData['opening_balance'])) {
+            if ('' !== (string) $newAccountData['opening_balance'] && is_numeric($newAccountData['opening_balance'])) {
                 $configuration['opening_balance']      = $newAccountData['opening_balance'];
                 $configuration['opening_balance_date'] = Carbon::now()->format('Y-m-d');
             }
             Log::info('Creating new Firefly III account', ['existing_account_id' => $importServiceId, 'configuration' => $configuration]);
 
             // Create Account object and create Firefly III account
-            $existingAccountObject = ImportServiceAccount::convertSingleAccount($existingAccount);
-            $accountMapper         = new AccountMapper();
-            $createdAccount        = $accountMapper->createFireflyIIIAccount($existingAccountObject, $configuration);
+            $existingAccountObject       = ImportServiceAccount::convertSingleAccount($existingAccount);
+            $accountMapper               = new AccountMapper();
+            $createdAccount              = $accountMapper->createFireflyIIIAccount($existingAccountObject, $configuration);
 
             // overrule the name with what we actually want to search for.
             $existingAccountObject->name = $newAccountData['name'];

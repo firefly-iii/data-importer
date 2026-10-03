@@ -44,9 +44,9 @@ final class ConfigurationPostRequest extends Request
     public function getAll(): array
     {
         // Decode underscore-encoded account IDs back to original IDs with spaces
-        $doImport    = $this->input('do_import') ?? [];
-        $accounts    = $this->input('accounts') ?? [];
-        $newAccounts = $this->input('new_accounts') ?? [];
+        $doImport     = $this->input('do_import') ?? [];
+        $accounts     = $this->input('accounts') ?? [];
+        $newAccounts  = $this->input('new_accounts') ?? [];
 
         // loop $accounts array, because it is always complete and present.
         $toImportFrom = [];
@@ -58,14 +58,14 @@ final class ConfigurationPostRequest extends Request
                 $toImportFrom[$identifier] = 0;
                 $toCreate[$identifier]     = $newAccounts[$identifier];
             }
-            if (array_key_exists($identifier, $doImport) && (int)$accounts[$identifier] > 0) {
-                $toImportFrom[$identifier] = (int)$accounts[$identifier];
+            if (array_key_exists($identifier, $doImport) && (int) $accounts[$identifier] > 0) {
+                $toImportFrom[$identifier] = (int) $accounts[$identifier];
             }
         }
 
         // calculate dates
-        $notBefore = $this->getCarbonDate('date_not_before');
-        $notAfter  = $this->getCarbonDate('date_not_after');
+        $notBefore    = $this->getCarbonDate('date_not_before');
+        $notAfter     = $this->getCarbonDate('date_not_after');
 
         // reverse dates if they are bla bla bla.
         if ($notBefore instanceof Carbon && $notAfter instanceof Carbon) {
@@ -128,21 +128,21 @@ final class ConfigurationPostRequest extends Request
         $raw = $this->get('unique_column_index', '0');
 
         // Handle empty input
-        if ('' === trim((string)$raw)) {
+        if ('' === trim((string) $raw)) {
             return 0;
         }
 
         // If it contains comma, parse as array and return first element
-        if (str_contains((string)$raw, ',')) {
-            $indices = array_map(trim(...), explode(',', (string)$raw));
+        if (str_contains((string) $raw, ',')) {
+            $indices = array_map(trim(...), explode(',', (string) $raw));
             $indices = array_filter($indices, is_numeric(...));
             $indices = array_map(intval(...), $indices);
 
-            return count($indices) > 0 ? (int)reset($indices) : 0;
+            return count($indices) > 0 ? (int) reset($indices) : 0;
         }
 
         // Single value - convert to integer
-        return (int)$raw;
+        return (int) $raw;
     }
 
     /**
@@ -156,10 +156,10 @@ final class ConfigurationPostRequest extends Request
             return [];
         }
 
-        $raw = $this->get('unique_column_index', '0');
+        $raw     = $this->get('unique_column_index', '0');
 
         // Parse column indices (handles both single "0" and multiple "0,3,5")
-        $indices = array_map(trim(...), explode(',', (string)$raw));
+        $indices = array_map(trim(...), explode(',', (string) $raw));
         $indices = array_filter($indices, is_numeric(...));
         $indices = array_map(intval(...), $indices);
 
@@ -169,16 +169,16 @@ final class ConfigurationPostRequest extends Request
         }
 
         // Build pseudo identifier definition (same for single or multiple columns)
-        $type = $this->convertToString('unique_column_type');
+        $type    = $this->convertToString('unique_column_type');
 
         return ['source_columns' => $indices, 'separator' => '|', 'role' => $type];
     }
 
     public function rules(): array
     {
-        $repository = new ImportJobRepository();
-        $identifier = request()->route()->parameter('identifier');
-        $importJob  = $repository->find($identifier);
+        $repository         = new ImportJobRepository();
+        $identifier         = request()->route()->parameter('identifier');
+        $importJob          = $repository->find($identifier);
         $importJob->refreshInstanceIdentifier(); // should prevent changes from being written to disk.
         $flow               = $importJob->getFlow();
         $columnOptions      = $this->getColumnOptions($flow);

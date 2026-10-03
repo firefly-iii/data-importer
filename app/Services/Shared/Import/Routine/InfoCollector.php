@@ -54,10 +54,10 @@ final class InfoCollector
         $return   = [];
         $count    = 0;
 
-        $inCache = RequestCache::hasKeyInCache($cacheKey, $token);
+        $inCache  = RequestCache::hasKeyInCache($cacheKey, $token);
         if (!$inCache) {
             Log::debug('Get response fresh!');
-            $request = new GetAccountsRequest($url, $token);
+            $request  = new GetAccountsRequest($url, $token);
             $request->setType(GetAccountsRequest::ALL);
             $request->setVerify(config('importer.connection.verify'));
             $request->setTimeOut(config('importer.connection.timeout'));

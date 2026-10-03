@@ -64,11 +64,11 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-09-29',
-    'build_time'                    => 1790673890,
+    'version'                       => 'develop/2026-10-03',
+    'build_time'                    => 1791004112,
     'fake_data'                     => env('FAKE_DATA', false),
     'store_fake_data'               => env('STORE_FAKE_DATA', false),
-    'stackable_fields'              => ['description', 'notes','note'],
+    'stackable_fields'              => ['description', 'notes', 'note'],
     'providers'                     => [
         'file'      => [
             'title'                     => 'File',

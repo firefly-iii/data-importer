@@ -87,7 +87,7 @@ final class MapperService
                     continue;
                 }
                 if ('' !== $column) {
-                    $data[$columnIndex]['values'][] = trim((string)$column);
+                    $data[$columnIndex]['values'][] = trim((string) $column);
                 }
             }
         }
@@ -129,12 +129,12 @@ final class MapperService
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
 
         // make file reader first.
-        $camtReader   = new CamtReader(Config::getDefault());
-        $camtMessage  = $camtReader->readString($content);
-        $transactions = [];
+        $camtReader     = new CamtReader(Config::getDefault());
+        $camtMessage    = $camtReader->readString($content);
+        $transactions   = [];
 
         // loop over records.
-        $statements = $camtMessage->getRecords();
+        $statements     = $camtMessage->getRecords();
 
         /** @var CamtReport|CamtStatement $statement */
         foreach ($statements as $statement) { // -> Level B
@@ -195,8 +195,8 @@ final class MapperService
         }
         // make all values unique for mapping and remove empty vars.
         foreach ($data as $title => $info) {
-            $filtered       = array_filter($info['values'], static fn(string $value) => '' !== $value);
-            $info['values'] = array_unique($filtered);
+            $filtered               = array_filter($info['values'], static fn (string $value) => '' !== $value);
+            $info['values']         = array_unique($filtered);
             sort($info['values']);
             $data[$title]['values'] = $info['values'];
         }
@@ -214,6 +214,6 @@ final class MapperService
     {
         $fields = config('camt.fields');
 
-        return array_filter($fields, static fn(array $field) => $field['mappable']);
+        return array_filter($fields, static fn (array $field) => $field['mappable']);
     }
 }

@@ -57,7 +57,7 @@ final class Kernel extends HttpKernel
      *
      * These middleware are run during every request to your application.
      */
-    protected $middleware = [
+    protected $middleware        = [
         TrustProxies::class,
         HandleCors::class,
         CheckForMaintenanceMode::class,
@@ -66,6 +66,7 @@ final class Kernel extends HttpKernel
         ConvertEmptyStringsToNull::class,
         StartSession::class,
     ];
+
     /**
      * The application's route middleware.
      *
@@ -83,10 +84,11 @@ final class Kernel extends HttpKernel
         'throttle'         => ThrottleRequests::class,
         'verified'         => EnsureEmailIsVerified::class,
     ];
+
     /**
      * The application's route middleware groups.
      */
-    protected $middlewareGroups = [
+    protected $middlewareGroups  = [
         'web' => [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,

@@ -65,25 +65,25 @@ trait MergesAccountLists
         /** @var ImportServiceAccount $account */
         foreach ($generic as $account) {
             Log::debug(sprintf(
-                           'Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")',
-                           $account->name,
-                           $account->id,
-                           $account->iban,
-                           $account->bban
-                       ));
+                'Working on generic account name: "%s": id:"%s" (iban:"%s", number:"%s")',
+                $account->name,
+                $account->id,
+                $account->iban,
+                $account->bban
+            ));
 
-            $entry = ['import_account' => $account, 'firefly_iii_accounts' => [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []]];
+            $entry    = ['import_account' => $account, 'firefly_iii_accounts' => [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []]];
 
             // Always show all accounts, but sort matches to the top
             $filtered = $this->filterByAccountInfo($fireflyIII, $account);
             foreach ([Constants::ASSET_ACCOUNTS, Constants::LIABILITIES] as $key) {
-                $matching = $filtered[$key];
-                $all      = $fireflyIII[$key];
+                $matching                            = $filtered[$key];
+                $all                                 = $fireflyIII[$key];
 
                 Log::debug(sprintf('There are %d accounts in $fireflyIII[%s], and %d (is) are matching', count($fireflyIII[$key]), $key, count($matching)));
 
                 // Remove matching from all to avoid duplicates
-                $nonMatching = array_udiff($all, $matching, static fn(Account $a, Account $b) => $a->id <=> $b->id);
+                $nonMatching                         = array_udiff($all, $matching, static fn (Account $a, Account $b) => $a->id <=> $b->id);
 
                 // Concatenate: matches first, then the rest
                 $entry['firefly_iii_accounts'][$key] = array_merge($matching, $nonMatching);
@@ -98,11 +98,11 @@ trait MergesAccountLists
     private function filterByAccountInfo(array $applicationAccounts, ImportServiceAccount $importServiceAccount): array
     {
         Log::debug(sprintf(
-                       'Now filtering Firefly III accounts by IBAN "%s", number "%s" or name "%s" (in that order).',
-                       $importServiceAccount->iban,
-                       $importServiceAccount->bban,
-                       $importServiceAccount->name
-                   ));
+            'Now filtering Firefly III accounts by IBAN "%s", number "%s" or name "%s" (in that order).',
+            $importServiceAccount->iban,
+            $importServiceAccount->bban,
+            $importServiceAccount->name
+        ));
         $result = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
 
         foreach ($applicationAccounts as $key => $set) {
